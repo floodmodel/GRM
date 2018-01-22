@@ -26,7 +26,7 @@ Public Class cFlowAccumInfo
     ''' <value></value>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Default Public ReadOnly Property CellList(ByVal accum As Integer) As Array 'List(Of Integer)
+    Default Public ReadOnly Property CellList(ByVal accum As Integer) As Array
         Get
             Dim key As Integer = accum
             If mDic.ContainsKey(key) Then

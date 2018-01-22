@@ -184,11 +184,6 @@ Public Class cCVAttribute
 #End Region
 
 #Region "강우관련"
-    '''' <summary>
-    '''' 현재 강우데이터에서 읽은 강우량 값
-    '''' </summary>
-    'Public rf_inthisInputRFData_m As Single
-
     ''' <summary>
     ''' dt 시간 동안의 강우량
     ''' </summary>
@@ -222,10 +217,6 @@ Public Class cCVAttribute
     ''' </summary>
     ''' <remarks></remarks>
     Public RFAcc_FromStartToNow_meter As Single
-
-    'Public PEuniformRF_mm As Single
-
-
 #End Region
 
 #Region "침투관련"
@@ -364,7 +355,7 @@ Public Class cCVAttribute
     ''' 현재 CV 토양의 초기포화도. 무차원. 0~1
     ''' </summary>
     ''' <remarks></remarks>
-    Public InitialSaturation As Single '이건 나중에 공간분포를 고려하기 위해서 변수로 잡음.
+    Public InitialSaturation As Single
 
     ''' <summary>
     ''' 현재 CV 토양의 유효포화도. 무차원. 0~1
@@ -475,7 +466,6 @@ Public Class cCVAttribute
 
     Public Function Clone() As Object Implements ICloneable.Clone
         Dim cln As New cCVAttribute
-        'cln = Me
         If Me.mStreamAttr IsNot Nothing Then
             cln.mStreamAttr = New cCVStreamAttribute
             cln.mStreamAttr.QCVch_i_j_m3Ps = Me.mStreamAttr.QCVch_i_j_m3Ps
