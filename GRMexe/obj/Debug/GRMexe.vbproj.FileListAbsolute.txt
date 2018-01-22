@@ -1,0 +1,17 @@
+D:\Github\GRM\GRMexe\bin\Debug\GRM.exe.config
+D:\Github\GRM\GRMexe\bin\Debug\GRM.exe
+D:\Github\GRM\GRMexe\bin\Debug\GRM.pdb
+D:\Github\GRM\GRMexe\bin\Debug\GRM.xml
+D:\Github\GRM\GRMexe\bin\Debug\GRMCore.dll
+D:\Github\GRM\GRMexe\bin\Debug\gentle.dll
+D:\Github\GRM\GRMexe\bin\Debug\GRMCore.pdb
+D:\Github\GRM\GRMexe\bin\Debug\GRMCore.xml
+D:\Github\GRM\GRMexe\bin\Debug\GRMCore.dll.config
+D:\Github\GRM\GRMexe\bin\Debug\gentle.pdb
+D:\Github\GRM\GRMexe\obj\Debug\GRMexe.vbprojResolveAssemblyReference.cache
+D:\Github\GRM\GRMexe\obj\Debug\GRM.Resources.resources
+D:\Github\GRM\GRMexe\obj\Debug\GRMexe.vbproj.GenerateResource.Cache
+D:\Github\GRM\GRMexe\obj\Debug\GRMexe.vbproj.CoreCompileInputs.cache
+D:\Github\GRM\GRMexe\obj\Debug\GRM.exe
+D:\Github\GRM\GRMexe\obj\Debug\GRM.xml
+D:\Github\GRM\GRMexe\obj\Debug\GRM.pdb

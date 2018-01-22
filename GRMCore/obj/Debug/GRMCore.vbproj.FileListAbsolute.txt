@@ -1,0 +1,14 @@
+D:\Github\GRM\GRMCore\bin\Release\GRMCore.dll.config
+D:\Github\GRM\GRMCore\bin\Release\GRMCore.dll
+D:\Github\GRM\GRMCore\bin\Release\GRMCore.pdb
+D:\Github\GRM\GRMCore\bin\Release\GRMCore.xml
+D:\Github\GRM\GRMCore\bin\Release\gentle.dll
+D:\Github\GRM\GRMCore\bin\Release\gentle.pdb
+D:\Github\GRM\GRMCore\obj\Debug\GRMCore.vbprojResolveAssemblyReference.cache
+D:\Github\GRM\GRMCore\obj\Debug\GRMCore.Resources.resources
+D:\Github\GRM\GRMCore\obj\Debug\GRMCore.vbproj.GenerateResource.Cache
+D:\Github\GRM\GRMCore\obj\Debug\GRMCore.dll.licenses
+D:\Github\GRM\GRMCore\obj\Debug\GRMCore.vbproj.CoreCompileInputs.cache
+D:\Github\GRM\GRMCore\obj\Debug\GRMCore.dll
+D:\Github\GRM\GRMCore\obj\Debug\GRMCore.xml
+D:\Github\GRM\GRMCore\obj\Debug\GRMCore.pdb
