@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="TimeSeriesDS" targetNamespace="http://tempuri.org/TimeSeriesDS.xsd" xmlns:mstns="http://tempuri.org/TimeSeriesDS.xsd" xmlns="http://tempuri.org/TimeSeriesDS.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections>
+          <Connection AppSettingsObjectName="MySettings" AppSettingsPropertyName="GRMTemplate_ConnectionString" IsAppSettingsProperty="true" Modifier="Assembly" Name="GRMTemplate_ConnectionString (MySettings)" PropertyReference="ApplicationSettings.GRMCore.My.MySettings.GlobalReference.Default.GRMTemplate_ConnectionString" Provider="System.Data.OleDb" />
+        </Connections>
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="TimeSeriesDS" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="TimeSeriesDS" msprop:Generator_UserDSName="TimeSeriesDS">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="FlowControlData" msprop:Generator_TableClassName="FlowControlDataDataTable" msprop:Generator_TableVarName="tableFlowControlData" msprop:Generator_TablePropName="FlowControlData" msprop:Generator_RowDeletingName="FlowControlDataRowDeleting" msprop:Generator_RowChangingName="FlowControlDataRowChanging" msprop:Generator_RowEvHandlerName="FlowControlDataRowChangeEventHandler" msprop:Generator_RowDeletedName="FlowControlDataRowDeleted" msprop:Generator_UserTableName="FlowControlData" msprop:Generator_RowChangedName="FlowControlDataRowChanged" msprop:Generator_RowEvArgName="FlowControlDataRowChangeEvent" msprop:Generator_RowClassName="FlowControlDataRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CVID" msprop:Generator_ColumnVarNameInTable="columnCVID" msprop:Generator_ColumnPropNameInRow="CVID" msprop:Generator_ColumnPropNameInTable="CVIDColumn" msprop:Generator_UserColumnName="CVID" type="xs:int" minOccurs="0" />
+              <xs:element name="Value" msprop:Generator_ColumnVarNameInTable="columnValue" msprop:Generator_ColumnPropNameInRow="Value" msprop:Generator_ColumnPropNameInTable="ValueColumn" msprop:Generator_UserColumnName="Value" type="xs:float" minOccurs="0" />
+              <xs:element name="DataTime" msprop:Generator_ColumnVarNameInTable="columnDataTime" msprop:Generator_ColumnPropNameInRow="DataTime" msprop:Generator_ColumnPropNameInTable="DataTimeColumn" msprop:Generator_UserColumnName="DataTime" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="RainfallFiles" msprop:Generator_TableClassName="RainfallFilesDataTable" msprop:Generator_TableVarName="tableRainfallFiles" msprop:Generator_TablePropName="RainfallFiles" msprop:Generator_RowDeletingName="RainfallFilesRowDeleting" msprop:Generator_RowChangingName="RainfallFilesRowChanging" msprop:Generator_RowEvHandlerName="RainfallFilesRowChangeEventHandler" msprop:Generator_RowDeletedName="RainfallFilesRowDeleted" msprop:Generator_UserTableName="RainfallFiles" msprop:Generator_RowChangedName="RainfallFilesRowChanged" msprop:Generator_RowEvArgName="RainfallFilesRowChangeEvent" msprop:Generator_RowClassName="RainfallFilesRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="FileOrder" msprop:Generator_ColumnVarNameInTable="columnFileOrder" msprop:Generator_ColumnPropNameInRow="FileOrder" msprop:Generator_ColumnPropNameInTable="FileOrderColumn" msprop:Generator_UserColumnName="FileOrder" type="xs:int" minOccurs="0" />
+              <xs:element name="FilePath" msprop:Generator_ColumnVarNameInTable="columnFilePath" msprop:Generator_ColumnPropNameInRow="FilePath" msprop:Generator_ColumnPropNameInTable="FilePathColumn" msprop:Generator_UserColumnName="FilePath" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="536870910" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="FileName" msprop:Generator_ColumnVarNameInTable="columnFileName" msprop:Generator_ColumnPropNameInRow="FileName" msprop:Generator_ColumnPropNameInTable="FileNameColumn" msprop:Generator_UserColumnName="FileName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="536870910" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="Rainfall" msprop:Generator_TableClassName="RainfallDataTable" msprop:Generator_TableVarName="tableRainfall" msprop:Generator_TablePropName="Rainfall" msprop:Generator_RowDeletingName="RainfallRowDeleting" msprop:Generator_RowChangingName="RainfallRowChanging" msprop:Generator_RowEvHandlerName="RainfallRowChangeEventHandler" msprop:Generator_RowDeletedName="RainfallRowDeleted" msprop:Generator_UserTableName="Rainfall" msprop:Generator_RowChangedName="RainfallRowChanged" msprop:Generator_RowEvArgName="RainfallRowChangeEvent" msprop:Generator_RowClassName="RainfallRow">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="Order" msprop:Generator_ColumnVarNameInTable="columnOrder" msprop:Generator_ColumnPropNameInRow="Order" msprop:Generator_ColumnPropNameInTable="OrderColumn" msprop:Generator_UserColumnName="Order" type="xs:int" minOccurs="0" />
+              <xs:element name="Rainfall" msprop:Generator_ColumnVarNameInTable="columnRainfall" msprop:Generator_ColumnPropNameInRow="Rainfall" msprop:Generator_ColumnPropNameInTable="RainfallColumn" msprop:Generator_UserColumnName="Rainfall" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="FileName" msprop:Generator_ColumnVarNameInTable="columnFileName" msprop:Generator_ColumnPropNameInRow="FileName" msprop:Generator_ColumnPropNameInTable="FileNameColumn" msprop:Generator_UserColumnName="FileName" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="536870910" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="FilePath" msprop:Generator_ColumnVarNameInTable="columnFilePath" msprop:Generator_ColumnPropNameInRow="FilePath" msprop:Generator_ColumnPropNameInTable="FilePathColumn" msprop:Generator_UserColumnName="FilePath" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="536870910" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="DataTime" msprop:Generator_ColumnVarNameInTable="columnDataTime" msprop:Generator_ColumnPropNameInRow="DataTime" msprop:Generator_ColumnPropNameInTable="DataTimeColumn" msprop:Generator_UserColumnName="DataTime" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
