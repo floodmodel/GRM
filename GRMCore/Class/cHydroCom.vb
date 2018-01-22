@@ -42,6 +42,27 @@ Public Class cHydroCom
                     Return cGRM.GRMFlowDirectionD8.NW
             End Select
         End If
+        If FDType = cGRM.FlowDirectionType.StartsFromE Then
+            Select Case value
+                Case 1
+                    Return cGRM.GRMFlowDirectionD8.E
+                Case 2
+                    Return cGRM.GRMFlowDirectionD8.SE
+                Case 4
+                    Return cGRM.GRMFlowDirectionD8.S
+                Case 8
+                    Return cGRM.GRMFlowDirectionD8.SW
+                Case 16
+                    Return cGRM.GRMFlowDirectionD8.W
+                Case 32
+                    Return cGRM.GRMFlowDirectionD8.NW
+                Case 64
+                    Return cGRM.GRMFlowDirectionD8.N
+                Case 128
+                    Return cGRM.GRMFlowDirectionD8.NE
+            End Select
+        End If
+
         If FDType = cGRM.FlowDirectionType.StartsFromE_TauDEM Then
             Select Case value
                 Case 1

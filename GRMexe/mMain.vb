@@ -137,7 +137,7 @@ Module mMain
                 cGRM.writelogAndConsole("GRM setup was failed !!!", True, True)
                 Exit Sub
             End If
-            ''여기서 최하류셀 위치를 미리 찾을 수 있다.
+            '''여기서 최하류셀 위치를 미리 찾을 수 있다.
             'Dim x As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).XCol
             'Dim y As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).YRow
             'Dim facMD As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).FAc

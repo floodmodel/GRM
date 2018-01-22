@@ -146,6 +146,8 @@
                         mFDType = cGRM.FlowDirectionType.StartsFromN
                     Case cGRM.FlowDirectionType.StartsFromNE.ToString
                         mFDType = cGRM.FlowDirectionType.StartsFromNE
+                    Case cGRM.FlowDirectionType.StartsFromE.ToString
+                        mFDType = cGRM.FlowDirectionType.StartsFromE
                     Case cGRM.FlowDirectionType.StartsFromE_TauDEM.ToString
                         mFDType = cGRM.FlowDirectionType.StartsFromE_TauDEM
                     Case Else

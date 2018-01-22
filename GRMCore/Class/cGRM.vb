@@ -78,6 +78,7 @@
     Public Enum FlowDirectionType
         StartsFromNE
         StartsFromN
+        StartsFromE
         StartsFromE_TauDEM
     End Enum
 
