@@ -33,17 +33,6 @@ Public Class cSimulator
 #End Region
 
     Private mStop As Boolean
-    '''' <summary>
-    '''' 현재의 모델링 진행시간. t+dt. [sec]
-    '''' </summary>
-    '''' <remarks></remarks>
-    ''Private mNowTsec As Integer
-
-    '''' <summary>
-    '''' 현재 모델링 대상 강우레이어 순서
-    '''' </summary>
-    '''' <remarks></remarks>
-    'Private mNowRFLayerNumber As Integer
 
     ''' <summary>
     ''' 강우입력자료가 끝났는지 여부
@@ -80,8 +69,6 @@ Public Class cSimulator
 
 
     Public Sub Initialize()
-        'mNowTsec = 0
-        'mNowRFLayerNumber = 1
         mbRFisEnded = False
 
         '2017.6.1  원 : 오늘 이전에는 now를 사용. 이경우 낙동강 전체 분석시.. 각 유역 별로 여기 coce 진입 시간이 몇초 차이 발생. 그래서. 유역 상하 관계에서.. 상류가 하류보다 elapsed time 적게 보이는 혼선 
@@ -91,11 +78,7 @@ Public Class cSimulator
         '2017.06.07 최 : cThisSimulation.mTimeThisStepStarted 이건 매번 출력 스텝에서 소요되는 시간을 측정하는 것이므로, 모의 시작시에 호출되는 이 프로시져에서는 삭제
         'cThisSimulation.mTimeThisStepStarted = g_dtStart_from_MonitorEXE                         ''2017.6.1  원 : 이후 lngTimeDiff   milisec 산출시 사용됨
 
-        cThisSimulation.mTimeThisSimulationStarted = g_dtStart_from_MonitorEXE               ''2017.6.1  원 : 이후 lngTimeDiffFromStarting_sec 산출시 사용됨
-        '2017.6.1 원 : GetCurrentProcess().StartTime() 의 정밀도가 낮아서. milsec 초기에 구할때는 오차가 발생됨. 이 사항은 무시함
-
-        'cThisSimulation.mPrintOutResultRowCount = 0
-
+        cThisSimulation.mTimeThisSimulationStarted = g_dtStart_from_MonitorEXE
         cThisSimulation.mRFMeanForDT_m = 0
         cThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0
 
@@ -143,7 +126,6 @@ Public Class cSimulator
         Dim nowTsec As Integer = cThisSimulation.dtsec
         cThisSimulation.dtsec_usedtoForwardToThisTime = cThisSimulation.dtsec
         Dim dtsec As Integer
-        'cThisSimulation.mTimeThisStepStarted = DateTime.Now ' 2017.06.07 최 : 출력 되기전 이번 스텝 시간 초기화는 여기서
         'CVid의 값은 1부터 시작함. 
         Dim simulationTimeLimitSEC As Integer = endingTimeSEC + dtsec + 1 ' 등호조건(<=)대신 (<) 조건을 사용하기 위해서 1을 더해 준다.
         Do While nowTsec <= simulationTimeLimitSEC
@@ -163,7 +145,6 @@ Public Class cSimulator
                     mbRFisEnded = True
                 End If
             End If
-            'cThisSimulation.mRFSumForAllCellsForDT_m = 0
             Dim nowT_MIN As Integer = CInt(Int(nowTsec / 60))
             SimulateRunoff(mProject, nowT_MIN)
             cRainfall.CalCumulativeRFDuringDTPrintOut(mProject, dtsec)
@@ -211,7 +192,6 @@ Public Class cSimulator
         Dim bRainfallisEnded As Boolean
         Dim nowT_MIN As Integer
         Dim targetCalTtoPrint_MIN As Integer = 0
-        'todo :  여기서 t와 tm1 값이 같이 설정되는데..  메모리 기반이 아닌 다른 값 입력되게..?
         Dim project_tm1 As cProjectBAK = Nothing
         Dim bBAKdata As Boolean = False
         Dim dTPrint_MIN As Integer = mRealTime.mDtPrintOutRT_min
@@ -219,16 +199,13 @@ Public Class cSimulator
         Dim EndingT_SEC As Integer = mRealTime.EndingTime_SEC
         Dim EndingT_HOUR As Integer = CInt(EndingT_SEC / 3600)
         Dim dTRFintervalSEC As Integer = CInt(mProject.Rainfall.RFIntervalSEC)
-        'Dim noDifferenceInDTandPrintDT As Boolean = False
         Dim sec_tm1 As Integer
-        'If (dtPrint_SEC Mod cThisSimulation.dtsec) = 0 Then noDifferenceInDTandPrintDT = True
         Initialize()
         SetCVStartingCondition(mProject, mProject.WatchPoint.WPCount)
         Dim nowRFLayerOrder As Integer = 0
         Dim nowTsec As Integer = cThisSimulation.dtsec
         cThisSimulation.dtsec_usedtoForwardToThisTime = cThisSimulation.dtsec
         Dim dtsec As Integer
-        'cThisSimulation.mTimeThisStepStarted = DateTime.Now  ' 2017.06.07 최 : 출력 되기전 이번 스텝 시간 초기화는 여기서
         Dim simulationTimeLimitSEC As Integer = EndingT_SEC + dtsec + 1
         Do While nowTsec < simulationTimeLimitSEC
             dtsec = cThisSimulation.dtsec
@@ -253,9 +230,7 @@ Public Class cSimulator
             End If
             If mProject.FCGrid.IsSet = True Then
                 '여기서 신규 fc 자료 검색 조건
-
-                Dim ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous As String = ""  '2017/7/4 원 : 예를 들어 7/3일 00시 10분 자료 DB에서 가져왔으면 상류 inet 처리시(for nfc~) 반복적으로 할 필요는 없슴
-
+                Dim ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous As String = ""
                 For nfc As Integer = 0 To mProject.FCGrid.FCCellCount - 1
                     Dim r As GRMProject.FlowControlGridRow = CType(mProject.FCGrid.mdtFCGridInfo.Rows(nfc),
                           GRMProject.FlowControlGridRow)
@@ -273,7 +248,6 @@ Public Class cSimulator
 
                                 Do
                                     If ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous <> TargetDataTime Or bAfterSleep Then
-                                        'bAfterSleep 인 경우도 수행함은 '2초후에는 DB에 새로운 상류 정보가 등장 할 수 있으므로 
                                         mRealTime.ReadDBorCSVandMakeFCdataTableForRealTime(TargetDataTime)
                                     End If
 
@@ -281,11 +255,8 @@ Public Class cSimulator
 
                                     If mStop = True Then Exit Sub
                                     Call mRealTime.UpdateFcDatainfoGRMRT(TargetDataTime, cvid, mRealTime.mdicFCDataOrder(cvid), dt_MIN)
-
-                                    'If mRealTime.mdicFCDataOrder(cvid) < mRealTime.mdicFCDataCountForEachCV(cvid) Then Exit Do  '2017.7.2 까지 사용
-                                    If mRealTime.mdicBNewFCdataAddedRT(cvid) = True Then Exit Do ' 2017.7.2 부터 사용 by 원 
-
-                                    Thread.Sleep(2000)  '2015.11.11 최 : 여기는 2초 지연이 적당함
+                                    If mRealTime.mdicBNewFCdataAddedRT(cvid) = True Then Exit Do
+                                    Thread.Sleep(2000)
                                     bAfterSleep = True
                                 Loop
                                 mRealTime.mdicFCDataOrder(cvid) += 1
@@ -295,7 +266,6 @@ Public Class cSimulator
                 Next
             End If
             cThisSimulation.vMaxInThisStep = Single.MinValue
-            'cThisSimulation.mRFSumForAllCellsForDT_m = 0
             SimulateRunoff(mProject, nowT_MIN)
             cRainfall.CalCumulativeRFDuringDTPrintOut(mProject, dtsec)
             Dim wpCount As Integer = mProject.WatchPoint.WPCount
@@ -324,7 +294,6 @@ Public Class cSimulator
     Public Sub SimulateRunoff(ByVal project As cProject, ByVal nowT_MIN As Integer)
         Dim cellsize As Integer = project.Watershed.mCellSize
         Dim dtsec As Integer = cThisSimulation.dtsec
-        ' 계산순서 : ' Flow Accumulation이 작은 것부터 큰것으로 순차적으로
         If cThisSimulation.IsParallel = True Then
             For fac As Integer = 0 To project.Watershed.mFacMax  'FA는 원래 0 부터 시작함.
                 If project.mCVANsForEachFA(fac) IsNot Nothing Then '없는 CV는 여기서 진입 안됨.
@@ -334,9 +303,7 @@ Public Class cSimulator
                     Dim cvans(project.mCVANsForEachFA(nfac).Length - 1) As Integer
                     project.mCVANsForEachFA(nfac).CopyTo(cvans, 0)
                     Dim options As ParallelOptions = New ParallelOptions()
-                    options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism   '2017.8.18 원 : 기존 값은 -1(이는 무제한 의미) 이고 64 core에서 64core로 설정하여 구동해 보았으나. 성능 개선 없슴,. 오히려 10% 정도 저감?
-
-                    'Parallel.ForEach(Partitioner.Create(ncv, cvans.Length), options,
+                    options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
                     Parallel.ForEach(Partitioner.Create(ncv, cvans.Length), options,
                                      Sub(range)
                                          For i As Integer = range.Item1 To range.Item2 - 1
@@ -385,14 +352,13 @@ Public Class cSimulator
                         End If
                     End With
                 Case cGRM.CellFlowType.ChannelFlow, cGRM.CellFlowType.ChannelNOverlandFlow
-                    'ChannelNOverlandFlow 셀에서의 overlandflow 부분은 InitializeCVForThisStep 에서 계산되어 있다.
                     Dim CSAchCVw_i_jP1 As Single = 0
                     If fac > 0 Then
                         CSAchCVw_i_jP1 = mFVMSolver.CalChCSA_CViW(project, cvan)
                     End If
                     With project
                         If CSAchCVw_i_jP1 > 0 OrElse .CV(cvan).mStreamAttr.hCVch_i_j > 0 Then
-                            mFVMSolver.CalculateChannelFlow(project, cvan, CSAchCVw_i_jP1) '상류에서 유입되는 양 없고, t-1에서의 수심과 강우에 의한 source가 없을 때는 무조건 0 이므로 이과정 생략
+                            mFVMSolver.CalculateChannelFlow(project, cvan, CSAchCVw_i_jP1)
                         Else '이경우는 상류에서 유입되는 양 없고, t-1에서의 수심과 강우에 의한 source가 없을 조건이므로 모든 것이 0
                             mFVMSolver.SetNoFluxChannelFlowCV(.CV(cvan))
                         End If
@@ -457,11 +423,6 @@ Public Class cSimulator
         End If
         Call mInfiltration.CalEffectiveRainfall(project, cvan, rfInterval_SEC, dTSEC)
         With project.CV(cvan)
-            ' 임의 CV 에서 강우에 의해서 발생되는 저류량은,
-            ' overland flow : 유효강우량, channel flow : 총강우량 을 이용해서 계산한다. 2009.09.23
-            ' 그런데 유효강우량을 산정할때 적용된 .RFApp_dt_meter 이 값은 대각선 흐름방향에 의해서 x 방향이 길어지는 경우에서 유량을 보전하기 위해
-            ' 다음과 같은 sngCVDeltaX_m 가 적용된 것이다..
-            ' 따라서 유효강우량을 이용해서 임의 격자에 발생된 강우의 양을 보존하기 위해서는 역시 환산된 x 방향의 길이를 곱해준다.
             Select Case .FlowType
                 Case cGRM.CellFlowType.OverlandFlow
                     'subsurface flow에 의한 수심 더해주고..
@@ -500,18 +461,14 @@ Public Class cSimulator
                     End If
                     If .QCVof_i_j_m3Ps > 0 Then
                         chCSAAddedByOFInChCell_m2 = mFVMSolver.CalChCSAFromQbyIteration(project.CV(cvan), .CSAof_i_j, .QCVof_i_j_m3Ps)
-                        '2015.03.13, of 의 유량으로 dt 시간동안에 유출되는 양을 계산해서.. 하도에 더해준다..
                     Else
                         chCSAAddedByOFInChCell_m2 = 0
                     End If
-                    '2015.03.17   여기서 일정 수심을 더해주지 않고, 현재 셀 하도의 w 로 입력해서, 홍수추적 계산에 반영.. OK
                     .mStreamAttr.CSAchAddedByOFinCHnOFcell = chCSAAddedByOFInChCell_m2
                     '현재셀의 of 부분에서 발생된 하도로의 ssf, of, bf 추가
                     .mStreamAttr.hCVch_i_j_ori = .mStreamAttr.hCVch_i_j + .RFApp_dt_meter +
                                                  chCSAAddedBySSFlow_m2 / ChWidth +
-                                                 chCSAAddedByBFlow_m2 / ChWidth '+ _
-                    '                            DepthAddedByOF()
-                    'chCSAAddedByOFInChCell_m2 / CVdx_m 'CMS 유량에서 계산된 기여 면적이므로 x 방향 값으로 나누어 줘야 횡방향 기여면적이 된다.
+                                                 chCSAAddedByBFlow_m2 / ChWidth
                     If .mStreamAttr.hCVch_i_j_ori < 0 Then .mStreamAttr.hCVch_i_j_ori = 0
                     .mStreamAttr.CSAch_i_j_ori = mFVMSolver.GetChannelCrossSectionAreaUsingDepth(ChWidth,
                                                           .mStreamAttr.mChBankCoeff, .mStreamAttr.hCVch_i_j_ori,
@@ -531,7 +488,7 @@ Public Class cSimulator
         Dim chCSAini As Single
         Dim qChCVini As Single
         Dim uChCVini As Single
-        For cvan As Integer = 0 To project.CVCount - 1  ' 모든 Control Volume을 검색한다.
+        For cvan As Integer = 0 To project.CVCount - 1
             Dim iniQAtWP As Single = 0
             Dim faAtBaseWP As Integer = project.Watershed.mFacMax
             With project.CV(cvan)
@@ -567,13 +524,10 @@ Public Class cSimulator
                             End If
                         Next
                     End If
-                    chCSAini = 0 '이건 모델링 초기조건으로 이용됨.(제약조건으로.. 즉, 이것보다 작으면 안된다.)
+                    chCSAini = 0
                     hChCVini = 0
                     qChCVini = 0
                     uChCVini = 0
-                    'If .CVID = 3619 Then
-                    '    Dim aa As Integer = 1
-                    'End If
                     If bApplyIniStreamFlowIsSet = True Then
                         If project.mSimulationType = cGRM.SimulationType.SingleEventPE_SSR Then
                             qChCVini = iniflow * (.FAc - project.Watershed.mFacMostUpChannelCell) _
@@ -586,13 +540,6 @@ Public Class cSimulator
                             Else
                                 qChCVini = .mStreamAttr.initialQCVch_i_j_m3Ps
                             End If
-
-                            'If project.EstimatedDist.mFPN_ChFlow = "" OrElse project.EstimatedDist.mChFlowDist Is Nothing Then
-                            '                  qChCVini = iniQAtWP * (.FAc - project.Watershed.mFacMostUpChannelCell) _
-                            '/ (faAtBaseWP - project.Watershed.mFacMostUpChannelCell)
-                            'ElseIf project.EstimatedDist.mChFlowDist IsNot Nothing Then
-                            '    'qChCVini = project.EstimatedDist.GetEstimatedParametersDistribution(cSetPDistribution.PType.ChannelFlow, .CVID)
-                            'End If
                         End If
                         If qChCVini > 0 Then
                             Dim sngCAS_ini As Single = qChCVini / .CVDeltaX_m '이렇게 해서 반복계산 초기값 설정
@@ -600,8 +547,6 @@ Public Class cSimulator
                             hChCVini = mFVMSolver.GetChannelDepthUsingArea(.mStreamAttr.ChBaseWidth, chCSAini, .mStreamAttr.chIsCompoundCS,
                                                           .mStreamAttr.chUpperRBaseWidth_m, .mStreamAttr.chLowerRArea_m2,
                                                           .mStreamAttr.chLowerRHeight, .mStreamAttr.mChBankCoeff) '이건 계산에서 초기조건으로 이용되고..
-                            'todo : 여기서 계산할지?
-                            'uChCVini=?
                         End If
                     End If
                     '===================================
@@ -688,12 +633,6 @@ Public Class cSimulator
                               wpCount As Integer, ByRef targetCalTtoPrint_MIN As Integer,
                              ByRef mSEC_tm1 As Integer,
                              ByRef Project_tm1 As cProjectBAK, SimType As cGRM.SimulationType, mNowRFLayerNumber As Integer)
-        '이렇게 하면 1시간 모의결과가 0시간으로 출력되며, 6시간 모의결과가 5시간에서 출력됨
-        '즉, 5시간동안 모의하도록 설정했으면, 6시간 모의하고 5 줄을 출력함. 즉, 0시간에서의 모의결과는 출력하지 않는다...
-        '왜냐하면, 첫번째 강우자료를 이용한 모의 결과는 첫번째 유량자료와 매칭되어야 하기때문에..
-        '       1번째 강우자료를 이용한 모의결과를 0 시간의 유량자료와 매칭하기 위해서..
-        '       timeToPrint_MIN = targetCalTtoPrint_MIN - dTPrint_MIN 이렇게 적용한다.
-
         '0시간으로 출력되게 하기 위한 설정
         '강우레이어의 시간간격은 출력 시간간격보다 항상 같거나 작다..
         '첫번째 강우레이어의 모델링한(결과)를 무조건 1번째 출력으로 한다.
@@ -724,13 +663,10 @@ Public Class cSimulator
                         mSEC_tm1 = mNowTsec
                         Project_tm1 = New cProjectBAK
                         Project_tm1.SetCloneUsingCurrentProject(project)
-                        'cThisSimulation.tsec_ProjectBakup = mNowTsec
                     End If
                 End If
                 If mNowTsec > (targetCalTtoPrint_MIN * 60) AndAlso
                     (mNowTsec - cThisSimulation.dtsec_usedtoForwardToThisTime) <= (targetCalTtoPrint_MIN * 60) Then
-                    'If mNowTsec > (targetCalTtoPrint_MIN * 60) AndAlso cThisSimulation.tsec_ProjectBakup > 0 _
-                    'AndAlso cThisSimulation.tsec_ProjectBakup <= (targetCalTtoPrint_MIN * 60) Then
                     Dim coeffInterpolation As Single
                     coeffInterpolation = CSng((targetCalTtoPrint_MIN * 60 - mSEC_tm1) / (mNowTsec - mSEC_tm1))
                     timeToPrint_MIN = targetCalTtoPrint_MIN - dTPrint_MIN
@@ -739,7 +675,6 @@ Public Class cSimulator
                                                              coeffInterpolation, Project_tm1, SimType)
                     targetCalTtoPrint_MIN = targetCalTtoPrint_MIN + dTPrint_MIN
                     Project_tm1 = Nothing
-                    'cThisSimulation.tsec_ProjectBakup = -1
                 End If
             End If
         End If
@@ -786,7 +721,6 @@ Public Class cSimulator
                 Next
             End With
         End If
-        'cThisSimulation.mTimeThisStepStarted = DateTime.Now ' 2017.06.07 최 : 출력이 한번 되고 난 후의 초기화는 여기서
     End Sub
 
     Public Sub StopSimulate()
