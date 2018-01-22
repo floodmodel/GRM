@@ -70,14 +70,6 @@ Public Class cSimulator
 
     Public Sub Initialize()
         mbRFisEnded = False
-
-        '2017.6.1  원 : 오늘 이전에는 now를 사용. 이경우 낙동강 전체 분석시.. 각 유역 별로 여기 coce 진입 시간이 몇초 차이 발생. 그래서. 유역 상하 관계에서.. 상류가 하류보다 elapsed time 적게 보이는 혼선 
-        'cThisSimulation.mTimeThisStepStarted = Now()
-        'cThisSimulation.mTimeThisSimulationStarted = Now()
-
-        '2017.06.07 최 : cThisSimulation.mTimeThisStepStarted 이건 매번 출력 스텝에서 소요되는 시간을 측정하는 것이므로, 모의 시작시에 호출되는 이 프로시져에서는 삭제
-        'cThisSimulation.mTimeThisStepStarted = g_dtStart_from_MonitorEXE                         ''2017.6.1  원 : 이후 lngTimeDiff   milisec 산출시 사용됨
-
         cThisSimulation.mTimeThisSimulationStarted = g_dtStart_from_MonitorEXE
         cThisSimulation.mRFMeanForDT_m = 0
         cThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0
@@ -99,7 +91,6 @@ Public Class cSimulator
     '    th.Start()
     'End Sub
 
-    'Private tc As New gentle.cTimeChecker("c:\GRMtimeChecker.txt")
     'Private Sub SimulateSingleEventInner()
     Public Sub SimulateSingleEvent(ByVal project As cProject)
         mProject = project
@@ -133,7 +124,6 @@ Public Class cSimulator
             cThisSimulation.vMaxInThisStep = Single.MinValue
             '2017.04.21. dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
             If Not mbRFisEnded AndAlso (nowRFOrder = 0 OrElse (nowTsec > dTRFintervalSEC * nowRFOrder)) Then
-                ' (mNowTsec Mod dTRFintervalSEC) =0 조건 적용하면 안된다.. 왜냐면, 이전까지 내린 비를 가지고 현재시간을 모의하기 때문에..
                 If nowRFOrder < cThisSimulation.mRFDataCountInThisEvent Then '현재까지 적용된 레이어가 전체 개수보다 작으면,,
                     nowRFOrder = nowRFOrder + 1 '이렇게 하면 마지막 레이어 적용
                     cRainfall.ReadRainfall(eRainfallDataType, dtRFinfo, dTRFintervalMIN, nowRFOrder, cThisSimulation.IsParallel)
@@ -152,9 +142,6 @@ Public Class cSimulator
                                        wpCount, targetCalTtoPrint_MIN,
                                         mSEC_tm1,
                                          Project_tm1, mProject.mSimulationType, nowRFOrder)
-            '기존 dt는 여기까지 적용
-            '=============
-            '여기서 부터는 새로운 dt 적용
             nowTsec = nowTsec + dtsec 'dtsec 만큼 전진
             cThisSimulation.dtsec_usedtoForwardToThisTime = dtsec
             If cThisSimulation.IsFixedTimeStep = False Then
@@ -171,10 +158,7 @@ Public Class cSimulator
             RaiseEvent SimulationComplete(Me)
             MyBase.Finalize()
         End If
-
     End Sub
-
-
 
     Public Sub SimulateRT(ByVal project As cProject, ByVal realTime As cRealTime)
         mProject = project
@@ -236,16 +220,14 @@ Public Class cSimulator
                           GRMProject.FlowControlGridRow)
                     Dim cvid As Integer = r.CVID
                     If r.ControlType.ToString <> cFlowControl.FlowControlType.ReservoirOperation.ToString Then
-                        Dim dt_MIN As Integer = r.DT '이건 분단위
+                        Dim dt_MIN As Integer = r.DT
                         If r.ControlType.ToString <> cFlowControl.FlowControlType.ReservoirOperation.ToString Then
                             If nowTsec > dt_MIN * 60 * mRealTime.mdicFCDataOrder(cvid) OrElse mRealTime.mdicFCDataOrder(cvid) = 0 Then
                                 Dim TargetDataTime As String
                                 TargetDataTime = Format(mRealTime.mDateTimeStartRT.Add _
                                  (New System.TimeSpan(0, CInt(mRealTime.mdicFCDataOrder(cvid) * dt_MIN), 0)),
                                  "yyyyMMddHHmm")
-
                                 Dim bAfterSleep As Boolean = False
-
                                 Do
                                     If ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous <> TargetDataTime Or bAfterSleep Then
                                         mRealTime.ReadDBorCSVandMakeFCdataTableForRealTime(TargetDataTime)
@@ -398,11 +380,8 @@ Public Class cSimulator
         Dim ofDepthAddedByRFlow_m2 As Single = 0
         Dim chCSAAddedBySSFlow_m2 As Single = 0
         If project.CV(cvan).FlowType = cGRM.CellFlowType.ChannelNOverlandFlow Then
-            '2015.03.05   X 방향을 줄이는 것이 아니라.. y 방향을 줄여야 한다........
-            '                 Y 가 하도 로 유입되는 of 유량을 감소시킨다..
             effOFdYinCHnOFcell = dY_m - project.CV(cvan).mStreamAttr.ChBaseWidth
         End If
-
         If project.GeneralSimulEnv.mbSimulateBFlow = True Then
             '여기서는 하도 영역에서 지하수 충진, 감소 되는 양, 하도 유량 추가 감소되는 양..
             chCSAAddedByBFlow_m2 = mSSnBS.CalBFlowAndGetCSAAddedByBFlow(project, cvan, dTSEC, dY_m)
@@ -482,6 +461,7 @@ Public Class cSimulator
         End With
     End Sub
 
+
     Public Sub SetCVStartingCondition(ByVal project As cProject, ByVal intWPCount As Integer,
                                       Optional ByVal iniflow As Single = 0)
         Dim hChCVini As Single
@@ -502,15 +482,10 @@ Public Class cSimulator
                     .FlowType = cGRM.CellFlowType.ChannelNOverlandFlow Then
                     Dim bApplyIniStreamFlowIsSet As Boolean = False
                     If project.SubWSPar.userPars(.WSID).iniFlow IsNot Nothing Then
-                        '현재 셀이 포함된 유역의 wp에 초기유량이 있으면
-                        ' 이 유역의 초기유량으로, 현재셀의 초기유량을 계산하기 위한 정보 설정
                         iniQAtWP = project.SubWSPar.userPars(.WSID).iniFlow.Value
                         faAtBaseWP = project.CV(project.WSNetwork.WSoutletCVID(.WSID) - 1).FAc
                         bApplyIniStreamFlowIsSet = True
                     Else
-                        '현재 셀이 포함된 유역의 wp에 초기유량이 없으면, 
-                        '하류에 있는 소유역에서 초기유량이 설정되어 있는지 찾고, 
-                        '현재 셀의 하도에서의 초기유량 계산에 활용할 base ws를 찾는다
                         Dim baseWSid As Integer = .WSID
                         For id As Integer = 0 To project.WSNetwork.WSIDsAllDowns(.WSID).Count - 1
                             Dim downWSid As Integer = project.WSNetwork.WSIDsNearbyDown(baseWSid)
@@ -679,7 +654,6 @@ Public Class cSimulator
             End If
         End If
     End Sub
-
 
 
     Private Sub OutputProcessManagerBySimType(ByVal nowTtoPrint_MIN As Integer,
