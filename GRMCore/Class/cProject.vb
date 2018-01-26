@@ -1760,16 +1760,7 @@ Public Class cProject
                         .InitialSaturation = mSubWSpar.userPars(wsid).iniSaturation
                     Else
                         ' 이경우에는 레이어 설정에서 값이 입력되어 있다.
-
                     End If
-                    'If Not mEstimatedDist.mFPN_SSR = "" AndAlso File.Exists(mEstimatedDist.mFPN_SSR) Then
-                    '    Dim SSR As Single = mEstimatedDist.GetEstimatedParametersDistribution(cSetPDistribution.PType.SSR, cell.CVID)
-                    '    If SSR > 1 Then SSR = 1
-                    '    .InitialSaturation = SSR
-                    'Else
-                    '    .InitialSaturation = mSubWSpar.userPars(wsid).iniSaturation
-                    'End If
-
                     'todo :이거 검토
                     '.SoilDepthEffectiveAsWaterDepth_m = .SoilDepth_m * (1 - .InitialSaturation) * .EffectivePorosityThetaE
                     '2014.1.8. 토양에 불투수 지역이 있을 경우, 침투가능 깊이도 불투수율 만큼 감소시킨다.
@@ -1806,13 +1797,10 @@ Public Class cProject
                     '-------------------------------------------------------------
                     '하천에 대한것
                     If Watershed.HasStreamLayer AndAlso .FlowType = cGRM.CellFlowType.ChannelFlow Then
-                        '2013.11.07 주석처리.. 셀크기 보다 작은 하폭에서 of 계산시 불투수율 적용 필요
-                        '.ImperviousRatio = 0 '하도셀에서는 불투수률 0인 것으로.. 모든 지역이 투수 가능...
                         .mStreamAttr.RoughnessCoeffCH = mSubWSpar.userPars(wsid).chRoughness
                         .mStreamAttr.chSideSlopeLeft = CSng(mChannel.mLeftBankSlope)
                         .mStreamAttr.chSideSlopeRight = CSng(mChannel.mRightBankSlope)
                         .mStreamAttr.mChBankCoeff = (1 / mChannel.mLeftBankSlope + 1 / mChannel.mRightBankSlope).Value
-                        '여기서 하도 경사 설정
                         If .Slope < mSubWSpar.userPars(wsid).minSlopeChBed Then '하도의 최소 경사 설정
                             .mStreamAttr.chBedSlope = mSubWSpar.userPars(wsid).minSlopeChBed
                         Else
@@ -1820,7 +1808,6 @@ Public Class cProject
                         End If
 
                         If Channel.mCrossSectionType = cSetCrossSection.CSTypeEnum.CSSingle Then
-                            '하폭의 적용 우선순위는 사용자 지정 하폭, 레이어 하폭, 최소하폭
                             '셀크기보다 큰 하폭을 dy로 설정하지 않는다.. 즉, 하천에 떨어지는 강우는 dy를 적용해서 질량보존하고, 하도홍수추적은 실제 하폭(하도단면적 등)으로 한다.
                             Dim cs As New cSetCSSingle
                             cs = CType(Channel.mCrossSection, cSetCSSingle)
@@ -1829,11 +1816,6 @@ Public Class cProject
                             Else
                                 .mStreamAttr.ChBaseWidth = .FAc * cs.mMaxChannelWidthSingleCS / cProject.Current.FacMax
                             End If
-
-                            '여기는 사용자 입력에 의한 실측 하폭 적용
-                            '위에서는 모든 하천 격자에 하폭 배분.. 
-                            '여기서는 레이어로 입력된 격자에서 제공되는 하폭으로 기존값을 덮어쓴다..
-                            '이렇게 하면.. 하폭 레이어가 하천망 레이어와 대상 격자가 일치하지 않아도 된다..
                             If Not String.IsNullOrEmpty(Watershed.mFPN_channelWidth) AndAlso
                                  .mStreamAttr.ChBaseWidthByLayer > 0 Then
                                 .mStreamAttr.ChBaseWidth = .mStreamAttr.ChBaseWidthByLayer

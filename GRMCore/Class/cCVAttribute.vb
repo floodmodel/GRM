@@ -2,9 +2,6 @@
 Public Class cCVAttribute
     Implements ICloneable
 
-
-
-
 #Region "Watershed"
     ''' <summary>
     ''' 유역에 해당하는 셀에만 부여되는 일련번호

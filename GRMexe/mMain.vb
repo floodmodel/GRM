@@ -9,7 +9,6 @@ Imports GRMCore
 ''' <remarks></remarks>
 Module mMain
     Private WithEvents mSimulator As cSimulator
-    'Private mbDeleteFilesExceptQ As Boolean = False
     Private mMessage As String = ""
     'Private mPrj As cProject
     Private mSimDurationHour As Integer
@@ -39,16 +38,10 @@ Module mMain
         'Dim row As GRMProject.ProjectSettingsRow = CType(dtPrjSettings.Rows(0), GRMProject.ProjectSettingsRow)
         'Dim aa As String = row.FlowAccumFile
 
-
-
-
-
         Try
             Dim prjFPN As String = ""
-            'Console.WriteLine("1")
             Select Case My.Application.CommandLineArgs.Count
                 Case 1
-                    'Console.WriteLine("2")
                     Dim arg0 As String = Trim(My.Application.CommandLineArgs(0).ToString)
                     Select Case arg0
                         Case ""
@@ -60,10 +53,8 @@ Module mMain
                             Exit Select
                         Case Else
                             If File.Exists(arg0) Then
-                                'Console.WriteLine(arg0)
                                 prjFPN = arg0
                                 StartSingleRun(prjFPN, False)
-                                'Console.WriteLine("4")
                                 Exit Select
                             Else
                                 Console.WriteLine("Current project file is inavlid!!!")
@@ -113,7 +104,6 @@ Module mMain
             End Select
             'waitUserKey()
         Catch ex As Exception
-            'Console.WriteLine("200")
             waitUserKey()
         End Try
     End Sub
@@ -137,7 +127,7 @@ Module mMain
                 cGRM.writelogAndConsole("GRM setup was failed !!!", True, True)
                 Exit Sub
             End If
-            '''여기서 최하류셀 위치를 미리 찾을 수 있다.
+            ''여기서 최하류셀 위치를 미리 찾을 수 있다.
             'Dim x As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).XCol
             'Dim y As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).YRow
             'Dim facMD As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).FAc

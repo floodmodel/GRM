@@ -109,6 +109,31 @@
         End If
     End Function
 
+    Public Function flowAccumulation(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Integer
+        If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
+            Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).FAc
+        Else
+            Return Nothing
+        End If
+    End Function
+
+    Public Function slope(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Double
+        If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
+            Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).Slope
+        Else
+            Return Nothing
+        End If
+    End Function
+
+    Public Function streamValue(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Integer
+        If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True AndAlso mstreamFPN <> "" Then
+            If grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).IsStream Then
+                Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).mStreamAttr.ChStrOrder
+            End If
+        End If
+        Return Nothing
+    End Function
+
     Public Function landCoverValue(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Integer
         If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
             Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).LandCoverValue

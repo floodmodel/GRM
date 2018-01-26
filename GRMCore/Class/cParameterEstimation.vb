@@ -242,7 +242,7 @@ Public Class cParameterEstimation
                     cv.mStreamAttr.QCVch_i_j_m3Ps = mProject.CV(cvid - 1).mStreamAttr.QCVch_i_j_m3Ps
                 End If
                 mCVresult_SSR_IniFlow.Add(cv)
-                '여기서 이렇게 설정하더라고.. 실제 모델링에서는 inlet을 상류만 false로 설정됨
+                '여기서 이렇게 설정하더라고.. 실제 모델링에서는 inlet의 상류만 false로 설정됨
                 mProject.CV(cvid - 1).toBeSimulated = False
             Next
         Next
