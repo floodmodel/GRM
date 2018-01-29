@@ -23,21 +23,27 @@
         grmPrj.ReadLayerFAcc(facFPN, True)
         If streamFPN <> "" AndAlso File.Exists(streamFPN) Then
             grmPrj.ReadLayerStream(streamFPN, True)
+            mstreamFPN = streamFPN
         End If
         If landCoverFPN <> "" AndAlso File.Exists(landCoverFPN) Then
             grmPrj.ReadLandCoverFile(landCoverFPN, True)
+            mlandCoverFPN = landCoverFPN
         End If
         If soilTextureFPN <> "" AndAlso File.Exists(soilTextureFPN) Then
             grmPrj.ReadSoilTextureFile(soilTextureFPN, True)
+            msoilTextureFPN = soilTextureFPN
         End If
         If soilDepthFPN <> "" AndAlso File.Exists(soilDepthFPN) Then
             grmPrj.ReadSoilDepthFile(soilDepthFPN, True)
+            msoilDepthFPN = soilDepthFPN
         End If
         If iniSoilSaturationFPN <> "" AndAlso File.Exists(iniSoilSaturationFPN) Then
             grmPrj.ReadLayerInitialSoilSaturation(iniSoilSaturationFPN, True)
+            miniSoilSaturationFPN = iniSoilSaturationFPN
         End If
         If iniChannelFlowFPN <> "" AndAlso File.Exists(iniChannelFlowFPN) Then
             grmPrj.ReadLayerInitialChannelFlow(iniChannelFlowFPN, True)
+            miniChannelFlowFPN = iniChannelFlowFPN
         End If
         grmPrj.SetGridNetworkFlowInformation()
         grmPrj.InitControlVolumeAttribute()

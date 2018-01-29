@@ -836,12 +836,6 @@ FACORIG must be greater than zero. A value of 0.001 is often suitable.
  </summary>
  <remarks></remarks>
 </member>
-<member name="F:GRMCore.cSimulator.mTime_MRESimulationStarting">
- <summary>
- 
- </summary>
- <remarks></remarks>
-</member>
 <member name="M:GRMCore.cSimulator.InitializeCVForThisStep(GRMCore.cProject,System.Int32)">
  <summary>
  강우, 지표하 유출, 기저유출에 의한 생성항 계산 및 t시간에서의 모의를 위한 초기값을 설정한다.
@@ -849,18 +843,6 @@ FACORIG must be greater than zero. A value of 0.001 is often suitable.
  </summary>
  <param name="project"></param>
  <param name="cvan"></param>
- <remarks></remarks>
-</member>
-<member name="M:GRMCore.cSimulator.WriteCurrentResultAndInitializeNextStep(GRMCore.cProject,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32,System.Int32@,System.Int32@,GRMCore.cProjectBAK@,GRMCore.cGRM.SimulationType,System.Int32)">
- <summary>
- 출력관련.. 제어
- </summary>
- <param name="dtsec"></param>
- <param name="dTRFintervalSEC"></param>
- <param name="dTPrint_MIN"></param>
- <param name="wpCount"></param>
- <param name="mSEC_tm1"></param>
- <param name="Project_tm1"></param>
  <remarks></remarks>
 </member>
 <member name="M:GRMCore.cSSandBSflow.GetRFlowOFAreaAddedBySSflowCVwAndCalSSflowAtNowCV(GRMCore.cProject,System.Int32,System.Int32,System.Single,System.Single)">

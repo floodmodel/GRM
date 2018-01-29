@@ -103,7 +103,24 @@ Module mMain
                 cGRM.writelogAndConsole("GRM setup was failed !!!", True, True)
                 Exit Sub
             End If
-            ''여기서 최하류셀 위치를 미리 찾을 수 있다.
+            ''여기서 셀 정보를 미리 알 수 있다.
+            'Dim WSFPN As String = cProject.Current.Watershed.mFPN_watershed
+            'Dim SlopeFPN As String = cProject.Current.Watershed.mFPN_slope
+            'Dim FdirFPN As String = cProject.Current.Watershed.mFPN_fdir
+            'Dim FacFPN As String = cProject.Current.Watershed.mFPN_fac
+            'Dim streamFPN As String = cProject.Current.Watershed.mFPN_stream
+            'Dim lcFPN As String = cProject.Current.Landcover.mGridLandCoverFPN
+            'Dim stFPN As String = cProject.Current.GreenAmpt.mGridSoilTextureFPN
+            'Dim sdFPN As String = cProject.Current.SoilDepth.mGridSoilDepthFPN
+            'Dim wsinfo As New cGetWatershedInfo(WSFPN, SlopeFPN, FdirFPN, FacFPN, streamFPN, lcFPN, stFPN, sdFPN,,)
+            'Dim x As Integer = wsinfo.mostDownStreamCellArrayXColPosition
+            'Dim y As Integer = wsinfo.mostDownStreamCellArrayYRowPosition
+            'Dim isIn As Boolean = wsinfo.IsInWatershedArea(x, y)
+            'Dim array() As String = wsinfo.allCellsInUpstreamArea(x, y)
+            'Dim fd As String = wsinfo.flowDirection(x, y)
+            'Dim lcv As Integer = wsinfo.landCoverValue(x, y)
+            'Dim wsCount As Integer = wsinfo.WScount
+            'Dim intStreamValue As Integer = wsinfo.streamValue(x, y)
             'Dim x As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).XCol
             'Dim y As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).YRow
             'Dim facMD As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).FAc
@@ -158,7 +175,7 @@ Module mMain
     Private Function GetGMPFileList(path As String) As String()
         Dim fileList() As String
         fileList = Directory.GetFiles(path, "*.gmp")
-        Dim bN As Boolean = True '모든 파일명의 머리글을 숫자로 변환할 수 있으면..
+        Dim bN As Boolean = True
         For Each fs As String In fileList
             Dim n As Integer
             If Integer.TryParse(IO.Path.GetFileNameWithoutExtension(fs).Split(CChar("_")).First, n) = False Then
@@ -166,7 +183,7 @@ Module mMain
                 Exit For
             End If
         Next
-        If bN = True Then '숫자 순으로 정렬
+        If bN = True Then '모든 파일명의 머리글을 숫자로 변환할 수 있으면..  숫자 순으로 정렬
             fileList = fileList.OrderBy(Function(fn) Int32.Parse(IO.Path.GetFileNameWithoutExtension(fn).Split(CChar("_")).First)).ToArray
         End If
         Return fileList
