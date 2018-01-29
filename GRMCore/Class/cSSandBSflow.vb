@@ -199,46 +199,34 @@
                 '이조건에서는 항상 포화상태, 침누있음, 강우에 의한 침투량 없음. 대신 지표면 저류량에 의한 침투는 항상 있음
                 cInfiltration.SetWaterAreaInfiltrationParameters(project.CV(cvan))
             End If
-            '==========================================
             .hUAQfromBedrock_m = .hUAQfromBedrock_m + soilDepthPercolated_m
             If .hUAQfromBedrock_m > (.SoilDepthToBedrock_m - .soilDepth_m) Then _
                 .hUAQfromBedrock_m = (.SoilDepthToBedrock_m - .soilDepth_m)
-            '여기서 부터는 상류 유입에 의한 변화
             If .FlowType = cGRM.CellFlowType.OverlandFlow Then 'overland flow 셀에 대해서만 b 층의 횡방향 이동 해석
                 Call GetBaseflowInputDepthAndCalculateLateralMovement(project, cvan, .CVDeltaX_m, cellSize_m, dtsec)
             Else
-                '이경우는 하천
                 If .mStreamAttr.hCVch_i_j > 0 Then
                     '하천 수심보다 더 많은 양이 침누되었을 경우, 하천 수심만큼만 침누된 것으로 한다.
-                    '하천 수심이 아주 작고, 침누량이 많을 경우 CalculateBaseflowAndGetCSAAddedByBF 이 값이 아주 커지는 수치적 오류 발생
                     Dim dHinUAQ_m As Single = soilDepthPercolated_m * .porosityEta
                     If dHinUAQ_m > .mStreamAttr.hCVch_i_j Then dHinUAQ_m = .mStreamAttr.hCVch_i_j
                     .hUAQfromChannelBed_m = .hUAQfromChannelBed_m + dHinUAQ_m
                     If .hUAQfromChannelBed_m > 0 Then
                         '기저유출은 물이 차있는 영역에서 발생하므로.. 포화수리전도도 적용
                         If .hUAQfromChannelBed_m > .mStreamAttr.hCVch_i_j Then
-                            '이때는 하천으로 유출
                             csa = CSng(.hydraulicConductK_mPsec *
                                                                         (.hUAQfromChannelBed_m - .mStreamAttr.hCVch_i_j) / .mStreamAttr.hCVch_i_j) _
-                                                                    * .mStreamAttr.ChBaseWidth * dtsec '수심이 dx, 수심의 차*공극률이 수두차 dh
+                                                                    * .mStreamAttr.ChBaseWidth * dtsec
                         Else
-                            '이때는 하천에서 땅속으로 유출
-                            '수심의 차에 해당하는 영역 높이에 대해서 침투하면서 빠진다..
                             csa = .hydraulicConductK_mPsec * (.hUAQfromChannelBed_m - .mStreamAttr.hCVch_i_j) * dtsec
                         End If
                     Else
                         csa = 0
                     End If
                 Else
-                    'h가 0인 경우는 하도셀 최상류, 강우 0 인 경우이다. 
-                    '이경우는 강우가 발생 하지 않은 상태이므로, 수심이 없는 초기 조건을 유지한다.
                     csa = 0
                 End If
-                'todo : 이거 검토
                 .hUAQfromChannelBed_m = .hUAQfromChannelBed_m - csa / .mStreamAttr.ChBaseWidth / .porosityEta
                 .hUAQfromBedrock_m = .hUAQfromBedrock_m - csa / .mStreamAttr.ChBaseWidth / .porosityEta
-
-                '하도에서 비피압대수층의 수심의 최소값은 하도 수심의 최소값인 0으로 본다. 즉, 홍수시의 비피압대수층의 최소 수심은 하도 수심과 동일
                 If .hUAQfromChannelBed_m < 0 Then .hUAQfromChannelBed_m = 0
                 If .hUAQfromBedrock_m < 0 Then .hUAQfromBedrock_m = 0
             End If

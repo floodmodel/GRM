@@ -97,7 +97,7 @@
         If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
             Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).WSID
         Else
-            Return -9999
+            Return Nothing
         End If
     End Function
 
@@ -134,14 +134,6 @@
         Return Nothing
     End Function
 
-    Public Function landCoverValue(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Integer
-        If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
-            Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).LandCoverValue
-        Else
-            Return -9999
-        End If
-    End Function
-
     Public Function cellFlowType(colXArrayIdx As Integer, rowYArrayIdx As Integer) As String
         If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
             Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).FlowType.ToString
@@ -149,6 +141,32 @@
             Return Nothing
         End If
     End Function
+
+    Public Function landCoverValue(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Integer
+        If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
+            Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).LandCoverValue
+        Else
+            Return Nothing
+        End If
+    End Function
+
+    Public Function soilTextureVlaue(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Integer
+        If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
+            Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).SoilTextureValue
+        Else
+            Return Nothing
+        End If
+    End Function
+
+
+    Public Function soilDepthVlaue(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Integer
+        If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
+            Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).SoilDepthTypeValue
+        Else
+            Return Nothing
+        End If
+    End Function
+
 
     ''' <summary>
     '''  Select all cells in upstream area of a input cell position. Return string array of cell positions - "column, row".

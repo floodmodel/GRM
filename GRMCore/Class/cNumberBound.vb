@@ -80,7 +80,6 @@
         Else
             If value >= mMax Then Return False
         End If
-
         Return True
     End Function
 
@@ -88,21 +87,18 @@
         Get
             Dim minSymbol As String
             Dim maxSymbol As String
-
             If IncludeMinvalue Then
                 minSymbol = "≤"
             Else
                 minSymbol = "<"
             End If
-
             If IncludeMaxValue Then
                 maxSymbol = "≤"
             Else
                 maxSymbol = "<"
             End If
-
-            Return String.Format("[{0}] is invalid. {3}  {1}{4}{0}{5}{2}", _
-                                 ValueName, Min, Max, _
+            Return String.Format("[{0}] is invalid. {3}  {1}{4}{0}{5}{2}",
+                                 ValueName, Min, Max,
                                  vbCrLf, minSymbol, maxSymbol)
         End Get
     End Property

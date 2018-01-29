@@ -14,7 +14,6 @@ Public Class cSimulator
     End Enum
 
 #Region "EVENTS"
-
     Public Event SimulationStep(ByVal sender As cSimulator, ByVal elapsedMinutes As Integer)
     Public Event SimulationStop(ByVal sender As cSimulator)
     Public Event SimulationComplete(ByVal sender As cSimulator)
@@ -25,7 +24,6 @@ Public Class cSimulator
 #End Region
 
 #Region "Exceptions"
-
     Public Class SimulatorCreateOutputFilesException
         Inherits Exception
     End Class
@@ -39,15 +37,6 @@ Public Class cSimulator
     ''' </summary>
     ''' <remarks></remarks>
     Private mbRFisEnded As Boolean
-
-
-    ''' <summary>
-    ''' 
-    ''' </summary>
-    ''' <remarks></remarks>
-    Private mTime_MRESimulationStarting As Date
-
-
 
     Private mHydroCom As New cHydroCom
     Private mFVMSolver As New cFVMSolver
@@ -118,11 +107,11 @@ Public Class cSimulator
         cThisSimulation.dtsec_usedtoForwardToThisTime = cThisSimulation.dtsec
         Dim dtsec As Integer
         'CVid의 값은 1부터 시작함. 
-        Dim simulationTimeLimitSEC As Integer = endingTimeSEC + dtsec + 1 ' 등호조건(<=)대신 (<) 조건을 사용하기 위해서 1을 더해 준다.
+        Dim simulationTimeLimitSEC As Integer = endingTimeSEC + dtsec
         Do While nowTsec <= simulationTimeLimitSEC
             dtsec = cThisSimulation.dtsec
             cThisSimulation.vMaxInThisStep = Single.MinValue
-            '2017.04.21. dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
+            'dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
             If Not mbRFisEnded AndAlso (nowRFOrder = 0 OrElse (nowTsec > dTRFintervalSEC * nowRFOrder)) Then
                 If nowRFOrder < cThisSimulation.mRFDataCountInThisEvent Then '현재까지 적용된 레이어가 전체 개수보다 작으면,,
                     nowRFOrder = nowRFOrder + 1 '이렇게 하면 마지막 레이어 적용
@@ -196,7 +185,7 @@ Public Class cSimulator
             nowT_MIN = CInt(nowTsec / 60)
             cThisSimulation.vMaxInThisStep = Single.MinValue
             If nowRFLayerOrder = 0 OrElse nowTsec > (dTRFintervalSEC * cThisSimulation.mRFDataCountInThisEvent) Then
-                '여기서 신규 강우자료 검색
+                '신규 강우자료 검색
                 Dim TargetRFLayerTime As String
                 TargetRFLayerTime = Format(mRealTime.mDateTimeStartRT.Add _
                                               (New System.TimeSpan(0, CInt(nowRFLayerOrder * dTRFintervalSEC / 60), 0)),
@@ -205,7 +194,7 @@ Public Class cSimulator
                     If mStop = True Then Exit Sub
                     Call mRealTime.UpdateRainfallInformationGRMRT(TargetRFLayerTime)
                     If nowRFLayerOrder < cThisSimulation.mRFDataCountInThisEvent Then Exit Do
-                    Thread.Sleep(2000)  '2015.11.11 최 : 여기 2초 지연 적절함
+                    Thread.Sleep(2000)  '2초 지연 적절함
                 Loop
                 nowRFLayerOrder = nowRFLayerOrder + 1 '이렇게 하면 마지막 레이어 적용
                 cRainfall.ReadRainfall(mRealTime.mRainfallDataTypeRT, mRealTime.mlstRFdataRT,
@@ -213,7 +202,7 @@ Public Class cSimulator
                 bRainfallisEnded = False
             End If
             If mProject.FCGrid.IsSet = True Then
-                '여기서 신규 fc 자료 검색 조건
+                '신규 fc 자료 검색 조건
                 Dim ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous As String = ""
                 For nfc As Integer = 0 To mProject.FCGrid.FCCellCount - 1
                     Dim r As GRMProject.FlowControlGridRow = CType(mProject.FCGrid.mdtFCGridInfo.Rows(nfc),
@@ -232,9 +221,7 @@ Public Class cSimulator
                                     If ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous <> TargetDataTime Or bAfterSleep Then
                                         mRealTime.ReadDBorCSVandMakeFCdataTableForRealTime(TargetDataTime)
                                     End If
-
                                     ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous = TargetDataTime
-
                                     If mStop = True Then Exit Sub
                                     Call mRealTime.UpdateFcDatainfoGRMRT(TargetDataTime, cvid, mRealTime.mdicFCDataOrder(cvid), dt_MIN)
                                     If mRealTime.mdicBNewFCdataAddedRT(cvid) = True Then Exit Do
@@ -264,7 +251,6 @@ Public Class cSimulator
             End If
             If mStop = True Then Exit Do
         Loop
-
         If mStop = True Then
             RaiseEvent SimulationStop(Me)
         Else
@@ -277,11 +263,10 @@ Public Class cSimulator
         Dim cellsize As Integer = project.Watershed.mCellSize
         Dim dtsec As Integer = cThisSimulation.dtsec
         If cThisSimulation.IsParallel = True Then
-            For fac As Integer = 0 To project.Watershed.mFacMax  'FA는 원래 0 부터 시작함.
-                If project.mCVANsForEachFA(fac) IsNot Nothing Then '없는 CV는 여기서 진입 안됨.
+            For fac As Integer = 0 To project.Watershed.mFacMax
+                If project.mCVANsForEachFA(fac) IsNot Nothing Then
                     Dim nfac As Integer = fac
                     Dim ncv As Integer = Nothing
-                    'If project.mCVANsForEachFA(nfac).Length > 100 Then ' 이조건을 이용해서 ??? 개 이상인 경우만 병렬로 계산하는 것도 속도 확인 필요함
                     Dim cvans(project.mCVANsForEachFA(nfac).Length - 1) As Integer
                     project.mCVANsForEachFA(nfac).CopyTo(cvans, 0)
                     Dim options As ParallelOptions = New ParallelOptions()
@@ -298,8 +283,8 @@ Public Class cSimulator
                 End If
             Next fac
         Else
-            For fac As Integer = 0 To project.Watershed.mFacMax  'FA는 원래 0 부터 시작함.
-                If project.mCVANsForEachFA(fac) IsNot Nothing Then '없는 CV는 여기서 진입 안됨.
+            For fac As Integer = 0 To project.Watershed.mFacMax
+                If project.mCVANsForEachFA(fac) IsNot Nothing Then
                     For Each cvan As Integer In project.mCVANsForEachFA(fac)
                         If project.CV(cvan).toBeSimulated = True Then
                             simulateRunoffCore(project, fac, cvan, dtsec, nowT_MIN, cellsize)
@@ -327,7 +312,7 @@ Public Class cSimulator
                         hCVw_i_jP1 = mFVMSolver.CalculateOverlandWaterDepthCViW(project, cvan)
                     End If
                     With project
-                        If hCVw_i_jP1 > 0 OrElse .CV(cvan).hCVof_i_j > 0 Then '상류에서 유입되는 양 없고, t-1에서의 수심과 강우에 의한 source가 없을 때는 무조건 0
+                        If hCVw_i_jP1 > 0 OrElse .CV(cvan).hCVof_i_j > 0 Then
                             mFVMSolver.CalculateOverlandFlow(project, cvan, hCVw_i_jP1, .Watershed.mCellSize)
                         Else
                             mFVMSolver.SetNoFluxOverlandFlowCV(.CV(cvan))
@@ -341,7 +326,7 @@ Public Class cSimulator
                     With project
                         If CSAchCVw_i_jP1 > 0 OrElse .CV(cvan).mStreamAttr.hCVch_i_j > 0 Then
                             mFVMSolver.CalculateChannelFlow(project, cvan, CSAchCVw_i_jP1)
-                        Else '이경우는 상류에서 유입되는 양 없고, t-1에서의 수심과 강우에 의한 source가 없을 조건이므로 모든 것이 0
+                        Else
                             mFVMSolver.SetNoFluxChannelFlowCV(.CV(cvan))
                         End If
                     End With
@@ -354,9 +339,9 @@ Public Class cSimulator
             Dim rows As GRMProject.FlowControlGridRow() =
                     CType(project.FCGrid.mdtFCGridInfo.Select("CVID = " & (cvan + 1)), GRMProject.FlowControlGridRow())
             Dim row As GRMProject.FlowControlGridRow = rows(0)
-            If row.MaxStorage * row.MaxStorageR = 0 Then '이거는 저수지 저류 모의 등하지 않고, overland flow에서 유량 처리함.
+            If row.MaxStorage * row.MaxStorageR = 0 Then '
                 mFC.CalFCSinkOrSourceFlow(project, nowT_min, cvan)
-            Else '이경우는 저수지 저류량 등의 모의를 하는 경우로..
+            Else
                 mFC.CalFCReservoirOperation(project, cvan, nowT_min)
             End If
         End If
@@ -383,14 +368,12 @@ Public Class cSimulator
             effOFdYinCHnOFcell = dY_m - project.CV(cvan).mStreamAttr.ChBaseWidth
         End If
         If project.GeneralSimulEnv.mbSimulateBFlow = True Then
-            '여기서는 하도 영역에서 지하수 충진, 감소 되는 양, 하도 유량 추가 감소되는 양..
             chCSAAddedByBFlow_m2 = mSSnBS.CalBFlowAndGetCSAAddedByBFlow(project, cvan, dTSEC, dY_m)
         End If
         If project.GeneralSimulEnv.mbSimulateSSFlow = True Then
             With project.CV(cvan)
                 Select Case .FlowType
                     Case cGRM.CellFlowType.OverlandFlow
-                        'Interflow에 의한 유입량 계산하고
                         ofDepthAddedByRFlow_m2 = mSSnBS.GetRFlowOFAreaAddedBySSflowCVwAndCalSSflowAtNowCV(project, cvan, dTSEC, dY_m, .CVDeltaX_m)
                     Case cGRM.CellFlowType.ChannelFlow
                         chCSAAddedBySSFlow_m2 = mSSnBS.GetChCSAaddedBySSFlowInChlCell(project, cvan)
@@ -404,33 +387,29 @@ Public Class cSimulator
         With project.CV(cvan)
             Select Case .FlowType
                 Case cGRM.CellFlowType.OverlandFlow
-                    'subsurface flow에 의한 수심 더해주고..
                     .hCVof_i_j_ori = .hCVof_i_j + .EffRFCV_dt_meter + ofDepthAddedByRFlow_m2
                     .hCVof_i_j = .hCVof_i_j_ori
                     .CSAof_i_j = .hCVof_i_j_ori * dY_m
                     .StorageAddedForDTfromRF_m3 = .EffRFCV_dt_meter * dY_m * CVdx_m
                 Case cGRM.CellFlowType.ChannelFlow
-                    'subsurface flow, base flow에 의한 기여 수심을 반영하고
                     Dim ChWidth As Single = .mStreamAttr.ChBaseWidth
                     .mStreamAttr.hCVch_i_j_ori = .mStreamAttr.hCVch_i_j + .RFApp_dt_meter _
                                                  + chCSAAddedBySSFlow_m2 / ChWidth _
-                                                 + chCSAAddedByBFlow_m2 / ChWidth '하폭 내에서의 기여 높이
+                                                 + chCSAAddedByBFlow_m2 / ChWidth
                     .mStreamAttr.CSAch_i_j_ori = mFVMSolver.GetChannelCrossSectionAreaUsingDepth(ChWidth,
                                                          .mStreamAttr.mChBankCoeff, .mStreamAttr.hCVch_i_j_ori,
                                                          .mStreamAttr.chIsCompoundCS, .mStreamAttr.chLowerRHeight,
                                                          .mStreamAttr.chLowerRArea_m2, .mStreamAttr.chUpperRBaseWidth_m)
                     .mStreamAttr.hCVch_i_j = .mStreamAttr.hCVch_i_j_ori
                     .mStreamAttr.CSAch_i_j = .mStreamAttr.CSAch_i_j_ori
-                    .StorageAddedForDTfromRF_m3 = .RFApp_dt_meter * dY_m * CVdx_m '하폭이 아닌 dy로 강우량 기여분 계산 -> 질량보존
+                    .StorageAddedForDTfromRF_m3 = .RFApp_dt_meter * dY_m * CVdx_m
                 Case cGRM.CellFlowType.ChannelNOverlandFlow
-                    '상류에서 발생된 subsurface flow에 의한 현재셀의 overland flow에 대한 기여 수심을 먼저 반영하고
                     Dim chCSAAddedByOFInChCell_m2 As Single
                     Dim ChWidth As Single = .mStreamAttr.ChBaseWidth
-                    .hCVof_i_j_ori = .hCVof_i_j + .EffRFCV_dt_meter + ofDepthAddedByRFlow_m2 '/ effOFdyInCHnOFcell  2015.03.06
+                    .hCVof_i_j_ori = .hCVof_i_j + .EffRFCV_dt_meter + ofDepthAddedByRFlow_m2
                     .hCVof_i_j = .hCVof_i_j_ori
                     .CSAof_i_j = .hCVof_i_j_ori * effOFdYinCHnOFcell
                     If .hCVof_i_j > 0 Then
-                        '하도셀에 포함된 overland flow에서는 w쪽 유입 없는 것으로 모의
                         Call mFVMSolver.CalculateOverlandFlow(project, cvan, 0, effOFdYinCHnOFcell)
                     Else
                         .hCVof_i_j = 0
@@ -444,7 +423,6 @@ Public Class cSimulator
                         chCSAAddedByOFInChCell_m2 = 0
                     End If
                     .mStreamAttr.CSAchAddedByOFinCHnOFcell = chCSAAddedByOFInChCell_m2
-                    '현재셀의 of 부분에서 발생된 하도로의 ssf, of, bf 추가
                     .mStreamAttr.hCVch_i_j_ori = .mStreamAttr.hCVch_i_j + .RFApp_dt_meter +
                                                  chCSAAddedBySSFlow_m2 / ChWidth +
                                                  chCSAAddedByBFlow_m2 / ChWidth
@@ -517,31 +495,25 @@ Public Class cSimulator
                             End If
                         End If
                         If qChCVini > 0 Then
-                            Dim sngCAS_ini As Single = qChCVini / .CVDeltaX_m '이렇게 해서 반복계산 초기값 설정
-                            chCSAini = mFVMSolver.CalChCSAFromQbyIteration(project.CV(cvan), sngCAS_ini, qChCVini) '이건 모델링 초기조건으로 이용됨.(제약조건으로.. 즉, 이것보다 작으면 안된다.)
+                            Dim sngCAS_ini As Single = qChCVini / .CVDeltaX_m '초기값 설정
+                            chCSAini = mFVMSolver.CalChCSAFromQbyIteration(project.CV(cvan), sngCAS_ini, qChCVini)
                             hChCVini = mFVMSolver.GetChannelDepthUsingArea(.mStreamAttr.ChBaseWidth, chCSAini, .mStreamAttr.chIsCompoundCS,
                                                           .mStreamAttr.chUpperRBaseWidth_m, .mStreamAttr.chLowerRArea_m2,
-                                                          .mStreamAttr.chLowerRHeight, .mStreamAttr.mChBankCoeff) '이건 계산에서 초기조건으로 이용되고..
+                                                          .mStreamAttr.chLowerRHeight, .mStreamAttr.mChBankCoeff)
                         End If
                     End If
-                    '===================================
-                    '초기유량을 시작조건으로 줄때..
                     .mStreamAttr.hCVch_i_j = hChCVini
                     .mStreamAttr.CSAch_i_j = chCSAini
                     .mStreamAttr.hCVch_i_j_ori = hChCVini
                     .mStreamAttr.CSAch_i_j_ori = chCSAini
                     .mStreamAttr.QCVch_i_j_m3Ps = qChCVini
                     .mStreamAttr.uCVch_i_j = uChCVini
-                    '=====================================
-                    '여긴 기저유출
                     If project.GeneralSimulEnv.mbSimulateBFlow = True Then
-                        .hUAQfromChannelBed_m = hChCVini '하도의 초기 수심을 비피압대수층의 초기 수심으로 설정한다. 
+                        .hUAQfromChannelBed_m = hChCVini '하도의 초기 수심을 비피압대수층의 초기 수심으로 설정 
                     Else
                         .hUAQfromChannelBed_m = 0
                     End If
-                    '=====================================
                 End If
-                '강우
                 .RFReadintensity_tM1_mPsec = 0
                 .EffRFCV_dt_meter = 0
                 .RFApp_dt_meter = 0
@@ -549,20 +521,16 @@ Public Class cSimulator
                 .RFAcc_FromStartToNow_meter = 0
                 .RFReadintensity_mPsec = 0
                 .RFReadintensity_tM1_mPsec = 0
-                '토양
                 .SoilMoistureChangeDeltaTheta = 0
                 .InfiltrationF_mPdt = 0
                 .InfiltrationRatef_mPsec = 0
                 .InfiltrationRatef_tM1_mPsec = 0
                 .EffectiveSaturationSe = 0
                 .bAfterSaturated = False
-                '기타 유량 등
                 .StorageAddedForDTfromRF_m3 = 0
                 .QsumCVw_dt_m3 = 0
                 .effCVCountFlowINTOCViW = 0
-                '지표하 유출
                 .SSF_Q_m3Ps = 0
-                '기저유출 관련 변수
                 .baseflow_Q_m3Ps = 0
                 .hUAQfromBedrock_m = cGRM.CONST_UAQ_HEIGHT_FROM_BEDROCK
                 .StorageCumulative_m3 = 0
@@ -571,7 +539,7 @@ Public Class cSimulator
                         Dim rows As GRMProject.FlowControlGridRow() = CType(project.FCGrid.mdtFCGridInfo.Select("CVID = " & (cvan + 1)), GRMProject.FlowControlGridRow())
                         Dim row As GRMProject.FlowControlGridRow = rows(0)
                         If Not row.IsIniStorageNull Then
-                            .StorageCumulative_m3 = row.IniStorage  '초기저류량을 시작조건으로 한다.
+                            .StorageCumulative_m3 = row.IniStorage
                         End If
                     End If
                 End If
@@ -592,25 +560,11 @@ Public Class cSimulator
     End Sub
 
 
-
-    ''' <summary>
-    ''' 출력관련.. 제어
-    ''' </summary>
-    ''' <param name="dtsec"></param>
-    ''' <param name="dTRFintervalSEC"></param>
-    ''' <param name="dTPrint_MIN"></param>
-    ''' <param name="wpCount"></param>
-    ''' <param name="mSEC_tm1"></param>
-    ''' <param name="Project_tm1"></param>
-    ''' <remarks></remarks>
     Private Sub WriteCurrentResultAndInitializeNextStep(project As cProject, mNowTsec As Integer,
                               dtsec As Integer, dTRFintervalSEC As Integer, dTPrint_MIN As Integer,
                               wpCount As Integer, ByRef targetCalTtoPrint_MIN As Integer,
                              ByRef mSEC_tm1 As Integer,
                              ByRef Project_tm1 As cProjectBAK, SimType As cGRM.SimulationType, mNowRFLayerNumber As Integer)
-        '0시간으로 출력되게 하기 위한 설정
-        '강우레이어의 시간간격은 출력 시간간격보다 항상 같거나 작다..
-        '첫번째 강우레이어의 모델링한(결과)를 무조건 1번째 출력으로 한다.
         Dim dTRFintervalMIN As Integer = CInt(dTRFintervalSEC / 60)
         Dim dTPrint_SEC As Integer = dTPrint_MIN * 60
         Dim dtmin As Single = CSng(dtsec / 60)
@@ -626,7 +580,6 @@ Public Class cSimulator
                                                      1, Nothing, SimType)
         Else
             If mNowTsec > 0 AndAlso (mNowTsec Mod dTPrint_SEC) = 0 Then
-                '이건 계산시간간격으로 출력 시간간격을 나누었을때 떨어지는 경우
                 timeToPrint_MIN = targetCalTtoPrint_MIN - dTPrint_MIN
                 OutputProcessManagerBySimType(timeToPrint_MIN, wpCount,
                                                          cThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m,

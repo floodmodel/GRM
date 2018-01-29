@@ -11,7 +11,6 @@ namespace gentle
 {
     public class cFile
     {
-
         public enum FilePattern
         {
             TEXTFILE,
@@ -21,41 +20,40 @@ namespace gentle
             OUT_Discharge
         };
 
+        private string[] mSourceFileList;
+        private List<string> mNotDupFileList;
 
-    private  string[] mSourceFileList;
-     private List<string> mNotDupFileList;
-
-    public static bool ConfirmDeleteFiles(List<string> FilePathNames)
-    {
-        bool bAlldeleted = false;
-        int n = 0;
-        while (!(bAlldeleted == true))
+        public static bool ConfirmDeleteFiles(List<string> FilePathNames)
         {
-            n += 1;
-            foreach (string fpn in FilePathNames)
+            bool bAlldeleted = false;
+            int n = 0;
+            while (!(bAlldeleted == true))
             {
-                if (File.Exists(fpn) == true)
+                n += 1;
+                foreach (string fpn in FilePathNames)
                 {
-                    File.Delete(fpn);
+                    if (File.Exists(fpn) == true)
+                    {
+                        File.Delete(fpn);
+                    }
                 }
+                foreach (string fpn in FilePathNames)
+                {
+                    if (File.Exists(fpn) == false)
+                    {
+                        bAlldeleted = true;
+                    }
+                    else
+                    {
+                        bAlldeleted = false;
+                        break;
+                    }
+                }
+                if (n > 100)
+                    return false;
             }
-            foreach (string fpn in FilePathNames)
-            {
-                if (File.Exists(fpn) == false)
-                {
-                    bAlldeleted = true;
-                }
-                else
-                {
-                    bAlldeleted = false;
-                    break; 
-                }
-            }
-            if (n > 100)
-                return false;
+            return true;
         }
-        return true;
-    }
 
 
         public static bool ConfirmDeleteFiles(string FilePathNames)
@@ -82,7 +80,7 @@ namespace gentle
             }
             return true;
         }
-    
+
         public static bool ConfirmDeleteDirectory(List<string> DirectoryPath)
         {
             bool bAlldeleted = false;
@@ -190,13 +188,13 @@ namespace gentle
             {
                 if (mNotDupFileList.Count == 0)
                 {
-                    MessageBox.Show("All of the selected files are already added."," Message", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    MessageBox.Show("All of the selected files are already added.", " Message", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                     return DialogResult.Cancel;
                 }
                 else if (mNotDupFileList.Count != mSourceFileList.Length)
                 {
                     DialogResult mbr = MessageBox.Show("Some of the selected files are already added." + "\r\n" +
-                        "Do you want to add not duplicated files(Skips duplicated files)?", "Message", MessageBoxButtons.OKCancel ,MessageBoxIcon.Exclamation);
+                        "Do you want to add not duplicated files(Skips duplicated files)?", "Message", MessageBoxButtons.OKCancel, MessageBoxIcon.Exclamation);
                     return mbr;
                 }
                 return DialogResult.Ignore;
@@ -214,12 +212,11 @@ namespace gentle
                 case cFile.FilePattern.TEXTFILE:
                     foreach (string rfFN in lstFLallinSourcePath)
                     {
-                        if (Path.GetExtension(rfFN).ToLower () == ".txt" || Path.GetExtension(rfFN).ToLower() == ".mrf")
+                        if (Path.GetExtension(rfFN).ToLower() == ".txt" || Path.GetExtension(rfFN).ToLower() == ".mrf")
                         {
                             lstFLselected.Add(Path.GetFileName(rfFN));
                         }
                     }
-
                     break;
                 case cFile.FilePattern.TIFFILE:
                     foreach (string rfFN in lstFLallinSourcePath)
@@ -229,7 +226,6 @@ namespace gentle
                             lstFLselected.Add(Path.GetFileName(rfFN));
                         }
                     }
-
                     break;
                 case cFile.FilePattern.ASCFILE:
                     foreach (string rfFN in lstFLallinSourcePath)
@@ -239,7 +235,6 @@ namespace gentle
                             lstFLselected.Add(Path.GetFileName(rfFN));
                         }
                     }
-
                     break;
                 case cFile.FilePattern.OUT_Discharge:
                     foreach (string rfFN in lstFLallinSourcePath)
@@ -249,14 +244,12 @@ namespace gentle
                             lstFLselected.Add(Path.GetFileName(rfFN));
                         }
                     }
-
                     break;
                 case cFile.FilePattern.ALLFILE:
                     foreach (string rfFN in lstFLallinSourcePath)
                     {
                         lstFLselected.Add(Path.GetFileName(rfFN));
                     }
-
                     break;
 
                 default:
@@ -267,7 +260,6 @@ namespace gentle
                             lstFLselected.Add(Path.GetFileName(rfFN));
                         }
                     }
-
                     break;
             }
             return lstFLselected;
@@ -307,7 +299,7 @@ namespace gentle
             {
                 string strFNameOnly = Path.GetFileName(items[i]);
                 DataRow nr = dtTarget.NewRow();
-                
+
                 nr[dtTarget.Columns.IndexOf(NameCol1)] = intRecordCountOri + i + 1;
                 nr[dtTarget.Columns.IndexOf(NameCol2)] = strFNameOnly;
                 nr[dtTarget.Columns.IndexOf(NameCol3)] = SourceFilePath;
@@ -393,7 +385,5 @@ namespace gentle
                 throw ex;
             }
         }
-
-
     }
 }

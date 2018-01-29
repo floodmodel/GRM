@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Data;
 
-
 namespace gentle
 {
     public class cTextFile
@@ -92,7 +91,6 @@ namespace gentle
 
         public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, double cellSize, string nodataValue, string[] rowsArray)
         {
-
             string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, nodataValue);
             File.AppendAllText(fpn, header);
             for (int n = 0; n <= rowsArray.Length - 1; n++)
@@ -122,11 +120,7 @@ namespace gentle
                 for (int nc = 0; nc <= ncols - 1; nc++)
                 {
                     string v = null;
-                    //If array(nc, nr) = Nothing Then
-                    //    v = nodataValue
-                    //Else
                     v = array[nc, nr].ToString();
-                    //End If
                     arow = arow + v + " ";
                 }
                 arow = arow.Trim() + "\r\n";
@@ -145,11 +139,7 @@ namespace gentle
                 for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
                 {
                     string v = null;
-                    //If array(nc, nr) = Nothing Then
-                    //    v = nodataValue
-                    //Else
                     v = array[nc, nr].ToString();
-                    //End If
                     arow = arow + v + " ";
                 }
                 arow = arow.Trim() + "\r\n";
@@ -162,7 +152,6 @@ namespace gentle
         {
             SortedList<int, string> values = new SortedList<int, string>();
             StreamReader reader = new StreamReader(sourceFPN, System.Text.Encoding.Default);
-            // VAT 값 읽어서 넣기
             while (!reader.EndOfStream)
             {
                 string line = reader.ReadLine();
@@ -187,7 +176,6 @@ namespace gentle
         {
             SortedList<int, string[]> values = new SortedList<int, string[]>();
             StreamReader reader = new StreamReader(sourceFPN, System.Text.Encoding.Default);
-            // VAT 값 읽어서 넣기
             while (!reader.EndOfStream)
             {
                 string line = reader.ReadLine();
@@ -210,8 +198,7 @@ namespace gentle
             reader.Close();
             return values;
         }
-
-
+        
         private static string[] GetTextFileValueSeparator(cTextFile.ValueSeparator valueSeparator)
         {
             string[] sepArray = null;
@@ -356,7 +343,6 @@ namespace gentle
                     return null;
                 }
                 StreamReader reader = new StreamReader(FPNsource, System.Text.Encoding.Default);
-                // VAT 값 읽어서 넣기
                 DataTable dt = new DataTable();
                 dt.BeginLoadData();
                 int intL = 0;
@@ -375,7 +361,6 @@ namespace gentle
                     {
                         if (fieldCount > 0 && nFieldCount != fieldCount)
                         {
-                            //여기서 설정된 필드 개수와 읽은 시계열 개수 검증
                             Console.WriteLine("Data series number in text file is different with user settings.   ");
                             return null;
                         }
@@ -416,7 +401,6 @@ namespace gentle
             }
             string[] Lines = System.IO.File.ReadAllLines(FPNsource);
             int nr = 0;
-            //이건 해더 기록
             if (BaseString[0] == null || string.IsNullOrEmpty(BaseString[0].ToString().Trim()))
             {
                 BaseString[nr] = columnName;
@@ -446,7 +430,6 @@ namespace gentle
                     else
                     {
                         value = parts[columnNumberToRead - 1].ToString().Trim();
-                        //데이터 양이 많을 경우, 정수형으로 쓴다.
                     }
                     if (BaseString[nr] == null || string.IsNullOrEmpty(BaseString[nr].ToString().Trim()))
                     {
@@ -481,6 +464,5 @@ namespace gentle
             }
             return nr;
         }
-
     }
 }

@@ -116,7 +116,6 @@
             Else
                 Return -1
             End If
-
         End Get
     End Property
 

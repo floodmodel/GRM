@@ -4,13 +4,8 @@ Public Class cRTStarter
     Event RTStatus(ByVal strMSG As String)
     Private WithEvents GRMRT As cRealTime
     Private RTProject As GRMCore.cProject
-
     Private Const CONST_PIC_WIDTH As Single = 1024
     Private Const CONST_PIC_HEIGHT As Single = 768
-    'Private Const CONST_Enable_Analyzer As Boolean = False
-    'Private Const CONST_Enable_CreateAscFile As Boolean = False
-    'Private Const CONST_Enable_CreateImgFile As Boolean = False
-
     Private mFPN_RTEnv As String
     Private mProjectFPN As String
     Private mFP_RFLayerFP As String
@@ -35,8 +30,8 @@ Public Class cRTStarter
     Public Sub New(fpn_REF As String, strGUID As String, dtStart As DateTime, Optional RTStartDateTime As String = "")
         mFPN_RTEnv = fpn_REF
         UpdateRTVariablesUsingEnvFile(mFPN_RTEnv, RTStartDateTime) '여기서 파일로 설정
-        g_performance_log_GUID = strGUID  '2017.6.1. 원 : 추가
-        g_dtStart_from_MonitorEXE = dtStart '2017.6.1. 원 : 추가
+        g_performance_log_GUID = strGUID
+        g_dtStart_from_MonitorEXE = dtStart
     End Sub
 
     Private Function UpdateRTVariablesUsingEnvFile(rtEnvFPN As String, Optional RTStartDateTime As String = "") As Boolean
@@ -66,21 +61,16 @@ Public Class cRTStarter
         End If
         mRFInterval_MIN = r.RFInterval_min
         mOutPutInterval_MIN = r.OutputInterval_min
-        'RTStartDateTime이 사용자 GUI에서 들어오면 그것을 사용하고, 이게 없으면, REF 파일에 있는 시작시간을 사용한다.
         If RTStartDateTime = "" Then
             mSimulationStartingTime = r.RTstartingTime
         Else
             mSimulationStartingTime = RTStartDateTime
         End If
-
-        'mRainfallDataType=
     End Function
 
 
     Public Sub SetUpAndStartGRMRT()
         If mbIsFC = True Then
-            'fcdata file은 항상 초기화 해서 사용. 
-            '모델링 시점 이후의 데이터가 서버에 있을경우 그 자료를 한번에 복사해서 저장해도 됨
             If IO.File.Exists(mFPN_FCData) Then IO.File.Delete(mFPN_FCData)
             Dim strH As String = "CVID,DataTime,Value" & vbCrLf
             IO.File.AppendAllText(mFPN_FCData, strH, Encoding.Default)
@@ -91,7 +81,6 @@ Public Class cRTStarter
     End Sub
 
 
-
     Public Sub SetupRT()
         GRMRT = Nothing
         RTProject = Nothing
@@ -100,8 +89,6 @@ Public Class cRTStarter
         GRMRT.SetupGRM(mProjectFPN, mFPN_FCData)
         RTProject = cProject.Current
     End Sub
-
-
 
 
     ''' <summary>
@@ -116,21 +103,15 @@ Public Class cRTStarter
             If .SubWSPar.userPars(.WSNetwork.MostDownstreamWSID).iniFlow Is Nothing Then
                 .GeneralSimulEnv.mbSimulateBFlow = False
             End If
-
         End With
 
         With GRMRT
             .mDtPrintOutRT_min = mOutPutInterval_MIN
             .mRFStartDateTimeRT = mSimulationStartingTime
-            '2016.12.08. mm/hr 단위인지 확인하기 위해서 아래와 같이 주석처리. 최윤석.. 아무래도 mm/10min 이 맞는 것 같다.. 원상태로 복귀
             .mRainfallDataTypeRT = cRainfall.RainfallDataType.TextFileASCgrid
-            '2016.12.08. mm/hr 단위인지 확인하기 위해서 아래 값으로 설정. 최윤석
-            ' .mRainfallDataTypeRT = cSetRainfall.RainfallDataType.TextFileASCgrid_mmPhr
-
             .mRfFilePathRT = mFP_RFLayerFP
             .mPicWidth = CONST_PIC_WIDTH
             .mPicHeight = CONST_PIC_HEIGHT
-
             .mbIsDWSS = mbDWSS_EXIST
             If .mbIsDWSS = True Then
                 .mDWSS_CVID_toConnectUWSS = mDWSS_CVID_toConnectUWSS

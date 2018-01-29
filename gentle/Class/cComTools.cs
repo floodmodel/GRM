@@ -10,18 +10,16 @@ namespace gentle
 {
    public class cComTools
     {
-
         public static string GetTimeToPrintOut(bool bDateTimeFormat, string startDateTime, int nowT_MIN_elapsed)
         {
             if (bDateTimeFormat == true)
             {
-                //string tv = String.Format(Convert.ToDateTime(startDateTime).Add(new System.TimeSpan(0, nowT_MIN_elapsed, 0)).ToString(), "yyyy/MM/dd HH:mm");
                 string tv = Convert.ToDateTime(startDateTime).Add(new System.TimeSpan(0, nowT_MIN_elapsed, 0)).ToString("yyyy/MM/dd HH:mm");
                 return tv;
             }
             else
             {
-                return String.Format(((double) nowT_MIN_elapsed / 60).ToString("F2"));//, "##0.00");
+                return String.Format(((double) nowT_MIN_elapsed / 60).ToString("F2"));
             }
         }
 
@@ -34,10 +32,9 @@ namespace gentle
             }
             else
             {
-                return String.Format((nowT_MIN_elapsed / 60).ToString("F"));//, "##0.00");
+                return String.Format((nowT_MIN_elapsed / 60).ToString("F"));
             }
         }
-
 
         public static bool IsNumeric(string value)
         {

@@ -38,7 +38,6 @@ namespace gentle
         /// <remarks></remarks>
         public int CalTimeDifference_milliSEC(string positionNow, int nowT_MIN)
         {
-            //int functionReturnValue = 0;
             if (mTfrom == null)
             {
                 Console.WriteLine("Starting time is not set");
@@ -47,21 +46,19 @@ namespace gentle
             TimeSpan ts = default(TimeSpan);
             ts = DateTime.Now.Subtract(Convert.ToDateTime(mTfrom));
             int toPrint = Convert.ToInt32(ts.TotalMilliseconds);
-            File.AppendAllText(mFPNout, Convert.ToString(nowT_MIN) + "\t"+ mPositionFrom + "\t" + positionNow + "\t" + Convert.ToString(toPrint) + "\r\n");
+            File.AppendAllText(mFPNout, Convert.ToString(nowT_MIN) + "\t" + mPositionFrom + "\t" + positionNow + "\t" + Convert.ToString(toPrint) + "\r\n");
             return toPrint;
         }
 
 
         public static int GetTimeDiffereceAsSEC(System.DateTime tStart, System.DateTime tNow)
         {
-
             TimeSpan ts = tNow.Subtract(Convert.ToDateTime(tStart));
             return Convert.ToInt32(ts.TotalSeconds);
         }
 
         public static int GetTimeDiffereceAsMilliSEC(System.DateTime tStart, System.DateTime tNow)
         {
-
             TimeSpan ts = tNow.Subtract(Convert.ToDateTime(tStart));
             return Convert.ToInt32(ts.TotalMilliseconds);
         }

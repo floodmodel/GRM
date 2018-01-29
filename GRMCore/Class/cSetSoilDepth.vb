@@ -1,7 +1,4 @@
 ﻿Public Class cSetSoilDepth
-    'Implements ioProjectFile
-    'Implements ioProjectDB
-
     Public Enum SoilDepthCode
         D
         MDMS
@@ -12,7 +9,6 @@
     End Enum
 
     Public mSoilDepthDataType As Nullable(Of cGRM.FileOrConst)
-    'Public mGridNameSoilDepth As String
     Public mGridSoilDepthFPN As String
     Public mSoilDepthVATFPN As String
     Public mdtSoilDepthInfo As GRMProject.SoilDepthDataTable
@@ -22,7 +18,7 @@
 
     End Sub
 
-    Public Sub SetValues(ByVal prjdb As GRMProject) 'Implements ioProjectFile.SetValues
+    Public Sub SetValues(ByVal prjdb As GRMProject)
         Dim row As GRMProject.ProjectSettingsRow = CType(prjdb.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
         If mSoilDepthDataType.HasValue Then
             With row
@@ -44,13 +40,11 @@
             For Each r As DataRow In mdtSoilDepthInfo.Rows
                 r.SetAdded()
             Next
-            'mdtSoilDepthInfo.WriteXml(prjDBxmlFpn)
         End If
 
     End Sub
 
-    Public Sub GetValues(ByVal prjdb As GRMProject) 'Implements ioProjectFile.GetValues
-        '  일단 초기화
+    Public Sub GetValues(ByVal prjdb As GRMProject)
         mSoilDepthDataType = Nothing
         mSoilDepthVATFPN = Nothing
         mConstSoilDepth = Nothing
@@ -79,33 +73,7 @@
 
     End Sub
 
-    'Public Sub Save(ByVal prjDBxmlFpn As String) Implements ioProjectDB.SaveDB
-    '    'Dim adpt As New GRMDynamicDBTableAdapters.SoilDepthTableAdapter
-    '    'adpt.Connection = conn
-    '    'adpt.DeleteAll()
-    '    If mSoilDepthDataType.Equals(LayerOrConst.Layer) Then
-    '        mdtSoilDepthInfo.AcceptChanges()
-    '        For Each row As DataRow In mdtSoilDepthInfo.Rows
-    '            row.SetAdded()
-    '        Next
-    '        'adpt.Update(mdtSoilDepthInfo)
-    '        mdtSoilDepthInfo.WriteXml(prjDBxmlFpn)
-    '    End If
-    'End Sub
-
-    'Public Sub Open(ByVal prjDBxmlFpn As String) Implements ioProjectDB.OpenDB
-    '    If mSoilDepthDataType.Equals(LayerOrConst.Layer) Then
-    '        'Dim adpt As New GRMDynamicDBTableAdapters.SoilDepthTableAdapter
-    '        'adpt.Connection = conn
-    '        mdtSoilDepthInfo = New GRMDynamicDB.SoilDepthDataTable
-    '        'adpt.Fill(mdtSoilDepthInfo)
-    '        mdtSoilDepthInfo.ReadXml(prjDBxmlFpn)
-    '    Else
-    '        mdtSoilDepthInfo = Nothing
-    '    End If
-    'End Sub
-
-    Public ReadOnly Property IsSet() As Boolean ' Implements ioProjectFile.IsSet
+    Public ReadOnly Property IsSet() As Boolean
         Get
             Return mSoilDepthDataType.HasValue
         End Get

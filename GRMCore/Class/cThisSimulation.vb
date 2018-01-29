@@ -34,11 +34,7 @@
     ''' </summary>
     ''' <remarks></remarks>
     Public Shared mRFMeanForDT_m As Double
-
     Public Shared mRFMeanForThisInputRFData As Double
-
-    'Public Shared mRFSumForAllCellsForDT_m As Double
-
     Public Shared mRFIntensitySumForAllCellsInCurrentRFData_mPs As Double
 
     ''' <summary>
@@ -47,24 +43,11 @@
     ''' <remarks></remarks>
     Public Shared mRFMeanForAllCell_sumForDTprintOut_m As Double
 
-    '''' <summary>
-    '''' 모델링 시간 확인용 변수. 지금 모델링 스텝에서의 시작시간[DATE]
-    '''' </summary>
-    '''' <remarks></remarks>
-    'Public Shared mTimeThisStepStarted As Date
-
     ''' <summary>
     ''' 모델링 시간 확인용 변수. 현재 모델링의 시작시간[DATE]
     ''' </summary>
     ''' <remarks></remarks>
     Public Shared mTimeThisSimulationStarted As Date
-
-    '''' <summary>
-    '''' 유출해석 결과를 출력한 행의 개수. 즉, 결과 출력 회수
-    '''' </summary>
-    '''' <remarks></remarks>
-    'Public Shared mPrintOutResultRowCount As Integer
-
     Public Shared mAnalyzerSet As Boolean = False
 
     Public Shared IsParallel As Boolean = False
@@ -74,7 +57,6 @@
     Public Shared vMaxInThisStep As Single = Single.MinValue
     Public Shared dtMaxLimit_sec As Integer = 1800
     Public Shared dtMinLimit_sec As Integer = 10
-
     Public Shared dtsec_usedtoForwardToThisTime As Integer
 
 

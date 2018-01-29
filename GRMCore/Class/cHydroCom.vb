@@ -1,5 +1,4 @@
-﻿'Imports System.Math
-Public Class cHydroCom
+﻿Public Class cHydroCom
 
     Public Shared Function GetFlowDirection(value As Integer, FDType As cGRM.FlowDirectionType) As cGRM.GRMFlowDirectionD8
         If FDType = cGRM.FlowDirectionType.StartsFromNE Then
@@ -109,46 +108,6 @@ Public Class cHydroCom
         Return CInt(dtsecNext)
     End Function
 
-
-
-    ' ''' <summary>
-    ' ''' 격자크기 조건을 이용해서 계산 시간간격(dt) 자동 계산
-    ' ''' 2015.03.26.  5분을 defalut 로 설정
-    ' ''' </summary>
-    ' ''' <param name="intDeltaX_meter"></param>
-    ' ''' <returns></returns>
-    ' ''' <remarks>
-    ' ''' '계산 시간간격은 셀사이즈에 따라서 결정한다. </remarks>
-    '셀크기[m] 지표수심 유속	dtsec   dtmin	적용dtsec
-    '   10	    200	    0.72 	13.87 	0.23 	5
-    '   20	    200	    0.72 	27.74 	0.46 	10
-    '   30	    200	    0.72 	41.61 	0.69 	20
-    '   60	    200	    0.72 	83.22 	1.39 	60
-    '   90	    200	    0.72 	124.83 	2.08 	60
-    '  100	    200	    0.72 	138.70 	2.31 	120
-    '  120	    200	    0.72 	166.44 	2.77 	120
-    '  150	    200	    0.72 	208.05 	3.47 	180
-    '  200	    200	    0.72 	277.40 	4.62 	180
-    '  500	    200	    0.72 	693.49 	11.56 	300
-    ' 1000	    200	    0.72 	1386.98 23.12 	600
-    ' 
-    '   m	m/s	s	s	
-    '  셀크기	유속  dt	 적용DT	분
-    '  50 4	12.5  12	0.2
-    ' 100	4	25	  30	0.5
-    ' 150	4	37.5  30	0.5
-    ' 200	4	50	  30	0.5
-    ' 250	4	62.5  60	1
-    ' 300	4	75	  60	1
-    ' 500	4	125	 120	2
-    ' 600	4	150	 120	2
-    ' 900	4	225	 180	3
-    '1000	4	250	 180	3
-    '1200	4	300	 300	5
-    '1500	4	375	 300	5
-    '2000	4	500	 300	5
-    '2500	4	625	 600	10
-    '3000	4	750	 600	10
 
     ''' <summary>
     ''' 기지의 x축의 두점 t1, t2에 대한 기지의 y 축 값 A, B를 이용해서 대상 x 축 값 tx에 대한 미지의 y축 값 X를 

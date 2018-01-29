@@ -26,16 +26,8 @@
     ''' </summary>
     ''' <remarks></remarks>
     Public mRowCount As Integer = -1
-
     Public mxllcorner As Double
     Public myllcorner As Double
-
-
-    '''' <summary>
-    '''' 하천에 속한 셀의 개수
-    '''' </summary>
-    '''' <remarks></remarks>
-    'Public mCellCountInChannel As Integer
 
     ''' <summary>
     ''' 대상 유역의 소유역 id 리스트
@@ -54,7 +46,6 @@
     ''' </summary>
     ''' <remarks></remarks>
     Public mFacMax As Integer
-
     Public mFacMin As Integer
 
     ''' <summary>
@@ -63,20 +54,12 @@
     ''' <remarks></remarks>
     Public mCVidListForEachWS As Dictionary(Of Integer, List(Of Integer))
 
-
     Public Sub New()
-        'mGridNameWS = Nothing
-        'mGridNameSlope = Nothing
-        'mGridNameFdir = Nothing
-        'mGridNameFac = Nothing
-        'mGridNameStream = Nothing
-        'mGridNameChannelWidth = Nothing
         mWSIDList = New List(Of Integer)
         mCVidListForEachWS = New Dictionary(Of Integer, List(Of Integer))
     End Sub
 
-    Public Sub SetValues(ByVal prjdb As GRMProject) 'Implements ioProjectFile.SetValues
-        'If mGridNameWS IsNot Nothing Then
+    Public Sub SetValues(ByVal prjdb As GRMProject)
         Dim row As GRMProject.ProjectSettingsRow = CType(prjdb.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
         With row
             .WatershedFile = mFPN_watershed
@@ -90,51 +73,35 @@
             .GridCellSize = mCellSize
             .FlowDirectionType = mFDType.ToString
         End With
-        'End If
     End Sub
 
-    Public Sub GetValues(ByVal prjdb As GRMProject) 'Implements ioProjectFile.GetValues
-        'mGridNameWS = Nothing
-        'mGridNameSlope = Nothing
-        'mGridNameFdir = Nothing
-        'mGridNameFac = Nothing
-        'mGridNameStream = Nothing
-        'mGridNameChannelWidth = Nothing
+    Public Sub GetValues(ByVal prjdb As GRMProject)
         Dim row As GRMProject.ProjectSettingsRow = CType(prjdb.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
         With row
             If Not .IsWatershedFileNull Then
-                'mGridNameWS = IO.Path.GetFileNameWithoutExtension(.WatershedFile)
                 mFPN_watershed = .WatershedFile
             End If
             If Not .IsSlopeFileNull Then
-                'mGridNameSlope = IO.Path.GetFileNameWithoutExtension(.SlopeFile)
                 mFPN_slope = .SlopeFile
             End If
             If Not .IsFlowDirectionFileNull Then
-                'mGridNameFdir = IO.Path.GetFileNameWithoutExtension(.FlowDirectionFile)
                 mFPN_fdir = .FlowDirectionFile
             End If
             If Not .IsFlowAccumFileNull Then
-                'mGridNameFac = IO.Path.GetFileNameWithoutExtension(.FlowAccumFile)
                 mFPN_fac = .FlowAccumFile
             End If
             If Not .IsStreamFileNull Then
-                'mGridNameStream = IO.Path.GetFileNameWithoutExtension(.StreamFile)
                 mFPN_stream = .StreamFile
             End If
             If .IsChannelWidthFileNull = False Then
-                'mGridNameChannelWidth = IO.Path.GetFileNameWithoutExtension(.ChannelWidthFile)
                 mFPN_channelWidth = .ChannelWidthFile
             End If
-
             If .IsInitialChannelFlowFileNull = False Then
                 mFPN_initialChannelFlow = .InitialChannelFlowFile
             End If
-
             If .IsInitialSoilSaturationRatioFileNull = False Then
                 mFPN_initialSoilSaturationRatio = .InitialSoilSaturationRatioFile
             End If
-
             If .IsGridCellSizeNull Then
                 mCellSize = -1
             Else
@@ -171,12 +138,11 @@
         End Get
     End Property
 
-    Public ReadOnly Property IsSet() As Boolean 'Implements ioProjectFile.IsSet
+    Public ReadOnly Property IsSet() As Boolean
         Get
             Return Not String.IsNullOrEmpty(mFPN_watershed)
         End Get
     End Property
-
 
     ''' <summary>
     ''' 분석대상 유역의 소유역 id 리스트
@@ -190,8 +156,6 @@
             Return mWSIDList
         End Get
     End Property
-
-
 
     Public ReadOnly Property CellCountforEachWSID(ByVal wsid As Integer) As Integer
         Get

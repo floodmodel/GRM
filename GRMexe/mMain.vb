@@ -10,34 +10,11 @@ Imports GRMCore
 Module mMain
     Private WithEvents mSimulator As cSimulator
     Private mMessage As String = ""
-    'Private mPrj As cProject
     Private mSimDurationHour As Integer
     Private mGrmAnalyzer As cGRMAnalyzer
     Private mbCreateDistributionFiles As Boolean = False
 
     Sub main()
-        'Dim WSFPN As String = "D:\TFS\GRM_Server_System_v2\TestSet\GRMTestSet\TestDataWi200ASC\WiWatershed.asc"
-        'Dim SlopeFPN As String = "D:\TFS\GRM_Server_System_v2\TestSet\GRMTestSet\TestDataWi200ASC\Wi_Slope_ST.asc"
-        'Dim FdirFPN As String = "D:\TFS\GRM_Server_System_v2\TestSet\GRMTestSet\TestDataWi200ASC\WiFDir.asc"
-        'Dim FacFPN As String = "D:\TFS\GRM_Server_System_v2\TestSet\GRMTestSet\TestDataWi200ASC\WiFAc.asc"
-        'Dim streamFPN As String = "D:\TFS\GRM_Server_System_v2\TestSet\GRMTestSet\TestDataWi200ASC\WiStream6.asc"
-        'Dim lcFPN As String = "D:\TFS\GRM_Server_System_v2\TestSet\GRMTestSet\TestDataWi200ASC\wilc200.asc"
-        'Dim stFPN As String = "D:\TFS\GRM_Server_System_v2\TestSet\GRMTestSet\TestDataWi200ASC\wistext200.asc"
-        'Dim sdFPN As String = "D:\TFS\GRM_Server_System_v2\TestSet\GRMTestSet\TestDataWi200ASC\wisdepth200.asc"
-        'Dim wsinfo As New cGetWatershedInfo(WSFPN, SlopeFPN, FdirFPN, FacFPN, streamFPN, lcFPN, stFPN, sdFPN,,)
-        'Dim x As Integer = wsinfo.mostDownStreamCellArrayXColPosition
-        'Dim y As Integer = wsinfo.mostDownStreamCellArrayYRowPosition
-        'Dim isIn As Boolean = wsinfo.IsInWatershedArea(x, y)
-        'Dim array() As String = wsinfo.allCellsInUpstreamArea(x, y)
-        'Dim fd As String = wsinfo.flowDirection(x, y)
-        'Dim lcv As Integer = wsinfo.landCoverValue(x, y)
-        'Dim wsCount As Integer = wsinfo.WScount
-        'Dim prj As New GRMProject
-        'prj.ReadXml("!!!.gmp")
-        'Dim dtPrjSettings As GRMProject.ProjectSettingsDataTable = prj.ProjectSettings
-        'Dim row As GRMProject.ProjectSettingsRow = CType(dtPrjSettings.Rows(0), GRMProject.ProjectSettingsRow)
-        'Dim aa As String = row.FlowAccumFile
-
         Try
             Dim prjFPN As String = ""
             Select Case My.Application.CommandLineArgs.Count
@@ -102,7 +79,6 @@ Module mMain
                     waitUserKey()
                     Exit Select
             End Select
-            'waitUserKey()
         Catch ex As Exception
             waitUserKey()
         End Try
@@ -148,7 +124,6 @@ Module mMain
             'IO.File.AppendAllText(cThisSimulation.tmp_InfoFile, String.Format("{0}", currentPrjFPN + vbTab))
             'IO.File.AppendAllText(cThisSimulation.tmp_InfoFile, String.Format("{0}{1}{2}{3}{4}{5}", cThisSimulation.MaxDegreeOfParallelism, vbTab, cThisSimulation.tmp_24H_RunTime, vbTab, cThisSimulation.tmp_48H_RunTime, vbCrLf))
             ''''''''''''''''''''''''''''
-
             'cProject.Current.SaveProject()
         Catch ex As Exception
             Console.WriteLine(ex.ToString)
@@ -179,11 +154,6 @@ Module mMain
             Console.WriteLine(String.Format("ERROR : [{0}] project could not be deleted!!!", currentPrjFPN))
         End Try
     End Sub
-    'Private Sub WaitUserKey()
-    '    Console.Write("Press any key to continue..")
-    '    Console.ReadKey()
-    'End Sub
-
 
     Private Function GetGMPFileList(path As String) As String()
         Dim fileList() As String
@@ -220,24 +190,14 @@ Module mMain
         Console.WriteLine(erroData.ToString)
     End Sub
 
-    'Private Delegate Sub CreateDistributionFilesDelegate(nowTtoPrint_MIN As Integer, imgWidth As Integer, imgHeight As Integer)
-
     Private Sub mSimulator_CallAnalyzer(sender As cSimulator, project As cProject,
                                         nowTtoPrint_MIN As Integer,
                                         createImgFile As Boolean,
                                         createAscFile As Boolean) Handles mSimulator.CallAnalyzer
         If mbCreateDistributionFiles = True Then
             mGrmAnalyzer.CreateDistributionFiles(nowTtoPrint_MIN, mGrmAnalyzer.ImgWidth, mGrmAnalyzer.ImgHeight)
-            'asc 파일 생성은 별도의 쓰레디로 실행되고 있음.
-            '여기서 한번더 쓰레드 생성해도, 속도에 별 차이 없음.. 
-            'asc 파일 개별쓰레드 생성하지 않고 여기서 쓰레드 생성 해도 별차이 없음..
-            '그래서, 여기서는 쓰레드 생성하지 않음.
-            'CreateDistributionFiles(AddressOf mGrmAnalyzer.CreateDistributionFiles, nowTtoPrint_MIN, mGrmAnalyzer.ImgWidth, mGrmAnalyzer.ImgHeight)
         End If
     End Sub
-    'Private Sub CreateDistributionFiles(d As CreateDistributionFilesDelegate, nowTtoPrint_MIN As Integer, imgWidth As Integer, imgHeight As Integer)
-    '    d.Invoke(nowTtoPrint_MIN, imgWidth, imgHeight)
-    'End Sub
 
     Private Sub GRMconsoleHelp()
         Console.WriteLine()
@@ -263,11 +223,11 @@ Module mMain
         Console.WriteLine("               d:\GRMrun>grm test.gmp")
         Console.WriteLine("- /f 폴더경로")
         Console.WriteLine("         grm을 폴더 단위로 실행시킨다.")
-        Console.WriteLine("          ** 예문 : grmmp /b d:\GRMrun\TestProject")
+        Console.WriteLine("          ** 예문 : grmmp /f d:\GRMrun\TestProject")
         Console.WriteLine("- /fd 폴더경로")
         Console.WriteLine("         grm을 폴더 단위로 실행시킨다.")
         Console.WriteLine("         유량 모의결과인 *discharge.out을 제외한 파일을 지운다(*.gmp, *Depth.out, 등등...)")
-        Console.WriteLine("          ** 예문 : grmmp /bd d:\GRMrun\TestProject")
+        Console.WriteLine("          ** 예문 : grmmp /fd d:\GRMrun\TestProject")
     End Sub
 
 

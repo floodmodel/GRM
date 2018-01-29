@@ -1,5 +1,4 @@
 ﻿Imports System.Xml
-Imports GRM
 
 ''' <summary>
 ''' 매개변수 값의 범위 설정
@@ -99,7 +98,6 @@ Public Class cParametersRange
 
     Public Function GetValidator(ByVal tb As TextBox,
                                  ByVal RangeName As Name, ByVal UserMessage As String) As cTextBoxNumberValidator
-        'Dim e As Name = CType(RangeName, Name)
         Return New cTextBoxNumberValidator(tb,
                         New cNumberBound(UserMessage, Min(RangeName), Max(RangeName), IncludeMin(RangeName),
                                                      IncludeMax(RangeName)))

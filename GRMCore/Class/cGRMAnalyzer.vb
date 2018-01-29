@@ -2,7 +2,6 @@
 
 
 Public Class cGRMAnalyzer
-    'Private mfAnalyzer As fAnalyzer
     Private mProject As cProject
     Private mColCount As Integer
     Private mRowCount As Integer
@@ -11,7 +10,6 @@ Public Class cGRMAnalyzer
     Private mArrayRF As Double(,)
     Private mArrayRFAcc As Double(,)
     Private mArrayQ As Double(,)
-    'Private mDistributionRenderer As cDistribution.RendererType
     Private mIMGfpn As String
     Private mASCfpnSSRD As String
     Private mASCfpnRFD As String
@@ -31,7 +29,6 @@ Public Class cGRMAnalyzer
 
 
     Sub New(ByVal project As cProject)
-        'mfAnalyzer = dlgAnalyzer
         mProject = project
         mImgHeight = 433
         mImgWidth = 583
@@ -80,7 +77,6 @@ Public Class cGRMAnalyzer
 
             If mbMakeArySSR = True Then
                 If Directory.Exists(mProject.OFPSSRDistribution) = False Then Exit Sub
-                'mStringArraySSR = GetStringArrayUsingCVAttribute(mProject.wsCells)
                 If mbMakeImgFile = True Then
                     mIMGfpn = Path.Combine(mProject.OFPSSRDistribution, cGRM.CONST_DIST_SSR_FILE_HEAD + strNowTimeToPrintOut + ".png")
                     Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
@@ -95,14 +91,13 @@ Public Class cGRMAnalyzer
 
                 If mbMakeAryRF = True Then
                     If Directory.Exists(mProject.OFPRFDistribution) = False Then Exit Sub
-                    'mStringArrayRF = GetStringArrayUsingCVAttribute(mProject.wsCells, cGRM.GRMOutputType.Rainfall)
-                    If mbMakeImgFile = True Then
-                        mIMGfpn = Path.Combine(mProject.OFPRFDistribution, cGRM.CONST_DIST_RF_FILE_HEAD + strNowTimeToPrintOut + ".png")
+                If mbMakeImgFile = True Then
+                    mIMGfpn = Path.Combine(mProject.OFPRFDistribution, cGRM.CONST_DIST_RF_FILE_HEAD + strNowTimeToPrintOut + ".png")
                     Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
                     imgMaker.MakeImgFileUsingArrayFromTL(mIMGfpn, mArrayRF,
                                                                picWidth, picHeight, cImg.RendererRange.RendererFrom0to500)
                 End If
-                    If mbMakeASCFile = True Then
+                If mbMakeASCFile = True Then
                         mASCfpnRFD = Path.Combine(mProject.OFPRFDistribution, cGRM.CONST_DIST_RF_FILE_HEAD + strNowTimeToPrintOut + ".asc")
                         StartCreateASCTextFileRFD()
                     End If
@@ -110,14 +105,13 @@ Public Class cGRMAnalyzer
 
                 If mbMakeAryRFAcc = True Then
                     If Directory.Exists(mProject.OFPRFAccDistribution) = False Then Exit Sub
-                    'mStringArrayRFAcc = GetStringArrayUsingCVAttribute(mProject.wsCells, cGRM.GRMOutputType.RainfallCumulative)
-                    If mbMakeImgFile = True Then
-                        mIMGfpn = Path.Combine(mProject.OFPRFAccDistribution, cGRM.CONST_DIST_RFACC_FILE_HEAD + strNowTimeToPrintOut + ".png")
+                If mbMakeImgFile = True Then
+                    mIMGfpn = Path.Combine(mProject.OFPRFAccDistribution, cGRM.CONST_DIST_RFACC_FILE_HEAD + strNowTimeToPrintOut + ".png")
                     Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
                     imgMaker.MakeImgFileUsingArrayFromTL(mIMGfpn, mArrayRFAcc,
                                                                picWidth, picHeight, cImg.RendererRange.RendererFrom0to1000)
                 End If
-                    If mbMakeASCFile = True Then
+                If mbMakeASCFile = True Then
                         mASCfpnRFaccD = Path.Combine(mProject.OFPRFAccDistribution, cGRM.CONST_DIST_RFACC_FILE_HEAD + strNowTimeToPrintOut + ".asc")
                         StartCreateASCTextFileRFaccD()
                     End If
@@ -125,14 +119,13 @@ Public Class cGRMAnalyzer
 
                 If mbMakeAryQ = True Then
                     If Directory.Exists(mProject.OFPFlowDistribution) = False Then Exit Sub
-                    'mStringArrayQ = GetStringArrayUsingCVAttribute(mProject.wsCells, cGRM.GRMOutputType.Discharge)
-                    If mbMakeImgFile = True Then
-                        mIMGfpn = Path.Combine(mProject.OFPFlowDistribution, cGRM.CONST_DIST_FLOW_FILE_HEAD + strNowTimeToPrintOut + ".png")
+                If mbMakeImgFile = True Then
+                    mIMGfpn = Path.Combine(mProject.OFPFlowDistribution, cGRM.CONST_DIST_FLOW_FILE_HEAD + strNowTimeToPrintOut + ".png")
                     Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
                     imgMaker.MakeImgFileUsingArrayFromTL(mIMGfpn, mArrayQ,
                                                                picWidth, picHeight, cImg.RendererRange.RendererFrom0to30000)
                 End If
-                    If mbMakeASCFile = True Then
+                If mbMakeASCFile = True Then
                         mASCfpnFlowD = Path.Combine(mProject.OFPFlowDistribution, cGRM.CONST_DIST_FLOW_FILE_HEAD + strNowTimeToPrintOut + ".asc")
                         StartCreateASCTextFileFlowD()
                     End If
@@ -179,63 +172,12 @@ Public Class cGRMAnalyzer
             Next
         Next
         Return True
-
-        'Select Case ValueType
-        '    Case cGRM.GRMOutputType.SoilSaturation
-
-        '        For nr As Integer = 0 To inCells.GetLength(1) - 1
-        '            For nc As Integer = 0 To inCells.GetLength(0) - 1
-        '                If inCells(nc, nr) IsNot Nothing Then
-        '                    If inCells(nc, nr).bToBeSimulated = True OrElse inCells(nc, nr).bToEstimateParameters = True Then
-        '                        Dim v As Single = inCells(nc, nr).soilSaturationRatio
-        '                        strAry(nc, nr) = Format(CDbl(v), sformat)
-        '                    End If
-        '                End If
-        '            Next
-        '        Next
-        '    Case cGRM.GRMOutputType.Rainfall
-
-        '        For nr As Integer = 0 To inCells.GetLength(1) - 1
-        '            For nc As Integer = 0 To inCells.GetLength(0) - 1
-        '                If inCells(nc, nr) IsNot Nothing Then
-        '                    If inCells(nc, nr).bToBeSimulated = True OrElse inCells(nc, nr).bToEstimateParameters = True Then
-
-        '                    End If
-        '                End If
-        '            Next
-        '        Next
-        '    Case cGRM.GRMOutputType.RainfallCumulative
-
-        '        For nr As Integer = 0 To inCells.GetLength(1) - 1
-        '            For nc As Integer = 0 To inCells.GetLength(0) - 1
-        '                If inCells(nc, nr) IsNot Nothing Then
-        '                    If inCells(nc, nr).bToBeSimulated = True OrElse inCells(nc, nr).bToEstimateParameters = True Then
-
-        '                    End If
-        '                End If
-        '            Next
-        '        Next
-        '    Case cGRM.GRMOutputType.Discharge
-
-        '        For nr As Integer = 0 To inCells.GetLength(1) - 1
-        '            For nc As Integer = 0 To inCells.GetLength(0) - 1
-        '                If inCells(nc, nr) IsNot Nothing Then
-        '                    If inCells(nc, nr).bToBeSimulated = True OrElse inCells(nc, nr).bToEstimateParameters = True Then
-
-        '                    End If
-        '                End If
-        '            Next
-        '        Next
-        'End Select
-        'Return strAry
     End Function
 
     Private Sub StartCreateASCTextFileSSRD()
         Dim ts As New ThreadStart(AddressOf CareateASCTextFileInnerSSRD)
         Dim th As New Thread(ts)
         th.Start()
-        'Call CareateASCTextFileInnerSSRD()
-
     End Sub
 
     Private Sub CareateASCTextFileInnerSSRD()
@@ -246,7 +188,6 @@ Public Class cGRMAnalyzer
         Dim ts As New ThreadStart(AddressOf CareateASCTextFileInnerRFD)
         Dim th As New Thread(ts)
         th.Start()
-        'Call CareateASCTextFileInnerRFD()
     End Sub
 
     Private Sub CareateASCTextFileInnerRFD()
@@ -257,7 +198,6 @@ Public Class cGRMAnalyzer
         Dim ts As New ThreadStart(AddressOf CareateASCTextFileInnerRFaccD)
         Dim th As New Thread(ts)
         th.Start()
-        'Call CareateASCTextFileInnerRFaccD()
     End Sub
 
     Private Sub CareateASCTextFileInnerRFaccD()
@@ -268,14 +208,11 @@ Public Class cGRMAnalyzer
         Dim ts As New ThreadStart(AddressOf CareateASCTextFileInnerFlowD)
         Dim th As New Thread(ts)
         th.Start()
-        'Call CareateASCTextFileInnerFlowD()
-
     End Sub
 
     Private Sub CareateASCTextFileInnerFlowD()
         cTextFile.MakeASCTextFile(mASCfpnFlowD, mASCHeaderStringAll, "-9999", mArrayQ)
     End Sub
-
 
     Public Property ImgWidth As Integer
         Get

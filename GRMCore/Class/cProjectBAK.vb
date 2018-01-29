@@ -11,7 +11,7 @@ Public Class cProjectBAK
         mFCGrid = New cFlowControl
     End Sub
 
-    Public Sub SetCloneUsingCurrentProject(project As cProject) 'As cProjectBAK
+    Public Sub SetCloneUsingCurrentProject(project As cProject)
         mCVs = project.CVs
         mWatchPoint = project.WatchPoint
         mFCGrid = project.FCGrid

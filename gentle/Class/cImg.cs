@@ -336,8 +336,8 @@ namespace gentle
             Bitmap bm = new Bitmap(Convert.ToInt32(LayerCellWcount * CellWbmp) + 1, Convert.ToInt32(LayerCellHcount * CellHbmp) + 1);
             Graphics gr = Graphics.FromImage(bm);
             gr.Clear(Color.White);
-            int ncols = 0;
-            int nrows = 0;
+            //int ncols = 0;
+            //int nrows = 0;
             for (int r = 0; r <= LayerCellHcount - 1; r++)
             {
                 string[] aRow = ascF.ValuesInOneRowFromTopLeft(r);
@@ -469,7 +469,7 @@ namespace gentle
         {
             try
             {
-                int hLimint = 0;
+                //int hLimint = 0;
                 int c1top = 0;
                 int c2top = 0;
                 int c3top = 0;

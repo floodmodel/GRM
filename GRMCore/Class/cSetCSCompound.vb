@@ -1,5 +1,4 @@
-﻿Imports GRM
-
+﻿
 Public Class cSetCSCompound
     Inherits cSetCrossSection
 
@@ -27,7 +26,6 @@ Public Class cSetCSCompound
     ''' </summary>
     ''' <remarks></remarks>
     Public mUpperRegionBaseWidth As Single
-    'Public mMinChannelWidthCompoundCS As Single
 
     ''' <summary>
     ''' 이거 보다 큰 하폭에서만 복단면 적용한다.[m]
@@ -52,11 +50,9 @@ Public Class cSetCSCompound
 
         Dim row As GRMProject.ProjectSettingsRow = CType(prjDB.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
         With row
-            'mIniFlowDepth = .CompoundCSIniFlowDepth
             mLowerRegionBaseWidth = .LowerRegionBaseWidth
             mLowerRegionHeight = .LowerRegionHeight
             mUpperRegionBaseWidth = .UpperRegionBaseWidth
-            'mMinChannelWidthCompoundCS = .ChannelWidthMinCompoundCS
             mCompoundCSCriteriaChannelWidth = .CompoundCSChannelWidthLimit
         End With
         Throw New NotImplementedException()
@@ -86,23 +82,16 @@ Public Class cSetCSCompound
         Dim row As GRMProject.ProjectSettingsRow = CType(prjDB.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
         With row
             .CrossSectionType = CSTypeEnum.CSCompound.ToString
-            '.CompoundCSIniFlowDepth = mIniFlowDepth
             .LowerRegionBaseWidth = mLowerRegionBaseWidth
             .LowerRegionHeight = mLowerRegionHeight
             .UpperRegionBaseWidth = mUpperRegionBaseWidth
-            '.ChannelWidthMinCompoundCS = mMinChannelWidthCompoundCS
             .CompoundCSChannelWidthLimit = mCompoundCSCriteriaChannelWidth
-
             .SingleCSChannelWidthType = Nothing
             .ChannelWidthEQc = Nothing
             .ChannelWidthEQd = Nothing
             .ChannelWidthEQe = Nothing
             .ChannelWidthMostDownStream = Nothing
-            '.ChannelWidthMinSingleCS = Nothing
         End With
         Throw New NotImplementedException()
-
     End Sub
-
-
 End Class

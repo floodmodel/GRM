@@ -1,15 +1,11 @@
 ﻿Imports System.Runtime.Serialization.Formatters.Binary
 
 Public Class cSetWatchPoint
-    'Implements ioProjectFile ', ioProjectDB
     Implements ICloneable
-
     Public Shared ReadOnly DEFAULT_WATCH_POINT_COLOR As Color = Color.Fuchsia
-
     Public mdtWatchPointInfo As GRMProject.WatchPointsDataTable
     Public mCellColor As Color
     Private mWatchPointCVidList As List(Of Integer)
-    'Private mWatchpointCount As Integer
 
     ''' <summary>
     ''' 현재 watch point 상류에 대해 원시자료에서 읽은 강우량.[m/s] 
@@ -162,37 +158,23 @@ Public Class cSetWatchPoint
         Next
     End Sub
 
-    Public ReadOnly Property IsSet() As Boolean 'Implements ioProjectFile.IsSet
+    Public ReadOnly Property IsSet() As Boolean
         Get
             Return mdtWatchPointInfo IsNot Nothing
         End Get
     End Property
 
-    Public Sub GetValues(ByVal prjdb As GRMProject) 'Implements ioProjectFile.GetValues
+    Public Sub GetValues(ByVal prjdb As GRMProject)
         Dim row As GRMProject.ProjectSettingsRow = CType(prjdb.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
         Dim cc As New ColorConverter
-        'mCellColor = CType(cc.ConvertFromString(row.WatchPointColor), Color)
-        'If Not row.IsWatchPointCountNull Then
-        '    mWatchpointCount = row.WatchPointCount
-        'Else
-        '    mWatchpointCount = 0
-        'End If
-        'If mWatchpointCount > 0 Then
         If prjdb.WatchPoints.Rows.Count > 0 Then
             mdtWatchPointInfo = New GRMProject.WatchPointsDataTable
             mdtWatchPointInfo = prjdb.WatchPoints
         End If
-        'End If
-
     End Sub
 
-    Public Sub SetValues(ByVal prjds As GRMProject) 'Implements ioProjectFile.SetValues
+    Public Sub SetValues(ByVal prjds As GRMProject)
         Dim row As GRMProject.ProjectSettingsRow = CType(prjds.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
-        'row.WatchPointColor = mCellColor.A.ToString & "," _
-        '                    & mCellColor.R.ToString & "," _
-        '                    & mCellColor.G.ToString & "," _
-        '                    & mCellColor.B.ToString
-        'row.WatchPointCount = WPCount
         If IsSet Then
             mdtWatchPointInfo.AcceptChanges()
             If mdtWatchPointInfo.Rows.Count > 0 Then
@@ -240,49 +222,48 @@ Public Class cSetWatchPoint
 
     Public Function Clone() As Object Implements ICloneable.Clone
         Dim cln As New cSetWatchPoint
-        'cln = Me
         If Me.mRFUpWsMeanForDtPrintout_mm IsNot Nothing Then
             For Each k As Integer In mWatchPointCVidList
-                If Me.mRFReadIntensitySumUpWs_mPs IsNot Nothing AndAlso _
+                If Me.mRFReadIntensitySumUpWs_mPs IsNot Nothing AndAlso
                     mRFReadIntensitySumUpWs_mPs.Keys.Contains(k) Then _
                 cln.mRFReadIntensitySumUpWs_mPs.Add(k, mRFReadIntensitySumUpWs_mPs(k))
-                If Me.mRFUpWsMeanForDt_mm IsNot Nothing AndAlso _
+                If Me.mRFUpWsMeanForDt_mm IsNot Nothing AndAlso
                     mRFUpWsMeanForDt_mm.Keys.Contains(k) Then _
                 cln.mRFUpWsMeanForDt_mm.Add(k, mRFUpWsMeanForDt_mm(k))
-                If Me.mRFUpWsMeanForDtPrintout_mm IsNot Nothing AndAlso _
+                If Me.mRFUpWsMeanForDtPrintout_mm IsNot Nothing AndAlso
                     mRFUpWsMeanForDtPrintout_mm.Keys.Contains(k) Then _
                 cln.mRFUpWsMeanForDtPrintout_mm.Add(k, mRFUpWsMeanForDtPrintout_mm(k))
-                If Me.mRFUpWsMeanTotal_mm IsNot Nothing AndAlso _
+                If Me.mRFUpWsMeanTotal_mm IsNot Nothing AndAlso
                     mRFUpWsMeanTotal_mm.Keys.Contains(k) Then _
                 cln.mRFUpWsMeanTotal_mm.Add(k, mRFUpWsMeanTotal_mm(k))
-                If Me.mRFWPGridForDtPrintout_mm IsNot Nothing AndAlso _
+                If Me.mRFWPGridForDtPrintout_mm IsNot Nothing AndAlso
                     mRFWPGridForDtPrintout_mm.Keys.Contains(k) Then _
                 cln.mRFWPGridForDtPrintout_mm.Add(k, mRFWPGridForDtPrintout_mm(k))
-                If Me.mRFWPGridTotal_mm IsNot Nothing AndAlso _
+                If Me.mRFWPGridTotal_mm IsNot Nothing AndAlso
                     mRFWPGridTotal_mm.Keys.Contains(k) Then _
                 cln.mRFWPGridTotal_mm.Add(k, mRFWPGridTotal_mm(k))
-                If Me.mTotalFlow_cms IsNot Nothing AndAlso _
+                If Me.mTotalFlow_cms IsNot Nothing AndAlso
                     mTotalFlow_cms.Keys.Contains(k) Then _
                 cln.mTotalFlow_cms.Add(k, mTotalFlow_cms(k))
-                If Me.mTotalDepth_m IsNot Nothing AndAlso _
+                If Me.mTotalDepth_m IsNot Nothing AndAlso
                     mTotalDepth_m.Keys.Contains(k) Then _
                 cln.mTotalDepth_m.Add(k, mTotalDepth_m(k))
-                If Me.mMaxFlow_cms IsNot Nothing AndAlso _
+                If Me.mMaxFlow_cms IsNot Nothing AndAlso
                     mMaxFlow_cms.Keys.Contains(k) Then _
                 cln.mMaxFlow_cms.Add(k, mMaxFlow_cms(k))
-                If Me.mMaxDepth_m IsNot Nothing AndAlso _
+                If Me.mMaxDepth_m IsNot Nothing AndAlso
                     mMaxDepth_m.Keys.Contains(k) Then _
                 cln.mMaxDepth_m.Add(k, mMaxDepth_m(k))
-                If Me.mMaxFlowTime IsNot Nothing AndAlso _
+                If Me.mMaxFlowTime IsNot Nothing AndAlso
                     mMaxFlowTime.Keys.Contains(k) Then _
                 cln.mMaxFlowTime.Add(k, mMaxFlowTime(k))
-                If Me.mMaxDepthTime IsNot Nothing AndAlso _
+                If Me.mMaxDepthTime IsNot Nothing AndAlso
                     mMaxDepthTime.Keys.Contains(k) Then _
                 cln.mMaxDepthTime.Add(k, mMaxDepthTime(k))
-                If Me.mQfromFCDataCMS IsNot Nothing AndAlso _
+                If Me.mQfromFCDataCMS IsNot Nothing AndAlso
                     mQfromFCDataCMS.Keys.Contains(k) Then _
                 cln.mQfromFCDataCMS.Add(k, mQfromFCDataCMS(k))
-                If Me.mFpnWpOut IsNot Nothing AndAlso _
+                If Me.mFpnWpOut IsNot Nothing AndAlso
                     mFpnWpOut.Keys.Contains(k) Then _
                 cln.mFpnWpOut.Add(k, mFpnWpOut(k))
                 cln.mWatchPointCVidList.Add(k)

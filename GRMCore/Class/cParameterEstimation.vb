@@ -8,8 +8,6 @@ Public Class cParameterEstimation
         SOIL_DEPTH
     End Enum
 
-    'Public Const INISSR_UNIFORM_RF_MM_INI As Single = 10
-
 #Region "Events"
     Public Event CallAnalyzer(ByVal sender As cParameterEstimation, ByVal project As cProject, ByVal nowTtoPrint_MIN As Integer, createImgFile As Boolean, createASCFile As Boolean)
     Public Event PEiteration(ByVal sender As cParameterEstimation, ByVal nowiter As Integer)
@@ -20,7 +18,6 @@ Public Class cParameterEstimation
 #Region "SSR"
     Private mPESSRuniformRFori_mm As Single
     Private mPESSRuniformRFtoApply_mm As Single
-    'Private mPESSR_iniflow_cms As Single
     Private mCompletedWSid As Dictionary(Of Integer, PE_SS_Result)
     Private mSWScountToEstSS As Integer
     Private mCVresult_SSR_IniFlow As List(Of cCVAttribute)
@@ -43,7 +40,7 @@ Public Class cParameterEstimation
 
     Public Sub StartPEiniSS(ByVal project As cProject, ByVal iniRF As Single, Optional ByVal printoutStep_min As Integer = 0)
         mPEtype = cParameterEstimation.PEtype.INI_SOIL_SATURATION_RATIO
-        mPESSRuniformRFori_mm = iniRF 'INISSR_UNIFORM_RF_MM_INI
+        mPESSRuniformRFori_mm = iniRF
         mPESSRuniformRFtoApply_mm = iniRF
         mProject = project
         If printoutStep_min = 0 Then
@@ -58,17 +55,11 @@ Public Class cParameterEstimation
 
 
     Private Sub PE_SSR_setIniSoilConditionAndSetRFwithUniformValueForCV()
-        'Dim hydroCom As New cHydroCom
         Dim rfInterval_sec As Integer = mProject.Rainfall.RFIntervalSEC
         Dim calinterval_sec As Integer = cThisSimulation.dtsec
         Dim cellSize As Single = mProject.Watershed.mCellSize
         For n As Integer = 0 To mProject.CVCount - 1
             With mProject.CV(n)
-                'If .bToBeSimulated Then
-                '    mProject.CV(n).bToEstimateParameters = True
-                'Else
-                '    mProject.CV(n).bToEstimateParameters = False
-                'End If
                 .InitialSaturation = 0
                 .soilSaturationRatio = 0
                 .CumulativeInfiltrationF_m = 0
@@ -95,9 +86,7 @@ Public Class cParameterEstimation
         Dim wpCount As Integer = mProject.WatchPoint.WPCount
         Dim simulator As New cSimulator
         Dim outputControl As New cOutPutControl
-
         If Not cThisSimulation.mGRMSetupIsNormal Then Exit Sub
-        'Dim dtsec As Integer = 
         Dim nowiterForPrint As Integer = 0
         mCompletedWSid = New Dictionary(Of Integer, PE_SS_Result)
         mCVresult_SSR_IniFlow = New List(Of cCVAttribute)
@@ -105,11 +94,9 @@ Public Class cParameterEstimation
         Dim niter As Integer = 0
         mCompletePE = False
         mStopPE = False
-
         simulator.Initialize()
         simulator.SetCVStartingCondition(mProject, wpCount, 0)
         PE_SSR_setIniSoilConditionAndSetRFwithUniformValueForCV()
-
         Do Until bContinue = False
             niter += 1
             Dim nowTmin As Integer = (niter - 1) * CInt(cThisSimulation.dtsec / 60)
@@ -127,8 +114,6 @@ Public Class cParameterEstimation
             End If
             RaiseEvent PEiteration(Me, niter)
             nowiterForPrint += 1
-            'todo : 여기서 탈출조건
-            'If PESS_CheckSatisfyToleranceAndSetCVatt() = False Then Exit For
             If mbAfterAllSSRbeenOne = True Then
                 PESS_CheckSatisfyToleranceAndSetCVatt()
             Else
@@ -140,7 +125,6 @@ Public Class cParameterEstimation
                 RaiseEvent PEcomplete(Me)
                 bContinue = False
             End If
-            'If mStopPE Then Exit For
             If mStopPE = True Then
                 RaiseEvent PEstop(Me)
                 bContinue = False
@@ -163,13 +147,11 @@ Public Class cParameterEstimation
     End Sub
 
     Private Sub NoRFcondition()
-        'Dim hydroCom As New cHydroCom
         Dim rfInterval_sec As Integer = mProject.Rainfall.RFIntervalSEC
         Dim calinterval_sec As Integer = cThisSimulation.dtsec
         Dim cellSize As Single = mProject.Watershed.mCellSize
         For n As Integer = 0 To mProject.CVCount - 1
-            cRainfall.CalRFintensity_mPsec(mProject.CV(n), 0,
-                                                                  rfInterval_sec)
+            cRainfall.CalRFintensity_mPsec(mProject.CV(n), 0, rfInterval_sec)
         Next
         mPESSRuniformRFtoApply_mm = 0
     End Sub
@@ -178,11 +160,9 @@ Public Class cParameterEstimation
         For Each id As Integer In mProject.Watershed.WSIDList
             If mCompletedWSid.ContainsKey(id) = False Then
                 If mProject.SubWSPar.userPars(id).isUserSet = True AndAlso mProject.SubWSPar.userPars(id).iniFlow IsNot Nothing Then
-
                     Dim wsCVarrayNum As Integer = mProject.WSNetwork.WSoutletCVID(id) - 1
                     Dim err As Double = Abs(mProject.CV(wsCVarrayNum).mStreamAttr.QCVch_i_j_m3Ps - mProject.SubWSPar.userPars(id).iniFlow.Value)
-                    If err < mProject.SubWSPar.userPars(id).iniFlow.Value / 100 Then 'tolerance를 1/100로 설정
-
+                    If err < mProject.SubWSPar.userPars(id).iniFlow.Value / 100 Then
                         mCompletedWSid.Add(id, New PE_SS_Result)
                         Dim results As New PE_SS_Result
                         If mProject.CV(wsCVarrayNum).FlowType = cGRM.CellFlowType.OverlandFlow Then
@@ -242,7 +222,7 @@ Public Class cParameterEstimation
                     cv.mStreamAttr.QCVch_i_j_m3Ps = mProject.CV(cvid - 1).mStreamAttr.QCVch_i_j_m3Ps
                 End If
                 mCVresult_SSR_IniFlow.Add(cv)
-                '여기서 이렇게 설정하더라고.. 실제 모델링에서는 inlet의 상류만 false로 설정됨
+                '여기서 이렇게 설정하더라도.. 실제 모델링에서는 inlet의 상류만 false로 설정됨
                 mProject.CV(cvid - 1).toBeSimulated = False
             Next
         Next
@@ -274,8 +254,6 @@ Public Class cParameterEstimation
         End With
     End Function
 
-
-
     Public Sub StopParameterEstimation()
         mStopPE = True
     End Sub
@@ -291,8 +269,4 @@ Public Class cParameterEstimation
             Return count
         End Get
     End Property
-
-
-
-
 End Class

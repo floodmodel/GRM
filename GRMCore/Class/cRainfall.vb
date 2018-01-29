@@ -2,11 +2,11 @@
 
 Public Class cRainfall
     Public Enum RainfallDataType
-        'GridFiles
-        'GridFilesRadar_mmPhr
         TextFileMAP
         TextFileASCgrid
         TextFileASCgrid_mmPhr
+        'GridFiles
+        'GridFilesRadar_mmPhr
         'UniformConstant_mm
     End Enum
 
@@ -25,12 +25,7 @@ Public Class cRainfall
     ''' </summary>
     ''' <remarks></remarks>
     Public mRainfallinterval As Nullable(Of Integer)
-
-    'Public mIsDateTimeFormat As Boolean = False
-    'Public mRFStartDateTime As String = Nothing
-    'Public mRainfallEndDateTime As String = Nothing
-
-    Public mlstRainfallData As List(Of RainfallData) ' TimeSeriesDS.RainfallDataTable
+    Public mlstRainfallData As List(Of RainfallData)
     Private mRainfallDataFilePathName As String = ""
 
     ''' <summary>
@@ -56,24 +51,15 @@ Public Class cRainfall
                         mRainfallDataType = RainfallDataType.TextFileASCgrid_mmPhr
                 End Select
                 mRainfallinterval = .RainfallInterval
-                'If Not .IsRainfallStartsFromNull Then
-                '    mRFStartDateTime = .RainfallStartsFrom
-                '    'mRainfallEndDateTime = .RainfallEndsAt
-                '    mIsDateTimeFormat = Not IsNumeric(mRFStartDateTime)
-                'Else
-                '    mIsDateTimeFormat = False
-                'End If
             End If
             mRainfallDataFilePathName = row.RainfallDataFile
         End With
         If mRainfallDataType.HasValue Then
-            mlstRainfallData = New List(Of RainfallData) ' TimeSeriesDS.RainfallDataTable
-            '여기서 파일 읽기로..
+            mlstRainfallData = New List(Of RainfallData)
             Dim Lines() As String = System.IO.File.ReadAllLines(mRainfallDataFilePathName)
             For n As Integer = 0 To Lines.Length - 1
                 If Lines(n).Trim = "" Then Exit For
-                Dim r As RainfallData
-                'Dim r As TimeSeriesDS.RainfallRow = prj.Rainfall.mdtRainfallinfo.NewRainfallRow
+                Dim r As New RainfallData
                 r.Order = n + 1
                 Select Case row.RainfallDataType
                     Case RainfallDataType.TextFileASCgrid.ToString,
@@ -86,18 +72,13 @@ Public Class cRainfall
                         r.FileName = Path.GetFileName(mRainfallDataFilePathName)
                         r.FilePath = Path.GetDirectoryName(mRainfallDataFilePathName)
                 End Select
-
-
                 If prj.GeneralSimulEnv.mIsDateTimeFormat = True Then
                     r.DataTime = cComTools.GetTimeToPrintOut(True, prj.GeneralSimulEnv.mSimStartDateTime, CInt(mRainfallinterval * n))
                 Else
                     r.DataTime = CStr(mRainfallinterval * n)
                 End If
                 mlstRainfallData.Add(r)
-                'mdtRainfallinfo.Rows.Add(r) ' = prj.Rainfall.mdtRainfallinfo
             Next
-
-
         End If
     End Sub
 
@@ -127,17 +108,14 @@ Public Class cRainfall
     Public Shared Sub ReadRainfall(ByVal eRainfallDataType As cRainfall.RainfallDataType,
                                        ByVal lstRFData As List(Of RainfallData),
                                        ByVal RFinterval_MIN As Integer, ByVal nowRFOrder As Integer, isparallel As Boolean)
-        'Dim dtSEC As Integer = cThisSimulation.dtsec
-        'Dim RFSum_INdt_m As Single = 0
         Dim inRF_mm As Single
         Dim rfIntervalSEC As Integer = RFinterval_MIN * 60
-        Dim rfRow As RainfallData = cProject.Current.Rainfall.GetRFdataByOrder(lstRFData, nowRFOrder) '여기서 nowRFOrder는 row 인덱스가 아니고, 'Order' 필드이 값으로 이용된다.
+        Dim rfRow As RainfallData = cProject.Current.Rainfall.GetRFdataByOrder(lstRFData, nowRFOrder)
         Dim RFfpn As String = Path.Combine(rfRow.FilePath, rfRow.FileName)
         Dim cellSize As Single = cProject.Current.Watershed.mCellSize
         cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs = 0
         For Each wpCVID As Integer In cProject.Current.WatchPoint.WPCVidList
             With cProject.Current
-                'wp 상류에 있는 격자 개수는 그 CV의 FA+1과 같음. (.CVid - 1)이 현재 셀의 CV 배열 번호
                 .WatchPoint.mRFReadIntensitySumUpWs_mPs(wpCVID) = 0
             End With
         Next
@@ -145,7 +123,6 @@ Public Class cRainfall
         Try
             Select Case eRainfallDataType
                 Case cRainfall.RainfallDataType.TextFileASCgrid, cRainfall.RainfallDataType.TextFileASCgrid_mmPhr
-
                     Dim ascReader As New cTextFileReaderASC(RFfpn)
                     If isparallel = True Then
                         Dim options As ParallelOptions = New ParallelOptions()
@@ -181,14 +158,12 @@ Public Class cRainfall
                                 For intC As Integer = 0 To .Watershed.mColCount - 1
                                     If .WSCell(intC, intR) Is Nothing Then Continue For
                                     Dim cvan As Integer = .WSCell(intC, intR).CVID - 1
-                                    ' inRF_mm = ascReader.ValueAtColumeXFormOneRowAsNotNegative(intC, RFs)
                                     inRF_mm = CSng(RFs(intC))
                                     If inRF_mm = 0 Then inRF_mm = 0
                                     If eRainfallDataType = cRainfall.RainfallDataType.TextFileASCgrid_mmPhr Then
                                         inRF_mm = inRF_mm / CSng(60 / .Rainfall.mRainfallinterval)
                                     End If
                                     Call CalRFintensity_mPsec(.CV(cvan), inRF_mm, rfIntervalSEC)
-                                    'RFSum_INdt_m = RFSum_INdt_m + .CV(cvan).RFReadintensity_mPsec * dtSEC
                                     Call CalRFSumForWPUpWSWithRFGrid(cvan)
                                 Next
                             Next
@@ -204,7 +179,6 @@ Public Class cRainfall
                     If inRF_mm < 0 Then inRF_mm = 0
                     For cvan As Integer = 0 To cProject.Current.CVCount - 1
                         Call CalRFintensity_mPsec(cProject.Current.CV(cvan), inRF_mm, rfIntervalSEC)
-                        'RFSum_INdt_m = RFSum_INdt_m + cProject.Current.CV(cvan).RFReadintensity_mPsec * dtSEC
                     Next
                     Call CalRFSumForWPUpWSWithMAPValue(cProject.Current.CV(0).RFReadintensity_mPsec) '모든 격자의 강우량 동일하므로.. 하나를 던저준다.
 
@@ -217,15 +191,6 @@ Public Class cRainfall
             cThisSimulation.mGRMSetupIsNormal = False
             Exit Sub
         End Try
-
-        'cThisSimulation.mRFMeanForDT_m = RFSum_INdt_m / cProject.Current.CVCount '전체유역의 평균 강우량
-        'For Each wpCVID As Integer In cProject.Current.WatchPoint.WPCVidList
-        '    With cProject.Current
-        '        'wp 상류에 있는 격자 개수는 그 CV의 FA+1과 같음. (.CVid - 1)이 현재 셀의 CV 배열 번호
-        '        .WatchPoint.mRFUpWsMeanForDt_mm(wpCVID) = (.WatchPoint.mRFReadIntensitySumUpWs_mPs(wpCVID) * dtSEC * 1000) / (.CV(wpCVID - 1).FAc + 1)
-        '        .WatchPoint.mRFReadIntensitySumUpWs_mPs(wpCVID) = 0
-        '    End With
-        'Next
     End Sub
 
     ''' <summary>
@@ -238,15 +203,11 @@ Public Class cRainfall
     ''' <remarks></remarks>
     Public Shared Sub CalRFintensity_mPsec(ByVal cv As cCVAttribute, ByVal rf_mm As Single,
                                                              ByVal rfIntevalSEC As Integer)
-        '여기서 중요사항 : .RFReadintensity_mPsec 과 .RFApp_dt_meter 는 단위환산해도 다른 값 나온다. 
-        '                 즉, .RFApp_dt_meter는 격자 네트워크 해석 결과가 반영된 환산 강우로,, 모형에 직접 이용되는 강우
         With cv
             If rf_mm = 0 Then
                 .RFReadintensity_mPsec = 0
-                '.RFApp_dt_meter = 0
             Else
                 .RFReadintensity_mPsec = rf_mm / 1000 / rfIntevalSEC
-                '.RFApp_dt_meter = .RFReadintensity_mPsec * dtSEC * (cellSize / .CVDeltaX_m) ' 2015.03.21. 대각선 방향일 경우, 폭을 줄이는것이 아니라, 강우강도를 줄이게 된다.
             End If
             cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs =
                 cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs + .RFReadintensity_mPsec
@@ -255,25 +216,18 @@ Public Class cRainfall
 
     Public Shared Sub CalRF_mPdt(ByVal cv As cCVAttribute,
                                                               ByVal dtsec As Integer, ByVal cellSize As Single)
-        '여기서 중요사항 : .RFReadintensity_mPsec 과 .RFApp_dt_meter 는 단위환산해도 다른 값 나온다. 
-        '                 즉, .RFApp_dt_meter는 격자 네트워크 해석 결과가 반영된 환산 강우로,, 모형에 직접 이용되는 강우
         Dim rf_mPs As Single = cv.RFReadintensity_mPsec
         With cv
             If rf_mPs = 0 Then
                 .RFApp_dt_meter = 0
             Else
-                .RFApp_dt_meter = rf_mPs * dtsec * (cellSize / .CVDeltaX_m) ' 2015.03.21. 대각선 방향일 경우, 폭을 줄이는것이 아니라, 강우강도를 줄이게 된다.
+                .RFApp_dt_meter = rf_mPs * dtsec * (cellSize / .CVDeltaX_m)
             End If
         End With
-        'cThisSimulation.mRFSumForAllCellsForDT_m = cThisSimulation.mRFSumForAllCellsForDT_m + rf_mPs * dtsec
     End Sub
 
 
     Public Shared Sub CalRFSumForWPUpWSWithRFGrid(ByVal cvan As Integer)
-
-        'If cProject.Current.CV(cvan).DownStreamWPCVids.Count = 2 Then
-        '    Dim m As Integer = 1
-        'End If
         For Each wpCVid As Integer In cProject.Current.CV(cvan).DownStreamWPCVids
             With cProject.Current
                 .WatchPoint.mRFReadIntensitySumUpWs_mPs(wpCVid) =
@@ -284,7 +238,8 @@ Public Class cRainfall
 
     Public Shared Sub CalRFSumForWPUpWSWithMAPValue(ByVal ConstRFintensity_mPs As Single)
         For Each wpCVid As Integer In cProject.Current.WatchPoint.WPCVidList
-            cProject.Current.WatchPoint.mRFReadIntensitySumUpWs_mPs(wpCVid) = ConstRFintensity_mPs * (cProject.Current.CV(wpCVid - 1).FAc + (1 - cProject.Current.FacMin)) 'wp 셀을 포함한 상류의 격자 개수는 그 CV의 FA+1과 같음.
+            cProject.Current.WatchPoint.mRFReadIntensitySumUpWs_mPs(wpCVid) =
+                ConstRFintensity_mPs * (cProject.Current.CV(wpCVid - 1).FAc + (1 - cProject.Current.FacMin))
         Next
     End Sub
 
@@ -312,34 +267,19 @@ Public Class cRainfall
         Next
     End Sub
 
-
-
     Public Shared Sub CalCumulativeRFDuringDTPrintOut(project As cProject, ByVal dtsec As Integer)
-        'cThisSimulation.mRFMeanForDT_m = cThisSimulation.mRFSumForAllCellsForDT_m / cProject.Current.CVCount '전체유역의 평균 강우량
-        cThisSimulation.mRFMeanForDT_m = (cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs * dtsec) / cProject.Current.CVCount '전체유역의 평균 강우량
+        cThisSimulation.mRFMeanForDT_m = (cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs * dtsec) / cProject.Current.CVCount
         cThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = cThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m + cThisSimulation.mRFMeanForDT_m
         For Each wpcvid As Integer In project.WatchPoint.WPCVidList
             Dim fac As Integer = project.CV(wpcvid - 1).FAc
             With project.WatchPoint
                 .mRFUpWsMeanForDt_mm(wpcvid) = (.mRFReadIntensitySumUpWs_mPs(wpcvid) * dtsec * 1000) / (fac + 1)
                 .mRFUpWsMeanForDtPrintout_mm(wpcvid) =
-                                .mRFUpWsMeanForDtPrintout_mm(wpcvid) + .mRFUpWsMeanForDt_mm(wpcvid)  '이건 매 dt 마다 새로 입력되므로.. 초기화 필요없고.
+                                .mRFUpWsMeanForDtPrintout_mm(wpcvid) + .mRFUpWsMeanForDt_mm(wpcvid)
                 .mRFWPGridForDtPrintout_mm(wpcvid) = .mRFWPGridForDtPrintout_mm(wpcvid) _
                                     + cProject.Current.CV(wpcvid - 1).RFReadintensity_mPsec * 1000 * dtsec
             End With
         Next
-
-        'For Each wpCVID As Integer In cProject.Current.WatchPoint.WPCVidList
-        '    With cProject.Current
-        '        'wp 상류에 있는 격자 개수는 그 CV의 FA+1과 같음. (.CVid - 1)이 현재 셀의 CV 배열 번호
-        '        .WatchPoint.mRFUpWsMeanForDt_mm(wpCVID) = (.WatchPoint.mRFReadIntensitySumUpWs_mPs(wpCVID) * dtsec * 1000) / (.CV(wpCVID - 1).FAc + 1)
-        '        '.WatchPoint.mRFReadIntensitySumUpWs_mPs(wpCVID) = 0
-        '    End With
-        'Next
-
-
-
-
         If project.GeneralSimulEnv.mbCreateASCFile = True _
             OrElse project.GeneralSimulEnv.mbCreateImageFile = True Then
             If project.GeneralSimulEnv.mbShowRFdistribution = True _
@@ -366,7 +306,7 @@ Public Class cRainfall
     Public ReadOnly Property RFDuration() As Integer
         Get
             If IsSet Then
-                Return mRainfallinterval.Value * mlstRainfallData.Count '.Rows.Count
+                Return mRainfallinterval.Value * mlstRainfallData.Count
             Else
                 Throw New InvalidOperationException
             End If
@@ -396,41 +336,22 @@ Public Class cRainfall
         End Get
     End Property
 
-    Public Function GetRFdataByOrder(ByVal dtRFinfo As List(Of RainfallData), ByVal order As Integer) As RainfallData ' TimeSeriesDS.RainfallRow
-        'Dim ResultRow() As DataRow = dtRFinfo.Select(String.Format("Order = {0}", order))
+    Public Function GetRFdataByOrder(ByVal dtRFinfo As List(Of RainfallData), ByVal order As Integer) As RainfallData
         If dtRFinfo.Count = 0 Then
             System.Console.WriteLine("Error: Rainfall data is not exist.   " & vbCrLf & "Order = " & order.ToString)
             Return Nothing
         End If
-
         For n As Integer = 0 To dtRFinfo.Count
             If dtRFinfo(n).Order = order Then
                 Return dtRFinfo(n)
             End If
         Next
-        'If ResultRow Is Nothing OrElse ResultRow.Length = 0 Then
-        '    System.Console.WriteLine("Error: Rainfall data is not exist.   " & vbCrLf & "Order = " & order.ToString)
-        '    Return Nothing
-        'ElseIf ResultRow.Length > 1 Then
-        '    System.Console.WriteLine("Error: One more rainfall data were founded!   " & vbCrLf & "Order = " & order.ToString)
-        '    Return Nothing
-        'Else
-        '    Return CType(ResultRow(0), TimeSeriesDS.RainfallRow)
-        'End If
+        Return Nothing
     End Function
-
 
     Public ReadOnly Property RFIntervalSEC() As Integer
         Get
             Return CInt(mRainfallinterval * 60)
         End Get
     End Property
-
-    'Public Shared Function SaveRainfallDataFile(rfdata As cRainfall) As Boolean
-    '    Dim strFNP As String = rfdata.RFDataFilePathName
-    '    For nr As Integer = 0 To rfdata.mdtRainfallinfo.Rows.Count - 1
-    '        Dim v As String = rfdata.mdtRainfallinfo.Rows(nr).Item(rfdata.mdtRainfallinfo.RainfallColumn).ToString
-    '        IO.File.AppendAllText(strFNP, v, Encoding.Default)
-    '    Next
-    'End Function
 End Class

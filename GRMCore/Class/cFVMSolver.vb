@@ -16,17 +16,15 @@ Public Class cFVMSolver
                 cCVw_n = uCVw_n * CONST_DtPDx * hCVw_n
             End If
             For iter As Integer = 0 To 20000
-                Dim hCVe_n As Single = Hp_n '운동파 모형에서는 등류로 모의하므로..
+                Dim hCVe_n As Single = Hp_n
                 Dim uCVe_n As Single = GetFlowVelocityByManningEq(hCVe_n, .SlopeOF, .RoughnessCoeffOF)
                 Dim cCVe_n As Single = uCVe_n * CONST_DtPDx * hCVe_n
-                '=============================================
-                'Newton-Raphson 방법 적용
+                'Newton-Raphson
                 Dim Fx As Single = Hp_n - cCVw_n + cCVe_n - constHp_j
                 Dim dFx As Single
                 dFx = 1 + CSng(1.66667 * CONST_DtPDx _
                          * (hCVe_n) ^ (0.66667) * (.SlopeOF ^ 0.5) / .RoughnessCoeffOF)
                 Dim Hp_nP1 As Single = CSng(Hp_n - Fx / dFx)
-                '======================================
                 If Hp_nP1 <= 0 Then
                     SetNoFluxOverlandFlowCV(project.CV(CVAN))
                     Exit For
@@ -36,7 +34,7 @@ Public Class cFVMSolver
                 If err < tolerance Then
                     .hCVof_i_j = Hp_nP1
                     .uCVof_i_j = GetFlowVelocityByManningEq(Hp_nP1, .SlopeOF, .RoughnessCoeffOF)
-                    .CSAof_i_j = Hp_nP1 * effDy_m ' cProject.Current.Watershed.mCellSize
+                    .CSAof_i_j = Hp_nP1 * effDy_m
                     .QCVof_i_j_m3Ps = .CSAof_i_j * .uCVof_i_j
                     If cThisSimulation.vMaxInThisStep < .uCVof_i_j Then
                         cThisSimulation.vMaxInThisStep = .uCVof_i_j
@@ -92,20 +90,14 @@ Public Class cFVMSolver
                 HRch = CSAChCVe_n / CSPerCh
                 Dim u_n As Single = GetFlowVelocityByManningEq(HRch, .mStreamAttr.chBedSlope, .mStreamAttr.RoughnessCoeffCH)
                 Dim cChCVe_n As Single = u_n * CONST_DtPDx * CSAChCVe_n
-                '==========================================================
-                'Newton-Raphson 방법 적용
+                'Newton-Raphson
                 Dim Fx As Single = CSAp_n - cChCVw_n + cChCVe_n - constCSAchCVp_j
                 Dim dFx As Single
                 dFx = 1 + CSng(1.66667 * (CSAChCVe_n) ^ (0.66667) * (.mStreamAttr.chBedSlope ^ 0.5) *
                                CONST_DtPDx / (.mStreamAttr.RoughnessCoeffCH * CSPerCh ^ 0.66667))
                 Dim CSAch_nP1 As Single = CSAp_n - Fx / dFx
-                '==========================================================
                 If CSAch_nP1 <= 0 Then
                     SetNoFluxChannelFlowCV(project.CV(cvan))
-                    '.mStreamAttr.hCVch_i_j = 0 '이렇게 적용하면, i>1일 경우 snghCV_i_jP1 이 값이 LTM에 적용 될 수 있음.
-                    '.mStreamAttr.uCVch_i_j = 0
-                    '.mStreamAttr.CSAch_i_j = 0
-                    '.mStreamAttr.QCVch_i_j_m3Ps = 0
                     Exit For
                 End If
                 Dim Qn As Single = u_n * CSAp_n
@@ -123,7 +115,7 @@ Public Class cFVMSolver
                     .mStreamAttr.hCVch_i_j = hCh_nP1
                     .mStreamAttr.uCVch_i_j = u_nP1
                     .mStreamAttr.CSAch_i_j = CSAch_nP1
-                    .mStreamAttr.QCVch_i_j_m3Ps = QnP1 ' .mStreamAttr.uCVch_i_j * CSAch_nP1  '새로 계산된 단위유량이 입력됨.
+                    .mStreamAttr.QCVch_i_j_m3Ps = QnP1
                     If cThisSimulation.vMaxInThisStep < u_nP1 Then
                         cThisSimulation.vMaxInThisStep = u_nP1
                     End If
@@ -136,8 +128,8 @@ Public Class cFVMSolver
     End Sub
 
 
-    Public Function CalChCSA_CViW(ByVal project As cProject, ByVal cvan As Integer) As Single ' , ByVal sngDeltaX_meter As Single) As Single ', ByVal intCVTotNumber As Integer, ByVal sngDeltaX_meter As Single) As Single '(ByVal inputCVid As Integer, ByVal intCVTotNumber As Integer) As Single
-        'w의 단면적을 계산
+    Public Function CalChCSA_CViW(ByVal project As cProject, ByVal cvan As Integer) As Single
+        'w의 단면적 계산
         Dim CSAe_iM1 As Single
         Dim CSAeSum_iM1 As Single = 0
         Dim qSumCViM1_m3Ps As Single = 0
@@ -147,7 +139,7 @@ Public Class cFVMSolver
             With project.CV(cvid - 1)
                 Select Case .FlowType
                     Case cGRM.CellFlowType.OverlandFlow
-                        CSAe_iM1 = .CSAof_i_j '.hCVof_i_j * project.Watershed.mCellSize '이거 sngDeltaY_meter 곱한거.. 검토 필요함
+                        CSAe_iM1 = .CSAof_i_j
                         qCViM1_m3Ps = .QCVof_i_j_m3Ps
                     Case cGRM.CellFlowType.ChannelFlow, cGRM.CellFlowType.ChannelNOverlandFlow
                         CSAe_iM1 = .mStreamAttr.CSAch_i_j
@@ -171,12 +163,11 @@ Public Class cFVMSolver
         project.CV(cvan).effCVCountFlowINTOCViW = effCellCountFlowToCV_iM1
 
         If CSAeSum_iM1 < cGRM.CONST_WET_AND_DRY_CRITERIA Then
-            '상류에서 진입되는 양이 이보다 작다면 없는 것으로 가정.. 즉, dry and wet 조건
             CalChCSA_CViW = 0
             Exit Function
         End If
 
-        Dim CSAw_n As Single = CSAeSum_iM1 '+ project.CV(cvan).mStreamAttr.CSAch_i_j ' 현재 단면과 상류에서 유입되는 단면을 합한 값
+        Dim CSAw_n As Single = CSAeSum_iM1
         Dim CSAw_nP1 As Single
         With project.CV(cvan)
             For iter As Integer = 0 To 20000
@@ -190,7 +181,7 @@ Public Class cFVMSolver
                                                                         .mStreamAttr.chLowerRArea_m2,
                                                                         .mStreamAttr.chUpperRBaseWidth_m)
                 Dim Fx As Single = CSng((CSAw_n ^ 1.66667 * .mStreamAttr.chBedSlope ^ 0.5) _
-                                                / (.mStreamAttr.RoughnessCoeffCH * chCSPeri ^ 0.66667) - qSumCViM1_m3Ps)   '5/3=1.66667
+                                                / (.mStreamAttr.RoughnessCoeffCH * chCSPeri ^ 0.66667) - qSumCViM1_m3Ps)
                 Dim dFx As Single = CSng(1.66667 * (CSAw_n ^ 0.66667) * (.mStreamAttr.chBedSlope ^ 0.5) _
                                                / (.mStreamAttr.RoughnessCoeffCH * chCSPeri ^ 0.66667))
                 CSAw_nP1 = CSAw_n - Fx / dFx
@@ -221,7 +212,7 @@ Public Class cFVMSolver
             Dim Fx As Single
             Dim dFx As Single
             Dim ChCrossSecPer As Single
-            For iter As Integer = 0 To 20000 '반복계산 제한 회수
+            For iter As Integer = 0 To 20000
                 Dim Hw_n As Single = GetChannelDepthUsingArea(cbw, CSA_n, .mStreamAttr.chIsCompoundCS,
                                bwUpperRegion, AreaLR, hLR, bc)
                 ChCrossSecPer = GetChannelCrossSectionPerimeter(cbw,
@@ -229,7 +220,7 @@ Public Class cFVMSolver
                                                                    Hw_n, bCompound,
                                                                    hLR, AreaLR, bwUpperRegion)
                 Fx = CSng((CSA_n ^ 1.66667 * .mStreamAttr.chBedSlope ^ 0.5) _
-                            / (.mStreamAttr.RoughnessCoeffCH * ChCrossSecPer ^ 0.66667) - Q_m3Ps)   '5/3=1.66667
+                            / (.mStreamAttr.RoughnessCoeffCH * ChCrossSecPer ^ 0.66667) - Q_m3Ps)
                 dFx = CSng(1.66667 * (CSA_n ^ 0.66667) * (.mStreamAttr.chBedSlope ^ 0.5) _
                             / (.mStreamAttr.RoughnessCoeffCH * ChCrossSecPer ^ 0.66667))
                 CSA_nP1 = CSA_n - Fx / dFx
@@ -257,31 +248,8 @@ Public Class cFVMSolver
         Dim effCellCountFlowToCViW As Byte
         effCellCountFlowToCViW = CByte(project.CV(cvan).NeighborCVidFlowIntoMe.Count)
         For Each cvid As Integer In project.CV(cvan).NeighborCVidFlowIntoMe
-            ''이건 상류셀 유량 보전 할때
-            ' CV_iM1은 자신의 CV_i와 동일한 CVid를 가지며(유입량 평균을 계산하기 위해, 가상의 CV 설정)
-            ' hCV_1M1은 자신으로 유입되는 상류셀들의 유량을 이용해서다시 계산된 수심이다.
-            ' 이때 i-1에서의 유속을 계산하기 위한 경사는 CV_i의 경사와, 고정값인 유량을 이용하여 
-            ' h를 가정, u를 계산 하는 과정을 반복하여 hw_i_jP1을 계산한다.
-            '===========================================================
-            'With project.cv(CInt(objCellid) - 1)
-            '    '여기서 상류셀에서의 유출량을 계산함. CVe_iM1에서의 수심을 이용하는 경우
-            '    '이때 i-1에서의 hCVE_i_jP1은 hCV_i_jP1 이 입력되어 있고
-            '    'uCVE_i_jP1은 uCV_i_jP1 이 입력되어 있다... e에서의 값이 아닌 p에서의 값이 적용됨.
-            '    'sngHE_iM1 = project.cv(CInt(objCellid) - 1).hCV_i_j '등류이므로, p==e
-            '    'sngUE_iM1 = project.CV(CInt(objCellid) - 1).uCV_i_j 'P1 '여기서 읽어 오는 것이 빠르다. 왜냐면, 직접 계산을 위해서는 상류 셀의 경사를 검색해서 받아 와야 하므로..
-            '    'sngQToCViM1 = sngQToCViM1 + sngHE_iM1 * sngUE_iM1
-            '    If .effectiveRainfallCV_dt_meter > 0 And .hCV_i_j = 0 Then
-            '        sngQCViM1 = .effectiveRainfallCV_dt_meter * GetFlowVelocityByManningEquation(.effectiveRainfallCV_dt_meter, .slopeCV, .ManningsNSurface)
-            '    Else
-            '        sngQCViM1 = .QCV_i_j_m3Ps / sngDeltaX_meter
-            '    End If
-            'End With
-            '===========================================================
-
-            '이건 상류셀 평형상태로 모의할때
             With project.CV(cvid - 1)
-                qCViM1 = .QCVof_i_j_m3Ps / project.Watershed.mCellSize ' 단위폭당 유량 '평균 수심이므로, 단위폭당 유량을 적용함.
-                ' 현재 직상류 격자로 부터의 유입량이 없을 때는 유효 셀의 개수를 하나씩 빼준다.
+                qCViM1 = .QCVof_i_j_m3Ps / project.Watershed.mCellSize ' 단위폭당 유량
                 If qCViM1 <= 0.0 Then
                     effCellCountFlowToCViW = CByte(effCellCountFlowToCViW - 1)
                     qCViM1 = 0
@@ -294,7 +262,7 @@ Public Class cFVMSolver
         With project.CV(cvan)
             If effCellCountFlowToCViW < 1 Then effCellCountFlowToCViW = 1
             .effCVCountFlowINTOCViW = effCellCountFlowToCViW
-            qWn_i = CSng(((.RoughnessCoeffOF * qSumToCViM1) / (.SlopeOF ^ 0.5)) ^ 0.6) '0.6=3/5 
+            qWn_i = CSng(((.RoughnessCoeffOF * qSumToCViM1) / (.SlopeOF ^ 0.5)) ^ 0.6)
         End With
         Return qWn_i
     End Function

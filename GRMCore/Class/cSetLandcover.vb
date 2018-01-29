@@ -1,6 +1,4 @@
 ﻿Public Class cSetLandcover
-    'Implements ioProjectFile
-    'Implements ioProjectDB
 
     Public Enum LandCoverCode
         WATR
@@ -15,7 +13,6 @@
     End Enum
 
     Public mLandCoverDataType As Nullable(Of cGRM.FileOrConst)
-    'Public mGridNameLandCover As String
     Public mGridLandCoverFPN As String
     Public mLandCoverVATFPN As String
     Public mdtLandCoverInfo As GRMProject.LandCoverDataTable
@@ -26,7 +23,7 @@
 
     End Sub
 
-    Public Sub SetValues(ByVal prjDB As GRMProject) 'Implements ioProjectFile.SetValues
+    Public Sub SetValues(ByVal prjDB As GRMProject)
         If mLandCoverDataType.HasValue Then
             Dim row As GRMProject.ProjectSettingsRow = CType(prjDB.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
             With row
@@ -53,10 +50,8 @@
         End If
     End Sub
 
-    Public Sub GetValues(ByVal prjDB As GRMProject) ' Implements ioProjectFile.GetValues
-        ' 일단 초기화
+    Public Sub GetValues(ByVal prjDB As GRMProject)
         mLandCoverDataType = Nothing
-        'mGridNameLandCover = Nothing
         mLandCoverVATFPN = Nothing
         mConstRoughnessCoefficient = Nothing
         mConstImperviousRatio = Nothing
@@ -66,7 +61,6 @@
                 Select Case .LandCoverDataType
                     Case cGRM.FileOrConst.File.ToString
                         mLandCoverDataType = cGRM.FileOrConst.File
-                        'mGridNameLandCover = IO.Path.GetFileName(.LandCoverFile)
                         mGridLandCoverFPN = .LandCoverFile
                         mLandCoverVATFPN = .LandCoverVATFile
                     Case cGRM.FileOrConst.Constant.ToString
@@ -84,10 +78,9 @@
         Else
             mdtLandCoverInfo = Nothing
         End If
-
     End Sub
 
-    Public ReadOnly Property IsSet() As Boolean 'Implements ioProjectFile.IsSet
+    Public ReadOnly Property IsSet() As Boolean
         Get
             Return mLandCoverDataType.HasValue
         End Get
@@ -113,6 +106,6 @@
             Case LandCoverCode.WTLD.ToString : Return LandCoverCode.WTLD
             Case Else : Return Nothing
         End Select
-
     End Function
+
 End Class

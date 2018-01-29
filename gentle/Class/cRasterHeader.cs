@@ -8,7 +8,6 @@ namespace gentle
 {
    public class cRasterHeader
     {
-
         private int mNumberCols;
         private int mNumberRows;
         private double mXllcorner;
@@ -88,21 +87,12 @@ namespace gentle
                 else
                 {
                     return -1;
-                }
-                
+                }                
             }
             set
             {
                 mNODATAvalue = value.ToString ();
             }
         }
-
-        //=======================================================
-        //Service provided by Telerik (www.telerik.com)
-        //Conversion powered by NRefactory.
-        //Twitter: @telerik
-        //Facebook: facebook.com/telerik
-        //=======================================================
-
     }
 }

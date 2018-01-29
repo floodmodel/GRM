@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace gentle
 {
-   public class cTextFileReaderASC
+    public class cTextFileReaderASC
     {
         private string[] mLines;
         private int mRowCountAll;
@@ -28,8 +28,8 @@ namespace gentle
                 return;
             }
             GetHeaderInfo(mDataStartLineInASCfile);
-            mHeaderStringAll = cTextFile.MakeHeaderString(mHeader.numberCols, mHeader.numberRows, 
-                 mHeader.xllcorner, mHeader.yllcorner, mHeader.cellsize, mHeader.nodataValue.ToString ());
+            mHeaderStringAll = cTextFile.MakeHeaderString(mHeader.numberCols, mHeader.numberRows,
+                 mHeader.xllcorner, mHeader.yllcorner, mHeader.cellsize, mHeader.nodataValue.ToString());
         }
 
         private void GetHeaderInfo(int HeaderLineCount)
@@ -37,9 +37,8 @@ namespace gentle
             for (int n = 0; n <= HeaderLineCount - 1; n++)
             {
                 string line = mLines[n];
-
                 string[] LineParts = line.Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
-                int iv=0;
+                int iv = 0;
                 double dv = 0;
                 switch (n)
                 {
@@ -147,19 +146,18 @@ namespace gentle
         /// <returns></returns>
         public float ValueFromLL(int xColNumber, int yRowNumber)
         {
-                int row = mRowCountAll - yRowNumber - 1;
-                string[] LVals = mLines[row].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
-                float result = 0;
-                if (float.TryParse(LVals[xColNumber], out result))
-                {
-                    return result;
-                }
-                else
-                {
-                    return -9999;
-                }
+            int row = mRowCountAll - yRowNumber - 1;
+            string[] LVals = mLines[row].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
+            float result = 0;
+            if (float.TryParse(LVals[xColNumber], out result))
+            {
+                return result;
+            }
+            else
+            {
+                return -9999;
+            }
         }
-
 
         /// <summary>
         /// Column and row numbers are started from zero
@@ -167,18 +165,18 @@ namespace gentle
         /// <param name="xColNumber"></param>
         /// <param name="yRowNumber"></param>
         /// <returns></returns>
-        public float ValueFromTL(int xColNumber, int yRowNumber )
+        public float ValueFromTL(int xColNumber, int yRowNumber)
         {
-                string[] LVals = mLines[mDataStartLineInASCfile + yRowNumber - 1].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
-                float result = 0;
-                if (float.TryParse(LVals[xColNumber], out result))
-                {
-                    return result;
-                }
-                else
-                {
-                    return -9999;
-                }
+            string[] LVals = mLines[mDataStartLineInASCfile + yRowNumber - 1].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
+            float result = 0;
+            if (float.TryParse(LVals[xColNumber], out result))
+            {
+                return result;
+            }
+            else
+            {
+                return -9999;
+            }
         }
 
         /// <summary>
@@ -189,15 +187,15 @@ namespace gentle
         /// <returns></returns>
         public float ValueFromTLasNotNegative(int xColNumber, int yRowNumber)
         {
-                mDataValueOri = ValueFromTL(xColNumber, yRowNumber);
-                if (mDataValueOri < 0)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return mDataValueOri;
-                }
+            mDataValueOri = ValueFromTL(xColNumber, yRowNumber);
+            if (mDataValueOri < 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return mDataValueOri;
+            }
         }
 
 
@@ -209,20 +207,20 @@ namespace gentle
         /// <returns></returns>
         public double ValueFromLLasNotNegative(int xcol, int yrow)
         {
-                mDataValueOri = ValueFromLL(xcol, yrow);
-                if (mDataValueOri < 0)
-                {
-                    return 0;
-                }
-                else
-                {
-                    return mDataValueOri;
-                }
-         }
-            
-    private int GetDataStartLineInASCfile()
-    {
-        for (int ln = 0; ln <= mLines.Length - 1; ln++)
+            mDataValueOri = ValueFromLL(xcol, yrow);
+            if (mDataValueOri < 0)
+            {
+                return 0;
+            }
+            else
+            {
+                return mDataValueOri;
+            }
+        }
+
+        private int GetDataStartLineInASCfile()
+        {
+            for (int ln = 0; ln <= mLines.Length - 1; ln++)
             {
                 string aline = mLines[ln];
                 string[] LineParts = aline.Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
@@ -233,42 +231,41 @@ namespace gentle
                 }
             }
             return -1;
-    }
+        }
 
-    public int DataStartLineInASCfile
+        public int DataStartLineInASCfile
         {
             get
             {
                 return mDataStartLineInASCfile;
-            }                        
+            }
         }
 
         public string[] ValuesInOneRowFromLowLeft(int yrow)
-    {
-
-                int row = mRowCountAll - yrow - 1;
-                return mLines[row].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+        {
+            int row = mRowCountAll - yrow - 1;
+            return mLines[row].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
         }
 
 
         public string[] ValuesInOneRowFromTopLeft(int yrow)
         {
 
-                int row = mDataStartLineInASCfile + yrow - 1;
-                return mLines[row].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
+            int row = mDataStartLineInASCfile + yrow - 1;
+            return mLines[row].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        public float ValueAtColumeXFormOneRow(int xcol, string [] Values)
+        public float ValueAtColumeXFormOneRow(int xcol, string[] Values)
         {
-                float result = 0;
-                if (float.TryParse(Values[xcol], out result))
-                {
-                    return result;
-                }
-                else
-                {
-                    return -9999;
-                }
+            float result = 0;
+            if (float.TryParse(Values[xcol], out result))
+            {
+                return result;
+            }
+            else
+            {
+                return -9999;
+            }
         }
 
         public float ValueAtColumeXFormOneRowAsNotNegative(int xcol, string[] Values)

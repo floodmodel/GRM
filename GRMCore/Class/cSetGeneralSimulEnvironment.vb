@@ -1,6 +1,5 @@
 ﻿Option Strict Off
 Public Class cSetGeneralSimulEnvironment
-    'Implements ioProjectFile
 
 #Region "Simulation Tab"
 
@@ -34,24 +33,15 @@ Public Class cSetGeneralSimulEnvironment
     Public mbCreateASCFile As Boolean = False
 
     Public mPrintOption As cGRM.GRMPrintType
-    'Public mbPrintDischargeOnlyInDischargeFile As Boolean = False
-    'Public mbPrintDischargeOnlyInAllFile As Boolean = False
-
 #End Region
 
 #Region "모델링 환경"
-
     Public mAboutThisProject As String
     Public mAboutWatershed As String
     Public mAboutLandCoverMap As String
     Public mAboutSoilMap As String
     Public mAboutSoilDepthMap As String
     Public mAboutRainfall As String
-    'Public mProjectSavedTime As String
-    'Public mComputerName As String
-    'Public mComputerUserName As String
-    'Public mHyGISVersion As String
-    'Public mGRMVersion As String
 #End Region
 
     ''' <summary>
@@ -65,19 +55,17 @@ Public Class cSetGeneralSimulEnvironment
         mPrintOutTimeStepMIN = Nothing
     End Sub
 
-    Public Sub GetValues(ByVal prjDB As GRMProject) 'Implements ioProjectFile.GetValues
+    Public Sub GetValues(ByVal prjDB As GRMProject)
         Dim row As GRMProject.ProjectSettingsRow = CType(prjDB.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
         If Not row.IsSimulationDurationNull Then
             With row
 
                 If Not .IsSimulStartingTimeNull Then
                     mSimStartDateTime = .SimulStartingTime
-                    'mRainfallEndDateTime = .RainfallEndsAt
                     mIsDateTimeFormat = Not IsNumeric(mSimStartDateTime)
                 Else
                     mIsDateTimeFormat = False
                 End If
-
                 mSimDurationHOUR = .SimulationDuration
                 mPrintOutTimeStepMIN = .OutputTimeStep
                 mbSimulateBFlow = .SimulateBaseFlow
@@ -142,19 +130,18 @@ Public Class cSetGeneralSimulEnvironment
         End If
     End Sub
 
-    Public ReadOnly Property IsSet() As Boolean 'Implements ioProjectFile.IsSet
+    Public ReadOnly Property IsSet() As Boolean
         Get
             Return mSimDurationHOUR.HasValue
         End Get
     End Property
 
-    Public Sub SetValues(ByVal prjDB As GRMProject) 'Implements ioProjectFile.SetValues
+    Public Sub SetValues(ByVal prjDB As GRMProject)
         If mSimDurationHOUR IsNot Nothing Then
             Dim row As GRMProject.ProjectSettingsRow = CType(prjDB.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
             With row
                 .SimulationDuration = mSimDurationHOUR.Value
                 .OutputTimeStep = mPrintOutTimeStepMIN.Value
-
                 .SimulateBaseFlow = mbSimulateBFlow
                 .SimulateSubsurfaceFlow = mbSimulateSSFlow
                 .SimulateFlowControl = mbSimulateFlowControl
@@ -196,7 +183,7 @@ Public Class cSetGeneralSimulEnvironment
     ''' 그러므로 혼동을 없애기 위해 사용자가 지정한 시간으로 모의결과를 마치기 위해서 1시간을 더 모의해 준다. </remarks>
     Public ReadOnly Property EndingTimeSec() As Integer
         Get
-            Return CInt((mSimDurationHOUR * 60 + mPrintOutTimeStepMIN) * 60) '초로 바꾼다. 
+            Return CInt((mSimDurationHOUR * 60 + mPrintOutTimeStepMIN) * 60)
         End Get
     End Property
 
@@ -218,6 +205,5 @@ Public Class cSetGeneralSimulEnvironment
             GetProductVersion = ""
         End Try
     End Function
-
 
 End Class

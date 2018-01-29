@@ -628,10 +628,6 @@ Public Class cPEST
     Public mbShowConsole As Boolean
     Public mbPPEST As Boolean
     Public mParsRMF As PAR_RMF
-    'Public mGRMProjectFileName As String
-    'Dim psPEST As Diagnostics.Process
-    'Dim psInfo As ProcessStartInfo
-    'Public mPsPslave As List(Of Diagnostics.Process)
     Private mPsIDPSlave As List(Of Integer)
     Sub New()
         mdtQobsSeries = New DataTable
@@ -795,16 +791,10 @@ Public Class cPEST
             Dim obsCount As Integer = mdtQobsSeries.Rows.Count
             Dim pifString As String
             Dim columnRange As String = ""
-            '텝을 한문자로 인식할경우, 유량은 18열 부터 시작해서 8자리 기록, 
-            '원래는 16, 18:25,  27:34, 36:43, 45:52 인데..
-            '한문자를 2자리로 인식. 그러면, 32, 36:50, 54:68, 72:86, 90:102
-            '그런데 날자와 첫번째 탭까지는 1자리로 인식 그러면, 16, 18:32, 34:48, 50:64 => 이게 최종 결론...
+            '날자와 첫번째 탭까지는 1자리로 인식 그러면, 16, 18:32, 34:48, 50:64 => 이게 최종 결론...
 
             columnRange = CStr(18 + 16 * (mWPColumnIndex - 1)) _
                        + ":" + CStr(18 + 16 * (mWPColumnIndex - 1) + 14)
-            'columnRange = CStr(18 + 18 * (mWPColumnIndex - 1)) + _
-            '             ":" + CStr(18 + 18 * (mWPColumnIndex - 1) + 16)
-
             pifString = "pif #" + vbCrLf
             pifString = pifString + String.Format("#[{0}]#", wpname) + vbCrLf
             For n As Integer = 0 To obsCount - 1
@@ -858,7 +848,6 @@ Public Class cPEST
             Next
             Dim newLines(Lines.Length) As String
             newLines(0) = "ptf #"
-
             For n As Integer = 1 To Lines.Length
                 newLines(n) = Lines(n - 1)
             Next
@@ -876,7 +865,6 @@ Public Class cPEST
             With mParsRMF
                 rmfs = rmfs + String.Format("prf") + vbCrLf
                 rmfs = rmfs + String.Format("{0} {1} {2} {3}", .NSLAVE, .IFLETYP, .WAIT, .PARLAM) + vbCrLf
-
                 rmfs = rmfs + String.Format("'MainMachine' .\") + vbCrLf
                 For n As Integer = 1 To .NSLAVE - 1
                     rmfs = rmfs + String.Format("'Pslave{0}' {1}{2}", n, .FPathSlave(n), "\") + vbCrLf
@@ -934,7 +922,7 @@ Public Class cPEST
         psPEST.WaitForExit()
         psPEST.Dispose()
         If mbPPEST = True Then Call CloseSlaveProcess()
-        Thread.Sleep(2000) ' 이건 프로세스 종료 완료 잠깐 시간지연, 관련 실행파일 삭제를 위해 
+        Thread.Sleep(2000) ' 프로세스 종료 완료 잠깐 시간지연, 관련 실행파일 삭제를 위해 
         RaiseEvent PESTEnded(Me)
     End Sub
 
@@ -961,10 +949,8 @@ Public Class cPEST
     End Sub
 
     Private Sub RunSlave()
-        'mPsPslave = New List(Of Diagnostics.Process)
         mPsIDPSlave = New List(Of Integer)
         If mbPPEST = True Then
-            '이건 slave 실행 시키는 부분
             For n As Integer = 0 To mParsRMF.NSLAVE - 1
                 Dim psinfo_tmp As New ProcessStartInfo
                 psinfo_tmp.FileName = mFPNPPestSlaveBat(n)
@@ -972,10 +958,7 @@ Public Class cPEST
                 Dim ps_tmp As New Diagnostics.Process
                 ps_tmp.StartInfo = psinfo_tmp
                 ps_tmp.Start()
-                'mPsPslave.Add(ps_tmp)
-                'mPsPslave(n).Start()
                 mPsIDPSlave.Add(ps_tmp.Id)
-                'ps_tmp.Dispose()
             Next
         End If
     End Sub
@@ -984,24 +967,12 @@ Public Class cPEST
         Try
             For n As Integer = 0 To mPsIDPSlave.Count - 1
                 Dim ps As Process = Process.GetProcessById(mPsIDPSlave(n))
-                ps.CloseMainWindow() '이렇게 해야 grm 실행중인 창도 강제로 닫힌다.
-                'ps.Kill() '이걸로 하면 grm 실행중인창은 작업관리자에서 process는 없어지는데, 창은 안닫히고 계속 실행된다.
+                ps.CloseMainWindow() 'grm 실행중인 창도 강제로 닫힌다.
                 ps.Close()
                 ps.Dispose()
             Next
         Catch ex As Exception
             Throw ex
         End Try
-        'Try '여기는 혹시 모르니.. 확인차원에서..
-        '    Dim PSes As Process() = Process.GetProcessesByName("pslave")
-        '    For Each aps As Process In PSes
-        '        aps.CloseMainWindow()
-        '        'aps.Kill()
-        '        aps.Close()
-        '        aps.Dispose()
-        '    Next
-        'Catch ex As Exception
-        '    Throw ex
-        'End Try
     End Sub
 End Class

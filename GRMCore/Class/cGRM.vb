@@ -27,8 +27,8 @@
     Public Enum SimulationType
         SingleEvent
         SingleEventPE_SSR
-        'MultiEvents
         RealTime
+        'MultiEvents
         'RealTimeLauncher
         'MultiProject
     End Enum
@@ -82,7 +82,6 @@
         StartsFromE_TauDEM
     End Enum
 
-    'Public Shared bProjectWithoutGUI As Boolean = False
     Public Shared ReadOnly LONG_DATE_FORMAT As String = "yyyy/MM/dd HH:mm"
     Public Shared fpnlog As String = ""
     Public Shared bwriteLog As Boolean
@@ -162,15 +161,10 @@
     'Public Const CONST_INITIAL_OVERLANDFLOW_DEPTH As Single = 0
 #End Region
 
-    'Private Shared mRange As cParametersRange '이건 GUI에서 필요한 것으로 수정. 2017.10.18.최
+    'Private Shared mRange As cParametersRange '이건 GUI에서 필요한 것
     Private Shared mBuildInfo As FileVersionInfo
 
 #Region "DB 관련 shared 변수"
-
-    'Private Shared mOdbCnnStatic As New OleDb.OleDbConnection
-    'Private Shared mFpnGRMStaticXmlDB As String
-    'Private Shared mstrPathNameGRMTemplateMDB As String
-    'Private Shared mstrHyGISTimeSeriesDBPathName As String
     Private Shared mGrmStarted As Boolean
     Private Shared mStaticXmlFPN As String
 
@@ -189,11 +183,7 @@
 #End Region
 
     Shared Sub New()
-        'Dim exePath As String = GRMCoreFPN '"C:\GRM"
         Dim GRMCoreFPN As String = Path.Combine(My.Application.Info.DirectoryPath, "GRMCore.dll")
-
-
-
         'If IO.File.Exists(My.Application.Info.DirectoryPath & "\Plugins\GRM\" & "grm.exe") Then
         '    GRMexeFPN = Path.Combine(My.Application.Info.DirectoryPath, "Plugins\GRM\" & "grm.exe")
         'ElseIf IO.File.Exists(Path.Combine(My.Application.Info.DirectoryPath, "grm.exe")) Then
@@ -235,9 +225,6 @@
                 Return Nothing
         End Select
     End Function
-
-
-
 
     Public Shared Function GetFDAngleNumber(fd As GRMFlowDirectionD8) As Integer
         Select Case fd
@@ -295,41 +282,11 @@
 
 #Region "Shared Properties"
 
-    'Public Shared ReadOnly Property PathNameGRMStaticDB() As String
-    '    Get
-    '        Return mFpnGRMStaticXmlDB
-    '    End Get
-    'End Property
-
     Public Shared ReadOnly Property BuildInfo() As FileVersionInfo
         Get
             Return mBuildInfo
         End Get
     End Property
-
-    'Public Shared ReadOnly Property OdbCnnStatic() As OleDb.OleDbConnection
-    '    Get
-    '        Return mOdbCnnStatic
-    '    End Get
-    'End Property
-
-    'Public Shared ReadOnly Property PathNameGRMTemplateMDB() As String
-    '    Get
-    '        Return mstrPathNameGRMTemplateMDB
-    '    End Get
-    'End Property
-
-    'Public Shared ReadOnly Property HyGISTimeSeriesDBPathName() As String
-    '    Get
-    '        Return mstrHyGISTimeSeriesDBPathName
-    '    End Get
-    'End Property
-
-    'Public Shared ReadOnly Property ParRange() As cParametersRange
-    '    Get
-    '        Return mRange
-    '    End Get
-    'End Property
 
     Public Shared ReadOnly Property Started() As Boolean
         Get

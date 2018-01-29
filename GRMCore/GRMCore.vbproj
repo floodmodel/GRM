@@ -178,7 +178,6 @@
     <Compile Include="Class\cOutPutControl.vb" />
     <Compile Include="Class\cOutputControlRT.vb" />
     <Compile Include="Class\cParameterEstimation.vb" />
-    <Compile Include="Class\cSetPDistribution.vb" />
     <Compile Include="Class\cSetTSData.vb" />
     <Compile Include="Class\cSimulator.vb" />
     <Compile Include="Class\cSSandBSflow.vb" />

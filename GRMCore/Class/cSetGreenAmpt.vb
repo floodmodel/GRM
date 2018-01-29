@@ -1,8 +1,5 @@
-﻿Imports GRM
+﻿Public Class cSetGreenAmpt
 
-Public Class cSetGreenAmpt
-    'Implements ioProjectFile
-    'Implements ioProjectDB
     Public Enum SoilTextureCode
         C
         CL
@@ -19,7 +16,6 @@ Public Class cSetGreenAmpt
     End Enum
 
     Public mSoilTextureDataType As Nullable(Of cGRM.FileOrConst)
-    'Public mGridNameSoilTexture As String
     Public mGridSoilTextureFPN As String
     Public mSoilTextureVATFPN As String
     Public mdtGreenAmptInfo As GRMProject.GreenAmptParameterDataTable
@@ -32,7 +28,7 @@ Public Class cSetGreenAmpt
 
     End Sub
 
-    Public Sub SetValues(ByVal prjdb As GRMProject) 'Implements ioProjectFile.SetValues
+    Public Sub SetValues(ByVal prjdb As GRMProject)
         Dim row As GRMProject.ProjectSettingsRow = CType(prjdb.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
         If mSoilTextureDataType.HasValue Then
             With row
@@ -60,13 +56,11 @@ Public Class cSetGreenAmpt
             For Each r As DataRow In mdtGreenAmptInfo.Rows
                 r.SetAdded()
             Next
-            'mdtGreenAmptInfo.WriteXml(prjDBxmlFpn)
         End If
 
     End Sub
 
-    Public Sub GetValues(ByVal prjdb As GRMProject) 'Implements ioProjectFile.GetValues
-        ' 일단초기화
+    Public Sub GetValues(ByVal prjdb As GRMProject)
         mSoilTextureDataType = Nothing
         mSoilTextureVATFPN = Nothing
         mConstPorosity = Nothing
@@ -97,32 +91,9 @@ Public Class cSetGreenAmpt
         Else
             mdtGreenAmptInfo = Nothing
         End If
-
     End Sub
 
-
-    'Public Sub SaveDB(prjDBxmlFpn As String) Implements ioProjectDB.SaveDB
-    '    If mSoilTextureDataType.Equals(LayerOrConst.Layer) Then
-    '        mdtGreenAmptInfo.AcceptChanges()
-    '        For Each row As DataRow In mdtGreenAmptInfo.Rows
-    '            row.SetAdded()
-    '        Next
-    '        mdtGreenAmptInfo.WriteXml(prjDBxmlFpn)
-    '    End If
-    '    Throw New NotImplementedException()
-    'End Sub
-
-    'Public Sub OpenDB(prjDBxmlFpn As String) Implements ioProjectDB.OpenDB
-    'If mSoilTextureDataType.Equals(LayerOrConst.Layer) Then
-    '    mdtGreenAmptInfo = New GRMDynamicDB.GreenAmptParameterDataTable
-    '    mdtGreenAmptInfo.ReadXml(prjDBxmlFpn)
-    'Else
-    '    mdtGreenAmptInfo = Nothing
-    'End If
-    'Throw New NotImplementedException()
-    'End Sub
-
-    Public ReadOnly Property IsSet() As Boolean 'Implements ioProjectFile.IsSet
+    Public ReadOnly Property IsSet() As Boolean
         Get
             Return mSoilTextureDataType.HasValue
         End Get
@@ -155,6 +126,5 @@ Public Class cSetGreenAmpt
             Case Else : Return Nothing
         End Select
     End Function
-
 
 End Class
