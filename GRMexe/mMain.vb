@@ -91,6 +91,8 @@ Module mMain
 
 
     Private Sub StartSingleRun(ByVal currentPrjFPN As String, Optional bDeleteFilesExceptQ As Boolean = False)
+
+        Dim wsinfo As New cGetWatershedInfo(currentPrjFPN)
         Dim wpNames As New List(Of String)
         If Path.GetDirectoryName(currentPrjFPN) = "" Then
             currentPrjFPN = Path.Combine(My.Application.Info.DirectoryPath, currentPrjFPN)
@@ -104,6 +106,11 @@ Module mMain
                 Exit Sub
             End If
             ''여기서 셀 정보를 미리 알 수 있다.
+            'Dim x As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).XCol
+            'Dim y As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).YRow
+            'Dim facMD As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).FAc
+            'Dim facMax As Integer = cProject.Current.FacMax
+
             'Dim WSFPN As String = cProject.Current.Watershed.mFPN_watershed
             'Dim SlopeFPN As String = cProject.Current.Watershed.mFPN_slope
             'Dim FdirFPN As String = cProject.Current.Watershed.mFPN_fdir
@@ -121,10 +128,6 @@ Module mMain
             'Dim lcv As Integer = wsinfo.landCoverValue(x, y)
             'Dim wsCount As Integer = wsinfo.WScount
             'Dim intStreamValue As Integer = wsinfo.streamValue(x, y)
-            'Dim x As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).XCol
-            'Dim y As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).YRow
-            'Dim facMD As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).FAc
-            'Dim facMax As Integer = cProject.Current.FacMax
 
             If cProject.Current.GeneralSimulEnv.mbCreateASCFile = True OrElse
                 cProject.Current.GeneralSimulEnv.mbCreateImageFile = True Then

@@ -17,6 +17,7 @@
             Optional iniSoilSaturationFPN As String = "",
             Optional iniChannelFlowFPN As String = "")
 
+
         grmPrj.ReadLayerWSandSetBasicInfo(watershedFPN, True)
         grmPrj.ReadLayerSlope(slopeFPN, True)
         grmPrj.ReadLayerFdir(fdirFPN, True)
@@ -47,6 +48,15 @@
         End If
         grmPrj.SetGridNetworkFlowInformation()
         grmPrj.InitControlVolumeAttribute()
+    End Sub
+
+    Sub New(gmpFPN As String)
+        cProject.OpenProject(gmpFPN, False)
+        grmPrj = cProject.Current
+        If cProject.Current.SetupModelParametersAfterProjectFileWasOpened() = False Then
+            cGRM.writelogAndConsole("GRM setup was failed !!!", True, True)
+            Exit Sub
+        End If
     End Sub
 
     Public Function IsInWatershedArea(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Boolean
@@ -82,6 +92,9 @@
         Return grmPrj.WSNetwork.WSIDsAll.Count
     End Function
 
+    Public Function mostDownStreamWSID() As Integer
+        Return grmPrj.WSNetwork.MostDownstreamWSID
+    End Function
 
     Public Function upStreamWSIDs(currentWSID As Integer) As List(Of Integer)
         Return grmPrj.WSNetwork.WSIDsAllUps(currentWSID)
@@ -204,17 +217,53 @@
         End If
     End Function
 
+    Public Sub SetOneSWSParametersAndUpdateAllSWSUsingNetwork(wsid As Integer,
+                                                iniSat As Single,
+                                                minSlopeLandSurface As Single,
+                                                minSlopeChannel As Single,
+                                                minChannelBaseWidth As Single,
+                                                roughnessChannel As Single,
+                                                dryStreamOrder As Integer,
+                                                ccLCRoughness As Single,
+                                                ccSoilDepth As Single,
+                                                ccPorosity As Single,
+                                                ccWFSuctionHead As Single,
+                                                ccSoilHydraulicCond As Single,
+                                                applyIniFlow As Boolean,
+                                                Optional iniFlow As Single = 0)
+        With grmPrj.SubWSPar.userPars(wsid)
+            .iniSaturation = iniSat
+            .minSlopeOF = minSlopeLandSurface
+            .minSlopeChBed = minSlopeChannel
+            .minChBaseWidth = minChannelBaseWidth
+            .chRoughness = roughnessChannel
+            .dryStreamOrder = dryStreamOrder
+            .ccLCRoughness = ccLCRoughness
+            .ccSoilDepth = ccSoilDepth
+            .ccPorosity = ccPorosity
+            .ccWFSuctionHead = ccWFSuctionHead
+            .ccHydraulicK = ccSoilHydraulicCond
+            If applyIniFlow = True AndAlso iniFlow > 0 Then
+                .iniFlow = iniFlow
+            Else
+                .iniFlow = Nothing
+            End If
+            .isUserSet = True
+        End With
+        cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(grmPrj)
+    End Sub
+
     ''' <summary>
     '''  This method is applied to update all the subwatersheds parameters when there are more than 1 subwatershed.
-    '''  Before this method is called, user set parameters must have been updated for each user set watershed.
+    '''  Before this method is called, user set parameters must have been updated for each user set watershed
+    '''  by using [ grmPrj.SubWSPar.userPars(wsid) property]
     '''  And after this method is called, all the paramters in all the watersheds would be updated by using user set parameters.
     ''' </summary>
-    Public Sub UpdateSubWatershedParametersUsingNetwork()
+    Public Sub UpdateAllSubWatershedParametersUsingNetwork()
         If WScount() > 1 Then
             cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(grmPrj)
         End If
     End Sub
-
 
     '여기에 필요한 내용 계속 추가
     ' function으로  return 한다.

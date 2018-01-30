@@ -95,7 +95,8 @@ GRMCore
 <member name="M:GRMCore.cGetWatershedInfo.UpdateSubWatershedParametersUsingNetwork">
  <summary>
   This method is applied to update all the subwatersheds parameters when there are more than 1 subwatershed.
-  Before this method is called, user set parameters must have been updated for each user set watershed.
+  Before this method is called, user set parameters must have been updated for each user set watershed
+  by using [ grmPrj.SubWSPar.userPars(wsid) property]
   And after this method is called, all the paramters in all the watersheds would be updated by using user set parameters.
  </summary>
 </member>
