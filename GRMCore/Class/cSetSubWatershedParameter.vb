@@ -8,7 +8,10 @@ Public Class cSetSubWatershedParameter
 
     Public Sub SetSubWSkeys(ByVal WSList As List(Of Integer))
         For Each wsid As Integer In WSList
-            If userPars.ContainsKey(wsid) = False Then userPars.Add(wsid, Nothing)
+            If userPars.ContainsKey(wsid) = False Then
+                Dim upars As New cUserParameters
+                userPars.Add(wsid, upars)
+            End If
         Next
     End Sub
 

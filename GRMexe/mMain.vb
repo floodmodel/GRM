@@ -92,7 +92,6 @@ Module mMain
 
     Private Sub StartSingleRun(ByVal currentPrjFPN As String, Optional bDeleteFilesExceptQ As Boolean = False)
 
-        Dim wsinfo As New cGetWatershedInfo(currentPrjFPN)
         Dim wpNames As New List(Of String)
         If Path.GetDirectoryName(currentPrjFPN) = "" Then
             currentPrjFPN = Path.Combine(My.Application.Info.DirectoryPath, currentPrjFPN)
@@ -106,11 +105,8 @@ Module mMain
                 Exit Sub
             End If
             ''여기서 셀 정보를 미리 알 수 있다.
-            'Dim x As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).XCol
-            'Dim y As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).YRow
-            'Dim facMD As Integer = cProject.Current.CV(cProject.Current.mMostDownCellArrayNumber).FAc
-            'Dim facMax As Integer = cProject.Current.FacMax
-
+            'Dim wsinfo As New cGetWatershedInfo(currentPrjFPN)
+            ''혹은 아래의 방법
             'Dim WSFPN As String = cProject.Current.Watershed.mFPN_watershed
             'Dim SlopeFPN As String = cProject.Current.Watershed.mFPN_slope
             'Dim FdirFPN As String = cProject.Current.Watershed.mFPN_fdir
@@ -120,6 +116,7 @@ Module mMain
             'Dim stFPN As String = cProject.Current.GreenAmpt.mGridSoilTextureFPN
             'Dim sdFPN As String = cProject.Current.SoilDepth.mGridSoilDepthFPN
             'Dim wsinfo As New cGetWatershedInfo(WSFPN, SlopeFPN, FdirFPN, FacFPN, streamFPN, lcFPN, stFPN, sdFPN,,)
+            'wsinfo.SetOneSWSParametersAndUpdateAllSWSUsingNetwork(1, 1, 0.0001, 0.0001, 30, 0.045, 0, 1, 1, 1, 1, 1, True, 30)
             'Dim x As Integer = wsinfo.mostDownStreamCellArrayXColPosition
             'Dim y As Integer = wsinfo.mostDownStreamCellArrayYRowPosition
             'Dim isIn As Boolean = wsinfo.IsInWatershedArea(x, y)

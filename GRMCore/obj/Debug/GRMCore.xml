@@ -92,7 +92,7 @@ GRMCore
  <param name="rowYArrayIdx"></param>
  <returns></returns>
 </member>
-<member name="M:GRMCore.cGetWatershedInfo.UpdateSubWatershedParametersUsingNetwork">
+<member name="M:GRMCore.cGetWatershedInfo.UpdateAllSubWatershedParametersUsingNetwork">
  <summary>
   This method is applied to update all the subwatersheds parameters when there are more than 1 subwatershed.
   Before this method is called, user set parameters must have been updated for each user set watershed
