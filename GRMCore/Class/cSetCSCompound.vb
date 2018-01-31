@@ -50,10 +50,10 @@ Public Class cSetCSCompound
 
         Dim row As GRMProject.ProjectSettingsRow = CType(prjDB.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
         With row
-            mLowerRegionBaseWidth = .LowerRegionBaseWidth
-            mLowerRegionHeight = .LowerRegionHeight
-            mUpperRegionBaseWidth = .UpperRegionBaseWidth
-            mCompoundCSCriteriaChannelWidth = .CompoundCSChannelWidthLimit
+            mLowerRegionBaseWidth = CSng(.LowerRegionBaseWidth)
+            mLowerRegionHeight = CSng(.LowerRegionHeight)
+            mUpperRegionBaseWidth = CSng(.UpperRegionBaseWidth)
+            mCompoundCSCriteriaChannelWidth = CSng(.CompoundCSChannelWidthLimit)
         End With
         Throw New NotImplementedException()
     End Sub
@@ -82,10 +82,10 @@ Public Class cSetCSCompound
         Dim row As GRMProject.ProjectSettingsRow = CType(prjDB.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
         With row
             .CrossSectionType = CSTypeEnum.CSCompound.ToString
-            .LowerRegionBaseWidth = mLowerRegionBaseWidth
-            .LowerRegionHeight = mLowerRegionHeight
-            .UpperRegionBaseWidth = mUpperRegionBaseWidth
-            .CompoundCSChannelWidthLimit = mCompoundCSCriteriaChannelWidth
+            .LowerRegionBaseWidth = CStr(mLowerRegionBaseWidth)
+            .LowerRegionHeight = CStr(mLowerRegionHeight)
+            .UpperRegionBaseWidth = CStr(mUpperRegionBaseWidth)
+            .CompoundCSChannelWidthLimit = CStr(mCompoundCSCriteriaChannelWidth)
             .SingleCSChannelWidthType = Nothing
             .ChannelWidthEQc = Nothing
             .ChannelWidthEQd = Nothing

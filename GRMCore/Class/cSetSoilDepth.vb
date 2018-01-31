@@ -31,7 +31,7 @@
                     Case cGRM.FileOrConst.Constant
                         .SetSoilDepthFileNull()
                         .SetSoilDepthVATFileNull()
-                        .ConstantSoilDepth = mConstSoilDepth.Value
+                        .ConstantSoilDepth = CStr(mConstSoilDepth.Value)
                 End Select
             End With
         End If
@@ -58,7 +58,7 @@
                         mSoilDepthVATFPN = .SoilDepthVATFile
                     Case cGRM.FileOrConst.Constant.ToString
                         mSoilDepthDataType = cGRM.FileOrConst.Constant
-                        mConstSoilDepth = .ConstantSoilDepth
+                        mConstSoilDepth = CSng(.ConstantSoilDepth)
                     Case Else
                         Throw New InvalidOperationException
                 End Select

@@ -117,6 +117,8 @@ Module mMain
             'Dim sdFPN As String = cProject.Current.SoilDepth.mGridSoilDepthFPN
             'Dim wsinfo As New cGetWatershedInfo(WSFPN, SlopeFPN, FdirFPN, FacFPN, streamFPN, lcFPN, stFPN, sdFPN,,)
             'wsinfo.SetOneSWSParametersAndUpdateAllSWSUsingNetwork(1, 1, 0.0001, 0.0001, 30, 0.045, 0, 1, 1, 1, 1, 1, True, 30)
+            'Dim v As Single = wsinfo.grmPrj.SubWSPar.userPars(1).iniSaturation
+            'Dim vv As Single = wsinfo.subwatershedPars(1).iniSaturation
             'Dim x As Integer = wsinfo.mostDownStreamCellArrayXColPosition
             'Dim y As Integer = wsinfo.mostDownStreamCellArrayYRowPosition
             'Dim isIn As Boolean = wsinfo.IsInWatershedArea(x, y)

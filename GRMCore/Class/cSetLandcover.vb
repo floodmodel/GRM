@@ -37,8 +37,8 @@
                     Case cGRM.FileOrConst.Constant
                         .SetLandCoverFileNull()
                         .SetLandCoverVATFileNull()
-                        .ConstantRoughnessCoeff = mConstRoughnessCoefficient.Value
-                        .ConstantImperviousRatio = mConstImperviousRatio.Value
+                        .ConstantRoughnessCoeff = CStr(mConstRoughnessCoefficient.Value)
+                        .ConstantImperviousRatio = CStr(mConstImperviousRatio.Value)
                 End Select
             End With
             If mLandCoverDataType.Equals(cGRM.FileOrConst.File) Then
@@ -65,8 +65,8 @@
                         mLandCoverVATFPN = .LandCoverVATFile
                     Case cGRM.FileOrConst.Constant.ToString
                         mLandCoverDataType = cGRM.FileOrConst.Constant
-                        mConstImperviousRatio = .ConstantImperviousRatio
-                        mConstRoughnessCoefficient = .ConstantRoughnessCoeff
+                        mConstImperviousRatio = CSng(.ConstantImperviousRatio)
+                        mConstRoughnessCoefficient = CSng(.ConstantRoughnessCoeff)
                     Case Else
                         Throw New InvalidOperationException
                 End Select

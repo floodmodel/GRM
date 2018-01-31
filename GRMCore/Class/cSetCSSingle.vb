@@ -22,12 +22,12 @@
         With row
             If .SingleCSChannelWidthType = cSetCSSingle.CSSingleChannelWidthType.CWEquation.ToString Then
                 mCSSingleWidthType = CSSingleChannelWidthType.CWEquation
-                mCWEc = .ChannelWidthEQc
-                mCWEd = .ChannelWidthEQd
-                mCWEe = .ChannelWidthEQe
+                mCWEc = CSng(.ChannelWidthEQc)
+                mCWEd = CSng(.ChannelWidthEQd)
+                mCWEe = CSng(.ChannelWidthEQe)
             Else
                 mCSSingleWidthType = CSSingleChannelWidthType.CWGeneration
-                mMaxChannelWidthSingleCS = .ChannelWidthMostDownStream
+                mMaxChannelWidthSingleCS = CSng(.ChannelWidthMostDownStream)
             End If
         End With
     End Sub
@@ -44,13 +44,13 @@
             .CrossSectionType = CSTypeEnum.CSSingle.ToString
             If mCSSingleWidthType = cSetCSSingle.CSSingleChannelWidthType.CWEquation Then
                 .SingleCSChannelWidthType = cSetCSSingle.CSSingleChannelWidthType.CWEquation.ToString
-                .ChannelWidthEQc = mCWEc
-                .ChannelWidthEQd = mCWEd
-                .ChannelWidthEQe = mCWEe
+                .ChannelWidthEQc = CStr(mCWEc)
+                .ChannelWidthEQd = CStr(mCWEd)
+                .ChannelWidthEQe = CStr(mCWEe)
                 .ChannelWidthMostDownStream = Nothing
             ElseIf mCSSingleWidthType = cSetCSSingle.CSSingleChannelWidthType.CWGeneration Then
                 .SingleCSChannelWidthType = cSetCSSingle.CSSingleChannelWidthType.CWGeneration.ToString
-                .ChannelWidthMostDownStream = mMaxChannelWidthSingleCS
+                .ChannelWidthMostDownStream = CStr(mMaxChannelWidthSingleCS)
                 .ChannelWidthEQc = Nothing
                 .ChannelWidthEQd = Nothing
                 .ChannelWidthEQe = Nothing

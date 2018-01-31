@@ -331,6 +331,7 @@ namespace gentle
                         System.Threading.ManualResetEvent mre = new System.Threading.ManualResetEvent(false);
                         mre.WaitOne(100);
                     }
+                    throw (e);
                 }
             }
             return isLocked;

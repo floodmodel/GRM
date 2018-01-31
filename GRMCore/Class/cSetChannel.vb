@@ -17,8 +17,8 @@ Public Class cSetChannel
         Dim row As GRMProject.ProjectSettingsRow = CType(prjDB.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
         If Not row.IsCrossSectionTypeNull Then
             With row
-                mRightBankSlope = .BankSideSlopeRight
-                mLeftBankSlope = .BankSideSlopeLeft
+                mRightBankSlope = CSng(.BankSideSlopeRight)
+                mLeftBankSlope = CSng(.BankSideSlopeLeft)
                 If .CrossSectionType.ToString = cSetCrossSection.CSTypeEnum.CSCompound.ToString Then
                     mCrossSection = New cSetCSCompound
                 Else
@@ -39,8 +39,8 @@ Public Class cSetChannel
         If IsSet Then
             Dim row As GRMProject.ProjectSettingsRow = CType(prjDB.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
             With row
-                .BankSideSlopeRight = mRightBankSlope.Value
-                .BankSideSlopeLeft = mLeftBankSlope.Value
+                .BankSideSlopeRight = CStr(mRightBankSlope.Value)
+                .BankSideSlopeLeft = CStr(mLeftBankSlope.Value)
             End With
             mCrossSection.SetValues(prjDB)
         End If

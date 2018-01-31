@@ -50,7 +50,7 @@ Public Class cRainfall
                     Case RainfallDataType.TextFileASCgrid_mmPhr.ToString
                         mRainfallDataType = RainfallDataType.TextFileASCgrid_mmPhr
                 End Select
-                mRainfallinterval = .RainfallInterval
+                mRainfallinterval = CInt(.RainfallInterval)
             End If
             mRainfallDataFilePathName = row.RainfallDataFile
         End With

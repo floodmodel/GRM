@@ -43,10 +43,10 @@
                 Else
                     .SetSoilTextureFileNull()
                     .SetSoilTextureVATFileNull()
-                    .ConstantSoilPorosity = mConstPorosity.Value
-                    .ConstantSoilEffPorosity = mConstEffectivePorosity.Value
-                    .ConstantSoilWettingFrontSuctionHead = mConstWFS.Value
-                    .ConstantSoilHydraulicConductivity = mConstHydraulicCond.Value
+                    .ConstantSoilPorosity = CStr(mConstPorosity.Value)
+                    .ConstantSoilEffPorosity = CStr(mConstEffectivePorosity.Value)
+                    .ConstantSoilWettingFrontSuctionHead = CStr(mConstWFS.Value)
+                    .ConstantSoilHydraulicConductivity = CStr(mConstHydraulicCond.Value)
                 End If
             End With
         End If
@@ -76,10 +76,10 @@
                     mSoilTextureVATFPN = .SoilTextureVATFile
                 ElseIf .SoilTextureDataType = cGRM.FileOrConst.Constant.ToString Then
                     mSoilTextureDataType = cGRM.FileOrConst.Constant
-                    mConstPorosity = .ConstantSoilPorosity
-                    mConstEffectivePorosity = .ConstantSoilEffPorosity
-                    mConstWFS = .ConstantSoilWettingFrontSuctionHead
-                    mConstHydraulicCond = .ConstantSoilHydraulicConductivity
+                    mConstPorosity = CSng(.ConstantSoilPorosity)
+                    mConstEffectivePorosity = CSng(.ConstantSoilEffPorosity)
+                    mConstWFS = CSng(.ConstantSoilWettingFrontSuctionHead)
+                    mConstHydraulicCond = CSng(.ConstantSoilHydraulicConductivity)
                 Else
                     Throw New InvalidOperationException
                 End If

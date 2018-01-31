@@ -51,12 +51,18 @@
     End Sub
 
     Sub New(gmpFPN As String)
-        cProject.OpenProject(gmpFPN, False)
-        grmPrj = cProject.Current
-        If cProject.Current.SetupModelParametersAfterProjectFileWasOpened() = False Then
-            cGRM.writelogAndConsole("GRM setup was failed !!!", True, True)
-            Exit Sub
-        End If
+        Try
+            cProject.OpenProject(gmpFPN, False)
+            grmPrj = cProject.Current
+            If cProject.Current.SetupModelParametersAfterProjectFileWasOpened() = False Then
+                cGRM.writelogAndConsole("GRM setup was failed !!!", True, True)
+                'MsgBox("GRM -1")
+                Exit Sub
+            End If
+            'MsgBox("GRM 1")
+        Catch ex As Exception
+            'MsgBox("GRM -1")
+        End Try
     End Sub
 
     Public Function IsInWatershedArea(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Boolean
@@ -217,7 +223,7 @@
         End If
     End Function
 
-    Public Sub SetOneSWSParametersAndUpdateAllSWSUsingNetwork(wsid As Integer,
+    Public Function SetOneSWSParametersAndUpdateAllSWSUsingNetwork(wsid As Integer,
                                                 iniSat As Single,
                                                 minSlopeLandSurface As Single,
                                                 minSlopeChannel As Single,
@@ -230,28 +236,33 @@
                                                 ccWFSuctionHead As Single,
                                                 ccSoilHydraulicCond As Single,
                                                 applyIniFlow As Boolean,
-                                                Optional iniFlow As Single = 0)
-        With grmPrj.SubWSPar.userPars(wsid)
-            .iniSaturation = iniSat
-            .minSlopeOF = minSlopeLandSurface
-            .minSlopeChBed = minSlopeChannel
-            .minChBaseWidth = minChannelBaseWidth
-            .chRoughness = roughnessChannel
-            .dryStreamOrder = dryStreamOrder
-            .ccLCRoughness = ccLCRoughness
-            .ccSoilDepth = ccSoilDepth
-            .ccPorosity = ccPorosity
-            .ccWFSuctionHead = ccWFSuctionHead
-            .ccHydraulicK = ccSoilHydraulicCond
-            If applyIniFlow = True AndAlso iniFlow > 0 Then
-                .iniFlow = iniFlow
-            Else
-                .iniFlow = Nothing
-            End If
-            .isUserSet = True
-        End With
-        cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(grmPrj)
-    End Sub
+                                                Optional iniFlow As Single = 0) As Boolean
+        Try
+            With grmPrj.SubWSPar.userPars(wsid)
+                .iniSaturation = iniSat
+                .minSlopeOF = minSlopeLandSurface
+                .minSlopeChBed = minSlopeChannel
+                .minChBaseWidth = minChannelBaseWidth
+                .chRoughness = roughnessChannel
+                .dryStreamOrder = dryStreamOrder
+                .ccLCRoughness = ccLCRoughness
+                .ccSoilDepth = ccSoilDepth
+                .ccPorosity = ccPorosity
+                .ccWFSuctionHead = ccWFSuctionHead
+                .ccHydraulicK = ccSoilHydraulicCond
+                If applyIniFlow = True AndAlso iniFlow > 0 Then
+                    .iniFlow = iniFlow
+                Else
+                    .iniFlow = Nothing
+                End If
+                .isUserSet = True
+            End With
+            cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(grmPrj)
+            Return True
+        Catch ex As Exception
+            Return False
+        End Try
+    End Function
 
     ''' <summary>
     '''  This method is applied to update all the subwatersheds parameters when there are more than 1 subwatershed.
@@ -264,6 +275,10 @@
             cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(grmPrj)
         End If
     End Sub
+
+    Public Function subwatershedPars(wsid As Integer) As cUserParameters
+        Return grmPrj.SubWSPar.userPars(wsid)
+    End Function
 
     '여기에 필요한 내용 계속 추가
     ' function으로  return 한다.

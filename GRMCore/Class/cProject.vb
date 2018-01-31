@@ -1873,7 +1873,7 @@ Public Class cProject
                 mProject.mFCGrid.GetValues(mProject)
             End If
 
-            cThisSimulation.dtsec = row.ComputationalTimeStep * 60
+            cThisSimulation.dtsec = CInt(row.ComputationalTimeStep) * 60
             If cThisSimulation.dtsec > CInt(mProject.GeneralSimulEnv.mPrintOutTimeStepMIN * 30) Then '출력시간간격의 반보다는 작게한다. 즉 한번 출력하기 전에 두번은 계산하게..
                 cThisSimulation.dtsec = CInt(mProject.GeneralSimulEnv.mPrintOutTimeStepMIN * 30)
             End If
@@ -1940,7 +1940,7 @@ Public Class cProject
             With row
                 .GRMSimulationType = mProject.mSimulationType.ToString
                 .SimulStartingTime = mProject.GeneralSimulEnv.mSimStartDateTime
-                .ComputationalTimeStep = CInt(cThisSimulation.dtsec / 60)
+                .ComputationalTimeStep = CStr(cThisSimulation.dtsec / 60)
             End With
             mProject.mGeneralSimulEnv.SetValues(mProject.PrjFile)
             mProject.mSubWSpar.SetValues(mProject.PrjFile)
@@ -2093,17 +2093,30 @@ Public Class cProject
 
     Public Shared Function ValidateProjectFile(prj As cProject) As Boolean
         Dim r As GRMProject.ProjectSettingsRow = CType(prj.PrjFile.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
+
+        If r.IsGRMSimulationTypeNull OrElse r.GRMSimulationType = "" Then
+            Console.WriteLine(String.Format("GRMSimulationType is invalid!!"))
+            Return False
+        End If
+
         If Not r.IsWatershedFileNull AndAlso r.WatershedFile <> "" Then
             If File.Exists(r.WatershedFile) = False Then
                 Console.WriteLine(String.Format("Watershed file is not exist!! {0} {1}", vbCrLf, r.WatershedFile))
                 Return False
             End If
+        Else
+            Console.WriteLine(String.Format("Watershed file is not exist!! {0} {1}", vbCrLf, r.WatershedFile))
+            Return False
         End If
+
         If Not r.IsSlopeFileNull AndAlso r.SlopeFile <> "" Then
             If File.Exists(r.SlopeFile) = False Then
                 Console.WriteLine(String.Format("Slope file is not exist!! {0} {1}", vbCrLf, r.SlopeFile))
                 Return False
             End If
+        Else
+            Console.WriteLine(String.Format("Slope file is not exist!! {0} {1}", vbCrLf, r.SlopeFile))
+            Return False
         End If
 
         If Not r.IsFlowDirectionFileNull AndAlso r.FlowDirectionFile <> "" Then
@@ -2111,6 +2124,9 @@ Public Class cProject
                 Console.WriteLine(String.Format("Flow direction file is not exist!! {0} {1}", vbCrLf, r.FlowDirectionFile))
                 Return False
             End If
+        Else
+            Console.WriteLine(String.Format("Flow direction file is not exist!! {0} {1}", vbCrLf, r.FlowDirectionFile))
+            Return False
         End If
 
         If Not r.IsFlowAccumFileNull AndAlso r.FlowAccumFile <> "" Then
@@ -2118,6 +2134,9 @@ Public Class cProject
                 Console.WriteLine(String.Format("Flow accumulation file is not exist!! {0} {1}", vbCrLf, r.FlowAccumFile))
                 Return False
             End If
+        Else
+            Console.WriteLine(String.Format("Flow accumulation file is not exist!! {0} {1}", vbCrLf, r.FlowAccumFile))
+            Return False
         End If
 
         If Not r.IsStreamFileNull AndAlso r.StreamFile <> "" Then
@@ -2134,25 +2153,155 @@ Public Class cProject
             End If
         End If
 
+        If r.IsLandCoverDataTypeNull OrElse r.LandCoverDataType = "" Then
+            Console.WriteLine(String.Format("LandCoverDataType is invalid!!"))
+            Return False
+        End If
+
         If Not r.IsLandCoverFileNull AndAlso r.LandCoverFile <> "" Then
             If File.Exists(r.LandCoverFile) = False Then
                 Console.WriteLine(String.Format("Land cover file is not exist!! {0} {1}", vbCrLf, r.LandCoverFile))
                 Return False
+            Else
+                If Not r.IsLandCoverVATFileNull AndAlso r.LandCoverVATFile <> "" Then
+                    If File.Exists(r.LandCoverVATFile) = False Then
+                        Console.WriteLine(String.Format("Land cover VAT file is not exist!! {0} {1}", vbCrLf, r.LandCoverVATFile))
+                        Return False
+                    End If
+                Else
+                    Console.WriteLine(String.Format("Land cover VAT file is invalid!!"))
+                    Return False
+                End If
             End If
+        End If
+
+        If Not r.IsConstantRoughnessCoeffNull AndAlso r.ConstantRoughnessCoeff <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.ConstantRoughnessCoeff, v) = False Then
+                Console.WriteLine(String.Format("ConstantRoughnessCoeff is invalid!! {0} {1}", vbCrLf, r.ConstantRoughnessCoeff))
+                Return False
+            End If
+        End If
+
+        If Not r.IsConstantImperviousRatioNull AndAlso r.ConstantImperviousRatio <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.ConstantImperviousRatio, v) = False Then
+                Console.WriteLine(String.Format("ConstantImperviousRatio is invalid!! {0} {1}", vbCrLf, r.ConstantImperviousRatio))
+                Return False
+            End If
+        End If
+
+        If r.IsSoilTextureDataTypeNull OrElse r.SoilTextureDataType = "" Then
+            Console.WriteLine(String.Format("SoilTextureDataType is invalid!!"))
+            Return False
         End If
 
         If Not r.IsSoilTextureFileNull AndAlso r.SoilTextureFile <> "" Then
             If File.Exists(r.SoilTextureFile) = False Then
                 Console.WriteLine(String.Format("Soil texture file is not exist!! {0} {1}", vbCrLf, r.SoilTextureFile))
                 Return False
+            Else
+                If Not r.IsSoilTextureVATFileNull AndAlso r.SoilTextureVATFile <> "" Then
+                    If File.Exists(r.SoilTextureVATFile) = False Then
+                        Console.WriteLine(String.Format("Soil texture VAT file is not exist!! {0} {1}", vbCrLf, r.SoilTextureVATFile))
+                        Return False
+                    End If
+                Else
+                    Console.WriteLine(String.Format("Soil texture VAT file is invalid!!"))
+                    Return False
+                End If
             End If
+        End If
+
+        If Not r.IsConstantSoilPorosityNull AndAlso r.ConstantSoilPorosity <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.ConstantSoilPorosity, v) = False Then
+                Console.WriteLine(String.Format("ConstantSoilPorosity is invalid!! {0} {1}", vbCrLf, r.ConstantSoilPorosity))
+                Return False
+            End If
+        End If
+
+        If Not r.IsConstantSoilEffPorosityNull AndAlso r.ConstantSoilEffPorosity <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.ConstantSoilEffPorosity, v) = False Then
+                Console.WriteLine(String.Format("ConstantSoilEffPorosity is invalid!! {0} {1}", vbCrLf, r.ConstantSoilEffPorosity))
+                Return False
+            End If
+        End If
+
+        If Not r.IsConstantSoilWettingFrontSuctionHeadNull AndAlso r.ConstantSoilWettingFrontSuctionHead <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.ConstantSoilWettingFrontSuctionHead, v) = False Then
+                Console.WriteLine(String.Format("ConstantSoilWettingFrontSuctionHead is invalid!! {0} {1}", vbCrLf, r.ConstantSoilWettingFrontSuctionHead))
+                Return False
+            End If
+        End If
+
+        If Not r.IsConstantSoilHydraulicConductivityNull AndAlso r.ConstantSoilHydraulicConductivity <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.ConstantSoilHydraulicConductivity, v) = False Then
+                Console.WriteLine(String.Format("ConstantSoilHydraulicConductivity is invalid!! {0} {1}", vbCrLf, r.ConstantSoilHydraulicConductivity))
+                Return False
+            End If
+        End If
+
+        If r.IsSoilDepthDataTypeNull OrElse r.SoilDepthDataType = "" Then
+            Console.WriteLine(String.Format("SoilDepthDataType is invalid!!"))
+            Return False
         End If
 
         If Not r.IsSoilDepthFileNull AndAlso r.SoilTextureFile <> "" Then
             If File.Exists(r.SoilDepthFile) = False Then
                 Console.WriteLine(String.Format("Soil depth file is not exist!! {0} {1}", vbCrLf, r.SoilTextureFile))
                 Return False
+            Else
+                If Not r.IsSoilDepthVATFileNull AndAlso r.SoilDepthVATFile <> "" Then
+                    If File.Exists(r.SoilDepthVATFile) = False Then
+                        Console.WriteLine(String.Format("Soil depth VAT file is not exist!! {0} {1}", vbCrLf, r.SoilDepthVATFile))
+                        Return False
+                    End If
+                Else
+                    Console.WriteLine(String.Format("Soil depth VAT file is invalid!!"))
+                    Return False
+                End If
             End If
+        End If
+
+        If Not r.IsConstantSoilDepthNull AndAlso r.ConstantSoilDepth <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.ConstantSoilDepth, v) = False Then
+                Console.WriteLine(String.Format("ConstantSoilDepth is invalid!! {0} {1}", vbCrLf, r.ConstantSoilDepth))
+                Return False
+            End If
+        End If
+
+        If Not r.IsInitialSoilSaturationRatioFileNull AndAlso r.InitialSoilSaturationRatioFile <> "" Then
+            If File.Exists(r.InitialSoilSaturationRatioFile) = False Then
+                Console.WriteLine(String.Format("InitialSoilSaturationRatioFile is not exist!! {0} {1}", vbCrLf, r.InitialSoilSaturationRatioFile))
+                Return False
+            End If
+        End If
+
+        If Not r.IsInitialChannelFlowFileNull AndAlso r.InitialChannelFlowFile <> "" Then
+            If File.Exists(r.InitialChannelFlowFile) = False Then
+                Console.WriteLine(String.Format("InitialChannelFlowFile is not exist!! {0} {1}", vbCrLf, r.InitialChannelFlowFile))
+                Return False
+            End If
+        End If
+
+        If r.IsRainfallDataTypeNull OrElse r.RainfallDataType = "" Then
+            Console.WriteLine(String.Format("RainfallDataType is invalid!!"))
+            Return False
+        End If
+
+        If Not r.IsRainfallIntervalNull AndAlso r.RainfallInterval <> "" Then
+            Dim v As Integer
+            If Integer.TryParse(r.RainfallInterval, v) = False Then
+                Console.WriteLine(String.Format("Rainfall data interval is invalid!! {0} {1}", vbCrLf, r.RainfallInterval))
+                Return False
+            End If
+        Else
+            Return False
         End If
 
         If Not r.IsRainfallDataFileNull AndAlso r.RainfallDataFile <> "" Then
@@ -2160,7 +2309,237 @@ Public Class cProject
                 Console.WriteLine(String.Format("Rainfall data file is not exist!! {0} {1}", vbCrLf, r.RainfallDataFile))
                 Return False
             End If
+        Else
+            Return False
         End If
+
+        If r.IsFlowDirectionTypeNull OrElse r.FlowDirectionType = "" Then
+            Console.WriteLine(String.Format("FlowDirectionType is invalid!!"))
+            Return False
+        End If
+
+        If Not r.IsGridCellSizeNull AndAlso r.GridCellSize <> "" Then
+            Dim v As Integer
+            If Integer.TryParse(r.GridCellSize, v) = False Then
+                Console.WriteLine(String.Format("Grid cell size is invalid!! {0} {1}", vbCrLf, r.GridCellSize))
+                Return False
+            End If
+        Else
+            Return False
+        End If
+
+        If Not r.IsIsParallelNull AndAlso r.IsParallel = "" Then
+            Console.WriteLine(String.Format("IsParallel is invalid!!"))
+            Return False
+        End If
+
+        If Not r.IsMaxDegreeOfParallelismNull AndAlso r.MaxDegreeOfParallelism <> "" Then
+            Dim v As Integer
+            If Integer.TryParse(r.MaxDegreeOfParallelism, v) = False Then
+                Console.WriteLine(String.Format("Grid cell size is invalid!! {0} {1}", vbCrLf, r.MaxDegreeOfParallelism))
+                Return False
+            End If
+        End If
+
+        If r.IsSimulStartingTimeNull OrElse r.SimulStartingTime = "" Then
+            Console.WriteLine(String.Format("Simulation StartingTime is invalid!!"))
+            Return False
+        End If
+
+        If Not r.IsSimulationDurationNull AndAlso r.SimulationDuration <> "" Then
+            Dim v As Integer
+            If Integer.TryParse(r.SimulationDuration, v) = False Then
+                Console.WriteLine(String.Format("Simulation duration is invalid!! {0} {1}", vbCrLf, r.SimulationDuration))
+                Return False
+            End If
+        Else
+            Return False
+        End If
+
+        If Not r.IsComputationalTimeStepNull AndAlso r.ComputationalTimeStep <> "" Then
+            Dim v As Integer
+            If Integer.TryParse(r.ComputationalTimeStep, v) = False Then
+                Console.WriteLine(String.Format("Computational time step is invalid!! {0} {1}", vbCrLf, r.ComputationalTimeStep))
+                Return False
+            End If
+        Else
+            Return False
+        End If
+
+        If Not r.IsIsFixedTimeStepNull AndAlso r.IsFixedTimeStep = "" Then
+            Console.WriteLine(String.Format("IsFixedTimeStep is invalid!!"))
+            Return False
+        End If
+
+        If Not r.IsOutputTimeStepNull AndAlso r.OutputTimeStep <> "" Then
+            Dim v As Integer
+            If Integer.TryParse(r.OutputTimeStep, v) = False Then
+                Console.WriteLine(String.Format("Output time step is invalid!! {0} {1}", vbCrLf, r.OutputTimeStep))
+                Return False
+            End If
+        Else
+            Return False
+        End If
+
+        If Not r.IsCrossSectionTypeNull AndAlso r.CrossSectionType = "" Then
+            Console.WriteLine(String.Format("CrossSectionType is invalid!!"))
+            Return False
+        End If
+
+        If Not r.IsSingleCSChannelWidthTypeNull AndAlso r.SingleCSChannelWidthType = "" Then
+            Console.WriteLine(String.Format("SingleCSChannelWidthType is invalid!!"))
+            Return False
+        End If
+
+        If Not r.IsChannelWidthEQcNull AndAlso r.ChannelWidthEQc <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.ChannelWidthEQc, v) = False Then
+                Console.WriteLine(String.Format("ChannelWidthEQc is invalid!! {0} {1}", vbCrLf, r.ChannelWidthEQc))
+                Return False
+            End If
+        End If
+
+        If Not r.IsChannelWidthEQdNull AndAlso r.ChannelWidthEQd <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.ChannelWidthEQd, v) = False Then
+                Console.WriteLine(String.Format("ChannelWidthEQd is invalid!! {0} {1}", vbCrLf, r.ChannelWidthEQd))
+                Return False
+            End If
+        End If
+
+        If Not r.IsChannelWidthEQeNull AndAlso r.ChannelWidthEQe <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.ChannelWidthEQe, v) = False Then
+                Console.WriteLine(String.Format("ChannelWidthEQe is invalid!! {0} {1}", vbCrLf, r.ChannelWidthEQe))
+                Return False
+            End If
+        End If
+
+        If Not r.IsChannelWidthMostDownStreamNull AndAlso r.ChannelWidthMostDownStream <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.ChannelWidthMostDownStream, v) = False Then
+                Console.WriteLine(String.Format("ChannelWidthMostDownStream is invalid!! {0} {1}", vbCrLf, r.ChannelWidthMostDownStream))
+                Return False
+            End If
+        End If
+
+        If Not r.IsLowerRegionHeightNull AndAlso r.LowerRegionHeight <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.LowerRegionHeight, v) = False Then
+                Console.WriteLine(String.Format("LowerRegionHeight is invalid!! {0} {1}", vbCrLf, r.LowerRegionHeight))
+                Return False
+            End If
+        End If
+
+        If Not r.IsLowerRegionBaseWidthNull AndAlso r.LowerRegionBaseWidth <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.LowerRegionBaseWidth, v) = False Then
+                Console.WriteLine(String.Format("LowerRegionBaseWidth is invalid!! {0} {1}", vbCrLf, r.LowerRegionBaseWidth))
+                Return False
+            End If
+        End If
+
+        If Not r.IsUpperRegionBaseWidthNull AndAlso r.UpperRegionBaseWidth <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.UpperRegionBaseWidth, v) = False Then
+                Console.WriteLine(String.Format("UpperRegionBaseWidth is invalid!! {0} {1}", vbCrLf, r.UpperRegionBaseWidth))
+                Return False
+            End If
+        End If
+
+        If Not r.IsCompoundCSIniFlowDepthNull AndAlso r.CompoundCSIniFlowDepth <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.CompoundCSIniFlowDepth, v) = False Then
+                Console.WriteLine(String.Format("CompoundCSIniFlowDepth is invalid!! {0} {1}", vbCrLf, r.CompoundCSIniFlowDepth))
+                Return False
+            End If
+        End If
+
+        If Not r.IsCompoundCSChannelWidthLimitNull AndAlso r.CompoundCSChannelWidthLimit <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.CompoundCSChannelWidthLimit, v) = False Then
+                Console.WriteLine(String.Format("CompoundCSChannelWidthLimit is invalid!! {0} {1}", vbCrLf, r.CompoundCSChannelWidthLimit))
+                Return False
+            End If
+        End If
+
+        If Not r.IsBankSideSlopeRightNull AndAlso r.BankSideSlopeRight <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.BankSideSlopeRight, v) = False Then
+                Console.WriteLine(String.Format("BankSideSlopeRight is invalid!! {0} {1}", vbCrLf, r.BankSideSlopeRight))
+                Return False
+            End If
+        End If
+
+        If Not r.IsBankSideSlopeLeftNull AndAlso r.BankSideSlopeLeft <> "" Then
+            Dim v As Single
+            If Single.TryParse(r.BankSideSlopeLeft, v) = False Then
+                Console.WriteLine(String.Format("BankSideSlopeLeft is invalid!! {0} {1}", vbCrLf, r.BankSideSlopeLeft))
+                Return False
+            End If
+        End If
+
+        If r.IsSimulateInfiltrationNull OrElse r.SimulateInfiltration = "" Then
+            Console.WriteLine(String.Format("SimulateInfiltration option  is invalid!!"))
+            Return False
+        End If
+
+        If r.IsSimulateSubsurfaceFlowNull OrElse r.SimulateSubsurfaceFlow = "" Then
+            Console.WriteLine(String.Format("SimulateSubsurfaceFlow option  is invalid!!"))
+            Return False
+        End If
+
+        If r.IsSimulateBaseFlowNull OrElse r.SimulateBaseFlow = "" Then
+            Console.WriteLine(String.Format("SimulateBaseFlow option  is invalid!!"))
+            Return False
+        End If
+
+        If r.IsSimulateFlowControlNull OrElse r.SimulateFlowControl = "" Then
+            Console.WriteLine(String.Format("SimulateFlowControl option  is invalid!!"))
+            Return False
+        End If
+
+        If r.IsMakeIMGFileNull OrElse r.MakeIMGFile = "" Then
+            Console.WriteLine(String.Format("MakeIMGFile option  is invalid!!"))
+            Return False
+        End If
+
+        If r.IsMakeASCFileNull OrElse r.MakeASCFile = "" Then
+            Console.WriteLine(String.Format("MakeASCFile option  is invalid!!"))
+            Return False
+        End If
+
+        If r.IsMakeSoilSaturationDistFileNull OrElse r.MakeSoilSaturationDistFile = "" Then
+            Console.WriteLine(String.Format("MakeSoilSaturationDistFile option  is invalid!!"))
+            Return False
+        End If
+
+        If r.IsMakeRfDistFileNull OrElse r.MakeRfDistFile = "" Then
+            Console.WriteLine(String.Format("MakeRfDistFile option  is invalid!!"))
+            Return False
+        End If
+
+        If r.IsMakeRFaccDistFileNull OrElse r.MakeRFaccDistFile = "" Then
+            Console.WriteLine(String.Format("MakeRFaccDistFile option  is invalid!!"))
+            Return False
+        End If
+
+        If r.IsMakeFlowDistFileNull OrElse r.MakeFlowDistFile = "" Then
+            Console.WriteLine(String.Format("MakeFlowDistFile option  is invalid!!"))
+            Return False
+        End If
+
+        If r.IsPrintOptionNull OrElse r.PrintOption = "" Then
+            Console.WriteLine(String.Format("PrintOption is invalid!!"))
+            Return False
+        End If
+
+        If Not r.IsWriteLogNull AndAlso r.WriteLog = "" Then
+            Console.WriteLine(String.Format("WriteLog option  is invalid!!"))
+            Return False
+        End If
+
+
     End Function
 
 End Class
