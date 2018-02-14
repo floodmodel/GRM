@@ -2356,7 +2356,7 @@ Public Class cProject
         End If
 
         If Not r.IsIsParallelNull AndAlso r.IsParallel = "" Then
-            Console.WriteLine(String.Format("IsParallel is invalid!!"))
+            Console.WriteLine(String.Format("IsParallel option is invalid!!"))
             Return False
         End If
 
@@ -2369,7 +2369,7 @@ Public Class cProject
         End If
 
         If r.IsSimulStartingTimeNull OrElse r.SimulStartingTime = "" Then
-            Console.WriteLine(String.Format("Simulation StartingTime is invalid!!"))
+            Console.WriteLine(String.Format("Simulation starting time is invalid!! Simulation starting time will be set to '0'"))
             Return False
         End If
 
