@@ -91,7 +91,7 @@ Module mMain
 
 
     Private Sub StartSingleRun(ByVal currentPrjFPN As String, Optional bDeleteFilesExceptQ As Boolean = False)
-
+        '여기서 셀 정보를 미리 알 수 있다.
         Dim wpNames As New List(Of String)
         If Path.GetDirectoryName(currentPrjFPN) = "" Then
             currentPrjFPN = Path.Combine(My.Application.Info.DirectoryPath, currentPrjFPN)
@@ -106,6 +106,8 @@ Module mMain
             End If
             ''여기서 셀 정보를 미리 알 수 있다.
             'Dim wsinfo As New cGetWatershedInfo(currentPrjFPN)
+            'Dim slp As Single = wsinfo.subwatershedPars(1).minSlopeChBed
+            'Dim cc As Integer = wsinfo.cellCountInWatershed
             ''혹은 아래의 방법
             'Dim WSFPN As String = cProject.Current.Watershed.mFPN_watershed
             'Dim SlopeFPN As String = cProject.Current.Watershed.mFPN_slope
@@ -115,7 +117,20 @@ Module mMain
             'Dim lcFPN As String = cProject.Current.Landcover.mGridLandCoverFPN
             'Dim stFPN As String = cProject.Current.GreenAmpt.mGridSoilTextureFPN
             'Dim sdFPN As String = cProject.Current.SoilDepth.mGridSoilDepthFPN
+
+            'Dim WSFPN As String = "C:/GRM/Sample/Data/WiWatershed.asc"
+            'Dim SlopeFPN As String = "C:\GRM\Sample\Data\Wi_Slope_ST.asc"
+            'Dim FdirFPN As String = "C:\GRM\Sample\Data\WiFDir.asc"
+            'Dim FacFPN As String = "C:\GRM\Sample\Data\WiFAc.asc"
+            'Dim streamFPN As String = "C:\GRM\Sample\Data\WiStream6.asc"
+            'Dim lcFPN As String = "C:\GRM\Sample\Data\wilc200.asc"
+            'Dim stFPN As String = "C:\GRM\Sample\Data\wistext200.asc"
+            'Dim sdFPN As String = "C:\GRM\Sample\Data\wisdepth200.asc"
+
             'Dim wsinfo As New cGetWatershedInfo(WSFPN, SlopeFPN, FdirFPN, FacFPN, streamFPN, lcFPN, stFPN, sdFPN,,)
+
+            'Dim cc As Integer = wsinfo.cellCountInWatershed
+
             'wsinfo.SetOneSWSParametersAndUpdateAllSWSUsingNetwork(1, 1, 0.0001, 0.0001, 30, 0.045, 0, 1, 1, 1, 1, 1, True, 30)
             'Dim v As Single = wsinfo.grmPrj.SubWSPar.userPars(1).iniSaturation
             'Dim vv As Single = wsinfo.subwatershedPars(1).iniSaturation
@@ -127,6 +142,7 @@ Module mMain
             'Dim lcv As Integer = wsinfo.landCoverValue(x, y)
             'Dim wsCount As Integer = wsinfo.WScount
             'Dim intStreamValue As Integer = wsinfo.streamValue(x, y)
+
 
             If cProject.Current.GeneralSimulEnv.mbCreateASCFile = True OrElse
                 cProject.Current.GeneralSimulEnv.mbCreateImageFile = True Then

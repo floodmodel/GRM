@@ -62,10 +62,10 @@ Public Class cSetGeneralSimulEnvironment
 
                 If Not .IsSimulStartingTimeNull Then
                     mSimStartDateTime = .SimulStartingTime
-                    mIsDateTimeFormat = Not IsNumeric(mSimStartDateTime)
                 Else
-                    mIsDateTimeFormat = False
+                    mSimStartDateTime = "0"
                 End If
+                mIsDateTimeFormat = Not IsNumeric(mSimStartDateTime)
                 mSimDurationHOUR = .SimulationDuration
                 mPrintOutTimeStepMIN = .OutputTimeStep
                 mbSimulateBFlow = .SimulateBaseFlow

@@ -1085,6 +1085,7 @@ Public Class cProject
     Public Function ReadLandCoverFile(fpnLC As String, isParallel As Boolean) As Boolean
         Try
             Dim gridLC As New cTextFileReaderASC(fpnLC)
+            Dim isnormal As Boolean = True
 
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
@@ -1098,7 +1099,8 @@ Public Class cProject
                                                                            If value > 0 Then
                                                                                cell.LandCoverValue = value
                                                                            Else
-                                                                               Throw New KeyNotFoundException
+                                                                               Console.WriteLine(String.Format("Landcover file {0} has an invalid value.", fpnLC), True, True)
+                                                                               isnormal = False
                                                                            End If
                                                                        End If
                                                                    Next
@@ -1113,14 +1115,17 @@ Public Class cProject
                             If value > 0 Then
                                 cell.LandCoverValue = value
                             Else
+                                isnormal = False
                                 Throw New KeyNotFoundException
                             End If
                         End If
                     Next cx
                 Next ry
             End If
-            Return True
+            Return isnormal
         Catch ex As Exception
+            Throw New KeyNotFoundException(String.Format(
+                                               "Landcover file {0} has an invalid value.", fpnLC))
             Return False
         End Try
     End Function
@@ -1147,6 +1152,7 @@ Public Class cProject
             vatLCcode.Add(CInt(row.GridValue), lcCode)
         Next
         Dim gridLC As New cTextFileReaderASC(fpnLC)
+        Dim isnormal As Boolean = True
         Try
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
@@ -1163,7 +1169,8 @@ Public Class cProject
                                                                                cell.ImperviousRatio = vatIR(value)
                                                                                cell.LandCoverCode = vatLCcode(value)
                                                                            Else
-                                                                               Throw New KeyNotFoundException
+                                                                               Console.WriteLine(String.Format("Landcover file {0} has an invalid value.", Landcover.mGridLandCoverFPN), True, True)
+                                                                               isnormal = False
                                                                            End If
                                                                        End If
                                                                    Next
@@ -1181,13 +1188,14 @@ Public Class cProject
                                 cell.ImperviousRatio = vatIR(value)
                                 cell.LandCoverCode = vatLCcode(value)
                             Else
+                                isnormal = False
                                 Throw New KeyNotFoundException
                             End If
                         End If
                     Next cx
                 Next ry
             End If
-            Return True
+            Return isnormal
         Catch ex As KeyNotFoundException
             Throw New KeyNotFoundException(String.Format(
                                                "Landcover file {0} has an invalid value.", Landcover.mGridLandCoverFPN))
@@ -1229,6 +1237,7 @@ Public Class cProject
     Public Function ReadSoilTextureFile(fpnST As String, isParallel As Boolean) As Boolean
         Try
             Dim gridSTexture As New cTextFileReaderASC(fpnST)
+            Dim isnormal As Boolean = True
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
                 options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
@@ -1241,7 +1250,8 @@ Public Class cProject
                                                                            If value > 0 Then
                                                                                cell.SoilTextureValue = value
                                                                            Else
-                                                                               Throw New KeyNotFoundException
+                                                                               Console.WriteLine(String.Format("Soil texture file {0} has an invalid value.", fpnST), True, True)
+                                                                               isnormal = False
                                                                            End If
                                                                        End If
                                                                    Next
@@ -1256,14 +1266,17 @@ Public Class cProject
                             If value > 0 Then
                                 cell.SoilTextureValue = value
                             Else
+                                isnormal = False
                                 Throw New KeyNotFoundException
                             End If
                         End If
                     Next cx
                 Next ry
             End If
-            Return True
+            Return isnormal
         Catch ex As Exception
+            Throw New KeyNotFoundException(String.Format(
+                                           "Soil texture file {0} has an invalid value.", fpnST))
             Return False
         End Try
     End Function
@@ -1294,6 +1307,7 @@ Public Class cProject
             End If
             vatSTcode.Add(CInt(row.GridValue), stCode)
         Next
+        Dim isnormal As Boolean = True
         Try
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
@@ -1312,7 +1326,9 @@ Public Class cProject
                                                                                cell.HydraulicConductKori_mPsec = vatHC(value) / 100 / 3600    ' cm/hr -> m/s
                                                                                cell.SoilTextureCode = vatSTcode(value)
                                                                            Else
-                                                                               Throw New KeyNotFoundException
+                                                                               Console.WriteLine(String.Format("Soil texture file {0} has an invalid value.",
+                                                                                                               GreenAmpt.mGridSoilTextureFPN), True, True)
+                                                                               isnormal = False
                                                                            End If
                                                                        End If
                                                                    Next
@@ -1332,13 +1348,14 @@ Public Class cProject
                                 cell.HydraulicConductKori_mPsec = vatHC(value) / 100 / 3600    ' cm/hr -> m/s
                                 cell.SoilTextureCode = vatSTcode(value)
                             Else
+                                isnormal = False
                                 Throw New KeyNotFoundException
                             End If
                         End If
                     Next cx
                 Next ry
             End If
-            Return True
+            Return isnormal
         Catch ex As KeyNotFoundException
             Throw New KeyNotFoundException(String.Format(
                                            "Soil texture file {0} has an invalid value.", GreenAmpt.mGridSoilTextureFPN))
@@ -1382,6 +1399,7 @@ Public Class cProject
 
     Public Function ReadSoilDepthFile(fpnSD As String, isParallel As Boolean) As Boolean
         Dim gridSDepth As New cTextFileReaderASC(fpnSD)
+        Dim isnormal As Boolean = True
         Try
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
@@ -1394,7 +1412,9 @@ Public Class cProject
                                                                            If value > 0 Then
                                                                                mWSCells(cx, ry).SoilDepthTypeValue = CInt(value)
                                                                            Else
-                                                                               Throw New KeyNotFoundException
+                                                                               Console.WriteLine(String.Format("Soil depth file {0} has an invalid value.",
+                                                                                                              fpnSD), True, True)
+                                                                               isnormal = False
                                                                            End If
                                                                        End If
                                                                    Next
@@ -1408,14 +1428,17 @@ Public Class cProject
                             If value > 0 Then
                                 mWSCells(cx, ry).SoilDepthTypeValue = CInt(value)
                             Else
+                                isnormal = False
                                 Throw New KeyNotFoundException
                             End If
                         End If
                     Next cx
                 Next ry
             End If
-            Return True
+            Return isnormal
         Catch ex As KeyNotFoundException
+            Throw New KeyNotFoundException(String.Format(
+                                           "Soil depth file {0} has an invalid value.", fpnSD))
             Return False
         End Try
     End Function
@@ -1440,6 +1463,7 @@ Public Class cProject
             End If
             vatSDcode.Add(CInt(row.GridValue), stCode)
         Next
+        Dim isnormal As Boolean = True
         Try
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
@@ -1454,7 +1478,9 @@ Public Class cProject
                                                                                mWSCells(cx, ry).SoilDepthOri_m = vatSD(value) / 100     ' cm ->  m
                                                                                mWSCells(cx, ry).SoilDepthCode = vatSDcode(value)
                                                                            Else
-                                                                               Throw New KeyNotFoundException
+                                                                               Console.WriteLine(String.Format("Soil depth file {0} has an invalid value.",
+                                                                                                              SoilDepth.mGridSoilDepthFPN), True, True)
+                                                                               isnormal = False
                                                                            End If
                                                                        End If
                                                                    Next
@@ -1470,13 +1496,14 @@ Public Class cProject
                                 mWSCells(cx, ry).SoilDepthOri_m = vatSD(value) / 100     ' cm ->  m
                                 mWSCells(cx, ry).SoilDepthCode = vatSDcode(value)
                             Else
+                                isnormal = False
                                 Throw New KeyNotFoundException
                             End If
                         End If
                     Next cx
                 Next ry
             End If
-            Return True
+            Return isnormal
         Catch ex As KeyNotFoundException
             Throw New KeyNotFoundException(String.Format(
                                                "Soil depth file {0} has an invalid value.", SoilDepth.mGridSoilDepthFPN))

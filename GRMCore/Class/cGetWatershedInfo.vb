@@ -126,6 +126,10 @@
         End If
     End Function
 
+    Public Function cellCountInWatershed() As Integer
+        Return grmPrj.CVCount
+    End Function
+
     Public Function flowDirection(colXArrayIdx As Integer, rowYArrayIdx As Integer) As String
         If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
             Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).FDir.ToString
@@ -175,7 +179,7 @@
         End If
     End Function
 
-    Public Function soilTextureVlaue(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Integer
+    Public Function soilTextureValue(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Integer
         If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
             Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).SoilTextureValue
         Else
@@ -184,7 +188,7 @@
     End Function
 
 
-    Public Function soilDepthVlaue(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Integer
+    Public Function soilDepthValue(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Integer
         If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
             Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).SoilDepthTypeValue
         Else
