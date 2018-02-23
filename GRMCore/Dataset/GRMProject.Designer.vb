@@ -622,8 +622,6 @@ Partial Public Class GRMProject
         
         Private columnUpperRegionBaseWidth As Global.System.Data.DataColumn
         
-        Private columnCompoundCSIniFlowDepth As Global.System.Data.DataColumn
-        
         Private columnCompoundCSChannelWidthLimit As Global.System.Data.DataColumn
         
         Private columnBankSideSlopeRight As Global.System.Data.DataColumn
@@ -1087,14 +1085,6 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public ReadOnly Property CompoundCSIniFlowDepthColumn() As Global.System.Data.DataColumn
-            Get
-                Return Me.columnCompoundCSIniFlowDepth
-            End Get
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public ReadOnly Property CompoundCSChannelWidthLimitColumn() As Global.System.Data.DataColumn
             Get
                 Return Me.columnCompoundCSChannelWidthLimit
@@ -1378,7 +1368,6 @@ Partial Public Class GRMProject
                     ByVal LowerRegionHeight As String,  _
                     ByVal LowerRegionBaseWidth As String,  _
                     ByVal UpperRegionBaseWidth As String,  _
-                    ByVal CompoundCSIniFlowDepth As String,  _
                     ByVal CompoundCSChannelWidthLimit As String,  _
                     ByVal BankSideSlopeRight As String,  _
                     ByVal BankSideSlopeLeft As String,  _
@@ -1405,7 +1394,7 @@ Partial Public Class GRMProject
                     ByVal ComputerUserName As String,  _
                     ByVal GRMVersion As String) As ProjectSettingsRow
             Dim rowProjectSettingsRow As ProjectSettingsRow = CType(Me.NewRow,ProjectSettingsRow)
-            Dim columnValuesArray() As Object = New Object() {ProjectFile, GRMSimulationType, WatershedFile, SlopeFile, FlowDirectionFile, FlowAccumFile, StreamFile, ChannelWidthFile, LandCoverDataType, LandCoverFile, LandCoverVATFile, ConstantRoughnessCoeff, ConstantImperviousRatio, SoilTextureDataType, SoilTextureFile, SoilTextureVATFile, ConstantSoilPorosity, ConstantSoilEffPorosity, ConstantSoilWettingFrontSuctionHead, ConstantSoilHydraulicConductivity, SoilDepthDataType, SoilDepthFile, SoilDepthVATFile, ConstantSoilDepth, InitialSoilSaturationRatioFile, InitialChannelFlowFile, RainfallDataType, RainfallInterval, RainfallDataFile, FlowDirectionType, GridCellSize, IsParallel, MaxDegreeOfParallelism, SimulStartingTime, SimulationDuration, ComputationalTimeStep, IsFixedTimeStep, OutputTimeStep, CrossSectionType, SingleCSChannelWidthType, ChannelWidthEQc, ChannelWidthEQd, ChannelWidthEQe, ChannelWidthMostDownStream, LowerRegionHeight, LowerRegionBaseWidth, UpperRegionBaseWidth, CompoundCSIniFlowDepth, CompoundCSChannelWidthLimit, BankSideSlopeRight, BankSideSlopeLeft, SimulateInfiltration, SimulateSubsurfaceFlow, SimulateBaseFlow, SimulateFlowControl, MakeIMGFile, MakeASCFile, MakeSoilSaturationDistFile, MakeRfDistFile, MakeRFaccDistFile, MakeFlowDistFile, PrintOption, WriteLog, AboutThisProject, AboutWatershed, AboutLandCoverMap, AboutSoilMap, AboutSoilDepthMap, AboutRainfall, ProjectSavedTime, ComputerName, ComputerUserName, GRMVersion}
+            Dim columnValuesArray() As Object = New Object() {ProjectFile, GRMSimulationType, WatershedFile, SlopeFile, FlowDirectionFile, FlowAccumFile, StreamFile, ChannelWidthFile, LandCoverDataType, LandCoverFile, LandCoverVATFile, ConstantRoughnessCoeff, ConstantImperviousRatio, SoilTextureDataType, SoilTextureFile, SoilTextureVATFile, ConstantSoilPorosity, ConstantSoilEffPorosity, ConstantSoilWettingFrontSuctionHead, ConstantSoilHydraulicConductivity, SoilDepthDataType, SoilDepthFile, SoilDepthVATFile, ConstantSoilDepth, InitialSoilSaturationRatioFile, InitialChannelFlowFile, RainfallDataType, RainfallInterval, RainfallDataFile, FlowDirectionType, GridCellSize, IsParallel, MaxDegreeOfParallelism, SimulStartingTime, SimulationDuration, ComputationalTimeStep, IsFixedTimeStep, OutputTimeStep, CrossSectionType, SingleCSChannelWidthType, ChannelWidthEQc, ChannelWidthEQd, ChannelWidthEQe, ChannelWidthMostDownStream, LowerRegionHeight, LowerRegionBaseWidth, UpperRegionBaseWidth, CompoundCSChannelWidthLimit, BankSideSlopeRight, BankSideSlopeLeft, SimulateInfiltration, SimulateSubsurfaceFlow, SimulateBaseFlow, SimulateFlowControl, MakeIMGFile, MakeASCFile, MakeSoilSaturationDistFile, MakeRfDistFile, MakeRFaccDistFile, MakeFlowDistFile, PrintOption, WriteLog, AboutThisProject, AboutWatershed, AboutLandCoverMap, AboutSoilMap, AboutSoilDepthMap, AboutRainfall, ProjectSavedTime, ComputerName, ComputerUserName, GRMVersion}
             rowProjectSettingsRow.ItemArray = columnValuesArray
             Me.Rows.Add(rowProjectSettingsRow)
             Return rowProjectSettingsRow
@@ -1475,7 +1464,6 @@ Partial Public Class GRMProject
             Me.columnLowerRegionHeight = MyBase.Columns("LowerRegionHeight")
             Me.columnLowerRegionBaseWidth = MyBase.Columns("LowerRegionBaseWidth")
             Me.columnUpperRegionBaseWidth = MyBase.Columns("UpperRegionBaseWidth")
-            Me.columnCompoundCSIniFlowDepth = MyBase.Columns("CompoundCSIniFlowDepth")
             Me.columnCompoundCSChannelWidthLimit = MyBase.Columns("CompoundCSChannelWidthLimit")
             Me.columnBankSideSlopeRight = MyBase.Columns("BankSideSlopeRight")
             Me.columnBankSideSlopeLeft = MyBase.Columns("BankSideSlopeLeft")
@@ -1600,8 +1588,6 @@ Partial Public Class GRMProject
             MyBase.Columns.Add(Me.columnLowerRegionBaseWidth)
             Me.columnUpperRegionBaseWidth = New Global.System.Data.DataColumn("UpperRegionBaseWidth", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnUpperRegionBaseWidth)
-            Me.columnCompoundCSIniFlowDepth = New Global.System.Data.DataColumn("CompoundCSIniFlowDepth", GetType(String), Nothing, Global.System.Data.MappingType.Element)
-            MyBase.Columns.Add(Me.columnCompoundCSIniFlowDepth)
             Me.columnCompoundCSChannelWidthLimit = New Global.System.Data.DataColumn("CompoundCSChannelWidthLimit", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnCompoundCSChannelWidthLimit)
             Me.columnBankSideSlopeRight = New Global.System.Data.DataColumn("BankSideSlopeRight", GetType(String), Nothing, Global.System.Data.MappingType.Element)
@@ -5143,21 +5129,6 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property CompoundCSIniFlowDepth() As String
-            Get
-                Try 
-                    Return CType(Me(Me.tableProjectSettings.CompoundCSIniFlowDepthColumn),String)
-                Catch e As Global.System.InvalidCastException
-                    Throw New Global.System.Data.StrongTypingException("'ProjectSettings' 테이블의 'CompoundCSIniFlowDepth' 열의 값이 DBNull입니다.", e)
-                End Try
-            End Get
-            Set
-                Me(Me.tableProjectSettings.CompoundCSIniFlowDepthColumn) = value
-            End Set
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Property CompoundCSChannelWidthLimit() As String
             Get
                 Try 
@@ -6081,18 +6052,6 @@ Partial Public Class GRMProject
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Sub SetUpperRegionBaseWidthNull()
             Me(Me.tableProjectSettings.UpperRegionBaseWidthColumn) = Global.System.Convert.DBNull
-        End Sub
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Function IsCompoundCSIniFlowDepthNull() As Boolean
-            Return Me.IsNull(Me.tableProjectSettings.CompoundCSIniFlowDepthColumn)
-        End Function
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Sub SetCompoundCSIniFlowDepthNull()
-            Me(Me.tableProjectSettings.CompoundCSIniFlowDepthColumn) = Global.System.Convert.DBNull
         End Sub
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _

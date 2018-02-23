@@ -5,4 +5,3 @@ D:\Github\GRM\gentle\obj\Debug\gentle.csproj.GenerateResource.Cache
 D:\Github\GRM\gentle\obj\Debug\gentle.csproj.CoreCompileInputs.cache
 D:\Github\GRM\gentle\obj\Debug\gentle.dll
 D:\Github\GRM\gentle\obj\Debug\gentle.pdb
-D:\Github\GRM\gentle\obj\Debug\gentle.csprojResolveAssemblyReference.cache

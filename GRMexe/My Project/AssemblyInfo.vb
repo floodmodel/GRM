@@ -8,12 +8,12 @@ Imports System.Runtime.InteropServices
 
 ' 어셈블리 특성 값을 검토합니다.
 
-<Assembly: AssemblyTitle("GRM2017 beta")>
+<Assembly: AssemblyTitle("GRM2018")>
 <Assembly: AssemblyDescription("Grid based Rainfall-runoff Model console application")>
 <Assembly: AssemblyCompany("KICT")>
-<Assembly: AssemblyProduct("GRM2017 beta")>
+<Assembly: AssemblyProduct("GRM2018")>
 <Assembly: AssemblyCopyright("Copyright © KICT 2017")>
-<Assembly: AssemblyTrademark("GRM2017")>
+<Assembly: AssemblyTrademark("GRM2018")>
 
 <Assembly: ComVisible(False)>
 
@@ -31,5 +31,5 @@ Imports System.Runtime.InteropServices
 ' 지정되도록 할 수 있습니다.
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("2017.5.0.0")>
-<Assembly: AssemblyFileVersion("2017.5.0.0")>
+<Assembly: AssemblyVersion("2018.3.0.0")>
+<Assembly: AssemblyFileVersion("2018.3.0.0")>

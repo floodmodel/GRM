@@ -55,7 +55,7 @@
                 .ChannelWidthEQd = Nothing
                 .ChannelWidthEQe = Nothing
             End If
-            .CompoundCSIniFlowDepth = Nothing
+            '.CompoundCSIniFlowDepth = Nothing
             .LowerRegionBaseWidth = Nothing
             .LowerRegionHeight = Nothing
             .UpperRegionBaseWidth = Nothing

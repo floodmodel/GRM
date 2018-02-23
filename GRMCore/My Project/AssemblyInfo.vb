@@ -8,12 +8,12 @@ Imports System.Runtime.InteropServices
 
 ' Review the values of the assembly attributes
 
-<Assembly: AssemblyTitle("GRMCore2017 beta")>
+<Assembly: AssemblyTitle("GRMCore2018")>
 <Assembly: AssemblyDescription("Grid based Rainfall-runoff Model core dll")>
 <Assembly: AssemblyCompany("KICT")>
-<Assembly: AssemblyProduct("GRMCore2017 beta")>
+<Assembly: AssemblyProduct("GRMCore2018")>
 <Assembly: AssemblyCopyright("Copyright © KICT 2017")>
-<Assembly: AssemblyTrademark("GRM2017")>
+<Assembly: AssemblyTrademark("GRM2018")>
 
 <Assembly: ComVisible(True)>
 
@@ -31,8 +31,8 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("2017.05.*")>
-<Assembly: AssemblyFileVersion("2017.05")>
+<Assembly: AssemblyVersion("2018.03.*")>
+<Assembly: AssemblyFileVersion("2018.03")>
 
 'Major.Minor.Build.Revision
 ' Build : 2000년 1월 1일 부터의 날자수

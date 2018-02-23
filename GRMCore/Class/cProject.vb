@@ -2474,13 +2474,13 @@ Public Class cProject
             End If
         End If
 
-        If Not r.IsCompoundCSIniFlowDepthNull AndAlso r.CompoundCSIniFlowDepth <> "" Then
-            Dim v As Single
-            If Single.TryParse(r.CompoundCSIniFlowDepth, v) = False Then
-                Console.WriteLine(String.Format("CompoundCSIniFlowDepth is invalid!! {0} {1}", vbCrLf, r.CompoundCSIniFlowDepth))
-                Return False
-            End If
-        End If
+        'If Not r.IsCompoundCSIniFlowDepthNull AndAlso r.CompoundCSIniFlowDepth <> "" Then
+        '    Dim v As Single
+        '    If Single.TryParse(r.CompoundCSIniFlowDepth, v) = False Then
+        '        Console.WriteLine(String.Format("CompoundCSIniFlowDepth is invalid!! {0} {1}", vbCrLf, r.CompoundCSIniFlowDepth))
+        '        Return False
+        '    End If
+        'End If
 
         If Not r.IsCompoundCSChannelWidthLimitNull AndAlso r.CompoundCSChannelWidthLimit <> "" Then
             Dim v As Single

@@ -1,11 +1,12 @@
 ﻿Public Class cGetWatershedInfo
     Public grmPrj As New cProject
-    Private mstreamFPN As String
-    Private mlandCoverFPN As String
-    Private msoilTextureFPN As String
-    Private msoilDepthFPN As String
-    Private miniSoilSaturationFPN As String
-    Private miniChannelFlowFPN As String
+    Public mstreamFPN As String
+    Public mlandCoverFPN As String
+    Public msoilTextureFPN As String
+    Public msoilDepthFPN As String
+    Public miniSoilSaturationFPN As String
+    Public miniChannelFlowFPN As String
+
     Sub New(watershedFPN As String,
                 slopeFPN As String,
                 fdirFPN As String,
@@ -16,8 +17,26 @@
             Optional soilDepthFPN As String = "",
             Optional iniSoilSaturationFPN As String = "",
             Optional iniChannelFlowFPN As String = "")
-
-
+        'Console.WriteLine(watershedFPN + " watershedFPN instancing argument file")
+        'Console.WriteLine(File.Exists(watershedFPN).ToString)
+        'Console.WriteLine(slopeFPN + " slopeFPN instancing argument file")
+        'Console.WriteLine(File.Exists(slopeFPN).ToString)
+        'Console.WriteLine(fdirFPN + " fdirFPN instancing argument file")
+        'Console.WriteLine(File.Exists(fdirFPN).ToString)
+        'Console.WriteLine(facFPN + " facFPN instancing argument file")
+        'Console.WriteLine(File.Exists(facFPN).ToString)
+        'Console.WriteLine(streamFPN + " streamFPN instancing argument file")
+        'Console.WriteLine(File.Exists(streamFPN).ToString)
+        'Console.WriteLine(landCoverFPN + " landCoverFPN instancing argument file")
+        'Console.WriteLine(File.Exists(landCoverFPN).ToString)
+        'Console.WriteLine(soilTextureFPN + " soilTextureFPN instancing argument file")
+        'Console.WriteLine(File.Exists(soilTextureFPN).ToString)
+        'Console.WriteLine(soilDepthFPN + " soilDepthFPN instancing argument file")
+        'Console.WriteLine(File.Exists(soilDepthFPN).ToString)
+        'Console.WriteLine(iniSoilSaturationFPN + " iniSoilSaturationFPN instancing argument file")
+        'Console.WriteLine(File.Exists(iniSoilSaturationFPN).ToString)
+        'Console.WriteLine(iniChannelFlowFPN + " iniChannelFlowFPN instancing argument file")
+        'Console.WriteLine(File.Exists(iniChannelFlowFPN).ToString)
         grmPrj.ReadLayerWSandSetBasicInfo(watershedFPN, True)
         grmPrj.ReadLayerSlope(slopeFPN, True)
         grmPrj.ReadLayerFdir(fdirFPN, True)
@@ -86,8 +105,8 @@
     ''' Watershed ID list.
     ''' </summary>
     ''' <returns></returns>
-    Public Function WSIDsAll() As List(Of Integer)
-        Return grmPrj.WSNetwork.WSIDsAll
+    Public Function WSIDsAll() As Integer()
+        Return grmPrj.WSNetwork.WSIDsAll.ToArray
     End Function
 
     ''' <summary>
@@ -187,7 +206,6 @@
         End If
     End Function
 
-
     Public Function soilDepthValue(colXArrayIdx As Integer, rowYArrayIdx As Integer) As Integer
         If IsInWatershedArea(colXArrayIdx, rowYArrayIdx) = True Then
             Return grmPrj.WSCells(colXArrayIdx, rowYArrayIdx).SoilDepthTypeValue
@@ -195,7 +213,6 @@
             Return Nothing
         End If
     End Function
-
 
     ''' <summary>
     '''  Select all cells in upstream area of a input cell position. Return string array of cell positions - "column, row".
@@ -282,6 +299,16 @@
 
     Public Function subwatershedPars(wsid As Integer) As cUserParameters
         Return grmPrj.SubWSPar.userPars(wsid)
+    End Function
+
+    Public Function RemoveUserParametersSetting(wsid As Integer) As Boolean
+        Try
+            grmPrj.SubWSPar.userPars(wsid).isUserSet = False
+            cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(grmPrj)
+            Return True
+        Catch ex As Exception
+            Return False
+        End Try
     End Function
 
     '여기에 필요한 내용 계속 추가

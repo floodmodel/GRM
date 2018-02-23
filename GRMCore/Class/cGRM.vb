@@ -205,6 +205,30 @@
         'mRange.GetValues(mFpnGRMStaticXmlDB)
     End Sub
 
+    Sub New(GRMCoreFPN As String)
+
+        'If IO.File.Exists(My.Application.Info.DirectoryPath & "\Plugins\GRM\" & "grm.exe") Then
+        '    GRMexeFPN = Path.Combine(My.Application.Info.DirectoryPath, "Plugins\GRM\" & "grm.exe")
+        'ElseIf IO.File.Exists(Path.Combine(My.Application.Info.DirectoryPath, "grm.exe")) Then
+        '    GRMexeFPN = Path.Combine(My.Application.Info.DirectoryPath, "grm.exe")
+        'ElseIf IO.File.Exists(Path.Combine(cFile.GetAbsolutePathOneUpper(My.Application.Info.DirectoryPath), "grm.exe")) Then
+        '    Dim np As String = cFile.GetAbsolutePathOneUpper(My.Application.Info.DirectoryPath)
+        '    GRMexeFPN = Path.Combine(np, "grm.exe")
+        'Else
+        '    Console.WriteLine(String.Format("GRM plugin 파일({0})이 {1} 폴더에 없습니다.", "grm.exe", My.Application.Info.DirectoryPath & "\Plugins\GRM"))
+        'End If
+        mBuildInfo = FileVersionInfo.GetVersionInfo(GRMCoreFPN)
+        GRMCoreFPN = Path.GetDirectoryName(GRMCoreFPN)
+        'mFpnGRMStaticXmlDB = Path.Combine(GRMCoreFPN, "GRMStaticDB.xml")
+        'If File.Exists(mFpnGRMStaticXmlDB) = False Then
+        '    Exit Sub
+        'End If
+        mStaticXmlFPN = Path.Combine(GRMCoreFPN, "GRMStatic.xml")
+        'mRange = New cParametersRange
+        'mRange.GetValues(mFpnGRMStaticXmlDB)
+    End Sub
+
+
     Public Shared Sub Start()
         mGrmStarted = True
     End Sub
@@ -287,6 +311,14 @@
             Return mBuildInfo
         End Get
     End Property
+
+    Public Function GRMBuildInfo() As FileVersionInfo
+        Try
+            Return mBuildInfo
+        Catch ex As Exception
+            Return Nothing
+        End Try
+    End Function
 
     Public Shared ReadOnly Property Started() As Boolean
         Get
