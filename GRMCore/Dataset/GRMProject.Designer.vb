@@ -4178,14 +4178,14 @@ Partial Public Class GRMProject
                     ByVal RowY As Integer,  _
                     ByVal Name As String,  _
                     ByVal ControlType As String,  _
-                    ByVal DT As Integer,  _
+                    ByVal DT As String,  _
                     ByVal FlowDataFile As String,  _
-                    ByVal IniStorage As Single,  _
-                    ByVal MaxStorage As Single,  _
-                    ByVal MaxStorageR As Single,  _
+                    ByVal IniStorage As String,  _
+                    ByVal MaxStorage As String,  _
+                    ByVal MaxStorageR As String,  _
                     ByVal ROType As String,  _
-                    ByVal ROConstQ As Single,  _
-                    ByVal ROConstQDuration As Single,  _
+                    ByVal ROConstQ As String,  _
+                    ByVal ROConstQDuration As String,  _
                     ByVal ROSDEqA As Single,  _
                     ByVal ROSDEqB As Single,  _
                     ByVal ROSDEqC As Single,  _
@@ -4250,21 +4250,21 @@ Partial Public Class GRMProject
             MyBase.Columns.Add(Me.columnName)
             Me.columnControlType = New Global.System.Data.DataColumn("ControlType", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnControlType)
-            Me.columnDT = New Global.System.Data.DataColumn("DT", GetType(Integer), Nothing, Global.System.Data.MappingType.Element)
+            Me.columnDT = New Global.System.Data.DataColumn("DT", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnDT)
             Me.columnFlowDataFile = New Global.System.Data.DataColumn("FlowDataFile", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnFlowDataFile)
-            Me.columnIniStorage = New Global.System.Data.DataColumn("IniStorage", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
+            Me.columnIniStorage = New Global.System.Data.DataColumn("IniStorage", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnIniStorage)
-            Me.columnMaxStorage = New Global.System.Data.DataColumn("MaxStorage", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
+            Me.columnMaxStorage = New Global.System.Data.DataColumn("MaxStorage", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnMaxStorage)
-            Me.columnMaxStorageR = New Global.System.Data.DataColumn("MaxStorageR", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
+            Me.columnMaxStorageR = New Global.System.Data.DataColumn("MaxStorageR", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnMaxStorageR)
             Me.columnROType = New Global.System.Data.DataColumn("ROType", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnROType)
-            Me.columnROConstQ = New Global.System.Data.DataColumn("ROConstQ", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
+            Me.columnROConstQ = New Global.System.Data.DataColumn("ROConstQ", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnROConstQ)
-            Me.columnROConstQDuration = New Global.System.Data.DataColumn("ROConstQDuration", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
+            Me.columnROConstQDuration = New Global.System.Data.DataColumn("ROConstQDuration", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnROConstQDuration)
             Me.columnROSDEqA = New Global.System.Data.DataColumn("ROSDEqA", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnROSDEqA)
@@ -7931,10 +7931,10 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property DT() As Integer
+        Public Property DT() As String
             Get
                 Try 
-                    Return CType(Me(Me.tableFlowControlGrid.DTColumn),Integer)
+                    Return CType(Me(Me.tableFlowControlGrid.DTColumn),String)
                 Catch e As Global.System.InvalidCastException
                     Throw New Global.System.Data.StrongTypingException("'FlowControlGrid' 테이블의 'DT' 열의 값이 DBNull입니다.", e)
                 End Try
@@ -7961,10 +7961,10 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property IniStorage() As Single
+        Public Property IniStorage() As String
             Get
                 Try 
-                    Return CType(Me(Me.tableFlowControlGrid.IniStorageColumn),Single)
+                    Return CType(Me(Me.tableFlowControlGrid.IniStorageColumn),String)
                 Catch e As Global.System.InvalidCastException
                     Throw New Global.System.Data.StrongTypingException("'FlowControlGrid' 테이블의 'IniStorage' 열의 값이 DBNull입니다.", e)
                 End Try
@@ -7976,10 +7976,10 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property MaxStorage() As Single
+        Public Property MaxStorage() As String
             Get
                 Try 
-                    Return CType(Me(Me.tableFlowControlGrid.MaxStorageColumn),Single)
+                    Return CType(Me(Me.tableFlowControlGrid.MaxStorageColumn),String)
                 Catch e As Global.System.InvalidCastException
                     Throw New Global.System.Data.StrongTypingException("'FlowControlGrid' 테이블의 'MaxStorage' 열의 값이 DBNull입니다.", e)
                 End Try
@@ -7991,10 +7991,10 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property MaxStorageR() As Single
+        Public Property MaxStorageR() As String
             Get
                 Try 
-                    Return CType(Me(Me.tableFlowControlGrid.MaxStorageRColumn),Single)
+                    Return CType(Me(Me.tableFlowControlGrid.MaxStorageRColumn),String)
                 Catch e As Global.System.InvalidCastException
                     Throw New Global.System.Data.StrongTypingException("'FlowControlGrid' 테이블의 'MaxStorageR' 열의 값이 DBNull입니다.", e)
                 End Try
@@ -8021,10 +8021,10 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property ROConstQ() As Single
+        Public Property ROConstQ() As String
             Get
                 Try 
-                    Return CType(Me(Me.tableFlowControlGrid.ROConstQColumn),Single)
+                    Return CType(Me(Me.tableFlowControlGrid.ROConstQColumn),String)
                 Catch e As Global.System.InvalidCastException
                     Throw New Global.System.Data.StrongTypingException("'FlowControlGrid' 테이블의 'ROConstQ' 열의 값이 DBNull입니다.", e)
                 End Try
@@ -8036,10 +8036,10 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property ROConstQDuration() As Single
+        Public Property ROConstQDuration() As String
             Get
                 Try 
-                    Return CType(Me(Me.tableFlowControlGrid.ROConstQDurationColumn),Single)
+                    Return CType(Me(Me.tableFlowControlGrid.ROConstQDurationColumn),String)
                 Catch e As Global.System.InvalidCastException
                     Throw New Global.System.Data.StrongTypingException("'FlowControlGrid' 테이블의 'ROConstQDuration' 열의 값이 DBNull입니다.", e)
                 End Try

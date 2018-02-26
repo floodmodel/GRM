@@ -501,7 +501,7 @@ Public Class cOutPutControl
                         Else
                             strSourceDT = strSourceDT + vbTab + "NONE"
                             If Not row.IsMaxStorageNull AndAlso Not row.IsMaxStorageRNull Then
-                                If row.MaxStorage * row.MaxStorageR > 0 Then
+                                If CSng(row.MaxStorage) * CSng(row.MaxStorageR) > 0 Then
                                     strResOperation = strResOperation + vbTab + "TRUE"
                                 Else
                                     strResOperation = strResOperation + vbTab + "FALSE"
@@ -511,7 +511,7 @@ Public Class cOutPutControl
                         If Not row.IsIniStorageNull Then strROiniStorage = strROiniStorage + vbTab + CStr(row.IniStorage)
                         If Not row.IsMaxStorageNull Then strROmaxStorage = strROmaxStorage + vbTab + CStr(row.MaxStorage)
                         If Not row.IsMaxStorageRNull Then strROmaxStorageRatio = strROmaxStorageRatio + vbTab + CStr(row.MaxStorageR)
-                        If Not row.IsMaxStorageRNull Then strROmaxStorageApp = strROmaxStorageApp + vbTab + CStr(row.MaxStorage * row.MaxStorageR)
+                        If Not row.IsMaxStorageRNull Then strROmaxStorageApp = strROmaxStorageApp + vbTab + CStr(CSng(row.MaxStorage) * CSng(row.MaxStorageR))
                         If Not row.IsROTypeNull Then strROType = strROType + vbTab + row.ROType
                         If Not row.IsROConstQNull Then strROConstQ = strROConstQ + vbTab + CStr(row.ROConstQ)
                         If Not row.IsROConstQDurationNull Then strROConstQduration = strROConstQduration + vbTab + CStr(row.ROConstQDuration)

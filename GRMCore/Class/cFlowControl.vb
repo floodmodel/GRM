@@ -108,9 +108,9 @@ Public Class cFlowControl
                             ar("CVID") = r.CVID
                             ar("Value") = CSng(Lines(n))
                             If prj.GeneralSimulEnv.mIsDateTimeFormat = True Then
-                                ar("DataTime") = cComTools.GetTimeToPrintOut(True, prj.GeneralSimulEnv.mSimStartDateTime, CInt(r.DT * n))
+                                ar("DataTime") = cComTools.GetTimeToPrintOut(True, prj.GeneralSimulEnv.mSimStartDateTime, CInt(r.DT) * n)
                             Else
-                                ar("DataTime") = CStr(r.DT * n)
+                                ar("DataTime") = CStr(CInt(r.DT) * n)
                             End If
                             mdtFCFlowData.Rows.Add(ar)
                         Next
@@ -196,7 +196,7 @@ Public Class cFlowControl
         Dim cellsize As Integer = project.Watershed.mCellSize
         With project.CV(cvan)
             If .FCType = cFlowControl.FlowControlType.SinkFlow OrElse .FCType = cFlowControl.FlowControlType.SourceFlow Then
-                rowOrder = CInt((nowT_MIN - 1) \ fcRow.DT)
+                rowOrder = CInt((nowT_MIN - 1) \ CInt(fcRow.DT))
                 Dim dv As DataView
                 dv = New DataView(project.FCGrid.mdtFCFlowData, String.Format("cvid={0}", fcCVid), " datetime asc", DataViewRowState.CurrentRows)
                 Dim dt As DataTable = dv.Table
@@ -214,18 +214,19 @@ Public Class cFlowControl
 
             Select Case fcRow.ROType.ToString
                 Case cFlowControl.ROType.AutoROM.ToString
-                    Call ApplyReservoirAutoROM(project.CV(cvan), cellsize, fcRow.MaxStorage * fcRow.MaxStorageR)
+                    Call ApplyReservoirAutoROM(project.CV(cvan), cellsize, CSng(fcRow.MaxStorage) * CSng(fcRow.MaxStorageR))
                 Case cFlowControl.ROType.RigidROM.ToString
-                    .StorageCumulative_m3 = .StorageCumulative_m3 - fcRow.ROConstQ * dtsec
-                    Call ApplyReservoirRigidROM(project.CV(cvan), cellsize, fcRow.MaxStorage * fcRow.MaxStorageR, fcRow.ROConstQ)
+                    .StorageCumulative_m3 = CSng(.StorageCumulative_m3) - CSng(fcRow.ROConstQ) * dtsec
+                    Call ApplyReservoirRigidROM(project.CV(cvan), cellsize, CSng(fcRow.MaxStorage) * CSng(fcRow.MaxStorageR), CSng(fcRow.ROConstQ))
 
                 Case cFlowControl.ROType.ConstantQ.ToString
                     Dim bOurflowDuration As Boolean = False
-                    If nowT_MIN <= fcRow.ROConstQDuration * 60 Then
-                        .StorageCumulative_m3 = .StorageCumulative_m3 - fcRow.ROConstQ * dtsec
+                    If nowT_MIN <= CSng(fcRow.ROConstQDuration) * 60 Then
+                        .StorageCumulative_m3 = CSng(.StorageCumulative_m3) - CSng(fcRow.ROConstQ) * dtsec
                         bOurflowDuration = True
                     End If
-                    Call ApplyReservoirConstantDischarge(project.CV(cvan), cellsize, fcRow.ROConstQ, fcRow.MaxStorage * fcRow.MaxStorageR, bOurflowDuration)
+                    Call ApplyReservoirConstantDischarge(project.CV(cvan), cellsize, CSng(fcRow.ROConstQ),
+                                                          CSng(fcRow.MaxStorage) * CSng(fcRow.MaxStorageR), bOurflowDuration)
                 Case cFlowControl.ROType.SDEqation.ToString
             End Select
         End With
@@ -354,7 +355,7 @@ Public Class cFlowControl
         Dim fcRow As GRMProject.FlowControlGridRow = CType(Rows(0), GRMProject.FlowControlGridRow)
         '60 /60의 경우에는 intFCDataArrayNum=0을 써야 하지만 나눈 몫이 1이므로, 배열 번호가 넘어가게 된다.
         '따라서, 59/60 을 만들기 위해서 (intNowTimeMin - 1)으로 한다.
-        Dim rowOrder As Integer = CInt((nowT_MIN - 1) \ fcRow.DT)
+        Dim rowOrder As Integer = CInt((nowT_MIN - 1) \ CInt(fcRow.DT))
         Dim fcDataRows() As DataRow = project.FCGrid.mdtFCFlowData.Select(String.Format("CVID = {0}", fcCVid))
         If rowOrder >= fcDataRows.Length Then rowOrder = fcDataRows.Length - 1
         With project.CV(cvan)
@@ -378,7 +379,7 @@ Public Class cFlowControl
         Dim fcCVid As Integer = project.CV(cvan).CVID
         Dim Rows() As DataRow = project.FCGrid.mdtFCGridInfo.Select(String.Format("cvid = {0}", fcCVid))
         Dim fcRow As GRMProject.FlowControlGridRow = CType(Rows(0), GRMProject.FlowControlGridRow)
-        Dim rowOrder As Integer = CInt((nowT_MIN - 1) \ fcRow.DT)
+        Dim rowOrder As Integer = CInt((nowT_MIN - 1) \ CInt(fcRow.DT))
         Dim dv As DataView
         dv = New DataView(project.FCGrid.mdtFCFlowData, String.Format("cvid={0}", fcCVid), " datetime asc", DataViewRowState.CurrentRows)
         Dim dt As DataTable = dv.Table

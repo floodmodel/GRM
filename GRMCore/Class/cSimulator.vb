@@ -209,7 +209,7 @@ Public Class cSimulator
                           GRMProject.FlowControlGridRow)
                     Dim cvid As Integer = r.CVID
                     If r.ControlType.ToString <> cFlowControl.FlowControlType.ReservoirOperation.ToString Then
-                        Dim dt_MIN As Integer = r.DT
+                        Dim dt_MIN As Integer = CInt(r.DT)
                         If r.ControlType.ToString <> cFlowControl.FlowControlType.ReservoirOperation.ToString Then
                             If nowTsec > dt_MIN * 60 * mRealTime.mdicFCDataOrder(cvid) OrElse mRealTime.mdicFCDataOrder(cvid) = 0 Then
                                 Dim TargetDataTime As String
@@ -339,7 +339,7 @@ Public Class cSimulator
             Dim rows As GRMProject.FlowControlGridRow() =
                     CType(project.FCGrid.mdtFCGridInfo.Select("CVID = " & (cvan + 1)), GRMProject.FlowControlGridRow())
             Dim row As GRMProject.FlowControlGridRow = rows(0)
-            If row.MaxStorage * row.MaxStorageR = 0 Then '
+            If CSng(row.MaxStorage) * CSng(row.MaxStorageR) = 0 Then '
                 mFC.CalFCSinkOrSourceFlow(project, nowT_min, cvan)
             Else
                 mFC.CalFCReservoirOperation(project, cvan, nowT_min)
@@ -539,7 +539,7 @@ Public Class cSimulator
                         Dim rows As GRMProject.FlowControlGridRow() = CType(project.FCGrid.mdtFCGridInfo.Select("CVID = " & (cvan + 1)), GRMProject.FlowControlGridRow())
                         Dim row As GRMProject.FlowControlGridRow = rows(0)
                         If Not row.IsIniStorageNull Then
-                            .StorageCumulative_m3 = row.IniStorage
+                            .StorageCumulative_m3 = CSng(row.IniStorage)
                         End If
                     End If
                 End If
