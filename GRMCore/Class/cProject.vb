@@ -1634,7 +1634,7 @@ Public Class cProject
                                 .mStreamAttr.chUpperRBaseWidth_m = .FAc * cs.mUpperRegionBaseWidth / FacMax
                                 .mStreamAttr.chLowerRHeight = .FAc * cs.mLowerRegionHeight / FacMax
                                 Dim mFVMSolver As New cFVMSolver
-                                .mStreamAttr.chLowerRArea_m2 = mFVMSolver.GetChannelCrossSectionAreaUsingDepth(.mStreamAttr.ChBaseWidth,
+                                .mStreamAttr.chLowerRArea_m2 = mFVMSolver.GetChannelCrossSectionAreaUsingChannelFlowDepth(.mStreamAttr.ChBaseWidth,
                                                                                              .mStreamAttr.mChBankCoeff,
                                                                                              .mStreamAttr.chLowerRHeight, False,
                                                                                              .mStreamAttr.chLowerRHeight,
@@ -2346,8 +2346,8 @@ Public Class cProject
         End If
 
         If Not r.IsGridCellSizeNull AndAlso r.GridCellSize <> "" Then
-            Dim v As Integer
-            If Integer.TryParse(r.GridCellSize, v) = False Then
+            Dim v As Single
+            If Single.TryParse(r.GridCellSize, v) = False Then
                 Console.WriteLine(String.Format("Grid cell size is invalid!! {0} {1}", vbCrLf, r.GridCellSize))
                 Return False
             End If

@@ -68,6 +68,7 @@ Public Class cSetGeneralSimulEnvironment
                 mIsDateTimeFormat = Not IsNumeric(mSimStartDateTime)
                 mSimDurationHOUR = .SimulationDuration
                 mPrintOutTimeStepMIN = .OutputTimeStep
+                cThisSimulation.dtMaxLimit_sec = mPrintOutTimeStepMIN / 2 * 60
                 mbSimulateBFlow = .SimulateBaseFlow
                 mbSimulateSSFlow = .SimulateSubsurfaceFlow
                 mbSimulateFlowControl = .SimulateFlowControl

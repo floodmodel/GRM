@@ -65,6 +65,8 @@ Public Class cOutPutControl
                                                 project_tm1.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps,
                                                 project.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps, interCoef))
                 End Select
+            Else
+                vToPrint = "0"
             End If
             lineToPrint = lineToPrint + vbTab + vToPrint.Trim
             Dim sv As Single = CSng(vToPrint)
@@ -303,6 +305,8 @@ Public Class cOutPutControl
                                                 project_tm1.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps,
                                                 project.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps, interCoef))
                 End Select
+            Else
+                vToPrint = "0"
             End If
             If lineToPrint.Trim = "" Then
                 lineToPrint = vToPrint.Trim
@@ -508,13 +512,13 @@ Public Class cOutPutControl
                                 End If
                             End If
                         End If
-                        If Not row.IsIniStorageNull Then strROiniStorage = strROiniStorage + vbTab + CStr(row.IniStorage)
-                        If Not row.IsMaxStorageNull Then strROmaxStorage = strROmaxStorage + vbTab + CStr(row.MaxStorage)
-                        If Not row.IsMaxStorageRNull Then strROmaxStorageRatio = strROmaxStorageRatio + vbTab + CStr(row.MaxStorageR)
-                        If Not row.IsMaxStorageRNull Then strROmaxStorageApp = strROmaxStorageApp + vbTab + CStr(CSng(row.MaxStorage) * CSng(row.MaxStorageR))
-                        If Not row.IsROTypeNull Then strROType = strROType + vbTab + row.ROType
-                        If Not row.IsROConstQNull Then strROConstQ = strROConstQ + vbTab + CStr(row.ROConstQ)
-                        If Not row.IsROConstQDurationNull Then strROConstQduration = strROConstQduration + vbTab + CStr(row.ROConstQDuration)
+                        If Not row.IsIniStorageNull AndAlso row.IniStorage <> "" Then strROiniStorage = strROiniStorage + vbTab + CStr(row.IniStorage)
+                        If Not row.IsMaxStorageNull AndAlso row.MaxStorage <> "" Then strROmaxStorage = strROmaxStorage + vbTab + CStr(row.MaxStorage)
+                        If Not row.IsMaxStorageRNull AndAlso row.MaxStorageR <> "" Then strROmaxStorageRatio = strROmaxStorageRatio + vbTab + CStr(row.MaxStorageR)
+                        If Not row.IsMaxStorageRNull AndAlso row.MaxStorageR <> "" Then strROmaxStorageApp = strROmaxStorageApp + vbTab + CStr(CSng(row.MaxStorage) * CSng(row.MaxStorageR))
+                        If Not row.IsROTypeNull AndAlso row.ROType <> "" Then strROType = strROType + vbTab + row.ROType
+                        If Not row.IsROConstQNull AndAlso row.ROConstQ <> "" Then strROConstQ = strROConstQ + vbTab + CStr(row.ROConstQ)
+                        If Not row.IsROConstQDurationNull AndAlso row.ROConstQDuration <> "" Then strROConstQduration = strROConstQduration + vbTab + CStr(row.ROConstQDuration)
                     Next
 
                     'FCApp - flow control data

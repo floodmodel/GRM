@@ -2005,7 +2005,7 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Overloads Function AddSubWatershedSettingsRow(ByVal ID As Integer, ByVal IniSaturation As Single, ByVal MinSlopeOF As Single, ByVal MinSlopeChBed As Single, ByVal MinChBaseWidth As Single, ByVal ChRoughness As Single, ByVal DryStreamOrder As Integer, ByVal IniFlow As Single, ByVal CalCoefLCRoughness As Single, ByVal CalCoefPorosity As Single, ByVal CalCoefWFSuctionHead As Single, ByVal CalCoefHydraulicK As Single, ByVal CalCoefSoilDepth As Single, ByVal PowerCeofUnSaturatedK As Single, ByVal UserSet As Boolean) As SubWatershedSettingsRow
+        Public Overloads Function AddSubWatershedSettingsRow(ByVal ID As Integer, ByVal IniSaturation As Single, ByVal MinSlopeOF As Single, ByVal MinSlopeChBed As Single, ByVal MinChBaseWidth As Single, ByVal ChRoughness As Single, ByVal DryStreamOrder As Integer, ByVal IniFlow As Single, ByVal CalCoefLCRoughness As Single, ByVal CalCoefPorosity As Single, ByVal CalCoefWFSuctionHead As Single, ByVal CalCoefHydraulicK As Single, ByVal CalCoefSoilDepth As Single, ByVal PowerCeofUnSaturatedK As Single, ByVal UserSet As String) As SubWatershedSettingsRow
             Dim rowSubWatershedSettingsRow As SubWatershedSettingsRow = CType(Me.NewRow,SubWatershedSettingsRow)
             Dim columnValuesArray() As Object = New Object() {ID, IniSaturation, MinSlopeOF, MinSlopeChBed, MinChBaseWidth, ChRoughness, DryStreamOrder, IniFlow, CalCoefLCRoughness, CalCoefPorosity, CalCoefWFSuctionHead, CalCoefHydraulicK, CalCoefSoilDepth, PowerCeofUnSaturatedK, UserSet}
             rowSubWatershedSettingsRow.ItemArray = columnValuesArray
@@ -2078,7 +2078,7 @@ Partial Public Class GRMProject
             MyBase.Columns.Add(Me.columnCalCoefSoilDepth)
             Me.columnPowerCeofUnSaturatedK = New Global.System.Data.DataColumn("PowerCeofUnSaturatedK", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnPowerCeofUnSaturatedK)
-            Me.columnUserSet = New Global.System.Data.DataColumn("UserSet", GetType(Boolean), Nothing, Global.System.Data.MappingType.Element)
+            Me.columnUserSet = New Global.System.Data.DataColumn("UserSet", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnUserSet)
             Me.Constraints.Add(New Global.System.Data.UniqueConstraint("WatershedSettingsKey1", New Global.System.Data.DataColumn() {Me.columnID}, false))
             Me.columnID.Unique = true
@@ -6578,10 +6578,10 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property UserSet() As Boolean
+        Public Property UserSet() As String
             Get
                 Try 
-                    Return CType(Me(Me.tableSubWatershedSettings.UserSetColumn),Boolean)
+                    Return CType(Me(Me.tableSubWatershedSettings.UserSetColumn),String)
                 Catch e As Global.System.InvalidCastException
                     Throw New Global.System.Data.StrongTypingException("'SubWatershedSettings' 테이블의 'UserSet' 열의 값이 DBNull입니다.", e)
                 End Try

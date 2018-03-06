@@ -132,7 +132,7 @@
     'Public Const CONST_MINIMUM_MANNING_COEFF_MULTIPLIER As Single = 0.001
 
     Public Const CONST_WET_AND_DRY_CRITERIA As Single = 0.000001
-    Public Const CONST_TOLERANCE As Single = 0.0001
+    Public Const CONST_TOLERANCE As Single = 0.001
 
     ''' <summary>
     ''' 암반까지의 깊이[m]

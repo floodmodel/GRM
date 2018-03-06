@@ -364,6 +364,8 @@ Public Class cFlowControl
             Else
                 .mStreamAttr.QCVch_i_j_m3Ps = CSng(fcDataRows(rowOrder).Item("value"))
                 .mStreamAttr.CSAch_i_j = mFVMsolver.CalChCSAFromQbyIteration(project.CV(cvan), .mStreamAttr.CSAch_i_j, .mStreamAttr.QCVch_i_j_m3Ps)
+                'Dim csa1 As Single = .mStreamAttr.CSAch_i_j
+                'Dim chCSAini2 As Single = mFVMsolver.CalChCSAFromManningEQ(project.CV(cvan), .mStreamAttr.CSAch_i_j, .mStreamAttr.QCVch_i_j_m3Ps)
                 .mStreamAttr.hCVch_i_j = mFVMsolver.GetChannelDepthUsingArea(.mStreamAttr.ChBaseWidth, .mStreamAttr.CSAch_i_j,
                                                          .mStreamAttr.chIsCompoundCS, .mStreamAttr.chUpperRBaseWidth_m,
                                                          .mStreamAttr.chLowerRArea_m2, .mStreamAttr.chLowerRHeight, .mStreamAttr.mChBankCoeff)

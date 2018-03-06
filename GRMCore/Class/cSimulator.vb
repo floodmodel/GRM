@@ -396,7 +396,7 @@ Public Class cSimulator
                     .mStreamAttr.hCVch_i_j_ori = .mStreamAttr.hCVch_i_j + .RFApp_dt_meter _
                                                  + chCSAAddedBySSFlow_m2 / ChWidth _
                                                  + chCSAAddedByBFlow_m2 / ChWidth
-                    .mStreamAttr.CSAch_i_j_ori = mFVMSolver.GetChannelCrossSectionAreaUsingDepth(ChWidth,
+                    .mStreamAttr.CSAch_i_j_ori = mFVMSolver.GetChannelCrossSectionAreaUsingChannelFlowDepth(ChWidth,
                                                          .mStreamAttr.mChBankCoeff, .mStreamAttr.hCVch_i_j_ori,
                                                          .mStreamAttr.chIsCompoundCS, .mStreamAttr.chLowerRHeight,
                                                          .mStreamAttr.chLowerRArea_m2, .mStreamAttr.chUpperRBaseWidth_m)
@@ -427,7 +427,7 @@ Public Class cSimulator
                                                  chCSAAddedBySSFlow_m2 / ChWidth +
                                                  chCSAAddedByBFlow_m2 / ChWidth
                     If .mStreamAttr.hCVch_i_j_ori < 0 Then .mStreamAttr.hCVch_i_j_ori = 0
-                    .mStreamAttr.CSAch_i_j_ori = mFVMSolver.GetChannelCrossSectionAreaUsingDepth(ChWidth,
+                    .mStreamAttr.CSAch_i_j_ori = mFVMSolver.GetChannelCrossSectionAreaUsingChannelFlowDepth(ChWidth,
                                                           .mStreamAttr.mChBankCoeff, .mStreamAttr.hCVch_i_j_ori,
                                                           .mStreamAttr.chIsCompoundCS, .mStreamAttr.chLowerRHeight,
                                                           .mStreamAttr.chLowerRArea_m2, .mStreamAttr.chUpperRBaseWidth_m)
@@ -538,7 +538,7 @@ Public Class cSimulator
                     If project.FCGrid.IsSet = True AndAlso project.FCGrid.FCGridCVidList.Contains(cvan + 1) Then
                         Dim rows As GRMProject.FlowControlGridRow() = CType(project.FCGrid.mdtFCGridInfo.Select("CVID = " & (cvan + 1)), GRMProject.FlowControlGridRow())
                         Dim row As GRMProject.FlowControlGridRow = rows(0)
-                        If Not row.IsIniStorageNull Then
+                        If Not row.IsIniStorageNull AndAlso row.IniStorage <> "" Then
                             .StorageCumulative_m3 = CSng(row.IniStorage)
                         End If
                     End If

@@ -55,7 +55,7 @@
     Public Shared IsFixedTimeStep As Boolean = True
     Public Shared dtsec As Integer
     Public Shared vMaxInThisStep As Single = Single.MinValue
-    Public Shared dtMaxLimit_sec As Integer = 1800
+    Public Shared dtMaxLimit_sec As Integer = 1800 '30분
     Public Shared dtMinLimit_sec As Integer = 10
     Public Shared dtsec_usedtoForwardToThisTime As Integer
 

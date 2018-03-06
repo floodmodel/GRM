@@ -83,7 +83,12 @@ Public Class cSetSubWatershedParameter
                         Else
                             upars.expUnsaturatedK = .PowerCeofUnSaturatedK
                         End If
-                        upars.isUserSet = .UserSet
+                        If LCase(.UserSet) = "true" Then
+                            upars.isUserSet = True
+                        Else
+                            upars.isUserSet = False
+                        End If
+
                     End If
                 End With
                 userPars.Add(row.ID, upars)
@@ -116,7 +121,7 @@ Public Class cSetSubWatershedParameter
                     .CalCoefHydraulicK = userPars(wsid).ccHydraulicK
                     .CalCoefSoilDepth = userPars(wsid).ccSoilDepth
                     .PowerCeofUnSaturatedK = userPars(wsid).expUnsaturatedK
-                    .UserSet = userPars(wsid).isUserSet
+                    .UserSet = userPars(wsid).isUserSet.ToString
                 End With
                 dt.Rows.Add(newRow)
             Next

@@ -170,7 +170,7 @@ Public Class cFVMSolver
         Dim CSAw_n As Single = CSAeSum_iM1
         Dim CSAw_nP1 As Single
         With project.CV(cvan)
-            For iter As Integer = 0 To 20000
+            For iter As Integer = 0 To 100
                 Dim hWn_i As Single = GetChannelDepthUsingArea(.mStreamAttr.ChBaseWidth, CSAw_n,
                                                       .mStreamAttr.chIsCompoundCS, .mStreamAttr.chUpperRBaseWidth_m,
                                            .mStreamAttr.chLowerRArea_m2, .mStreamAttr.chLowerRHeight, .mStreamAttr.mChBankCoeff)
@@ -196,9 +196,10 @@ Public Class cFVMSolver
     End Function
 
 
-
-    Public Function CalChCSAFromQbyIteration(ByVal cv As cCVAttribute, ByVal CASini As Single,
+    Public Function CalChCSAFromQbyIteration(ByVal cv As cCVAttribute, ByVal CSAini As Single,
                                              ByVal Q_m3Ps As Single) As Single
+
+        If Q_m3Ps <= 0 Then Return 0
         Dim CSA_nP1 As Single
         With cv
             Dim cbw As Single = .mStreamAttr.ChBaseWidth
@@ -208,11 +209,15 @@ Public Class cFVMSolver
             Dim AreaLR As Single = .mStreamAttr.chLowerRArea_m2
             Dim bwUpperRegion As Single = .mStreamAttr.chUpperRBaseWidth_m
             Dim CSA_n As Single
-            CSA_n = CASini
+            If CSAini > 0 Then
+                CSA_n = CSAini
+            Else
+                CSA_n = Q_m3Ps / cv.CVDeltaX_m
+            End If
             Dim Fx As Single
             Dim dFx As Single
             Dim ChCrossSecPer As Single
-            For iter As Integer = 0 To 20000
+            For iter As Integer = 0 To 100
                 Dim Hw_n As Single = GetChannelDepthUsingArea(cbw, CSA_n, .mStreamAttr.chIsCompoundCS,
                                bwUpperRegion, AreaLR, hLR, bc)
                 ChCrossSecPer = GetChannelCrossSectionPerimeter(cbw,
@@ -286,12 +291,12 @@ Public Class cFVMSolver
     ''' <param name="upperRegionBaseWidth"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Function GetChannelCrossSectionAreaUsingDepth(ByVal lowerRegionBaseWidth As Single, _
-                                               ByVal chBankConst As Single, _
-                                               ByVal crossSectionDepth As Single, _
-                                               ByVal isCompoundCrossSection As Boolean, _
-                                               ByVal lowerRegionHeight As Single, _
-                                               ByVal lowerRegionArea As Single, _
+    Public Function GetChannelCrossSectionAreaUsingChannelFlowDepth(ByVal lowerRegionBaseWidth As Single,
+                                               ByVal chBankConst As Single,
+                                               ByVal crossSectionDepth As Single,
+                                               ByVal isCompoundCrossSection As Boolean,
+                                               ByVal lowerRegionHeight As Single,
+                                               ByVal lowerRegionArea As Single,
                                                ByVal upperRegionBaseWidth As Single) As Single
         If (isCompoundCrossSection = True) Then
             If (crossSectionDepth > lowerRegionHeight) Then
@@ -364,7 +369,7 @@ Public Class cFVMSolver
         Else
             sngChCSDepth = CSng((Sqrt(baseWidthLowerRegion ^ 2 + 2 * chBankConst * chCSAinput) - baseWidthLowerRegion) / chBankConst)
         End If
-        GetChannelDepthUsingArea = sngChCSDepth
+        Return sngChCSDepth
     End Function
 
     Public Sub SetNoFluxOverlandFlowCV(cv As cCVAttribute)

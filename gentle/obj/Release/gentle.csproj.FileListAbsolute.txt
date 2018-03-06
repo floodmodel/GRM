@@ -1,5 +1,6 @@
 D:\Github\GRM\gentle\bin\Release\gentle.dll
 D:\Github\GRM\gentle\bin\Release\gentle.pdb
+D:\Github\GRM\gentle\obj\Release\gentle.csprojResolveAssemblyReference.cache
 D:\Github\GRM\gentle\obj\Release\gentle.Dialog.fProgressBar.resources
 D:\Github\GRM\gentle\obj\Release\gentle.csproj.GenerateResource.Cache
 D:\Github\GRM\gentle\obj\Release\gentle.csproj.CoreCompileInputs.cache
