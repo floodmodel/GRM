@@ -200,16 +200,21 @@
     End Function
 
 
-    Public Shared Function Kunsaturated(ByVal cv As cCVAttribute, powCUnsaturatedK As Single) As Single
-        Dim ca As Single = 0.2 '0.24
+    Public Shared Function Kunsaturated(ByVal cv As cCVAttribute, uKType As cGRM.UnSaturatedKType, CoefUnsaturatedK As Single) As Single
+        'Dim ca As Single = 0.2 '0.24
         Dim ssr As Single = GetSoilSaturationRaito(cv.CumulativeInfiltrationF_tM1_m, cv.SoilDepthEffectiveAsWaterDepth_m, cv.FlowType)
         Dim Ks As Single = cv.hydraulicConductK_mPsec
         If ssr > 0.99 Then
             Return Ks
         Else
             Dim Kus As Single
-            Kus = CSng(ca * Ks * ssr)
-            'Kus = CSng(Ks * ssr ^ powCUnsaturatedK)
+            Select Case uKType
+                Case cGRM.UnSaturatedKType.Linear
+                    Kus = CSng(Ks * ssr * CoefUnsaturatedK)
+                Case cGRM.UnSaturatedKType.Exponential
+                    Kus = CSng(Ks * ssr ^ CoefUnsaturatedK)
+                Case Else
+            End Select
             Return Kus
         End If
     End Function

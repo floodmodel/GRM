@@ -55,7 +55,7 @@ Public Class cProject
             Dim max As Single = 0
             For Each id As Integer In cProject.Current.Watershed.WSIDList
                 If mProject.SubWSPar.userPars(id).isUserSet = True AndAlso
-                    mProject.SubWSPar.userPars(id).iniFlow IsNot Nothing Then
+                    mProject.SubWSPar.userPars(id).iniFlow > 0 Then
                     If max < mProject.SubWSPar.userPars(id).iniFlow Then
                         max = CSng(mProject.SubWSPar.userPars(id).iniFlow)
                     End If
@@ -1557,7 +1557,15 @@ Public Class cProject
                     .RoughnessCoeffOF = .RoughnessCoeffOFori * mSubWSpar.userPars(wsid).ccLCRoughness
 
                     ' 토양
-                    .powCUnsaturatedK = mSubWSpar.userPars(wsid).expUnsaturatedK
+                    Select Case mSubWSpar.userPars(wsid).UKType.ToLower
+                        Case cGRM.UnSaturatedKType.Linear.ToString.ToLower
+                            .UKType = cGRM.UnSaturatedKType.Linear
+                        Case cGRM.UnSaturatedKType.Exponential.ToString.ToLower
+                            .UKType = cGRM.UnSaturatedKType.Exponential
+                        Case Else
+                            .UKType = cGRM.UnSaturatedKType.Linear
+                    End Select
+                    .coefUK = mSubWSpar.userPars(wsid).coefUK
                     .porosityEta = .PorosityEtaOri * mSubWSpar.userPars(wsid).ccPorosity
                     If .porosityEta >= 1 Then .porosityEta = 0.99
                     If .porosityEta <= 0 Then .porosityEta = 0.01
@@ -1922,6 +1930,7 @@ Public Class cProject
             If row.IsIsFixedTimeStepNull = False AndAlso row.IsFixedTimeStep.ToLower = "false" Then
                 cThisSimulation.IsFixedTimeStep = False
             End If
+
             mProject.Watershed.WSIDList.Clear()
             For Each id As Integer In mProject.SubWSPar.userPars.Keys
                 mProject.Watershed.WSIDList.Add(id)

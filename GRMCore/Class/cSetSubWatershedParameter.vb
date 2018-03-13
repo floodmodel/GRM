@@ -64,25 +64,41 @@ Public Class cSetSubWatershedParameter
                         upars.wsid = row.ID
                         upars.iniSaturation = .IniSaturation
                         upars.minSlopeOF = .MinSlopeOF
+                        If Not .IsUnsaturatedKTypeNull AndAlso .UnsaturatedKType <> "" Then
+                            Select Case .UnsaturatedKType.ToString.ToLower
+                                Case cGRM.UnSaturatedKType.Linear.ToString.ToLower
+                                    upars.UKType = cGRM.UnSaturatedKType.Linear.ToString
+                                Case cGRM.UnSaturatedKType.Exponential.ToString.ToLower
+                                    upars.UKType = cGRM.UnSaturatedKType.Exponential.ToString
+                                Case Else
+                                    upars.UKType = cGRM.UnSaturatedKType.Linear.ToString
+                            End Select
+                        Else
+                            upars.UKType = cGRM.UnSaturatedKType.Linear.ToString
+                        End If
+
+                        If Not .IsCoefUnsaturatedKNull AndAlso .CoefUnsaturatedK <> "" Then
+                            upars.coefUK = CSng(.CoefUnsaturatedK)
+                        Else
+                            Select Case upars.UKType.ToLower
+                                Case cGRM.UnSaturatedKType.Linear.ToString.ToLower
+                                    upars.coefUK = 0.2
+                                Case cGRM.UnSaturatedKType.Exponential.ToString.ToLower
+                                    upars.coefUK = 6.4
+                                Case Else
+                                    upars.coefUK = 0.2
+                            End Select
+                        End If
                         upars.minSlopeChBed = .MinSlopeChBed
                         upars.minChBaseWidth = .MinChBaseWidth
                         upars.chRoughness = .ChRoughness
                         upars.dryStreamOrder = .DryStreamOrder
-                        If .IsIniFlowNull Then
-                            upars.iniFlow = Nothing
-                        Else
-                            upars.iniFlow = .IniFlow
-                        End If
+                        upars.iniFlow = .IniFlow
                         upars.ccLCRoughness = .CalCoefLCRoughness
                         upars.ccPorosity = .CalCoefPorosity
                         upars.ccWFSuctionHead = .CalCoefWFSuctionHead
                         upars.ccHydraulicK = .CalCoefHydraulicK
                         upars.ccSoilDepth = .CalCoefSoilDepth
-                        If .IsPowerCeofUnSaturatedKNull Then
-                            upars.expUnsaturatedK = cGRM.CONST_EXPONENTIAL_NUMBER_UNSATURATED_K
-                        Else
-                            upars.expUnsaturatedK = .PowerCeofUnSaturatedK
-                        End If
                         If LCase(.UserSet) = "true" Then
                             upars.isUserSet = True
                         Else
@@ -106,21 +122,18 @@ Public Class cSetSubWatershedParameter
                     .ID = wsid
                     .IniSaturation = userPars(wsid).iniSaturation
                     .MinSlopeOF = userPars(wsid).minSlopeOF
+                    .UnsaturatedKType = userPars(wsid).UKType.ToString
+                    .CoefUnsaturatedK = userPars(wsid).coefUK.ToString
                     .ChRoughness = userPars(wsid).chRoughness
                     .MinSlopeChBed = userPars(wsid).minSlopeChBed
                     .MinChBaseWidth = userPars(wsid).minChBaseWidth
                     .DryStreamOrder = userPars(wsid).dryStreamOrder
-                    If userPars(wsid).iniFlow Is Nothing Then
-                        .SetIniFlowNull()
-                    Else
-                        .IniFlow = userPars(wsid).iniFlow.Value
-                    End If
+                    .IniFlow = userPars(wsid).iniFlow
                     .CalCoefLCRoughness = userPars(wsid).ccLCRoughness
                     .CalCoefPorosity = userPars(wsid).ccPorosity
                     .CalCoefWFSuctionHead = userPars(wsid).ccWFSuctionHead
                     .CalCoefHydraulicK = userPars(wsid).ccHydraulicK
                     .CalCoefSoilDepth = userPars(wsid).ccSoilDepth
-                    .PowerCeofUnSaturatedK = userPars(wsid).expUnsaturatedK
                     .UserSet = userPars(wsid).isUserSet.ToString
                 End With
                 dt.Rows.Add(newRow)
@@ -165,7 +178,9 @@ Public Class cSetSubWatershedParameter
         With grmproject.SubWSPar.userPars(TargetWSid)
             .iniSaturation = spars(rid).iniSaturation
             .minSlopeChBed = spars(rid).minSlopeChBed
-            .minSlopeOF = spars(rid).minSlopeOF
+            .UKType = spars(rid).UKType
+            .coefUK = spars(rid).minSlopeChBed
+            .minSlopeOF = spars(rid).coefUK
             .minChBaseWidth = spars(rid).minChBaseWidth
             .chRoughness = spars(rid).chRoughness
             .dryStreamOrder = spars(rid).dryStreamOrder

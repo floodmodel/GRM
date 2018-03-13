@@ -137,7 +137,7 @@ GRMCore
  </summary>
  <remarks></remarks>
 </member>
-<member name="M:GRMCore.cRTStarter.UpdateWSPars(System.Int32,System.Single,System.Single,System.Single,System.Single,System.Single,System.Int32,System.Single,System.Single,System.Single,System.Single,System.Single,System.Boolean,System.Single)">
+<member name="M:GRMCore.cRTStarter.UpdateWSPars(System.Int32,System.Single,System.Single,System.String,System.Single,System.Single,System.Single,System.Single,System.Int32,System.Single,System.Single,System.Single,System.Single,System.Single,System.Boolean,System.Single)">
  <summary>
  유역 매개변수 업데이트는 여기서 수행..
  </summary>

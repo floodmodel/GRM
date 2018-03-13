@@ -179,7 +179,7 @@
         With project.CV(cvan)
             '토양이 건조하지 않으면, 하부는 포화상태, 하부에서 부터 침누, 강우에 의한 수분은 위에서 부터 전파
             If .soilSaturationRatio > 0 Then
-                soilDepthPercolated_m = cInfiltration.Kunsaturated(project.CV(cvan), .powCUnsaturatedK) * dtsec
+                soilDepthPercolated_m = cInfiltration.Kunsaturated(project.CV(cvan), .UKType, .coefUK) * dtsec
             Else
                 soilDepthPercolated_m = 0
             End If

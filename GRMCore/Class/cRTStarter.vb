@@ -100,8 +100,8 @@ Public Class cRTStarter
             .Rainfall.mRainfallinterval = mRFInterval_MIN
             .GeneralSimulEnv.mIsDateTimeFormat = True
             .mSimulationType = cGRM.SimulationType.RealTime
-            If .SubWSPar.userPars(.WSNetwork.MostDownstreamWSID).iniFlow Is Nothing Then
-                .GeneralSimulEnv.mbSimulateBFlow = False
+            If .SubWSPar.userPars(.WSNetwork.MostDownstreamWSID).iniFlow = 0 Then
+                '.GeneralSimulEnv.mbSimulateBFlow = False 'todo. 이거 확인 필요. 2018.03.13. 최
             End If
         End With
 
@@ -143,6 +143,8 @@ Public Class cRTStarter
     ''' <returns></returns>
     Public Function UpdateWSPars(ByVal wsid As Integer, iniSat As Single,
                                                 minSlopeLandSurface As Single,
+                                                 UnsKType As String,
+                                                 coefUnsK As Single,
                                                 minSlopeChannel As Single,
                                                 minChannelBaseWidth As Single,
                                                 roughnessChannel As Single,
@@ -157,6 +159,8 @@ Public Class cRTStarter
         With RTProject.SubWSPar.userPars(wsid)
             .iniSaturation = iniSat
             .minSlopeOF = minSlopeLandSurface
+            .UKType = UnsKType
+            .coefUK = coefUnsK
             .minSlopeChBed = minSlopeChannel
             .minChBaseWidth = minChannelBaseWidth
             .chRoughness = roughnessChannel
@@ -166,11 +170,7 @@ Public Class cRTStarter
             .ccPorosity = ccPorosity
             .ccWFSuctionHead = ccWFSuctionHead
             .ccHydraulicK = ccSoilHydraulicCond
-            If applyIniFlow = True AndAlso iniFlow > 0 Then
-                .iniFlow = iniFlow
-            Else
-                .iniFlow = Nothing
-            End If
+            .iniFlow = iniFlow
             .isUserSet = True
         End With
         cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(RTProject)

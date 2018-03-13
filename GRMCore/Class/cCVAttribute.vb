@@ -248,7 +248,7 @@ Public Class cCVAttribute
 
     Public bAfterSaturated As Boolean = False
 
-    Public powCUnsaturatedK As Single
+    'Public powCUnsaturatedK As Single
 
 #End Region
 
@@ -371,6 +371,9 @@ Public Class cCVAttribute
     '''' </summary>
     '''' <remarks></remarks>
     'Public bSaturated As Boolean
+
+    Public UKType As cGRM.UnSaturatedKType
+    Public coefUK As Single 
 #End Region
 
 #Region "지하수 관련"

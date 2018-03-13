@@ -1789,6 +1789,10 @@ Partial Public Class GRMProject
         
         Private columnMinSlopeOF As Global.System.Data.DataColumn
         
+        Private columnUnsaturatedKType As Global.System.Data.DataColumn
+        
+        Private columnCoefUnsaturatedK As Global.System.Data.DataColumn
+        
         Private columnMinSlopeChBed As Global.System.Data.DataColumn
         
         Private columnMinChBaseWidth As Global.System.Data.DataColumn
@@ -1808,8 +1812,6 @@ Partial Public Class GRMProject
         Private columnCalCoefHydraulicK As Global.System.Data.DataColumn
         
         Private columnCalCoefSoilDepth As Global.System.Data.DataColumn
-        
-        Private columnPowerCeofUnSaturatedK As Global.System.Data.DataColumn
         
         Private columnUserSet As Global.System.Data.DataColumn
         
@@ -1869,6 +1871,22 @@ Partial Public Class GRMProject
         Public ReadOnly Property MinSlopeOFColumn() As Global.System.Data.DataColumn
             Get
                 Return Me.columnMinSlopeOF
+            End Get
+        End Property
+        
+        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
+        Public ReadOnly Property UnsaturatedKTypeColumn() As Global.System.Data.DataColumn
+            Get
+                Return Me.columnUnsaturatedKType
+            End Get
+        End Property
+        
+        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
+        Public ReadOnly Property CoefUnsaturatedKColumn() As Global.System.Data.DataColumn
+            Get
+                Return Me.columnCoefUnsaturatedK
             End Get
         End Property
         
@@ -1954,14 +1972,6 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public ReadOnly Property PowerCeofUnSaturatedKColumn() As Global.System.Data.DataColumn
-            Get
-                Return Me.columnPowerCeofUnSaturatedK
-            End Get
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public ReadOnly Property UserSetColumn() As Global.System.Data.DataColumn
             Get
                 Return Me.columnUserSet
@@ -2005,9 +2015,25 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Overloads Function AddSubWatershedSettingsRow(ByVal ID As Integer, ByVal IniSaturation As Single, ByVal MinSlopeOF As Single, ByVal MinSlopeChBed As Single, ByVal MinChBaseWidth As Single, ByVal ChRoughness As Single, ByVal DryStreamOrder As Integer, ByVal IniFlow As Single, ByVal CalCoefLCRoughness As Single, ByVal CalCoefPorosity As Single, ByVal CalCoefWFSuctionHead As Single, ByVal CalCoefHydraulicK As Single, ByVal CalCoefSoilDepth As Single, ByVal PowerCeofUnSaturatedK As Single, ByVal UserSet As String) As SubWatershedSettingsRow
+        Public Overloads Function AddSubWatershedSettingsRow( _
+                    ByVal ID As Integer,  _
+                    ByVal IniSaturation As Single,  _
+                    ByVal MinSlopeOF As Single,  _
+                    ByVal UnsaturatedKType As String,  _
+                    ByVal CoefUnsaturatedK As String,  _
+                    ByVal MinSlopeChBed As Single,  _
+                    ByVal MinChBaseWidth As Single,  _
+                    ByVal ChRoughness As Single,  _
+                    ByVal DryStreamOrder As Integer,  _
+                    ByVal IniFlow As Single,  _
+                    ByVal CalCoefLCRoughness As Single,  _
+                    ByVal CalCoefPorosity As Single,  _
+                    ByVal CalCoefWFSuctionHead As Single,  _
+                    ByVal CalCoefHydraulicK As Single,  _
+                    ByVal CalCoefSoilDepth As Single,  _
+                    ByVal UserSet As String) As SubWatershedSettingsRow
             Dim rowSubWatershedSettingsRow As SubWatershedSettingsRow = CType(Me.NewRow,SubWatershedSettingsRow)
-            Dim columnValuesArray() As Object = New Object() {ID, IniSaturation, MinSlopeOF, MinSlopeChBed, MinChBaseWidth, ChRoughness, DryStreamOrder, IniFlow, CalCoefLCRoughness, CalCoefPorosity, CalCoefWFSuctionHead, CalCoefHydraulicK, CalCoefSoilDepth, PowerCeofUnSaturatedK, UserSet}
+            Dim columnValuesArray() As Object = New Object() {ID, IniSaturation, MinSlopeOF, UnsaturatedKType, CoefUnsaturatedK, MinSlopeChBed, MinChBaseWidth, ChRoughness, DryStreamOrder, IniFlow, CalCoefLCRoughness, CalCoefPorosity, CalCoefWFSuctionHead, CalCoefHydraulicK, CalCoefSoilDepth, UserSet}
             rowSubWatershedSettingsRow.ItemArray = columnValuesArray
             Me.Rows.Add(rowSubWatershedSettingsRow)
             Return rowSubWatershedSettingsRow
@@ -2033,6 +2059,8 @@ Partial Public Class GRMProject
             Me.columnID = MyBase.Columns("ID")
             Me.columnIniSaturation = MyBase.Columns("IniSaturation")
             Me.columnMinSlopeOF = MyBase.Columns("MinSlopeOF")
+            Me.columnUnsaturatedKType = MyBase.Columns("UnsaturatedKType")
+            Me.columnCoefUnsaturatedK = MyBase.Columns("CoefUnsaturatedK")
             Me.columnMinSlopeChBed = MyBase.Columns("MinSlopeChBed")
             Me.columnMinChBaseWidth = MyBase.Columns("MinChBaseWidth")
             Me.columnChRoughness = MyBase.Columns("ChRoughness")
@@ -2043,7 +2071,6 @@ Partial Public Class GRMProject
             Me.columnCalCoefWFSuctionHead = MyBase.Columns("CalCoefWFSuctionHead")
             Me.columnCalCoefHydraulicK = MyBase.Columns("CalCoefHydraulicK")
             Me.columnCalCoefSoilDepth = MyBase.Columns("CalCoefSoilDepth")
-            Me.columnPowerCeofUnSaturatedK = MyBase.Columns("PowerCeofUnSaturatedK")
             Me.columnUserSet = MyBase.Columns("UserSet")
         End Sub
         
@@ -2056,6 +2083,10 @@ Partial Public Class GRMProject
             MyBase.Columns.Add(Me.columnIniSaturation)
             Me.columnMinSlopeOF = New Global.System.Data.DataColumn("MinSlopeOF", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnMinSlopeOF)
+            Me.columnUnsaturatedKType = New Global.System.Data.DataColumn("UnsaturatedKType", GetType(String), Nothing, Global.System.Data.MappingType.Element)
+            MyBase.Columns.Add(Me.columnUnsaturatedKType)
+            Me.columnCoefUnsaturatedK = New Global.System.Data.DataColumn("CoefUnsaturatedK", GetType(String), Nothing, Global.System.Data.MappingType.Element)
+            MyBase.Columns.Add(Me.columnCoefUnsaturatedK)
             Me.columnMinSlopeChBed = New Global.System.Data.DataColumn("MinSlopeChBed", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnMinSlopeChBed)
             Me.columnMinChBaseWidth = New Global.System.Data.DataColumn("MinChBaseWidth", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
@@ -2076,14 +2107,13 @@ Partial Public Class GRMProject
             MyBase.Columns.Add(Me.columnCalCoefHydraulicK)
             Me.columnCalCoefSoilDepth = New Global.System.Data.DataColumn("CalCoefSoilDepth", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnCalCoefSoilDepth)
-            Me.columnPowerCeofUnSaturatedK = New Global.System.Data.DataColumn("PowerCeofUnSaturatedK", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
-            MyBase.Columns.Add(Me.columnPowerCeofUnSaturatedK)
             Me.columnUserSet = New Global.System.Data.DataColumn("UserSet", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnUserSet)
             Me.Constraints.Add(New Global.System.Data.UniqueConstraint("WatershedSettingsKey1", New Global.System.Data.DataColumn() {Me.columnID}, false))
             Me.columnID.Unique = true
             Me.columnIniSaturation.AllowDBNull = false
-            Me.columnPowerCeofUnSaturatedK.Caption = "CalCoefUnSaturatedK"
+            Me.columnUnsaturatedKType.Caption = "CalCoefUnSaturatedK"
+            Me.columnCoefUnsaturatedK.Caption = "CalCoefUnSaturatedK"
         End Sub
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
@@ -6413,6 +6443,36 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
+        Public Property UnsaturatedKType() As String
+            Get
+                Try 
+                    Return CType(Me(Me.tableSubWatershedSettings.UnsaturatedKTypeColumn),String)
+                Catch e As Global.System.InvalidCastException
+                    Throw New Global.System.Data.StrongTypingException("'SubWatershedSettings' 테이블의 'UnsaturatedKType' 열의 값이 DBNull입니다.", e)
+                End Try
+            End Get
+            Set
+                Me(Me.tableSubWatershedSettings.UnsaturatedKTypeColumn) = value
+            End Set
+        End Property
+        
+        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
+        Public Property CoefUnsaturatedK() As String
+            Get
+                Try 
+                    Return CType(Me(Me.tableSubWatershedSettings.CoefUnsaturatedKColumn),String)
+                Catch e As Global.System.InvalidCastException
+                    Throw New Global.System.Data.StrongTypingException("'SubWatershedSettings' 테이블의 'CoefUnsaturatedK' 열의 값이 DBNull입니다.", e)
+                End Try
+            End Get
+            Set
+                Me(Me.tableSubWatershedSettings.CoefUnsaturatedKColumn) = value
+            End Set
+        End Property
+        
+        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Property MinSlopeChBed() As Single
             Get
                 Try 
@@ -6563,21 +6623,6 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property PowerCeofUnSaturatedK() As Single
-            Get
-                Try 
-                    Return CType(Me(Me.tableSubWatershedSettings.PowerCeofUnSaturatedKColumn),Single)
-                Catch e As Global.System.InvalidCastException
-                    Throw New Global.System.Data.StrongTypingException("'SubWatershedSettings' 테이블의 'PowerCeofUnSaturatedK' 열의 값이 DBNull입니다.", e)
-                End Try
-            End Get
-            Set
-                Me(Me.tableSubWatershedSettings.PowerCeofUnSaturatedKColumn) = value
-            End Set
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Property UserSet() As String
             Get
                 Try 
@@ -6613,6 +6658,30 @@ Partial Public Class GRMProject
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Sub SetMinSlopeOFNull()
             Me(Me.tableSubWatershedSettings.MinSlopeOFColumn) = Global.System.Convert.DBNull
+        End Sub
+        
+        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
+        Public Function IsUnsaturatedKTypeNull() As Boolean
+            Return Me.IsNull(Me.tableSubWatershedSettings.UnsaturatedKTypeColumn)
+        End Function
+        
+        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
+        Public Sub SetUnsaturatedKTypeNull()
+            Me(Me.tableSubWatershedSettings.UnsaturatedKTypeColumn) = Global.System.Convert.DBNull
+        End Sub
+        
+        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
+        Public Function IsCoefUnsaturatedKNull() As Boolean
+            Return Me.IsNull(Me.tableSubWatershedSettings.CoefUnsaturatedKColumn)
+        End Function
+        
+        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
+         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
+        Public Sub SetCoefUnsaturatedKNull()
+            Me(Me.tableSubWatershedSettings.CoefUnsaturatedKColumn) = Global.System.Convert.DBNull
         End Sub
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
@@ -6733,18 +6802,6 @@ Partial Public Class GRMProject
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Sub SetCalCoefSoilDepthNull()
             Me(Me.tableSubWatershedSettings.CalCoefSoilDepthColumn) = Global.System.Convert.DBNull
-        End Sub
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Function IsPowerCeofUnSaturatedKNull() As Boolean
-            Return Me.IsNull(Me.tableSubWatershedSettings.PowerCeofUnSaturatedKColumn)
-        End Function
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Sub SetPowerCeofUnSaturatedKNull()
-            Me(Me.tableSubWatershedSettings.PowerCeofUnSaturatedKColumn) = Global.System.Convert.DBNull
         End Sub
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _

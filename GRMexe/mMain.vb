@@ -118,7 +118,11 @@ Module mMain
             ''여기서 셀 정보를 미리 알 수 있다.
             'Dim wsinfo As New cGetWatershedInfo(currentPrjFPN)
             'Dim slp As Single = wsinfo.subwatershedPars(1).minSlopeChBed
+            'Dim ukk As String = wsinfo.subwatershedPars(1).UKType
             'Dim cc As Integer = wsinfo.cellCountInWatershed
+
+            'Dim aa As Boolean = wsinfo.SetOneSWSParametersAndUpdateAllSWSUsingNetwork(1, 0.5, 0.001, "Linear", 0.2, 0.045, 100, 0.045, 0, 1, 1, 1, 1, 1, 50)
+            'Dim a As Integer = 1
             ''혹은 아래의 방법
             'Dim WSFPN As String = cProject.Current.Watershed.mFPN_watershed
             'Dim SlopeFPN As String = cProject.Current.Watershed.mFPN_slope

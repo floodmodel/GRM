@@ -245,23 +245,27 @@
     End Function
 
     Public Function SetOneSWSParametersAndUpdateAllSWSUsingNetwork(wsid As Integer,
-                                                iniSat As Single,
-                                                minSlopeLandSurface As Single,
-                                                minSlopeChannel As Single,
-                                                minChannelBaseWidth As Single,
-                                                roughnessChannel As Single,
-                                                dryStreamOrder As Integer,
-                                                ccLCRoughness As Single,
-                                                ccSoilDepth As Single,
-                                                ccPorosity As Single,
-                                                ccWFSuctionHead As Single,
+                                                iniSat As Single, minSlopeLandSurface As Single,
+                                                UnsKType As String, coefUnsK As Single,
+                                                minSlopeChannel As Single, minChannelBaseWidth As Single,
+                                                roughnessChannel As Single, dryStreamOrder As Integer,
+                                                ccLCRoughness As Single, ccSoilDepth As Single,
+                                                ccPorosity As Single, ccWFSuctionHead As Single,
                                                 ccSoilHydraulicCond As Single,
-                                                applyIniFlow As Boolean,
                                                 Optional iniFlow As Single = 0) As Boolean
         Try
             With grmPrj.SubWSPar.userPars(wsid)
                 .iniSaturation = iniSat
                 .minSlopeOF = minSlopeLandSurface
+                Select Case UnsKType.ToLower
+                    Case cGRM.UnSaturatedKType.Linear.ToString.ToLower
+                        .UKType = cGRM.UnSaturatedKType.Linear.ToString
+                    Case cGRM.UnSaturatedKType.Exponential.ToString.ToLower
+                        .UKType = cGRM.UnSaturatedKType.Exponential.ToString
+                    Case Else
+                        .UKType = cGRM.UnSaturatedKType.Linear.ToString
+                End Select
+                .coefUK = coefUnsK
                 .minSlopeChBed = minSlopeChannel
                 .minChBaseWidth = minChannelBaseWidth
                 .chRoughness = roughnessChannel
@@ -271,11 +275,7 @@
                 .ccPorosity = ccPorosity
                 .ccWFSuctionHead = ccWFSuctionHead
                 .ccHydraulicK = ccSoilHydraulicCond
-                If applyIniFlow = True AndAlso iniFlow > 0 Then
-                    .iniFlow = iniFlow
-                Else
-                    .iniFlow = Nothing
-                End If
+                .iniFlow = iniFlow
                 .isUserSet = True
             End With
             cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(grmPrj)

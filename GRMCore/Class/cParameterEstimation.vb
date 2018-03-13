@@ -159,10 +159,10 @@ Public Class cParameterEstimation
     Private Sub PESS_CheckSatisfyToleranceAndSetCVatt()
         For Each id As Integer In mProject.Watershed.WSIDList
             If mCompletedWSid.ContainsKey(id) = False Then
-                If mProject.SubWSPar.userPars(id).isUserSet = True AndAlso mProject.SubWSPar.userPars(id).iniFlow IsNot Nothing Then
+                If mProject.SubWSPar.userPars(id).isUserSet = True AndAlso mProject.SubWSPar.userPars(id).iniFlow > 0 Then
                     Dim wsCVarrayNum As Integer = mProject.WSNetwork.WSoutletCVID(id) - 1
-                    Dim err As Double = Abs(mProject.CV(wsCVarrayNum).mStreamAttr.QCVch_i_j_m3Ps - mProject.SubWSPar.userPars(id).iniFlow.Value)
-                    If err < mProject.SubWSPar.userPars(id).iniFlow.Value / 100 Then
+                    Dim err As Double = Abs(mProject.CV(wsCVarrayNum).mStreamAttr.QCVch_i_j_m3Ps - mProject.SubWSPar.userPars(id).iniFlow)
+                    If err < mProject.SubWSPar.userPars(id).iniFlow / 100 Then
                         mCompletedWSid.Add(id, New PE_SS_Result)
                         Dim results As New PE_SS_Result
                         If mProject.CV(wsCVarrayNum).FlowType = cGRM.CellFlowType.OverlandFlow Then
@@ -234,7 +234,7 @@ Public Class cParameterEstimation
         With project
             Dim wsidToExclude As New List(Of Integer)
             For Each upsid As Integer In .WSNetwork.WSIDsAllUps(baseWSID)
-                If .SubWSPar.userPars(upsid).isUserSet = True AndAlso .SubWSPar.userPars(upsid).iniFlow IsNot Nothing Then
+                If .SubWSPar.userPars(upsid).isUserSet = True AndAlso .SubWSPar.userPars(upsid).iniFlow > 0 Then
                     If Not wsidToExclude.Contains(upsid) Then
                         wsidToExclude.Add(upsid)
                     End If
@@ -262,7 +262,7 @@ Public Class cParameterEstimation
         Get
             Dim count As Integer = 0
             For Each id As Integer In mProject.Watershed.WSIDList
-                If mProject.SubWSPar.userPars(id).iniFlow IsNot Nothing Then
+                If mProject.SubWSPar.userPars(id).iniFlow > 0 Then
                     count += 1
                 End If
             Next

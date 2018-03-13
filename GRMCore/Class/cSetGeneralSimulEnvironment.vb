@@ -16,6 +16,8 @@ Public Class cSetGeneralSimulEnvironment
     ''' <remarks></remarks>
     Public mPrintOutTimeStepMIN As Nullable(Of Integer)
 
+
+
 #End Region
 
 #Region "모의 옵션"

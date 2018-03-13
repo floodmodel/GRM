@@ -82,6 +82,12 @@
         StartsFromE_TauDEM
     End Enum
 
+    Public Enum UnSaturatedKType
+        Linear
+        Exponential
+    End Enum
+
+
     Public Shared ReadOnly LONG_DATE_FORMAT As String = "yyyy/MM/dd HH:mm"
     Public Shared fpnlog As String = ""
     Public Shared bwriteLog As Boolean

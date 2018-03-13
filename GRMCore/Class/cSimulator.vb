@@ -418,7 +418,8 @@ Public Class cSimulator
                         .QCVof_i_j_m3Ps = 0
                     End If
                     If .QCVof_i_j_m3Ps > 0 Then
-                        chCSAAddedByOFInChCell_m2 = mFVMSolver.CalChCSAFromQbyIteration(project.CV(cvan), .CSAof_i_j, .QCVof_i_j_m3Ps)
+                        'chCSAAddedByOFInChCell_m2 = mFVMSolver.CalChCSAFromQbyIteration(project.CV(cvan), .CSAof_i_j, .QCVof_i_j_m3Ps)
+                        chCSAAddedByOFInChCell_m2 = .CSAof_i_j '이렇게 단순화 해도, 별 차이 없다. 계산시간은 좀 준다. 2018.03.12.최
                     Else
                         chCSAAddedByOFInChCell_m2 = 0
                     End If
@@ -459,16 +460,16 @@ Public Class cSimulator
                 If .FlowType = cGRM.CellFlowType.ChannelFlow OrElse
                     .FlowType = cGRM.CellFlowType.ChannelNOverlandFlow Then
                     Dim bApplyIniStreamFlowIsSet As Boolean = False
-                    If project.SubWSPar.userPars(.WSID).iniFlow IsNot Nothing Then
-                        iniQAtWP = project.SubWSPar.userPars(.WSID).iniFlow.Value
+                    If project.SubWSPar.userPars(.WSID).iniFlow > 0 Then
+                        iniQAtWP = project.SubWSPar.userPars(.WSID).iniFlow
                         faAtBaseWP = project.CV(project.WSNetwork.WSoutletCVID(.WSID) - 1).FAc
                         bApplyIniStreamFlowIsSet = True
                     Else
                         Dim baseWSid As Integer = .WSID
                         For id As Integer = 0 To project.WSNetwork.WSIDsAllDowns(.WSID).Count - 1
                             Dim downWSid As Integer = project.WSNetwork.WSIDsNearbyDown(baseWSid)
-                            If project.SubWSPar.userPars(downWSid).iniFlow IsNot Nothing Then
-                                iniQAtWP = project.SubWSPar.userPars(downWSid).iniFlow.Value
+                            If project.SubWSPar.userPars(downWSid).iniFlow > 0 Then
+                                iniQAtWP = project.SubWSPar.userPars(downWSid).iniFlow
                                 faAtBaseWP = project.CV(project.WSNetwork.WSoutletCVID(downWSid) - 1).FAc
                                 bApplyIniStreamFlowIsSet = True
                                 Exit For
