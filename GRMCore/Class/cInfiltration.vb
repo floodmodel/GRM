@@ -204,6 +204,7 @@
         'Dim ca As Single = 0.2 '0.24
         Dim ssr As Single = GetSoilSaturationRaito(cv.CumulativeInfiltrationF_tM1_m, cv.SoilDepthEffectiveAsWaterDepth_m, cv.FlowType)
         Dim Ks As Single = cv.hydraulicConductK_mPsec
+        If CoefUnsaturatedK = 0 Then Return Ks
         If ssr > 0.99 Then
             Return Ks
         Else
