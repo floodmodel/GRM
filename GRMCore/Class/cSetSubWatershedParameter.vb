@@ -70,6 +70,8 @@ Public Class cSetSubWatershedParameter
                                     upars.UKType = cGRM.UnSaturatedKType.Linear.ToString
                                 Case cGRM.UnSaturatedKType.Exponential.ToString.ToLower
                                     upars.UKType = cGRM.UnSaturatedKType.Exponential.ToString
+                                Case cGRM.UnSaturatedKType.Constant.ToString.ToLower
+                                    upars.UKType = cGRM.UnSaturatedKType.Constant.ToString
                                 Case Else
                                     upars.UKType = cGRM.UnSaturatedKType.Linear.ToString
                             End Select
@@ -85,6 +87,8 @@ Public Class cSetSubWatershedParameter
                                     upars.coefUK = 0.2
                                 Case cGRM.UnSaturatedKType.Exponential.ToString.ToLower
                                     upars.coefUK = 6.4
+                                Case cGRM.UnSaturatedKType.Constant.ToString.ToLower
+                                    upars.coefUK = 0
                                 Case Else
                                     upars.coefUK = 0.2
                             End Select
@@ -104,7 +108,6 @@ Public Class cSetSubWatershedParameter
                         Else
                             upars.isUserSet = False
                         End If
-
                     End If
                 End With
                 userPars.Add(row.ID, upars)
@@ -177,10 +180,10 @@ Public Class cSetSubWatershedParameter
         Dim rid As Integer = ReferenceWSid
         With grmproject.SubWSPar.userPars(TargetWSid)
             .iniSaturation = spars(rid).iniSaturation
-            .minSlopeChBed = spars(rid).minSlopeChBed
+            .minSlopeOF = spars(rid).minSlopeOF
             .UKType = spars(rid).UKType
-            .coefUK = spars(rid).minSlopeChBed
-            .minSlopeOF = spars(rid).coefUK
+            .coefUK = spars(rid).coefUK
+            .minSlopeChBed = spars(rid).minSlopeChBed
             .minChBaseWidth = spars(rid).minChBaseWidth
             .chRoughness = spars(rid).chRoughness
             .dryStreamOrder = spars(rid).dryStreamOrder
@@ -189,6 +192,9 @@ Public Class cSetSubWatershedParameter
             .ccWFSuctionHead = spars(rid).ccWFSuctionHead
             .ccHydraulicK = spars(rid).ccHydraulicK
             .ccSoilDepth = spars(rid).ccSoilDepth
+            If .isUserSet = False Then
+                .iniFlow = 0
+            End If
         End With
         Return True
     End Function

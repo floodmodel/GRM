@@ -83,6 +83,7 @@
     End Enum
 
     Public Enum UnSaturatedKType
+        Constant
         Linear
         Exponential
     End Enum

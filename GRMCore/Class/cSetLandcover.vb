@@ -8,7 +8,8 @@
         GRSS
         FRST
         AGRL
-        CONST_VALUE
+        USER
+        CONSTV
         NULL
     End Enum
 
@@ -104,6 +105,8 @@
             Case LandCoverCode.URBN.ToString : Return LandCoverCode.URBN
             Case LandCoverCode.WATR.ToString : Return LandCoverCode.WATR
             Case LandCoverCode.WTLD.ToString : Return LandCoverCode.WTLD
+            Case LandCoverCode.USER.ToString : Return LandCoverCode.USER
+            Case LandCoverCode.CONSTV.ToString : Return LandCoverCode.CONSTV
             Case Else : Return Nothing
         End Select
     End Function

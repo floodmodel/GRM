@@ -204,7 +204,7 @@
         'Dim ca As Single = 0.2 '0.24
         Dim ssr As Single = GetSoilSaturationRaito(cv.CumulativeInfiltrationF_tM1_m, cv.SoilDepthEffectiveAsWaterDepth_m, cv.FlowType)
         Dim Ks As Single = cv.hydraulicConductK_mPsec
-        If CoefUnsaturatedK = 0 Then Return Ks
+        If CoefUnsaturatedK <= 0 Then Return Ks
         If ssr > 0.99 Then
             Return Ks
         Else
@@ -214,10 +214,13 @@
                     Kus = CSng(Ks * ssr * CoefUnsaturatedK)
                 Case cGRM.UnSaturatedKType.Exponential
                     Kus = CSng(Ks * ssr ^ CoefUnsaturatedK)
+                Case cGRM.UnSaturatedKType.Constant
+                    Return Ks
                 Case Else
+                    Return Ks
             End Select
-            Return Kus
         End If
+
     End Function
 
 End Class

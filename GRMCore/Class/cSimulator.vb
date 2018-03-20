@@ -143,7 +143,7 @@ Public Class cSimulator
         If mStop Then
             RaiseEvent SimulationStop(Me)
         Else
-            cGRM.writelogAndConsole("Simulation was completed.", cGRM.bwriteLog, True)
+            cGRM.writelogAndConsole("Simulation was completed.", cGRM.bwriteLog, False)
             RaiseEvent SimulationComplete(Me)
             MyBase.Finalize()
         End If

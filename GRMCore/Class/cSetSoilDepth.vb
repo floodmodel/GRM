@@ -5,6 +5,8 @@
         S
         VD
         VS
+        USER
+        CONSTV
         NULL
     End Enum
 
@@ -86,6 +88,8 @@
             Case SoilDepthCode.S.ToString : Return SoilDepthCode.S
             Case SoilDepthCode.VD.ToString : Return SoilDepthCode.VD
             Case SoilDepthCode.VS.ToString : Return SoilDepthCode.VS
+            Case SoilDepthCode.USER.ToString : Return SoilDepthCode.USER
+            Case SoilDepthCode.CONSTV.ToString : Return SoilDepthCode.CONSTV
             Case SoilDepthCode.NULL.ToString : Return SoilDepthCode.NULL
             Case Else : Return Nothing
         End Select

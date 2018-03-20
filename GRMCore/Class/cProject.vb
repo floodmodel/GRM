@@ -1214,7 +1214,7 @@ Public Class cProject
                                                                        cell.LandCoverValue = 0     ' 상수 의미
                                                                        cell.RoughnessCoeffOFori = Landcover.mConstRoughnessCoefficient.Value
                                                                        cell.ImperviousRatio = Landcover.mConstImperviousRatio.Value
-                                                                       cell.LandCoverCode = cSetLandcover.LandCoverCode.CONST_VALUE
+                                                                       cell.LandCoverCode = cSetLandcover.LandCoverCode.CONSTV
                                                                    End If
                                                                Next
                                                            End Sub)
@@ -1226,7 +1226,7 @@ Public Class cProject
                         cell.LandCoverValue = 0    ' 상수 의미
                         cell.RoughnessCoeffOFori = Landcover.mConstRoughnessCoefficient.Value
                         cell.ImperviousRatio = Landcover.mConstImperviousRatio.Value
-                        cell.LandCoverCode = cSetLandcover.LandCoverCode.CONST_VALUE
+                        cell.LandCoverCode = cSetLandcover.LandCoverCode.CONSTV
                     End If
                 Next cx
             Next ry
@@ -1377,6 +1377,7 @@ Public Class cProject
                                                                        cell.EffectivePorosityThetaEori = GreenAmpt.mConstEffectivePorosity.Value
                                                                        cell.WettingFrontSuctionHeadPsiOri_m = GreenAmpt.mConstWFS.Value / 100  ' cm -> m
                                                                        cell.HydraulicConductKori_mPsec = GreenAmpt.mConstHydraulicCond.Value / 100 / 3600    ' cm/hr -> m/s
+                                                                       cell.SoilTextureCode = cSetGreenAmpt.SoilTextureCode.CONSTV
                                                                    End If
                                                                Next
                                                            End Sub)
@@ -1390,6 +1391,7 @@ Public Class cProject
                         cell.EffectivePorosityThetaEori = GreenAmpt.mConstEffectivePorosity.Value
                         cell.WettingFrontSuctionHeadPsiOri_m = GreenAmpt.mConstWFS.Value / 100  ' cm -> m
                         cell.HydraulicConductKori_mPsec = GreenAmpt.mConstHydraulicCond.Value / 100 / 3600    ' cm/hr -> m/s
+                        cell.SoilTextureCode = cSetGreenAmpt.SoilTextureCode.CONSTV
                     End If
                 Next cx
             Next ry
@@ -1521,6 +1523,7 @@ Public Class cProject
                                                                    If mWSCells(cx, ry) IsNot Nothing Then
                                                                        mWSCells(cx, ry).SoilDepthTypeValue = Integer.MinValue  ' 상수를 의미
                                                                        mWSCells(cx, ry).SoilDepthOri_m = SoilDepth.mConstSoilDepth.Value / 100     ' cm ->  m
+                                                                       mWSCells(cx, ry).SoilDepthCode = cSetSoilDepth.SoilDepthCode.CONSTV
                                                                    End If
                                                                Next
                                                            End Sub)
@@ -1530,6 +1533,7 @@ Public Class cProject
                     If mWSCells(cx, ry) IsNot Nothing Then
                         mWSCells(cx, ry).SoilDepthTypeValue = Integer.MinValue  ' 상수를 의미
                         mWSCells(cx, ry).SoilDepthOri_m = SoilDepth.mConstSoilDepth.Value / 100     ' cm ->  m
+                        mWSCells(cx, ry).SoilDepthCode = cSetSoilDepth.SoilDepthCode.CONSTV
                     End If
                 Next cx
             Next ry
@@ -1562,6 +1566,8 @@ Public Class cProject
                             .UKType = cGRM.UnSaturatedKType.Linear
                         Case cGRM.UnSaturatedKType.Exponential.ToString.ToLower
                             .UKType = cGRM.UnSaturatedKType.Exponential
+                        Case cGRM.UnSaturatedKType.Constant.ToString.ToLower
+                            .UKType = cGRM.UnSaturatedKType.Constant
                         Case Else
                             .UKType = cGRM.UnSaturatedKType.Linear
                     End Select

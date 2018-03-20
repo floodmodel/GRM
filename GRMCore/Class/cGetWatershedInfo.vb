@@ -262,6 +262,8 @@
                         .UKType = cGRM.UnSaturatedKType.Linear.ToString
                     Case cGRM.UnSaturatedKType.Exponential.ToString.ToLower
                         .UKType = cGRM.UnSaturatedKType.Exponential.ToString
+                    Case cGRM.UnSaturatedKType.Constant.ToString.ToLower
+                        .UKType = cGRM.UnSaturatedKType.Constant.ToString
                     Case Else
                         .UKType = cGRM.UnSaturatedKType.Linear.ToString
                 End Select

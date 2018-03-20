@@ -10,6 +10,11 @@ _ReSharper.*
 /bin/
 /obj/
 /packages/
+*.dll
+*.pdb
+*.cache
+*.exe
+*.ide
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -73,6 +78,8 @@ artifacts/
 *.pidb
 *.svclog
 *.scc
+
+
 
 # Chutzpah Test files
 _Chutzpah*

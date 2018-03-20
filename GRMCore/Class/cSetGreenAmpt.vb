@@ -12,6 +12,8 @@
         SiCL
         SiL
         SL
+        USER
+        CONSTV
         NULL
     End Enum
 
@@ -122,6 +124,8 @@
             Case SoilTextureCode.SiCL.ToString : Return SoilTextureCode.SiCL
             Case SoilTextureCode.SiL.ToString : Return SoilTextureCode.SiL
             Case SoilTextureCode.SL.ToString : Return SoilTextureCode.SL
+            Case SoilTextureCode.USER.ToString : Return SoilTextureCode.USER
+            Case SoilTextureCode.CONSTV.ToString : Return SoilTextureCode.CONSTV
             Case SoilTextureCode.NULL.ToString : Return SoilTextureCode.NULL
             Case Else : Return Nothing
         End Select

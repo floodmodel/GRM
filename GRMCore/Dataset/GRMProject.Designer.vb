@@ -3440,10 +3440,6 @@ Partial Public Class GRMProject
         
         Private columnGRMCode As Global.System.Data.DataColumn
         
-        Private columnGRMTextureE As Global.System.Data.DataColumn
-        
-        Private columnGRMTextureK As Global.System.Data.DataColumn
-        
         Private columnPorosity As Global.System.Data.DataColumn
         
         Private columnEffectivePorosity As Global.System.Data.DataColumn
@@ -3508,22 +3504,6 @@ Partial Public Class GRMProject
         Public ReadOnly Property GRMCodeColumn() As Global.System.Data.DataColumn
             Get
                 Return Me.columnGRMCode
-            End Get
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public ReadOnly Property GRMTextureEColumn() As Global.System.Data.DataColumn
-            Get
-                Return Me.columnGRMTextureE
-            End Get
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public ReadOnly Property GRMTextureKColumn() As Global.System.Data.DataColumn
-            Get
-                Return Me.columnGRMTextureK
             End Get
         End Property
         
@@ -3596,9 +3576,9 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Overloads Function AddGreenAmptParameterRow(ByVal GridValue As Integer, ByVal USERSoil As String, ByVal GRMCode As String, ByVal GRMTextureE As String, ByVal GRMTextureK As String, ByVal Porosity As Single, ByVal EffectivePorosity As Single, ByVal WFSoilSuctionHead As Single, ByVal HydraulicConductivity As Single) As GreenAmptParameterRow
+        Public Overloads Function AddGreenAmptParameterRow(ByVal GridValue As Integer, ByVal USERSoil As String, ByVal GRMCode As String, ByVal Porosity As Single, ByVal EffectivePorosity As Single, ByVal WFSoilSuctionHead As Single, ByVal HydraulicConductivity As Single) As GreenAmptParameterRow
             Dim rowGreenAmptParameterRow As GreenAmptParameterRow = CType(Me.NewRow,GreenAmptParameterRow)
-            Dim columnValuesArray() As Object = New Object() {GridValue, USERSoil, GRMCode, GRMTextureE, GRMTextureK, Porosity, EffectivePorosity, WFSoilSuctionHead, HydraulicConductivity}
+            Dim columnValuesArray() As Object = New Object() {GridValue, USERSoil, GRMCode, Porosity, EffectivePorosity, WFSoilSuctionHead, HydraulicConductivity}
             rowGreenAmptParameterRow.ItemArray = columnValuesArray
             Me.Rows.Add(rowGreenAmptParameterRow)
             Return rowGreenAmptParameterRow
@@ -3624,8 +3604,6 @@ Partial Public Class GRMProject
             Me.columnGridValue = MyBase.Columns("GridValue")
             Me.columnUSERSoil = MyBase.Columns("USERSoil")
             Me.columnGRMCode = MyBase.Columns("GRMCode")
-            Me.columnGRMTextureE = MyBase.Columns("GRMTextureE")
-            Me.columnGRMTextureK = MyBase.Columns("GRMTextureK")
             Me.columnPorosity = MyBase.Columns("Porosity")
             Me.columnEffectivePorosity = MyBase.Columns("EffectivePorosity")
             Me.columnWFSoilSuctionHead = MyBase.Columns("WFSoilSuctionHead")
@@ -3641,10 +3619,6 @@ Partial Public Class GRMProject
             MyBase.Columns.Add(Me.columnUSERSoil)
             Me.columnGRMCode = New Global.System.Data.DataColumn("GRMCode", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnGRMCode)
-            Me.columnGRMTextureE = New Global.System.Data.DataColumn("GRMTextureE", GetType(String), Nothing, Global.System.Data.MappingType.Element)
-            MyBase.Columns.Add(Me.columnGRMTextureE)
-            Me.columnGRMTextureK = New Global.System.Data.DataColumn("GRMTextureK", GetType(String), Nothing, Global.System.Data.MappingType.Element)
-            MyBase.Columns.Add(Me.columnGRMTextureK)
             Me.columnPorosity = New Global.System.Data.DataColumn("Porosity", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnPorosity)
             Me.columnEffectivePorosity = New Global.System.Data.DataColumn("EffectivePorosity", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
@@ -3655,8 +3629,6 @@ Partial Public Class GRMProject
             MyBase.Columns.Add(Me.columnHydraulicConductivity)
             Me.columnUSERSoil.MaxLength = 50
             Me.columnGRMCode.MaxLength = 50
-            Me.columnGRMTextureE.MaxLength = 50
-            Me.columnGRMTextureK.MaxLength = 50
         End Sub
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
@@ -3800,10 +3772,6 @@ Partial Public Class GRMProject
         
         Private columnGRMCode As Global.System.Data.DataColumn
         
-        Private columnSoilDepthClassE As Global.System.Data.DataColumn
-        
-        Private columnSoilDepthClassK As Global.System.Data.DataColumn
-        
         Private columnSoilDepth As Global.System.Data.DataColumn
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
@@ -3867,22 +3835,6 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public ReadOnly Property SoilDepthClassEColumn() As Global.System.Data.DataColumn
-            Get
-                Return Me.columnSoilDepthClassE
-            End Get
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public ReadOnly Property SoilDepthClassKColumn() As Global.System.Data.DataColumn
-            Get
-                Return Me.columnSoilDepthClassK
-            End Get
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public ReadOnly Property SoilDepthColumn() As Global.System.Data.DataColumn
             Get
                 Return Me.columnSoilDepth
@@ -3926,9 +3878,9 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Overloads Function AddSoilDepthRow(ByVal GridValue As Integer, ByVal UserDepthClass As String, ByVal GRMCode As String, ByVal SoilDepthClassE As String, ByVal SoilDepthClassK As String, ByVal SoilDepth As Single) As SoilDepthRow
+        Public Overloads Function AddSoilDepthRow(ByVal GridValue As Integer, ByVal UserDepthClass As String, ByVal GRMCode As String, ByVal SoilDepth As Single) As SoilDepthRow
             Dim rowSoilDepthRow As SoilDepthRow = CType(Me.NewRow,SoilDepthRow)
-            Dim columnValuesArray() As Object = New Object() {GridValue, UserDepthClass, GRMCode, SoilDepthClassE, SoilDepthClassK, SoilDepth}
+            Dim columnValuesArray() As Object = New Object() {GridValue, UserDepthClass, GRMCode, SoilDepth}
             rowSoilDepthRow.ItemArray = columnValuesArray
             Me.Rows.Add(rowSoilDepthRow)
             Return rowSoilDepthRow
@@ -3954,8 +3906,6 @@ Partial Public Class GRMProject
             Me.columnGridValue = MyBase.Columns("GridValue")
             Me.columnUserDepthClass = MyBase.Columns("UserDepthClass")
             Me.columnGRMCode = MyBase.Columns("GRMCode")
-            Me.columnSoilDepthClassE = MyBase.Columns("SoilDepthClassE")
-            Me.columnSoilDepthClassK = MyBase.Columns("SoilDepthClassK")
             Me.columnSoilDepth = MyBase.Columns("SoilDepth")
         End Sub
         
@@ -3968,16 +3918,10 @@ Partial Public Class GRMProject
             MyBase.Columns.Add(Me.columnUserDepthClass)
             Me.columnGRMCode = New Global.System.Data.DataColumn("GRMCode", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnGRMCode)
-            Me.columnSoilDepthClassE = New Global.System.Data.DataColumn("SoilDepthClassE", GetType(String), Nothing, Global.System.Data.MappingType.Element)
-            MyBase.Columns.Add(Me.columnSoilDepthClassE)
-            Me.columnSoilDepthClassK = New Global.System.Data.DataColumn("SoilDepthClassK", GetType(String), Nothing, Global.System.Data.MappingType.Element)
-            MyBase.Columns.Add(Me.columnSoilDepthClassK)
             Me.columnSoilDepth = New Global.System.Data.DataColumn("SoilDepth", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnSoilDepth)
             Me.columnUserDepthClass.MaxLength = 50
             Me.columnGRMCode.MaxLength = 50
-            Me.columnSoilDepthClassE.MaxLength = 50
-            Me.columnSoilDepthClassK.MaxLength = 50
         End Sub
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
@@ -4121,10 +4065,6 @@ Partial Public Class GRMProject
         
         Private columnGRMCode As Global.System.Data.DataColumn
         
-        Private columnGRMLandCoverE As Global.System.Data.DataColumn
-        
-        Private columnGRMLandCoverK As Global.System.Data.DataColumn
-        
         Private columnRoughnessCoefficient As Global.System.Data.DataColumn
         
         Private columnImperviousRatio As Global.System.Data.DataColumn
@@ -4190,22 +4130,6 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public ReadOnly Property GRMLandCoverEColumn() As Global.System.Data.DataColumn
-            Get
-                Return Me.columnGRMLandCoverE
-            End Get
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public ReadOnly Property GRMLandCoverKColumn() As Global.System.Data.DataColumn
-            Get
-                Return Me.columnGRMLandCoverK
-            End Get
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public ReadOnly Property RoughnessCoefficientColumn() As Global.System.Data.DataColumn
             Get
                 Return Me.columnRoughnessCoefficient
@@ -4257,9 +4181,9 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Overloads Function AddLandCoverRow(ByVal GridValue As Integer, ByVal UserLandCover As String, ByVal GRMCode As String, ByVal GRMLandCoverE As String, ByVal GRMLandCoverK As String, ByVal RoughnessCoefficient As Single, ByVal ImperviousRatio As Single) As LandCoverRow
+        Public Overloads Function AddLandCoverRow(ByVal GridValue As Integer, ByVal UserLandCover As String, ByVal GRMCode As String, ByVal RoughnessCoefficient As Single, ByVal ImperviousRatio As Single) As LandCoverRow
             Dim rowLandCoverRow As LandCoverRow = CType(Me.NewRow,LandCoverRow)
-            Dim columnValuesArray() As Object = New Object() {GridValue, UserLandCover, GRMCode, GRMLandCoverE, GRMLandCoverK, RoughnessCoefficient, ImperviousRatio}
+            Dim columnValuesArray() As Object = New Object() {GridValue, UserLandCover, GRMCode, RoughnessCoefficient, ImperviousRatio}
             rowLandCoverRow.ItemArray = columnValuesArray
             Me.Rows.Add(rowLandCoverRow)
             Return rowLandCoverRow
@@ -4285,8 +4209,6 @@ Partial Public Class GRMProject
             Me.columnGridValue = MyBase.Columns("GridValue")
             Me.columnUserLandCover = MyBase.Columns("UserLandCover")
             Me.columnGRMCode = MyBase.Columns("GRMCode")
-            Me.columnGRMLandCoverE = MyBase.Columns("GRMLandCoverE")
-            Me.columnGRMLandCoverK = MyBase.Columns("GRMLandCoverK")
             Me.columnRoughnessCoefficient = MyBase.Columns("RoughnessCoefficient")
             Me.columnImperviousRatio = MyBase.Columns("ImperviousRatio")
         End Sub
@@ -4300,18 +4222,12 @@ Partial Public Class GRMProject
             MyBase.Columns.Add(Me.columnUserLandCover)
             Me.columnGRMCode = New Global.System.Data.DataColumn("GRMCode", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnGRMCode)
-            Me.columnGRMLandCoverE = New Global.System.Data.DataColumn("GRMLandCoverE", GetType(String), Nothing, Global.System.Data.MappingType.Element)
-            MyBase.Columns.Add(Me.columnGRMLandCoverE)
-            Me.columnGRMLandCoverK = New Global.System.Data.DataColumn("GRMLandCoverK", GetType(String), Nothing, Global.System.Data.MappingType.Element)
-            MyBase.Columns.Add(Me.columnGRMLandCoverK)
             Me.columnRoughnessCoefficient = New Global.System.Data.DataColumn("RoughnessCoefficient", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnRoughnessCoefficient)
             Me.columnImperviousRatio = New Global.System.Data.DataColumn("ImperviousRatio", GetType(Single), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnImperviousRatio)
             Me.columnUserLandCover.MaxLength = 50
             Me.columnGRMCode.MaxLength = 50
-            Me.columnGRMLandCoverE.MaxLength = 50
-            Me.columnGRMLandCoverK.MaxLength = 50
         End Sub
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
@@ -7845,36 +7761,6 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property GRMTextureE() As String
-            Get
-                If Me.IsGRMTextureENull Then
-                    Return Nothing
-                Else
-                    Return CType(Me(Me.tableGreenAmptParameter.GRMTextureEColumn),String)
-                End If
-            End Get
-            Set
-                Me(Me.tableGreenAmptParameter.GRMTextureEColumn) = value
-            End Set
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property GRMTextureK() As String
-            Get
-                If Me.IsGRMTextureKNull Then
-                    Return Nothing
-                Else
-                    Return CType(Me(Me.tableGreenAmptParameter.GRMTextureKColumn),String)
-                End If
-            End Get
-            Set
-                Me(Me.tableGreenAmptParameter.GRMTextureKColumn) = value
-            End Set
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Property Porosity() As Single
             Get
                 Try 
@@ -7967,30 +7853,6 @@ Partial Public Class GRMProject
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Sub SetGRMCodeNull()
             Me(Me.tableGreenAmptParameter.GRMCodeColumn) = Global.System.Convert.DBNull
-        End Sub
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Function IsGRMTextureENull() As Boolean
-            Return Me.IsNull(Me.tableGreenAmptParameter.GRMTextureEColumn)
-        End Function
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Sub SetGRMTextureENull()
-            Me(Me.tableGreenAmptParameter.GRMTextureEColumn) = Global.System.Convert.DBNull
-        End Sub
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Function IsGRMTextureKNull() As Boolean
-            Return Me.IsNull(Me.tableGreenAmptParameter.GRMTextureKColumn)
-        End Function
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Sub SetGRMTextureKNull()
-            Me(Me.tableGreenAmptParameter.GRMTextureKColumn) = Global.System.Convert.DBNull
         End Sub
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
@@ -8104,36 +7966,6 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property SoilDepthClassE() As String
-            Get
-                If Me.IsSoilDepthClassENull Then
-                    Return Nothing
-                Else
-                    Return CType(Me(Me.tableSoilDepth.SoilDepthClassEColumn),String)
-                End If
-            End Get
-            Set
-                Me(Me.tableSoilDepth.SoilDepthClassEColumn) = value
-            End Set
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property SoilDepthClassK() As String
-            Get
-                If Me.IsSoilDepthClassKNull Then
-                    Return Nothing
-                Else
-                    Return CType(Me(Me.tableSoilDepth.SoilDepthClassKColumn),String)
-                End If
-            End Get
-            Set
-                Me(Me.tableSoilDepth.SoilDepthClassKColumn) = value
-            End Set
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Property SoilDepth() As Single
             Get
                 Try 
@@ -8181,30 +8013,6 @@ Partial Public Class GRMProject
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Sub SetGRMCodeNull()
             Me(Me.tableSoilDepth.GRMCodeColumn) = Global.System.Convert.DBNull
-        End Sub
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Function IsSoilDepthClassENull() As Boolean
-            Return Me.IsNull(Me.tableSoilDepth.SoilDepthClassEColumn)
-        End Function
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Sub SetSoilDepthClassENull()
-            Me(Me.tableSoilDepth.SoilDepthClassEColumn) = Global.System.Convert.DBNull
-        End Sub
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Function IsSoilDepthClassKNull() As Boolean
-            Return Me.IsNull(Me.tableSoilDepth.SoilDepthClassKColumn)
-        End Function
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Sub SetSoilDepthClassKNull()
-            Me(Me.tableSoilDepth.SoilDepthClassKColumn) = Global.System.Convert.DBNull
         End Sub
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
@@ -8282,36 +8090,6 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property GRMLandCoverE() As String
-            Get
-                If Me.IsGRMLandCoverENull Then
-                    Return Nothing
-                Else
-                    Return CType(Me(Me.tableLandCover.GRMLandCoverEColumn),String)
-                End If
-            End Get
-            Set
-                Me(Me.tableLandCover.GRMLandCoverEColumn) = value
-            End Set
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property GRMLandCoverK() As String
-            Get
-                If Me.IsGRMLandCoverKNull Then
-                    Return Nothing
-                Else
-                    Return CType(Me(Me.tableLandCover.GRMLandCoverKColumn),String)
-                End If
-            End Get
-            Set
-                Me(Me.tableLandCover.GRMLandCoverKColumn) = value
-            End Set
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Property RoughnessCoefficient() As Single
             Get
                 Try 
@@ -8374,30 +8152,6 @@ Partial Public Class GRMProject
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Sub SetGRMCodeNull()
             Me(Me.tableLandCover.GRMCodeColumn) = Global.System.Convert.DBNull
-        End Sub
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Function IsGRMLandCoverENull() As Boolean
-            Return Me.IsNull(Me.tableLandCover.GRMLandCoverEColumn)
-        End Function
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Sub SetGRMLandCoverENull()
-            Me(Me.tableLandCover.GRMLandCoverEColumn) = Global.System.Convert.DBNull
-        End Sub
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Function IsGRMLandCoverKNull() As Boolean
-            Return Me.IsNull(Me.tableLandCover.GRMLandCoverKColumn)
-        End Function
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Sub SetGRMLandCoverKNull()
-            Me(Me.tableLandCover.GRMLandCoverKColumn) = Global.System.Convert.DBNull
         End Sub
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
