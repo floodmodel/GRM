@@ -82,13 +82,14 @@ Public Class cSetSubWatershedParameter
                         If Not .IsCoefUnsaturatedKNull AndAlso .CoefUnsaturatedK <> "" Then
                             upars.coefUK = CSng(.CoefUnsaturatedK)
                         Else
+                            'set defalut value
                             Select Case upars.UKType.ToLower
                                 Case cGRM.UnSaturatedKType.Linear.ToString.ToLower
                                     upars.coefUK = 0.2
                                 Case cGRM.UnSaturatedKType.Exponential.ToString.ToLower
                                     upars.coefUK = 6.4
                                 Case cGRM.UnSaturatedKType.Constant.ToString.ToLower
-                                    upars.coefUK = 0
+                                    upars.coefUK = 0.1
                                 Case Else
                                     upars.coefUK = 0.2
                             End Select

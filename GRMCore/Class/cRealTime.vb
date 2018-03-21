@@ -23,15 +23,17 @@ Public Class cRealTime
     Public mDateTimeStartRT As DateTime
     Public mbSimulationRTisOngoing As Boolean
     Private Shared mGRMRT As cRealTime
-    Public mFPNFcData As String
+    'Public mFPNFcData As String
     Public mPicWidth As Single
     Public mPicHeight As Single
     Private mGrmAnalyzer As cGRMAnalyzer
 
     Public mbIsDWSS As Boolean
-    Public mDWSS_CVID_toConnectUWSS As Integer
-    Public mCWSS_CVID_toConnectWithDWSS As Integer
-    Public mFPNDWssFCData As String
+    Public mCWCellColX_ToConnectDW As Integer
+    Public mCWCellRowY_ToConnectDW As Integer
+    Public mDWCellColX_ToConnectCW As Integer
+    Public mDWCellRowY_ToConnectCW As Integer
+    'Public mFPNDWssFCData As String
 
     Private WithEvents mSimul As cSimulator
     Private m_odt_flowcontrolinfo As Data.DataTable
@@ -46,8 +48,8 @@ Public Class cRealTime
         mGRMRT = New cRealTime
     End Sub
 
-    Public Sub SetupGRM(ByVal FPNprj As String, Optional FPNfcdata As String = "")
-        mFPNFcData = FPNfcdata
+    Public Sub SetupGRM(ByVal FPNprj As String) 'fc 자료는 항상 db를 사용하는 것으로 수정, Optional FPNfcdata As String = "")
+        'mFPNFcData = FPNfcdata
         If cProject.OpenProject(FPNprj, True) = False Then
             RaiseEvent RTStatus("모형 설정 실패.")
             If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(cProject.Current.ProjectNameOnly, "모형 설정 실패.")
@@ -110,10 +112,10 @@ Public Class cRealTime
                 mdicBNewFCdataAddedRT.Add(id, True)
                 mdicFCDataOrder.Add(id, 0)
             Next
-            If mGRMRT.mFPNFcData.Trim <> "" AndAlso IO.File.Exists(mGRMRT.mFPNFcData) = False Then
-                System.Console.WriteLine(String.Format("Realtime flow control data file is not valid. {0} {1}", vbCrLf, mGRMRT.mFPNFcData))
-                Exit Sub
-            End If
+            'If mGRMRT.mFPNFcData.Trim <> "" AndAlso IO.File.Exists(mGRMRT.mFPNFcData) = False Then
+            '    System.Console.WriteLine(String.Format("Realtime flow control data file is not valid. {0} {1}", vbCrLf, mGRMRT.mFPNFcData))
+            '    Exit Sub
+            'End If
             cProject.Current.FCGrid.mdtFCFlowData = New DataTable
             Call ReadDBorCSVandMakeFCdataTableForRealTime(mRFStartDateTimeRT)
             If cProject.Current.FCGrid.mdtFCFlowData.Rows.Count < 1 Then

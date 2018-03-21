@@ -78,32 +78,32 @@ Public Class cOutputControlRT
                 End If
                 oSQLCon.Close()
 
-            Else
-                strOutPutLine = String.Format("{0},{1},{2}{3}", RTProject.mDWSS_CVID_toConnectUWSS.ToString,
-                                                  cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut),
-                                                  vToPrint.Trim, vbCrLf)
-                If RTProject.mbIsDWSS = True Then
-                    If RTProject.mFPNDWssFCData IsNot Nothing AndAlso cFile.IsFileLocked(RTProject.mFPNDWssFCData, 10) = False Then
-                        Dim checkError As Boolean = True
-                        While checkError
-                            Try
-                                IO.File.AppendAllText(RTProject.mFPNDWssFCData, strOutPutLine, Encoding.Default)
-                                checkError = False
-                            Catch ex2 As IOException
-                                Console.WriteLine(String.Format("{0} : {1} File 기록 동시 접근상황", Now.ToLongTimeString, RTProject.mFPNDWssFCData))
-                                checkError = True
-                            Catch e As Exception
-                                Throw New ApplicationException("IO.File.AppendAllText(RTProject.mFPNDWssFCData, strOutPutLine, Encoding.Default)")
-                            End Try
-                        End While
-                    Else
-                        Dim msgstr As String
-                        msgstr = "Calculated discharge cannot be written in the downstream watershed flow control file." + vbCrLf
-                        msgstr = msgstr + String.Format("File name : {0}{1}", RTProject.mFPNDWssFCData, vbCrLf)
-                        msgstr = msgstr + "The file may be locked by another process."
-                        Throw New ApplicationException(msgstr)
-                    End If
-                End If
+            Else '항상 db를 사용
+                'strOutPutLine = String.Format("{0},{1},{2}{3}", RTProject.mDWSS_CVID_toConnectUWSS.ToString,
+                '                                  cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut),
+                '                                  vToPrint.Trim, vbCrLf)
+                'If RTProject.mbIsDWSS = True Then
+                '    If RTProject.mFPNDWssFCData IsNot Nothing AndAlso cFile.IsFileLocked(RTProject.mFPNDWssFCData, 10) = False Then
+                '        Dim checkError As Boolean = True
+                '        While checkError
+                '            Try
+                '                IO.File.AppendAllText(RTProject.mFPNDWssFCData, strOutPutLine, Encoding.Default)
+                '                checkError = False
+                '            Catch ex2 As IOException
+                '                Console.WriteLine(String.Format("{0} : {1} File 기록 동시 접근상황", Now.ToLongTimeString, RTProject.mFPNDWssFCData))
+                '                checkError = True
+                '            Catch e As Exception
+                '                Throw New ApplicationException("IO.File.AppendAllText(RTProject.mFPNDWssFCData, strOutPutLine, Encoding.Default)")
+                '            End Try
+                '        End While
+                '    Else
+                '        Dim msgstr As String
+                '        msgstr = "Calculated discharge cannot be written in the downstream watershed flow control file." + vbCrLf
+                '        msgstr = msgstr + String.Format("File name : {0}{1}", RTProject.mFPNDWssFCData, vbCrLf)
+                '        msgstr = msgstr + "The file may be locked by another process."
+                '        Throw New ApplicationException(msgstr)
+                '    End If
+                'End If
             End If
         Next
     End Sub
@@ -160,10 +160,10 @@ Public Class cOutputControlRT
             End If
 
             If cRealTime.CONST_bUseDBMS_FOR_RealTimeSystem = False Then
-                If RTproject.mbIsDWSS = True AndAlso Not IO.File.Exists(RTproject.mFPNDWssFCData) Then
-                    strOutPutLine = "CVID," + cGRM.CONST_OUTPUT_TABLE_TIME_FIELD_NAME + ",Value" & vbCrLf
-                    IO.File.AppendAllText(RTproject.mFPNDWssFCData, strOutPutLine, Encoding.Default)
-                End If
+                'If RTproject.mbIsDWSS = True AndAlso Not IO.File.Exists(RTproject.mFPNDWssFCData) Then
+                '    strOutPutLine = "CVID," + cGRM.CONST_OUTPUT_TABLE_TIME_FIELD_NAME + ",Value" & vbCrLf
+                '    IO.File.AppendAllText(RTproject.mFPNDWssFCData, strOutPutLine, Encoding.Default)
+                'End If
             End If
 
             Return True

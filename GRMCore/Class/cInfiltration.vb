@@ -188,36 +188,41 @@
 
     Public Shared Function GetSoilSaturationRaito(ByVal cumulativeInfiltration As Single,
                                                   ByVal effSoilDepth As Single, ByVal flowType As cGRM.CellFlowType) As Single
-        Dim SSR As Single = 0
-        If flowType = cGRM.CellFlowType.ChannelFlow Then
-            SSR = 1
-        End If
-        If effSoilDepth <= 0 Then SSR = 1
-        If cumulativeInfiltration <= 0 Then SSR = 0
-        SSR = cumulativeInfiltration / effSoilDepth
-        If SSR > 1 Then SSR = 1
+        If flowType = cGRM.CellFlowType.ChannelFlow Then Return 1
+        If effSoilDepth <= 0 Then Return 1
+        If cumulativeInfiltration <= 0 Then Return 0
+        Dim SSR As Single = cumulativeInfiltration / effSoilDepth
+        If SSR > 1 Then Return 1
         Return SSR
+    End Function
+
+    Public Shared Function GetSoilSaturationRaito(curssr As Single, ByVal cumulativeInfiltration As Single,
+                                                  ByVal effSoilDepth As Single, ByVal flowType As cGRM.CellFlowType) As Single
+        If flowType = cGRM.CellFlowType.ChannelFlow Then Return 1
+        If effSoilDepth <= 0 Then Return 1
+        If cumulativeInfiltration <= 0 Then Return 0
+        Return curssr
     End Function
 
 
     Public Shared Function Kunsaturated(ByVal cv As cCVAttribute, uKType As cGRM.UnSaturatedKType, CoefUnsaturatedK As Single) As Single
         'Dim ca As Single = 0.2 '0.24
-        Dim ssr As Single = GetSoilSaturationRaito(cv.CumulativeInfiltrationF_tM1_m, cv.SoilDepthEffectiveAsWaterDepth_m, cv.FlowType)
+        Dim ssr As Single = GetSoilSaturationRaito(cv.soilSaturationRatio, cv.CumulativeInfiltrationF_tM1_m, cv.SoilDepthEffectiveAsWaterDepth_m, cv.FlowType)
+        'Dim ssr As Single = GetSoilSaturationRaito(cv.CumulativeInfiltrationF_tM1_m, cv.SoilDepthEffectiveAsWaterDepth_m, cv.FlowType)
         Dim Ks As Single = cv.hydraulicConductK_mPsec
-        If CoefUnsaturatedK <= 0 Then Return Ks
+        If CoefUnsaturatedK <= 0 Then Return CSng(Ks * 0.1)
         If ssr > 0.99 Then
             Return Ks
         Else
-            Dim Kus As Single
             Select Case uKType
                 Case cGRM.UnSaturatedKType.Linear
-                    Kus = CSng(Ks * ssr * CoefUnsaturatedK)
+                    Return CSng(Ks * ssr * CoefUnsaturatedK)
                 Case cGRM.UnSaturatedKType.Exponential
-                    Kus = CSng(Ks * ssr ^ CoefUnsaturatedK)
+                    Return CSng(Ks * ssr ^ CoefUnsaturatedK)
                 Case cGRM.UnSaturatedKType.Constant
-                    Return Ks
+                    Return CSng(Ks * CoefUnsaturatedK)
                 Case Else
-                    Return Ks
+                    Return CSng(Ks * 0.1)
             End Select
         End If
 

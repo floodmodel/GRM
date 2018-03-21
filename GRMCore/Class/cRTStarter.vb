@@ -9,14 +9,16 @@ Public Class cRTStarter
     Private mFPN_RTEnv As String
     Private mProjectFPN As String
     Private mFP_RFLayerFP As String
-    Private mFPN_FCData As String
+    'Private mFPN_FCData As String '현재 유역에서 읽을 fc data 파일. db 매개로 수정하였으므로 필요없음.
     Private mSimulationStartingTime As String
     Private mRainfallDataType As GRMCore.cRainfall.RainfallDataType
-    Private mbDWSS_EXIST As Boolean
+    Private mbDWS_EXIST As Boolean
     Private mbIsFC As Boolean
-    Private mCWSS_CVID_toConnectWithDWSS As Integer
-    Private mDWSS_CVID_toConnectUWSS As Integer
-    Private mFPN_DWSS_FCDATA As String
+    Private mCWCellColXToConnectDW As Integer
+    Private mCWCellRowYToConnectDW As Integer
+    Private mDWCellColXToConnectCW As Integer
+    Private mDWCellRowYToConnectCW As Integer
+    'Private mFPN_DWSS_FCDATA As String  '하류 유역의 fc data로 사용할 파일. db 매개로 수정하였으므로 필요없음.
     Private mRFInterval_MIN As Integer
     Private mOutPutInterval_MIN As Integer
 
@@ -42,22 +44,24 @@ Public Class cRTStarter
         mFP_RFLayerFP = r.RTRFfolderName
         If r.IsFC = True Then
             mbIsFC = True
-            If Not r.IsRTFCdataFPNNull AndAlso r.RTFCdataFPN <> "" Then
-                mFPN_FCData = r.RTFCdataFPN
-            Else
-                mFPN_FCData = ""
-            End If
+            'If Not r.IsRTFCdataFPNNull AndAlso r.RTFCdataFPN <> "" Then
+            '    mFPN_FCData = r.RTFCdataFPN
+            'Else
+            '    mFPN_FCData = ""
+            'End If
         Else
-            mFPN_FCData = ""
+            'mFPN_FCData = ""
             mbIsFC = False
         End If
-        mbDWSS_EXIST = r.IsDWSSexist
-        If mbDWSS_EXIST = True Then
-            mDWSS_CVID_toConnectUWSS = r.DWSSCVIDtoConnectWithUWSS
-            mCWSS_CVID_toConnectWithDWSS = r.CWSSCVIDtoConnectWithDWSS
-            If cRealTime.CONST_bUseDBMS_FOR_RealTimeSystem = False Then
-                mFPN_DWSS_FCDATA = r.FPNDWSSFCdata
-            End If
+        mbDWS_EXIST = r.IsDWSExist
+        If mbDWS_EXIST = True Then
+            mCWCellColXToConnectDW = r.CWCellColXToConnectDW
+            mCWCellRowYToConnectDW = r.CWCellRowYToConnectDW
+            mDWCellColXToConnectCW = r.DWCellColXToConnectCW
+            mDWCellRowYToConnectCW = r.DWCellRowYToConnectCW
+            'If cRealTime.CONST_bUseDBMS_FOR_RealTimeSystem = False Then
+            '    mFPN_DWSS_FCDATA = r.FPNDWSSFCdata
+            'End If
         End If
         mRFInterval_MIN = r.RFInterval_min
         mOutPutInterval_MIN = r.OutputInterval_min
@@ -70,11 +74,11 @@ Public Class cRTStarter
 
 
     Public Sub SetUpAndStartGRMRT()
-        If mbIsFC = True Then
-            If IO.File.Exists(mFPN_FCData) Then IO.File.Delete(mFPN_FCData)
-            Dim strH As String = "CVID,DataTime,Value" & vbCrLf
-            IO.File.AppendAllText(mFPN_FCData, strH, Encoding.Default)
-        End If
+        'If mbIsFC = True Then
+        '    If IO.File.Exists(mFPN_FCData) Then IO.File.Delete(mFPN_FCData)
+        '    Dim strH As String = "CVID,DataTime,Value" & vbCrLf
+        '    IO.File.AppendAllText(mFPN_FCData, strH, Encoding.Default)
+        'End If
         Call SetupRT()
         UpateGRMGeneralParsByUserSettiing()
         GRMRT.RunGRMRT()
@@ -86,7 +90,7 @@ Public Class cRTStarter
         RTProject = Nothing
         cRealTime.InitializeGRMRT()
         GRMRT = cRealTime.Current
-        GRMRT.SetupGRM(mProjectFPN, mFPN_FCData)
+        GRMRT.SetupGRM(mProjectFPN)
         RTProject = cProject.Current
     End Sub
 
@@ -112,13 +116,15 @@ Public Class cRTStarter
             .mRfFilePathRT = mFP_RFLayerFP
             .mPicWidth = CONST_PIC_WIDTH
             .mPicHeight = CONST_PIC_HEIGHT
-            .mbIsDWSS = mbDWSS_EXIST
+            .mbIsDWSS = mbDWS_EXIST
             If .mbIsDWSS = True Then
-                .mDWSS_CVID_toConnectUWSS = mDWSS_CVID_toConnectUWSS
-                .mCWSS_CVID_toConnectWithDWSS = mCWSS_CVID_toConnectWithDWSS
-                If GRMCore.cRealTime.CONST_bUseDBMS_FOR_RealTimeSystem = False Then
-                    .mFPNDWssFCData = mFPN_DWSS_FCDATA
-                End If
+                .mCWCellColX_ToConnectDW = mCWCellColXToConnectDW
+                .mCWCellRowY_ToConnectDW = mCWCellRowYToConnectDW
+                .mDWCellColX_ToConnectCW = mDWCellColXToConnectCW
+                .mDWCellRowY_ToConnectCW = mDWCellRowYToConnectCW
+                'If GRMCore.cRealTime.CONST_bUseDBMS_FOR_RealTimeSystem = False Then
+                '    .mFPNDWssFCData = mFPN_DWSS_FCDATA
+                'End If
             End If
         End With
     End Sub
@@ -154,7 +160,6 @@ Public Class cRTStarter
                                                 ccPorosity As Single,
                                                 ccWFSuctionHead As Single,
                                                 ccSoilHydraulicCond As Single,
-                                                applyIniFlow As Boolean,
                                                 Optional iniFlow As Single = 0) As Boolean
         With RTProject.SubWSPar.userPars(wsid)
             .iniSaturation = iniSat

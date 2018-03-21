@@ -1,6 +1,13 @@
 ﻿
 
 Partial Public Class GRMProject
+    Partial Public Class RTenvDataTable
+        Private Sub RTenvDataTable_ColumnChanging(sender As Object, e As DataColumnChangeEventArgs) Handles Me.ColumnChanging
+
+        End Sub
+
+    End Class
+
     Partial Public Class FlowControlGridDataTable
         Private Sub FlowControlGridDataTable_ColumnChanging(sender As Object, e As DataColumnChangeEventArgs) Handles Me.ColumnChanging
             If (e.Column.ColumnName = Me.ROSDEqAColumn.ColumnName) Then

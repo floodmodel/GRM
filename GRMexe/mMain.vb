@@ -116,14 +116,14 @@ Module mMain
                 Exit Sub
             End If
             '여기서 셀 정보를 미리 알 수 있다.
-            Dim wsinfo As New cGetWatershedInfo(currentPrjFPN)
-            Dim slp As Single = wsinfo.subwatershedPars(1).minSlopeChBed
-            Dim ukk As String = wsinfo.subwatershedPars(1).UKType
-            Dim cc As Integer = wsinfo.cellCountInWatershed
-            wsinfo.UpdateAllSubWatershedParametersUsingNetwork()
+            'Dim wsinfo As New cGetWatershedInfo(currentPrjFPN)
+            'Dim slp As Single = wsinfo.subwatershedPars(1).minSlopeChBed
+            'Dim ukk As String = wsinfo.subwatershedPars(1).UKType
+            'Dim cc As Integer = wsinfo.cellCountInWatershed
+            'wsinfo.UpdateAllSubWatershedParametersUsingNetwork()
 
-            Dim aa As Single = wsinfo.subwatershedPars(2).coefUK
-            Dim a As Integer = 1
+            'Dim aa As Single = wsinfo.subwatershedPars(2).coefUK
+            'Dim a As Integer = 1
             ''혹은 아래의 방법
             'Dim WSFPN As String = cProject.Current.Watershed.mFPN_watershed
             'Dim SlopeFPN As String = cProject.Current.Watershed.mFPN_slope

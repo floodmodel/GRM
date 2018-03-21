@@ -30,8 +30,7 @@
             End If
 
             ' 상류에서 유입된 지표하 유출 깊이 더하고..
-            .CumulativeInfiltrationF_tM1_m = .CumulativeInfiltrationF_tM1_m _
-                                   + SSFAddedToMeFromCVw_m
+            .CumulativeInfiltrationF_tM1_m = .CumulativeInfiltrationF_tM1_m + SSFAddedToMeFromCVw_m
 
             '현재의 침투 깊이를 이용해서 rf 계산하고..
 
@@ -57,9 +56,7 @@
 
     Public Function GetTotalSSFfromCVwOFcell_m3Ps(ByVal project As cProject, ByVal cvan As Integer) As Single
         Dim cumulativeSSF_m3Ps As Single
-        ' sngCumulativeSaturatedSoilDepth_m는 자신으로 유입되는 상류셀들의 유량을 이용해서다시 계산된 수심이다.
-        'GetTotalSubSurfaceDischargeFromCVwOFcell_m3Ps = 0
-        For Each objCellid As Integer In project.CV(cvan).NeighborCVidFlowIntoMe '.cellidFlowIntoCViW
+        For Each objCellid As Integer In project.CV(cvan).NeighborCVidFlowIntoMe
             With project.CV(objCellid - 1)
                 If .FlowType = cGRM.CellFlowType.OverlandFlow Then '상류셀 중 overlandflow type에 대해서만 받는다.
                     '즉, GRM에서 Green-Ampt 모형을 이용해서 침투된 양을 계산할때, 포화된 깊이로 계산됨. 즉, 현재 침투률로 얼만큼 깊이 들어갔는지는 계산하지 않는다..
@@ -177,7 +174,7 @@
         Dim csa As Single = 0
         deltaSoilDepthofUAQ_m = 0
         With project.CV(cvan)
-            '토양이 건조하지 않으면, 하부는 포화상태, 하부에서 부터 침누, 강우에 의한 수분은 위에서 부터 전파
+            '토양의 포화 상태와 상관없이 침누가 발생한다. 토양포화도가 상승 및 하강한다.
             If .soilSaturationRatio > 0 Then
                 soilDepthPercolated_m = cInfiltration.Kunsaturated(project.CV(cvan), .UKType, .coefUK) * dtsec
             Else
@@ -186,10 +183,11 @@
             If .soilDepth_m < soilDepthPercolated_m Then 'B층의 최대 증가 가능 높이는 토양심을 초과하지 않는다.
                 soilDepthPercolated_m = .soilDepth_m
                 .CumulativeInfiltrationF_tM1_m = 0 '이전시간에 침투된 모든 양이 B 층으로 침누된 경우이므로..
+            Else
+                waterDepthPercolated_m = soilDepthPercolated_m * .effectivePorosityThetaE
+                .CumulativeInfiltrationF_tM1_m = .CumulativeInfiltrationF_tM1_m - waterDepthPercolated_m
+                If .CumulativeInfiltrationF_tM1_m < 0 Then .CumulativeInfiltrationF_tM1_m = 0
             End If
-            waterDepthPercolated_m = soilDepthPercolated_m * .effectivePorosityThetaE
-            .CumulativeInfiltrationF_tM1_m = .CumulativeInfiltrationF_tM1_m - waterDepthPercolated_m
-            If .CumulativeInfiltrationF_tM1_m < 0 Then .CumulativeInfiltrationF_tM1_m = 0
             If .CumulativeInfiltrationF_tM1_m > .SoilDepthEffectiveAsWaterDepth_m Then _
                .CumulativeInfiltrationF_tM1_m = .SoilDepthEffectiveAsWaterDepth_m
             If (.FlowType = cGRM.CellFlowType.ChannelFlow AndAlso
