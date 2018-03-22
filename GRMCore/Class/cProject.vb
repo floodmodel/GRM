@@ -1327,7 +1327,7 @@ Public Class cProject
                                                                                cell.SoilTextureCode = vatSTcode(value)
                                                                            Else
                                                                                Console.WriteLine(String.Format("Soil texture file {0} has an invalid value.",
-                                                                                                               GreenAmpt.mGridSoilTextureFPN), True, True)
+                                                                                GreenAmpt.mGridSoilTextureFPN), True, True)
                                                                                isnormal = False
                                                                            End If
                                                                        End If
@@ -1548,72 +1548,27 @@ Public Class cProject
                 If WSCell(intC, intR) Is Nothing Then Continue For
                 Dim cell As cCVAttribute = WSCell(intC, intR)
                 Dim wsid As Integer = cell.WSID
+                Dim ups As cUserParameters = mSubWSpar.userPars(wsid)
                 With cell
                     .DownStreamWPCVids.Clear()
                     .toBeSimulated = True
                     If .FlowType = cGRM.CellFlowType.ChannelNOverlandFlow Then .FlowType = cGRM.CellFlowType.ChannelFlow
                     '지표면 경사
-                    If .Slope < mSubWSpar.userPars(wsid).minSlopeOF Then
-                        .SlopeOF = mSubWSpar.userPars(wsid).minSlopeOF
+                    If .Slope < ups.minSlopeOF Then
+                        .SlopeOF = ups.minSlopeOF
                     Else
                         .SlopeOF = .Slope
                     End If
-                    .RoughnessCoeffOF = .RoughnessCoeffOFori * mSubWSpar.userPars(wsid).ccLCRoughness
-
-                    ' 토양
-                    Select Case mSubWSpar.userPars(wsid).UKType.ToLower
-                        Case cGRM.UnSaturatedKType.Linear.ToString.ToLower
-                            .UKType = cGRM.UnSaturatedKType.Linear
-                        Case cGRM.UnSaturatedKType.Exponential.ToString.ToLower
-                            .UKType = cGRM.UnSaturatedKType.Exponential
-                        Case cGRM.UnSaturatedKType.Constant.ToString.ToLower
-                            .UKType = cGRM.UnSaturatedKType.Constant
-                        Case Else
-                            .UKType = cGRM.UnSaturatedKType.Linear
-                    End Select
-                    .coefUK = mSubWSpar.userPars(wsid).coefUK
-                    .porosityEta = .PorosityEtaOri * mSubWSpar.userPars(wsid).ccPorosity
-                    If .porosityEta >= 1 Then .porosityEta = 0.99
-                    If .porosityEta <= 0 Then .porosityEta = 0.01
-                    .effectivePorosityThetaE = .EffectivePorosityThetaEori * mSubWSpar.userPars(wsid).ccPorosity   '유효 공극율의 보정은 공극률 보정계수를 함께 사용한다.
-                    If .effectivePorosityThetaE >= 1 Then .effectivePorosityThetaE = 0.99
-                    If .effectivePorosityThetaE <= 0 Then .effectivePorosityThetaE = 0.01
-                    .wettingFrontSuctionHeadPsi_m = .WettingFrontSuctionHeadPsiOri_m * mSubWSpar.userPars(wsid).ccWFSuctionHead
-                    .hydraulicConductK_mPsec = .HydraulicConductKori_mPsec * mSubWSpar.userPars(wsid).ccHydraulicK
-                    .soilDepth_m = .SoilDepthOri_m * mSubWSpar.userPars(wsid).ccSoilDepth
-
-                    If Watershed.mFPN_initialSoilSaturationRatio = "" OrElse File.Exists(Watershed.mFPN_initialSoilSaturationRatio) = False Then
-                        .InitialSaturation = mSubWSpar.userPars(wsid).iniSaturation
-                    Else
-                        ' 이경우에는 레이어 설정에서 값이 입력되어 있다.
-                    End If
-                    .SoilDepthEffectiveAsWaterDepth_m = .soilDepth_m * .effectivePorosityThetaE
-                    If .FlowType = cGRM.CellFlowType.ChannelFlow Then
-                        .SoilDepthEffectiveAsWaterDepth_m = CSng(.SoilDepthEffectiveAsWaterDepth_m * 0.5) '하도 셀에서는 50% 정도가 침투 가능 영역 
-                    End If
-
-                    .CumulativeInfiltrationF_m = .SoilDepthEffectiveAsWaterDepth_m * .InitialSaturation
-                    .CumulativeInfiltrationF_tM1_m = .CumulativeInfiltrationF_m
-                    .soilSaturationRatio = .InitialSaturation
-                    If .InitialSaturation = 1 OrElse
-                       .LandCoverCode = cSetLandcover.LandCoverCode.WATR OrElse
-                       .LandCoverCode = cSetLandcover.LandCoverCode.WTLD Then
-                        .soilSaturationRatio = 1
-                    End If
-
-                    .SoilDepthToBedrock_m = cGRM.CONST_DEPTH_TO_BEDROCK '암반까지의 깊이를 20m로 가정, 산악지역에서는 5m
-                    If .LandCoverCode = cSetLandcover.LandCoverCode.FRST Then
-                        .SoilDepthToBedrock_m = cGRM.CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN
-                    End If
+                    .RoughnessCoeffOF = .RoughnessCoeffOFori * ups.ccLCRoughness
 
                     '하천
                     If Watershed.HasStreamLayer AndAlso .FlowType = cGRM.CellFlowType.ChannelFlow Then
-                        .mStreamAttr.RoughnessCoeffCH = mSubWSpar.userPars(wsid).chRoughness
+                        .mStreamAttr.RoughnessCoeffCH = ups.chRoughness
                         .mStreamAttr.chSideSlopeLeft = CSng(mChannel.mLeftBankSlope)
                         .mStreamAttr.chSideSlopeRight = CSng(mChannel.mRightBankSlope)
                         .mStreamAttr.mChBankCoeff = (1 / mChannel.mLeftBankSlope + 1 / mChannel.mRightBankSlope).Value
-                        If .Slope < mSubWSpar.userPars(wsid).minSlopeChBed Then '하도의 최소 경사 설정
-                            .mStreamAttr.chBedSlope = mSubWSpar.userPars(wsid).minSlopeChBed
+                        If .Slope < ups.minSlopeChBed Then '하도의 최소 경사 설정
+                            .mStreamAttr.chBedSlope = ups.minSlopeChBed
                         Else
                             .mStreamAttr.chBedSlope = .Slope
                         End If
@@ -1622,7 +1577,9 @@ Public Class cProject
                             Dim cs As New cSetCSSingle
                             cs = CType(Channel.mCrossSection, cSetCSSingle)
                             If cs.mCSSingleWidthType = cSetCSSingle.CSSingleChannelWidthType.CWEquation Then
-                                .mStreamAttr.ChBaseWidth = CSng(cs.mCWEc * ((.FAc + 1) * (Watershed.mCellSize * Watershed.mCellSize / 1000000)) ^ cs.mCWEd / .mStreamAttr.chBedSlope ^ cs.mCWEe)
+                                .mStreamAttr.ChBaseWidth =
+                                    CSng(cs.mCWEc * ((.FAc + 1) * (Watershed.mCellSize * Watershed.mCellSize / 1000000)) ^ cs.mCWEd _
+                                    / .mStreamAttr.chBedSlope ^ cs.mCWEe)
                             Else
                                 .mStreamAttr.ChBaseWidth = .FAc * cs.mMaxChannelWidthSingleCS / cProject.Current.FacMax
                             End If
@@ -1637,7 +1594,6 @@ Public Class cProject
                             Dim cs As New cSetCSCompound
                             cs = CType(Channel.mCrossSection, cSetCSCompound)
                             .mStreamAttr.ChBaseWidth = .FAc * cs.mLowerRegionBaseWidth / FacMax
-
                             If .mStreamAttr.ChBaseWidth < cs.mCompoundCSCriteriaChannelWidth Then
                                 .mStreamAttr.chIsCompoundCS = False
                                 .mStreamAttr.chUpperRBaseWidth_m = 0
@@ -1648,23 +1604,61 @@ Public Class cProject
                                 .mStreamAttr.chUpperRBaseWidth_m = .FAc * cs.mUpperRegionBaseWidth / FacMax
                                 .mStreamAttr.chLowerRHeight = .FAc * cs.mLowerRegionHeight / FacMax
                                 Dim mFVMSolver As New cFVMSolver
-                                .mStreamAttr.chLowerRArea_m2 = mFVMSolver.GetChannelCrossSectionAreaUsingChannelFlowDepth(.mStreamAttr.ChBaseWidth,
-                                                                                             .mStreamAttr.mChBankCoeff,
-                                                                                             .mStreamAttr.chLowerRHeight, False,
-                                                                                             .mStreamAttr.chLowerRHeight,
-                                                                                             .mStreamAttr.chLowerRArea_m2,
-                                                                                            0)
+                                .mStreamAttr.chLowerRArea_m2 =
+                                    mFVMSolver.GetChannelCrossSectionAreaUsingChannelFlowDepth(.mStreamAttr.ChBaseWidth,
+                                                                .mStreamAttr.mChBankCoeff, .mStreamAttr.chLowerRHeight, False,
+                                                                .mStreamAttr.chLowerRHeight, .mStreamAttr.chLowerRArea_m2, 0)
                             End If
                         End If
                         '최소 하폭
-                        If .mStreamAttr.ChBaseWidth < mSubWSpar.userPars(wsid).minChBaseWidth Then _
-                            .mStreamAttr.ChBaseWidth = mSubWSpar.userPars(wsid).minChBaseWidth
+                        If .mStreamAttr.ChBaseWidth < ups.minChBaseWidth Then _
+                            .mStreamAttr.ChBaseWidth = ups.minChBaseWidth
                         If .mStreamAttr.ChBaseWidth < Watershed.mCellSize Then
                             .FlowType = cGRM.CellFlowType.ChannelNOverlandFlow
-                        Else
-                            .soilSaturationRatio = 1
                         End If
+                    End If
 
+                    ' 토양
+                    If Watershed.mFPN_initialSoilSaturationRatio = "" OrElse
+                        File.Exists(Watershed.mFPN_initialSoilSaturationRatio) = False Then
+                        .InitialSaturation = ups.iniSaturation
+                    Else
+                        ' 이경우에는 레이어 설정에서 값이 입력되어 있다.
+                    End If
+                    If .FlowType = cGRM.CellFlowType.ChannelFlow OrElse
+                            .LandCoverCode = cSetLandcover.LandCoverCode.WATR OrElse
+                       .LandCoverCode = cSetLandcover.LandCoverCode.WTLD Then
+                        .soilSaturationRatio = 1
+                    Else
+                        .soilSaturationRatio = .InitialSaturation
+                    End If
+                    Select Case ups.UKType.ToLower
+                        Case cGRM.UnSaturatedKType.Linear.ToString.ToLower
+                            .UKType = cGRM.UnSaturatedKType.Linear
+                        Case cGRM.UnSaturatedKType.Exponential.ToString.ToLower
+                            .UKType = cGRM.UnSaturatedKType.Exponential
+                        Case cGRM.UnSaturatedKType.Constant.ToString.ToLower
+                            .UKType = cGRM.UnSaturatedKType.Constant
+                        Case Else
+                            .UKType = cGRM.UnSaturatedKType.Linear
+                    End Select
+                    .coefUK = ups.coefUK
+                    .porosityEta = .PorosityEtaOri * ups.ccPorosity
+                    If .porosityEta >= 1 Then .porosityEta = 0.99
+                    If .porosityEta <= 0 Then .porosityEta = 0.01
+                    .effectivePorosityThetaE = .EffectivePorosityThetaEori * ups.ccPorosity   '유효 공극율의 보정은 공극률 보정계수를 함께 사용한다.
+                    If .effectivePorosityThetaE >= 1 Then .effectivePorosityThetaE = 0.99
+                    If .effectivePorosityThetaE <= 0 Then .effectivePorosityThetaE = 0.01
+                    .wettingFrontSuctionHeadPsi_m = .WettingFrontSuctionHeadPsiOri_m * ups.ccWFSuctionHead
+                    .hydraulicConductK_mPsec = .HydraulicConductKori_mPsec * ups.ccHydraulicK
+                    .soilDepth_m = .SoilDepthOri_m * ups.ccSoilDepth
+                    .SoilDepthEffectiveAsWaterDepth_m = .soilDepth_m * .effectivePorosityThetaE
+                    .soilWaterContent_m = .SoilDepthEffectiveAsWaterDepth_m * .soilSaturationRatio
+                    .soilWaterContent_tM1_m = .soilWaterContent_m
+
+                    .SoilDepthToBedrock_m = cGRM.CONST_DEPTH_TO_BEDROCK '암반까지의 깊이를 20m로 가정, 산악지역에서는 5m
+                    If .LandCoverCode = cSetLandcover.LandCoverCode.FRST Then
+                        .SoilDepthToBedrock_m = cGRM.CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN
                     End If
                 End With
             Next intC
@@ -1719,6 +1713,178 @@ Public Class cProject
         End If
         '-------------------------------------------------------------
     End Sub
+
+    'Public Sub UpdateCVbyUserSettings()
+    '    For intR As Integer = 0 To mWatershed.mRowCount - 1
+    '        For intC As Integer = 0 To mWatershed.mColCount - 1
+    '            If WSCell(intC, intR) Is Nothing Then Continue For
+    '            Dim cell As cCVAttribute = WSCell(intC, intR)
+    '            Dim wsid As Integer = cell.WSID
+    '            Dim ups As cUserParameters = mSubWSpar.userPars(wsid)
+    '            With cell
+    '                .DownStreamWPCVids.Clear()
+    '                .toBeSimulated = True
+    '                If .FlowType = cGRM.CellFlowType.ChannelNOverlandFlow Then .FlowType = cGRM.CellFlowType.ChannelFlow
+    '                '지표면 경사
+    '                If .Slope < mSubWSpar.userPars(wsid).minSlopeOF Then
+    '                    .SlopeOF = mSubWSpar.userPars(wsid).minSlopeOF
+    '                Else
+    '                    .SlopeOF = .Slope
+    '                End If
+    '                .RoughnessCoeffOF = .RoughnessCoeffOFori * mSubWSpar.userPars(wsid).ccLCRoughness
+
+    '                '하천
+    '                If Watershed.HasStreamLayer AndAlso .FlowType = cGRM.CellFlowType.ChannelFlow Then
+    '                    .mStreamAttr.RoughnessCoeffCH = mSubWSpar.userPars(wsid).chRoughness
+    '                    .mStreamAttr.chSideSlopeLeft = CSng(mChannel.mLeftBankSlope)
+    '                    .mStreamAttr.chSideSlopeRight = CSng(mChannel.mRightBankSlope)
+    '                    .mStreamAttr.mChBankCoeff = (1 / mChannel.mLeftBankSlope + 1 / mChannel.mRightBankSlope).Value
+    '                    If .Slope < mSubWSpar.userPars(wsid).minSlopeChBed Then '하도의 최소 경사 설정
+    '                        .mStreamAttr.chBedSlope = mSubWSpar.userPars(wsid).minSlopeChBed
+    '                    Else
+    '                        .mStreamAttr.chBedSlope = .Slope
+    '                    End If
+
+    '                    If Channel.mCrossSectionType = cSetCrossSection.CSTypeEnum.CSSingle Then
+    '                        Dim cs As New cSetCSSingle
+    '                        cs = CType(Channel.mCrossSection, cSetCSSingle)
+    '                        If cs.mCSSingleWidthType = cSetCSSingle.CSSingleChannelWidthType.CWEquation Then
+    '                            .mStreamAttr.ChBaseWidth =
+    '                                CSng(cs.mCWEc * ((.FAc + 1) * (Watershed.mCellSize * Watershed.mCellSize / 1000000)) ^ cs.mCWEd _
+    '                                / .mStreamAttr.chBedSlope ^ cs.mCWEe)
+    '                        Else
+    '                            .mStreamAttr.ChBaseWidth = .FAc * cs.mMaxChannelWidthSingleCS / cProject.Current.FacMax
+    '                        End If
+    '                        If Not String.IsNullOrEmpty(Watershed.mFPN_channelWidth) AndAlso
+    '                             .mStreamAttr.ChBaseWidthByLayer > 0 Then
+    '                            .mStreamAttr.ChBaseWidth = .mStreamAttr.ChBaseWidthByLayer
+    '                        End If
+    '                        .mStreamAttr.chUpperRBaseWidth_m = Nothing
+    '                        .mStreamAttr.chIsCompoundCS = False
+    '                        .mStreamAttr.chLowerRArea_m2 = 0
+    '                    Else
+    '                        Dim cs As New cSetCSCompound
+    '                        cs = CType(Channel.mCrossSection, cSetCSCompound)
+    '                        .mStreamAttr.ChBaseWidth = .FAc * cs.mLowerRegionBaseWidth / FacMax
+    '                        If .mStreamAttr.ChBaseWidth < cs.mCompoundCSCriteriaChannelWidth Then
+    '                            .mStreamAttr.chIsCompoundCS = False
+    '                            .mStreamAttr.chUpperRBaseWidth_m = 0
+    '                            .mStreamAttr.chLowerRHeight = 0
+    '                            .mStreamAttr.chLowerRArea_m2 = 0
+    '                        Else
+    '                            .mStreamAttr.chIsCompoundCS = True
+    '                            .mStreamAttr.chUpperRBaseWidth_m = .FAc * cs.mUpperRegionBaseWidth / FacMax
+    '                            .mStreamAttr.chLowerRHeight = .FAc * cs.mLowerRegionHeight / FacMax
+    '                            Dim mFVMSolver As New cFVMSolver
+    '                            .mStreamAttr.chLowerRArea_m2 =
+    '                                mFVMSolver.GetChannelCrossSectionAreaUsingChannelFlowDepth(.mStreamAttr.ChBaseWidth,
+    '                                                            .mStreamAttr.mChBankCoeff, .mStreamAttr.chLowerRHeight, False,
+    '                                                            .mStreamAttr.chLowerRHeight, .mStreamAttr.chLowerRArea_m2, 0)
+    '                        End If
+    '                    End If
+    '                    '최소 하폭
+    '                    If .mStreamAttr.ChBaseWidth < mSubWSpar.userPars(wsid).minChBaseWidth Then _
+    '                        .mStreamAttr.ChBaseWidth = mSubWSpar.userPars(wsid).minChBaseWidth
+    '                    If .mStreamAttr.ChBaseWidth < Watershed.mCellSize Then
+    '                        .FlowType = cGRM.CellFlowType.ChannelNOverlandFlow
+    '                    End If
+    '                End If
+
+    '                ' 토양
+    '                If Watershed.mFPN_initialSoilSaturationRatio = "" OrElse
+    '                    File.Exists(Watershed.mFPN_initialSoilSaturationRatio) = False Then
+    '                    .InitialSaturation = mSubWSpar.userPars(wsid).iniSaturation
+    '                Else
+    '                    ' 이경우에는 레이어 설정에서 값이 입력되어 있다.
+    '                End If
+    '                If .FlowType = cGRM.CellFlowType.ChannelFlow OrElse
+    '                        .LandCoverCode = cSetLandcover.LandCoverCode.WATR OrElse
+    '                   .LandCoverCode = cSetLandcover.LandCoverCode.WTLD Then
+    '                    .soilSaturationRatio = 1
+    '                Else
+    '                    .soilSaturationRatio = .InitialSaturation
+    '                End If
+    '                Select Case mSubWSpar.userPars(wsid).UKType.ToLower
+    '                    Case cGRM.UnSaturatedKType.Linear.ToString.ToLower
+    '                        .UKType = cGRM.UnSaturatedKType.Linear
+    '                    Case cGRM.UnSaturatedKType.Exponential.ToString.ToLower
+    '                        .UKType = cGRM.UnSaturatedKType.Exponential
+    '                    Case cGRM.UnSaturatedKType.Constant.ToString.ToLower
+    '                        .UKType = cGRM.UnSaturatedKType.Constant
+    '                    Case Else
+    '                        .UKType = cGRM.UnSaturatedKType.Linear
+    '                End Select
+    '                .coefUK = mSubWSpar.userPars(wsid).coefUK
+    '                .porosityEta = .PorosityEtaOri * mSubWSpar.userPars(wsid).ccPorosity
+    '                If .porosityEta >= 1 Then .porosityEta = 0.99
+    '                If .porosityEta <= 0 Then .porosityEta = 0.01
+    '                .effectivePorosityThetaE = .EffectivePorosityThetaEori * mSubWSpar.userPars(wsid).ccPorosity   '유효 공극율의 보정은 공극률 보정계수를 함께 사용한다.
+    '                If .effectivePorosityThetaE >= 1 Then .effectivePorosityThetaE = 0.99
+    '                If .effectivePorosityThetaE <= 0 Then .effectivePorosityThetaE = 0.01
+    '                .wettingFrontSuctionHeadPsi_m = .WettingFrontSuctionHeadPsiOri_m * mSubWSpar.userPars(wsid).ccWFSuctionHead
+    '                .hydraulicConductK_mPsec = .HydraulicConductKori_mPsec * mSubWSpar.userPars(wsid).ccHydraulicK
+    '                .soilDepth_m = .SoilDepthOri_m * mSubWSpar.userPars(wsid).ccSoilDepth
+    '                .SoilDepthEffectiveAsWaterDepth_m = .soilDepth_m * .effectivePorosityThetaE
+    '                .soilWaterContent_m = .SoilDepthEffectiveAsWaterDepth_m * .soilSaturationRatio
+    '                .soilWaterContent_tM1_m = .soilWaterContent_m
+
+    '                .SoilDepthToBedrock_m = cGRM.CONST_DEPTH_TO_BEDROCK '암반까지의 깊이를 20m로 가정, 산악지역에서는 5m
+    '                If .LandCoverCode = cSetLandcover.LandCoverCode.FRST Then
+    '                    .SoilDepthToBedrock_m = cGRM.CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN
+    '                End If
+    '            End With
+    '        Next intC
+    '    Next intR
+
+    '    'Flow control
+    '    If GeneralSimulEnv.mbSimulateFlowControl = True AndAlso FCGrid.FCCellCount > 0 Then
+    '        For Each cvid As Integer In FCGrid.FCGridCVidList
+    '            Dim rows() As DataRow = FCGrid.mdtFCGridInfo.Select("CVID = " & cvid)
+    '            Dim row As GRMProject.FlowControlGridRow
+    '            row = CType(rows(0), GRMProject.FlowControlGridRow)
+    '            Select Case row.ControlType
+    '                Case cFlowControl.FlowControlType.Inlet.ToString
+    '                    CV(cvid - 1).FCType = cFlowControl.FlowControlType.Inlet
+    '                Case cFlowControl.FlowControlType.ReservoirOperation.ToString
+    '                    CV(cvid - 1).FCType = cFlowControl.FlowControlType.ReservoirOperation
+    '                Case cFlowControl.FlowControlType.ReservoirOutflow.ToString
+    '                    CV(cvid - 1).FCType = cFlowControl.FlowControlType.ReservoirOutflow
+    '                Case cFlowControl.FlowControlType.SinkFlow.ToString
+    '                    CV(cvid - 1).FCType = cFlowControl.FlowControlType.SinkFlow
+    '                Case cFlowControl.FlowControlType.SourceFlow.ToString
+    '                    CV(cvid - 1).FCType = cFlowControl.FlowControlType.SourceFlow
+    '                Case Else
+    '                    Throw New InvalidDataException
+    '            End Select
+    '        Next
+    '    End If
+
+    '    ' Inlet
+    '    If mGeneralSimulEnv.mbSimulateFlowControl = True AndAlso FCGrid.InletExisted Then
+    '        Dim bEnded As Boolean = False
+    '        Dim lBaseCVid As List(Of Integer)
+    '        Dim lNewCVid As List(Of Integer)
+    '        lBaseCVid = New List(Of Integer)
+    '        lBaseCVid = FCGrid.InletCVidList
+    '        Do Until bEnded = True
+    '            lNewCVid = New List(Of Integer)
+    '            bEnded = True
+    '            For Each cvidBase As Integer In lBaseCVid
+    '                Dim cvAN As Integer = cvidBase - 1
+    '                If CV(cvAN).NeighborCVidFlowIntoMe.Count > 0 Then
+    '                    bEnded = False
+    '                    For Each cvidFlowIntoMe As Integer In CV(cvAN).NeighborCVidFlowIntoMe
+    '                        CV(cvidFlowIntoMe - 1).toBeSimulated = False
+    '                        lNewCVid.Add(cvidFlowIntoMe)
+    '                    Next
+    '                End If
+    '            Next
+    '            lBaseCVid = New List(Of Integer)
+    '            lBaseCVid = lNewCVid
+    '        Loop
+    '    End If
+    '    '-------------------------------------------------------------
+    'End Sub
 
     ''' <summary>
     ''' 업데이트된 하폭 정보를 이용해서 wp 격자의 celltype을 업데이트 하고,

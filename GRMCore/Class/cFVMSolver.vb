@@ -36,9 +36,9 @@ Public Class cFVMSolver
                     .uCVof_i_j = GetFlowVelocityByManningEq(Hp_nP1, .SlopeOF, .RoughnessCoeffOF)
                     .CSAof_i_j = Hp_nP1 * effDy_m
                     .QCVof_i_j_m3Ps = .CSAof_i_j * .uCVof_i_j
-                    If cThisSimulation.vMaxInThisStep < .uCVof_i_j Then
-                        cThisSimulation.vMaxInThisStep = .uCVof_i_j
-                    End If
+                    'If cThisSimulation.vMaxInThisStep < .uCVof_i_j Then
+                    '    cThisSimulation.vMaxInThisStep = .uCVof_i_j
+                    'End If
                     Exit For
                 End If
                 Hp_n = Hp_nP1
@@ -116,9 +116,9 @@ Public Class cFVMSolver
                     .mStreamAttr.uCVch_i_j = u_nP1
                     .mStreamAttr.CSAch_i_j = CSAch_nP1
                     .mStreamAttr.QCVch_i_j_m3Ps = QnP1
-                    If cThisSimulation.vMaxInThisStep < u_nP1 Then
-                        cThisSimulation.vMaxInThisStep = u_nP1
-                    End If
+                    'If cThisSimulation.vMaxInThisStep < u_nP1 Then
+                    '    cThisSimulation.vMaxInThisStep = u_nP1
+                    'End If
                     Exit For
                 End If
                 CSAp_n = CSAch_nP1

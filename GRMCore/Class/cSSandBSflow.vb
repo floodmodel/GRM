@@ -21,7 +21,7 @@
             SSFfromCVw = GetTotalSSFfromCVwOFcell_m3Ps(project, cvan) * dtSEC / (Dy_m * Dx_m)
 
             '상류의 지표하 유출에 의한 현재 셀의 rf 기여분 계산
-            If cInfiltration.GetSoilSaturationRaito(.CumulativeInfiltrationF_tM1_m, .SoilDepthEffectiveAsWaterDepth_m, .FlowType) >= 0.99 Then
+            If cInfiltration.GetSoilSaturationRaito(.soilWaterContent_tM1_m, .SoilDepthEffectiveAsWaterDepth_m, .FlowType) >= 0.99 Then
                 RflowBySSFfromCVw_m2 = SSFfromCVw * Dy_m
                 SSFAddedToMeFromCVw_m = 0
             Else
@@ -30,24 +30,24 @@
             End If
 
             ' 상류에서 유입된 지표하 유출 깊이 더하고..
-            .CumulativeInfiltrationF_tM1_m = .CumulativeInfiltrationF_tM1_m + SSFAddedToMeFromCVw_m
+            .soilWaterContent_tM1_m = .soilWaterContent_tM1_m + SSFAddedToMeFromCVw_m
 
             '현재의 침투 깊이를 이용해서 rf 계산하고..
 
-            If .CumulativeInfiltrationF_tM1_m > .SoilDepthEffectiveAsWaterDepth_m Then
+            If .soilWaterContent_tM1_m > .SoilDepthEffectiveAsWaterDepth_m Then
                 '하류로 이송된 지표하 유출량이 현재 셀의 포화가능 깊이를 초과하면, 초과분은 returnflow
-                RflowBySSFfromCVw_m2 = (.CumulativeInfiltrationF_tM1_m - .SoilDepthEffectiveAsWaterDepth_m) * Dy_m _
+                RflowBySSFfromCVw_m2 = (.soilWaterContent_tM1_m - .SoilDepthEffectiveAsWaterDepth_m) * Dy_m _
                                         + RflowBySSFfromCVw_m2
-                .CumulativeInfiltrationF_tM1_m = .SoilDepthEffectiveAsWaterDepth_m
+                .soilWaterContent_tM1_m = .SoilDepthEffectiveAsWaterDepth_m
             End If
 
-            If .CumulativeInfiltrationF_tM1_m < 0 Then .CumulativeInfiltrationF_tM1_m = 0
+            If .soilWaterContent_tM1_m < 0 Then .soilWaterContent_tM1_m = 0
             '이건 현재 셀의 지표하 유출. 지표하 유출이 발생하는 부분은 물이 차있는 부분이므로.. 포화수리전도도 적용
-            .SSF_Q_m3Ps = (.CumulativeInfiltrationF_tM1_m / .porosityEta) _
+            .SSF_Q_m3Ps = (.soilWaterContent_tM1_m / .porosityEta) _
                       * .hydraulicConductK_mPsec * CSng(Math.Sin(Math.Atan(.SlopeOF))) * Dy_m
 
             '이건 하류로 유출한 이후의 현재 누가침투심
-            .CumulativeInfiltrationF_tM1_m = .CumulativeInfiltrationF_tM1_m _
+            .soilWaterContent_tM1_m = .soilWaterContent_tM1_m _
                     - .SSF_Q_m3Ps / (Dy_m * .CVDeltaX_m) * dtSEC
             Return RflowBySSFfromCVw_m2 ' + .subSurfaceflow_Q_m3Ps
         End With
@@ -182,20 +182,36 @@
             End If
             If .soilDepth_m < soilDepthPercolated_m Then 'B층의 최대 증가 가능 높이는 토양심을 초과하지 않는다.
                 soilDepthPercolated_m = .soilDepth_m
-                .CumulativeInfiltrationF_tM1_m = 0 '이전시간에 침투된 모든 양이 B 층으로 침누된 경우이므로..
-            Else
-                waterDepthPercolated_m = soilDepthPercolated_m * .effectivePorosityThetaE
-                .CumulativeInfiltrationF_tM1_m = .CumulativeInfiltrationF_tM1_m - waterDepthPercolated_m
-                If .CumulativeInfiltrationF_tM1_m < 0 Then .CumulativeInfiltrationF_tM1_m = 0
             End If
-            If .CumulativeInfiltrationF_tM1_m > .SoilDepthEffectiveAsWaterDepth_m Then _
-               .CumulativeInfiltrationF_tM1_m = .SoilDepthEffectiveAsWaterDepth_m
+            'If .FlowType <> cGRM.CellFlowType.ChannelFlow AndAlso
+            '  project.CV(cvan).LandCoverCode <> cSetLandcover.LandCoverCode.WATR AndAlso
+            '  project.CV(cvan).LandCoverCode <> cSetLandcover.LandCoverCode.WTLD Then 'channel flow 혹은 수역에서는 토양수분함량 변하지 않는다.
+            '    'If .soilDepth_m = soilDepthPercolated_m Then 'B층의 최대 증가 가능 높이는 토양심을 초과하지 않는다.
+            '    '    .CumulativeInfiltrationF_tM1_m = 0 '이전시간에 침투된 모든 양이 B 층으로 침누된 경우이므로..
+            '    'Else
+            '    '    waterDepthPercolated_m = soilDepthPercolated_m * .effectivePorosityThetaE
+            '    '    .CumulativeInfiltrationF_tM1_m = .CumulativeInfiltrationF_tM1_m - waterDepthPercolated_m
+            '    '    If .CumulativeInfiltrationF_tM1_m < 0 Then .CumulativeInfiltrationF_tM1_m = 0
+            '    'End If
+            'End If
+
+
+            'If .CumulativeInfiltrationF_tM1_m > .SoilDepthEffectiveAsWaterDepth_m Then _
+            '   .CumulativeInfiltrationF_tM1_m = .SoilDepthEffectiveAsWaterDepth_m
             If (.FlowType = cGRM.CellFlowType.ChannelFlow AndAlso
             .mStreamAttr.ChStrOrder > project.SubWSPar.userPars(.WSID).dryStreamOrder) OrElse
             .LandCoverCode = cSetLandcover.LandCoverCode.WATR OrElse
             .LandCoverCode = cSetLandcover.LandCoverCode.WTLD Then
                 '이조건에서는 항상 포화상태, 침누있음, 강우에 의한 침투량 없음. 대신 지표면 저류량에 의한 침투는 항상 있음
                 cInfiltration.SetWaterAreaInfiltrationParameters(project.CV(cvan))
+            Else
+                If .soilDepth_m = soilDepthPercolated_m Then 'B층의 최대 증가 가능 높이는 토양심을 초과하지 않는다.
+                    .soilWaterContent_tM1_m = 0 '이전시간에 침투된 모든 양이 B 층으로 침누된 경우이므로..
+                Else
+                    waterDepthPercolated_m = soilDepthPercolated_m * .effectivePorosityThetaE
+                    .soilWaterContent_tM1_m = .soilWaterContent_tM1_m - waterDepthPercolated_m
+                    If .soilWaterContent_tM1_m < 0 Then .soilWaterContent_tM1_m = 0
+                End If
             End If
             .hUAQfromBedrock_m = .hUAQfromBedrock_m + soilDepthPercolated_m
             If .hUAQfromBedrock_m > (.SoilDepthToBedrock_m - .soilDepth_m) Then _

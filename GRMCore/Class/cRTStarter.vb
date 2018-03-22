@@ -144,7 +144,6 @@ Public Class cRTStarter
     ''' <param name="ccPorosity"></param>
     ''' <param name="ccWFSuctionHead"></param>
     ''' <param name="ccSoilHydraulicCond"></param>
-    ''' <param name="applyIniFlow"></param>
     ''' <param name="iniFlow"></param>
     ''' <returns></returns>
     Public Function UpdateWSPars(ByVal wsid As Integer, iniSat As Single,

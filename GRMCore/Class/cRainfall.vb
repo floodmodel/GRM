@@ -105,71 +105,67 @@ Public Class cRainfall
     '    End If
     'End Sub
 
-    Public Shared Sub ReadRainfall(ByVal eRainfallDataType As cRainfall.RainfallDataType,
+    Public Shared Sub ReadRainfall(project As cProject, ByVal eRainfallDataType As cRainfall.RainfallDataType,
                                        ByVal lstRFData As List(Of RainfallData),
                                        ByVal RFinterval_MIN As Integer, ByVal nowRFOrder As Integer, isparallel As Boolean)
-        Dim inRF_mm As Single
         Dim rfIntervalSEC As Integer = RFinterval_MIN * 60
-        Dim rfRow As RainfallData = cProject.Current.Rainfall.GetRFdataByOrder(lstRFData, nowRFOrder)
+        Dim rfRow As RainfallData = project.Rainfall.GetRFdataByOrder(lstRFData, nowRFOrder)
         Dim RFfpn As String = Path.Combine(rfRow.FilePath, rfRow.FileName)
-        Dim cellSize As Single = cProject.Current.Watershed.mCellSize
+        Dim cellSize As Single = project.Watershed.mCellSize
         cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs = 0
-        For Each wpCVID As Integer In cProject.Current.WatchPoint.WPCVidList
-            With cProject.Current
-                .WatchPoint.mRFReadIntensitySumUpWs_mPs(wpCVID) = 0
-            End With
+        For Each wpCVID As Integer In project.WatchPoint.WPCVidList
+            project.WatchPoint.mRFReadIntensitySumUpWs_mPs(wpCVID) = 0
         Next
-
         Try
             Select Case eRainfallDataType
                 Case cRainfall.RainfallDataType.TextFileASCgrid, cRainfall.RainfallDataType.TextFileASCgrid_mmPhr
                     Dim ascReader As New cTextFileReaderASC(RFfpn)
+                    Dim rowCount As Integer = project.Watershed.mRowCount
+                    Dim colCount As Integer = project.Watershed.mColCount
                     If isparallel = True Then
                         Dim options As ParallelOptions = New ParallelOptions()
                         options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
-                        Dim rowCount As Integer = cProject.Current.Watershed.mRowCount
-                        Dim colCount As Integer = cProject.Current.Watershed.mColCount
                         Parallel.For(0, rowCount, options, Sub(ry As Integer)
                                                                Dim RFs As String() = ascReader.ValuesInOneRowFromTopLeft(ry)
                                                                For cx As Integer = 0 To colCount - 1
-                                                                   If cProject.Current.WSCell(cx, ry) Is Nothing Then Continue For
-                                                                   Dim cvan As Integer = cProject.Current.WSCell(cx, ry).CVID - 1
-                                                                   inRF_mm = CSng(RFs(cx))
-                                                                   If inRF_mm = 0 Then inRF_mm = 0
+                                                                   If project.WSCell(cx, ry) Is Nothing OrElse project.WSCell(cx, ry).toBeSimulated = False Then Continue For
+                                                                   Dim cvan As Integer = project.WSCell(cx, ry).CVID - 1
+                                                                   Dim inRF_mm As Single = CSng(RFs(cx))
                                                                    If eRainfallDataType = cRainfall.RainfallDataType.TextFileASCgrid_mmPhr Then
                                                                        inRF_mm = inRF_mm / CSng(60 / RFinterval_MIN)
                                                                    End If
-                                                                   Call CalRFintensity_mPsec(cProject.Current.CV(cvan), inRF_mm, rfIntervalSEC)
+                                                                   Call CalRFintensity_mPsec(project.CV(cvan), inRF_mm, rfIntervalSEC)
                                                                Next
                                                            End Sub)
-
                         For ry As Integer = 0 To rowCount - 1
                             For cx As Integer = 0 To colCount - 1
-                                If cProject.Current.WSCell(cx, ry) IsNot Nothing Then
-                                    Dim cvan As Integer = cProject.Current.WSCell(cx, ry).CVID - 1
+                                If project.WSCell(cx, ry) IsNot Nothing AndAlso project.WSCell(cx, ry).toBeSimulated = True Then
+                                    cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs =
+                                              cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs + project.WSCell(cx, ry).RFReadintensity_mPsec
+                                    Dim cvan As Integer = project.WSCell(cx, ry).CVID - 1
                                     Call CalRFSumForWPUpWSWithRFGrid(cvan)
                                 End If
                             Next
                         Next
                     Else
-                        With cProject.Current
-                            For intR As Integer = 0 To .Watershed.mRowCount - 1
-                                Dim RFs As String() = ascReader.ValuesInOneRowFromTopLeft(intR)
-                                For intC As Integer = 0 To .Watershed.mColCount - 1
-                                    If .WSCell(intC, intR) Is Nothing Then Continue For
-                                    Dim cvan As Integer = .WSCell(intC, intR).CVID - 1
-                                    inRF_mm = CSng(RFs(intC))
-                                    If inRF_mm = 0 Then inRF_mm = 0
-                                    If eRainfallDataType = cRainfall.RainfallDataType.TextFileASCgrid_mmPhr Then
-                                        inRF_mm = inRF_mm / CSng(60 / .Rainfall.mRainfallinterval)
-                                    End If
-                                    Call CalRFintensity_mPsec(.CV(cvan), inRF_mm, rfIntervalSEC)
-                                    Call CalRFSumForWPUpWSWithRFGrid(cvan)
-                                Next
+                        For ry As Integer = 0 To rowCount - 1
+                            Dim RFs As String() = ascReader.ValuesInOneRowFromTopLeft(ry)
+                            For cx As Integer = 0 To colCount - 1
+                                If project.WSCell(cx, ry) Is Nothing OrElse project.WSCell(cx, ry).toBeSimulated = False Then Continue For
+                                Dim cvan As Integer = project.WSCell(cx, ry).CVID - 1
+                                Dim inRF_mm As Single = CSng(RFs(cx))
+                                If eRainfallDataType = cRainfall.RainfallDataType.TextFileASCgrid_mmPhr Then
+                                    inRF_mm = inRF_mm / CSng(60 / RFinterval_MIN)
+                                End If
+                                Call CalRFintensity_mPsec(project.CV(cvan), inRF_mm, rfIntervalSEC)
+                                cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs =
+                                          cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs + project.WSCell(cx, ry).RFReadintensity_mPsec
+                                Call CalRFSumForWPUpWSWithRFGrid(cvan)
                             Next
-                        End With
+                        Next
                     End If
                 Case cRainfall.RainfallDataType.TextFileMAP
+                    Dim inRF_mm As Single
                     If IsNumeric(rfRow.Rainfall) Then
                         inRF_mm = CSng(rfRow.Rainfall)
                     Else
@@ -177,15 +173,15 @@ Public Class cRainfall
                         Exit Sub
                     End If
                     If inRF_mm < 0 Then inRF_mm = 0
-                    For cvan As Integer = 0 To cProject.Current.CVCount - 1
-                        Call CalRFintensity_mPsec(cProject.Current.CV(cvan), inRF_mm, rfIntervalSEC)
+                    For cvan As Integer = 0 To project.CVCount - 1
+                        Call CalRFintensity_mPsec(project.CV(cvan), inRF_mm, rfIntervalSEC)
+                        cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs =
+                                              cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs + project.CV(cvan).RFReadintensity_mPsec
                     Next
-                    Call CalRFSumForWPUpWSWithMAPValue(cProject.Current.CV(0).RFReadintensity_mPsec) '모든 격자의 강우량 동일하므로.. 하나를 던저준다.
-
+                    Call CalRFSumForWPUpWSWithMAPValue(project.CV(0).RFReadintensity_mPsec) '모든 격자의 강우량 동일하므로.. 하나를 던저준다.
                 Case Else
                     System.Console.WriteLine("Error: Rainfall data type is invalid.")
             End Select
-
         Catch ex As Exception
             System.Console.WriteLine("An error was occurred while reading rainfall data.")
             cThisSimulation.mGRMSetupIsNormal = False
@@ -209,8 +205,6 @@ Public Class cRainfall
             Else
                 .RFReadintensity_mPsec = rf_mm / 1000 / rfIntevalSEC
             End If
-            cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs =
-                cThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs + .RFReadintensity_mPsec
         End With
     End Sub
 

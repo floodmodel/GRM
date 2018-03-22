@@ -115,7 +115,7 @@ Public Class cSimulator
             If Not mbRFisEnded AndAlso (nowRFOrder = 0 OrElse (nowTsec > dTRFintervalSEC * nowRFOrder)) Then
                 If nowRFOrder < cThisSimulation.mRFDataCountInThisEvent Then '현재까지 적용된 레이어가 전체 개수보다 작으면,,
                     nowRFOrder = nowRFOrder + 1 '이렇게 하면 마지막 레이어 적용
-                    cRainfall.ReadRainfall(eRainfallDataType, dtRFinfo, dTRFintervalMIN, nowRFOrder, cThisSimulation.IsParallel)
+                    cRainfall.ReadRainfall(project, eRainfallDataType, dtRFinfo, dTRFintervalMIN, nowRFOrder, cThisSimulation.IsParallel)
                     mbRFisEnded = False
                 Else
                     cRainfall.SetRainfallintensity_mPsec_And_Rainfall_dt_meter_Zero(mProject)
@@ -197,7 +197,7 @@ Public Class cSimulator
                     Thread.Sleep(2000)  '2초 지연 적절함
                 Loop
                 nowRFLayerOrder = nowRFLayerOrder + 1 '이렇게 하면 마지막 레이어 적용
-                cRainfall.ReadRainfall(mRealTime.mRainfallDataTypeRT, mRealTime.mlstRFdataRT,
+                cRainfall.ReadRainfall(mProject, mRealTime.mRainfallDataTypeRT, mRealTime.mlstRFdataRT,
                                                   CInt(mProject.Rainfall.mRainfallinterval), nowRFLayerOrder, cThisSimulation.IsParallel)
                 bRainfallisEnded = False
             End If
@@ -234,7 +234,7 @@ Public Class cSimulator
                     End If
                 Next
             End If
-            cThisSimulation.vMaxInThisStep = Single.MinValue
+            'cThisSimulation.vMaxInThisStep = Single.MinValue
             SimulateRunoff(mProject, nowT_MIN)
             cRainfall.CalCumulativeRFDuringDTPrintOut(mProject, dtsec)
             Dim wpCount As Integer = mProject.WatchPoint.WPCount
@@ -288,12 +288,23 @@ Public Class cSimulator
                     For Each cvan As Integer In project.mCVANsForEachFA(fac)
                         If project.CV(cvan).toBeSimulated = True Then
                             simulateRunoffCore(project, fac, cvan, dtsec, nowT_MIN, cellsize)
-                            Dim rf_mPs As Single = project.CV(cvan).RFReadintensity_mPsec
+                            'Dim rf_mPs As Single = project.CV(cvan).RFReadintensity_mPsec
                         End If
                     Next
                 End If
             Next fac
         End If
+        For Each icv As cCVAttribute In project.CVs
+            If icv.FlowType = cGRM.CellFlowType.OverlandFlow Then
+                If cThisSimulation.vMaxInThisStep < icv.uCVof_i_j Then
+                    cThisSimulation.vMaxInThisStep = icv.uCVof_i_j
+                End If
+            Else
+                If cThisSimulation.vMaxInThisStep < icv.mStreamAttr.uCVch_i_j Then
+                    cThisSimulation.vMaxInThisStep = icv.mStreamAttr.uCVch_i_j
+                End If
+            End If
+        Next
     End Sub
 
 
@@ -611,14 +622,14 @@ Public Class cSimulator
 
 
     Private Sub OutputProcessManagerBySimType(ByVal nowTtoPrint_MIN As Integer,
-                                  ByVal wpCount As Integer, ByVal SumRFMeanForDTprintOut As Double,
+                                  ByVal wpCount As Integer, ByVal SumRFMeanForDTprintOut_m As Double,
                                   ByVal coeffInterpolation As Single, ByVal Project_tm1 As cProjectBAK, simType As cGRM.SimulationType)
         Select Case simType
             Case cGRM.SimulationType.SingleEvent
                 RaiseEvent SimulationStep(Me, nowTtoPrint_MIN)
                 If mProject.GeneralSimulEnv.mPrintOption = cGRM.GRMPrintType.All Then
                     mOutputControl.WriteSimResultsToTextFileForSingleEvent(mProject, wpCount,
-                                                                       nowTtoPrint_MIN, SumRFMeanForDTprintOut, coeffInterpolation, Project_tm1)
+                                                                       nowTtoPrint_MIN, SumRFMeanForDTprintOut_m, coeffInterpolation, Project_tm1)
                 End If
                 If mProject.GeneralSimulEnv.mPrintOption = cGRM.GRMPrintType.DischargeFileQ Then
                     mOutputControl.WriteDischargeOnlyToDischargeFile(mProject, coeffInterpolation, Project_tm1)

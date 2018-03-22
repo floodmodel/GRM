@@ -62,8 +62,8 @@ Public Class cParameterEstimation
             With mProject.CV(n)
                 .InitialSaturation = 0
                 .soilSaturationRatio = 0
-                .CumulativeInfiltrationF_m = 0
-                .CumulativeInfiltrationF_tM1_m = 0
+                .soilWaterContent_m = 0
+                .soilWaterContent_tM1_m = 0
 
                 If (.FlowType = cGRM.CellFlowType.ChannelFlow AndAlso
                     .mStreamAttr.ChStrOrder > cProject.Current.SubWSPar.userPars(.WSID).dryStreamOrder) Then

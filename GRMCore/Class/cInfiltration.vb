@@ -32,18 +32,18 @@
         Dim CONSTGreenAmpt As Single
         Dim residualMoistContentThetaR As Single
         With project.CV(cvan)
-            .soilSaturationRatio = CSng(GetSoilSaturationRaito(.CumulativeInfiltrationF_tM1_m, .SoilDepthEffectiveAsWaterDepth_m, .FlowType))
+            .soilSaturationRatio = CSng(GetSoilSaturationRaito(.soilWaterContent_tM1_m, .SoilDepthEffectiveAsWaterDepth_m, .FlowType))
             If .soilSaturationRatio > 0.99 _
                 OrElse (project.mSimulationType = cGRM.SimulationType.SingleEventPE_SSR AndAlso .soilSaturationRatio = 1) _
                 Then
                 If .soilSaturationRatio = 1 Then
-                    .CumulativeInfiltrationF_m = .SoilDepthEffectiveAsWaterDepth_m '.CumulativeInfiltrationF_tM1_m
+                    .soilWaterContent_m = .SoilDepthEffectiveAsWaterDepth_m '.CumulativeInfiltrationF_tM1_m
                 End If
                 .bAfterSaturated = True
                 .InfiltrationF_mPdt = 0
                 .InfiltrationRatef_mPsec = 0
                 .EffRFCV_dt_meter = .RFApp_dt_meter
-                .CumulativeInfiltrationF_m = .CumulativeInfiltrationF_tM1_m
+                .soilWaterContent_m = .soilWaterContent_tM1_m
             Else
                 residualMoistContentThetaR = .porosityEta - .effectivePorosityThetaE
                 If residualMoistContentThetaR < 0 Then residualMoistContentThetaR = 0
@@ -62,15 +62,15 @@
                     infiltrationF_mPdt_max = GetInfiltrationForDtAfterPonding(dtSEC, cvan, CONSTGreenAmpt, .hydraulicConductK_mPsec)
                     beingPonding = True
                 End If
-                .InfiltrationF_mPdt = WaterDepthCanBeInfiltrated(.CumulativeInfiltrationF_tM1_m, .SoilDepthEffectiveAsWaterDepth_m, infiltrationF_mPdt_max)
+                .InfiltrationF_mPdt = WaterDepthCanBeInfiltrated(.soilWaterContent_tM1_m, .SoilDepthEffectiveAsWaterDepth_m, infiltrationF_mPdt_max)
                 '누가 침투량으로 dt 동안에 추가된 침투량을 더한다.
-                .CumulativeInfiltrationF_m = .CumulativeInfiltrationF_tM1_m + .InfiltrationF_mPdt
+                .soilWaterContent_m = .soilWaterContent_tM1_m + .InfiltrationF_mPdt
                 '현재까지의 누가 침투량을 이용해서 이에 대한 포텐셜 침투률을 계산한다.
-                If .CumulativeInfiltrationF_m <= 0 Then
+                If .soilWaterContent_m <= 0 Then
                     .InfiltrationRatef_mPsec = 0
-                    .CumulativeInfiltrationF_m = 0
+                    .soilWaterContent_m = 0
                 Else
-                    .InfiltrationRatef_mPsec = .hydraulicConductK_mPsec * (1 + CONSTGreenAmpt / .CumulativeInfiltrationF_m)
+                    .InfiltrationRatef_mPsec = .hydraulicConductK_mPsec * (1 + CONSTGreenAmpt / .soilWaterContent_m)
                 End If
 
                 '이경우에는 침투는 있지만.. 강우는 모두 직접 유출.. 침투는 지표면 저류 상태에서 발생
@@ -93,9 +93,9 @@
         End With
         '유효강우량의 계산이 끝났으므로, 현재까지 계산된 침투, 강우강도 등을 tM1 변수로 저장한다.
         With project.CV(cvan)
-            .soilSaturationRatio = CSng(GetSoilSaturationRaito(.CumulativeInfiltrationF_m, .SoilDepthEffectiveAsWaterDepth_m, .FlowType))
+            .soilSaturationRatio = CSng(GetSoilSaturationRaito(.soilWaterContent_m, .SoilDepthEffectiveAsWaterDepth_m, .FlowType))
             If .soilSaturationRatio = 1 Then .bAfterSaturated = True
-            .CumulativeInfiltrationF_tM1_m = .CumulativeInfiltrationF_m
+            .soilWaterContent_tM1_m = .soilWaterContent_m
             .InfiltrationRatef_tM1_mPsec = .InfiltrationRatef_mPsec
             .RFReadintensity_tM1_mPsec = .RFReadintensity_mPsec
         End With
@@ -124,13 +124,13 @@
         Dim dFx As Single
         Dim constCI_tm1 As Single = 0
         With cProject.Current.CV(cvan)
-            CI_n = .CumulativeInfiltrationF_tM1_m + .InfiltrationRatef_tM1_mPsec * dtSEC
-            constCI_tm1 = .CumulativeInfiltrationF_tM1_m
+            CI_n = .soilWaterContent_tM1_m + .InfiltrationRatef_tM1_mPsec * dtSEC
+            constCI_tm1 = .soilWaterContent_tM1_m
             For intiterlationN As Integer = 0 To 20000
                 'Newton-Raphson
                 Fx = CSng(CI_n - constCI_tm1 - Kapp * dtSEC _
                         - CONSTGreenAmpt * Math.Log((CI_n + CONSTGreenAmpt) _
-                                                    / (.CumulativeInfiltrationF_tM1_m + CONSTGreenAmpt)))
+                                                    / (.soilWaterContent_tM1_m + CONSTGreenAmpt)))
                 dFx = 1 - CONSTGreenAmpt / (CI_n + CONSTGreenAmpt)
                 CI_nP1 = CI_n - CSng(Fx / dFx)
                 err = Math.Abs(CI_nP1 - CI_n)
@@ -158,8 +158,8 @@
             .InfiltrationF_mPdt = 0
             .InfiltrationRatef_mPsec = 0
             .soilSaturationRatio = 0
-            .CumulativeInfiltrationF_m = 0
-            .CumulativeInfiltrationF_tM1_m = 0
+            .soilWaterContent_m = 0
+            .soilWaterContent_tM1_m = 0
             .EffRFCV_dt_meter = .RFApp_dt_meter
         End With
     End Sub
@@ -179,8 +179,8 @@
         With CV
             .InfiltrationF_mPdt = 0
             .InfiltrationRatef_mPsec = 0
-            .CumulativeInfiltrationF_m = 0
-            .CumulativeInfiltrationF_tM1_m = 0
+            '.CumulativeInfiltrationF_m = 0 '이건 침투된 깊이가 아니라, 실제로는 토양수분함량이다.
+            '.CumulativeInfiltrationF_tM1_m = 0
             .soilSaturationRatio = 1
             .EffRFCV_dt_meter = .RFApp_dt_meter
         End With
@@ -207,7 +207,7 @@
 
     Public Shared Function Kunsaturated(ByVal cv As cCVAttribute, uKType As cGRM.UnSaturatedKType, CoefUnsaturatedK As Single) As Single
         'Dim ca As Single = 0.2 '0.24
-        Dim ssr As Single = GetSoilSaturationRaito(cv.soilSaturationRatio, cv.CumulativeInfiltrationF_tM1_m, cv.SoilDepthEffectiveAsWaterDepth_m, cv.FlowType)
+        Dim ssr As Single = GetSoilSaturationRaito(cv.soilSaturationRatio, cv.soilWaterContent_tM1_m, cv.SoilDepthEffectiveAsWaterDepth_m, cv.FlowType)
         'Dim ssr As Single = GetSoilSaturationRaito(cv.CumulativeInfiltrationF_tM1_m, cv.SoilDepthEffectiveAsWaterDepth_m, cv.FlowType)
         Dim Ks As Single = cv.hydraulicConductK_mPsec
         If CoefUnsaturatedK <= 0 Then Return CSng(Ks * 0.1)
@@ -222,7 +222,7 @@
                 Case cGRM.UnSaturatedKType.Constant
                     Return CSng(Ks * CoefUnsaturatedK)
                 Case Else
-                    Return CSng(Ks * 0.1)
+                    Return CSng(Ks * ssr * CoefUnsaturatedK)
             End Select
         End If
 

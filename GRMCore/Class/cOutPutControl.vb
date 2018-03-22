@@ -21,7 +21,7 @@ Public Class cOutPutControl
         Dim lngTimeDiffFromStarting_SEC As Long
         Dim strNowTimeToPrintOut As String
         Dim cvan As Integer
-        Dim sngMeanRainfallSumForPrintoutTime_mm As Double
+        Dim meanRFSumForPrintoutTime_mm As Double
         Dim strFNPDischarge As String
         Dim strFNPDepth As String
         Dim strFNPRFGrid As String
@@ -31,7 +31,7 @@ Public Class cOutPutControl
         Dim lineToPrint As String = ""
         Dim vToPrint As String = ""
 
-        sngMeanRainfallSumForPrintoutTime_mm = meanRainfallSumToPrintOut_m * 1000
+        meanRFSumForPrintoutTime_mm = meanRainfallSumToPrintOut_m * 1000
         timeNow = Now()
         lngTimeDiffFromStarting_SEC = DateDiff(DateInterval.Second, cThisSimulation.mTimeThisSimulationStarted, timeNow)
         strNowTimeToPrintOut = cComTools.GetTimeToPrintOut(project.GeneralSimulEnv.mIsDateTimeFormat, project.GeneralSimulEnv.mSimStartDateTime, nowT_MIN)
@@ -78,7 +78,7 @@ Public Class cOutPutControl
                 End If
             End With
         Next
-        lineToPrint = lineToPrint + vbTab + Format(sngMeanRainfallSumForPrintoutTime_mm, "#0.00") + vbTab + CStr(lngTimeDiffFromStarting_SEC) & vbCrLf
+        lineToPrint = lineToPrint + vbTab + Format(meanRFSumForPrintoutTime_mm, "#0.00") + vbTab + CStr(lngTimeDiffFromStarting_SEC) & vbCrLf
         IO.File.AppendAllText(strFNPDischarge, lineToPrint, Encoding.Default)
 
         ''삭제 대상
@@ -198,7 +198,7 @@ Public Class cOutPutControl
                     strL = strL + String.Format("{0,8:#0.##}", project.CV(cvanWP).mStreamAttr.QCVch_i_j_m3Ps) + vbTab
                 End If
                 strL = strL + Format(project.CV(cvanWP).hUAQfromChannelBed_m, "#0.0000") + vbTab
-                strL = strL + Format(project.CV(cvanWP).CumulativeInfiltrationF_m, "#0.0000") + vbTab
+                strL = strL + Format(project.CV(cvanWP).soilWaterContent_m, "#0.0000") + vbTab
                 strL = strL + Format(project.CV(cvanWP).soilSaturationRatio, "#0.0000") + vbTab
                 strL = strL + Format(project.WatchPoint.mRFWPGridForDtPrintout_mm(wpcvid), "#0.0000") + vbTab
                 strL = strL + Format(project.WatchPoint.mRFUpWsMeanForDtPrintout_mm(wpcvid), "#0.0000") + vbTab
@@ -219,8 +219,8 @@ Public Class cOutPutControl
                                     project_tm1.CV(cvanWP).hUAQfromChannelBed_m,
                                     project.CV(cvanWP).hUAQfromChannelBed_m, interCoef), "#0.0000") + vbTab
                 strL = strL + Format(cHydroCom.GetInterpolatedValueLinear(
-                                    project_tm1.CV(cvanWP).CumulativeInfiltrationF_m,
-                                    project.CV(cvanWP).CumulativeInfiltrationF_m, interCoef), "#0.0000") + vbTab
+                                    project_tm1.CV(cvanWP).soilWaterContent_m,
+                                    project.CV(cvanWP).soilWaterContent_m, interCoef), "#0.0000") + vbTab
                 Dim ssv As Single = cHydroCom.GetInterpolatedValueLinear(
                                                     project_tm1.CV(cvanWP).soilSaturationRatio,
                                                     project.CV(cvanWP).soilSaturationRatio, interCoef)
@@ -431,7 +431,7 @@ Public Class cOutPutControl
                         Exit Function
                     End If
                     Dim strL As String = cGRM.CONST_OUTPUT_TABLE_TIME_FIELD_NAME + vbTab + "Discharge[cms]" + vbTab + "BaseFlowDepth[m]" + vbTab +
-                                         "CumulativeInfiltrion[m]" + vbTab + "SSR" + vbTab + "RFGrid" + vbTab + "RFUpMean" + vbTab + "FCData" + vbTab + "FCResStor" + vbCrLf
+                                         "SoilWaterContent[m]" + vbTab + "SoilSatR" + vbTab + "RFGrid" + vbTab + "RFUpMean" + vbTab + "FCData" + vbTab + "FCResStor" + vbCrLf
                     IO.File.AppendAllText(nFPN, strOutputCommonHeader, Encoding.Default)
                     IO.File.AppendAllText(nFPN, "Output data : All the results for watch point '" + wpName + "'" + vbCrLf & vbCrLf, Encoding.Default)
                     IO.File.AppendAllText(nFPN, strL, Encoding.Default)

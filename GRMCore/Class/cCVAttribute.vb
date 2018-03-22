@@ -218,16 +218,16 @@ Public Class cCVAttribute
 
 #Region "침투관련"
     ''' <summary>
-    ''' t 시간까지의 누적 침투량[m], 토양깊이가 아니고, 수심이다.
+    ''' 토양수분함량. t 시간까지의 누적 침투량[m], 토양깊이가 아니고, 수심이다.
     ''' </summary>
     ''' <remarks></remarks>
-    Public CumulativeInfiltrationF_m As Single
+    Public soilWaterContent_m As Single
 
     ''' <summary>
-    ''' t-1 시간까지의 누적 침투량[m]. 수심
+    ''' 토양수분함량. t-1 시간까지의 누적 침투량[m]. 수심
     ''' </summary>
     ''' <remarks></remarks>
-    Public CumulativeInfiltrationF_tM1_m As Single
+    Public soilWaterContent_tM1_m As Single
 
     ''' <summary>
     ''' t 시간에서 계산된 침투률[m/s]
@@ -373,7 +373,7 @@ Public Class cCVAttribute
     'Public bSaturated As Boolean
 
     Public UKType As cGRM.UnSaturatedKType
-    Public coefUK As Single 
+    Public coefUK As Single
 #End Region
 
 #Region "지하수 관련"
@@ -474,7 +474,7 @@ Public Class cCVAttribute
         End If
         cln.hUAQfromChannelBed_m = Me.hUAQfromChannelBed_m
         cln.soilSaturationRatio = Me.soilSaturationRatio
-        cln.CumulativeInfiltrationF_m = Me.CumulativeInfiltrationF_m
+        cln.soilWaterContent_m = Me.soilWaterContent_m
         cln.StorageCumulative_m3 = Me.StorageCumulative_m3
         Return cln
 

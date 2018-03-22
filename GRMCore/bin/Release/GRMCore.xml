@@ -153,7 +153,6 @@ GRMCore
  <param name="ccPorosity"></param>
  <param name="ccWFSuctionHead"></param>
  <param name="ccSoilHydraulicCond"></param>
- <param name="applyIniFlow"></param>
  <param name="iniFlow"></param>
  <returns></returns>
 </member>
@@ -1119,15 +1118,15 @@ m2, dt 시간에 대해서 평균된 면적을 반환함.
  </summary>
  <remarks></remarks>
 </member>
-<member name="F:GRMCore.cCVAttribute.CumulativeInfiltrationF_m">
+<member name="F:GRMCore.cCVAttribute.soilWaterContent_m">
  <summary>
- t 시간까지의 누적 침투량[m], 토양깊이가 아니고, 수심이다.
+ 토양수분함량. t 시간까지의 누적 침투량[m], 토양깊이가 아니고, 수심이다.
  </summary>
  <remarks></remarks>
 </member>
-<member name="F:GRMCore.cCVAttribute.CumulativeInfiltrationF_tM1_m">
+<member name="F:GRMCore.cCVAttribute.soilWaterContent_tM1_m">
  <summary>
- t-1 시간까지의 누적 침투량[m]. 수심
+ 토양수분함량. t-1 시간까지의 누적 침투량[m]. 수심
  </summary>
  <remarks></remarks>
 </member>
