@@ -546,7 +546,7 @@ Public Class cProject
                 .toBeSimulated = True
                 .DownStreamWPCVids = New List(Of Integer)
                 Dim deltaXw As Single
-                If .FAc > 0 Then
+                If .NeighborCVidFlowIntoMe.Count > 0 Then
                     deltaXw = .deltaXwSum / .NeighborCVidFlowIntoMe.Count
                 Else
                     deltaXw = .DeltaXDownHalf_m
@@ -636,9 +636,9 @@ Public Class cProject
                             mWSNetwork.SetWSoutletCVID(.WSID, .CVID)
                         Else
                             If targetCell.NeighborCVidFlowIntoMe Is Nothing Then targetCell.NeighborCVidFlowIntoMe = New List(Of Integer)
-                            targetCell.NeighborCVidFlowIntoMe.Add(.CVID) 'source의 cellid 기록
+                            targetCell.NeighborCVidFlowIntoMe.Add(.CVID) '현재의 cellid를 하류셀의 정보에 기록
                             targetCell.deltaXwSum = targetCell.deltaXwSum + deltaXe
-                            .DownCellidToFlow = targetCell.CVID  '흘러갈 방향의 cellid 기록함
+                            .DownCellidToFlow = targetCell.CVID  '흘러갈 방향의 cellid를 현재 셀의 정보에 기록
                             If Not (.WSID = targetCell.WSID) Then
                                 If mWSNetwork.WSIDsNearbyDown(.WSID) <> targetCell.WSID Then
                                     mWSNetwork.AddWSIDdown(.WSID, targetCell.WSID)
