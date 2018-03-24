@@ -379,7 +379,7 @@ Public Class cOutPutControl
             If deleteOnly = True Then Return True
 
             If cProject.Current.GeneralSimulEnv.mPrintOption = cGRM.GRMPrintType.All Then
-                If project.GeneralSimulEnv.mbEnableAnalyzer = True Then
+                If project.GeneralSimulEnv.mbMakeRasterOutput = True Then
                     Dim Dpath As New List(Of String)
                     If project.GeneralSimulEnv.mbShowSoilSaturation = True Then
                         Dpath.Add(project.OFPSSRDistribution)

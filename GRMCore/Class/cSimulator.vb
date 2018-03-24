@@ -19,7 +19,8 @@ Public Class cSimulator
     Public Event SimulationComplete(ByVal sender As cSimulator)
     Public Event SimulationRaiseError(ByVal sender As cSimulator, ByVal simulError As SimulationErrors, ByVal erroData As Object)
     Public Event SimulationMultiEventStep(ByVal sender As cSimulator, ByVal eventOrder As Integer)
-    Public Event CallAnalyzer(ByVal sender As cSimulator, ByVal project As cProject, ByVal nowTtoPrint_MIN As Integer, createImgFile As Boolean, createAscFile As Boolean)
+    Public Event MakeRasterOutput(ByVal sender As cSimulator, ByVal project As cProject, ByVal nowTtoPrint_MIN As Integer)
+    Public Event SendQToAnalyzer(ByVal sender As cSimulator, ByVal project As cProject, project_tm1 As cProjectBAK, ByVal nowTtoPrint_MIN As Integer, interCoef As Single)
 
 #End Region
 
@@ -644,8 +645,11 @@ Public Class cSimulator
                                                                            nowTtoPrint_MIN, coeffInterpolation, Project_tm1, mRealTime)
         End Select
 
-        If mProject.GeneralSimulEnv.mbEnableAnalyzer = True Then
-            RaiseEvent CallAnalyzer(Me, mProject, nowTtoPrint_MIN, mProject.GeneralSimulEnv.mbCreateImageFile, mProject.GeneralSimulEnv.mbCreateASCFile)
+        If mProject.GeneralSimulEnv.mbRunAanlyzer = True Then
+            RaiseEvent SendQToAnalyzer(Me, mProject, Project_tm1, nowTtoPrint_MIN, coeffInterpolation)
+        End If
+        If mProject.GeneralSimulEnv.mbMakeRasterOutput = True Then
+            RaiseEvent MakeRasterOutput(Me, mProject, nowTtoPrint_MIN)
         End If
 
         cThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0

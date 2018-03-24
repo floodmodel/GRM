@@ -11,7 +11,7 @@ Module mMain
     Private WithEvents mSimulator As cSimulator
     Private mMessage As String = ""
     Private mSimDurationHour As Integer
-    Private mGrmAnalyzer As cGRMAnalyzer
+    Private mGrmAnalyzer As cRasterOutput
     Private mbCreateDistributionFiles As Boolean = False
 
     Sub main()
@@ -149,7 +149,7 @@ Module mMain
             If cProject.Current.GeneralSimulEnv.mbCreateASCFile = True OrElse
                 cProject.Current.GeneralSimulEnv.mbCreateImageFile = True Then
                 mbCreateDistributionFiles = True
-                mGrmAnalyzer = New cGRMAnalyzer(cProject.Current)
+                mGrmAnalyzer = New cRasterOutput(cProject.Current)
             End If
             cGRM.writelogAndConsole(currentPrjFPN + " -> Model setup completed.", cGRM.bwriteLog, True)
             For Each row As GRMProject.WatchPointsRow In cProject.Current.WatchPoint.mdtWatchPointInfo
@@ -228,9 +228,7 @@ Module mMain
     End Sub
 
     Private Sub mSimulator_CallAnalyzer(sender As cSimulator, project As cProject,
-                                        nowTtoPrint_MIN As Integer,
-                                        createImgFile As Boolean,
-                                        createAscFile As Boolean) Handles mSimulator.CallAnalyzer
+                                        nowTtoPrint_MIN As Integer) Handles mSimulator.MakeRasterOutput
         If mbCreateDistributionFiles = True Then
             mGrmAnalyzer.CreateDistributionFiles(nowTtoPrint_MIN, mGrmAnalyzer.ImgWidth, mGrmAnalyzer.ImgHeight)
         End If

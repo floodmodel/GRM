@@ -106,7 +106,7 @@ Public Class cParameterEstimation
             Call simulator.SimulateRunoff(mProject, nowTmin)
             If (nowiterForPrint) * cThisSimulation.dtsec / 60 = mPrintOutStep_min OrElse niter = 1 Then
                 outputControl.WriteSimResultsToTextFileForSingleEvent(mProject, wpCount, nowTmin, cThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m, 1, Nothing)
-                If mProject.GeneralSimulEnv.mbEnableAnalyzer = True Then
+                If mProject.GeneralSimulEnv.mbMakeRasterOutput = True Then
                     RaiseEvent CallAnalyzer(Me, mProject, nowTmin, mProject.GeneralSimulEnv.mbCreateImageFile, mProject.GeneralSimulEnv.mbCreateASCFile)
 
                 End If

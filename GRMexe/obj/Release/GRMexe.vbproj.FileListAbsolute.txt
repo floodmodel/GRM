@@ -1,3 +1,7 @@
+D:\Github\GRM\GRMexe\obj\Release\GRMexe.vbprojResolveAssemblyReference.cache
+D:\Github\GRM\GRMexe\obj\Release\GRM.Resources.resources
+D:\Github\GRM\GRMexe\obj\Release\GRMexe.vbproj.GenerateResource.Cache
+D:\Github\GRM\GRMexe\obj\Release\GRMexe.vbproj.CoreCompileInputs.cache
 D:\Github\GRM\GRMexe\bin\Release\GRM.exe.config
 D:\Github\GRM\GRMexe\bin\Release\GRM.exe
 D:\Github\GRM\GRMexe\bin\Release\GRM.pdb
@@ -8,10 +12,6 @@ D:\Github\GRM\GRMexe\bin\Release\GRMCore.pdb
 D:\Github\GRM\GRMexe\bin\Release\GRMCore.xml
 D:\Github\GRM\GRMexe\bin\Release\GRMCore.dll.config
 D:\Github\GRM\GRMexe\bin\Release\gentle.pdb
-D:\Github\GRM\GRMexe\obj\Release\GRMexe.vbprojResolveAssemblyReference.cache
-D:\Github\GRM\GRMexe\obj\Release\GRM.Resources.resources
-D:\Github\GRM\GRMexe\obj\Release\GRMexe.vbproj.GenerateResource.Cache
-D:\Github\GRM\GRMexe\obj\Release\GRMexe.vbproj.CoreCompileInputs.cache
 D:\Github\GRM\GRMexe\obj\Release\GRM.exe
 D:\Github\GRM\GRMexe\obj\Release\GRM.xml
 D:\Github\GRM\GRMexe\obj\Release\GRM.pdb

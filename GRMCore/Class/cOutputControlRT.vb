@@ -141,7 +141,7 @@ Public Class cOutputControlRT
                     "RFMean[mm]" + vbTab + "Qobs[CMS]" + vbTab + "Qsim[CMS]" + vbTab + "TimeFormStarting[MIN]" + vbCrLf
                 IO.File.AppendAllText(strFNP, strOutPutLine, Encoding.Default)
             Next
-            If project.GeneralSimulEnv.mbEnableAnalyzer = True Then
+            If project.GeneralSimulEnv.mbMakeRasterOutput = True Then
                 Dim Dpath As New List(Of String)
                 Dpath.Add(project.OFPSSRDistribution)
                 Dpath.Add(project.OFPRFDistribution)

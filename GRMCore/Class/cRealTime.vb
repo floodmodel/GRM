@@ -26,7 +26,7 @@ Public Class cRealTime
     'Public mFPNFcData As String
     Public mPicWidth As Single
     Public mPicHeight As Single
-    Private mGrmAnalyzer As cGRMAnalyzer
+    Private mGrmAnalyzer As cRasterOutput
 
     Public mbIsDWSS As Boolean
     Public mCWCellColX_ToConnectDW As Integer
@@ -66,14 +66,14 @@ Public Class cRealTime
 
     Public Sub RunGRMRT()
         cThisSimulation.mGRMSetupIsNormal = True
-        If cProject.Current.GeneralSimulEnv.mbEnableAnalyzer = True Then
+        If cProject.Current.GeneralSimulEnv.mbMakeRasterOutput = True Then
             With cProject.Current
                 .mImgFPN_dist_Flow = New List(Of String)
                 .mImgFPN_dist_RF = New List(Of String)
                 .mImgFPN_dist_RFAcc = New List(Of String)
                 .mImgFPN_dist_SSR = New List(Of String)
             End With
-            mGrmAnalyzer = New cGRMAnalyzer(cProject.Current)
+            mGrmAnalyzer = New cRasterOutput(cProject.Current)
         End If
         mDateTimeStartRT = New DateTime(CInt(Mid(mRFStartDateTimeRT, 1, 4)),
                                              CInt(Mid(mRFStartDateTimeRT, 5, 2)),
@@ -325,9 +325,9 @@ Public Class cRealTime
         RaiseEvent RTStatus("분석종료")
     End Sub
 
-    Private Sub mSimul_CallAnalyzer(sender As cSimulator, project As cProject, nowTtoPrint_MIN As Integer,
-                                    createImgFile As Boolean, createASCFile As Boolean) Handles mSimul.CallAnalyzer
-        If project.GeneralSimulEnv.mbEnableAnalyzer = True Then _
+    Private Sub mSimul_CallAnalyzer(sender As cSimulator, project As cProject,
+                                    nowTtoPrint_MIN As Integer) Handles mSimul.MakeRasterOutput
+        If project.GeneralSimulEnv.mbMakeRasterOutput = True Then _
         mGrmAnalyzer.CreateDistributionFiles(nowTtoPrint_MIN, mGrmAnalyzer.ImgWidth, mGrmAnalyzer.ImgHeight)
     End Sub
 

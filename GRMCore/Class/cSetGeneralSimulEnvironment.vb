@@ -21,12 +21,14 @@ Public Class cSetGeneralSimulEnvironment
 #End Region
 
 #Region "모의 옵션"
+
     Public mbSimulateInfiltration As Boolean = True
     Public mbSimulateSSFlow As Boolean = True
     Public mbSimulateFlowControl As Boolean = False
     Public mbSimulateBFlow As Boolean = True
 
-    Public mbEnableAnalyzer As Boolean = False
+    Public mbRunAanlyzer As Boolean = False
+    Public mbMakeRasterOutput As Boolean = False
     Public mbShowSoilSaturation As Boolean = False
     Public mbShowRFdistribution As Boolean = False
     Public mbShowRFaccDistribution As Boolean = False
@@ -107,9 +109,9 @@ Public Class cSetGeneralSimulEnvironment
                 End If
 
                 If mbCreateImageFile = True OrElse mbCreateASCFile = True Then
-                    mbEnableAnalyzer = True
+                    mbMakeRasterOutput = True
                 Else
-                    mbEnableAnalyzer = False
+                    mbMakeRasterOutput = False
                 End If
                 If Not .IsPrintOptionNull Then
                     Select Case .PrintOption.ToString.ToLower
