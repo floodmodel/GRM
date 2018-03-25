@@ -34,8 +34,8 @@ Public Class fAnalyzer
     Private mAninmationRepeat As Boolean = False
 
     Private Sub fAnalyzer_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
-        'Me.tbGMPfpn.Text = "D:\Github\TestSet_GRM\AnalyzerTest\SampleProject.gmp"
-        'Me.tbFPNObsData.Text = "D:\Github\TestSet_GRM\AnalyzerTest\Qobs - 복사본.txt"
+        Me.tbGMPfpn.Text = "D:\Github\TestSet_GRM\AnalyzerTest\SampleProject.gmp"
+        Me.tbFPNObsData.Text = "D:\Github\TestSet_GRM\AnalyzerTest\Qobs - 복사본.txt"
         cThisSimulation.mAnalyzerSet = False
         Me.tbChart.Width = 470
     End Sub
@@ -137,6 +137,7 @@ Public Class fAnalyzer
             If ObsDataCount > mMaxPrintoutCount Then
                 mMaxPrintoutCount = ObsDataCount
             End If
+
             If mbShowSimData = True Then
                 Qsims = New Dictionary(Of Integer, List(Of Single))
                 RFsims = New Dictionary(Of Integer, Single)
@@ -216,8 +217,8 @@ Public Class fAnalyzer
                     mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, LegendsSim, mMaxPrintoutCount)
                 End If
             End If
-
-            Call SetTrackBar(mChart.MaxDataCountInAseriesofQ)
+            Call SetTrackBar(mMaxPrintoutCount)
+            'Call SetTrackBar(mChart.MaxCountOfData)
             Call SetDistributedPictureFilesAndRenderer(Me)
             Me.pbChartMain.Controls.Clear()
             Me.pbChartRF.Controls.Clear()
@@ -1121,6 +1122,10 @@ Public Class fAnalyzer
 
     Private Sub tmAni_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmAni.Tick
         Me.tbChart.Value = Me.tbChart.Value + 1
+        If mStartNewSimulation = False AndAlso Me.tbChart.Value = mChart.MaxCountOfSimulatedData Then
+            Me.tmAni.Stop()
+            Exit Sub
+        End If
 
         If Me.tbChart.Value = tbChart.Maximum Then
             Me.tmAni.Stop()

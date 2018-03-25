@@ -176,14 +176,22 @@ Public Class cChart
         mPbChartMain = pbChartMain
         mPbChartRF = pbChartRF
         mQobss = inQobs
+        If Not inQsims Is Nothing Then mQsims = inQsims
         mLegendsObs = inObsLegends
         mLegendsSim = inSimLegends
 
 
         If Not inSimLegends Is Nothing Then mLegendsSim = inSimLegends
 
+        Dim maxCountX As Integer = mQobss.Count
+        If mQsims IsNot Nothing AndAlso mQsims.Count > mQobss.Count Then
+            maxCountX = mQsims.Count
+        End If
+        If maxCountX < mMaxOutPrintCount Then
+            maxCountX = mMaxOutPrintCount
+        End If
         If Not inRF Is Nothing Then
-            For n As Integer = 0 To mQobss.Count - 1
+            For n As Integer = 0 To maxCountX - 1
                 If n <= (inRF.Count - 1) Then
                     mRFs.Add(n, inRF(n))
                 Else
@@ -192,7 +200,7 @@ Public Class cChart
             Next
         End If
 
-        If Not inQsims Is Nothing Then mQsims = inQsims
+
 
         If Not inXLabels Is Nothing AndAlso inXLabels.Count > 1 Then
             mAxisXLabel = inXLabels
@@ -605,7 +613,18 @@ Public Class cChart
         Return LineParts.ToList()
     End Function
 
-    Public ReadOnly Property MaxDataCountInAseriesofQ() As Integer
+    Public ReadOnly Property MaxCountOfSimulatedData() As Integer
+        Get
+            If mQsims IsNot Nothing Then
+                Return mQsims.Count
+            Else
+                If mQobss IsNot Nothing Then Return mQobss.Count
+            End If
+            Return 0
+        End Get
+    End Property
+
+    Public ReadOnly Property MaxCountOfData() As Integer
         Get
             If mQobss IsNot Nothing Then
                 If mQsims IsNot Nothing Then
@@ -621,6 +640,8 @@ Public Class cChart
             Return 0
         End Get
     End Property
+
+
 
     Public ReadOnly Property SeriesCountInAClassOBS() As Integer
         Get
