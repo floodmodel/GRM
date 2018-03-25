@@ -1,5 +1,10 @@
 ﻿Imports System.Threading
 
+Public Structure ImgFileInfo
+    Public PFN As String
+    Public width As Integer
+    Public height As Integer
+End Structure
 
 Public Class cRasterOutput
     Private mProject As cProject
@@ -10,11 +15,14 @@ Public Class cRasterOutput
     Private mArrayRF As Double(,)
     Private mArrayRFAcc As Double(,)
     Private mArrayQ As Double(,)
-    Private mIMGfpn As String
     Private mASCfpnSSRD As String
     Private mASCfpnRFD As String
     Private mASCfpnRFaccD As String
     Private mASCfpnFlowD As String
+    Private mImgInfoSSR As ImgFileInfo
+    Private mImgInfoRF As ImgFileInfo
+    Private mImgInfoRFAcc As ImgFileInfo
+    Private mImgInfoFlow As ImgFileInfo
     Private mImgWidth As Integer
     Private mImgHeight As Integer
 
@@ -26,6 +34,8 @@ Public Class cRasterOutput
     Private mbMakeImgFile As Boolean = False
     Private mbMakeASCFile As Boolean = False
     Private mbMakeValueAry As Boolean = False
+
+    Private mbUseOtherThread As Boolean = False
 
 
     Sub New(ByVal project As cProject)
@@ -61,8 +71,11 @@ Public Class cRasterOutput
         End If
     End Sub
 
-    Public Sub CreateDistributionFiles(ByVal nowT_MIN As Integer, picWidth As Single, picHeight As Single)
+    Public Sub MakeDistributionFiles(ByVal nowT_MIN As Integer, imgWidth As Integer, imgHeight As Integer, usingOtherThread As Boolean)
         Try
+            mImgHeight = imgHeight
+            mImgWidth = imgWidth
+            mbUseOtherThread = usingOtherThread
             Dim strNowTimeToPrintOut As String = ""
             strNowTimeToPrintOut = cComTools.GetTimeToPrintOut(mProject.GeneralSimulEnv.mIsDateTimeFormat, mProject.GeneralSimulEnv.mSimStartDateTime, nowT_MIN)
             strNowTimeToPrintOut = cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut)
@@ -71,62 +84,62 @@ Public Class cRasterOutput
                 If mbMakeAryRF = True Then mArrayRF = New Double(mColCount - 1, mRowCount - 1) {}
                 If mbMakeAryRFAcc = True Then mArrayRFAcc = New Double(mColCount - 1, mRowCount - 1) {}
                 If mbMakeAryQ = True Then mArrayQ = New Double(mColCount - 1, mRowCount - 1) {}
-                GetStringArrayUsingCVAttribute(mProject.WSCells)
+                GetStringArrayUsingCVAttribute(mProject.WSCells, True)
             End If
 
             If mbMakeArySSR = True Then
                 If Directory.Exists(mProject.OFPSSRDistribution) = False Then Exit Sub
                 If mbMakeImgFile = True Then
-                    mIMGfpn = Path.Combine(mProject.OFPSSRDistribution, cGRM.CONST_DIST_SSR_FILE_HEAD + strNowTimeToPrintOut + ".png")
-                    Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
-                    imgMaker.MakeImgFileUsingArrayFromTL(mIMGfpn, mArraySSR,
-                                                               picWidth, picHeight, cImg.RendererRange.RendererFrom0to1)
+                    mImgInfoSSR.PFN = Path.Combine(mProject.OFPSSRDistribution, cGRM.CONST_DIST_SSR_FILE_HEAD + strNowTimeToPrintOut + ".png")
+                    mImgInfoSSR.width = imgWidth
+                    mImgInfoSSR.height = imgHeight
+                    StartMakeImgSSRD()
                 End If
                 If mbMakeASCFile = True Then
                     mASCfpnSSRD = Path.Combine(mProject.OFPSSRDistribution, cGRM.CONST_DIST_SSR_FILE_HEAD + strNowTimeToPrintOut + ".asc")
-                    StartCreateASCTextFileSSRD()
+                    StartMakeASCTextFileSSRD()
                 End If
             End If
 
             If mbMakeAryRF = True Then
                 If Directory.Exists(mProject.OFPRFDistribution) = False Then Exit Sub
                 If mbMakeImgFile = True Then
-                    mIMGfpn = Path.Combine(mProject.OFPRFDistribution, cGRM.CONST_DIST_RF_FILE_HEAD + strNowTimeToPrintOut + ".png")
-                    Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
-                    imgMaker.MakeImgFileUsingArrayFromTL(mIMGfpn, mArrayRF,
-                                                               picWidth, picHeight, cImg.RendererRange.RendererFrom0to500)
+                    mImgInfoRF.PFN = Path.Combine(mProject.OFPRFDistribution, cGRM.CONST_DIST_RF_FILE_HEAD + strNowTimeToPrintOut + ".png")
+                    mImgInfoRF.width = imgWidth
+                    mImgInfoRF.height = imgHeight
+                    StartMakeImgRFD()
                 End If
                 If mbMakeASCFile = True Then
                     mASCfpnRFD = Path.Combine(mProject.OFPRFDistribution, cGRM.CONST_DIST_RF_FILE_HEAD + strNowTimeToPrintOut + ".asc")
-                    StartCreateASCTextFileRFD()
+                    StartMakeASCTextFileRFD()
                 End If
             End If
 
             If mbMakeAryRFAcc = True Then
                 If Directory.Exists(mProject.OFPRFAccDistribution) = False Then Exit Sub
                 If mbMakeImgFile = True Then
-                    mIMGfpn = Path.Combine(mProject.OFPRFAccDistribution, cGRM.CONST_DIST_RFACC_FILE_HEAD + strNowTimeToPrintOut + ".png")
-                    Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
-                    imgMaker.MakeImgFileUsingArrayFromTL(mIMGfpn, mArrayRFAcc,
-                                                               picWidth, picHeight, cImg.RendererRange.RendererFrom0to1000)
+                    mImgInfoRFAcc.PFN = Path.Combine(mProject.OFPRFAccDistribution, cGRM.CONST_DIST_RFACC_FILE_HEAD + strNowTimeToPrintOut + ".png")
+                    mImgInfoRFAcc.width = imgWidth
+                    mImgInfoRFAcc.height = imgHeight
+                    StartMakeImgRFAccD()
                 End If
                 If mbMakeASCFile = True Then
                     mASCfpnRFaccD = Path.Combine(mProject.OFPRFAccDistribution, cGRM.CONST_DIST_RFACC_FILE_HEAD + strNowTimeToPrintOut + ".asc")
-                    StartCreateASCTextFileRFaccD()
+                    StartMakeASCTextFileRFaccD()
                 End If
             End If
 
             If mbMakeAryQ = True Then
                 If Directory.Exists(mProject.OFPFlowDistribution) = False Then Exit Sub
                 If mbMakeImgFile = True Then
-                    mIMGfpn = Path.Combine(mProject.OFPFlowDistribution, cGRM.CONST_DIST_FLOW_FILE_HEAD + strNowTimeToPrintOut + ".png")
-                    Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
-                    imgMaker.MakeImgFileUsingArrayFromTL(mIMGfpn, mArrayQ,
-                                                               picWidth, picHeight, cImg.RendererRange.RendererFrom0to30000)
+                    mImgInfoFlow.PFN = Path.Combine(mProject.OFPFlowDistribution, cGRM.CONST_DIST_FLOW_FILE_HEAD + strNowTimeToPrintOut + ".png")
+                    mImgInfoFlow.width = imgWidth
+                    mImgInfoFlow.height = imgHeight
+                    StartMakeImgFlowD()
                 End If
                 If mbMakeASCFile = True Then
                     mASCfpnFlowD = Path.Combine(mProject.OFPFlowDistribution, cGRM.CONST_DIST_FLOW_FILE_HEAD + strNowTimeToPrintOut + ".asc")
-                    StartCreateASCTextFileFlowD()
+                    StartMakeASCTextFileFlowD()
                 End If
             End If
         Catch ex As Exception
@@ -135,81 +148,184 @@ Public Class cRasterOutput
     End Sub
 
 
-    Private Function GetStringArrayUsingCVAttribute(inCells As cCVAttribute(,)) As Boolean
+    Private Function GetStringArrayUsingCVAttribute(inCells As cCVAttribute(,), isparallel As Boolean) As Boolean
         Dim sformat As String = ""
-        For nr As Integer = 0 To inCells.GetLength(1) - 1
-            For nc As Integer = 0 To inCells.GetLength(0) - 1
-                If inCells(nc, nr) IsNot Nothing Then
-                    If inCells(nc, nr).toBeSimulated = True Then
-                        If mbMakeArySSR = True Then
-                            Dim v As Single = inCells(nc, nr).soilSaturationRatio
-                            sformat = "#0.##"
-                            mArraySSR(nc, nr) = CDbl(Format(v, sformat))
-                        End If
-                        If mbMakeAryRF = True Then
-                            sformat = "#0.##"
-                            Dim v As Single = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
-                            mArrayRF(nc, nr) = CDbl(Format(v, sformat))
-                        End If
-                        If mbMakeAryRFAcc = True Then
-                            sformat = "#0.##"
-                            Dim v As Single = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
-                            mArrayRFAcc(nc, nr) = CDbl(Format(v, sformat))
-                        End If
-                        If mbMakeAryQ = True Then
-                            sformat = "#0.##"
-                            Dim v As Single
-                            If inCells(nc, nr).FlowType = cGRM.CellFlowType.OverlandFlow Then
-                                v = inCells(nc, nr).QCVof_i_j_m3Ps
-                            Else
-                                v = inCells(nc, nr).mStreamAttr.QCVch_i_j_m3Ps
+        If isparallel = False Then
+            For nr As Integer = 0 To inCells.GetLength(1) - 1
+                For nc As Integer = 0 To inCells.GetLength(0) - 1
+                    If inCells(nc, nr) IsNot Nothing Then
+                        If inCells(nc, nr).toBeSimulated = True Then
+                            If mbMakeArySSR = True Then
+                                Dim v As Single = inCells(nc, nr).soilSaturationRatio
+                                sformat = "#0.##"
+                                mArraySSR(nc, nr) = CDbl(Format(v, sformat))
                             End If
-                            mArrayQ(nc, nr) = CDbl(Format(v, sformat))
+                            If mbMakeAryRF = True Then
+                                sformat = "#0.##"
+                                Dim v As Single = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
+                                mArrayRF(nc, nr) = CDbl(Format(v, sformat))
+                            End If
+                            If mbMakeAryRFAcc = True Then
+                                sformat = "#0.##"
+                                Dim v As Single = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
+                                mArrayRFAcc(nc, nr) = CDbl(Format(v, sformat))
+                            End If
+                            If mbMakeAryQ = True Then
+                                sformat = "#0.##"
+                                Dim v As Single
+                                If inCells(nc, nr).FlowType = cGRM.CellFlowType.OverlandFlow Then
+                                    v = inCells(nc, nr).QCVof_i_j_m3Ps
+                                Else
+                                    v = inCells(nc, nr).mStreamAttr.QCVch_i_j_m3Ps
+                                End If
+                                mArrayQ(nc, nr) = CDbl(Format(v, sformat))
+                            End If
                         End If
                     End If
-                End If
+                Next
             Next
-        Next
+        Else
+            Dim options As ParallelOptions = New ParallelOptions()
+            options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
+            Parallel.For(0, inCells.GetLength(1), options, Sub(nr As Integer)
+                                                               For nc As Integer = 0 To inCells.GetLength(0) - 1
+                                                                   If inCells(nc, nr) IsNot Nothing Then
+                                                                       If inCells(nc, nr).toBeSimulated = True Then
+                                                                           If mbMakeArySSR = True Then
+                                                                               Dim v As Single = inCells(nc, nr).soilSaturationRatio
+                                                                               sformat = "#0.##"
+                                                                               mArraySSR(nc, nr) = CDbl(Format(v, sformat))
+                                                                           End If
+                                                                           If mbMakeAryRF = True Then
+                                                                               sformat = "#0.##"
+                                                                               Dim v As Single = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
+                                                                               mArrayRF(nc, nr) = CDbl(Format(v, sformat))
+                                                                           End If
+                                                                           If mbMakeAryRFAcc = True Then
+                                                                               sformat = "#0.##"
+                                                                               Dim v As Single = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
+                                                                               mArrayRFAcc(nc, nr) = CDbl(Format(v, sformat))
+                                                                           End If
+                                                                           If mbMakeAryQ = True Then
+                                                                               sformat = "#0.##"
+                                                                               Dim v As Single
+                                                                               If inCells(nc, nr).FlowType = cGRM.CellFlowType.OverlandFlow Then
+                                                                                   v = inCells(nc, nr).QCVof_i_j_m3Ps
+                                                                               Else
+                                                                                   v = inCells(nc, nr).mStreamAttr.QCVch_i_j_m3Ps
+                                                                               End If
+                                                                               mArrayQ(nc, nr) = CDbl(Format(v, sformat))
+                                                                           End If
+                                                                       End If
+                                                                   End If
+                                                               Next
+                                                           End Sub)
+        End If
+
         Return True
     End Function
 
-    Private Sub StartCreateASCTextFileSSRD()
-        Dim ts As New ThreadStart(AddressOf CareateASCTextFileInnerSSRD)
+    Private Sub StartMakeImgSSRD()
+        If mbUseOtherThread = True Then
+            Dim ts As New ThreadStart(AddressOf MakeImgSSRDInner)
+            Dim th As New Thread(ts)
+            th.Start()
+        Else
+            MakeImgSSRDInner()
+        End If
+    End Sub
+
+    Private Sub MakeImgSSRDInner()
+        Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
+        imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoSSR.PFN, mArraySSR,
+                                                   mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
+    End Sub
+
+    Private Sub StartMakeImgRFD()
+        If mbUseOtherThread = True Then
+            Dim ts As New ThreadStart(AddressOf MakeImgRFDInner)
+            Dim th As New Thread(ts)
+            th.Start()
+        Else
+            MakeImgRFDInner()
+        End If
+    End Sub
+
+    Private Sub MakeImgRFDInner()
+        Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
+        imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
+                                                   mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to500)
+    End Sub
+
+    Private Sub StartMakeImgRFAccD()
+        If mbUseOtherThread = True Then
+            Dim ts As New ThreadStart(AddressOf MakeImgRFAccDInner)
+            Dim th As New Thread(ts)
+            th.Start()
+        Else
+            MakeImgRFAccDInner()
+        End If
+    End Sub
+
+    Private Sub MakeImgRFAccDInner()
+        Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
+        imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
+                                                   mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to1000)
+    End Sub
+
+    Private Sub StartMakeImgFlowD()
+        If mbUseOtherThread = True Then
+            Dim ts As New ThreadStart(AddressOf MakeImgFlowDInner)
+            Dim th As New Thread(ts)
+            th.Start()
+        Else
+            MakeImgFlowDInner()
+        End If
+    End Sub
+
+    Private Sub MakeImgFlowDInner()
+        Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
+        imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
+                                                   mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to30000)
+    End Sub
+
+    Private Sub StartMakeASCTextFileSSRD()
+        Dim ts As New ThreadStart(AddressOf MakeASCTextFileInnerSSRD)
         Dim th As New Thread(ts)
         th.Start()
     End Sub
 
-    Private Sub CareateASCTextFileInnerSSRD()
+    Private Sub MakeASCTextFileInnerSSRD()
         gentle.cTextFile.MakeASCTextFile(mASCfpnSSRD, mASCHeaderStringAll, "-9999", mArraySSR)
     End Sub
 
-    Private Sub StartCreateASCTextFileRFD()
-        Dim ts As New ThreadStart(AddressOf CareateASCTextFileInnerRFD)
+    Private Sub StartMakeASCTextFileRFD()
+        Dim ts As New ThreadStart(AddressOf MakeASCTextFileInnerRFD)
         Dim th As New Thread(ts)
         th.Start()
     End Sub
 
-    Private Sub CareateASCTextFileInnerRFD()
+    Private Sub MakeASCTextFileInnerRFD()
         cTextFile.MakeASCTextFile(mASCfpnRFD, mASCHeaderStringAll, "-9999", mArrayRF)
     End Sub
 
-    Private Sub StartCreateASCTextFileRFaccD()
-        Dim ts As New ThreadStart(AddressOf CareateASCTextFileInnerRFaccD)
+    Private Sub StartMakeASCTextFileRFaccD()
+        Dim ts As New ThreadStart(AddressOf MakeASCTextFileInnerRFaccD)
         Dim th As New Thread(ts)
         th.Start()
     End Sub
 
-    Private Sub CareateASCTextFileInnerRFaccD()
+    Private Sub MakeASCTextFileInnerRFaccD()
         cTextFile.MakeASCTextFile(mASCfpnRFaccD, mASCHeaderStringAll, "-9999", mArrayRFAcc)
     End Sub
 
-    Private Sub StartCreateASCTextFileFlowD()
-        Dim ts As New ThreadStart(AddressOf CareateASCTextFileInnerFlowD)
+    Private Sub StartMakeASCTextFileFlowD()
+        Dim ts As New ThreadStart(AddressOf MakeASCTextFileInnerFlowD)
         Dim th As New Thread(ts)
         th.Start()
     End Sub
 
-    Private Sub CareateASCTextFileInnerFlowD()
+    Private Sub MakeASCTextFileInnerFlowD()
         cTextFile.MakeASCTextFile(mASCfpnFlowD, mASCHeaderStringAll, "-9999", mArrayQ)
     End Sub
 

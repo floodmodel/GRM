@@ -75,12 +75,9 @@
             grmPrj = cProject.Current
             If cProject.Current.SetupModelParametersAfterProjectFileWasOpened() = False Then
                 cGRM.writelogAndConsole("GRM setup was failed !!!", True, True)
-                'MsgBox("GRM -1")
                 Exit Sub
             End If
-            'MsgBox("GRM 1")
         Catch ex As Exception
-            'MsgBox("GRM -1")
         End Try
     End Sub
 

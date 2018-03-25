@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 //using System.Linq;
 //using System.Text;
-//using System.Threading.Tasks;
+using System.Threading.Tasks;
 using System.Drawing;
-//using System.Drawing.Drawing2D;
 using System.IO;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
@@ -254,10 +253,11 @@ namespace gentle
             }
         }
 
-        public static Bitmap GetBmpImageByFileStream(string fpnSource)
+        public static Bitmap GetBMPImageByFileStream(string fpnSource)
         {
             FileStream streamBMP = new FileStream(fpnSource, FileMode.Open);
             Bitmap img = (Bitmap)Bitmap.FromStream(streamBMP);
+            
             streamBMP.Dispose();
             return img;
         }
@@ -285,18 +285,13 @@ namespace gentle
                 Bitmap bm = new Bitmap(Convert.ToInt32(colxCount * CellWbmp) + 1, Convert.ToInt32(rowyCount * CellHbmp) + 1);
                 Graphics gr = Graphics.FromImage(bm);
                 gr.Clear(Color.White);
-                string[] strArray = new string[rowyCount];
-                for (int r = 0; r <= rowyCount - 1; r++)
+                for (int r = 0; r < rowyCount; r++)
                 {
-                    //string aRow = "";
-                    for (int c = 0; c <= colxCount - 1; c++)
+                    for (int c = 0; c < colxCount; c++)
                     {
-                        //Dim rec As New Rectangle(c * CellWbmp, (LayerCellHcount - r - 1) * CellHbmp, CellWbmp, CellHbmp) ''이건 low left 부터 시작
                         Rectangle rec = new Rectangle(c * CellWbmp, r * CellHbmp, CellWbmp, CellHbmp);
-                        //이건 top left 부터 시작
                         Color cToShow = DefaultNullColor;
-                        double dv = 0;
-                        if (double.TryParse (array[c, r].ToString (), out dv) == true)
+                        if (double.TryParse(array[c, r].ToString(), out double dv) == true)
                         {
                             cToShow = GetColorFromMemoryRendererInDifferentInterval(dv, rangeType, nullValue);
                         }
@@ -304,7 +299,24 @@ namespace gentle
                         gr.FillRectangle(brsh, rec);
                     }
                 }
+                //병렬로 하니까.. 애러가 난다.. 진행이 안된다.
+                //var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+                //Parallel.For(0, rowyCount, options, delegate (int r)
+                //{
+                //    for (int c = 0; c < colxCount ; c++)
+                //    {
+                //        Rectangle rec = new Rectangle(c * CellWbmp, r * CellHbmp, CellWbmp, CellHbmp);
+                //        Color cToShow = DefaultNullColor;
+                //        if (double.TryParse(array[c, r].ToString(), out double dv) == true)
+                //        {
+                //            cToShow = GetColorFromMemoryRendererInDifferentInterval(dv, rangeType, nullValue);
+                //        }
+                //        SolidBrush brsh = new SolidBrush(cToShow);
+                //        gr.FillRectangle(brsh, rec);
+                //    }
+                //});
                 bm.Save(imgFPNtoMake, ImageFormat.Png);
+                //bm.Save(imgFPNtoMake);
                 return true;
             }
             catch (Exception ex)
@@ -401,7 +413,7 @@ namespace gentle
                     double divideBy = 0;
                     double divideByH = 0;
                     double divideByW = 0;
-                    imgOrg = GetBmpImageByFileStream(ImagePN);
+                    imgOrg = GetBMPImageByFileStream(ImagePN);
                     divideByW = imgOrg.Width / picBox.Width;
                     divideByH = imgOrg.Height / picBox.Height;
 

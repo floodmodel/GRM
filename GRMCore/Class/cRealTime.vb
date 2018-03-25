@@ -23,6 +23,7 @@ Public Class cRealTime
     Public mDateTimeStartRT As DateTime
     Public mbSimulationRTisOngoing As Boolean
     Private Shared mGRMRT As cRealTime
+    Private mRTProject As cProject
     'Public mFPNFcData As String
     Public mPicWidth As Single
     Public mPicHeight As Single
@@ -52,28 +53,34 @@ Public Class cRealTime
         'mFPNFcData = FPNfcdata
         If cProject.OpenProject(FPNprj, True) = False Then
             RaiseEvent RTStatus("모형 설정 실패.")
-            If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(cProject.Current.ProjectNameOnly, "모형 설정 실패.")
+            If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(IO.Path.GetFileName(FPNprj), "모형 설정 실패.")
             Exit Sub
         End If
-        cProject.Current.mSimulationType = cGRM.SimulationType.RealTime
-        If cProject.Current.SetupModelParametersAfterProjectFileWasOpened() = False Then
+        'mRTProject = New cProject
+        mRTProject = cProject.Current
+        mRTProject.mSimulationType = cGRM.SimulationType.RealTime
+        If mRTProject.SetupModelParametersAfterProjectFileWasOpened() = False Then
             cGRM.writelogAndConsole("GRM setup was failed !!!", True, True)
             Exit Sub
         End If
+        If cOutPutControl.CreateNewOutputFiles(cProject.Current, True) = False Then ' 기존의 single 이벤트에서의 출력파일을 지운다.
+            cGRM.writelogAndConsole("Deleting single event output files were failed !!!", True, True)
+        End If
+
         RaiseEvent RTStatus("모형 설정 완료.")
-        If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(cProject.Current.ProjectNameOnly, "모형 설정 완료.")
+        If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(mRTProject.ProjectNameOnly, "모형 설정 완료.")
     End Sub
 
     Public Sub RunGRMRT()
         cThisSimulation.mGRMSetupIsNormal = True
-        If cProject.Current.GeneralSimulEnv.mbMakeRasterOutput = True Then
-            With cProject.Current
+        If mRTProject.GeneralSimulEnv.mbMakeRasterOutput = True Then
+            With mRTProject
                 .mImgFPN_dist_Flow = New List(Of String)
                 .mImgFPN_dist_RF = New List(Of String)
                 .mImgFPN_dist_RFAcc = New List(Of String)
                 .mImgFPN_dist_SSR = New List(Of String)
             End With
-            mGrmAnalyzer = New cRasterOutput(cProject.Current)
+            mGrmAnalyzer = New cRasterOutput(mRTProject)
         End If
         mDateTimeStartRT = New DateTime(CInt(Mid(mRFStartDateTimeRT, 1, 4)),
                                              CInt(Mid(mRFStartDateTimeRT, 5, 2)),
@@ -85,13 +92,13 @@ Public Class cRealTime
         mlstRFdataRT = New List(Of cRainfall.RainfallData)
         mRFLayerCountToApply_RT = 0
         If CONST_bUseDBMS_FOR_RealTimeSystem Then
-            Call Clear_DBMS_Table_Qwatershed(cProject.Current.ProjectNameOnly)
+            Call Clear_DBMS_Table_Qwatershed(mRTProject.ProjectNameOnly)
             RaiseEvent RTStatus("DBMS Qwatershed_CAL Table Cleared")
-            Call Add_Log_toDBMS(cProject.Current.ProjectNameOnly, "DBMS Qwatershed Table Cleared")
+            Call Add_Log_toDBMS(mRTProject.ProjectNameOnly, "DBMS Qwatershed Table Cleared")
         End If
 
         RaiseEvent RTStatus("실시간 유출해석 시작..")
-        If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(cProject.Current.ProjectNameOnly, "실시간 유출해석 시작..")
+        If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(mRTProject.ProjectNameOnly, "실시간 유출해석 시작..")
 
         mSimul = New cSimulator
         If CreateNewOutputFilesRT() = False Then Exit Sub
@@ -102,12 +109,12 @@ Public Class cRealTime
             RaiseEvent RTStatus("강우자료와 유출해석 시작 시간을 확인하시길 바랍니다.")
         End If
 
-        If cProject.Current.FCGrid.IsSet = True Then
+        If mRTProject.FCGrid.IsSet = True Then
             mdicFCDataCountForEachCV = New Dictionary(Of Integer, Integer)
             mdicFCNameForEachCV = New Dictionary(Of Integer, String)
             mdicFCDataOrder = New Dictionary(Of Integer, Integer)
             mdicBNewFCdataAddedRT = New Dictionary(Of Integer, Boolean)
-            For Each id As Integer In cProject.Current.FCGrid.FCGridCVidList
+            For Each id As Integer In mRTProject.FCGrid.FCGridCVidList
                 mdicFCDataCountForEachCV.Add(id, 0)
                 mdicBNewFCdataAddedRT.Add(id, True)
                 mdicFCDataOrder.Add(id, 0)
@@ -116,14 +123,14 @@ Public Class cRealTime
             '    System.Console.WriteLine(String.Format("Realtime flow control data file is not valid. {0} {1}", vbCrLf, mGRMRT.mFPNFcData))
             '    Exit Sub
             'End If
-            cProject.Current.FCGrid.mdtFCFlowData = New DataTable
+            mRTProject.FCGrid.mdtFCFlowData = New DataTable
             Call ReadDBorCSVandMakeFCdataTableForRealTime(mRFStartDateTimeRT)
-            If cProject.Current.FCGrid.mdtFCFlowData.Rows.Count < 1 Then
+            If mRTProject.FCGrid.mdtFCFlowData.Rows.Count < 1 Then
                 RaiseEvent RTStatus("유출해석 시작 시간에서의 flow control 자료가 없습니다.")
                 RaiseEvent RTStatus("유출해석 시작시간과 댐방류량, inlet 자료 등 flow control 자료를 확인하시길 바랍니다.")
             End If
         End If
-        mSimul.SimulateRT(cProject.Current, Me)
+        mSimul.SimulateRT(mRTProject, Me)
     End Sub
 
     Private Sub Clear_DBMS_Table_Qwatershed(strName As String)
@@ -138,14 +145,14 @@ Public Class cRealTime
     End Sub
 
     Private Function CreateNewOutputFilesRT() As Boolean
-        If Not cOutputControlRT.CreateNewOutputTextFileRT(cProject.Current, mGRMRT) Then Return False
+        If Not cOutputControlRT.CreateNewOutputTextFileRT(mRTProject, mGRMRT) Then Return False
         Return True
     End Function
 
     Public Sub UpdateFcDatainfoGRMRT(ByVal strDate As String, cvid As Integer,
                                      previousOrder As Integer, dtMIN As Integer)
-        Dim fcname As String = cProject.Current.FCGrid.GetFCName(cvid)
-        Dim drs As DataRow() = cProject.Current.FCGrid.mdtFCFlowData.Select(String.Format("CVID = {0} and datetime={1}", cvid, strDate))
+        Dim fcname As String = mRTProject.FCGrid.GetFCName(cvid)
+        Dim drs As DataRow() = mRTProject.FCGrid.mdtFCFlowData.Select(String.Format("CVID = {0} and datetime={1}", cvid, strDate))
         If drs.Count > 0 Then
             mdicBNewFCdataAddedRT(cvid) = True
             RaiseEvent RTStatus(String.Format("  FC Data 입력완료...({3} {0}, CVID={1}, Value={2})",
@@ -251,8 +258,8 @@ Public Class cRealTime
             Next oDR
             cProject.Current.FCGrid.mdtFCFlowData = dt
             If False Then
-                cProject.Current.FCGrid.mdtFCFlowData.TableName = "tmp"
-                cProject.Current.FCGrid.mdtFCFlowData.WriteXml("C:\temp\read_method_" + cProject.Current.ProjectNameOnly + "_" + Now.ToString("yyMMddHHmmss") + "grm.xml")
+                mRTProject.FCGrid.mdtFCFlowData.TableName = "tmp"
+                mRTProject.FCGrid.mdtFCFlowData.WriteXml("C:\temp\read_method_" + cProject.Current.ProjectNameOnly + "_" + Now.ToString("yyMMddHHmmss") + "grm.xml")
             End If
         Else
             dt.Columns.Add(New Global.System.Data.DataColumn("CVID", GetType(Integer), Nothing, Global.System.Data.MappingType.Element))
@@ -275,7 +282,7 @@ Public Class cRealTime
                         nr("CVID") = CInt(TextIncurrentRow(0))
                         nr("DataTime") = TextIncurrentRow(1)
                         nr("Value") = CSng(TextIncurrentRow(2))
-                        cProject.Current.FCGrid.mdtFCFlowData.Rows.Add(nr)
+                        mRTProject.FCGrid.mdtFCFlowData.Rows.Add(nr)
                     End If
                     intL += 1
                 End While
@@ -325,10 +332,10 @@ Public Class cRealTime
         RaiseEvent RTStatus("분석종료")
     End Sub
 
-    Private Sub mSimul_CallAnalyzer(sender As cSimulator, project As cProject,
+    Private Sub mSimul_CallAnalyzer(sender As cSimulator,
                                     nowTtoPrint_MIN As Integer) Handles mSimul.MakeRasterOutput
-        If project.GeneralSimulEnv.mbMakeRasterOutput = True Then _
-        mGrmAnalyzer.CreateDistributionFiles(nowTtoPrint_MIN, mGrmAnalyzer.ImgWidth, mGrmAnalyzer.ImgHeight)
+        If mRTProject.GeneralSimulEnv.mbMakeRasterOutput = True Then _
+        mGrmAnalyzer.MakeDistributionFiles(nowTtoPrint_MIN, mGrmAnalyzer.ImgWidth, mGrmAnalyzer.ImgHeight, True)
     End Sub
 
     Private Sub cRealTime_RTStatus(strMSG As String) Handles Me.RTStatus

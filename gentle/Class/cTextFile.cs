@@ -119,9 +119,7 @@ namespace gentle
                 string arow = "";
                 for (int nc = 0; nc <= ncols - 1; nc++)
                 {
-                    string v = null;
-                    v = array[nc, nr].ToString();
-                    arow = arow + v + " ";
+                    arow = arow + array[nc, nr].ToString() + " ";
                 }
                 arow = arow.Trim() + "\r\n";
                 File.AppendAllText(fpn, arow);
@@ -138,12 +136,34 @@ namespace gentle
                 string arow = "";
                 for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
                 {
-                    string v = null;
-                    v = array[nc, nr].ToString();
-                    arow = arow + v + " ";
+                    arow = arow + array[nc, nr].ToString() + " ";
                 }
                 arow = arow.Trim() + "\r\n";
                 File.AppendAllText(fpn, arow);
+            }
+            return true;
+        }
+
+        public static bool MakeASCTextFileAsParallel(string fpn, string allHeader, string nodataValue, double[,] array)
+        {
+            File.AppendAllText(fpn, allHeader);
+            int rowYcount = array.GetLength(1);
+            int colXcount = array.GetLength(0);
+            var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+            string[] rows = new string[rowYcount];
+            Parallel.For(0, rowYcount, options, delegate (int ry)
+            {
+                string arow = "";
+                for (int cx = 0; cx < colXcount; cx++)
+                {
+                    arow = arow + array[cx, ry].ToString() + " ";
+                }
+                arow = arow.Trim() + "\r\n";
+                rows[ry] = arow;
+            });
+            for (int nr = 0; nr < rowYcount; nr++)
+            {
+                File.AppendAllText(fpn, rows[nr]);
             }
             return true;
         }

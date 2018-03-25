@@ -302,13 +302,16 @@ Public Class cChart
                 For m As Integer = 0 To mQsims.Count - 1 '키는 0부터 시작
                     If mQsims(m) IsNot Nothing Then valuesSim.Add(mQsims(m)(n))
                 Next
-
-                'If n = 0 AndAlso mQobss Is Nothing OrElse mQobss.Count < 1 Then
-                For m As Integer = 0 To mMaxOutPrintCount - 1 'mQsims.Count - 1 '키는 0부터 시작
-                    valuesSim.Add(Nothing)
+                'For m As Integer = valuesSim.Count To mMaxOutPrintCount - 1 'mQsims.Count - 1 '키는 0부터 시작
+                '    valuesSim.Add(Nothing)
+                'Next
+                'mSQsim(n).Points.DataBindXY(mAxisXLabel.Values, valuesSim)
+                Dim axisXLabelSim As New Dictionary(Of Integer, String)
+                For nl As Integer = 0 To valuesSim.Count - 1
+                    axisXLabelSim.Add(nl, mAxisXLabel.Values(nl))
                 Next
-                mSQsim(n).Points.DataBindXY(mAxisXLabel.Values, valuesSim)
-                'End If
+                mSQsim(n).Points.DataBindXY(axisXLabelSim.Values, valuesSim)
+
                 If valuesSim IsNot Nothing Then
                     mSQsim(n).Points.DataBindY(valuesSim)
                 End If

@@ -2116,14 +2116,15 @@ Public Class cProject
         If mProject.mSimulationType <> cGRM.SimulationType.RealTime Then
             cThisSimulation.mRFDataCountInThisEvent = mProject.Rainfall.mlstRainfallData.Count
         End If
-        Dim deleteOnly As Boolean = False
-        If cProject.Current.mSimulationType = cGRM.SimulationType.RealTime Then
-            deleteOnly = True
-        End If
-        If cOutPutControl.CreateNewOutputFiles(mProject, deleteOnly) = False Then
-            Console.WriteLine("Making output file template was failed..")
-            Return False
-        End If
+        'Dim deleteOnly As Boolean = False
+        'If cProject.Current.mSimulationType = cGRM.SimulationType.RealTime Then
+        '    deleteOnly = True
+        'End If
+
+        'If cOutPutControl.CreateNewOutputFiles(mProject, deleteOnly) = False Then
+        '    Console.WriteLine("Making output file template was failed..")
+        '    Return False
+        'End If
         Return True
     End Function
 

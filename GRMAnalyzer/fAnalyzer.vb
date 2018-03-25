@@ -20,7 +20,7 @@ Public Class fAnalyzer
     Public mImgFPN_dist_RFAcc As List(Of String)
     Public mImgFPN_dist_Flow As List(Of String)
     Public mMaxPrintoutCount As Integer = 0
-    Public mImg As New cImg(cImg.RendererType.WaterDepth)
+    Public mImg As New cImg(cImg.RendererType.Risk)
     Public mChart As cChart
     Private mdtData As DataTable
 
@@ -34,11 +34,11 @@ Public Class fAnalyzer
     Private mAninmationRepeat As Boolean = False
 
     Private Sub fAnalyzer_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+        'Me.tbGMPfpn.Text = "D:\Github\TestSet_GRM\AnalyzerTest\SampleProject.gmp"
+        'Me.tbFPNObsData.Text = "D:\Github\TestSet_GRM\AnalyzerTest\Qobs - 복사본.txt"
         cThisSimulation.mAnalyzerSet = False
         Me.tbChart.Width = 470
     End Sub
-
-
 
     Private Sub btStartGRMorApplySettings_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btStartGRMorApplySettings.Click
         Try
@@ -152,7 +152,7 @@ Public Class fAnalyzer
                         colindexRf = n
                         Exit For
                     End If
-                    If Titles(n) <> "Date_Time" Then
+                    If Titles(n) <> "Data_Time" Then
                         IndexQsim.Add(n)
                         Dim leg As String = Replace(Titles(n), "[", "")
                         leg = Replace(leg, "]", "")
@@ -162,6 +162,10 @@ Public Class fAnalyzer
 
                 If IndexQsim.Count <> mproject.WatchPoint.mdtWatchPointInfo.Rows.Count Then
                     MsgBox(" Watchpoint of current project is different from simulated file. ", MsgBoxStyle.Exclamation, cGRM.BuildInfo.ProductName)
+                    Exit Sub
+                End If
+                If strLines.Length < 5 Then
+                    MsgBox(" There is no simulated data in the output file. ", MsgBoxStyle.Exclamation, cGRM.BuildInfo.ProductName)
                     Exit Sub
                 End If
                 ''여기서 키를 만들고
@@ -237,91 +241,103 @@ Public Class fAnalyzer
     End Sub
 
     Private Sub StartGRMSimulationThread()
+        If cOutPutControl.CreateNewOutputFiles(mproject, False) = False Then
+            MsgBox("Making output file template was failed..", MsgBoxStyle.Exclamation, cGRM.BuildInfo.ProductName)
+            Exit Sub
+        End If
         mSimulator.SimulateSingleEvent(mproject)
     End Sub
 
-    Private Delegate Sub DrawImagesDelegate(ByVal nowTtoPrint_MIN As Integer, imgWidth As Integer, imgHeight As Integer)
-    Private Delegate Sub DrawChartDelegate(project As cProject, project_tm1 As cProjectBAK, ByVal nowT_Min As Integer, interCoef As Single)
+    Private Delegate Sub RasterOutputDelegate(ByVal nowTtoPrint_MIN As Integer, imgWidth As Integer, imgHeight As Integer, usingOtherThread As Boolean)
+    Private Delegate Sub DrawChartDelegate(project_tm1 As cProjectBAK, ByVal nowT_Min As Integer, interCoef As Single)
 
-    Private Sub mSimulator_MakeRasterOutput(sender As cSimulator, project As cProject,
+    Private Sub Simulator_MakeRasterOutput(sender As cSimulator,
                                         nowTtoPrint_MIN As Integer) Handles mSimulator.MakeRasterOutput
+        'Private Sub mSimulator_MakeRasterOutput(sender As cSimulator, project As cProject,
+        '                            nowTtoPrint_MIN As Integer) Handles mSimulator.MakeRasterOutput
         If mbCreateDistributionFiles = True Then
-            DrawImgs(project, nowTtoPrint_MIN)
+            MakeRasterOutputFile(nowTtoPrint_MIN)
+            'DrawImgs(project, nowTtoPrint_MIN)
             Dim strNowTimeToPrintOut As String = cComTools.GetTimeToPrintOut(mproject.GeneralSimulEnv.mIsDateTimeFormat,
                                                                              mproject.GeneralSimulEnv.mSimStartDateTime, nowTtoPrint_MIN)
             strNowTimeToPrintOut = cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut)
             If mproject.GeneralSimulEnv.mbShowSoilSaturation = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPSSRDistribution, cGRM.CONST_DIST_SSR_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_SSR.Add(mIMGfpn)
-                ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbSSRimg, mIMGfpn)
+                ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbSSRimg, mIMGfpn)
             End If
             If mproject.GeneralSimulEnv.mbShowRFdistribution = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPRFDistribution, cGRM.CONST_DIST_RF_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_RF.Add(mIMGfpn)
-                ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbRFimg, mIMGfpn)
+                ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbRFimg, mIMGfpn)
             End If
             If mproject.GeneralSimulEnv.mbShowRFaccDistribution = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPRFAccDistribution, cGRM.CONST_DIST_RFACC_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_RFAcc.Add(mIMGfpn)
-                ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbRFACCimg, mIMGfpn)
+                ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbRFACCimg, mIMGfpn)
             End If
             If mproject.GeneralSimulEnv.mbShowFlowDistribution = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPFlowDistribution, cGRM.CONST_DIST_FLOW_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_Flow.Add(mIMGfpn)
-                ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbFLOWimg, mIMGfpn)
+                ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbFLOWimg, mIMGfpn)
             End If
         End If
 
     End Sub
 
-    Private Sub mSimulator_SendQToAnalyzer(sender As cSimulator, project As cProject, project_tm1 As cProjectBAK, nowTtoPrint_MIN As Integer, interCoef As Single) Handles mSimulator.SendQToAnalyzer
-        DrawChart(project, project_tm1, nowTtoPrint_MIN, interCoef)
+    'Private Sub mSimulator_SendQToAnalyzer(sender As cSimulator, project As cProject, project_tm1 As cProjectBAK, nowTtoPrint_MIN As Integer, interCoef As Single) Handles mSimulator.SendQToAnalyzer
+    Private Sub mSimulator_SendQToAnalyzer(sender As cSimulator, project_tm1 As cProjectBAK,
+                                           nowTtoPrint_MIN As Integer, interCoef As Single) Handles mSimulator.SendQToAnalyzer
+        DrawChart(project_tm1, nowTtoPrint_MIN, interCoef)
+        'DrawChart(project, project_tm1, nowTtoPrint_MIN, interCoef)
     End Sub
 
-    Private Sub DrawChart(project As cProject, project_tm1 As cProjectBAK, nowTtoPrint_MIN As Integer, interCoef As Single)
+    'Private Sub DrawChart(project As cProject , project_tm1 As cProjectBAK, nowTtoPrint_MIN As Integer, interCoef As Single)
+    Private Sub DrawChart(project_tm1 As cProjectBAK, nowTtoPrint_MIN As Integer, interCoef As Single)
         If Me.pbChartMain.InvokeRequired = True Then
             Dim d As New DrawChartDelegate(AddressOf AddDataAndUpdateChart)
-            Me.pbChartMain.Invoke(d, project, project_tm1, nowTtoPrint_MIN, interCoef)
+            Me.pbChartMain.Invoke(d, project_tm1, nowTtoPrint_MIN, interCoef)
         Else
-            AddDataAndUpdateChart(project, project_tm1, nowTtoPrint_MIN, interCoef)
+            AddDataAndUpdateChart(project_tm1, nowTtoPrint_MIN, interCoef)
         End If
     End Sub
-    Private Sub DrawImgs(project As cProject, nowTtoPrint_MIN As Integer)
+    Private Sub MakeRasterOutputFile(nowTtoPrint_MIN As Integer)
         If Me.InvokeRequired Then
-            Dim d As New DrawImagesDelegate(AddressOf mRasterOutput.CreateDistributionFiles)
-            Me.Invoke(d, nowTtoPrint_MIN, mRasterOutput.ImgWidth, mRasterOutput.ImgHeight)
+            Dim d As New RasterOutputDelegate(AddressOf mRasterOutput.MakeDistributionFiles)
+            Me.Invoke(d, nowTtoPrint_MIN, mRasterOutput.ImgWidth, mRasterOutput.ImgHeight, False)
         Else
-            mRasterOutput.CreateDistributionFiles(nowTtoPrint_MIN, mRasterOutput.ImgWidth, mRasterOutput.ImgHeight)
+            mRasterOutput.MakeDistributionFiles(nowTtoPrint_MIN, mRasterOutput.ImgWidth, mRasterOutput.ImgHeight, False)
         End If
     End Sub
 
 
-    Public Sub AddDataAndUpdateChart(project As cProject, project_tm1 As cProjectBAK, ByVal nowT_Min As Integer, interCoef As Single)
+    'Public Sub AddDataAndUpdateChart(project As cProject, project_tm1 As cProjectBAK, ByVal nowT_Min As Integer, interCoef As Single)
+    Public Sub AddDataAndUpdateChart(project_tm1 As cProjectBAK, ByVal nowT_Min As Integer, interCoef As Single)
         Dim Qs As New List(Of Single)
         Dim qsim As Single = 0
         For Each cvid As Integer In cProject.Current.WatchPoint.WPCVidList
             Dim cvan As Integer = cvid - 1
             If interCoef = 1 Then
-                If project.CV(cvan).FlowType = cGRM.CellFlowType.OverlandFlow Then
-                    qsim = CSng(String.Format("{0,8:#0.##}", project.CV(cvan).QCVof_i_j_m3Ps))
+                If mproject.CV(cvan).FlowType = cGRM.CellFlowType.OverlandFlow Then
+                    qsim = CSng(String.Format("{0,8:#0.##}", mproject.CV(cvan).QCVof_i_j_m3Ps))
                 Else
-                    qsim = CSng(String.Format("{0,8:#0.##}", project.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps))
+                    qsim = CSng(String.Format("{0,8:#0.##}", mproject.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps))
                 End If
             ElseIf project_tm1 IsNot Nothing Then
-                If project.CV(cvan).FlowType = cGRM.CellFlowType.OverlandFlow Then
+                If mproject.CV(cvan).FlowType = cGRM.CellFlowType.OverlandFlow Then
                     qsim = CSng(String.Format("{0,8:#0.##}", cHydroCom.GetInterpolatedValueLinear(
                                    project_tm1.CV(cvan).QCVof_i_j_m3Ps,
-                                   project.CV(cvan).QCVof_i_j_m3Ps, interCoef)))
+                                   mproject.CV(cvan).QCVof_i_j_m3Ps, interCoef)))
                 Else
                     qsim = CSng(String.Format("{0,8:#0.##}", cHydroCom.GetInterpolatedValueLinear(
                                    project_tm1.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps,
-                                   project.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps, interCoef)))
+                                   mproject.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps, interCoef)))
                 End If
             End If
             Qs.Add(qsim)
         Next
         mChart.AddQsimAndRFpointAndUpdateChart(CSng(cThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m) * 1000, Qs)
-        Call AddDataAndUpdateDataGridView(project, nowT_Min)
+        Call AddDataAndUpdateDataGridView(mproject, nowT_Min)
     End Sub
 
 
@@ -402,7 +418,7 @@ Public Class fAnalyzer
     End Sub
 
     Private Sub fAnalyzer_FormClosing(ByVal sender As Object, ByVal e As System.Windows.Forms.FormClosingEventArgs) Handles Me.FormClosing
-        ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbSSRimg)
+        ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbSSRimg)
         pbSSRimg = Nothing
         cThisSimulation.mAnalyzerSet = False
     End Sub
@@ -412,26 +428,26 @@ Public Class fAnalyzer
     ''' 폼에 있는 picturebox를 지우고 새 이미지로 그린다.
     ''' </summary>
     ''' <param name="pb"></param>
-    ''' <param name="bmpFPN"></param>
+    ''' <param name="imgFpn"></param>
     ''' <returns></returns>
     ''' <remarks></remarks>
-    Public Shared Function ClearPictureBoxAndDrawNewBMPwithBMPFile(ByVal pb As PictureBox, Optional ByVal bmpFPN As String = "") As Boolean
+    Public Shared Function ClearPictureBoxAndDrawNewImgwithImgFile(ByVal pb As PictureBox, Optional ByVal imgFpn As String = "") As Boolean
         If pb.Image IsNot Nothing Then
             pb.Image.Dispose()
             pb.Image = Nothing
         End If
-        If bmpFPN <> "" Then
-            If IO.File.Exists(bmpFPN) Then
-                Dim imgOrg As Bitmap = cImg.GetBmpImageByFileStream(bmpFPN)
+        If imgFpn <> "" Then
+            If IO.File.Exists(imgFpn) Then
+                Dim imgOrg As Bitmap = cImg.GetBMPImageByFileStream(imgFpn)
                 Dim divideByH, divideByW As Double
                 divideByW = imgOrg.Width / pb.Width
                 divideByH = imgOrg.Height / pb.Height
                 If divideByW > 1 Or divideByH > 1 Then
-                    pb.Image = AutosizeImage(bmpFPN, pb)
+                    pb.Image = AutosizeImage(imgFpn, pb)
                 Else
                     pb.Image = imgOrg
                 End If
-                pb.Image.Tag = bmpFPN
+                pb.Image.Tag = imgFpn
             End If
         End If
         Return True
@@ -447,7 +463,7 @@ Public Class fAnalyzer
                 Dim imgShow As Bitmap
                 Dim g As Graphics
                 Dim divideBy, divideByH, divideByW As Double
-                imgOrg = cImg.GetBmpImageByFileStream(ImagePN)
+                imgOrg = cImg.GetBMPImageByFileStream(ImagePN)
                 divideByW = imgOrg.Width / picBox.Width
                 divideByH = imgOrg.Height / picBox.Height
                 '===============================================
@@ -488,7 +504,7 @@ Public Class fAnalyzer
 
 
     Public Sub SetDistributedPictureFilesAndRenderer(inForm As fAnalyzer)
-        Dim tmpImg As New cImg(cImg.RendererType.WaterDepth)
+        Dim tmpImg As New cImg(cImg.RendererType.Risk)
         If mproject.GeneralSimulEnv.mbShowSoilSaturation = True Then
             Call UpdateSoilSaturationBMPFileList(mproject.ProjectPathName)
             Call SetSSRendererWithInitialColor(inForm, tmpImg)
@@ -783,14 +799,14 @@ Public Class fAnalyzer
                 If mCurrentOrder > 0 AndAlso mCurrentOrder - 1 < mImgFPN_dist_SSR.Count Then
                     If mImgFPN_dist_SSR(mCurrentOrder - 1) IsNot Nothing AndAlso
                        IO.File.Exists(mImgFPN_dist_SSR(mCurrentOrder - 1)) Then
-                        ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbSSRimg, mImgFPN_dist_SSR(mCurrentOrder - 1))
+                        ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbSSRimg, mImgFPN_dist_SSR(mCurrentOrder - 1))
                     End If
                 Else
-                    ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbSSRimg)
+                    ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbSSRimg)
                     Me.pbSSRimg.Refresh()
                 End If
             Else
-                ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbSSRimg)
+                ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbSSRimg)
                 Me.pbSSRimg.Refresh()
             End If
         End If
@@ -800,14 +816,14 @@ Public Class fAnalyzer
                 If mCurrentOrder > 0 AndAlso mCurrentOrder - 1 < mImgFPN_dist_RF.Count Then
                     If mImgFPN_dist_RF(mCurrentOrder - 1) IsNot Nothing AndAlso
                        IO.File.Exists(mImgFPN_dist_RF(mCurrentOrder - 1)) Then
-                        ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbRFimg, mImgFPN_dist_RF(mCurrentOrder - 1))
+                        ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbRFimg, mImgFPN_dist_RF(mCurrentOrder - 1))
                     End If
                 Else
-                    ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbRFimg)
+                    ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbRFimg)
                     Me.pbRFimg.Refresh()
                 End If
             Else
-                ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbRFimg)
+                ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbRFimg)
                 Me.pbRFimg.Refresh()
             End If
         End If
@@ -817,14 +833,14 @@ Public Class fAnalyzer
                 If mCurrentOrder > 0 AndAlso mCurrentOrder - 1 < mImgFPN_dist_RFAcc.Count Then
                     If mImgFPN_dist_RFAcc(mCurrentOrder - 1) IsNot Nothing AndAlso
                        IO.File.Exists(mImgFPN_dist_RFAcc(mCurrentOrder - 1)) Then
-                        ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbRFACCimg, mImgFPN_dist_RFAcc(mCurrentOrder - 1))
+                        ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbRFACCimg, mImgFPN_dist_RFAcc(mCurrentOrder - 1))
                     End If
                 Else
-                    ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbRFACCimg)
+                    ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbRFACCimg)
                     Me.pbRFACCimg.Refresh()
                 End If
             Else
-                ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbRFACCimg)
+                ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbRFACCimg)
                 Me.pbRFACCimg.Refresh()
             End If
         End If
@@ -834,14 +850,14 @@ Public Class fAnalyzer
                 If mCurrentOrder > 0 AndAlso mCurrentOrder - 1 < mImgFPN_dist_Flow.Count Then
                     If mImgFPN_dist_Flow(mCurrentOrder - 1) IsNot Nothing AndAlso
                        IO.File.Exists(mImgFPN_dist_Flow(mCurrentOrder - 1)) Then
-                        ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbFLOWimg, mImgFPN_dist_Flow(mCurrentOrder - 1))
+                        ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbFLOWimg, mImgFPN_dist_Flow(mCurrentOrder - 1))
                     End If
                 Else
-                    ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbFLOWimg)
+                    ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbFLOWimg)
                     Me.pbFLOWimg.Refresh()
                 End If
             Else
-                ClearPictureBoxAndDrawNewBMPwithBMPFile(Me.pbFLOWimg)
+                ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbFLOWimg)
                 Me.pbFLOWimg.Refresh()
             End If
         End If
@@ -1031,7 +1047,7 @@ Public Class fAnalyzer
         Dim fpnASC As String
         Dim fpnBMP As String
         Dim pb As PictureBox = Nothing
-        Dim IniColor As New cImg(cImg.RendererType.WaterDepth)
+        Dim IniColor As New cImg(cImg.RendererType.Risk)
         Dim rangeType As cImg.RendererRange = Nothing
         If sender Is Me.btInitializeSSRenderer Then
             SetSSRendererWithInitialColor(Me, IniColor)
@@ -1059,7 +1075,7 @@ Public Class fAnalyzer
             fpnBMP = CStr(pb.Image.Tag)
             fpnASC = Path.Combine(IO.Path.GetDirectoryName(fpnBMP), Path.GetFileNameWithoutExtension(fpnBMP) + ".asc")
             If File.Exists(fpnASC) = True Then
-                ClearPictureBoxAndDrawNewBMPwithBMPFile(pb)
+                ClearPictureBoxAndDrawNewImgwithImgFile(pb)
                 pb.Refresh()
                 mImg.MakeImgFileUsingASCfileFromTL(fpnASC, fpnBMP, rangeType,
                                                        pb.Width, pb.Height,

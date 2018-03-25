@@ -23,9 +23,9 @@ Partial Class fAnalyzer
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Dim ChartArea2 As System.Windows.Forms.DataVisualization.Charting.ChartArea = New System.Windows.Forms.DataVisualization.Charting.ChartArea()
-        Dim Legend2 As System.Windows.Forms.DataVisualization.Charting.Legend = New System.Windows.Forms.DataVisualization.Charting.Legend()
-        Dim Series2 As System.Windows.Forms.DataVisualization.Charting.Series = New System.Windows.Forms.DataVisualization.Charting.Series()
+        Dim ChartArea1 As System.Windows.Forms.DataVisualization.Charting.ChartArea = New System.Windows.Forms.DataVisualization.Charting.ChartArea()
+        Dim Legend1 As System.Windows.Forms.DataVisualization.Charting.Legend = New System.Windows.Forms.DataVisualization.Charting.Legend()
+        Dim Series1 As System.Windows.Forms.DataVisualization.Charting.Series = New System.Windows.Forms.DataVisualization.Charting.Series()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(fAnalyzer))
         Me.Label87 = New System.Windows.Forms.Label()
         Me.pbFlow_200_300 = New System.Windows.Forms.PictureBox()
@@ -2673,16 +2673,16 @@ Partial Class fAnalyzer
         '
         'Chart1
         '
-        ChartArea2.Name = "ChartArea1"
-        Me.Chart1.ChartAreas.Add(ChartArea2)
-        Legend2.Name = "Legend1"
-        Me.Chart1.Legends.Add(Legend2)
+        ChartArea1.Name = "ChartArea1"
+        Me.Chart1.ChartAreas.Add(ChartArea1)
+        Legend1.Name = "Legend1"
+        Me.Chart1.Legends.Add(Legend1)
         Me.Chart1.Location = New System.Drawing.Point(89, 238)
         Me.Chart1.Name = "Chart1"
-        Series2.ChartArea = "ChartArea1"
-        Series2.Legend = "Legend1"
-        Series2.Name = "Series1"
-        Me.Chart1.Series.Add(Series2)
+        Series1.ChartArea = "ChartArea1"
+        Series1.Legend = "Legend1"
+        Series1.Name = "Series1"
+        Me.Chart1.Series.Add(Series1)
         Me.Chart1.Size = New System.Drawing.Size(73, 73)
         Me.Chart1.TabIndex = 38
         Me.Chart1.Text = "Chart1"
@@ -2809,8 +2809,8 @@ Partial Class fAnalyzer
         Me.Controls.Add(Me.tcDistribution)
         Me.Controls.Add(Me.dgvResults)
         Me.Controls.Add(Me.gbHydrograph)
+        Me.MaximizeBox = False
         Me.MaximumSize = New System.Drawing.Size(996, 875)
-        Me.MinimizeBox = False
         Me.MinimumSize = New System.Drawing.Size(996, 875)
         Me.Name = "fAnalyzer"
         Me.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide

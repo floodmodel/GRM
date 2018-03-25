@@ -115,6 +115,10 @@ Module mMain
                 cGRM.writelogAndConsole("GRM setup was failed !!!", True, True)
                 Exit Sub
             End If
+            If cOutPutControl.CreateNewOutputFiles(cProject.Current, False) = False Then ' 기존의 single 이벤트에서의 출력파일을 지운다.
+                cGRM.writelogAndConsole("Making new output files were failed !!!", True, True)
+            End If
+
             '여기서 셀 정보를 미리 알 수 있다.
             'Dim wsinfo As New cGetWatershedInfo(currentPrjFPN)
             'Dim slp As Single = wsinfo.subwatershedPars(1).minSlopeChBed
@@ -227,10 +231,10 @@ Module mMain
         Console.WriteLine(erroData.ToString)
     End Sub
 
-    Private Sub mSimulator_CallAnalyzer(sender As cSimulator, project As cProject,
+    Private Sub mSimulator_MakeRasterOutput(sender As cSimulator,
                                         nowTtoPrint_MIN As Integer) Handles mSimulator.MakeRasterOutput
         If mbCreateDistributionFiles = True Then
-            mGrmAnalyzer.CreateDistributionFiles(nowTtoPrint_MIN, mGrmAnalyzer.ImgWidth, mGrmAnalyzer.ImgHeight)
+            mGrmAnalyzer.MakeDistributionFiles(nowTtoPrint_MIN, mGrmAnalyzer.ImgWidth, mGrmAnalyzer.ImgHeight, True)
         End If
     End Sub
 
