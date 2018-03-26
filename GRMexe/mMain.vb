@@ -92,16 +92,20 @@ Module mMain
 
     Private Sub StartSingleRun(ByVal currentPrjFPN As String, Optional bDeleteFilesExceptQ As Boolean = False)
         '여기서 셀 정보를 미리 알 수 있다.
-        'Dim WSFPN As String = "C:/GRM/Sample/Data/WiWatershed.asc"
-        'Dim SlopeFPN As String = "C:\GRM\Sample\Data\Wi_Slope_ST.asc"
-        'Dim FdirFPN As String = "C:\GRM\Sample\Data\WiFDir.asc"
-        'Dim FacFPN As String = "C:\GRM\Sample\Data\WiFAc.asc"
-        'Dim streamFPN As String = "C:\GRM\Sample\Data\WiStream6.asc"
-        'Dim lcFPN As String = "C:\GRM\Sample\Data\wilc200.asc"
-        'Dim stFPN As String = "C:\GRM\Sample\Data\wistext200.asc"
-        'Dim sdFPN As String = "C:\GRM\Sample\Data\wisdepth200.asc"
-        'Dim wsinfo As New cGetWatershedInfo(WSFPN, SlopeFPN, FdirFPN, FacFPN, streamFPN, lcFPN, stFPN, sdFPN,,)
-        'Dim cc As Integer = wsinfo.cellCountInWatershed
+        Dim WSFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_ws.asc"
+        Dim SlopeFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_slope.asc"
+        Dim FdirFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_fdir.asc"
+        Dim FacFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_fac.asc"
+        Dim streamFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_stream.asc"
+        Dim lcFPN As String = "C:/GRM_Projects/GHG500/watershed/GHG_lc.asc"
+        Dim stFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_SoilTexture.asc"
+        Dim sdFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_SoilDepth.asc"
+
+
+        Dim wsinfo As New cGetWatershedInfo(cGRM.FlowDirectionType.StartsFromE.ToString, WSFPN, SlopeFPN, FdirFPN, FacFPN, streamFPN, lcFPN, stFPN, sdFPN,,)
+        Dim cc As Integer = wsinfo.cellCountInWatershed
+        Dim a As Integer = wsinfo.WSIDsAll.Count
+        Dim aa As List(Of Integer) = wsinfo.upStreamWSIDs(1)
 
         Dim wpNames As New List(Of String)
         If Path.GetDirectoryName(currentPrjFPN) = "" Then
@@ -119,7 +123,7 @@ Module mMain
                 cGRM.writelogAndConsole("Making new output files were failed !!!", True, True)
             End If
 
-            '여기서 셀 정보를 미리 알 수 있다.
+            ''여기서 셀 정보를 미리 알 수 있다.
             'Dim wsinfo As New cGetWatershedInfo(currentPrjFPN)
             'Dim slp As Single = wsinfo.subwatershedPars(1).minSlopeChBed
             'Dim ukk As String = wsinfo.subwatershedPars(1).UKType

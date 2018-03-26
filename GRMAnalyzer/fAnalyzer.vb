@@ -34,8 +34,8 @@ Public Class fAnalyzer
     Private mAninmationRepeat As Boolean = False
 
     Private Sub fAnalyzer_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
-        Me.tbGMPfpn.Text = "D:\Github\TestSet_GRM\AnalyzerTest\SampleProject.gmp"
-        Me.tbFPNObsData.Text = "D:\Github\TestSet_GRM\AnalyzerTest\Qobs - 복사본.txt"
+        'Me.tbGMPfpn.Text = "D:\Github\TestSet_GRM\AnalyzerTest\SampleProject.gmp"
+        'Me.tbFPNObsData.Text = "D:\Github\TestSet_GRM\AnalyzerTest\Qobs - 복사본.txt"
         cThisSimulation.mAnalyzerSet = False
         Me.tbChart.Width = 470
     End Sub

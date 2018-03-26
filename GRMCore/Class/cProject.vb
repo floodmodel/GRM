@@ -463,7 +463,7 @@ Public Class cProject
             Dim row As GRMProject.ProjectSettingsRow = CType(mPrjFile.ProjectSettings.Rows(0), GRMProject.ProjectSettingsRow)
             ReadLayerWSandSetBasicInfo(row.WatershedFile, cThisSimulation.IsParallel)
             ReadLayerSlope(row.SlopeFile, cThisSimulation.IsParallel)
-            ReadLayerFdir(row.FlowDirectionFile, cThisSimulation.IsParallel)
+            ReadLayerFdir(row.FlowDirectionFile, mWatershed.mFDType, cThisSimulation.IsParallel)
             ReadLayerFAcc(row.FlowAccumFile, cThisSimulation.IsParallel)
             Dim FPNstream As String = ""
             Dim FPNchannelWidth As String = ""
@@ -840,7 +840,7 @@ Public Class cProject
     ''' Flow Dir 레이어 읽기
     ''' </summary>
     ''' <remarks></remarks>
-    Public Function ReadLayerFdir(fpnFdir As String, isParallel As Boolean) As Boolean
+    Public Function ReadLayerFdir(fpnFdir As String, fdtype As cGRM.FlowDirectionType, isParallel As Boolean) As Boolean
         If File.Exists(fpnFdir) = False Then
             Throw New FileNotFoundException(fpnFdir)
             Return False
@@ -862,7 +862,7 @@ Public Class cProject
                 Dim valuesInaLine() As String = gridFdir.ValuesInOneRowFromTopLeft(ry)
                 For cx As Integer = 0 To Watershed.mColCount - 1
                     If mWSCells(cx, ry) IsNot Nothing Then
-                        mWSCells(cx, ry).FDir = cHydroCom.GetFlowDirection(CInt(valuesInaLine(cx)), Watershed.mFDType)
+                        mWSCells(cx, ry).FDir = cHydroCom.GetFlowDirection(CInt(valuesInaLine(cx)), fdtype)
                     End If
                 Next cx
             Next ry

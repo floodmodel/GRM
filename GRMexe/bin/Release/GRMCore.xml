@@ -1494,7 +1494,7 @@ m2, dt 시간에 대해서 평균된 면적을 반환함.
  <returns>오류가 있는 경우 False</returns>
  <remarks></remarks>
 </member>
-<member name="M:GRMCore.cProject.ReadLayerFdir(System.String,System.Boolean)">
+<member name="M:GRMCore.cProject.ReadLayerFdir(System.String,GRMCore.cGRM.FlowDirectionType,System.Boolean)">
  <summary>
  Flow Dir 레이어 읽기
  </summary>

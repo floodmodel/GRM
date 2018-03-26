@@ -7,7 +7,7 @@
     Public miniSoilSaturationFPN As String
     Public miniChannelFlowFPN As String
 
-    Sub New(watershedFPN As String,
+    Sub New(fdirType As String, watershedFPN As String,
                 slopeFPN As String,
                 fdirFPN As String,
                 facFPN As String,
@@ -39,7 +39,20 @@
         'Console.WriteLine(File.Exists(iniChannelFlowFPN).ToString)
         grmPrj.ReadLayerWSandSetBasicInfo(watershedFPN, True)
         grmPrj.ReadLayerSlope(slopeFPN, True)
-        grmPrj.ReadLayerFdir(fdirFPN, True)
+        Dim fdType As cGRM.FlowDirectionType
+        Select Case fdirType
+            Case cGRM.FlowDirectionType.StartsFromN.ToString
+                fdType = cGRM.FlowDirectionType.StartsFromN
+            Case cGRM.FlowDirectionType.StartsFromNE.ToString
+                fdType = cGRM.FlowDirectionType.StartsFromNE
+            Case cGRM.FlowDirectionType.StartsFromE.ToString
+                fdType = cGRM.FlowDirectionType.StartsFromE
+            Case cGRM.FlowDirectionType.StartsFromE_TauDEM.ToString
+                fdType = cGRM.FlowDirectionType.StartsFromE_TauDEM
+            Case Else
+                fdType = cGRM.FlowDirectionType.StartsFromE_TauDEM
+        End Select
+        grmPrj.ReadLayerFdir(fdirFPN, fdType, False)
         grmPrj.ReadLayerFAcc(facFPN, True)
         If streamFPN <> "" AndAlso File.Exists(streamFPN) Then
             grmPrj.ReadLayerStream(streamFPN, True)
