@@ -53,7 +53,7 @@
             Case Else
                 mfdType = cGRM.FlowDirectionType.StartsFromE_TauDEM
         End Select
-        grmPrj.ReadLayerFdir(fdirFPN, mfdType, False)
+        grmPrj.ReadLayerFdir(fdirFPN, mfdType, True)
         grmPrj.ReadLayerFAcc(facFPN, True)
         If streamFPN <> "" AndAlso File.Exists(streamFPN) Then
             grmPrj.ReadLayerStream(streamFPN, True)

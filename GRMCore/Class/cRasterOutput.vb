@@ -71,11 +71,11 @@ Public Class cRasterOutput
         End If
     End Sub
 
-    Public Sub MakeDistributionFiles(ByVal nowT_MIN As Integer, imgWidth As Integer, imgHeight As Integer, usingOtherThread As Boolean)
+    Public Sub MakeDistributionFiles(ByVal nowT_MIN As Integer, imgWidth As Integer, imgHeight As Integer, usingNewThreadMakingImgFile As Boolean)
         Try
             mImgHeight = imgHeight
             mImgWidth = imgWidth
-            mbUseOtherThread = usingOtherThread
+            mbUseOtherThread = usingNewThreadMakingImgFile
             Dim strNowTimeToPrintOut As String = ""
             strNowTimeToPrintOut = cComTools.GetTimeToPrintOut(mProject.GeneralSimulEnv.mIsDateTimeFormat, mProject.GeneralSimulEnv.mSimStartDateTime, nowT_MIN)
             strNowTimeToPrintOut = cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut)

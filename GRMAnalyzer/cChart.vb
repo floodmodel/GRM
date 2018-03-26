@@ -366,10 +366,7 @@ Public Class cChart
 
     Public Function AddQsimAndRFpointAndUpdateChart(ByVal RfToAdd As Single, ByVal QsimToAdd As List(Of Single)) As Boolean
         mAddedValueCount += 1
-        'Dim kindexToBeAdded As Integer = GetKeyIndexTobeAdded(mRFs)
         Dim kindexToBeAdded As Integer = mAddedValueCount - 1
-
-        'If kindexToBeAdded > mQobss.Count - 1 Then
         If kindexToBeAdded > mMaxOutPrintCount - 1 Then
             Return False
             Exit Function

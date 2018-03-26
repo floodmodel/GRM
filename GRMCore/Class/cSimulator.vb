@@ -669,7 +669,7 @@ Public Class cSimulator
         End If
     End Sub
 
-    Public Sub StopSimulate()
+    Public Sub StopSimulation()
         mStop = True
     End Sub
 

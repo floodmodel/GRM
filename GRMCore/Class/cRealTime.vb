@@ -291,7 +291,7 @@ Public Class cRealTime
     End Sub
 
     Sub StopGRM()
-        mSimul.StopSimulate()
+        mSimul.StopSimulation()
         RaiseEvent RTStatus("실시간 모델링 종료")
     End Sub
 
