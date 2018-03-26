@@ -1,5 +1,6 @@
 ﻿Public Class cGetWatershedInfo
     Public grmPrj As New cProject
+    Public mfdType As cGRM.FlowDirectionType
     Public mstreamFPN As String
     Public mlandCoverFPN As String
     Public msoilTextureFPN As String
@@ -39,20 +40,20 @@
         'Console.WriteLine(File.Exists(iniChannelFlowFPN).ToString)
         grmPrj.ReadLayerWSandSetBasicInfo(watershedFPN, True)
         grmPrj.ReadLayerSlope(slopeFPN, True)
-        Dim fdType As cGRM.FlowDirectionType
+
         Select Case fdirType
             Case cGRM.FlowDirectionType.StartsFromN.ToString
-                fdType = cGRM.FlowDirectionType.StartsFromN
+                mfdType = cGRM.FlowDirectionType.StartsFromN
             Case cGRM.FlowDirectionType.StartsFromNE.ToString
-                fdType = cGRM.FlowDirectionType.StartsFromNE
+                mfdType = cGRM.FlowDirectionType.StartsFromNE
             Case cGRM.FlowDirectionType.StartsFromE.ToString
-                fdType = cGRM.FlowDirectionType.StartsFromE
+                mfdType = cGRM.FlowDirectionType.StartsFromE
             Case cGRM.FlowDirectionType.StartsFromE_TauDEM.ToString
-                fdType = cGRM.FlowDirectionType.StartsFromE_TauDEM
+                mfdType = cGRM.FlowDirectionType.StartsFromE_TauDEM
             Case Else
-                fdType = cGRM.FlowDirectionType.StartsFromE_TauDEM
+                mfdType = cGRM.FlowDirectionType.StartsFromE_TauDEM
         End Select
-        grmPrj.ReadLayerFdir(fdirFPN, fdType, False)
+        grmPrj.ReadLayerFdir(fdirFPN, mfdType, False)
         grmPrj.ReadLayerFAcc(facFPN, True)
         If streamFPN <> "" AndAlso File.Exists(streamFPN) Then
             grmPrj.ReadLayerStream(streamFPN, True)
