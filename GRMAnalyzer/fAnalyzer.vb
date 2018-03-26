@@ -1,6 +1,8 @@
 ﻿Imports System.Windows.Forms.DataVisualization.Charting
 Imports System.Math
 Imports System.IO
+Imports System.Drawing
+Imports System.Drawing.Imaging
 Imports System.Threading
 
 Public Class fAnalyzer
@@ -502,25 +504,23 @@ Public Class fAnalyzer
     End Function
 
 
-
-
     Public Sub SetDistributedPictureFilesAndRenderer(inForm As fAnalyzer)
         Dim tmpImg As New cImg(cImg.RendererType.Risk)
         If mproject.GeneralSimulEnv.mbShowSoilSaturation = True Then
-            Call UpdateSoilSaturationBMPFileList(mproject.ProjectPathName)
+            Call UpdateSoilSaturationImgFileList(mproject.ProjectPathName, Imaging.ImageFormat.Png)
             Call SetSSRendererWithInitialColor(inForm, tmpImg)
         End If
         If mproject.GeneralSimulEnv.mbShowRFdistribution = True Then
-            Call UpdateRFdistBMPFileList(mproject.ProjectPathName)
+            Call UpdateRFdistImgFileList(mproject.ProjectPathName, Imaging.ImageFormat.Png)
             Call SetRFRendererWithInitialColor(inForm, tmpImg)
         End If
         If mproject.GeneralSimulEnv.mbShowRFaccDistribution = True Then
-            Call UpdateRFAccDistBMPFileList(mproject.ProjectPathName)
+            Call UpdateRFAccDistImgFileList(mproject.ProjectPathName, Imaging.ImageFormat.Png)
             Call SetRFAccRendererWithInitialColor(inForm, tmpImg)
         End If
 
         If mproject.GeneralSimulEnv.mbShowFlowDistribution = True Then
-            Call UpdateFlowDistBMPFileList(mproject.ProjectPathName)
+            Call UpdateFlowDistImgFileList(mproject.ProjectPathName, Imaging.ImageFormat.Png)
             Call SetFlowRendererWithInitialColor(inForm, tmpImg)
         End If
     End Sub
@@ -699,7 +699,7 @@ Public Class fAnalyzer
     End Sub
 
 
-    Private Function UpdateSoilSaturationBMPFileList(ByVal FPNproject As String) As Boolean
+    Private Function UpdateSoilSaturationImgFileList(ByVal FPNproject As String, imgFormat As Imaging.ImageFormat) As Boolean
         Try
             mImgFPN_dist_SSR = New List(Of String)
             Dim dirName_base As String = IO.Path.GetDirectoryName(FPNproject)
@@ -707,7 +707,13 @@ Public Class fAnalyzer
             Dim fpn As String = Path.Combine(dirName_base, dirName_save)
             Dim files As String() = Nothing
             If IO.Directory.Exists(fpn) Then
-                files = IO.Directory.GetFiles(fpn, "*.bmp")
+                If imgFormat Is Imaging.ImageFormat.Bmp Then
+                    files = IO.Directory.GetFiles(fpn, "*.bmp")
+                ElseIf imgFormat Is Imaging.ImageFormat.Png Then
+                    files = IO.Directory.GetFiles(fpn, "*.png")
+                Else
+                    files = IO.Directory.GetFiles(fpn, "*.bmp")
+                End If
             End If
             If files IsNot Nothing Then
                 For n As Integer = 0 To files.Length - 1
@@ -720,7 +726,7 @@ Public Class fAnalyzer
         End Try
     End Function
 
-    Private Function UpdateRFdistBMPFileList(ByVal FPNproject As String) As Boolean
+    Private Function UpdateRFdistImgFileList(ByVal FPNproject As String, imgFormat As Imaging.ImageFormat) As Boolean
         Try
             mImgFPN_dist_RF = New List(Of String)
             Dim dirName As String = IO.Path.GetDirectoryName(FPNproject)
@@ -728,7 +734,13 @@ Public Class fAnalyzer
             Dim fpn As String = Path.Combine(dirName, folderName)
             Dim files As String() = Nothing
             If IO.Directory.Exists(fpn) Then
-                files = IO.Directory.GetFiles(fpn, "*.bmp")
+                If imgFormat Is Imaging.ImageFormat.Bmp Then
+                    files = IO.Directory.GetFiles(fpn, "*.bmp")
+                ElseIf imgFormat Is Imaging.ImageFormat.Png Then
+                    files = IO.Directory.GetFiles(fpn, "*.png")
+                Else
+                    files = IO.Directory.GetFiles(fpn, "*.bmp")
+                End If
             End If
             If files IsNot Nothing Then
                 For n As Integer = 0 To files.Length - 1
@@ -741,7 +753,7 @@ Public Class fAnalyzer
         End Try
     End Function
 
-    Private Function UpdateRFAccDistBMPFileList(ByVal FPNproject As String) As Boolean
+    Private Function UpdateRFAccDistImgFileList(ByVal FPNproject As String, imgFormat As Imaging.ImageFormat) As Boolean
         Try
             mImgFPN_dist_RFAcc = New List(Of String)
             Dim dirName As String = IO.Path.GetDirectoryName(FPNproject)
@@ -749,7 +761,13 @@ Public Class fAnalyzer
             Dim fpn As String = Path.Combine(dirName, folderName)
             Dim files As String() = Nothing
             If IO.Directory.Exists(fpn) Then
-                files = IO.Directory.GetFiles(fpn, "*.bmp")
+                If imgFormat Is Imaging.ImageFormat.Bmp Then
+                    files = IO.Directory.GetFiles(fpn, "*.bmp")
+                ElseIf imgFormat Is Imaging.ImageFormat.Png Then
+                    files = IO.Directory.GetFiles(fpn, "*.png")
+                Else
+                    files = IO.Directory.GetFiles(fpn, "*.bmp")
+                End If
             End If
             If files IsNot Nothing Then
                 For n As Integer = 0 To files.Length - 1
@@ -763,7 +781,7 @@ Public Class fAnalyzer
     End Function
 
 
-    Private Function UpdateFlowDistBMPFileList(ByVal FPNproject As String) As Boolean
+    Private Function UpdateFlowDistImgFileList(ByVal FPNproject As String, imgFormat As Imaging.ImageFormat) As Boolean
         Try
             mImgFPN_dist_Flow = New List(Of String)
             Dim dirName As String = IO.Path.GetDirectoryName(FPNproject)
@@ -771,7 +789,13 @@ Public Class fAnalyzer
             Dim fpn As String = Path.Combine(dirName, folderName)
             Dim files As String() = Nothing
             If IO.Directory.Exists(fpn) Then
-                files = IO.Directory.GetFiles(fpn, "*.bmp")
+                If imgFormat Is Imaging.ImageFormat.Bmp Then
+                    files = IO.Directory.GetFiles(fpn, "*.bmp")
+                ElseIf imgFormat Is Imaging.ImageFormat.Png Then
+                    files = IO.Directory.GetFiles(fpn, "*.png")
+                Else
+                    files = IO.Directory.GetFiles(fpn, "*.bmp")
+                End If
             End If
             If files IsNot Nothing Then
                 For n As Integer = 0 To files.Length - 1
@@ -1122,7 +1146,7 @@ Public Class fAnalyzer
 
     Private Sub tmAni_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmAni.Tick
         Me.tbChart.Value = Me.tbChart.Value + 1
-        If mStartNewSimulation = False AndAlso Me.tbChart.Value = mChart.MaxCountOfSimulatedData Then
+        If mStartNewSimulation = False AndAlso mAninmationRepeat = False AndAlso Me.tbChart.Value = mChart.MaxCountOfSimulatedData Then
             Me.tmAni.Stop()
             Exit Sub
         End If
@@ -1202,6 +1226,22 @@ Public Class fAnalyzer
         MsgBox("Simulation was completed!!   ", MsgBoxStyle.ApplicationModal, cGRM.BuildInfo.ProductName)
         Me.btStartGRMorApplySettings.Enabled = True
         btClose.Enabled = True
+        btStopSimulation.Enabled = False
+    End Sub
+
+
+    Private Delegate Sub StopSimulationActionDelegate()
+    Private Sub mSimulator_SimulationStop(sender As cSimulator) Handles mSimulator.SimulationStop
+        If Me.InvokeRequired Then
+            Dim d As New StopSimulationActionDelegate(AddressOf StopSimulationAction)
+            Me.Invoke(d)
+        Else
+            StopSimulationAction()
+        End If
+    End Sub
+
+    Private Sub StopSimulationAction()
+        btStopSimulation.Enabled = False
     End Sub
 
 End Class
