@@ -19,10 +19,8 @@ Public Class cSimulator
     Public Event SimulationComplete(ByVal sender As cSimulator)
     Public Event SimulationRaiseError(ByVal sender As cSimulator, ByVal simulError As SimulationErrors, ByVal erroData As Object)
     Public Event SimulationMultiEventStep(ByVal sender As cSimulator, ByVal eventOrder As Integer)
-    'Public Event MakeRasterOutput(ByVal sender As cSimulator, ByVal project As cProject, ByVal nowTtoPrint_MIN As Integer)
     Public Event MakeRasterOutput(ByVal sender As cSimulator, ByVal nowTtoPrint_MIN As Integer)
-    'Public Event SendQToAnalyzer(ByVal sender As cSimulator, ByVal project As cProject, project_tm1 As cProjectBAK, ByVal nowTtoPrint_MIN As Integer, interCoef As Single)
-    Public Event SendQToAnalyzer(ByVal sender As cSimulator, project_tm1 As cProjectBAK, ByVal nowTtoPrint_MIN As Integer, interCoef As Single)
+    Public Event SendQToAnalyzer(ByVal sender As cSimulator, ByVal nowTtoPrint_MIN As Integer, interCoef As Single)
 
 #End Region
 
@@ -75,15 +73,6 @@ Public Class cSimulator
         End If
     End Sub
 
-    ''2017.04.24. GUI와 별개 exe로 실행되기 때문에 쓰레드 생성 실행 아래의 부분은 필요 없음.
-    'Public Sub SimulateSingleEventWithNewThread(ByVal project As cProject)
-    '    mProject = project
-    '    Dim ts As New ThreadStart(AddressOf SimulateSingleEventInner)
-    '    Dim th As New Thread(ts)
-    '    th.Start()
-    'End Sub
-
-    'Private Sub SimulateSingleEventInner()
     Public Sub SimulateSingleEvent(ByVal project As cProject)
         mProject = project
         mStop = False
@@ -529,6 +518,7 @@ Public Class cSimulator
                         .hUAQfromChannelBed_m = 0
                     End If
                 End If
+                .Qprint_cms = 0
                 .RFReadintensity_tM1_mPsec = 0
                 .EffRFCV_dt_meter = 0
                 .RFApp_dt_meter = 0
@@ -627,6 +617,8 @@ Public Class cSimulator
     Private Sub OutputProcessManagerBySimType(ByVal nowTtoPrint_MIN As Integer,
                                   ByVal wpCount As Integer, ByVal SumRFMeanForDTprintOut_m As Double,
                                   ByVal coeffInterpolation As Single, ByVal Project_tm1 As cProjectBAK, simType As cGRM.SimulationType)
+
+
         Select Case simType
             Case cGRM.SimulationType.SingleEvent
                 RaiseEvent SimulationStep(Me, nowTtoPrint_MIN)
@@ -649,7 +641,7 @@ Public Class cSimulator
 
         If mProject.GeneralSimulEnv.mbRunAanlyzer = True Then
             'RaiseEvent SendQToAnalyzer(Me, mProject, Project_tm1, nowTtoPrint_MIN, coeffInterpolation)
-            RaiseEvent SendQToAnalyzer(Me, Project_tm1, nowTtoPrint_MIN, coeffInterpolation)
+            RaiseEvent SendQToAnalyzer(Me, nowTtoPrint_MIN, coeffInterpolation)
         End If
         If mProject.GeneralSimulEnv.mbMakeRasterOutput = True Then
             RaiseEvent MakeRasterOutput(Me, nowTtoPrint_MIN)

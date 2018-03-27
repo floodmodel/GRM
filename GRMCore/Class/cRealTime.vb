@@ -27,7 +27,7 @@ Public Class cRealTime
     'Public mFPNFcData As String
     Public mPicWidth As Single
     Public mPicHeight As Single
-    Private mGrmAnalyzer As cRasterOutput
+    Private mRasterFileOutput As cRasterOutput
 
     Public mbIsDWSS As Boolean
     Public mCWCellColX_ToConnectDW As Integer
@@ -80,7 +80,7 @@ Public Class cRealTime
                 .mImgFPN_dist_RFAcc = New List(Of String)
                 .mImgFPN_dist_SSR = New List(Of String)
             End With
-            mGrmAnalyzer = New cRasterOutput(mRTProject)
+            mRasterFileOutput = New cRasterOutput(mRTProject)
         End If
         mDateTimeStartRT = New DateTime(CInt(Mid(mRFStartDateTimeRT, 1, 4)),
                                              CInt(Mid(mRFStartDateTimeRT, 5, 2)),
@@ -335,7 +335,7 @@ Public Class cRealTime
     Private Sub mSimul_CallAnalyzer(sender As cSimulator,
                                     nowTtoPrint_MIN As Integer) Handles mSimul.MakeRasterOutput
         If mRTProject.GeneralSimulEnv.mbMakeRasterOutput = True Then _
-        mGrmAnalyzer.MakeDistributionFiles(nowTtoPrint_MIN, mGrmAnalyzer.ImgWidth, mGrmAnalyzer.ImgHeight, True)
+        mRasterFileOutput.MakeDistributionFiles(nowTtoPrint_MIN, mRasterFileOutput.ImgWidth, mRasterFileOutput.ImgHeight, True)
     End Sub
 
     Private Sub cRealTime_RTStatus(strMSG As String) Handles Me.RTStatus

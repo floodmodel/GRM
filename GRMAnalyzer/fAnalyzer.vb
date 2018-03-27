@@ -281,92 +281,66 @@ Public Class fAnalyzer
 
 
     Private Delegate Sub RasterOutputDelegate(ByVal nowTtoPrint_MIN As Integer, imgWidth As Integer, imgHeight As Integer, usingOtherThread As Boolean)
-    Private Delegate Sub DrawChartDelegate(project_tm1 As cProjectBAK, ByVal nowT_Min As Integer, interCoef As Single)
+    Private Delegate Sub DrawChartDelegate(ByVal nowT_Min As Integer, interCoef As Single)
 
     Private Sub Simulator_MakeRasterOutput(sender As cSimulator,
                                         nowTtoPrint_MIN As Integer) Handles mSimulator.MakeRasterOutput
-        'Private Sub mSimulator_MakeRasterOutput(sender As cSimulator, project As cProject,
-        '                            nowTtoPrint_MIN As Integer) Handles mSimulator.MakeRasterOutput
         If mbCreateDistributionFiles = True Then
-            MakeRasterOutputFile(nowTtoPrint_MIN)
-            'DrawImgs(project, nowTtoPrint_MIN)
+            mRasterOutput.MakeDistributionFiles(nowTtoPrint_MIN, mRasterOutput.ImgWidth, mRasterOutput.ImgHeight, False)
             Dim strNowTimeToPrintOut As String = cComTools.GetTimeToPrintOut(mproject.GeneralSimulEnv.mIsDateTimeFormat,
                                                                              mproject.GeneralSimulEnv.mSimStartDateTime, nowTtoPrint_MIN)
             strNowTimeToPrintOut = cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut)
             If mproject.GeneralSimulEnv.mbShowSoilSaturation = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPSSRDistribution, cGRM.CONST_DIST_SSR_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_SSR.Add(mIMGfpn)
-                DrawPictureBoxUsingNewImgFile(Me.pbSSRimg, mIMGfpn)
+                'DrawPictureBoxUsingNewImgFile(Me.pbSSRimg, mIMGfpn)
+                DrawPictureBoxUsingBitmap(Me.pbSSRimg, mRasterOutput.mImgSSR, mIMGfpn)
             End If
             If mproject.GeneralSimulEnv.mbShowRFdistribution = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPRFDistribution, cGRM.CONST_DIST_RF_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_RF.Add(mIMGfpn)
-                DrawPictureBoxUsingNewImgFile(Me.pbRFimg, mIMGfpn)
+                'DrawPictureBoxUsingNewImgFile(Me.pbRFimg, mIMGfpn)
+                DrawPictureBoxUsingBitmap(Me.pbRFimg, mRasterOutput.mImgRF, mIMGfpn)
             End If
             If mproject.GeneralSimulEnv.mbShowRFaccDistribution = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPRFAccDistribution, cGRM.CONST_DIST_RFACC_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_RFAcc.Add(mIMGfpn)
-                DrawPictureBoxUsingNewImgFile(Me.pbRFACCimg, mIMGfpn)
+                'DrawPictureBoxUsingNewImgFile(Me.pbRFACCimg, mIMGfpn)
+                DrawPictureBoxUsingBitmap(Me.pbRFACCimg, mRasterOutput.mImgRFacc, mIMGfpn)
             End If
             If mproject.GeneralSimulEnv.mbShowFlowDistribution = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPFlowDistribution, cGRM.CONST_DIST_FLOW_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_Flow.Add(mIMGfpn)
-                DrawPictureBoxUsingNewImgFile(Me.pbFLOWimg, mIMGfpn)
+                'DrawPictureBoxUsingNewImgFile(Me.pbFLOWimg, mIMGfpn)
+                DrawPictureBoxUsingBitmap(Me.pbFLOWimg, mRasterOutput.mImgFlow, mIMGfpn)
             End If
         End If
 
     End Sub
 
-    'Private Sub mSimulator_SendQToAnalyzer(sender As cSimulator, project As cProject, project_tm1 As cProjectBAK, nowTtoPrint_MIN As Integer, interCoef As Single) Handles mSimulator.SendQToAnalyzer
-    Private Sub mSimulator_SendQToAnalyzer(sender As cSimulator, project_tm1 As cProjectBAK,
-                                           nowTtoPrint_MIN As Integer, interCoef As Single) Handles mSimulator.SendQToAnalyzer
-        DrawChart(project_tm1, nowTtoPrint_MIN, interCoef)
-        'DrawChart(project, project_tm1, nowTtoPrint_MIN, interCoef)
+
+    Private Sub mSimulator_SendQToAnalyzer(sender As cSimulator, nowTtoPrint_MIN As Integer, interCoef As Single) Handles mSimulator.SendQToAnalyzer
+        DrawChart(nowTtoPrint_MIN, interCoef)
     End Sub
 
-    'Private Sub DrawChart(project As cProject , project_tm1 As cProjectBAK, nowTtoPrint_MIN As Integer, interCoef As Single)
-    Private Sub DrawChart(project_tm1 As cProjectBAK, nowTtoPrint_MIN As Integer, interCoef As Single)
+    Private Sub DrawChart(nowTtoPrint_MIN As Integer, interCoef As Single)
         If Me.pbChartMain.InvokeRequired = True Then
             Dim d As New DrawChartDelegate(AddressOf AddDataAndUpdateChart)
-            Me.pbChartMain.Invoke(d, project_tm1, nowTtoPrint_MIN, interCoef)
+            Me.pbChartMain.Invoke(d, nowTtoPrint_MIN, interCoef)
         Else
-            AddDataAndUpdateChart(project_tm1, nowTtoPrint_MIN, interCoef)
+            AddDataAndUpdateChart(nowTtoPrint_MIN, interCoef)
         End If
     End Sub
-    Private Sub MakeRasterOutputFile(nowTtoPrint_MIN As Integer)
-        'If Me.InvokeRequired Then
-        '    Dim d As New RasterOutputDelegate(AddressOf mRasterOutput.MakeDistributionFiles)
-        '    Me.Invoke(d, nowTtoPrint_MIN, mRasterOutput.ImgWidth, mRasterOutput.ImgHeight, False)
-        'Else
-        mRasterOutput.MakeDistributionFiles(nowTtoPrint_MIN, mRasterOutput.ImgWidth, mRasterOutput.ImgHeight, False)
-        'End If
-    End Sub
 
 
-    'Public Sub AddDataAndUpdateChart(project As cProject, project_tm1 As cProjectBAK, ByVal nowT_Min As Integer, interCoef As Single)
-    Public Sub AddDataAndUpdateChart(project_tm1 As cProjectBAK, ByVal nowT_Min As Integer, interCoef As Single)
+
+    Public Sub AddDataAndUpdateChart(ByVal nowT_Min As Integer, interCoef As Single)
         Dim Qs As New List(Of Single)
         Dim qsim As Single = 0
         Dim qSimforEachWP As New Dictionary(Of Integer, Single)
         For Each cvid As Integer In cProject.Current.WatchPoint.WPCVidList
             Dim cvan As Integer = cvid - 1
-            If interCoef = 1 Then
-                If mproject.CV(cvan).FlowType = cGRM.CellFlowType.OverlandFlow Then
-                    qsim = CSng(String.Format("{0,8:#0.##}", mproject.CV(cvan).QCVof_i_j_m3Ps))
-                Else
-                    qsim = CSng(String.Format("{0,8:#0.##}", mproject.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps))
-                End If
-            ElseIf project_tm1 IsNot Nothing Then
-                If mproject.CV(cvan).FlowType = cGRM.CellFlowType.OverlandFlow Then
-                    qsim = CSng(String.Format("{0,8:#0.##}", cHydroCom.GetInterpolatedValueLinear(
-                                   project_tm1.CV(cvan).QCVof_i_j_m3Ps,
-                                   mproject.CV(cvan).QCVof_i_j_m3Ps, interCoef)))
-                Else
-                    qsim = CSng(String.Format("{0,8:#0.##}", cHydroCom.GetInterpolatedValueLinear(
-                                   project_tm1.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps,
-                                   mproject.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps, interCoef)))
-                End If
-            End If
+            qsim = mproject.CV(cvan).Qprint_cms
             qSimforEachWP.Add(cvid, qsim)
             Qs.Add(qsim)
         Next
@@ -481,7 +455,7 @@ Public Class fAnalyzer
                 divideByW = imgOrg.Width / pb.Width
                 divideByH = imgOrg.Height / pb.Height
                 If divideByW > 1 Or divideByH > 1 Then
-                    pb.Image = AutosizeImage(imgFpn, pb)
+                    pb.Image = AutosizeImage(imgOrg, pb)
                 Else
                     pb.Image = imgOrg
                 End If
@@ -491,17 +465,35 @@ Public Class fAnalyzer
         Return True
     End Function
 
+    Public Shared Function DrawPictureBoxUsingBitmap(ByVal pb As PictureBox, inBM As Bitmap, Optional imgFpn As String = "") As Boolean
+        If inBM IsNot Nothing Then
+            Dim imgOrg As Bitmap = inBM
+            Dim divideByH, divideByW As Double
+            divideByW = imgOrg.Width / pb.Width
+            divideByH = imgOrg.Height / pb.Height
+            If divideByW > 1 Or divideByH > 1 Then
+                pb.Image = AutosizeImage(imgOrg, pb)
+            Else
+                pb.Image = imgOrg
+            End If
+            pb.Image.Tag = imgFpn
+        End If
+        Return True
+    End Function
 
-    Public Shared Function AutosizeImage(ByVal ImagePN As String, ByVal picBox As PictureBox, Optional ByVal pSizeMode As PictureBoxSizeMode = PictureBoxSizeMode.CenterImage) As Image
+
+    'Public Shared Function AutosizeImage(ByVal ImagePN As string, ByVal picBox As PictureBox, Optional ByVal pSizeMode As PictureBoxSizeMode = PictureBoxSizeMode.CenterImage) As Image
+    Public Shared Function AutosizeImage(ByVal InBM As Bitmap, ByVal picBox As PictureBox, Optional ByVal pSizeMode As PictureBoxSizeMode = PictureBoxSizeMode.CenterImage) As Image
         Try
             picBox.Image = Nothing
             picBox.SizeMode = pSizeMode
-            If System.IO.File.Exists(ImagePN) Then
-                Dim imgOrg As Bitmap
+            If InBM IsNot Nothing Then
+                'If System.IO.File.Exists(ImagePN) Then
+                Dim imgOrg As Bitmap = InBM
                 Dim imgShow As Bitmap
                 Dim g As Graphics
                 Dim divideBy, divideByH, divideByW As Double
-                imgOrg = cImg.GetBMPImageByFileStream(ImagePN)
+                'imgOrg = cImg.GetBMPImageByFileStream(ImagePN)
                 divideByW = imgOrg.Width / picBox.Width
                 divideByH = imgOrg.Height / picBox.Height
                 '===============================================
@@ -1173,7 +1165,7 @@ Public Class fAnalyzer
 
     Private Sub tmAni_Tick(ByVal sender As Object, ByVal e As System.EventArgs) Handles tmAni.Tick
         Me.tbChart.Value = Me.tbChart.Value + 1
-        If mStartNewSimulation = False AndAlso mAninmationRepeat = False AndAlso Me.tbChart.Value = mChart.MaxCountOfSimulatedData Then
+        If  mAninmationRepeat = False AndAlso Me.tbChart.Value = mChart.MaxCountOfSimulatedData Then
             Me.tmAni.Stop()
             Exit Sub
         End If

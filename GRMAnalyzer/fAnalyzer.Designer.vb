@@ -2641,12 +2641,14 @@ Partial Class fAnalyzer
         Me.dgvResults.AllowUserToAddRows = False
         Me.dgvResults.AllowUserToDeleteRows = False
         Me.dgvResults.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
+        Me.dgvResults.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None
         Me.dgvResults.Location = New System.Drawing.Point(12, 291)
         Me.dgvResults.MultiSelect = False
         Me.dgvResults.Name = "dgvResults"
         Me.dgvResults.ReadOnly = True
         Me.dgvResults.RowHeadersWidth = 10
         Me.dgvResults.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
+        Me.dgvResults.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None
         Me.dgvResults.RowTemplate.Height = 23
         Me.dgvResults.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
         Me.dgvResults.Size = New System.Drawing.Size(367, 538)

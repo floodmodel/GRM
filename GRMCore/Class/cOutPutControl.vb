@@ -68,6 +68,7 @@ Public Class cOutPutControl
             Else
                 vToPrint = "0"
             End If
+            project.CV(cvan).Qprint_cms = CSng(vToPrint)
             lineToPrint = lineToPrint + vbTab + vToPrint.Trim
             Dim sv As Single = CSng(vToPrint)
             With project.WatchPoint
@@ -190,13 +191,13 @@ Public Class cOutPutControl
             Dim cvanWP As Integer = wpcvid - 1
             Dim strL As String
             strL = strNowTimeToPrintOut + vbTab
-
+            strL = strL + String.Format("{0,8:#0.##}", project.CV(cvanWP).Qprint_cms) + vbTab
             If interCoef = 1 Then
-                If project.CV(cvanWP).FlowType = cGRM.CellFlowType.OverlandFlow Then
-                    strL = strL + String.Format("{0,8:#0.##}", project.CV(cvanWP).QCVof_i_j_m3Ps) + vbTab
-                Else
-                    strL = strL + String.Format("{0,8:#0.##}", project.CV(cvanWP).mStreamAttr.QCVch_i_j_m3Ps) + vbTab
-                End If
+                'If project.CV(cvanWP).FlowType = cGRM.CellFlowType.OverlandFlow Then
+                '    strL = strL + String.Format("{0,8:#0.##}", project.CV(cvanWP).QCVof_i_j_m3Ps) + vbTab
+                'Else
+                '    strL = strL + String.Format("{0,8:#0.##}", project.CV(cvanWP).mStreamAttr.QCVch_i_j_m3Ps) + vbTab
+                'End If
                 strL = strL + Format(project.CV(cvanWP).hUAQfromChannelBed_m, "#0.0000") + vbTab
                 strL = strL + Format(project.CV(cvanWP).soilWaterContent_m, "#0.0000") + vbTab
                 strL = strL + Format(project.CV(cvanWP).soilSaturationRatio, "#0.0000") + vbTab
@@ -205,15 +206,15 @@ Public Class cOutPutControl
                 strL = strL + Format(project.WatchPoint.mQfromFCDataCMS(wpcvid), "#0.00") + vbTab
                 strL = strL + Format(project.CV(cvanWP).StorageCumulative_m3, "#0.00") + vbCrLf
             ElseIf project_tm1 IsNot Nothing Then
-                If project.CV(cvanWP).FlowType = cGRM.CellFlowType.OverlandFlow Then
-                    strL = strL + String.Format("{0,8:#0.##}", cHydroCom.GetInterpolatedValueLinear(
-                                   project_tm1.CV(cvanWP).QCVof_i_j_m3Ps,
-                                   project.CV(cvanWP).QCVof_i_j_m3Ps, interCoef)) + vbTab
-                Else
-                    strL = strL + String.Format("{0,8:#0.##}", cHydroCom.GetInterpolatedValueLinear(
-                                   project_tm1.CV(cvanWP).mStreamAttr.QCVch_i_j_m3Ps,
-                                   project.CV(cvanWP).mStreamAttr.QCVch_i_j_m3Ps, interCoef)) + vbTab
-                End If
+                'If project.CV(cvanWP).FlowType = cGRM.CellFlowType.OverlandFlow Then
+                '    strL = strL + String.Format("{0,8:#0.##}", cHydroCom.GetInterpolatedValueLinear(
+                '                   project_tm1.CV(cvanWP).QCVof_i_j_m3Ps,
+                '                   project.CV(cvanWP).QCVof_i_j_m3Ps, interCoef)) + vbTab
+                'Else
+                '    strL = strL + String.Format("{0,8:#0.##}", cHydroCom.GetInterpolatedValueLinear(
+                '                   project_tm1.CV(cvanWP).mStreamAttr.QCVch_i_j_m3Ps,
+                '                   project.CV(cvanWP).mStreamAttr.QCVch_i_j_m3Ps, interCoef)) + vbTab
+                'End If
 
                 strL = strL + Format(cHydroCom.GetInterpolatedValueLinear(
                                     project_tm1.CV(cvanWP).hUAQfromChannelBed_m,
@@ -308,6 +309,7 @@ Public Class cOutPutControl
             Else
                 vToPrint = "0"
             End If
+            project.CV(cvan).Qprint_cms = CSng(vToPrint)
             If lineToPrint.Trim = "" Then
                 lineToPrint = vToPrint.Trim
             Else
@@ -341,6 +343,7 @@ Public Class cOutPutControl
                                    project.CV(cvanWP).mStreamAttr.QCVch_i_j_m3Ps, interCoef)) + vbCrLf
                 End If
             End If
+            project.CV(cvanWP).Qprint_cms = CSng(strL)
             Dim wpName As String = project.WatchPoint.wpName(wpcvid)
             Dim nFPN As String = Path.Combine(project.ProjectPath, project.ProjectNameOnly & "WP_" & wpName & ".out")
             IO.File.AppendAllText(nFPN, strL, Encoding.Default)

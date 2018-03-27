@@ -178,6 +178,11 @@ Public Class cCVAttribute
     ''' </summary>
     ''' <remarks></remarks>
     Public QsumCVw_dt_m3 As Single
+
+    ''' <summary>
+    ''' 보간 등을 거친 출력할 유량 값
+    ''' </summary>
+    Public Qprint_cms As Single
 #End Region
 
 #Region "강우관련"

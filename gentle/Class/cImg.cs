@@ -262,7 +262,7 @@ namespace gentle
             return img;
         }
 
-        public bool MakeImgFileUsingArrayFromTL(string imgFPNtoMake, double[,] array, float imgWidth, 
+        public Bitmap  MakeImgFileAndGetImgUsingArrayFromTL(string imgFPNtoMake, double[,] array, float imgWidth, 
             float imgHeight, RendererRange rangeType, double nullValue=-9999 )
         {
             try
@@ -284,7 +284,7 @@ namespace gentle
                 }
                 Bitmap bm = new Bitmap(Convert.ToInt32(colxCount * CellWbmp) + 1, Convert.ToInt32(rowyCount * CellHbmp) + 1);
                 Graphics gr = Graphics.FromImage(bm);
-                gr.Clear(Color.White);
+                //gr.Clear(Color.White);
                 for (int r = 0; r < rowyCount; r++)
                 {
                     for (int c = 0; c < colxCount; c++)
@@ -299,11 +299,28 @@ namespace gentle
                         gr.FillRectangle(brsh, rec);
                     }
                 }
-                //병렬로 하니까.. 애러가 난다.. 진행이 안된다.
+
+                ////이건 pixel 단위로 처리
+                //var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+                //Parallel.For(0, bm.Height, options, y =>
+                //{
+                //    for (int x = 0; x < bm.Width; x++)
+                //    {
+                //        Color cToShow = DefaultNullColor;
+                //        if (double.TryParse(array[x, y].ToString(), out double dv) == true)
+                //        {
+                //            cToShow = GetColorFromMemoryRendererInDifferentInterval(dv, rangeType, nullValue);
+                //        }
+
+                //        bm.SetPixel(x, y, cToShow);
+                //    }
+                //});
+
+                ////병렬로 하니까.. 애러가 난다.. 진행이 안된다. gr, bm을 공유할 수 없다.
                 //var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
                 //Parallel.For(0, rowyCount, options, delegate (int r)
                 //{
-                //    for (int c = 0; c < colxCount ; c++)
+                //    for (int c = 0; c < colxCount; c++)
                 //    {
                 //        Rectangle rec = new Rectangle(c * CellWbmp, r * CellHbmp, CellWbmp, CellHbmp);
                 //        Color cToShow = DefaultNullColor;
@@ -316,16 +333,15 @@ namespace gentle
                 //    }
                 //});
                 bm.Save(imgFPNtoMake, ImageFormat.Png);
-                //bm.Save(imgFPNtoMake);
-                return true;
+                return bm;
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
-                return false;
+                return Nothing;
             }
         }
-
+        
         public bool MakeImgFileUsingASCfileFromTL(string inASCFPN, string imgFpnToMake, RendererRange rangeType, float width, 
             float height, Color defaultColor, double nullValue=-9999)
         {
@@ -740,6 +756,14 @@ namespace gentle
             get
             {
                 return miniRendererColors;
+            }
+        }
+
+        public Bitmap Nothing
+        {
+            get
+            {
+                return Nothing;
             }
         }
     }

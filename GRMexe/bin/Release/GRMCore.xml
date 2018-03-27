@@ -1082,6 +1082,11 @@ m2, dt 시간에 대해서 평균된 면적을 반환함.
  </summary>
  <remarks></remarks>
 </member>
+<member name="F:GRMCore.cCVAttribute.Qprint_cms">
+ <summary>
+ 보간 등을 거친 출력할 유량 값
+ </summary>
+</member>
 <member name="F:GRMCore.cCVAttribute.RFApp_dt_meter">
  <summary>
  dt 시간 동안의 강우량

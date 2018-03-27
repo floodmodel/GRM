@@ -26,6 +26,11 @@ Public Class cRasterOutput
     Private mImgWidth As Integer
     Private mImgHeight As Integer
 
+    Public mImgSSR As Bitmap
+    Public mImgRF As Bitmap
+    Public mImgRFacc As Bitmap
+    Public mImgFlow As Bitmap
+
     Private mbMakeArySSR As Boolean = False
     Private mbMakeAryRF As Boolean = False
     Private mbMakeAryRFAcc As Boolean = False
@@ -147,9 +152,8 @@ Public Class cRasterOutput
         End Try
     End Sub
 
-
     Private Function GetStringArrayUsingCVAttribute(inCells As cCVAttribute(,), isparallel As Boolean) As Boolean
-        Dim sformat As String = ""
+        Dim sformat As String = "#0.##"
         If isparallel = False Then
             For nr As Integer = 0 To inCells.GetLength(1) - 1
                 For nc As Integer = 0 To inCells.GetLength(0) - 1
@@ -157,21 +161,17 @@ Public Class cRasterOutput
                         If inCells(nc, nr).toBeSimulated = True Then
                             If mbMakeArySSR = True Then
                                 Dim v As Single = inCells(nc, nr).soilSaturationRatio
-                                sformat = "#0.##"
                                 mArraySSR(nc, nr) = CDbl(Format(v, sformat))
                             End If
                             If mbMakeAryRF = True Then
-                                sformat = "#0.##"
                                 Dim v As Single = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
                                 mArrayRF(nc, nr) = CDbl(Format(v, sformat))
                             End If
                             If mbMakeAryRFAcc = True Then
-                                sformat = "#0.##"
                                 Dim v As Single = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
                                 mArrayRFAcc(nc, nr) = CDbl(Format(v, sformat))
                             End If
                             If mbMakeAryQ = True Then
-                                sformat = "#0.##"
                                 Dim v As Single
                                 If inCells(nc, nr).FlowType = cGRM.CellFlowType.OverlandFlow Then
                                     v = inCells(nc, nr).QCVof_i_j_m3Ps
@@ -193,21 +193,17 @@ Public Class cRasterOutput
                                                                        If inCells(nc, nr).toBeSimulated = True Then
                                                                            If mbMakeArySSR = True Then
                                                                                Dim v As Single = inCells(nc, nr).soilSaturationRatio
-                                                                               sformat = "#0.##"
                                                                                mArraySSR(nc, nr) = CDbl(Format(v, sformat))
                                                                            End If
                                                                            If mbMakeAryRF = True Then
-                                                                               sformat = "#0.##"
                                                                                Dim v As Single = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
                                                                                mArrayRF(nc, nr) = CDbl(Format(v, sformat))
                                                                            End If
                                                                            If mbMakeAryRFAcc = True Then
-                                                                               sformat = "#0.##"
                                                                                Dim v As Single = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
                                                                                mArrayRFAcc(nc, nr) = CDbl(Format(v, sformat))
                                                                            End If
                                                                            If mbMakeAryQ = True Then
-                                                                               sformat = "#0.##"
                                                                                Dim v As Single
                                                                                If inCells(nc, nr).FlowType = cGRM.CellFlowType.OverlandFlow Then
                                                                                    v = inCells(nc, nr).QCVof_i_j_m3Ps
@@ -237,7 +233,8 @@ Public Class cRasterOutput
 
     Private Sub MakeImgSSRDInner()
         Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
-        imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoSSR.PFN, mArraySSR,
+        mImgSSR = Nothing
+        mImgSSR = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoSSR.PFN, mArraySSR,
                                                    mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
     End Sub
 
@@ -253,7 +250,8 @@ Public Class cRasterOutput
 
     Private Sub MakeImgRFDInner()
         Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
-        imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
+        mImgRF = Nothing
+        mImgRF = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
                                                    mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to500)
     End Sub
 
@@ -269,7 +267,8 @@ Public Class cRasterOutput
 
     Private Sub MakeImgRFAccDInner()
         Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
-        imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
+        mImgRFacc = Nothing
+        mImgRFacc = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
                                                    mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to1000)
     End Sub
 
@@ -285,7 +284,8 @@ Public Class cRasterOutput
 
     Private Sub MakeImgFlowDInner()
         Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
-        imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
+        mImgFlow = Nothing
+        mImgFlow = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
                                                    mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to30000)
     End Sub
 
