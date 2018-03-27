@@ -315,6 +315,7 @@ Public Class fAnalyzer
                 DrawPictureBoxUsingBitmap(Me.pbFLOWimg, mRasterOutput.mImgFlow, mIMGfpn)
             End If
         End If
+        System.Windows.Forms.Application.DoEvents()
 
     End Sub
 
