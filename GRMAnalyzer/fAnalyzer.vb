@@ -716,6 +716,7 @@ Public Class fAnalyzer
         mdtData.Rows.Add(row)
         Me.dgvResults.CurrentCell = Me.dgvResults.Rows(Me.dgvResults.RowCount - 1).Cells(0)
         Me.dgvResults.CurrentRow.Selected = False '여기서는 선택하지 않게..
+        System.Windows.Forms.Application.DoEvents()
     End Sub
 
 
