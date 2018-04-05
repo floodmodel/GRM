@@ -644,7 +644,7 @@ Public Class cProject
                                     mWSNetwork.AddWSIDdown(.WSID, targetCell.WSID)
                                     mWSNetwork.SetWSoutletCVID(.WSID, .CVID)
                                 End If
-
+                                'If cell.XCol = 97 AndAlso cell.YRow = 17 Then Stop
                                 If Not mWSNetwork.WSIDsNearbyUp(targetCell.WSID).Contains(.WSID) Then
                                     mWSNetwork.AddWSIDup(targetCell.WSID, .WSID)
                                 End If
@@ -853,7 +853,7 @@ Public Class cProject
                                                                Dim valuesInaLine() As String = gridFdir.ValuesInOneRowFromTopLeft(ry)
                                                                For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                    If mWSCells(cx, ry) IsNot Nothing Then
-                                                                       mWSCells(cx, ry).FDir = cHydroCom.GetFlowDirection(CInt(valuesInaLine(cx)), Watershed.mFDType)
+                                                                       mWSCells(cx, ry).FDir = cHydroCom.GetFlowDirection(CInt(valuesInaLine(cx)), fdtype)
                                                                    End If
                                                                Next
                                                            End Sub)
@@ -862,6 +862,7 @@ Public Class cProject
                 Dim valuesInaLine() As String = gridFdir.ValuesInOneRowFromTopLeft(ry)
                 For cx As Integer = 0 To Watershed.mColCount - 1
                     If mWSCells(cx, ry) IsNot Nothing Then
+                        If cx = 97 AndAlso ry = 17 Then Stop
                         mWSCells(cx, ry).FDir = cHydroCom.GetFlowDirection(CInt(valuesInaLine(cx)), fdtype)
                     End If
                 Next cx

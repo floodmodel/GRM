@@ -92,20 +92,20 @@ Module mMain
 
     Private Sub StartSingleRun(ByVal currentPrjFPN As String, Optional bDeleteFilesExceptQ As Boolean = False)
         '여기서 셀 정보를 미리 알 수 있다.
-        'Dim WSFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_ws.asc"
-        'Dim SlopeFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_slope.asc"
-        'Dim FdirFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_fdir.asc"
-        'Dim FacFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_fac.asc"
-        'Dim streamFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_stream.asc"
-        'Dim lcFPN As String = "C:/GRM_Projects/GHG500/watershed/GHG_lc.asc"
-        'Dim stFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_SoilTexture.asc"
-        'Dim sdFPN As String = "C:/GRM_Projects/GHG500/watershed/ghg500_SoilDepth.asc"
+        Dim WSFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_watershed_reverse.asc"
+        Dim SlopeFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Slope.asc"
+        Dim FdirFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Fdr.asc"
+        Dim FacFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Fac.asc"
+        Dim streamFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Stream.asc"
+        Dim lcFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/GHG500_lc.asc"
+        Dim stFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_SoilTexture.asc"
+        Dim sdFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_SoilDepth.asc"
 
+        Dim wsinfo As New cGetWatershedInfo(cGRM.FlowDirectionType.StartsFromE_TauDEM.ToString, WSFPN, SlopeFPN, FdirFPN, FacFPN, streamFPN, lcFPN, stFPN, sdFPN,,)
+        Dim cc As Integer = wsinfo.cellCountInWatershed
+        Dim a As Integer = wsinfo.WSIDsAll.Count
+        Dim aa As List(Of Integer) = wsinfo.upStreamWSIDs(1)
 
-        'Dim wsinfo As New cGetWatershedInfo(cGRM.FlowDirectionType.StartsFromE.ToString, WSFPN, SlopeFPN, FdirFPN, FacFPN, streamFPN, lcFPN, stFPN, sdFPN,,)
-        'Dim cc As Integer = wsinfo.cellCountInWatershed
-        'Dim a As Integer = wsinfo.WSIDsAll.Count
-        'Dim aa As List(Of Integer) = wsinfo.upStreamWSIDs(1)
 
         Dim wpNames As New List(Of String)
         If Path.GetDirectoryName(currentPrjFPN) = "" Then
