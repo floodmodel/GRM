@@ -1,0 +1,1 @@
+Set the binaries and smaple data in C:\GRM folder.

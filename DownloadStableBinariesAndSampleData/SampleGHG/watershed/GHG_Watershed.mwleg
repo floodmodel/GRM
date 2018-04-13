@@ -1,0 +1,12 @@
+<ColoringScheme SchemeType="Grid" GridName="GHG_Watershed" GroupName="Data Layers">
+  <GridColoringScheme AmbientIntensity="0.7" Key="" LightSourceAzimuth="90" LightSourceElevation="45" LightSourceIntensity="0.7" NoDataColor="-16776975" ImageLayerFillTransparency="1" ImageUpsamplingMethod="None" ImageDownsamplingMethod="None">
+    <Break Caption="-1.000" LowValue="-1" HighValue="-1" LowColor="-4292244" HighColor="-4292244" ColoringType="2" GradientModel="1" />
+    <Break Caption="1.000" LowValue="1" HighValue="1" LowColor="-3567254" HighColor="-3567254" ColoringType="2" GradientModel="1" />
+    <Break Caption="2.000" LowValue="2" HighValue="2" LowColor="-3495326" HighColor="-3495326" ColoringType="2" GradientModel="1" />
+    <Break Caption="3.000" LowValue="3" HighValue="3" LowColor="-6122141" HighColor="-6122141" ColoringType="2" GradientModel="1" />
+    <Break Caption="4.000" LowValue="4" HighValue="4" LowColor="-5780337" HighColor="-5780337" ColoringType="2" GradientModel="1" />
+    <Break Caption="5.000" LowValue="5" HighValue="5" LowColor="-6235741" HighColor="-6235741" ColoringType="2" GradientModel="1" />
+    <Break Caption="6.000" LowValue="6" HighValue="6" LowColor="-2820742" HighColor="-2820742" ColoringType="2" GradientModel="1" />
+    <Break Caption="7.000" LowValue="7" HighValue="7" LowColor="-1732718" HighColor="-1732718" ColoringType="2" GradientModel="1" />
+  </GridColoringScheme>
+</ColoringScheme>
