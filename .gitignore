@@ -7,8 +7,8 @@
 *.userosscache
 *.sln.docstates
 _ReSharper.*
-/bin/
-/obj/
+bin/
+obj/
 /packages/
 *.pdb
 *.cache
