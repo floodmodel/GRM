@@ -394,7 +394,7 @@ Public Class fAnalyzer
             Dim fpnBMP As String = CStr(Me.pbRFimg.Image.Tag)
             Dim fpnASC As String = Path.Combine(IO.Path.GetDirectoryName(fpnBMP), Path.GetFileNameWithoutExtension(fpnBMP) + ".asc")
             If File.Exists(fpnASC) = True Then
-                mImg.MakeImgFileUsingASCfileFromTL(fpnASC, fpnBMP, cImg.RendererRange.RendererFrom0to200,
+                mImg.MakeImgFileUsingASCfileFromTL(fpnASC, fpnBMP, cImg.RendererRange.RendererFrom0to100,
                                                        Me.pbRFimg.Width, Me.pbRFimg.Height,
                                                    mImg.DefaultNullColor)
             End If
@@ -1104,7 +1104,7 @@ Public Class fAnalyzer
         If sender Is Me.btInitializeRFrenderer Then
             SetRFRendererWithInitialColor(Me, IniColor)
             pb = Me.pbRFimg
-            rangeType = cImg.RendererRange.RendererFrom0to200
+            rangeType = cImg.RendererRange.RendererFrom0to50
         End If
         If sender Is Me.btInitializeRFAccRenderer Then
             SetRFAccRendererWithInitialColor(Me, IniColor)
@@ -1115,7 +1115,7 @@ Public Class fAnalyzer
         If sender Is Me.btInitializeFlowRenderer Then
             SetFlowRendererWithInitialColor(Me, IniColor)
             pb = Me.pbFLOWimg
-            rangeType = cImg.RendererRange.RendererFrom0to30000
+            rangeType = cImg.RendererRange.RendererFrom0to10000
         End If
 
         If pb.Image IsNot Nothing Then

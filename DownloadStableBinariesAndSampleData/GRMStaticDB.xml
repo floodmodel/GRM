@@ -193,7 +193,7 @@
     <SoilDepthDefault>125</SoilDepthDefault>
   </SoilDepthParameter>
   <SoilDepthParameter>
-    <GRMCode>MDMS</GRMCode>
+    <GRMCode>M</GRMCode>
     <SoilDepthClassE>ModeratelyDeepOrModeratelyShallow</SoilDepthClassE>
     <SoilDepthClassK>보통</SoilDepthClassK>
     <SoilDepthMin>50</SoilDepthMin>

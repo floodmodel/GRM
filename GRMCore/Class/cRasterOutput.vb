@@ -252,7 +252,7 @@ Public Class cRasterOutput
         Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
         mImgRF = Nothing
         mImgRF = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
-                                                   mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to500)
+                                                   mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
     End Sub
 
     Private Sub StartMakeImgRFAccD()
@@ -269,7 +269,7 @@ Public Class cRasterOutput
         Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
         mImgRFacc = Nothing
         mImgRFacc = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
-                                                   mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to1000)
+                                                   mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
     End Sub
 
     Private Sub StartMakeImgFlowD()
@@ -286,7 +286,7 @@ Public Class cRasterOutput
         Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
         mImgFlow = Nothing
         mImgFlow = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
-                                                   mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to30000)
+                                                   mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
     End Sub
 
     Private Sub StartMakeASCTextFileSSRD()

@@ -1,7 +1,7 @@
 ﻿Public Class cSetSoilDepth
     Public Enum SoilDepthCode
         D
-        MDMS
+        M
         S
         VD
         VS
@@ -84,7 +84,7 @@
     Public Shared Function GetSoilDepthCode(ByVal inName As String) As SoilDepthCode
         Select Case Trim(inName)
             Case SoilDepthCode.D.ToString : Return SoilDepthCode.D
-            Case SoilDepthCode.MDMS.ToString : Return SoilDepthCode.MDMS
+            Case SoilDepthCode.M.ToString : Return SoilDepthCode.M
             Case SoilDepthCode.S.ToString : Return SoilDepthCode.S
             Case SoilDepthCode.VD.ToString : Return SoilDepthCode.VD
             Case SoilDepthCode.VS.ToString : Return SoilDepthCode.VS
