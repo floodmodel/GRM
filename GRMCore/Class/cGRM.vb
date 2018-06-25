@@ -73,6 +73,7 @@
         W
         NW
         N
+        NONE
     End Enum
 
     Public Enum FlowDirectionType

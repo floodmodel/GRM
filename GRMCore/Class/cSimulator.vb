@@ -99,8 +99,8 @@ Public Class cSimulator
         cThisSimulation.dtsec_usedtoForwardToThisTime = cThisSimulation.dtsec
         Dim dtsec As Integer
         'CVid의 값은 1부터 시작함. 
-        Dim simulationTimeLimitSEC As Integer = endingTimeSEC + dtsec
-        Do While nowTsec <= simulationTimeLimitSEC
+        Dim simulationTimeLimitSEC As Integer = endingTimeSEC + cThisSimulation.dtsec
+        Do While nowTsec <= endingTimeSEC 'simulationTimeLimitSEC
             dtsec = cThisSimulation.dtsec
             cThisSimulation.vMaxInThisStep = Single.MinValue
             'dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
@@ -123,12 +123,27 @@ Public Class cSimulator
                                        wpCount, targetCalTtoPrint_MIN,
                                         mSEC_tm1,
                                          Project_tm1, mProject.mSimulationType, nowRFOrder)
-            nowTsec = nowTsec + dtsec 'dtsec 만큼 전진
-            cThisSimulation.dtsec_usedtoForwardToThisTime = dtsec
-            If cThisSimulation.IsFixedTimeStep = False Then
-                cThisSimulation.dtsec = cHydroCom.getDTsec(cGRM.CONST_CFL_NUMBER,
-                                                           project.Watershed.mCellSize, cThisSimulation.vMaxInThisStep, dTPrint_MIN)
+            'nowTsec = nowTsec + dtsec 'dtsec 만큼 전진
+
+            'cThisSimulation.dtsec_usedtoForwardToThisTime = dtsec
+            'If cThisSimulation.IsFixedTimeStep = False Then
+            '    cThisSimulation.dtsec = cHydroCom.getDTsec(cGRM.CONST_CFL_NUMBER,
+            '                                               project.Watershed.mCellSize, cThisSimulation.vMaxInThisStep, dTPrint_MIN)
+            'End If
+
+            If nowTsec < endingTimeSEC AndAlso nowTsec + dtsec > endingTimeSEC Then
+                cThisSimulation.dtsec = nowTsec + dtsec - endingTimeSEC
+                nowTsec = endingTimeSEC
+                cThisSimulation.dtsec_usedtoForwardToThisTime = cThisSimulation.dtsec
+            Else
+                nowTsec = nowTsec + dtsec 'dtsec 만큼 전진
+                cThisSimulation.dtsec_usedtoForwardToThisTime = cThisSimulation.dtsec
+                If cThisSimulation.IsFixedTimeStep = False Then
+                    cThisSimulation.dtsec = cHydroCom.getDTsec(cGRM.CONST_CFL_NUMBER,
+                                                               project.Watershed.mCellSize, cThisSimulation.vMaxInThisStep, dTPrint_MIN)
+                End If
             End If
+
             If mStop Then Exit Do
         Loop
 
@@ -274,29 +289,45 @@ Public Class cSimulator
                                      End Sub)
                 End If
             Next fac
+
+            For Each icv As cCVAttribute In project.CVs
+                If icv.toBeSimulated = True Then
+                    If icv.FlowType = cGRM.CellFlowType.OverlandFlow Then
+                        If cThisSimulation.vMaxInThisStep < icv.uCVof_i_j Then
+                            cThisSimulation.vMaxInThisStep = icv.uCVof_i_j
+                        End If
+                    Else
+                        If cThisSimulation.vMaxInThisStep < icv.mStreamAttr.uCVch_i_j Then
+                            cThisSimulation.vMaxInThisStep = icv.mStreamAttr.uCVch_i_j
+                        End If
+                    End If
+                End If
+            Next
         Else
             For fac As Integer = 0 To project.Watershed.mFacMax
                 If project.mCVANsForEachFA(fac) IsNot Nothing Then
                     For Each cvan As Integer In project.mCVANsForEachFA(fac)
                         If project.CV(cvan).toBeSimulated = True Then
+                            'If project.CV(cvan).XCol = 353 AndAlso project.CV(cvan).YRow = 43 Then
+                            '    Dim a As Integer = 1
+                            'End If
                             simulateRunoffCore(project, fac, cvan, dtsec, nowT_MIN, cellsize)
                             'Dim rf_mPs As Single = project.CV(cvan).RFReadintensity_mPsec
-                        End If
+                            If project.CV(cvan).FlowType = cGRM.CellFlowType.OverlandFlow Then
+                                    If cThisSimulation.vMaxInThisStep < project.CV(cvan).uCVof_i_j Then
+                                        cThisSimulation.vMaxInThisStep = project.CV(cvan).uCVof_i_j
+                                    End If
+                                Else
+                                    If cThisSimulation.vMaxInThisStep < project.CV(cvan).mStreamAttr.uCVch_i_j Then
+                                        cThisSimulation.vMaxInThisStep = project.CV(cvan).mStreamAttr.uCVch_i_j
+                                    End If
+                                End If
+                            End If
                     Next
                 End If
             Next fac
         End If
-        For Each icv As cCVAttribute In project.CVs
-            If icv.FlowType = cGRM.CellFlowType.OverlandFlow Then
-                If cThisSimulation.vMaxInThisStep < icv.uCVof_i_j Then
-                    cThisSimulation.vMaxInThisStep = icv.uCVof_i_j
-                End If
-            Else
-                If cThisSimulation.vMaxInThisStep < icv.mStreamAttr.uCVch_i_j Then
-                    cThisSimulation.vMaxInThisStep = icv.mStreamAttr.uCVch_i_j
-                End If
-            End If
-        Next
+
     End Sub
 
 

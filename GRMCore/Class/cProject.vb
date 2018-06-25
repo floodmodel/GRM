@@ -626,6 +626,10 @@ Public Class cProject
                             targetC = col
                             targetR = row - 1
                             deltaXe = DeltaXPerpendicularHalf_m
+                        Case cGRM.GRMFlowDirectionD8.NONE
+                            targetC = -1
+                            targetR = -1
+                            deltaXe = DeltaXPerpendicularHalf_m
                         Case Else
                             Throw New InvalidOperationException
                     End Select
@@ -644,13 +648,16 @@ Public Class cProject
                                     mWSNetwork.AddWSIDdown(.WSID, targetCell.WSID)
                                     mWSNetwork.SetWSoutletCVID(.WSID, .CVID)
                                 End If
-                                'If cell.XCol = 97 AndAlso cell.YRow = 17 Then Stop
+                                'If cell.XCol = 97 AndAlso cell.YRow = 17 Then 
                                 If Not mWSNetwork.WSIDsNearbyUp(targetCell.WSID).Contains(.WSID) Then
                                     mWSNetwork.AddWSIDup(targetCell.WSID, .WSID)
                                 End If
 
                             End If
                         End If
+                        .DeltaXDownHalf_m = deltaXe
+                    Else
+                        .DownCellidToFlow = -1
                         .DeltaXDownHalf_m = deltaXe
                     End If
 
@@ -735,6 +742,7 @@ Public Class cProject
                                                                    End If
                                                                Next cx
                                                            End Sub)
+            '순차적으로 id를 부여하기 위해서 아래의 과정 필요..
             For ry As Integer = 0 To mWatershed.mRowCount - 1
                 For cx As Integer = 0 To mWatershed.mColCount - 1
                     If mWSCells(cx, ry) IsNot Nothing Then
@@ -767,7 +775,7 @@ Public Class cProject
                         With cv
                             .WSID = wsid
                             .CVID = cvid + 1 ' mCVs.Count + 1.  CVid를 CV 리스트(mCVs)의 인덱스 번호 +1 의 값으로 입력 
-                            .FlowType = cGRM.CellFlowType.OverlandFlow
+                            .FlowType = cGRM.CellFlowType.OverlandFlow '우선 overland flow로 설정
                             .XCol = cx
                             .YRow = ry
                             If Not mWatershed.WSIDList.Contains(.WSID) Then
@@ -811,7 +819,7 @@ Public Class cProject
                                                                    If mWSCells(cx, ry) IsNot Nothing Then
                                                                        mWSCells(cx, ry).Slope = CSng(valuesInaLine(cx))
                                                                        If mWSCells(cx, ry).Slope <= 0.0 Then
-                                                                           mWSCells(cx, ry).Slope = 0.000001
+                                                                           mWSCells(cx, ry).Slope = 0.0001
                                                                            bNoError = False
                                                                        End If
                                                                    End If
@@ -825,7 +833,7 @@ Public Class cProject
                     If mWSCells(cx, ry) IsNot Nothing Then
                         mWSCells(cx, ry).Slope = CSng(valuesInaLine(cx))
                         If mWSCells(cx, ry).Slope <= 0.0 Then
-                            mWSCells(cx, ry).Slope = 0.000001
+                            mWSCells(cx, ry).Slope = 0.0001
                             bNoError = False
                         End If
                     End If
@@ -862,7 +870,6 @@ Public Class cProject
                 Dim valuesInaLine() As String = gridFdir.ValuesInOneRowFromTopLeft(ry)
                 For cx As Integer = 0 To Watershed.mColCount - 1
                     If mWSCells(cx, ry) IsNot Nothing Then
-                        If cx = 97 AndAlso ry = 17 Then Stop
                         mWSCells(cx, ry).FDir = cHydroCom.GetFlowDirection(CInt(valuesInaLine(cx)), fdtype)
                     End If
                 Next cx
@@ -888,7 +895,12 @@ Public Class cProject
                                                                Dim valuesInaLine() As String = gridFac.ValuesInOneRowFromTopLeft(ry)
                                                                For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                    If mWSCells(cx, ry) IsNot Nothing Then
-                                                                       mWSCells(cx, ry).FAc = CInt(valuesInaLine(cx))
+                                                                       Dim v As Integer = CInt(valuesInaLine(cx))
+                                                                       If v < 0 Then
+                                                                           mWSCells(cx, ry).FAc = 0
+                                                                       Else
+                                                                           mWSCells(cx, ry).FAc = v
+                                                                       End If
                                                                    End If
                                                                Next
                                                            End Sub)
@@ -898,7 +910,12 @@ Public Class cProject
                 Dim valuesInaLine() As String = gridFac.ValuesInOneRowFromTopLeft(ry)
                 For cx As Integer = 0 To Watershed.mColCount - 1
                     If mWSCells(cx, ry) IsNot Nothing Then
-                        mWSCells(cx, ry).FAc = CInt(valuesInaLine(cx))
+                        Dim v As Integer = CInt(valuesInaLine(cx))
+                        If v < 0 Then
+                            mWSCells(cx, ry).FAc = 0
+                        Else
+                            mWSCells(cx, ry).FAc = v
+                        End If
                     End If
                 Next cx
             Next ry
@@ -987,10 +1004,10 @@ Public Class cProject
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) IsNot Nothing Then
                             Dim value As Single = CSng(valuesInaLine(cx))
-                            If value < 0 Then
-                                mWSCells(cx, ry).mStreamAttr.ChBaseWidthByLayer = 0
-                            Else
+                            If value > 0 Then
                                 mWSCells(cx, ry).mStreamAttr.ChBaseWidthByLayer = value
+                            Else
+                                mWSCells(cx, ry).mStreamAttr.ChBaseWidthByLayer = CSng(Watershed.mCellSize / 10)
                             End If
                         End If
                     Next cx
@@ -1087,7 +1104,6 @@ Public Class cProject
         Try
             Dim gridLC As New cTextFileReaderASC(fpnLC)
             Dim isnormal As Boolean = True
-
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
                 options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
@@ -1117,7 +1133,7 @@ Public Class cProject
                                 cell.LandCoverValue = value
                             Else
                                 isnormal = False
-                                Throw New KeyNotFoundException
+                                Console.WriteLine(String.Format("Landcover file {0} has an invalid value.", fpnLC), True, True)
                             End If
                         End If
                     Next cx
@@ -1153,7 +1169,8 @@ Public Class cProject
             vatLCcode.Add(CInt(row.GridValue), lcCode)
         Next
         Dim gridLC As New cTextFileReaderASC(fpnLC)
-        Dim isnormal As Boolean = True
+        'Dim isnormal As Boolean = True
+        Dim vBak As Integer = vatRC.Keys(0) '여기서 기본값.
         Try
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
@@ -1164,14 +1181,19 @@ Public Class cProject
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
                                                                            Dim cell As cCVAttribute = mWSCells(cx, ry)
                                                                            Dim value As Integer = CInt(valuesInaLine(cx))
+                                                                           vBak = value '여기서 최신 셀의 값
                                                                            If value > 0 Then
                                                                                cell.LandCoverValue = value
                                                                                cell.RoughnessCoeffOFori = vatRC(value)
                                                                                cell.ImperviousRatio = vatIR(value)
                                                                                cell.LandCoverCode = vatLCcode(value)
                                                                            Else
-                                                                               Console.WriteLine(String.Format("Landcover file {0} has an invalid value.", Landcover.mGridLandCoverFPN), True, True)
-                                                                               isnormal = False
+                                                                               cell.LandCoverValue = vBak
+                                                                               cell.RoughnessCoeffOFori = vatRC(vBak)
+                                                                               cell.ImperviousRatio = vatIR(vBak)
+                                                                               cell.LandCoverCode = vatLCcode(vBak)
+                                                                               Console.WriteLine(String.Format("Landcover file {0} has an invalid value. {1} was applied.", Landcover.mGridLandCoverFPN, vBak), True, True)
+                                                                               'isnormal = False
                                                                            End If
                                                                        End If
                                                                    Next
@@ -1183,20 +1205,26 @@ Public Class cProject
                         If mWSCells(cx, ry) IsNot Nothing Then
                             Dim cell As cCVAttribute = mWSCells(cx, ry)
                             Dim value As Integer = CInt(valuesInaLine(cx))
+                            vBak = value '여기서 최신 셀의 값
                             If value > 0 Then
                                 cell.LandCoverValue = value
                                 cell.RoughnessCoeffOFori = vatRC(value)
                                 cell.ImperviousRatio = vatIR(value)
                                 cell.LandCoverCode = vatLCcode(value)
                             Else
-                                isnormal = False
-                                Throw New KeyNotFoundException
+                                cell.LandCoverValue = vBak
+                                cell.RoughnessCoeffOFori = vatRC(vBak)
+                                cell.ImperviousRatio = vatIR(vBak)
+                                cell.LandCoverCode = vatLCcode(vBak)
+                                Console.WriteLine(String.Format("Landcover file {0} has an invalid value. {1} was applied.", Landcover.mGridLandCoverFPN, vBak), True, True)
+                                'isnormal = False
+                                'Throw New KeyNotFoundException
                             End If
                         End If
                     Next cx
                 Next ry
             End If
-            Return isnormal
+            Return True
         Catch ex As KeyNotFoundException
             Throw New KeyNotFoundException(String.Format(
                                                "Landcover file {0} has an invalid value.", Landcover.mGridLandCoverFPN))
@@ -1268,7 +1296,7 @@ Public Class cProject
                                 cell.SoilTextureValue = value
                             Else
                                 isnormal = False
-                                Throw New KeyNotFoundException
+                                Console.WriteLine(String.Format("Soil texture file {0} has an invalid value.", fpnST), True, True)
                             End If
                         End If
                     Next cx
@@ -1309,6 +1337,7 @@ Public Class cProject
             vatSTcode.Add(CInt(row.GridValue), stCode)
         Next
         Dim isnormal As Boolean = True
+        Dim vBak As Integer = vatP.Keys(0) '여기서 기본값.
         Try
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
@@ -1319,6 +1348,7 @@ Public Class cProject
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
                                                                            Dim cell As cCVAttribute = mWSCells(cx, ry)
                                                                            Dim value As Integer = CInt(valuesInaLine(cx))
+                                                                           vBak = value '여기서 최신 셀의 값
                                                                            If value > 0 Then
                                                                                cell.SoilTextureValue = value
                                                                                cell.PorosityEtaOri = vatP(value)
@@ -1327,9 +1357,15 @@ Public Class cProject
                                                                                cell.HydraulicConductKori_mPsec = vatHC(value) / 100 / 3600    ' cm/hr -> m/s
                                                                                cell.SoilTextureCode = vatSTcode(value)
                                                                            Else
-                                                                               Console.WriteLine(String.Format("Soil texture file {0} has an invalid value.",
-                                                                                GreenAmpt.mGridSoilTextureFPN), True, True)
-                                                                               isnormal = False
+                                                                               Console.WriteLine(String.Format("Soil texture file {0} has an invalid value. {1} was applied.",
+                                                                                GreenAmpt.mGridSoilTextureFPN, vBak), True, True)
+                                                                               cell.SoilTextureValue = vBak
+                                                                               cell.PorosityEtaOri = vatP(vBak)
+                                                                               cell.EffectivePorosityThetaEori = vatEP(vBak)
+                                                                               cell.WettingFrontSuctionHeadPsiOri_m = vatWFSH(vBak) / 100  ' cm -> m
+                                                                               cell.HydraulicConductKori_mPsec = vatHC(vBak) / 100 / 3600    ' cm/hr -> m/s
+                                                                               cell.SoilTextureCode = vatSTcode(vBak)
+                                                                               'isnormal = False
                                                                            End If
                                                                        End If
                                                                    Next
@@ -1341,6 +1377,7 @@ Public Class cProject
                         If mWSCells(cx, ry) IsNot Nothing Then
                             Dim cell As cCVAttribute = mWSCells(cx, ry)
                             Dim value As Integer = CInt(valuesInaLine(cx))
+                            vBak = value '여기서 최신 셀의 값
                             If value > 0 Then
                                 cell.SoilTextureValue = value
                                 cell.PorosityEtaOri = vatP(value)
@@ -1349,14 +1386,21 @@ Public Class cProject
                                 cell.HydraulicConductKori_mPsec = vatHC(value) / 100 / 3600    ' cm/hr -> m/s
                                 cell.SoilTextureCode = vatSTcode(value)
                             Else
-                                isnormal = False
-                                Throw New KeyNotFoundException
+                                Console.WriteLine(String.Format("Soil texture file {0} has an invalid value. {1} was applied.", GreenAmpt.mGridSoilTextureFPN, vBak), True, True)
+                                cell.SoilTextureValue = vBak
+                                cell.PorosityEtaOri = vatP(vBak)
+                                cell.EffectivePorosityThetaEori = vatEP(vBak)
+                                cell.WettingFrontSuctionHeadPsiOri_m = vatWFSH(vBak) / 100  ' cm -> m
+                                cell.HydraulicConductKori_mPsec = vatHC(vBak) / 100 / 3600    ' cm/hr -> m/s
+                                cell.SoilTextureCode = vatSTcode(vBak)
+                                'isnormal = False
+                                'Throw New KeyNotFoundException
                             End If
                         End If
                     Next cx
                 Next ry
             End If
-            Return isnormal
+            Return True
         Catch ex As KeyNotFoundException
             Throw New KeyNotFoundException(String.Format(
                                            "Soil texture file {0} has an invalid value.", GreenAmpt.mGridSoilTextureFPN))
@@ -1467,6 +1511,7 @@ Public Class cProject
             vatSDcode.Add(CInt(row.GridValue), stCode)
         Next
         Dim isnormal As Boolean = True
+        Dim vBak As Integer = vatSD.Keys(0) '여기서 기본값.
         Try
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
@@ -1476,14 +1521,18 @@ Public Class cProject
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
                                                                            Dim value As Integer = CInt(valuesInaLine(cx))
+                                                                           vBak = value '여기서 최신 셀의 값
                                                                            If value > 0 Then
                                                                                mWSCells(cx, ry).SoilDepthTypeValue = CInt(value)
                                                                                mWSCells(cx, ry).SoilDepthOri_m = vatSD(value) / 100     ' cm ->  m
                                                                                mWSCells(cx, ry).SoilDepthCode = vatSDcode(value)
                                                                            Else
-                                                                               Console.WriteLine(String.Format("Soil depth file {0} has an invalid value.",
-                                                                                                              SoilDepth.mGridSoilDepthFPN), True, True)
-                                                                               isnormal = False
+                                                                               Console.WriteLine(String.Format("Soil depth file {0} has an invalid value. {1} was applied.",
+                                                                                                              SoilDepth.mGridSoilDepthFPN, vBak), True, True)
+                                                                               mWSCells(cx, ry).SoilDepthTypeValue = CInt(vBak)
+                                                                               mWSCells(cx, ry).SoilDepthOri_m = vatSD(vBak) / 100     ' cm ->  m
+                                                                               mWSCells(cx, ry).SoilDepthCode = vatSDcode(vBak)
+                                                                               'isnormal = False
                                                                            End If
                                                                        End If
                                                                    Next
@@ -1494,19 +1543,25 @@ Public Class cProject
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) IsNot Nothing Then
                             Dim value As Integer = CInt(valuesInaLine(cx))
+                            vBak = value '여기서 최신 셀의 값
                             If value > 0 Then
                                 mWSCells(cx, ry).SoilDepthTypeValue = CInt(value)
                                 mWSCells(cx, ry).SoilDepthOri_m = vatSD(value) / 100     ' cm ->  m
                                 mWSCells(cx, ry).SoilDepthCode = vatSDcode(value)
                             Else
-                                isnormal = False
-                                Throw New KeyNotFoundException
+                                Console.WriteLine(String.Format("Soil depth file {0} has an invalid value. {1} was applied.",
+                                                                                                            SoilDepth.mGridSoilDepthFPN, vBak), True, True)
+                                mWSCells(cx, ry).SoilDepthTypeValue = CInt(vBak)
+                                mWSCells(cx, ry).SoilDepthOri_m = vatSD(vBak) / 100     ' cm ->  m
+                                mWSCells(cx, ry).SoilDepthCode = vatSDcode(vBak)
+                                'isnormal = False
+                                'Throw New KeyNotFoundException
                             End If
                         End If
                     Next cx
                 Next ry
             End If
-            Return isnormal
+            Return True
         Catch ex As KeyNotFoundException
             Throw New KeyNotFoundException(String.Format(
                                                "Soil depth file {0} has an invalid value.", SoilDepth.mGridSoilDepthFPN))

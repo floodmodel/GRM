@@ -341,7 +341,53 @@ namespace gentle
                 return Nothing;
             }
         }
-        
+
+
+
+        public void MakeImgFileUsingArrayFromTL(string imgFPNtoMake, double[,] array, float imgWidth,
+            float imgHeight, RendererRange rangeType, double nullValue = -9999)
+        {
+            try
+            {
+                int colxCount = array.GetLength(0);
+                int rowyCount = array.GetLength(1);
+                int CellCount = (colxCount * rowyCount);
+                int CellWbmp = 0;
+                int CellHbmp = 0;
+                CellWbmp = Convert.ToInt32(imgWidth / colxCount);
+                CellHbmp = Convert.ToInt32(imgHeight / rowyCount);
+                if (CellWbmp < CellHbmp)
+                {
+                    CellHbmp = CellWbmp;
+                }
+                else
+                {
+                    CellWbmp = CellHbmp;
+                }
+                Bitmap bm = new Bitmap(Convert.ToInt32(colxCount * CellWbmp) + 1, Convert.ToInt32(rowyCount * CellHbmp) + 1);
+                Graphics gr = Graphics.FromImage(bm);
+                for (int r = 0; r < rowyCount; r++)
+                {
+                    for (int c = 0; c < colxCount; c++)
+                    {
+                        Rectangle rec = new Rectangle(c * CellWbmp, r * CellHbmp, CellWbmp, CellHbmp);
+                        Color cToShow = DefaultNullColor;
+                        if (double.TryParse(array[c, r].ToString(), out double dv) == true)
+                        {
+                            cToShow = GetColorFromMemoryRendererInDifferentInterval(dv, rangeType, nullValue);
+                        }
+                        SolidBrush brsh = new SolidBrush(cToShow);
+                        gr.FillRectangle(brsh, rec);
+                    }
+                }
+                bm.Save(imgFPNtoMake, ImageFormat.Png);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
         public bool MakeImgFileUsingASCfileFromTL(string inASCFPN, string imgFpnToMake, RendererRange rangeType, float width, 
             float height, Color defaultColor, double nullValue=-9999)
         {

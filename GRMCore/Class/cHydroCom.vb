@@ -19,6 +19,8 @@
                     Return cGRM.GRMFlowDirectionD8.NW
                 Case 128
                     Return cGRM.GRMFlowDirectionD8.N
+                Case Else
+                    Return cGRM.GRMFlowDirectionD8.NONE
             End Select
         End If
         If FDType = cGRM.FlowDirectionType.StartsFromN Then
@@ -39,6 +41,8 @@
                     Return cGRM.GRMFlowDirectionD8.W
                 Case 128
                     Return cGRM.GRMFlowDirectionD8.NW
+                Case Else
+                    Return cGRM.GRMFlowDirectionD8.NONE
             End Select
         End If
         If FDType = cGRM.FlowDirectionType.StartsFromE Then
@@ -59,6 +63,8 @@
                     Return cGRM.GRMFlowDirectionD8.N
                 Case 128
                     Return cGRM.GRMFlowDirectionD8.NE
+                Case Else
+                    Return cGRM.GRMFlowDirectionD8.NONE
             End Select
         End If
 
@@ -80,6 +86,8 @@
                     Return cGRM.GRMFlowDirectionD8.S
                 Case 8
                     Return cGRM.GRMFlowDirectionD8.SE
+                Case Else
+                    Return cGRM.GRMFlowDirectionD8.NONE
             End Select
         End If
 

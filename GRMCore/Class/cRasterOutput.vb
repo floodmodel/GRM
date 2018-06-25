@@ -186,7 +186,11 @@ Public Class cRasterOutput
             Next
         Else
             Dim options As ParallelOptions = New ParallelOptions()
-            options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
+            If cThisSimulation.IsParallel = True Then
+                options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
+            Else
+                options.MaxDegreeOfParallelism = -1
+            End If
             Parallel.For(0, inCells.GetLength(1), options, Sub(nr As Integer)
                                                                For nc As Integer = 0 To inCells.GetLength(0) - 1
                                                                    If inCells(nc, nr) IsNot Nothing Then
@@ -234,7 +238,9 @@ Public Class cRasterOutput
     Private Sub MakeImgSSRDInner()
         Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
         mImgSSR = Nothing
-        mImgSSR = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoSSR.PFN, mArraySSR,
+        'mImgSSR = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoSSR.PFN, mArraySSR,
+        '                                           mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
+        imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoSSR.PFN, mArraySSR,
                                                    mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
     End Sub
 
@@ -251,9 +257,13 @@ Public Class cRasterOutput
     Private Sub MakeImgRFDInner()
         Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
         mImgRF = Nothing
-        mImgRF = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
+        'mImgRF = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
+        '                                           mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
+        imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
                                                    mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
+
     End Sub
+
 
     Private Sub StartMakeImgRFAccD()
         If mbUseOtherThread = True Then
@@ -268,8 +278,11 @@ Public Class cRasterOutput
     Private Sub MakeImgRFAccDInner()
         Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
         mImgRFacc = Nothing
-        mImgRFacc = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
+        'mImgRFacc = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
+        '                                           mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
+        imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
                                                    mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
+
     End Sub
 
     Private Sub StartMakeImgFlowD()
@@ -285,8 +298,11 @@ Public Class cRasterOutput
     Private Sub MakeImgFlowDInner()
         Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
         mImgFlow = Nothing
-        mImgFlow = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
+        'mImgFlow = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
+        '                                           mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
+        imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
                                                    mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
+
     End Sub
 
     Private Sub StartMakeASCTextFileSSRD()
