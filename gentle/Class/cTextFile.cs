@@ -114,16 +114,17 @@ namespace gentle
         {
             string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, nodataValue);
             File.AppendAllText(fpn, header);
-            for (int nr = 0; nr <= nrows - 1; nr++)
-            {
-                string arow = "";
-                for (int nc = 0; nc <= ncols - 1; nc++)
-                {
-                    arow = arow + array[nc, nr].ToString() + " ";
-                }
-                arow = arow.Trim() + "\r\n";
-                File.AppendAllText(fpn, arow);
-            }
+            WriteTwoDimData(fpn, array);
+            //for (int nr = 0; nr <= nrows - 1; nr++)
+            //{
+            //    string arow = "";
+            //    for (int nc = 0; nc <= ncols - 1; nc++)
+            //    {
+            //        arow = arow + array[nc, nr].ToString() + " ";
+            //    }
+            //    arow = arow.Trim() + "\r\n";
+            //    File.AppendAllText(fpn, arow);
+            //}
             return true;
         }
 
@@ -131,17 +132,48 @@ namespace gentle
         public static bool MakeASCTextFile(string fpn, string allHeader, string nodataValue, double[,] array)
         {
             File.AppendAllText(fpn, allHeader);
+            WriteTwoDimData(fpn, array);
+            //string rows = "";
+            //for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
+            //{
+            //    string arow = "";
+            //    for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
+            //    {
+            //        arow = arow + array[nc, nr].ToString() + " ";
+            //    }
+            //    arow = arow.Trim() + "\r\n";
+            //    rows = rows + arow;
+            //    if (nr % 2 == 0)
+            //    {
+            //        File.AppendAllText(fpn, rows); 
+            //        rows = "";
+            //    }
+            //    //File.AppendAllText(fpn, arow); // 이방법이 더 빠르다.
+            //}
+            //File.AppendAllText(fpn, rows);
+            ////File.AppendAllText(fpn, rows); // 이방법이 더 느리다
+            return true;
+        }
+        
+        private static void WriteTwoDimData(string fpn, double [,] array)
+        {
+            string rows = "";
             for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
             {
                 string arow = "";
                 for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
                 {
-                    arow = arow + array[nc, nr].ToString() + " ";
+                    arow = arow + array[nc, nr].ToString("F2") + " ";
                 }
                 arow = arow.Trim() + "\r\n";
-                File.AppendAllText(fpn, arow);
+                rows = rows + arow;
+                if (nr % 2 == 0) //이부분 더 크게 하면 오히려 늦어 진다..
+                {
+                    File.AppendAllText(fpn, rows);
+                    rows = "";
+                }
             }
-            return true;
+            File.AppendAllText(fpn, rows);
         }
 
         public static bool MakeASCTextFileAsParallel(string fpn, string allHeader, string nodataValue, double[,] array)

@@ -257,13 +257,13 @@ namespace gentle
         {
             FileStream streamBMP = new FileStream(fpnSource, FileMode.Open);
             Bitmap img = (Bitmap)Bitmap.FromStream(streamBMP);
-            
+
             streamBMP.Dispose();
             return img;
         }
 
-        public Bitmap  MakeImgFileAndGetImgUsingArrayFromTL(string imgFPNtoMake, double[,] array, float imgWidth, 
-            float imgHeight, RendererRange rangeType, double nullValue=-9999 )
+        public Bitmap MakeImgFileAndGetImgUsingArrayFromTL(string imgFPNtoMake, double[,] array, float imgWidth,
+            float imgHeight, RendererRange rangeType, double nullValue = -9999)
         {
             try
             {
@@ -388,6 +388,66 @@ namespace gentle
             }
         }
 
+        public void MakeImgFileUsingArrayFromTL_InParallel(string imgFPNtoMake, double[,] array, float imgWidth,
+           float imgHeight, RendererRange rangeType, double nullValue = -9999)
+        {
+            try
+            {
+                unsafe
+                {
+                    int colxCount = array.GetLength(0);
+                    int rowyCount = array.GetLength(1);
+                    int CellCount = (colxCount * rowyCount);
+                    int CellWbmp = 0;
+                    int CellHbmp = 0;
+                    CellWbmp = Convert.ToInt32(imgWidth / colxCount);
+                    CellHbmp = Convert.ToInt32(imgHeight / rowyCount);
+                    if (CellWbmp < CellHbmp)
+                    {
+                        CellHbmp = CellWbmp;
+                    }
+                    else
+                    {
+                        CellWbmp = CellHbmp;
+                    }
+                    Bitmap bm = new Bitmap(Convert.ToInt32(colxCount * CellWbmp) + 1, Convert.ToInt32(rowyCount * CellHbmp) + 1);
+                    BitmapData bitmapData = bm.LockBits(new Rectangle(0, 0, bm.Width, bm.Height), ImageLockMode.ReadWrite, bm.PixelFormat);
+                    int bytesPerPixel = System.Drawing.Bitmap.GetPixelFormatSize(bitmapData.PixelFormat) / 8;
+                    int heightInPixels = bitmapData.Height;
+                    int widthInBytes = bitmapData.Width * bytesPerPixel;
+                    byte* PtrFirstPixel = (byte*)bitmapData.Scan0;
+                    Parallel.For(0, rowyCount, y =>
+                    {
+                        //for (int y = 0; y < rowyCount; y++)
+                        //{
+                        byte* currentLine = PtrFirstPixel + (y * bitmapData.Stride);
+                        for (int x = 0; x < colxCount; x++)
+                        {
+                            Color cToShow = DefaultNullColor;
+                            if (double.TryParse(array[x, y].ToString(), out double dv) == true)
+                            {
+                                cToShow = GetColorFromMemoryRendererInDifferentInterval(dv, rangeType, nullValue);
+                            }
+                            currentLine[x * bytesPerPixel] = (byte)cToShow.B;
+                            currentLine[x * bytesPerPixel + 1] = (byte)cToShow.G;
+                            currentLine[x * bytesPerPixel + 2] = (byte)cToShow.R;
+                            currentLine[x * bytesPerPixel + 3] = (byte)255;
+                        }
+                        //}
+                    });
+                        
+                    bm.UnlockBits(bitmapData);
+                    bm.Save(imgFPNtoMake, ImageFormat.Png);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+
+
         public bool MakeImgFileUsingASCfileFromTL(string inASCFPN, string imgFpnToMake, RendererRange rangeType, float width, 
             float height, Color defaultColor, double nullValue=-9999)
         {
@@ -410,8 +470,6 @@ namespace gentle
             Bitmap bm = new Bitmap(Convert.ToInt32(LayerCellWcount * CellWbmp) + 1, Convert.ToInt32(LayerCellHcount * CellHbmp) + 1);
             Graphics gr = Graphics.FromImage(bm);
             gr.Clear(Color.White);
-            //int ncols = 0;
-            //int nrows = 0;
             for (int r = 0; r <= LayerCellHcount - 1; r++)
             {
                 string[] aRow = ascF.ValuesInOneRowFromTopLeft(r);
