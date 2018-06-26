@@ -128,8 +128,11 @@
         Return grmPrj.WSNetwork.WSIDsAll.Count
     End Function
 
-    Public Function mostDownStreamWSID() As Integer
-        Return grmPrj.WSNetwork.MostDownstreamWSID
+    '2018.06.26. 최
+    '이것을 리스트로 바꾼다. 
+    '연결되지 않는 여러개 유역 영역을 가지는 정보에서 모든 최하류 유역 id를 받는다.
+    Public Function mostDownStreamWSIDs() As List(Of Integer)
+        Return grmPrj.WSNetwork.MostDownstreamWSIDs
     End Function
 
     Public Function upStreamWSIDs(currentWSID As Integer) As List(Of Integer)

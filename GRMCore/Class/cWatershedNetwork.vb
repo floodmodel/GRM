@@ -4,7 +4,7 @@
     Private mWSIDsNearbyDown As New SortedList(Of Integer, List(Of Integer))
     Private mWSIDsAllUps As New SortedList(Of Integer, List(Of Integer))
     Private mWSIDsAllDowns As New SortedList(Of Integer, List(Of Integer))
-    Private mMostDownstreamWSID As Integer
+    Private mMostDownstreamWSIDs As List(Of Integer)
 
     Private mWSoutletCVids As New Dictionary(Of Integer, Integer)
 
@@ -23,6 +23,7 @@
             mWSIDsNearbyDown.Add(i, New List(Of Integer))
             mWSoutletCVids.Add(i, -1)
         Next
+        mMostDownstreamWSIDs = New List(Of Integer)
     End Sub
 
     Public Sub UpdateAllDownsAndUpsNetwork()
@@ -57,8 +58,9 @@
         Next
         For Each nowID As Integer In mWSidList
             If mWSIDsNearbyDown(nowID).Count = 0 Then
-                mMostDownstreamWSID = nowID
-                Exit For
+                mMostDownstreamWSIDs.Add(nowID)
+                'mMostDownstreamWSIDs = nowID
+                'Exit For
             End If
         Next
     End Sub
@@ -103,9 +105,9 @@
         End Get
     End Property
 
-    Public ReadOnly Property MostDownstreamWSID() As Integer
+    Public ReadOnly Property MostDownstreamWSIDs() As List(Of Integer)
         Get
-            Return mMostDownstreamWSID
+            Return mMostDownstreamWSIDs
         End Get
     End Property
 

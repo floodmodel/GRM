@@ -104,9 +104,9 @@ Public Class cRTStarter
             .Rainfall.mRainfallinterval = mRFInterval_MIN
             .GeneralSimulEnv.mIsDateTimeFormat = True
             .mSimulationType = cGRM.SimulationType.RealTime
-            If .SubWSPar.userPars(.WSNetwork.MostDownstreamWSID).iniFlow = 0 Then
-                '.GeneralSimulEnv.mbSimulateBFlow = False 'todo. 이거 확인 필요. 2018.03.13. 최
-            End If
+            'If .SubWSPar.userPars(.WSNetwork.MostDownstreamWSIDs).iniFlow = 0 Then
+            '    '.GeneralSimulEnv.mbSimulateBFlow = False 'todo. 이거 확인 필요. 2018.03.13. 최
+            'End If
         End With
 
         With GRMRT
