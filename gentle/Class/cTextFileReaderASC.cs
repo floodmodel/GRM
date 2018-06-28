@@ -99,9 +99,9 @@ namespace gentle
                         }
                         else
                         {
-                            if (int.TryParse(LineParts[1], out iv))
+                            if (double.TryParse(LineParts[1], out  double v))
                             {
-                                mHeader.nodataValue = iv;
+                                mHeader.nodataValue = v;
                             }
                             else
                             {
