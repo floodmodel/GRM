@@ -331,7 +331,7 @@ Public Class cRasterOutput
     Private Sub StartMakeASCTextFileSSRD()
         Dim ts As New ThreadStart(AddressOf MakeASCTextFileInnerSSRD)
         Dim th As New Thread(ts)
-        'th.Start()
+        th.Start()
     End Sub
 
     Private Sub MakeASCTextFileInnerSSRD()
