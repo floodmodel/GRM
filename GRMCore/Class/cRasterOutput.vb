@@ -331,12 +331,12 @@ Public Class cRasterOutput
     Private Sub StartMakeASCTextFileSSRD()
         Dim ts As New ThreadStart(AddressOf MakeASCTextFileInnerSSRD)
         Dim th As New Thread(ts)
-        th.Start()
+        'th.Start()
     End Sub
 
     Private Sub MakeASCTextFileInnerSSRD()
-        gentle.cTextFile.MakeASCTextFile(mASCfpnSSRD, mASCHeaderStringAll, "-9999", mArraySSR)
-        'gentle.cTextFile.MakeASCTextFile(mASCfpnSSRD, mASCHeaderStringAll, "-9999", mArraySSRasOneD)
+        cTextFile.MakeASCTextFile(mASCfpnSSRD, mASCHeaderStringAll, "-9999", mArraySSR)
+        'cTextFile.MakeASCTextFileAsParallel(mASCfpnSSRD, mASCHeaderStringAll, "-9999", mArraySSR) '이게 더 느리다.. 취합과정 땜에..
 
     End Sub
 
@@ -348,6 +348,7 @@ Public Class cRasterOutput
 
     Private Sub MakeASCTextFileInnerRFD()
         cTextFile.MakeASCTextFile(mASCfpnRFD, mASCHeaderStringAll, "-9999", mArrayRF)
+        'cTextFile.MakeASCTextFileAsParallel(mASCfpnRFD, mASCHeaderStringAll, "-9999", mArrayRF)'이게 더 느리다.. 취합과정 땜에..
     End Sub
 
     Private Sub StartMakeASCTextFileRFaccD()
@@ -358,6 +359,7 @@ Public Class cRasterOutput
 
     Private Sub MakeASCTextFileInnerRFaccD()
         cTextFile.MakeASCTextFile(mASCfpnRFaccD, mASCHeaderStringAll, "-9999", mArrayRFAcc)
+        'cTextFile.MakeASCTextFileAsParallel(mASCfpnRFaccD, mASCHeaderStringAll, "-9999", mArrayRFAcc) '이게 더 느리다.. 취합과정 땜에..
     End Sub
 
     Private Sub StartMakeASCTextFileFlowD()
@@ -368,6 +370,7 @@ Public Class cRasterOutput
 
     Private Sub MakeASCTextFileInnerFlowD()
         cTextFile.MakeASCTextFile(mASCfpnFlowD, mASCHeaderStringAll, "-9999", mArrayQ)
+        'cTextFile.MakeASCTextFileAsParallel(mASCfpnFlowD, mASCHeaderStringAll, "-9999", mArrayQ) '이게 더 느리다.. 취합과정 땜에..
     End Sub
 
     Public Property ImgWidth As Integer

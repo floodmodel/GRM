@@ -155,16 +155,14 @@ namespace gentle
             return true;
         }
 
-
         private static void WriteTwoDimData(string fpn, double[,] array)
         {
-            StringBuilder sbALL = new StringBuilder("");
+            StringBuilder sbALL = new StringBuilder();
             for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
             {
                 for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
                 {
                     sbALL.Append(array[nc, nr].ToString("F2")+" ");
-                    //sbALL.Append(" ");
                 }
                 sbALL.Append("\r\n");
             }
@@ -194,6 +192,33 @@ namespace gentle
         }
 
         public static bool MakeASCTextFileAsParallel(string fpn, string allHeader, string nodataValue, double[,] array)
+        {
+            File.AppendAllText(fpn, allHeader);
+            int rowYcount = array.GetLength(1);
+            int colXcount = array.GetLength(0);
+            var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+            string[] rows = new string[rowYcount];
+            StringBuilder[] sbs= new StringBuilder[rowYcount];
+            Parallel.For(0, rowYcount, options, delegate (int ry)
+            {
+                sbs[ry] = new StringBuilder();
+                for (int cx = 0; cx < colXcount; cx++)
+                {
+                    sbs[ry].Append(array[cx, ry].ToString("F2") + " ");
+                }
+                sbs[ry].Append("\r\n");
+            });
+            StringBuilder sbALL = new StringBuilder();
+            for (int nr = 0; nr < rowYcount; nr++)
+            {
+                sbALL.Append(sbs[nr]);
+            }
+            File.AppendAllText(fpn, sbALL.ToString());
+            return true;
+        }
+
+
+        public static bool MakeASCTextFileAsParallel_old(string fpn, string allHeader, string nodataValue, double[,] array)
         {
             File.AppendAllText(fpn, allHeader);
             int rowYcount = array.GetLength(1);

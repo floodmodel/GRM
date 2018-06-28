@@ -255,6 +255,12 @@ namespace gentle
             return mLines[row].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
         }
 
+        public string OneRowContainsValuesFromTop(int yrow)
+        {
+            int row = mDataStartLineInASCfile + yrow - 1;
+            return mLines[row];
+        }
+
         public float ValueAtColumeXFormOneRow(int xcol, string[] Values)
         {
             float result = 0;
