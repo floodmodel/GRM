@@ -20,7 +20,6 @@ Public Class cOutPutControl
         Dim timeNow As Date
         Dim lngTimeDiffFromStarting_SEC As Long
         Dim strNowTimeToPrintOut As String
-        Dim cvan As Integer
         Dim meanRFSumForPrintoutTime_mm As Double
         Dim strFNPDischarge As String
         Dim strFNPDepth As String
@@ -28,7 +27,7 @@ Public Class cOutPutControl
         Dim strFNPRFMean As String
         Dim strFNPFCData As String
         Dim strFNPFCStorage As String
-        Dim lineToPrint As String = ""
+        'Dim lineToPrint As String = ""
         Dim vToPrint As String = ""
 
         meanRFSumForPrintoutTime_mm = meanRainfallSumToPrintOut_m * 1000
@@ -44,9 +43,11 @@ Public Class cOutPutControl
 
         '===================================================================================================
         '유량
-        lineToPrint = strNowTimeToPrintOut
+        Dim sbQ As StringBuilder = New StringBuilder()
+        'lineToPrint = strNowTimeToPrintOut
+        sbQ.Append(strNowTimeToPrintOut)
         For Each wpcvid As Integer In project.WatchPoint.WPCVidList
-            cvan = wpcvid - 1
+            Dim cvan As Integer = wpcvid - 1
             If interCoef = 1 Then
                 Select Case project.CV(cvan).FlowType
                     Case cGRM.CellFlowType.OverlandFlow
@@ -69,7 +70,8 @@ Public Class cOutPutControl
                 vToPrint = "0"
             End If
             project.CV(cvan).Qprint_cms = CSng(vToPrint)
-            lineToPrint = lineToPrint + vbTab + vToPrint.Trim
+            'lineToPrint = lineToPrint + vbTab + vToPrint.Trim
+            sbQ.Append(vbTab + vToPrint.Trim)
             Dim sv As Single = CSng(vToPrint)
             With project.WatchPoint
                 .mTotalFlow_cms(wpcvid) = .mTotalFlow_cms(wpcvid) + sv
@@ -78,9 +80,13 @@ Public Class cOutPutControl
                     .mMaxFlowTime(wpcvid) = strNowTimeToPrintOut
                 End If
             End With
+            WriteWPouputs(strNowTimeToPrintOut, cvan, interCoef, project, project_tm1)
         Next
-        lineToPrint = lineToPrint + vbTab + Format(meanRFSumForPrintoutTime_mm, "#0.00") + vbTab + CStr(lngTimeDiffFromStarting_SEC) & vbCrLf
-        IO.File.AppendAllText(strFNPDischarge, lineToPrint, Encoding.Default)
+        'lineToPrint = lineToPrint + vbTab + Format(meanRFSumForPrintoutTime_mm, "#0.00") + vbTab + CStr(lngTimeDiffFromStarting_SEC) & vbCrLf
+        sbQ.Append(vbTab + Format(meanRFSumForPrintoutTime_mm, "#0.00") + vbTab + CStr(lngTimeDiffFromStarting_SEC) + vbCrLf)
+
+        'IO.File.AppendAllText(strFNPDischarge, lineToPrint, Encoding.Default)
+        File.AppendAllText(strFNPDischarge, sbQ.ToString, Encoding.Default)
 
         ''삭제 대상
         'If CInt(strNowTimeToPrintOut) = 24 Then cThisSimulation.tmp_24H_RunTime = CStr(lngTimeDiffFromStarting_SEC)
@@ -185,91 +191,98 @@ Public Class cOutPutControl
         'lineToPrint = lineToPrint + vbCrLf
         'IO.File.AppendAllText(strFNPRFMean, lineToPrint, Encoding.Default)
         ''===================================================================
-        '===================================================================
-        ' watchpoint별 모든 자료 출력
-        For Each wpcvid As Integer In project.WatchPoint.WPCVidList
-            Dim cvanWP As Integer = wpcvid - 1
-            Dim strL As String
-            strL = strNowTimeToPrintOut + vbTab
-            strL = strL + String.Format("{0,8:#0.##}", project.CV(cvanWP).Qprint_cms) + vbTab
-            If interCoef = 1 Then
-                'If project.CV(cvanWP).FlowType = cGRM.CellFlowType.OverlandFlow Then
-                '    strL = strL + String.Format("{0,8:#0.##}", project.CV(cvanWP).QCVof_i_j_m3Ps) + vbTab
-                'Else
-                '    strL = strL + String.Format("{0,8:#0.##}", project.CV(cvanWP).mStreamAttr.QCVch_i_j_m3Ps) + vbTab
-                'End If
-                strL = strL + Format(project.CV(cvanWP).hUAQfromChannelBed_m, "#0.0000") + vbTab
-                strL = strL + Format(project.CV(cvanWP).soilWaterContent_m, "#0.0000") + vbTab
-                strL = strL + Format(project.CV(cvanWP).soilSaturationRatio, "#0.0000") + vbTab
-                strL = strL + Format(project.WatchPoint.mRFWPGridForDtPrintout_mm(wpcvid), "#0.0000") + vbTab
-                strL = strL + Format(project.WatchPoint.mRFUpWsMeanForDtPrintout_mm(wpcvid), "#0.0000") + vbTab
-                strL = strL + Format(project.WatchPoint.mQfromFCDataCMS(wpcvid), "#0.00") + vbTab
-                strL = strL + Format(project.CV(cvanWP).StorageCumulative_m3, "#0.00") + vbCrLf
-            ElseIf project_tm1 IsNot Nothing Then
-                'If project.CV(cvanWP).FlowType = cGRM.CellFlowType.OverlandFlow Then
-                '    strL = strL + String.Format("{0,8:#0.##}", cHydroCom.GetInterpolatedValueLinear(
-                '                   project_tm1.CV(cvanWP).QCVof_i_j_m3Ps,
-                '                   project.CV(cvanWP).QCVof_i_j_m3Ps, interCoef)) + vbTab
-                'Else
-                '    strL = strL + String.Format("{0,8:#0.##}", cHydroCom.GetInterpolatedValueLinear(
-                '                   project_tm1.CV(cvanWP).mStreamAttr.QCVch_i_j_m3Ps,
-                '                   project.CV(cvanWP).mStreamAttr.QCVch_i_j_m3Ps, interCoef)) + vbTab
-                'End If
-
-                strL = strL + Format(cHydroCom.GetInterpolatedValueLinear(
-                                    project_tm1.CV(cvanWP).hUAQfromChannelBed_m,
-                                    project.CV(cvanWP).hUAQfromChannelBed_m, interCoef), "#0.0000") + vbTab
-                strL = strL + Format(cHydroCom.GetInterpolatedValueLinear(
-                                    project_tm1.CV(cvanWP).soilWaterContent_m,
-                                    project.CV(cvanWP).soilWaterContent_m, interCoef), "#0.0000") + vbTab
-                Dim ssv As Single = cHydroCom.GetInterpolatedValueLinear(
-                                                    project_tm1.CV(cvanWP).soilSaturationRatio,
-                                                    project.CV(cvanWP).soilSaturationRatio, interCoef)
-
-                strL = strL + Format(cHydroCom.GetInterpolatedValueLinear(
-                                                    project_tm1.CV(cvanWP).soilSaturationRatio,
-                                                    project.CV(cvanWP).soilSaturationRatio, interCoef), "#0.0000") + vbTab
-
-                strL = strL + Format(cHydroCom.GetInterpolatedValueLinear(
-                                    CSng(project_tm1.WatchPoint.mRFWPGridForDtPrintout_mm(wpcvid)),
-                                    CSng(project.WatchPoint.mRFWPGridForDtPrintout_mm(wpcvid)), interCoef), "#0.0000") + vbTab
-                strL = strL + Format(cHydroCom.GetInterpolatedValueLinear(
-                                    CSng(project_tm1.WatchPoint.mRFUpWsMeanForDtPrintout_mm(wpcvid)),
-                                    CSng(project.WatchPoint.mRFUpWsMeanForDtPrintout_mm(wpcvid)), interCoef), "#0.0000") + vbTab
-                strL = strL + Format(cHydroCom.GetInterpolatedValueLinear(
-                                    CSng(project_tm1.WatchPoint.mQfromFCDataCMS(wpcvid)),
-                                    CSng(project.WatchPoint.mQfromFCDataCMS(wpcvid)), interCoef), "#0.00") + vbTab
-                strL = strL + Format(cHydroCom.GetInterpolatedValueLinear(
-                                    project_tm1.CV(cvanWP).StorageCumulative_m3,
-                                    project.CV(cvanWP).StorageCumulative_m3, interCoef), "#0.00") + vbCrLf
-            End If
-            IO.File.AppendAllText(project.WatchPoint.mFpnWpOut(wpcvid), strL, Encoding.Default)
-        Next
+        ''===================================================================
+        '' watchpoint별 모든 자료 출력
+        'For Each wpcvid As Integer In project.WatchPoint.WPCVidList
+        '    Dim cvanWP As Integer = wpcvid - 1
+        '    'Dim strL As String
+        '    Dim sbWP As StringBuilder = New StringBuilder
+        '    sbWP.Append(strNowTimeToPrintOut + vbTab)
+        '    sbWP.Append(String.Format("{0,8:#0.##}", project.CV(cvanWP).Qprint_cms) + vbTab)
+        '    If interCoef = 1 Then
+        '        sbWP.Append(Format(project.CV(cvanWP).hUAQfromChannelBed_m, "#0.0000") + vbTab)
+        '        sbWP.Append(Format(project.CV(cvanWP).soilWaterContent_m, "#0.0000") + vbTab)
+        '        sbWP.Append(Format(project.CV(cvanWP).soilSaturationRatio, "#0.0000") + vbTab)
+        '        sbWP.Append(Format(project.WatchPoint.mRFWPGridForDtPrintout_mm(wpcvid), "#0.0000") + vbTab)
+        '        sbWP.Append(Format(project.WatchPoint.mRFUpWsMeanForDtPrintout_mm(wpcvid), "#0.0000") + vbTab)
+        '        sbWP.Append(Format(project.WatchPoint.mQfromFCDataCMS(wpcvid), "#0.00") + vbTab)
+        '        sbWP.Append(Format(project.CV(cvanWP).StorageCumulative_m3, "#0.00") + vbCrLf)
+        '    ElseIf project_tm1 IsNot Nothing Then
+        '        sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+        '                            project_tm1.CV(cvanWP).hUAQfromChannelBed_m,
+        '                            project.CV(cvanWP).hUAQfromChannelBed_m, interCoef), "#0.0000") + vbTab)
+        '        sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+        '                            project_tm1.CV(cvanWP).soilWaterContent_m,
+        '                            project.CV(cvanWP).soilWaterContent_m, interCoef), "#0.0000") + vbTab)
+        '        Dim ssv As Single = cHydroCom.GetInterpolatedValueLinear(
+        '                                            project_tm1.CV(cvanWP).soilSaturationRatio,
+        '                                            project.CV(cvanWP).soilSaturationRatio, interCoef)
+        '        sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+        '                                            project_tm1.CV(cvanWP).soilSaturationRatio,
+        '                                            project.CV(cvanWP).soilSaturationRatio, interCoef), "#0.0000") + vbTab)
+        '        sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+        '                            CSng(project_tm1.WatchPoint.mRFWPGridForDtPrintout_mm(wpcvid)),
+        '                            CSng(project.WatchPoint.mRFWPGridForDtPrintout_mm(wpcvid)), interCoef), "#0.0000") + vbTab)
+        '        sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+        '                            CSng(project_tm1.WatchPoint.mRFUpWsMeanForDtPrintout_mm(wpcvid)),
+        '                            CSng(project.WatchPoint.mRFUpWsMeanForDtPrintout_mm(wpcvid)), interCoef), "#0.0000") + vbTab)
+        '        sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+        '                            CSng(project_tm1.WatchPoint.mQfromFCDataCMS(wpcvid)),
+        '                            CSng(project.WatchPoint.mQfromFCDataCMS(wpcvid)), interCoef), "#0.00") + vbTab)
+        '        sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+        '                            project_tm1.CV(cvanWP).StorageCumulative_m3,
+        '                            project.CV(cvanWP).StorageCumulative_m3, interCoef), "#0.00") + vbCrLf)
+        '    End If
+        '    IO.File.AppendAllText(project.WatchPoint.mFpnWpOut(wpcvid), sbWP.ToString, Encoding.Default)
+        'Next
 
         '===================================================================
         'FCAppFlow, FCStorage
         If project.GeneralSimulEnv.mbSimulateFlowControl = True AndAlso project.FCGrid.FCCellCount > 0 Then
-            Dim strLFlow As String = strNowTimeToPrintOut
-            Dim strLStorage As String = strNowTimeToPrintOut
+            Dim sbFCFlow As StringBuilder = New StringBuilder
+            Dim sbFCStorage As StringBuilder = New StringBuilder
+            sbFCFlow.Append(strNowTimeToPrintOut)
+            sbFCStorage.Append(strNowTimeToPrintOut)
             If interCoef = 1 Then
                 For Each fcCvid As Integer In project.FCGrid.FCGridCVidList
-                    strLFlow = strLFlow + vbTab + Format(project.FCGrid.mFCdataToApplyNowT(fcCvid), "#0.00")
-                    strLStorage = strLStorage + vbTab + Format(project.CV(fcCvid - 1).StorageCumulative_m3, "#0.00")
+                    sbFCFlow.Append(vbTab + Format(project.FCGrid.mFCdataToApplyNowT(fcCvid), "#0.00"))
+                    sbFCStorage.Append(vbTab + Format(project.CV(fcCvid - 1).StorageCumulative_m3, "#0.00"))
                 Next
             ElseIf project_tm1 IsNot Nothing Then
                 For Each fcCvid As Integer In project.FCGrid.FCGridCVidList
-                    strLFlow = strLFlow + vbTab + Format(cHydroCom.GetInterpolatedValueLinear(
+                    sbFCFlow.Append(vbTab + Format(cHydroCom.GetInterpolatedValueLinear(
                                                         CSng(project_tm1.FCGrid.mFCdataToApplyNowT(fcCvid)),
-                                                        CSng(project.FCGrid.mFCdataToApplyNowT(fcCvid)), interCoef), "#0.00")
-                    strLStorage = strLStorage + vbTab + Format(cHydroCom.GetInterpolatedValueLinear(
+                                                        CSng(project.FCGrid.mFCdataToApplyNowT(fcCvid)), interCoef), "#0.00"))
+                    sbFCStorage.Append(vbTab + Format(cHydroCom.GetInterpolatedValueLinear(
                                                              project_tm1.CV(fcCvid - 1).StorageCumulative_m3,
-                                                             project.CV(fcCvid - 1).StorageCumulative_m3, interCoef), "#0.00")
+                                                             project.CV(fcCvid - 1).StorageCumulative_m3, interCoef), "#0.00"))
                 Next
             End If
-            strLFlow = strLFlow + vbCrLf
-            strLStorage = strLStorage + vbCrLf
-            IO.File.AppendAllText(strFNPFCData, strLFlow, Encoding.Default)
-            IO.File.AppendAllText(strFNPFCStorage, strLStorage, Encoding.Default)
+            sbFCFlow.Append(vbCrLf)
+            sbFCStorage.Append(vbCrLf)
+            IO.File.AppendAllText(strFNPFCData, sbFCFlow.ToString, Encoding.Default)
+            IO.File.AppendAllText(strFNPFCStorage, sbFCStorage.ToString, Encoding.Default)
+            'Dim strLFlow As String = strNowTimeToPrintOut
+            'Dim strLStorage As String = strNowTimeToPrintOut
+            'If interCoef = 1 Then
+            '    For Each fcCvid As Integer In project.FCGrid.FCGridCVidList
+            '        strLFlow = strLFlow + vbTab + Format(project.FCGrid.mFCdataToApplyNowT(fcCvid), "#0.00")
+            '        strLStorage = strLStorage + vbTab + Format(project.CV(fcCvid - 1).StorageCumulative_m3, "#0.00")
+            '    Next
+            'ElseIf project_tm1 IsNot Nothing Then
+            '    For Each fcCvid As Integer In project.FCGrid.FCGridCVidList
+            '        strLFlow = strLFlow + vbTab + Format(cHydroCom.GetInterpolatedValueLinear(
+            '                                            CSng(project_tm1.FCGrid.mFCdataToApplyNowT(fcCvid)),
+            '                                            CSng(project.FCGrid.mFCdataToApplyNowT(fcCvid)), interCoef), "#0.00")
+            '        strLStorage = strLStorage + vbTab + Format(cHydroCom.GetInterpolatedValueLinear(
+            '                                                 project_tm1.CV(fcCvid - 1).StorageCumulative_m3,
+            '                                                 project.CV(fcCvid - 1).StorageCumulative_m3, interCoef), "#0.00")
+            '    Next
+            'End If
+            'strLFlow = strLFlow + vbCrLf
+            'strLStorage = strLStorage + vbCrLf
+            'IO.File.AppendAllText(strFNPFCData, strLFlow, Encoding.Default)
+            'IO.File.AppendAllText(strFNPFCStorage, strLStorage, Encoding.Default)
         End If
         '===================================================================
         If nowT_MIN = CInt(project.GeneralSimulEnv.mSimDurationHOUR * 60) Then
@@ -278,46 +291,127 @@ Public Class cOutPutControl
     End Sub
 
 
+
+    Private Sub WriteWPouputs(strNowTimeToPrintOut As String, cvan As Integer, interCoef As Single, project As cProject, project_tm1 As cProjectBAK)
+        ' watchpoint별 모든 자료 출력
+        Dim wpcvid As Integer = cvan + 1
+        Dim sbWP As StringBuilder = New StringBuilder
+        sbWP.Append(strNowTimeToPrintOut + vbTab)
+        sbWP.Append(String.Format("{0,8:#0.##}", project.CV(cvan).Qprint_cms) + vbTab)
+        If interCoef = 1 Then
+            sbWP.Append(Format(project.CV(cvan).hUAQfromChannelBed_m, "#0.0000") + vbTab)
+            sbWP.Append(Format(project.CV(cvan).soilWaterContent_m, "#0.0000") + vbTab)
+            sbWP.Append(Format(project.CV(cvan).soilSaturationRatio, "#0.0000") + vbTab)
+            sbWP.Append(Format(project.WatchPoint.mRFWPGridForDtPrintout_mm(wpcvid), "#0.0000") + vbTab)
+            sbWP.Append(Format(project.WatchPoint.mRFUpWsMeanForDtPrintout_mm(wpcvid), "#0.0000") + vbTab)
+            sbWP.Append(Format(project.WatchPoint.mQfromFCDataCMS(wpcvid), "#0.00") + vbTab)
+            sbWP.Append(Format(project.CV(cvan).StorageCumulative_m3, "#0.00") + vbCrLf)
+        ElseIf project_tm1 IsNot Nothing Then
+            sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+                                    project_tm1.CV(cvan).hUAQfromChannelBed_m,
+                                    project.CV(cvan).hUAQfromChannelBed_m, interCoef), "#0.0000") + vbTab)
+            sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+                                    project_tm1.CV(cvan).soilWaterContent_m,
+                                    project.CV(cvan).soilWaterContent_m, interCoef), "#0.0000") + vbTab)
+            Dim ssv As Single = cHydroCom.GetInterpolatedValueLinear(
+                                                    project_tm1.CV(cvan).soilSaturationRatio,
+                                                    project.CV(cvan).soilSaturationRatio, interCoef)
+            sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+                                                    project_tm1.CV(cvan).soilSaturationRatio,
+                                                    project.CV(cvan).soilSaturationRatio, interCoef), "#0.0000") + vbTab)
+            sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+                                    CSng(project_tm1.WatchPoint.mRFWPGridForDtPrintout_mm(wpcvid)),
+                                    CSng(project.WatchPoint.mRFWPGridForDtPrintout_mm(wpcvid)), interCoef), "#0.0000") + vbTab)
+            sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+                                    CSng(project_tm1.WatchPoint.mRFUpWsMeanForDtPrintout_mm(wpcvid)),
+                                    CSng(project.WatchPoint.mRFUpWsMeanForDtPrintout_mm(wpcvid)), interCoef), "#0.0000") + vbTab)
+            sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+                                    CSng(project_tm1.WatchPoint.mQfromFCDataCMS(wpcvid)),
+                                    CSng(project.WatchPoint.mQfromFCDataCMS(wpcvid)), interCoef), "#0.00") + vbTab)
+            sbWP.Append(Format(cHydroCom.GetInterpolatedValueLinear(
+                                    project_tm1.CV(cvan).StorageCumulative_m3,
+                                    project.CV(cvan).StorageCumulative_m3, interCoef), "#0.00") + vbCrLf)
+        End If
+        IO.File.AppendAllText(project.WatchPoint.mFpnWpOut(wpcvid), sbWP.ToString, Encoding.Default)
+    End Sub
+
+
     Public Sub WriteDischargeOnlyToDischargeFile(ByVal project As cProject,
                                                 ByVal interCoef As Single,
                                                 ByVal project_tm1 As cProjectBAK)
-        Dim cvan As Integer
+
         Dim strFNPDischarge As String
-        Dim lineToPrint As String = ""
+        Dim sbQ As StringBuilder = New StringBuilder
         Dim vToPrint As String = ""
         strFNPDischarge = project.OFNPDischarge
         For Each wpcvid As Integer In project.WatchPoint.WPCVidList
-            cvan = wpcvid - 1
+            Dim cvan As Integer = wpcvid - 1
             If interCoef = 1 Then
                 Select Case project.CV(cvan).FlowType
                     Case cGRM.CellFlowType.OverlandFlow
-                        vToPrint = String.Format("{0,8:#0.#####}", project.CV(cvan).QCVof_i_j_m3Ps)
+                        vToPrint = project.CV(cvan).QCVof_i_j_m3Ps.ToString("F2")
                     Case Else
-                        vToPrint = String.Format("{0,8:#0.#####}", project.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps)
+                        vToPrint = project.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps.ToString("F2")
                 End Select
             ElseIf project_tm1 IsNot Nothing Then
                 Select Case project.CV(cvan).FlowType
                     Case cGRM.CellFlowType.OverlandFlow
-                        vToPrint = String.Format("{0,8:#0.#####}", cHydroCom.GetInterpolatedValueLinear(
+                        vToPrint = cHydroCom.GetInterpolatedValueLinear(
                                                project_tm1.CV(cvan).QCVof_i_j_m3Ps,
-                                               project.CV(cvan).QCVof_i_j_m3Ps, interCoef))
+                                               project.CV(cvan).QCVof_i_j_m3Ps, interCoef).ToString("F2")
                     Case Else
-                        vToPrint = String.Format("{0,8:#0.#####}", cHydroCom.GetInterpolatedValueLinear(
+                        vToPrint = cHydroCom.GetInterpolatedValueLinear(
                                                 project_tm1.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps,
-                                                project.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps, interCoef))
+                                                project.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps, interCoef).ToString("F2")
                 End Select
             Else
                 vToPrint = "0"
             End If
             project.CV(cvan).Qprint_cms = CSng(vToPrint)
-            If lineToPrint.Trim = "" Then
-                lineToPrint = vToPrint.Trim
+            If sbQ.ToString.Trim = "" Then
+                sbQ.Append(vToPrint.Trim)
             Else
-                lineToPrint = lineToPrint.Trim + vbTab + vToPrint.Trim
+                sbQ.Append(vbTab + vToPrint.Trim)
             End If
-
         Next
-        IO.File.AppendAllText(strFNPDischarge, lineToPrint & vbCrLf, Encoding.Default)
+        sbQ.Append(vbCrLf)
+        IO.File.AppendAllText(strFNPDischarge, sbQ.ToString, Encoding.Default)
+        'Dim cvan As Integer
+        'Dim strFNPDischarge As String
+        'Dim lineToPrint As String = ""
+        'Dim vToPrint As String = ""
+        'strFNPDischarge = project.OFNPDischarge
+        'For Each wpcvid As Integer In project.WatchPoint.WPCVidList
+        '    cvan = wpcvid - 1
+        '    If interCoef = 1 Then
+        '        Select Case project.CV(cvan).FlowType
+        '            Case cGRM.CellFlowType.OverlandFlow
+        '                vToPrint = String.Format("{0,8:#0.#####}", project.CV(cvan).QCVof_i_j_m3Ps)
+        '            Case Else
+        '                vToPrint = String.Format("{0,8:#0.#####}", project.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps)
+        '        End Select
+        '    ElseIf project_tm1 IsNot Nothing Then
+        '        Select Case project.CV(cvan).FlowType
+        '            Case cGRM.CellFlowType.OverlandFlow
+        '                vToPrint = String.Format("{0,8:#0.#####}", cHydroCom.GetInterpolatedValueLinear(
+        '                                       project_tm1.CV(cvan).QCVof_i_j_m3Ps,
+        '                                       project.CV(cvan).QCVof_i_j_m3Ps, interCoef))
+        '            Case Else
+        '                vToPrint = String.Format("{0,8:#0.#####}", cHydroCom.GetInterpolatedValueLinear(
+        '                                        project_tm1.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps,
+        '                                        project.CV(cvan).mStreamAttr.QCVch_i_j_m3Ps, interCoef))
+        '        End Select
+        '    Else
+        '        vToPrint = "0"
+        '    End If
+        '    project.CV(cvan).Qprint_cms = CSng(vToPrint)
+        '    If lineToPrint.Trim = "" Then
+        '        lineToPrint = vToPrint.Trim
+        '    Else
+        '        lineToPrint = lineToPrint.Trim + vbTab + vToPrint.Trim
+        '    End If
+        'Next
+        'IO.File.AppendAllText(strFNPDischarge, lineToPrint & vbCrLf, Encoding.Default)
     End Sub
 
     Public Sub WriteDischargeOnlyToWPFile(ByVal project As cProject,
