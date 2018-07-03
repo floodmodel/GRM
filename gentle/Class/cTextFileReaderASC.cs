@@ -137,6 +137,94 @@ namespace gentle
             }
         }
 
+        public double bottom
+        {
+            get
+            {
+                return mHeader.yllcorner;
+            }
+        }
+
+        public double top
+        {
+            get
+            {
+                return (mHeader.yllcorner + mHeader.numberRows * mHeader.cellsize);
+            }
+        }
+
+        public double left
+        {
+            get
+            {
+                return mHeader.xllcorner ;
+            }
+        }
+
+        public double right
+        {
+            get
+            {
+                return (mHeader.xllcorner  + mHeader.numberCols  * mHeader.cellsize );
+            }
+        }
+
+        public double extentWidth
+        {
+            get
+            {
+                return (right - left);
+            }
+        }
+
+        public double extentHeight
+        {
+            get
+            {
+                return (top - bottom);
+            }
+        }
+
+        public double cellSize
+        {
+            get
+            {
+                return mHeader.cellsize ;
+            }
+        }
+
+        public static bool CheckTwoGridLayerExtent( cTextFileReaderASC  GridBase, cTextFileReaderASC GridTarget)
+        {
+            //   cTextFileReaderASC oGridExtBase = new ct 
+            //'    Dim oGridExtTarget As New cGrid(GridTarget)
+            if (GridBase.Header.numberCols  != GridTarget.Header.numberCols ){ return false; }
+            if (GridBase.Header.numberRows  != GridTarget.Header.numberRows) { return false; }
+            if (GridBase.bottom  != GridTarget.bottom) { return false; }
+            if (GridBase.top != GridTarget.top) { return false; }
+            if (GridBase.left != GridTarget.left) { return false; }
+            if (GridBase.right != GridTarget.right) { return false; }
+                return true;
+        }
+
+        public static void MakeNewAsciiRasterFile(cTextFileReaderASC baseGrid,
+                                             string fpn, cData.DataType dType, double defaultValue)
+        {
+            Console.WriteLine("This was not developed yet.");
+        }
+
+
+
+        //'Public Shared Function CreateNewGrid(baseGrid As MapWinGIS.Grid, _
+        //'                                     fpn As String, dataType As MapWinGIS.GridDataType, _
+        //'                                     defaultValue As Integer) As MapWinGIS.Grid
+        //'    Dim dG As New MapWinGIS.Grid ' 빈 데이터셑 생성
+        //'    'Dim hG As New MapWinGIS.GridHeader ' 빈 해더 생성
+        //'    dG.CreateNew(fpn, baseGrid.Header, dataType, defaultValue, _
+        //'                        True, MapWinGIS.GridFileType.GeoTiff)
+        //'    dG.Save()
+        //'    Return dG
+        //'End Function
+
 
         /// <summary>
         /// Column and row numbers are started from zero
