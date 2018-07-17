@@ -1331,7 +1331,7 @@ Public Class cProject
             If Not row.IsGRMCodeNull Then
                 stCode = cSetGreenAmpt.GetSoilTextureCode(row.GRMCode.ToString)
             Else
-                cGRM.writelogAndConsole(String.Format("Soil texturer attribute code was not set for {0}. ", row.GridValue), True, True)
+                cGRM.writelogAndConsole(String.Format("Soil texture attribute code was not set for {0}. ", row.GridValue), True, True)
                 Return False
             End If
             vatSTcode.Add(CInt(row.GridValue), stCode)

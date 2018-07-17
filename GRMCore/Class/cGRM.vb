@@ -113,7 +113,7 @@
     Public Const CONST_DIST_RF_FILE_HEAD As String = "rf_"
     Public Const CONST_DIST_RFACC_FILE_HEAD As String = "rfc_"
     Public Const CONST_DIST_FLOW_FILE_HEAD As String = "flow_"
-    Public Const FILE_NAME_GRMMP_EXE As String = "GRMMP.exe"
+    'Public Const FILE_NAME_GRMMP_EXE As String = "GRMMP.exe"
 
     Public Const CONST_MAX_CVW As Integer = 7 '인접상류셀의 최대 개수는 7개
     'Public Const CONST_TEMPORAL_WEIGHTING_FACTOR As Single = 1

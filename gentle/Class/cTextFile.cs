@@ -196,7 +196,8 @@ namespace gentle
             File.AppendAllText(fpn, allHeader);
             int rowYcount = array.GetLength(1);
             int colXcount = array.GetLength(0);
-            var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+            //var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+            var options = new ParallelOptions { MaxDegreeOfParallelism = Environment .ProcessorCount *4 };
             string[] rows = new string[rowYcount];
             StringBuilder[] sbs= new StringBuilder[rowYcount];
             Parallel.For(0, rowYcount, options, delegate (int ry)
@@ -223,7 +224,8 @@ namespace gentle
             File.AppendAllText(fpn, allHeader);
             int rowYcount = array.GetLength(1);
             int colXcount = array.GetLength(0);
-            var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+            //var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+            var options = new ParallelOptions { MaxDegreeOfParallelism = Environment .ProcessorCount *4 };
             string[] rows = new string[rowYcount];
             Parallel.For(0, rowYcount, options, delegate (int ry)
             {
