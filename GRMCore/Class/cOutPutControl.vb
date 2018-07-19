@@ -468,6 +468,7 @@ Public Class cOutPutControl
                     .Add(wpfpn)
                 Next
             End With
+            Console.Write("Deleting previous output files... ")
             If cFile.ConfirmDeleteFiles(FPNs) = False Then
                 cThisSimulation.mGRMSetupIsNormal = False
                 Exit Function
@@ -505,6 +506,7 @@ Public Class cOutPutControl
                         End If
                     End If
                 End If
+                Console.WriteLine("completed. ")
 
                 '해더
                 Dim strOutPutLine As String
