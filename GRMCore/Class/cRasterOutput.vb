@@ -165,18 +165,12 @@ Public Class cRasterOutput
                     If inCells(nc, nr) IsNot Nothing Then
                         If inCells(nc, nr).toBeSimulated = True Then
                             If mbMakeArySSR = True Then
-                                'Dim v As Single = inCells(nc, nr).soilSaturationRatio
-                                'mArraySSR(nc, nr) = CDbl(Format(v, sformat))
                                 mArraySSR(nc, nr) = inCells(nc, nr).soilSaturationRatio
                             End If
                             If mbMakeAryRF = True Then
-                                'Dim v As Single = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
-                                'mArrayRF(nc, nr) = CDbl(Format(v, sformat))
                                 mArrayRF(nc, nr) = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
                             End If
                             If mbMakeAryRFAcc = True Then
-                                'Dim v As Single = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
-                                'mArrayRFAcc(nc, nr) = CDbl(Format(v, sformat))
                                 mArrayRFAcc(nc, nr) = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
                             End If
                             If mbMakeAryQ = True Then
@@ -186,9 +180,21 @@ Public Class cRasterOutput
                                 Else
                                     v = inCells(nc, nr).mStreamAttr.QCVch_i_j_m3Ps
                                 End If
-                                'mArrayQ(nc, nr) = CDbl(Format(v, sformat))
                                 mArrayQ(nc, nr) = v
                             End If
+                        End If
+                    Else
+                        If mbMakeArySSR = True Then
+                            mArraySSR(nc, nr) = -9999
+                        End If
+                        If mbMakeAryRF = True Then
+                            mArrayRF(nc, nr) = -9999
+                        End If
+                        If mbMakeAryRFAcc = True Then
+                            mArrayRFAcc(nc, nr) = -9999
+                        End If
+                        If mbMakeAryQ = True Then
+                            mArrayQ(nc, nr) = -9999
                         End If
                     End If
                 Next
@@ -205,18 +211,12 @@ Public Class cRasterOutput
                                                                    If inCells(nc, nr) IsNot Nothing Then
                                                                        If inCells(nc, nr).toBeSimulated = True Then
                                                                            If mbMakeArySSR = True Then
-                                                                               'Dim v As Single = inCells(nc, nr).soilSaturationRatio
-                                                                               'mArraySSR(nc, nr) = CDbl(Format(v, sformat))
                                                                                mArraySSR(nc, nr) = inCells(nc, nr).soilSaturationRatio
                                                                            End If
                                                                            If mbMakeAryRF = True Then
-                                                                               'Dim v As Single = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
-                                                                               'mArrayRF(nc, nr) = CDbl(Format(v, sformat))
                                                                                mArrayRF(nc, nr) = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
                                                                            End If
                                                                            If mbMakeAryRFAcc = True Then
-                                                                               'Dim v As Single = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
-                                                                               'mArrayRFAcc(nc, nr) = CDbl(Format(v, sformat))
                                                                                mArrayRFAcc(nc, nr) = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
                                                                            End If
                                                                            If mbMakeAryQ = True Then
@@ -226,9 +226,21 @@ Public Class cRasterOutput
                                                                                Else
                                                                                    v = inCells(nc, nr).mStreamAttr.QCVch_i_j_m3Ps
                                                                                End If
-                                                                               'mArrayQ(nc, nr) = CDbl(Format(v, sformat))
                                                                                mArrayQ(nc, nr) = v
                                                                            End If
+                                                                       End If
+                                                                   Else
+                                                                       If mbMakeArySSR = True Then
+                                                                           mArraySSR(nc, nr) = -9999
+                                                                       End If
+                                                                       If mbMakeAryRF = True Then
+                                                                           mArrayRF(nc, nr) = -9999
+                                                                       End If
+                                                                       If mbMakeAryRFAcc = True Then
+                                                                           mArrayRFAcc(nc, nr) = -9999
+                                                                       End If
+                                                                       If mbMakeAryQ = True Then
+                                                                           mArrayQ(nc, nr) = -9999
                                                                        End If
                                                                    End If
                                                                Next

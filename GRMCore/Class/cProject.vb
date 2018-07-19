@@ -738,7 +738,10 @@ Public Class cProject
                                                                    If wsid > 0 Then '유역 내부
                                                                        Dim cv As New cCVAttribute
                                                                        cv.WSID = wsid
+                                                                       cv.toBeSimulated = True
                                                                        mWSCells(cx, ry) = cv
+                                                                       'Else
+                                                                       '    mWSCells(cx, ry).toBeSimulated = False
                                                                    End If
                                                                Next cx
                                                            End Sub)
@@ -786,9 +789,12 @@ Public Class cProject
                             mWatershed.mCVidListForEachWS.Add(wsid, New List(Of Integer))
                         End If
                         mWatershed.mCVidListForEachWS(wsid).Add(cv.CVID)
+                        cv.toBeSimulated = True
                         mWSCells(cx, ry) = cv
                         CVs.Add(cv)
                         cvid += 1
+                        'Else
+                        '    mWSCells(cx, ry).toBeSimulated = False
                     End If
                 Next
             Next

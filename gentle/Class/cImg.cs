@@ -421,8 +421,8 @@ namespace gentle
                     byte* PtrFirstPixel = (byte*)bitmapData.Scan0;
                     Parallel.For(0, rowyCount, y =>
                     {
-                        //for (int y = 0; y < rowyCount; y++)
-                        //{
+                    //    for (int y = 0; y < rowyCount; y++)
+                    //{
                         byte* currentLine = PtrFirstPixel + (y * bitmapData.Stride);
                         for (int x = 0; x < colxCount; x++)
                         {
@@ -438,7 +438,7 @@ namespace gentle
                         }
                         //}
                     });
-                        
+
                     bm.UnlockBits(bitmapData);
                     bm.Save(imgFPNtoMake, ImageFormat.Png);
                     return bm;
