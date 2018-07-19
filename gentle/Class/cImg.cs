@@ -388,7 +388,7 @@ namespace gentle
             }
         }
 
-        public void MakeImgFileUsingArrayFromTL_InParallel(string imgFPNtoMake, double[,] array, float imgWidth,
+        public Bitmap MakeImgFileAndGetImgUsingArrayFromTL_InParallel(string imgFPNtoMake, double[,] array, float imgWidth,
            float imgHeight, RendererRange rangeType, double nullValue = -9999)
         {
             try
@@ -402,6 +402,8 @@ namespace gentle
                     int CellHbmp = 0;
                     CellWbmp = Convert.ToInt32(imgWidth / colxCount);
                     CellHbmp = Convert.ToInt32(imgHeight / rowyCount);
+                    if (CellHbmp <= 0) { CellHbmp = 1; }
+                    if (CellWbmp <= 0) { CellWbmp = 1; }
                     if (CellWbmp < CellHbmp)
                     {
                         CellHbmp = CellWbmp;
@@ -411,6 +413,7 @@ namespace gentle
                         CellWbmp = CellHbmp;
                     }
                     Bitmap bm = new Bitmap(Convert.ToInt32(colxCount * CellWbmp) + 1, Convert.ToInt32(rowyCount * CellHbmp) + 1);
+                    //Bitmap bm = new Bitmap(Convert.ToInt32(imgWidth) + 1, Convert.ToInt32(imgHeight) + 1);
                     BitmapData bitmapData = bm.LockBits(new Rectangle(0, 0, bm.Width, bm.Height), ImageLockMode.ReadWrite, bm.PixelFormat);
                     int bytesPerPixel = System.Drawing.Bitmap.GetPixelFormatSize(bitmapData.PixelFormat) / 8;
                     int heightInPixels = bitmapData.Height;
@@ -438,11 +441,13 @@ namespace gentle
                         
                     bm.UnlockBits(bitmapData);
                     bm.Save(imgFPNtoMake, ImageFormat.Png);
+                    return bm;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+                return Nothing;
             }
         }
 

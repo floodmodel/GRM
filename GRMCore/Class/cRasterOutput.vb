@@ -47,8 +47,8 @@ Public Class cRasterOutput
 
     Sub New(ByVal project As cProject)
         mProject = project
-        mImgHeight = 433
-        mImgWidth = 583
+        mImgHeight = 370 '433
+        mImgWidth = 370 '583
         mColCount = mProject.Watershed.mColCount
         mRowCount = mProject.Watershed.mRowCount
         mASCHeaderStringAll = cTextFile.MakeHeaderString(mColCount, mRowCount,
@@ -253,9 +253,7 @@ Public Class cRasterOutput
         mImgSSR = Nothing
         'mImgSSR = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoSSR.PFN, mArraySSR,
         '                                           mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
-        'imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoSSR.PFN, mArraySSR,
-        '                                           mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
-        imgMaker.MakeImgFileUsingArrayFromTL_InParallel(mImgInfoSSR.PFN, mArraySSR,
+        mImgSSR = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoSSR.PFN, mArraySSR,
                                                    mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
 
     End Sub
@@ -275,9 +273,7 @@ Public Class cRasterOutput
         mImgRF = Nothing
         'mImgRF = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
         '                                           mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
-        'imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
-        '                                           mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
-        imgMaker.MakeImgFileUsingArrayFromTL_InParallel(mImgInfoRF.PFN, mArrayRF,
+        mImgRF = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoRF.PFN, mArrayRF,
                                                    mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
 
     End Sub
@@ -298,9 +294,7 @@ Public Class cRasterOutput
         mImgRFacc = Nothing
         'mImgRFacc = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
         '                                           mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
-        'imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
-        '                                           mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
-        imgMaker.MakeImgFileUsingArrayFromTL_InParallel(mImgInfoRFAcc.PFN, mArrayRFAcc,
+        mImgRFacc = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoRFAcc.PFN, mArrayRFAcc,
                                                    mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
 
     End Sub
@@ -320,10 +314,7 @@ Public Class cRasterOutput
         mImgFlow = Nothing
         'mImgFlow = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
         '                                           mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
-        'imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
-        '                                           mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
-
-        imgMaker.MakeImgFileUsingArrayFromTL_InParallel(mImgInfoFlow.PFN, mArrayQ,
+        mImgFlow = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoFlow.PFN, mArrayQ,
                                                    mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
 
     End Sub
