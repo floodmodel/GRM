@@ -23,9 +23,9 @@ Partial Class fAnalyzer
     <System.Diagnostics.DebuggerStepThrough()> _
     Private Sub InitializeComponent()
         Me.components = New System.ComponentModel.Container()
-        Dim ChartArea1 As System.Windows.Forms.DataVisualization.Charting.ChartArea = New System.Windows.Forms.DataVisualization.Charting.ChartArea()
-        Dim Legend1 As System.Windows.Forms.DataVisualization.Charting.Legend = New System.Windows.Forms.DataVisualization.Charting.Legend()
-        Dim Series1 As System.Windows.Forms.DataVisualization.Charting.Series = New System.Windows.Forms.DataVisualization.Charting.Series()
+        Dim ChartArea7 As System.Windows.Forms.DataVisualization.Charting.ChartArea = New System.Windows.Forms.DataVisualization.Charting.ChartArea()
+        Dim Legend7 As System.Windows.Forms.DataVisualization.Charting.Legend = New System.Windows.Forms.DataVisualization.Charting.Legend()
+        Dim Series7 As System.Windows.Forms.DataVisualization.Charting.Series = New System.Windows.Forms.DataVisualization.Charting.Series()
         Dim resources As System.ComponentModel.ComponentResourceManager = New System.ComponentModel.ComponentResourceManager(GetType(fAnalyzer))
         Me.Label87 = New System.Windows.Forms.Label()
         Me.pbFlow_200_300 = New System.Windows.Forms.PictureBox()
@@ -377,7 +377,7 @@ Partial Class fAnalyzer
         '
         'pbFLOWimg
         '
-        Me.pbFLOWimg.BackColor = System.Drawing.Color.FromArgb(CType(CType(224, Byte), Integer), CType(CType(224, Byte), Integer), CType(CType(224, Byte), Integer))
+        Me.pbFLOWimg.BackColor = System.Drawing.Color.White
         Me.pbFLOWimg.Location = New System.Drawing.Point(10, 18)
         Me.pbFLOWimg.Name = "pbFLOWimg"
         Me.pbFLOWimg.Size = New System.Drawing.Size(370, 370)
@@ -715,7 +715,7 @@ Partial Class fAnalyzer
         '
         'pbRFimg
         '
-        Me.pbRFimg.BackColor = System.Drawing.Color.FromArgb(CType(CType(224, Byte), Integer), CType(CType(224, Byte), Integer), CType(CType(224, Byte), Integer))
+        Me.pbRFimg.BackColor = System.Drawing.Color.White
         Me.pbRFimg.Location = New System.Drawing.Point(10, 18)
         Me.pbRFimg.Name = "pbRFimg"
         Me.pbRFimg.Size = New System.Drawing.Size(370, 370)
@@ -1110,7 +1110,7 @@ Partial Class fAnalyzer
         '
         'pbRFACCimg
         '
-        Me.pbRFACCimg.BackColor = System.Drawing.Color.FromArgb(CType(CType(224, Byte), Integer), CType(CType(224, Byte), Integer), CType(CType(224, Byte), Integer))
+        Me.pbRFACCimg.BackColor = System.Drawing.Color.White
         Me.pbRFACCimg.Location = New System.Drawing.Point(10, 18)
         Me.pbRFACCimg.Name = "pbRFACCimg"
         Me.pbRFACCimg.Size = New System.Drawing.Size(370, 370)
@@ -1243,6 +1243,7 @@ Partial Class fAnalyzer
         '
         'gbSoilSaturation
         '
+        Me.gbSoilSaturation.BackColor = System.Drawing.SystemColors.Control
         Me.gbSoilSaturation.Controls.Add(Me.pbSSRimg)
         Me.gbSoilSaturation.Controls.Add(Me.btInitializeSSRenderer)
         Me.gbSoilSaturation.Controls.Add(Me.Label18)
@@ -1295,7 +1296,7 @@ Partial Class fAnalyzer
         '
         'pbSSRimg
         '
-        Me.pbSSRimg.BackColor = System.Drawing.Color.FromArgb(CType(CType(224, Byte), Integer), CType(CType(224, Byte), Integer), CType(CType(224, Byte), Integer))
+        Me.pbSSRimg.BackColor = System.Drawing.Color.White
         Me.pbSSRimg.Location = New System.Drawing.Point(10, 18)
         Me.pbSSRimg.Name = "pbSSRimg"
         Me.pbSSRimg.Size = New System.Drawing.Size(370, 370)
@@ -1777,6 +1778,7 @@ Partial Class fAnalyzer
         '
         'GroupBox1
         '
+        Me.GroupBox1.BackColor = System.Drawing.SystemColors.Control
         Me.GroupBox1.Controls.Add(Me.Label58)
         Me.GroupBox1.Controls.Add(Me.Label52)
         Me.GroupBox1.Controls.Add(Me.Label53)
@@ -2387,6 +2389,7 @@ Partial Class fAnalyzer
         '
         'GroupBox2
         '
+        Me.GroupBox2.BackColor = System.Drawing.SystemColors.Control
         Me.GroupBox2.Controls.Add(Me.Label87)
         Me.GroupBox2.Controls.Add(Me.pbFlow_200_300)
         Me.GroupBox2.Controls.Add(Me.pbFLOWimg)
@@ -2433,6 +2436,7 @@ Partial Class fAnalyzer
         Me.GroupBox2.Controls.Add(Me.pbFlow_15000_20000)
         Me.GroupBox2.Controls.Add(Me.pbFlow_10000_15000)
         Me.GroupBox2.Controls.Add(Me.pbFlow_8000_10000)
+        Me.GroupBox2.ForeColor = System.Drawing.SystemColors.ControlText
         Me.GroupBox2.Location = New System.Drawing.Point(5, 3)
         Me.GroupBox2.Name = "GroupBox2"
         Me.GroupBox2.Size = New System.Drawing.Size(565, 398)
@@ -2560,6 +2564,7 @@ Partial Class fAnalyzer
         '
         'gbRF
         '
+        Me.gbRF.BackColor = System.Drawing.SystemColors.Control
         Me.gbRF.Controls.Add(Me.Label39)
         Me.gbRF.Controls.Add(Me.Label40)
         Me.gbRF.Controls.Add(Me.Label64)
@@ -2641,14 +2646,12 @@ Partial Class fAnalyzer
         Me.dgvResults.AllowUserToAddRows = False
         Me.dgvResults.AllowUserToDeleteRows = False
         Me.dgvResults.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.dgvResults.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None
         Me.dgvResults.Location = New System.Drawing.Point(12, 291)
         Me.dgvResults.MultiSelect = False
         Me.dgvResults.Name = "dgvResults"
         Me.dgvResults.ReadOnly = True
         Me.dgvResults.RowHeadersWidth = 10
         Me.dgvResults.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
-        Me.dgvResults.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.None
         Me.dgvResults.RowTemplate.Height = 23
         Me.dgvResults.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
         Me.dgvResults.Size = New System.Drawing.Size(367, 538)
@@ -2675,16 +2678,16 @@ Partial Class fAnalyzer
         '
         'Chart1
         '
-        ChartArea1.Name = "ChartArea1"
-        Me.Chart1.ChartAreas.Add(ChartArea1)
-        Legend1.Name = "Legend1"
-        Me.Chart1.Legends.Add(Legend1)
+        ChartArea7.Name = "ChartArea1"
+        Me.Chart1.ChartAreas.Add(ChartArea7)
+        Legend7.Name = "Legend1"
+        Me.Chart1.Legends.Add(Legend7)
         Me.Chart1.Location = New System.Drawing.Point(89, 238)
         Me.Chart1.Name = "Chart1"
-        Series1.ChartArea = "ChartArea1"
-        Series1.Legend = "Legend1"
-        Series1.Name = "Series1"
-        Me.Chart1.Series.Add(Series1)
+        Series7.ChartArea = "ChartArea1"
+        Series7.Legend = "Legend1"
+        Series7.Name = "Series1"
+        Me.Chart1.Series.Add(Series7)
         Me.Chart1.Size = New System.Drawing.Size(73, 73)
         Me.Chart1.TabIndex = 38
         Me.Chart1.Text = "Chart1"

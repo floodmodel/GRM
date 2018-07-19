@@ -281,7 +281,7 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeImgRFDInner()
-        Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
+        Dim imgMaker As New gentle.cImg(cImg.RendererType.WaterDepth)
         mImgRF = Nothing
         'mImgRF = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
         '                                           mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
@@ -302,7 +302,7 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeImgRFAccDInner()
-        Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
+        Dim imgMaker As New gentle.cImg(cImg.RendererType.WaterDepth)
         mImgRFacc = Nothing
         'mImgRFacc = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
         '                                           mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
@@ -322,7 +322,7 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeImgFlowDInner()
-        Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
+        Dim imgMaker As New gentle.cImg(cImg.RendererType.WaterDepth)
         mImgFlow = Nothing
         'mImgFlow = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
         '                                           mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)

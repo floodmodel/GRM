@@ -150,9 +150,12 @@ namespace gentle
 
                 if (renderingType == RendererType.WaterDepth)
                 {
-                    cr = 200;
-                    cg = 255;
-                    cb = 255;
+                    //cr = 200;
+                    //cg = 255;
+                    //cb = 255;
+                    cr = 255;
+                    cg =233;
+                    cb = 210;
                     miniRendererColors.Add(0, Color.FromArgb(255, cr, cg, cb));
                     cr = 150;
                     cg = 255;

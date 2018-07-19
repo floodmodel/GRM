@@ -533,24 +533,36 @@ Public Class fAnalyzer
 
 
     Public Sub SetDistributedPictureFilesAndRenderer(inForm As fAnalyzer)
-        Dim tmpImg As New cImg(cImg.RendererType.Risk)
+        Dim riskImg As New cImg(cImg.RendererType.Risk)
+        Dim depthImg As New cImg(cImg.RendererType.WaterDepth)
+
+        'Dim bc As New Color
+        'bc = Color.FromArgb(255, 255, 255, 224)
+        'Me.pbSSRimg.BackColor = bc
         If mproject.GeneralSimulEnv.mbShowSoilSaturation = True Then
             Call UpdateSoilSaturationImgFileList(mproject.ProjectPathName, Imaging.ImageFormat.Png)
-            Call SetSSRendererWithInitialColor(inForm, tmpImg)
+            Call SetSSRendererWithInitialColor(inForm, riskImg)
+            'Me.pbSSRimg.BackColor = tmpImg.DefaultNullColor
         End If
+        'Me.pbRFimg.BackColor = bc
         If mproject.GeneralSimulEnv.mbShowRFdistribution = True Then
             Call UpdateRFdistImgFileList(mproject.ProjectPathName, Imaging.ImageFormat.Png)
-            Call SetRFRendererWithInitialColor(inForm, tmpImg)
+            Call SetRFRendererWithInitialColor(inForm, depthImg)
+            'Me.pbRFimg.BackColor = tmpImg.DefaultNullColor
         End If
+        'Me.pbRFACCimg.BackColor = bc
         If mproject.GeneralSimulEnv.mbShowRFaccDistribution = True Then
             Call UpdateRFAccDistImgFileList(mproject.ProjectPathName, Imaging.ImageFormat.Png)
-            Call SetRFAccRendererWithInitialColor(inForm, tmpImg)
+            Call SetRFAccRendererWithInitialColor(inForm, depthImg)
+            'Me.pbRFACCimg.BackColor = tmpImg.DefaultNullColor
         End If
-
+        'Me.pbFLOWimg.BackColor = bc
         If mproject.GeneralSimulEnv.mbShowFlowDistribution = True Then
             Call UpdateFlowDistImgFileList(mproject.ProjectPathName, Imaging.ImageFormat.Png)
-            Call SetFlowRendererWithInitialColor(inForm, tmpImg)
+            Call SetFlowRendererWithInitialColor(inForm, depthImg)
+            'Me.pbFLOWimg.BackColor = tmpImg.DefaultNullColor
         End If
+
     End Sub
 
 
