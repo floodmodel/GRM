@@ -200,7 +200,7 @@ Public Class cRainfall
     Public Shared Sub CalRFintensity_mPsec(ByVal cv As cCVAttribute, ByVal rf_mm As Single,
                                                              ByVal rfIntevalSEC As Integer)
         With cv
-            If rf_mm = 0 Then
+            If rf_mm <= 0 Then
                 .RFReadintensity_mPsec = 0
             Else
                 .RFReadintensity_mPsec = rf_mm / 1000 / rfIntevalSEC
