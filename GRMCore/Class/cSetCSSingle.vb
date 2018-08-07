@@ -27,7 +27,9 @@
                 mCWEe = CSng(.ChannelWidthEQe)
             Else
                 mCSSingleWidthType = CSSingleChannelWidthType.CWGeneration
-                mMaxChannelWidthSingleCS = CSng(.ChannelWidthMostDownStream)
+                If .ChannelWidthMostDownStream <> "" Then
+                    mMaxChannelWidthSingleCS = CSng(.ChannelWidthMostDownStream)
+                End If
             End If
         End With
     End Sub

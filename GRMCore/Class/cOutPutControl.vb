@@ -468,10 +468,21 @@ Public Class cOutPutControl
                     .Add(wpfpn)
                 Next
             End With
-            Console.Write("Deleting previous output files... ")
-            If cFile.ConfirmDeleteFiles(FPNs) = False Then
-                cThisSimulation.mGRMSetupIsNormal = False
-                Exit Function
+
+            Dim beenRun As Boolean = False
+            For Each fpn As String In FPNs
+                If File.Exists(fpn) Then
+                    beenRun = True
+                    Exit For
+                End If
+            Next
+
+            If beenRun = True Then
+                Console.Write("Deleting previous output files... ")
+                If cFile.ConfirmDeleteFiles(FPNs) = False Then
+                    cThisSimulation.mGRMSetupIsNormal = False
+                    Exit Function
+                End If
             End If
 
             If deleteOnly = True Then Return True
@@ -506,7 +517,7 @@ Public Class cOutPutControl
                         End If
                     End If
                 End If
-                Console.WriteLine("completed. ")
+                If beenRun = True Then Console.WriteLine("completed. ")
 
                 '해더
                 Dim strOutPutLine As String
