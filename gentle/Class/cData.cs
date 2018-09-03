@@ -27,7 +27,12 @@ namespace gentle
                     return dtype;
                 }
             }
-            return cData .DataType .None ;
+            return cData.DataType.None;
         }
+    }
+    public struct CellPosition
+    {
+        public int x;
+        public int y;
     }
 }

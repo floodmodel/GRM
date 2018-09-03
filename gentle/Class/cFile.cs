@@ -269,12 +269,19 @@ namespace gentle
         {
             List<string> lstFLselected = new List<string>();
             string[] lstFLallinSourcePath = Directory.GetFiles(folderPath);
-            foreach (string rfFN in lstFLallinSourcePath)
+            if (filePattern != "")
             {
-                if (rfFN.Contains(filePattern.ToString()) == true)
+                foreach (string rfFN in lstFLallinSourcePath)
                 {
-                    lstFLselected.Add(Path.GetFileName(rfFN));
+                    if (rfFN.Contains(filePattern.ToString()) == true)
+                    {
+                        lstFLselected.Add(Path.GetFileName(rfFN));
+                    }
                 }
+            }
+            else
+            {
+                lstFLselected = lstFLallinSourcePath.ToList();
             }
             return lstFLselected;
         }

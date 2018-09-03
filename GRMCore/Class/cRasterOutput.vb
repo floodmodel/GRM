@@ -338,7 +338,7 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeASCTextFileInnerSSRD()
-        cTextFile.MakeASCTextFile(mASCfpnSSRD, mASCHeaderStringAll, "-9999", mArraySSR)
+        cTextFile.MakeASCTextFile(mASCfpnSSRD, mASCHeaderStringAll, mArraySSR)
         'cTextFile.MakeASCTextFileAsParallel(mASCfpnSSRD, mASCHeaderStringAll, "-9999", mArraySSR) '이게 더 느리다.. 취합과정 땜에..
 
     End Sub
@@ -350,7 +350,7 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeASCTextFileInnerRFD()
-        cTextFile.MakeASCTextFile(mASCfpnRFD, mASCHeaderStringAll, "-9999", mArrayRF)
+        cTextFile.MakeASCTextFile(mASCfpnRFD, mASCHeaderStringAll, mArrayRF)
         'cTextFile.MakeASCTextFileAsParallel(mASCfpnRFD, mASCHeaderStringAll, "-9999", mArrayRF)'이게 더 느리다.. 취합과정 땜에..
     End Sub
 
@@ -361,7 +361,7 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeASCTextFileInnerRFaccD()
-        cTextFile.MakeASCTextFile(mASCfpnRFaccD, mASCHeaderStringAll, "-9999", mArrayRFAcc)
+        cTextFile.MakeASCTextFile(mASCfpnRFaccD, mASCHeaderStringAll, mArrayRFAcc)
         'cTextFile.MakeASCTextFileAsParallel(mASCfpnRFaccD, mASCHeaderStringAll, "-9999", mArrayRFAcc) '이게 더 느리다.. 취합과정 땜에..
     End Sub
 
@@ -372,7 +372,7 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeASCTextFileInnerFlowD()
-        cTextFile.MakeASCTextFile(mASCfpnFlowD, mASCHeaderStringAll, "-9999", mArrayQ)
+        cTextFile.MakeASCTextFile(mASCfpnFlowD, mASCHeaderStringAll, mArrayQ)
         'cTextFile.MakeASCTextFileAsParallel(mASCfpnFlowD, mASCHeaderStringAll, "-9999", mArrayQ) '이게 더 느리다.. 취합과정 땜에..
     End Sub
 
