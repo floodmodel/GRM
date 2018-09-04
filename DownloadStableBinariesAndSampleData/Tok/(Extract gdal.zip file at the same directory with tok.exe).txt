@@ -1,4 +1,0 @@
-ex)
-d:\TokTool\Tok.exe
-d:\TokTool\gentle.exe
-d:\TokTool\gdal\(gdal files.....)
