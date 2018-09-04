@@ -115,43 +115,21 @@ namespace gentle
             string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, nodataValue);
             File.AppendAllText(fpn, header);
             WriteTwoDimData(fpn, array, decimalPartN);
-            //for (int nr = 0; nr <= nrows - 1; nr++)
-            //{
-            //    string arow = "";
-            //    for (int nc = 0; nc <= ncols - 1; nc++)
-            //    {
-            //        arow = arow + array[nc, nr].ToString() + " ";
-            //    }
-            //    arow = arow.Trim() + "\r\n";
-            //    File.AppendAllText(fpn, arow);
-            //}
             return true;
         }
 
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fpn"></param>
+        /// <param name="allHeader">모든 헤더. nodata 부분까지 포함</param>
+        /// <param name="array">래스터 값을 저장하고 있는 2차원 배열</param>
+        /// <param name="decimalPartN">소숫점 이하 출력 자리 수</param>
+        /// <returns></returns>
         public static bool MakeASCTextFile(string fpn, string allHeader, double[,] array, int decimalPartN)
         {
             File.AppendAllText(fpn, allHeader);
             WriteTwoDimData(fpn, array, decimalPartN);
-            //string rows = "";
-            //for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
-            //{
-            //    string arow = "";
-            //    for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
-            //    {
-            //        arow = arow + array[nc, nr].ToString() + " ";
-            //    }
-            //    arow = arow.Trim() + "\r\n";
-            //    rows = rows + arow;
-            //    if (nr % 2 == 0)
-            //    {
-            //        File.AppendAllText(fpn, rows); 
-            //        rows = "";
-            //    }
-            //    //File.AppendAllText(fpn, arow); // 이방법이 더 빠르다.
-            //}
-            //File.AppendAllText(fpn, rows);
-            ////File.AppendAllText(fpn, rows); // 이방법이 더 느리다
             return true;
         }
 
@@ -254,7 +232,7 @@ namespace gentle
             if (decimalPartNum == 2) { dpn = "F2"; }
             if (decimalPartNum == 3) { dpn = "F3"; }
             if (decimalPartNum == 4) { dpn = "F4"; }
-            if (decimalPartNum == 4) { dpn = "F5"; }
+            if (decimalPartNum == 5) { dpn = "F5"; }
             StringBuilder sbALL = new StringBuilder();
             for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
             {
