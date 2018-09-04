@@ -110,11 +110,11 @@ namespace gentle
             return true;
         }
 
-        public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, float cellSize, string nodataValue, double[,] array)
+        public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, float cellSize, string nodataValue, double[,] array, int decimalPartN)
         {
             string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, nodataValue);
             File.AppendAllText(fpn, header);
-            WriteTwoDimData(fpn, array);
+            WriteTwoDimData(fpn, array, decimalPartN);
             //for (int nr = 0; nr <= nrows - 1; nr++)
             //{
             //    string arow = "";
@@ -129,10 +129,10 @@ namespace gentle
         }
 
 
-        public static bool MakeASCTextFile(string fpn, string allHeader, double[,] array)
+        public static bool MakeASCTextFile(string fpn, string allHeader, double[,] array, int decimalPartN)
         {
             File.AppendAllText(fpn, allHeader);
-            WriteTwoDimData(fpn, array);
+            WriteTwoDimData(fpn, array, decimalPartN);
             //string rows = "";
             //for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
             //{
@@ -247,14 +247,20 @@ namespace gentle
             return array;
         }
 
-        private static void WriteTwoDimData(string fpn, double[,] array)
+        private static void WriteTwoDimData(string fpn, double[,] array, int decimalPartNum)
         {
+            string dpn = "";
+            if (decimalPartNum == 1) { dpn = "F1"; }
+            if (decimalPartNum == 2) { dpn = "F2"; }
+            if (decimalPartNum == 3) { dpn = "F3"; }
+            if (decimalPartNum == 4) { dpn = "F4"; }
+            if (decimalPartNum == 4) { dpn = "F5"; }
             StringBuilder sbALL = new StringBuilder();
             for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
             {
                 for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
                 {
-                    sbALL.Append(array[nc, nr].ToString("F2")+" ");
+                    sbALL.Append(array[nc, nr].ToString(dpn) +" ");
                 }
                 sbALL.Append("\r\n");
             }
