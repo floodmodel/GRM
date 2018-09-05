@@ -166,6 +166,8 @@ Public Class cSimulator
     End Sub
 
     Public Sub SimulateRTInner()
+        '2018.8 원 : 이건 single event에서는 사용 아닌 것으로 가정함
+
         Console.WriteLine("..debug.. Sub SimulateRTInner()")
         mStop = False
         mOutputControlRT = New cOutputControlRT()
@@ -226,7 +228,7 @@ Public Class cSimulator
                                 Dim bAfterSleep As Boolean = False
                                 Do
                                     If ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous <> TargetDataTime Or bAfterSleep Then
-                                        mRealTime.ReadDBorCSVandMakeFCdataTableForRealTime(TargetDataTime)
+                                        mRealTime.ReadDBorCSVandMakeFCdataTableForRealTime_v2018(TargetDataTime)
                                     End If
                                     ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous = TargetDataTime
                                     If mStop = True Then Exit Sub

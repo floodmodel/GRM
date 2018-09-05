@@ -362,7 +362,12 @@ Public Class cFlowControl
             If .FlowType = cGRM.CellFlowType.OverlandFlow Then
                 System.Console.WriteLine("ERROR: Reservoir outflow is simulated only in channel flow!!!    ")
             Else
-                .mStreamAttr.QCVch_i_j_m3Ps = CSng(fcDataRows(rowOrder).Item("value"))
+                If fcDataRows(rowOrder).Item("value").ToString = "-" Then   '2018.9.3 원 : 추가. 이는 임시조치임. 최박사님과 조치 예정
+                    .mStreamAttr.QCVch_i_j_m3Ps = 0
+                Else
+                    .mStreamAttr.QCVch_i_j_m3Ps = CSng(fcDataRows(rowOrder).Item("value"))
+                End If
+
                 .mStreamAttr.CSAch_i_j = mFVMsolver.CalChCSAFromQbyIteration(project.CV(cvan), .mStreamAttr.CSAch_i_j, .mStreamAttr.QCVch_i_j_m3Ps)
                 'Dim csa1 As Single = .mStreamAttr.CSAch_i_j
                 'Dim chCSAini2 As Single = mFVMsolver.CalChCSAFromManningEQ(project.CV(cvan), .mStreamAttr.CSAch_i_j, .mStreamAttr.QCVch_i_j_m3Ps)
@@ -371,7 +376,7 @@ Public Class cFlowControl
                                                          .mStreamAttr.chLowerRArea_m2, .mStreamAttr.chLowerRHeight, .mStreamAttr.mChBankCoeff)
                 .mStreamAttr.uCVch_i_j = .mStreamAttr.QCVch_i_j_m3Ps / .mStreamAttr.CSAch_i_j
             End If
-            project.FCGrid.mFCdataToApplyNowT(fcCVid) = CDbl(fcDataRows(rowOrder).Item("value"))
+            project.FCGrid.mFCdataToApplyNowT(fcCVid) = .mStreamAttr.QCVch_i_j_m3Ps   '2018.9.3 원 : 다시 fcDataRows(rowOrder).Item("value") 가져오는거 보다 낳다고 판단했슴 
         End With
     End Sub
 

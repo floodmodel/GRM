@@ -10,7 +10,8 @@ Public Class cRealTime
     Public mSimDurationrRT_Hour As Integer
     Public mRFStartDateTimeRT As String
     Public mbNewRFAddedRT As Boolean
-    Public mdicBNewFCdataAddedRT As Dictionary(Of Integer, Boolean)
+    Public mdicBNewFCdataAddedRT As Dictionary(Of Integer, Boolean)   'CVID 로 구분
+    'Public mdicBNewFCdataAddedRT_v2018 As Dictionary(Of String, Boolean)    'DAM 으로 구분 . 굳이 이리할 필요 없어서. 도입하지 않음. 2018.8.28
     Public mlstRFdataRT As List(Of cRainfall.RainfallData)
     ''' <summary>
     ''' Get data count by Cvid
@@ -41,7 +42,7 @@ Public Class cRealTime
 
     Public Shared Sub InitializeGRMRT()
         Dim strTmp As String = File.ReadAllText("C:\Nakdong\outputDrive.txt")
-        If strTmp.ToUpper() <> "C" And strTmp.ToUpper() <> "D" Then
+        If strTmp.ToUpper() <> "C" And strTmp.ToUpper() <> "D" And strTmp.ToUpper() <> "S" Then
             Console.WriteLine("Can not Read " + strTmp)
             Stop
         End If
@@ -92,9 +93,11 @@ Public Class cRealTime
         mlstRFdataRT = New List(Of cRainfall.RainfallData)
         mRFLayerCountToApply_RT = 0
         If CONST_bUseDBMS_FOR_RealTimeSystem Then
-            Call Clear_DBMS_Table_Qwatershed(mRTProject.ProjectNameOnly)
-            RaiseEvent RTStatus("DBMS Qwatershed_CAL Table Cleared")
-            Call Add_Log_toDBMS(mRTProject.ProjectNameOnly, "DBMS Qwatershed Table Cleared")
+            If False Then   '2018.8 부터 이제 과거 분석 기록은 보존됨..그래서 삭제 code는 미수행.
+                Call Clear_DBMS_Table_Qwatershed(mRTProject.ProjectNameOnly)
+                RaiseEvent RTStatus("DBMS [Q_CAL] Table Cleared")
+                Call Add_Log_toDBMS(mRTProject.ProjectNameOnly, "DBMS [Q_CAL] Table Cleared")
+            End If
         End If
 
         RaiseEvent RTStatus("실시간 유출해석 시작..")
@@ -124,7 +127,7 @@ Public Class cRealTime
             '    Exit Sub
             'End If
             mRTProject.FCGrid.mdtFCFlowData = New DataTable
-            Call ReadDBorCSVandMakeFCdataTableForRealTime(mRFStartDateTimeRT)
+            Call ReadDBorCSVandMakeFCdataTableForRealTime_v2018(mRFStartDateTimeRT)
             If mRTProject.FCGrid.mdtFCFlowData.Rows.Count < 1 Then
                 RaiseEvent RTStatus("유출해석 시작 시간에서의 flow control 자료가 없습니다.")
                 RaiseEvent RTStatus("유출해석 시작시간과 댐방류량, inlet 자료 등 flow control 자료를 확인하시길 바랍니다.")
@@ -133,13 +136,17 @@ Public Class cRealTime
         mSimul.SimulateRT(mRTProject, Me)
     End Sub
 
+    '2018.8.8 이제 부터는 과거  run 도 보존 . 그래서 이 함수는 미사용됨.
     Private Sub Clear_DBMS_Table_Qwatershed(strName As String)
         Dim oSQLCon As New System.Data.SqlClient.SqlConnection(g_strDBMSCnn)
         If oSQLCon.State = ConnectionState.Closed Then oSQLCon.Open()
-        Dim strSQL As String = String.Format("delete QWatershed_CAL where wscode='{0}'", strName)
+
+        'Dim strSQL As String = String.Format("delete [Q_CAL] where wscode='{0}'", strName)
+        Dim strSQL As String = String.Format("delete [Q_CAL] where runid={0}", g_GUID_from_monitorEXE)   ''2018.8.8 부터 임시 적용. 한시적
+
         Dim oSQLCMD As New SqlClient.SqlCommand(strSQL, oSQLCon)
         Dim intAffectedRecords As Integer = oSQLCMD.ExecuteNonQuery()
-        Dim strMsg As String = String.Format("QWatershed_CAL Table에서 {0} 유역 {1}건 Data 삭제됨. 초기화 완료.", strName, intAffectedRecords)
+        Dim strMsg As String = String.Format("[Q_CAL] Table에서 {0} 유역 {1}건 Data 삭제됨. 초기화 완료.", strName, intAffectedRecords)
         RaiseEvent RTStatus(strMsg)
         Call Add_Log_toDBMS(strName, strMsg)
     End Sub
@@ -164,6 +171,24 @@ Public Class cRealTime
         End If
     End Sub
 
+    '2018.8 CVID 아닌 DAM 이름 방식으로 변경하려던 시도. 현재 이방법 채택하지 않음
+    'Public Sub UpdateFcDatainfoGRMRT_v2018(ByVal strDate As String, GName As String,
+    '                                 previousOrder As Integer, dtMIN As Integer)
+
+    '    'Dim drs As DataRow() = mRTProject.FCGrid.mdtFCFlowData.Select(String.Format("CVID = {0} and datetime={1}", cvid, strDate))  '2017년 방식은 CVID로 한정 
+    '    Dim drs As DataRow() = mRTProject.FCGrid.mdtFCFlowData.Select(String.Format("gname = '{0}' and datetime={1}", GName, strDate))  '2018년 방식은 DAM 정보를 받아야 하는거 아니가?
+
+    '    If drs.Count > 0 Then
+    '        mdicBNewFCdataAddedRT_v2018(GName) = True
+    '        RaiseEvent RTStatus(String.Format("  FC Data 입력완료...({2}, GName={0}, Value={1})",
+    '                                           GName, drs(0).Item("value").ToString.PadLeft(8), strDate))
+    '    Else
+    '        mdicBNewFCdataAddedRT_v2018(GName) = False
+    '        RaiseEvent RTStatus(String.Format("FC 자료(GName={0}, {1}) 수신대기 중...",
+    '                               GName, strDate))
+    '    End If
+    'End Sub
+
 
     Public Sub UpdateRainfallInformationGRMRT(ByVal strDate As String)
         Dim lngTimeDiffFromStarting_SEC As Long = DateDiff(DateInterval.Second, cThisSimulation.mTimeThisSimulationStarted, Now)
@@ -177,7 +202,9 @@ Public Class cRealTime
         End If
         Select Case mRainfallDataTypeRT
             Case cRainfall.RainfallDataType.TextFileASCgrid_mmPhr, cRainfall.RainfallDataType.TextFileASCgrid
-                Dim ascFPN As String = mRfFilePathRT + "\" + GetYearAndMonthFromyyyyMMddHHmm(strDate) + "\" + strDate + ".asc"
+                'Dim strFilenameOnly As String = strDate   '2017년 방식
+                Dim strFilenameOnly As String = "RDR_COMP_ADJ_" + strDate + ".RKDP.bin"    '2018년 8.8 현재 산출 naming
+                Dim ascFPN As String = mRfFilePathRT + "\" + GetYearAndMonthFromyyyyMMddHHmm(strDate) + "\" + strFilenameOnly + ".asc"        '2018년 8.8 현재 산출 naming
                 If IO.File.Exists(ascFPN) = True Then
                     mRFLayerCountToApply_RT += 1
                     cThisSimulation.mRFDataCountInThisEvent = mRFLayerCountToApply_RT
@@ -185,9 +212,9 @@ Public Class cRealTime
                     With nr
                         .Order = mRFLayerCountToApply_RT
                         .DataTime = strDate
-                        .Rainfall = strDate + ".asc"
+                        .Rainfall = strFilenameOnly + ".asc" ' 
                         .FilePath = mRfFilePathRT + "\" + GetYearAndMonthFromyyyyMMddHHmm(strDate)
-                        .FileName = strDate + ".asc"
+                        .FileName = strFilenameOnly + ".asc"
                     End With
                     mlstRFdataRT.Add(nr)
                     RaiseEvent RTStatus(nr.FileName & " 입력완료(강우)")
@@ -199,7 +226,7 @@ Public Class cRealTime
         RaiseEvent RTStatus(String.Format("강우자료({0}) 수신대기 중..", strDate))
     End Sub
 
-    Public Sub ReadDBorCSVandMakeFCdataTableForRealTime(TargetDateTime As String, Optional CSVFPNsource As String = "")
+    Public Sub ReadDBorCSVandMakeFCdataTableForRealTime_v2017(TargetDateTime As String, Optional CSVFPNsource As String = "")
         Dim dt As New DataTable
         If CONST_bUseDBMS_FOR_RealTimeSystem Then
             If m_odt_flowcontrolinfo Is Nothing Then
@@ -289,6 +316,172 @@ Public Class cRealTime
             End Using
         End If
     End Sub
+
+
+
+
+    Public Sub ReadDBorCSVandMakeFCdataTableForRealTime_v2018(TargetDateTime As String, Optional CSVFPNsource As String = "")
+
+        Dim dt As New DataTable
+
+        If CONST_bUseDBMS_FOR_RealTimeSystem Then
+            '2018.8.28 원 : CVID 이건 DB에 없슴. 격자 규격 col, row 위치가 변경시에 CVID도 변경될 것임. 그래서 정적인 DB에 구성 안하는 의도로 예상됨.  최초 gmp road 등 하는 단계에서 temp table로 구성해도 좋겠슴.
+
+            Dim strSQL As String = String.Format("Select  w.name, 999 as cvid ,[Time] as datetime ,[QValue] AS VALUE  From [QDam_OBS] d , WatchPoint w Where d.Gname=w.Gname and w.fc=1 And TIME ='{0}' ", TargetDateTime)
+
+            Dim odt As New Data.DataTable
+            Dim oSqlDataAdapter As New SqlClient.SqlDataAdapter(strSQL, g_strDBMSCnn)
+            oSqlDataAdapter.SelectCommand.CommandTimeout = 60
+            oSqlDataAdapter.Fill(odt)
+
+            For Each oDR As DataRow In odt.Rows
+                Dim oDR_Target As DataRow = mRTProject.FCGrid.mdtFCGridInfo.Select(String.Format("Name='{0}'", oDR.Item("NAME").ToString)).FirstOrDefault
+                Dim strCVID As String = oDR_Target.Item("CVID").ToString
+                oDR.Item("CVID") = strCVID
+                Debug.Print(strCVID)
+            Next
+            dt.Merge(odt)
+
+            '2018.9.3 원  : auto rom 목록도 추가 해주는 처리 시도... 가 필요하다고 생각 했는데. 없어도 잘됨.  
+            'Dim oDR_AutoROMs() As DataRow = mRTProject.FCGrid.mdtFCGridInfo.Select(String.Format("rotype='AutoROM'"))
+            'Dim odt_auto As New Data.DataTable
+            'For Each oDR As DataRow In oDR_AutoROMs
+            '    Dim nr As DataRow = dt.NewRow
+            '    nr("CVID") = oDR.Item("CVID").ToString
+            '    nr("datetime") = TargetDateTime
+            '    nr("Value") = ""
+            '    odt_auto.Rows.Add(nr)
+            'Next
+            'dt.Merge(odt_auto)
+
+            '경천DAM 처리
+            Dim strSpcealDams As String = "'경천댐'"       '2018.8.29 원 : 여기서 n 개 기입... 이건 추후 DB 등으로 이동되어야 함
+            Dim strSQL2 As String = String.Format("Select  w.name, 999 as cvid ,[Time] as datetime ,[QValue] AS VALUE From QStream_OBS_ht d , WatchPoint w  Where  d.GName in({1}) and  TIME ='{0}' and d.Gname=w.Gname ", TargetDateTime, strSpcealDams)
+
+            Dim odt2 As New Data.DataTable
+            Dim oSqlDataAdapter2 As New SqlClient.SqlDataAdapter(strSQL2, g_strDBMSCnn)
+            oSqlDataAdapter2.SelectCommand.CommandTimeout = 60
+            oSqlDataAdapter2.Fill(odt2)
+
+            If odt2.Rows.Count <> 1 Then Stop
+            For Each oDR2 As DataRow In odt2.Rows
+                Dim oDR_Target2 As DataRow = mRTProject.FCGrid.mdtFCGridInfo.Select(String.Format("Name='{0}'", oDR2.Item("NAME").ToString)).FirstOrDefault
+                Dim strCVID2 As String = oDR_Target2.Item("CVID").ToString
+                oDR2.Item("CVID") = strCVID2
+                Debug.Print(strCVID2)
+            Next
+
+            dt.Merge(odt2)
+
+            cProject.Current.FCGrid.mdtFCFlowData = dt
+
+        Else    'DBMS 방식이 아닌 경우
+            dt.Columns.Add(New Global.System.Data.DataColumn("CVID", GetType(Integer), Nothing, Global.System.Data.MappingType.Element))
+            dt.Columns.Add(New Global.System.Data.DataColumn("DataTime", GetType(String), Nothing, Global.System.Data.MappingType.Element))
+            dt.Columns.Add(New Global.System.Data.DataColumn("Value", GetType(Single), Nothing, Global.System.Data.MappingType.Element))
+            Dim intL As Integer = 0
+            Using oTextReader As New FileIO.TextFieldParser(CSVFPNsource, Encoding.Default)
+                oTextReader.TextFieldType = FileIO.FieldType.Delimited
+                oTextReader.SetDelimiters(",")
+                oTextReader.TrimWhiteSpace = True
+                Dim TextIncurrentRow As String()
+                While Not oTextReader.EndOfData
+                    TextIncurrentRow = oTextReader.ReadFields
+                    For Each ele As String In TextIncurrentRow
+                        If Trim(TextIncurrentRow(0)).ToString = "" Then Exit While
+                    Next
+                    Dim nFieldCount As Integer = TextIncurrentRow.Length
+                    If intL > 0 AndAlso TextIncurrentRow(1) = TargetDateTime Then
+                        Dim nr As DataRow = dt.NewRow
+                        nr("CVID") = CInt(TextIncurrentRow(0))
+                        nr("DataTime") = TextIncurrentRow(1)
+                        nr("Value") = CSng(TextIncurrentRow(2))
+                        mRTProject.FCGrid.mdtFCFlowData.Rows.Add(nr)
+                    End If
+                    intL += 1
+                End While
+            End Using
+        End If
+    End Sub
+
+    'Public Sub ReadDBorCSVandMakeFCdataTableForRealTime_v2018_old(TargetDateTime As String, Optional CSVFPNsource As String = "")
+    '    '2018.8.28 원 : 이 방법은. DB 에서 건건히 가져오는 방법임.. 비효율 
+
+    '    Dim dt As New DataTable
+
+    '    If CONST_bUseDBMS_FOR_RealTimeSystem Then
+    '        Dim strSQL As String
+
+    '        If False Then   '// 2018.8.28 원 : DB에서 FC 만 정확히 관리해 주면 이부분 불필요함
+    '            Dim strNameS As String = ""
+    '            For Each oDR As DataRow In mRTProject.FCGrid.mdtFCGridInfo.Rows
+    '                Dim strName As String = oDR.Item("Name").ToString  '"ADS_WP4"
+    '                strNameS = strNameS + String.Format(",'{0}'", strName)
+    '            Next
+    '            If strNameS.StartsWith(",") Then strNameS = strNameS.Substring(1)
+
+    '            '// GNAME 얻기
+    '            strSQL = String.Format("SELECT distinct GName,name  FROM WatchPoint where [name] in ({0})", strNameS)
+    '        End If
+
+    '        strSQL = "SELECT GName,name  from  [WatchPoint] where fc=1"
+
+    '        Dim odt As New Data.DataTable
+    '        Dim oSqlDataAdapter As New SqlClient.SqlDataAdapter(strSQL, g_strDBMSCnn)
+    '        oSqlDataAdapter.SelectCommand.CommandTimeout = 60
+    '        oSqlDataAdapter.Fill(odt)
+    '        Dim strGNameS As String = ""
+
+    '        For Each oDR As DataRow In odt.Rows
+    '            Dim strGName As String = oDR.Item(0).ToString
+    '            Dim strName As String = oDR.Item(1).ToString
+    '            'strGNameS = strGNameS + String.Format(",'{0}'", strName)
+
+    '            'If strGNameS.StartsWith(",") Then strGNameS = strGNameS.Substring(1)
+    '            'Dim strSQL_TS As String = String.Format("select  {0} as cvid, time as datetime, value from {1} where {4} {3} ='{2}' and time='{5}'",
+    '            Dim drS As DataRow() = mRTProject.FCGrid.mdtFCGridInfo.Select(String.Format("Name='{0}'", strName))
+    '            Dim strCVID As String = drS(0).Item("CVID").ToString
+
+    '            Dim strSQL_TS As String = String.Format("Select name,  {0} as cvid     ,[Time] as datetime      ,[QValue] AS VALUE  From [QDam_OBS] Where GName = '{1}' And TIME ='{2}' ", strCVID, strGName, TargetDateTime)
+    '            '
+    '            Dim odt_TS As New Data.DataTable
+    '            Dim oSqlDataAdapter_TS As New SqlClient.SqlDataAdapter(strSQL_TS, g_strDBMSCnn)
+    '            oSqlDataAdapter_TS.SelectCommand.CommandTimeout = 60
+    '            oSqlDataAdapter_TS.Fill(odt_TS)
+    '            oSqlDataAdapter_TS.Dispose()
+    '            dt.Merge(odt_TS)
+    '        Next
+
+    '        cProject.Current.FCGrid.mdtFCFlowData = dt
+
+    '    Else    'DBMS 방식이 아닌 경우
+    '        dt.Columns.Add(New Global.System.Data.DataColumn("CVID", GetType(Integer), Nothing, Global.System.Data.MappingType.Element))
+    '        dt.Columns.Add(New Global.System.Data.DataColumn("DataTime", GetType(String), Nothing, Global.System.Data.MappingType.Element))
+    '        dt.Columns.Add(New Global.System.Data.DataColumn("Value", GetType(Single), Nothing, Global.System.Data.MappingType.Element))
+    '        Dim intL As Integer = 0
+    '        Using oTextReader As New FileIO.TextFieldParser(CSVFPNsource, Encoding.Default)
+    '            oTextReader.TextFieldType = FileIO.FieldType.Delimited
+    '            oTextReader.SetDelimiters(",")
+    '            oTextReader.TrimWhiteSpace = True
+    '            Dim TextIncurrentRow As String()
+    '            While Not oTextReader.EndOfData
+    '                TextIncurrentRow = oTextReader.ReadFields
+    '                For Each ele As String In TextIncurrentRow
+    '                    If Trim(TextIncurrentRow(0)).ToString = "" Then Exit While
+    '                Next
+    '                Dim nFieldCount As Integer = TextIncurrentRow.Length
+    '                If intL > 0 AndAlso TextIncurrentRow(1) = TargetDateTime Then
+    '                    Dim nr As DataRow = dt.NewRow
+    '                    nr("CVID") = CInt(TextIncurrentRow(0))
+    '                    nr("DataTime") = TextIncurrentRow(1)
+    '                    nr("Value") = CSng(TextIncurrentRow(2))
+    '                    mRTProject.FCGrid.mdtFCFlowData.Rows.Add(nr)
+    '                End If
+    '                intL += 1
+    '            End While
+    '        End Using
+    '    End If
+    'End Sub
 
     Sub StopGRM()
         mSimul.StopSimulation()

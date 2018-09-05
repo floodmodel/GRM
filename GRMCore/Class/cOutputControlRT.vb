@@ -59,17 +59,32 @@ Public Class cOutputControlRT
 
             If Not IO.Directory.Exists(IO.Path.GetDirectoryName(strFNP)) Then IO.Directory.CreateDirectory(IO.Path.GetDirectoryName(strFNP))
             IO.File.AppendAllText(strFNP, strOutPutLine, Encoding.Default)
-            Call Log_Performance_data(project.ProjectNameOnly, strNowTimeToPrintOut, lngTimeDiffFromStarting_SEC / 60.0) '성능 비교 분석용 정보 수집
+            Call Log_Performance_data(project.ProjectNameOnly, strWPName, strNowTimeToPrintOut, lngTimeDiffFromStarting_SEC / 60.0) '성능 비교 분석용 정보 수집
 
             If cRealTime.CONST_bUseDBMS_FOR_RealTimeSystem Then
                 Dim oSQLCon As New System.Data.SqlClient.SqlConnection(g_strDBMSCnn)
                 If oSQLCon.State = ConnectionState.Closed Then oSQLCon.Open()
                 Dim intPos As Integer = row.Name.IndexOf("_"c)
                 Dim strGaugeCode As String = row.Name.Substring(intPos + 1)
-                Dim strSQL As String = String.Format("insert into Qwatershed_CAL ([WSCODE], GaugeCode, time ,[Value], [RFMean_mm]) values('{0}','{1}',{2},{3},{4})",
-                                                         project.ProjectNameOnly, strGaugeCode, cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut),
-                                                         vToPrint, project.WatchPoint.mRFUpWsMeanForDtPrintout_mm(row.CVID), cGRM.CONST_OUTPUT_TABLE_TIME_FIELD_NAME.ToString)
-                '  
+
+                '2017년 방식
+                'Dim strSQL As String = String.Format("insert into Qwatershed_CAL ([WSCODE], GaugeCode, time ,[Value], [RFMean_mm]) values('{0}','{1}',{2},{3},{4})",
+                '    project.ProjectNameOnly,
+                '    strGaugeCode,
+                '    cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut),
+                '    vToPrint,
+                '    project.WatchPoint.mRFUpWsMeanForDtPrintout_mm(row.CVID),
+                '    cGRM.CONST_OUTPUT_TABLE_TIME_FIELD_NAME.ToString)
+
+                '2018년 방식 by 원 2018.8.8 
+                '2018.8.10 이전에 9999 였고. 이제 test 위해 g_performance_log_GUID 사용중
+                Dim strSQL As String = String.Format("insert into [Q_CAL] (runid,WPName, [Time],[value], RFMean_mm) values({0},'{1}','{2}',{3},{4})",
+                    g_RunID,
+                    strWPName,
+                    cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut),
+                    vToPrint,
+                    project.WatchPoint.mRFUpWsMeanForDtPrintout_mm(row.CVID))
+
                 Dim oSQLCMD As New SqlClient.SqlCommand(strSQL, oSQLCon)
                 Dim intRetVal As Integer = oSQLCMD.ExecuteNonQuery()
                 If intRetVal <> 1 Then
@@ -108,12 +123,12 @@ Public Class cOutputControlRT
         Next
     End Sub
 
-    Sub Log_Performance_data(strBasin As String, strDataTime As String, dblElapTime As Double)
+    Sub Log_Performance_data(strBasin As String, strTag As String, strDataTime As String, dblElapTime As Double)
         '성능 비교 용도. 개별 프로세스. launcher .exe 에 집중. 머신 전체는 monitor에서 측정하도록함
         Dim oSQLCon As New System.Data.SqlClient.SqlConnection(g_strDBMSCnn)
         If oSQLCon.State = ConnectionState.Closed Then oSQLCon.Open()
-        Dim strSQL As String = String.Format("insert into run_perf ([basin],[RainfallDataCompleted],[ElapsedTime_Min],[net_process_PrivateMemorySize64],[run_meta_guid],[OutputDrive]) values('{0}','{1}',{2},{3},'{4}','{5}')",
-                                                         strBasin, strDataTime, dblElapTime, Process.GetCurrentProcess.PrivateMemorySize64 / 1024 / 1024 / 1024, g_performance_log_GUID, cRealTime.CONST_Output_File_Target_DISK)
+        Dim strSQL As String = String.Format("insert into run_perf ([basin],[RainfallDataCompleted],[ElapsedTime_Min],[net_process_PrivateMemorySize64],[run_meta_guid],[OutputDrive],[tag]) values('{0}','{1}',{2},{3},'{4}','{5}','{6}')",
+                                                         strBasin, strDataTime, dblElapTime, Process.GetCurrentProcess.PrivateMemorySize64 / 1024 / 1024 / 1024, g_RunID, cRealTime.CONST_Output_File_Target_DISK, strTag)
         Dim oSQLCMD As New SqlClient.SqlCommand(strSQL, oSQLCon)
         Dim intRetVal As Integer = oSQLCMD.ExecuteNonQuery()
         If intRetVal <> 1 Then
