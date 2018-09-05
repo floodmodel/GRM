@@ -294,7 +294,8 @@ namespace gentle
                     {
                         Rectangle rec = new Rectangle(c * CellWbmp, r * CellHbmp, CellWbmp, CellHbmp);
                         Color cToShow = DefaultNullColor;
-                        if (double.TryParse(array[c, r].ToString(), out double dv) == true)
+                        double dv;
+                        if (double.TryParse(array[c, r].ToString(), out  dv) == true)
                         {
                             cToShow = GetColorFromMemoryRendererInDifferentInterval(dv, rangeType, nullValue);
                         }
@@ -375,7 +376,8 @@ namespace gentle
                     {
                         Rectangle rec = new Rectangle(c * CellWbmp, r * CellHbmp, CellWbmp, CellHbmp);
                         Color cToShow = DefaultNullColor;
-                        if (double.TryParse(array[c, r].ToString(), out double dv) == true)
+                        double dv;
+                        if (double.TryParse(array[c, r].ToString(), out  dv) == true)
                         {
                             cToShow = GetColorFromMemoryRendererInDifferentInterval(dv, rangeType, nullValue);
                         }
@@ -430,7 +432,8 @@ namespace gentle
                         for (int x = 0; x < colxCount; x++)
                         {
                             Color cToShow = DefaultNullColor;
-                            if (double.TryParse(array[x, y].ToString(), out double dv) == true)
+                            double dv;
+                            if (double.TryParse(array[x, y].ToString(), out  dv) == true)
                             {
                                 cToShow = GetColorFromMemoryRendererInDifferentInterval(dv, rangeType, nullValue);
                             }
