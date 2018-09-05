@@ -9,21 +9,20 @@ namespace gentle
     public class cTextFileReaderASC
     {
         private string[] mLines;
-        private int mLineCountAll;
+        private int mRowCountAll;
         private int mDataStartLineInASCfile;
         private float mDataValueOri;
         private cRasterHeader mHeader = new cRasterHeader();
         private string mHeaderStringAll;
         private string[] mSeparator = { " ", "\t", "," };
-        private double[,] mValuesAllFromTLasTwoDimArray;
 
         public cTextFileReaderASC(string FPN)
         {
             mLines = System.IO.File.ReadAllLines(FPN, System.Text.Encoding.Default);
-            mLineCountAll = mLines.Length;
+            mRowCountAll = mLines.Length;
             mDataStartLineInASCfile = GetDataStartLineInASCfile();
 
-            if (mLineCountAll < mDataStartLineInASCfile)
+            if (mRowCountAll < mDataStartLineInASCfile)
             {
                 Console.WriteLine(FPN + " has no data valuable. ");
                 return;
@@ -100,7 +99,8 @@ namespace gentle
                         }
                         else
                         {
-                            if (double.TryParse(LineParts[1], out  double v))
+                            double v;
+                            if (double.TryParse(LineParts[1], out v))
                             {
                                 mHeader.nodataValue = v;
                             }
@@ -118,7 +118,7 @@ namespace gentle
         {
             get
             {
-                return mLineCountAll;
+                return mRowCountAll;
             }
         }
 
@@ -207,58 +207,6 @@ namespace gentle
                 return true;
         }
 
-        public static bool CheckTwoGridLayerExtentUsingRowAndColNum(cTextFileReaderASC GridBase, cTextFileReaderASC GridTarget)
-        {
-            if (GridBase.Header.numberCols != GridTarget.Header.numberCols) { return false; }
-            if (GridBase.Header.numberRows != GridTarget.Header.numberRows) { return false; }
-            if (GridBase.bottom != GridTarget.bottom) { return false; }
-            return true;
-        }
-
-        public static CellPosition[] GetPositiveCellsPositions(cTextFileReaderASC inGrid)
-        {
-            List<CellPosition> cells= new List<CellPosition>();
-            //double[,] oriValues = inGrid.ValuesAllFromTLasTwoDimArray(); 
-            for (int y=0; y<inGrid .Header .numberRows;y++)
-            {
-                string[] aline = inGrid.ValuesInOneRowFromTopLeft(y);
-                for (int x = 0; x < inGrid.Header.numberCols; x++)
-                {
-                    double v;
-                    if (double.TryParse(aline[x], out v) == true)
-                    {
-                        if (v > 0)
-                        {
-                            CellPosition cp;
-                            cp.x = x;
-                            cp.y = y;
-                            cells.Add(cp);
-                        }
-                    }
-                }
-            }
-            return cells.ToArray();
-        }
-
-
-
-        public static double CellsAverageValue(CellPosition[] targetCells, cTextFileReaderASC inASC, bool allowNegative)
-        {
-            double[,] oriValues = inASC.ValuesAllFromTLasTwoDimArray();
-            double sum = 0;
-            for (int n = 0; n < targetCells.Length; n++)
-            {
-                double v = oriValues[targetCells[n].x, targetCells[n].y];
-                if (allowNegative == false && v < 0)
-                {
-                    v = 0;
-                }
-                sum += v;
-            }
-            return sum / targetCells.Length;
-        }
-
-
         public static void MakeNewAsciiRasterFile(cTextFileReaderASC baseGrid,
                                              string fpn, cData.DataType dType, double defaultValue)
         {
@@ -278,47 +226,6 @@ namespace gentle
         //'    Return dG
         //'End Function
 
-        private void getValuesAllFromTLasTwoDimArray()
-        {
-            mValuesAllFromTLasTwoDimArray = new double[Header.numberCols, Header.numberRows];
-            //for(int y = 0; y<Header .numberRows;y++ )
-            //{
-            //    for (int x =0; x< Header .numberCols;x++)
-            //    {
-            //        mValuesAllFromTLasTwoDimArray[x,y]=ValueFromTL(x, y);
-            //    }
-            //}
-
-            var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount  };
-            string[] rows = new string[Header.numberRows];
-            Parallel.For(0, Header.numberRows, options, delegate (int y)
-            {
-                string[] aline = ValuesInOneRowFromTopLeft(y);
-                for (int x = 0; x < Header.numberCols; x++)
-                {
-                    double v;
-                    if (double.TryParse(aline[x], out v) == true)
-                    {
-                        mValuesAllFromTLasTwoDimArray[x, y] = v;
-                    }
-                    else
-                    {
-                        mValuesAllFromTLasTwoDimArray[x, y] = Header.nodataValue;
-                    }
-                }
-            });
-        }
-
-        public double[,] ValuesAllFromTLasTwoDimArray()
-        {
-            //mValuesAllFromTLasTwoDimArray = new double[Header.numberCols, Header.numberRows];
-            if (mValuesAllFromTLasTwoDimArray==null)
-            {
-                getValuesAllFromTLasTwoDimArray();
-            }
-            return mValuesAllFromTLasTwoDimArray;
-        }
-
 
         /// <summary>
         /// Column and row numbers are started from zero
@@ -328,7 +235,7 @@ namespace gentle
         /// <returns></returns>
         public float ValueFromLL(int xColNumber, int yRowNumber)
         {
-            int row = mLineCountAll - yRowNumber - 1;
+            int row = mRowCountAll - yRowNumber - 1;
             string[] LVals = mLines[row].Split(mSeparator, StringSplitOptions.RemoveEmptyEntries);
             float result = 0;
             if (float.TryParse(LVals[xColNumber], out result))
@@ -425,7 +332,7 @@ namespace gentle
 
         public string[] ValuesInOneRowFromLowLeft(int yrow)
         {
-            int row = mLineCountAll - yrow - 1;
+            int row = mRowCountAll - yrow - 1;
             return mLines[row].Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
         }
 
