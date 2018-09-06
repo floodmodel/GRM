@@ -211,7 +211,6 @@ namespace gentle
         {
             if (GridBase.Header.numberCols != GridTarget.Header.numberCols) { return false; }
             if (GridBase.Header.numberRows != GridTarget.Header.numberRows) { return false; }
-            if (GridBase.bottom != GridTarget.bottom) { return false; }
             return true;
         }
 

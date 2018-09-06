@@ -273,7 +273,7 @@ namespace gentle
             {
                 foreach (string rfFN in lstFLallinSourcePath)
                 {
-                    if (rfFN.Contains(filePattern.ToString()) == true)
+                    if (Path.GetExtension(rfFN) == filePattern.Trim())
                     {
                         lstFLselected.Add(Path.GetFileName(rfFN));
                     }

@@ -26,6 +26,7 @@ namespace gentle
         }
 
         public static double[,] calculate2DArryUsing2TermAlgebra(string inOperator, bool is1ASC, bool is2ASC,
+            bool is1ASCnodataAsZero, bool is2ASCnodataAsZero,
             double[,] asc1 = null, double[,] asc2 = null, double value1 = 0, double value2 = 0, double nodataValue = -9999)
         {
             double[,] resultArr = null;
@@ -38,8 +39,8 @@ namespace gentle
             int nx = resultArr.GetLength(0);
             ParallelOptions options = new ParallelOptions();
             options.MaxDegreeOfParallelism = Environment.ProcessorCount;
-            // For y As Integer = 0 To nRowy - 1
-            //{ 
+            //for (int y  = 0; y< ny; y++)
+            //{
             Parallel.For(0, ny, options, delegate (int y)
             {
                 for (int x = 0; x <= nx - 1; x++)
@@ -47,15 +48,35 @@ namespace gentle
                     double v1;
                     double v2;
                     if (is1ASC == true)
-                    { v1 = asc1[x, y]; }
+                    {
+                        v1 = asc1[x, y];
+                        if (is1ASCnodataAsZero == true && v1 == nodataValue) { v1 = 0; }
+                    }
                     else
                     { v1 = value1; }
 
                     if (is2ASC == true)
-                    { v2 = asc2[x, y]; }
+                    {
+                        v2 = asc2[x, y];
+                        if (is2ASCnodataAsZero == true && v2 == nodataValue) { v2 = 0; }
+                    }
                     else
                     { v2 = value2; }
-                    resultArr[x, y] = algebraicCal(inOperator, v1, v2, nodataValue);
+
+                    bool goCal = true;
+                    if (is1ASC == true && is1ASCnodataAsZero == false && v1 == nodataValue)
+                    { goCal = false; }
+                    if (is2ASC == true && is2ASCnodataAsZero == false && v2 == nodataValue)
+                    { goCal = false; }
+
+                    if (goCal == true)
+                    {
+                        resultArr[x, y] = algebraicCal(inOperator, v1, v2, nodataValue);
+                    }
+                    else
+                    {
+                        resultArr[x, y] = nodataValue;
+                    }
                 }
             });
         //}
@@ -169,11 +190,9 @@ namespace gentle
             return vout;
         }
 
-        public static double algebraicCal(string conditionString, double v1, double v2, double nodataValue)
+        public static double algebraicCal(string conditionString, double v1, double v2,  double nodataValue)
         {
             double vout = 0;
-            if(v1==nodataValue) { v1 = 0; }
-            if (v2 == nodataValue) { v2 = 0; }
             switch (conditionString)
             {
                 case "+":
