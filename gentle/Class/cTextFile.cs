@@ -646,15 +646,8 @@ namespace gentle
 
         }
 
-        //public static string[] getTextLineArrayFromText(string inString)
-        //{
-        //    //string[] instr;
-        //    string[] outstr= new string [10];
-
-        //    return outstr;
-        //}
-
-        public static void ReplaceLinesInTextFile(string strSourceFNP, string strTagetFNP, int staringLineNum, int endingLineNum, string[] textLinesToReplace)
+        public static void ReplaceLineByLineInTextFile(string strSourceFNP, string strTagetFNP, string strTextToFind, string strTextToReplace,
+            int startingLineIndex = 0, int endingLineIndex = 0)
         {
             try
             {
@@ -662,11 +655,19 @@ namespace gentle
                 int intTotCountLine = strLines.Length;
                 int intNLine = 0;
                 string strOneLine = null;
-                int nl = 0;
-                for (intNLine = staringLineNum-1; intNLine < endingLineNum ; intNLine++)
+                for (intNLine = 0; intNLine <= intTotCountLine - 1; intNLine++)
                 {
-                    strLines[intNLine] = textLinesToReplace[nl];
-                    nl++;
+                    if (endingLineIndex > 0 && intNLine > endingLineIndex)
+                    {
+                        break;
+                    }
+                    if (intNLine >= startingLineIndex)
+                    {
+                        if (strLines[intNLine].Trim () == strTextToFind .Trim ())
+                        {
+                            strLines[intNLine] = strTextToReplace.Trim();
+                        }
+                    }
                 }
                 System.IO.File.WriteAllLines(strTagetFNP, strLines);
             }
@@ -675,6 +676,63 @@ namespace gentle
                 throw ex;
             }
         }
+
+
+        public static void RemoveAlineFromTextFile(string strSourceFNP, string strTagetFNP, int lineIndexToStart = 0, int lineIdexToEnd=0)
+        {
+            try
+            {
+                string[] lines = System.IO.File.ReadAllLines(strSourceFNP);
+               List<string> lst = lines.ToList();
+                for (int r=lineIndexToStart; r<= lineIdexToEnd;r++)
+                {
+                    lst.RemoveAt(lineIndexToStart); // 인덱스 개수가 계속 줄어드니까.. 이렇게 해야한다.
+                }
+                string[] newLines = lst.ToArray();
+                System.IO.File.WriteAllLines(strTagetFNP, newLines);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        public static void InsertAlineIntoTextFile(string strSourceFNP, string strTagetFNP, string txtToInsert,
+    int lineIndexToInsert = 0)
+        {
+            try
+            {
+                string[] lines = System.IO.File.ReadAllLines(strSourceFNP);
+                string[] newLines = new string[lines.Length+1];
+                bool inserted = false;
+                for (int y = 0; y<lines.Length+1;y++)
+                {
+                    if (y==lineIndexToInsert )
+                    {
+                        newLines[y] = txtToInsert;
+                        inserted = true;
+                    }
+                    else
+                    {
+                        if (inserted ==true )
+                        {
+                            newLines[y] = lines[y-1];
+                        }
+                        else
+                        {
+                            newLines[y] = lines[y];
+                        }
+                    }
+                }
+                System.IO.File.WriteAllLines(strTagetFNP, newLines);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
 
         public static DataTable ReadTextFileAndSetDataTable(string FPNsource, cTextFile.ValueSeparator valueSeparator, int fieldCount = 0)
         {
