@@ -646,13 +646,13 @@ namespace gentle
 
         }
 
-        public static string[] getTextLineArrayFromText(string inString)
-        {
-            string[] instr;
-            string[] outstr= new string [10];
+        //public static string[] getTextLineArrayFromText(string inString)
+        //{
+        //    //string[] instr;
+        //    string[] outstr= new string [10];
 
-            return outstr;
-        }
+        //    return outstr;
+        //}
 
         public static void ReplaceLinesInTextFile(string strSourceFNP, string strTagetFNP, int staringLineNum, int endingLineNum, string[] textLinesToReplace)
         {

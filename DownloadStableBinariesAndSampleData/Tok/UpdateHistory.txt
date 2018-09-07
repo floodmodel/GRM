@@ -19,10 +19,10 @@ Tok의 특징과 주요 기능은 아래와 같습니다.
 2018.09.06. 업데이트, 버그 수정 내용
   - 모든 ascii 데이터가 소수점 2자리 까지 출력되는 현상 수정(원본 데이터들의 자리수 그대로 유지되게 수정)
   - raster calculator에서 버그 수정
-  - 클리핑에서 실수형 셀사이즈 관련 버그 수정,
-  - extension filter 관려 버그 수정
+  - 클리핑에서 실수형 셀사이즈 관련 버그 수정
+  - extension filter 관련 버그 수정
   - converting format, resampling, clipping에서 xml 파일 안만들어지게 수정
-  - Progress bar 관련 수정
+  - Progress bar stop 기능 관련 수정
 
 
 
