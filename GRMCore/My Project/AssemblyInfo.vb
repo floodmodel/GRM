@@ -31,8 +31,8 @@ Imports System.Runtime.InteropServices
 ' by using the '*' as shown below:
 ' <Assembly: AssemblyVersion("1.0.*")> 
 
-<Assembly: AssemblyVersion("2018.04.0.1")>
-<Assembly: AssemblyFileVersion("2018.04.0.1")>
+<Assembly: AssemblyVersion("2018.08.07.0")>
+<Assembly: AssemblyFileVersion("2018.08.07.0")>
 
 'Major.Minor.Build.Revision
 ' Build : 2000년 1월 1일 부터의 날자수

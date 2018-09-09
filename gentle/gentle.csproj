@@ -68,7 +68,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Class\cCalculator.cs" />
     <Compile Include="Class\cComTools.cs" />
+    <Compile Include="Class\cData.cs" />
     <Compile Include="Class\cFile.cs" />
     <Compile Include="Class\cImg.cs" />
     <Compile Include="Class\cRasterHeader.cs" />

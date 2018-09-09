@@ -23,6 +23,7 @@ namespace gentle
         public enum RendererRange
         {
             RendererFrom0to1,
+            RendererFrom0to2,
             RendererFrom0to5,
             RendererFrom0to10,
             RendererFrom0to50,
@@ -150,9 +151,12 @@ namespace gentle
 
                 if (renderingType == RendererType.WaterDepth)
                 {
-                    cr = 200;
-                    cg = 255;
-                    cb = 255;
+                    //cr = 200;
+                    //cg = 255;
+                    //cb = 255;
+                    cr = 255;
+                    cg =233;
+                    cb = 210;
                     miniRendererColors.Add(0, Color.FromArgb(255, cr, cg, cb));
                     cr = 150;
                     cg = 255;
@@ -221,7 +225,6 @@ namespace gentle
                     cg = 0;
                     cb = 200;
                     miniRendererColors.Add(16, Color.FromArgb(255, cr, cg, cb));
-
                     cr = 0;
                     cg = 0;
                     cb = 175;
@@ -230,17 +233,17 @@ namespace gentle
                     cg = 0;
                     cb = 150;
                     miniRendererColors.Add(18, Color.FromArgb(255, cr, cg, cb));
-                    cr = 135;
-                    cg = 15;
-                    cb = 255;
+                    cr = 0;
+                    cg = 0;
+                    cb = 125;
                     miniRendererColors.Add(19, Color.FromArgb(255, cr, cg, cb));
-                    cr = 200;
-                    cg = 20;
-                    cb = 250;
+                    cr = 0;
+                    cg =0;
+                    cb = 100;
                     miniRendererColors.Add(20, Color.FromArgb(255, cr, cg, cb));
-                    cr = 250;
-                    cg = 20;
-                    cb = 110;
+                    cr = 0;
+                    cg = 0;
+                    cb = 75;
                     miniRendererColors.Add(21, Color.FromArgb(255, cr, cg, cb));
                 }
 
@@ -388,7 +391,7 @@ namespace gentle
             }
         }
 
-        public void MakeImgFileUsingArrayFromTL_InParallel(string imgFPNtoMake, double[,] array, float imgWidth,
+        public Bitmap MakeImgFileAndGetImgUsingArrayFromTL_InParallel(string imgFPNtoMake, double[,] array, float imgWidth,
            float imgHeight, RendererRange rangeType, double nullValue = -9999)
         {
             try
@@ -402,6 +405,71 @@ namespace gentle
                     int CellHbmp = 0;
                     CellWbmp = Convert.ToInt32(imgWidth / colxCount);
                     CellHbmp = Convert.ToInt32(imgHeight / rowyCount);
+                    if (CellHbmp <= 0) { CellHbmp = 1; }
+                    if (CellWbmp <= 0) { CellWbmp = 1; }
+                    if (CellWbmp < CellHbmp)
+                    {
+                        CellHbmp = CellWbmp;
+                    }
+                    else
+                    {
+                        CellWbmp = CellHbmp;
+                    }
+                    Bitmap bm = new Bitmap(Convert.ToInt32(colxCount * CellWbmp) + 1, Convert.ToInt32(rowyCount * CellHbmp) + 1);
+                    //Bitmap bm = new Bitmap(Convert.ToInt32(imgWidth) + 1, Convert.ToInt32(imgHeight) + 1);
+                    BitmapData bitmapData = bm.LockBits(new Rectangle(0, 0, bm.Width, bm.Height), ImageLockMode.ReadWrite, bm.PixelFormat);
+                    int bytesPerPixel = System.Drawing.Bitmap.GetPixelFormatSize(bitmapData.PixelFormat) / 8;
+                    int heightInPixels = bitmapData.Height;
+                    int widthInBytes = bitmapData.Width * bytesPerPixel;
+                    byte* PtrFirstPixel = (byte*)bitmapData.Scan0;
+                    Parallel.For(0, rowyCount, y =>
+                    {
+                    //    for (int y = 0; y < rowyCount; y++)
+                    //{
+                        byte* currentLine = PtrFirstPixel + (y * bitmapData.Stride);
+                        for (int x = 0; x < colxCount; x++)
+                        {
+                            Color cToShow = DefaultNullColor;
+                            if (double.TryParse(array[x, y].ToString(), out double dv) == true)
+                            {
+                                    cToShow = GetColorFromMemoryRendererInDifferentInterval(dv, rangeType, nullValue);
+                            }
+                            currentLine[x * bytesPerPixel] = (byte)cToShow.B;
+                            currentLine[x * bytesPerPixel + 1] = (byte)cToShow.G;
+                            currentLine[x * bytesPerPixel + 2] = (byte)cToShow.R;
+                            currentLine[x * bytesPerPixel + 3] = (byte)255;
+                        }
+                        //}
+                    });
+
+                    bm.UnlockBits(bitmapData);
+                    bm.Save(imgFPNtoMake, ImageFormat.Png);
+                    return bm;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return Nothing;
+            }
+        }
+
+        public Bitmap MakeImgFileAndGetImgSameIntervalUsingArrayFromTL_InParallel(string imgFPNtoMake, double[,] array, float imgWidth,
+         float imgHeight, double rendererMaxV, double nullValue = -9999)
+        {
+            try
+            {
+                unsafe
+                {
+                    int colxCount = array.GetLength(0);
+                    int rowyCount = array.GetLength(1);
+                    int CellCount = (colxCount * rowyCount);
+                    int CellWbmp = 0;
+                    int CellHbmp = 0;
+                    CellWbmp = Convert.ToInt32(imgWidth / colxCount);
+                    CellHbmp = Convert.ToInt32(imgHeight / rowyCount);
+                    if (CellHbmp <= 0) { CellHbmp = 1; }
+                    if (CellWbmp <= 0) { CellWbmp = 1; }
                     if (CellWbmp < CellHbmp)
                     {
                         CellHbmp = CellWbmp;
@@ -418,31 +486,30 @@ namespace gentle
                     byte* PtrFirstPixel = (byte*)bitmapData.Scan0;
                     Parallel.For(0, rowyCount, y =>
                     {
-                        //for (int y = 0; y < rowyCount; y++)
-                        //{
                         byte* currentLine = PtrFirstPixel + (y * bitmapData.Stride);
                         for (int x = 0; x < colxCount; x++)
                         {
                             Color cToShow = DefaultNullColor;
                             if (double.TryParse(array[x, y].ToString(), out double dv) == true)
                             {
-                                cToShow = GetColorFromMemoryRendererInDifferentInterval(dv, rangeType, nullValue);
+                                    cToShow = GetColorFromMemoryRendererInSameInterval(dv, rendererMaxV, nullValue);
                             }
                             currentLine[x * bytesPerPixel] = (byte)cToShow.B;
                             currentLine[x * bytesPerPixel + 1] = (byte)cToShow.G;
                             currentLine[x * bytesPerPixel + 2] = (byte)cToShow.R;
                             currentLine[x * bytesPerPixel + 3] = (byte)255;
                         }
-                        //}
                     });
-                        
+
                     bm.UnlockBits(bitmapData);
                     bm.Save(imgFPNtoMake, ImageFormat.Png);
+                    return bm;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex);
+                return Nothing;
             }
         }
 
@@ -619,8 +686,17 @@ namespace gentle
                         }
                         else
                         {
-                            return miniRendererColors[(int)((value * 100) / (0.05 * 100))];
-                        }                                                  
+                            return miniRendererColors[(int)((value * 400) / 20)];
+                        }
+                    case RendererRange.RendererFrom0to2:
+                        if (value > 2)
+                        {
+                            return miniRendererColors[21];
+                        }
+                        else
+                        {
+                            return miniRendererColors[(int)((value * 200) / 20)];
+                        }
                     case RendererRange.RendererFrom0to5:
                         c1top = 1;
                         divider1 = 0.2;
@@ -750,7 +826,37 @@ namespace gentle
         }
 
 
-        public Color GetColorFromMemoryRendererInSameInterval(float value, cImg.RendererRange inRendererType)
+        public Color GetColorFromMemoryRendererInSameInterval(double value, double maxV, double nodataValue)
+        {
+            try
+            {
+                if (value < 0 || value ==nodataValue )
+                {
+                    return DefaultNullColor;
+                }
+                else if (value == 0)
+                {
+                    return miniRendererColors[0];
+                }
+                else if (value > maxV)
+                {
+                    return miniRendererColors[21];
+                }
+                else
+                {
+                    double multiple = 400 / maxV;
+                    return miniRendererColors[(int)(value* multiple / 20)];
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return DefaultNullColor;
+            }
+        }
+
+
+        public Color GetColorFromMemoryRendererInSameInterval(float value, cImg.RendererRange inRendererType, double nodataValue)
         {
             try
             {
@@ -809,7 +915,7 @@ namespace gentle
                     default:
                         return DefaultNullColor;
                 }
-                if (value < 0)
+                if (value < 0|| value== nodataValue)
                 {
                     return DefaultNullColor;
                 }

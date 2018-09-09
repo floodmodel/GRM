@@ -36,12 +36,6 @@ namespace gentle
             }
         }
 
-        public static bool IsNumeric(string value)
-        {
-            float v = 0;
-            return float.TryParse(value, out v);
-        }
-
         public static string GetTimeStringFromDateTimeFormat(string nowTimeToPrintOut)
         {
             nowTimeToPrintOut = nowTimeToPrintOut.Replace("/", "");
@@ -51,6 +45,34 @@ namespace gentle
 
             return nowTimeToPrintOut;
         }
+
+
+        public static string GetNowTimeToPrintOut(string strStartingTime, int TimeStepToOut_MIN, int intNowOrder)
+        {
+            string strNowTimeToPrintOut = null;
+            try
+            {
+                //strStartingTime = strStartingTime.Replace("/", "");
+                //strStartingTime = strStartingTime.Replace(" ", "");
+                //strStartingTime = strStartingTime.Replace(":", "");
+                //strStartingTime = strStartingTime.Replace("-", "");
+                strNowTimeToPrintOut = string.Format(Convert.ToDateTime(strStartingTime).Add(new System.TimeSpan(0, TimeStepToOut_MIN * intNowOrder, 0)).ToString("yyyyMMddHHmm"));
+                return strNowTimeToPrintOut;
+            }
+            catch (Exception ex)
+            {
+                return "-1";
+                throw ex;
+            }
+        }
+
+
+        public static bool IsNumeric(string value)
+        {
+            float v = 0;
+            return float.TryParse(value, out v);
+        }
+
 
         /// <summary>
         /// 문자열에 공백 있을 경우 필수 사용
@@ -79,24 +101,7 @@ namespace gentle
             }
         }
 
-        public static string GetNowTimeToPrintOut(string strStartingTime, int TimeStepToOut_MIN, int intNowOrder)
-        {
-            string strNowTimeToPrintOut = null;
-            try
-            {
-                strNowTimeToPrintOut = string.Format( Convert.ToDateTime(strStartingTime).Add(new System.TimeSpan(0, TimeStepToOut_MIN * intNowOrder, 0)).ToString(), "yyyy/MM/dd HH:mm");
-                strNowTimeToPrintOut = strNowTimeToPrintOut.Replace( "/", "");
-                strNowTimeToPrintOut = strNowTimeToPrintOut.Replace( " ", "");
-                strNowTimeToPrintOut = strNowTimeToPrintOut.Replace( ":", "");
-                strNowTimeToPrintOut = strNowTimeToPrintOut.Replace( "-", "");
-                return strNowTimeToPrintOut;
-            }
-            catch (Exception ex)
-            {
-                return  "-1";
-                throw ex;
-            }
-        }
+ 
 
         public static List<string> GetListFromDataTable(DataTable indt, int cidx)
         {

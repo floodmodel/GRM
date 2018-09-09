@@ -173,10 +173,10 @@ Public Class cFile
                     On Error Resume Next
                 End If
             Next
+            
+            bAlldeleted = True 'Assumption
             For Each fpn As String In FilePathNames
-                If File.Exists(fpn) = False Then
-                    bAlldeleted = True
-                Else
+                If File.Exists(fpn) Then
                     bAlldeleted = False
                     Exit For
                 End If

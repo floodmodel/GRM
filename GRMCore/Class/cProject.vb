@@ -738,7 +738,10 @@ Public Class cProject
                                                                    If wsid > 0 Then '유역 내부
                                                                        Dim cv As New cCVAttribute
                                                                        cv.WSID = wsid
+                                                                       cv.toBeSimulated = True
                                                                        mWSCells(cx, ry) = cv
+                                                                       'Else
+                                                                       '    mWSCells(cx, ry).toBeSimulated = False
                                                                    End If
                                                                Next cx
                                                            End Sub)
@@ -786,9 +789,12 @@ Public Class cProject
                             mWatershed.mCVidListForEachWS.Add(wsid, New List(Of Integer))
                         End If
                         mWatershed.mCVidListForEachWS(wsid).Add(cv.CVID)
+                        cv.toBeSimulated = True
                         mWSCells(cx, ry) = cv
                         CVs.Add(cv)
                         cvid += 1
+                        'Else
+                        '    mWSCells(cx, ry).toBeSimulated = False
                     End If
                 Next
             Next
@@ -1331,7 +1337,7 @@ Public Class cProject
             If Not row.IsGRMCodeNull Then
                 stCode = cSetGreenAmpt.GetSoilTextureCode(row.GRMCode.ToString)
             Else
-                cGRM.writelogAndConsole(String.Format("Soil texturer attribute code was not set for {0}. ", row.GridValue), True, True)
+                cGRM.writelogAndConsole(String.Format("Soil texture attribute code was not set for {0}. ", row.GridValue), True, True)
                 Return False
             End If
             vatSTcode.Add(CInt(row.GridValue), stCode)
@@ -1348,8 +1354,8 @@ Public Class cProject
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
                                                                            Dim cell As cCVAttribute = mWSCells(cx, ry)
                                                                            Dim value As Integer = CInt(valuesInaLine(cx))
-                                                                           vBak = value '여기서 최신 셀의 값
                                                                            If value > 0 Then
+                                                                               vBak = value '여기서 최신 셀의 값
                                                                                cell.SoilTextureValue = value
                                                                                cell.PorosityEtaOri = vatP(value)
                                                                                cell.EffectivePorosityThetaEori = vatEP(value)
@@ -1357,8 +1363,8 @@ Public Class cProject
                                                                                cell.HydraulicConductKori_mPsec = vatHC(value) / 100 / 3600    ' cm/hr -> m/s
                                                                                cell.SoilTextureCode = vatSTcode(value)
                                                                            Else
-                                                                               Console.WriteLine(String.Format("Soil texture file {0} has an invalid value. {1} was applied.",
-                                                                                GreenAmpt.mGridSoilTextureFPN, vBak), True, True)
+                                                                               Console.WriteLine(String.Format("Soil texture file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.",
+                                                                                GreenAmpt.mGridSoilTextureFPN, value, cx, ry, vBak), True, True)
                                                                                cell.SoilTextureValue = vBak
                                                                                cell.PorosityEtaOri = vatP(vBak)
                                                                                cell.EffectivePorosityThetaEori = vatEP(vBak)
@@ -1377,8 +1383,8 @@ Public Class cProject
                         If mWSCells(cx, ry) IsNot Nothing Then
                             Dim cell As cCVAttribute = mWSCells(cx, ry)
                             Dim value As Integer = CInt(valuesInaLine(cx))
-                            vBak = value '여기서 최신 셀의 값
                             If value > 0 Then
+                                vBak = value '여기서 최신 셀의 값
                                 cell.SoilTextureValue = value
                                 cell.PorosityEtaOri = vatP(value)
                                 cell.EffectivePorosityThetaEori = vatEP(value)
@@ -1386,7 +1392,7 @@ Public Class cProject
                                 cell.HydraulicConductKori_mPsec = vatHC(value) / 100 / 3600    ' cm/hr -> m/s
                                 cell.SoilTextureCode = vatSTcode(value)
                             Else
-                                Console.WriteLine(String.Format("Soil texture file {0} has an invalid value. {1} was applied.", GreenAmpt.mGridSoilTextureFPN, vBak), True, True)
+                                Console.WriteLine(String.Format("Soil texture file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.", GreenAmpt.mGridSoilTextureFPN, value, cx, ry, vBak), True, True)
                                 cell.SoilTextureValue = vBak
                                 cell.PorosityEtaOri = vatP(vBak)
                                 cell.EffectivePorosityThetaEori = vatEP(vBak)
@@ -1521,14 +1527,14 @@ Public Class cProject
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
                                                                            Dim value As Integer = CInt(valuesInaLine(cx))
-                                                                           vBak = value '여기서 최신 셀의 값
                                                                            If value > 0 Then
+                                                                               vBak = value '여기서 최신 셀의 값
                                                                                mWSCells(cx, ry).SoilDepthTypeValue = CInt(value)
                                                                                mWSCells(cx, ry).SoilDepthOri_m = vatSD(value) / 100     ' cm ->  m
                                                                                mWSCells(cx, ry).SoilDepthCode = vatSDcode(value)
                                                                            Else
-                                                                               Console.WriteLine(String.Format("Soil depth file {0} has an invalid value. {1} was applied.",
-                                                                                                              SoilDepth.mGridSoilDepthFPN, vBak), True, True)
+                                                                               Console.WriteLine(String.Format("Soil depth file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.",
+                                                                                                              SoilDepth.mGridSoilDepthFPN, value, cx, ry, vBak), True, True)
                                                                                mWSCells(cx, ry).SoilDepthTypeValue = CInt(vBak)
                                                                                mWSCells(cx, ry).SoilDepthOri_m = vatSD(vBak) / 100     ' cm ->  m
                                                                                mWSCells(cx, ry).SoilDepthCode = vatSDcode(vBak)
@@ -1543,14 +1549,14 @@ Public Class cProject
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) IsNot Nothing Then
                             Dim value As Integer = CInt(valuesInaLine(cx))
-                            vBak = value '여기서 최신 셀의 값
                             If value > 0 Then
+                                vBak = value '여기서 최신 셀의 값
                                 mWSCells(cx, ry).SoilDepthTypeValue = CInt(value)
                                 mWSCells(cx, ry).SoilDepthOri_m = vatSD(value) / 100     ' cm ->  m
                                 mWSCells(cx, ry).SoilDepthCode = vatSDcode(value)
                             Else
-                                Console.WriteLine(String.Format("Soil depth file {0} has an invalid value. {1} was applied.",
-                                                                                                            SoilDepth.mGridSoilDepthFPN, vBak), True, True)
+                                Console.WriteLine(String.Format("Soil depth file {0} has an invalid value{1} at ({2}, {3}). {4} was applied.",
+                                                                                                            SoilDepth.mGridSoilDepthFPN, value, cx, ry, vBak), True, True)
                                 mWSCells(cx, ry).SoilDepthTypeValue = CInt(vBak)
                                 mWSCells(cx, ry).SoilDepthOri_m = vatSD(vBak) / 100     ' cm ->  m
                                 mWSCells(cx, ry).SoilDepthCode = vatSDcode(vBak)

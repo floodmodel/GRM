@@ -128,6 +128,7 @@ Public Class cOutputControlRT
             Dim strFNP As String
             Dim strOutPutLine As String
             Dim FPNs As List(Of String)
+            Console.Write("Deleting previous output files... ")
             For Each row As GRMProject.WatchPointsRow In project.WatchPoint.mdtWatchPointInfo
                 strWPName = Replace(row.Name, ",", "_")
                 strFNP = project.ProjectPath & "\" & project.ProjectNameOnly & "RealTime_" & strWPName & ".out"
@@ -158,7 +159,7 @@ Public Class cOutputControlRT
                     End If
                 End If
             End If
-
+            Console.WriteLine("completed. ")
             If cRealTime.CONST_bUseDBMS_FOR_RealTimeSystem = False Then
                 'If RTproject.mbIsDWSS = True AndAlso Not IO.File.Exists(RTproject.mFPNDWssFCData) Then
                 '    strOutPutLine = "CVID," + cGRM.CONST_OUTPUT_TABLE_TIME_FIELD_NAME + ",Value" & vbCrLf

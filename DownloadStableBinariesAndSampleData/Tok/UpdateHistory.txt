@@ -1,0 +1,44 @@
+2018.08.31. 처음 배포
+Tok의 특징과 주요 기능은 아래와 같습니다.
+0. 다수의 텍스트 파일을 처리할때 사용
+1. GIS 관련 기능을 모두 제외. 그래서 ASCII 텍스트 파일, 일반 텍스트 파일을 대상으로 함
+   (단, TIFF와 ASCII 파일의 변환기능은 포함 - GDAL 이용, 다른 S/W에 있는 기능은 가능한 제외..)
+2. ascii 파일 변환 - TIFF<->ASCII, clipping, resampling
+3. ascii 파일에서 정보 추출
+    - 사용되는 ascii 파일들은 모두 같은 해상도와 영역을 대상으로 해야 합니다.
+    - 특정 위치의 셀 값, 특정 영역의 평균값
+    - 전체 ascii 파일 누적,  ascii 파일 몇 개씩 누적
+4. 텍스트 파일에서 어떤 조건에 위치한 값 추출
+5. 텍스트 파일에서 어떤 문자 수정
+6. ascii 파일의 어떤 영역에서 어떤 값을 다른 값으로 수정
+7. 파일 이름 변경
+8. 파일 이름을 일련번호 혹은 날자포맷(yyyymmddHHmm)으로 수정
+9. 최대 3개의 ascii 래스터 파일을 이용해서 간단한 대수연산, 조건연산, 조건연산에서 대수연산 포함
+
+
+2018.09.06. 업데이트, 버그 수정 내용
+  - 모든 ascii 데이터가 소수점 2자리 까지 출력되는 현상 수정(원본 데이터들의 자리수 그대로 유지되게 수정)
+  - raster calculator에서 버그 수정
+  - 클리핑에서 실수형 셀사이즈 관련 버그 수정
+  - extension filter 관련 버그 수정
+  - converting format, resampling, clipping에서 xml 파일 안만들어지게 수정
+  - Progress bar stop 기능 관련 수정
+2018.09.07
+  - Progress bar 버그 수정
+  - Search and replace line by line 기능 추가
+  - 텍스트 Line 추가 기능 추가
+  - 라인 삭제 기능 추가
+  - 파일 경로+이름 리스트 저장 기능 추가
+
+
+
+파일 다운로드와 세팅 가이드는         https://github.com/floodmodel/GRM/blob/master/DownloadStableBinariesAndSampleData/Tok/Tok_SettingAndStarting_Guideline_20180904.pdf 
+
+파일 다운로드 위치는 
+        https://github.com/floodmodel/GRM/tree/master/DownloadStableBinariesAndSampleData/Tok
+   에서 gdal.zip, Tok.exe, gentle.dll 3개를 다운로드 하시고, 
+   gdal.zip은 Tok.exe와 같은 폴더에 폴더째로 압축 풀어서 사용하시면 됩니다.
+
+(ex,  d:\TokTool\Tok.exe
+       d:\TokTool\gentle.exe
+       d:\TokTool\gdal\(gdal files.....)

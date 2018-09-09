@@ -75,12 +75,12 @@ namespace gentle
             }
         }
 
-        public int nodataValue
+        public double nodataValue
         {
             get
             {
-                int v;
-                if (int.TryParse(mNODATAvalue, out v))
+                double v;
+                if (double.TryParse(mNODATAvalue, out v))
                 {
                     return v;
                 }

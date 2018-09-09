@@ -47,8 +47,8 @@ Public Class cRasterOutput
 
     Sub New(ByVal project As cProject)
         mProject = project
-        mImgHeight = 433
-        mImgWidth = 583
+        mImgHeight = 370 '433
+        mImgWidth = 370 '583
         mColCount = mProject.Watershed.mColCount
         mRowCount = mProject.Watershed.mRowCount
         mASCHeaderStringAll = cTextFile.MakeHeaderString(mColCount, mRowCount,
@@ -165,18 +165,12 @@ Public Class cRasterOutput
                     If inCells(nc, nr) IsNot Nothing Then
                         If inCells(nc, nr).toBeSimulated = True Then
                             If mbMakeArySSR = True Then
-                                'Dim v As Single = inCells(nc, nr).soilSaturationRatio
-                                'mArraySSR(nc, nr) = CDbl(Format(v, sformat))
                                 mArraySSR(nc, nr) = inCells(nc, nr).soilSaturationRatio
                             End If
                             If mbMakeAryRF = True Then
-                                'Dim v As Single = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
-                                'mArrayRF(nc, nr) = CDbl(Format(v, sformat))
                                 mArrayRF(nc, nr) = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
                             End If
                             If mbMakeAryRFAcc = True Then
-                                'Dim v As Single = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
-                                'mArrayRFAcc(nc, nr) = CDbl(Format(v, sformat))
                                 mArrayRFAcc(nc, nr) = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
                             End If
                             If mbMakeAryQ = True Then
@@ -186,9 +180,21 @@ Public Class cRasterOutput
                                 Else
                                     v = inCells(nc, nr).mStreamAttr.QCVch_i_j_m3Ps
                                 End If
-                                'mArrayQ(nc, nr) = CDbl(Format(v, sformat))
                                 mArrayQ(nc, nr) = v
                             End If
+                        End If
+                    Else
+                        If mbMakeArySSR = True Then
+                            mArraySSR(nc, nr) = -9999
+                        End If
+                        If mbMakeAryRF = True Then
+                            mArrayRF(nc, nr) = -9999
+                        End If
+                        If mbMakeAryRFAcc = True Then
+                            mArrayRFAcc(nc, nr) = -9999
+                        End If
+                        If mbMakeAryQ = True Then
+                            mArrayQ(nc, nr) = -9999
                         End If
                     End If
                 Next
@@ -205,18 +211,12 @@ Public Class cRasterOutput
                                                                    If inCells(nc, nr) IsNot Nothing Then
                                                                        If inCells(nc, nr).toBeSimulated = True Then
                                                                            If mbMakeArySSR = True Then
-                                                                               'Dim v As Single = inCells(nc, nr).soilSaturationRatio
-                                                                               'mArraySSR(nc, nr) = CDbl(Format(v, sformat))
                                                                                mArraySSR(nc, nr) = inCells(nc, nr).soilSaturationRatio
                                                                            End If
                                                                            If mbMakeAryRF = True Then
-                                                                               'Dim v As Single = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
-                                                                               'mArrayRF(nc, nr) = CDbl(Format(v, sformat))
                                                                                mArrayRF(nc, nr) = (inCells(nc, nr).RF_dtPrintOut_meter * 1000)
                                                                            End If
                                                                            If mbMakeAryRFAcc = True Then
-                                                                               'Dim v As Single = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
-                                                                               'mArrayRFAcc(nc, nr) = CDbl(Format(v, sformat))
                                                                                mArrayRFAcc(nc, nr) = (inCells(nc, nr).RFAcc_FromStartToNow_meter * 1000)
                                                                            End If
                                                                            If mbMakeAryQ = True Then
@@ -226,9 +226,21 @@ Public Class cRasterOutput
                                                                                Else
                                                                                    v = inCells(nc, nr).mStreamAttr.QCVch_i_j_m3Ps
                                                                                End If
-                                                                               'mArrayQ(nc, nr) = CDbl(Format(v, sformat))
                                                                                mArrayQ(nc, nr) = v
                                                                            End If
+                                                                       End If
+                                                                   Else
+                                                                       If mbMakeArySSR = True Then
+                                                                           mArraySSR(nc, nr) = -9999
+                                                                       End If
+                                                                       If mbMakeAryRF = True Then
+                                                                           mArrayRF(nc, nr) = -9999
+                                                                       End If
+                                                                       If mbMakeAryRFAcc = True Then
+                                                                           mArrayRFAcc(nc, nr) = -9999
+                                                                       End If
+                                                                       If mbMakeAryQ = True Then
+                                                                           mArrayQ(nc, nr) = -9999
                                                                        End If
                                                                    End If
                                                                Next
@@ -253,9 +265,7 @@ Public Class cRasterOutput
         mImgSSR = Nothing
         'mImgSSR = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoSSR.PFN, mArraySSR,
         '                                           mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
-        'imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoSSR.PFN, mArraySSR,
-        '                                           mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
-        imgMaker.MakeImgFileUsingArrayFromTL_InParallel(mImgInfoSSR.PFN, mArraySSR,
+        mImgSSR = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoSSR.PFN, mArraySSR,
                                                    mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
 
     End Sub
@@ -271,13 +281,11 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeImgRFDInner()
-        Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
+        Dim imgMaker As New gentle.cImg(cImg.RendererType.WaterDepth)
         mImgRF = Nothing
         'mImgRF = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
         '                                           mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
-        'imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
-        '                                           mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
-        imgMaker.MakeImgFileUsingArrayFromTL_InParallel(mImgInfoRF.PFN, mArrayRF,
+        mImgRF = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoRF.PFN, mArrayRF,
                                                    mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
 
     End Sub
@@ -294,13 +302,11 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeImgRFAccDInner()
-        Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
+        Dim imgMaker As New gentle.cImg(cImg.RendererType.WaterDepth)
         mImgRFacc = Nothing
         'mImgRFacc = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
         '                                           mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
-        'imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
-        '                                           mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
-        imgMaker.MakeImgFileUsingArrayFromTL_InParallel(mImgInfoRFAcc.PFN, mArrayRFAcc,
+        mImgRFacc = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoRFAcc.PFN, mArrayRFAcc,
                                                    mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
 
     End Sub
@@ -316,14 +322,11 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeImgFlowDInner()
-        Dim imgMaker As New gentle.cImg(cImg.RendererType.Risk)
+        Dim imgMaker As New gentle.cImg(cImg.RendererType.WaterDepth)
         mImgFlow = Nothing
         'mImgFlow = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
         '                                           mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
-        'imgMaker.MakeImgFileUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
-        '                                           mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
-
-        imgMaker.MakeImgFileUsingArrayFromTL_InParallel(mImgInfoFlow.PFN, mArrayQ,
+        mImgFlow = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoFlow.PFN, mArrayQ,
                                                    mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
 
     End Sub
@@ -335,8 +338,8 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeASCTextFileInnerSSRD()
-        gentle.cTextFile.MakeASCTextFile(mASCfpnSSRD, mASCHeaderStringAll, "-9999", mArraySSR)
-        'gentle.cTextFile.MakeASCTextFile(mASCfpnSSRD, mASCHeaderStringAll, "-9999", mArraySSRasOneD)
+        cTextFile.MakeASCTextFile(mASCfpnSSRD, mASCHeaderStringAll, mArraySSR, 2)
+        'cTextFile.MakeASCTextFileAsParallel(mASCfpnSSRD, mASCHeaderStringAll, "-9999", mArraySSR) '이게 더 느리다.. 취합과정 땜에..
 
     End Sub
 
@@ -347,7 +350,8 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeASCTextFileInnerRFD()
-        cTextFile.MakeASCTextFile(mASCfpnRFD, mASCHeaderStringAll, "-9999", mArrayRF)
+        cTextFile.MakeASCTextFile(mASCfpnRFD, mASCHeaderStringAll, mArrayRF, 2)
+        'cTextFile.MakeASCTextFileAsParallel(mASCfpnRFD, mASCHeaderStringAll, "-9999", mArrayRF)'이게 더 느리다.. 취합과정 땜에..
     End Sub
 
     Private Sub StartMakeASCTextFileRFaccD()
@@ -357,7 +361,8 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeASCTextFileInnerRFaccD()
-        cTextFile.MakeASCTextFile(mASCfpnRFaccD, mASCHeaderStringAll, "-9999", mArrayRFAcc)
+        cTextFile.MakeASCTextFile(mASCfpnRFaccD, mASCHeaderStringAll, mArrayRFAcc, 2)
+        'cTextFile.MakeASCTextFileAsParallel(mASCfpnRFaccD, mASCHeaderStringAll, "-9999", mArrayRFAcc) '이게 더 느리다.. 취합과정 땜에..
     End Sub
 
     Private Sub StartMakeASCTextFileFlowD()
@@ -367,7 +372,8 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeASCTextFileInnerFlowD()
-        cTextFile.MakeASCTextFile(mASCfpnFlowD, mASCHeaderStringAll, "-9999", mArrayQ)
+        cTextFile.MakeASCTextFile(mASCfpnFlowD, mASCHeaderStringAll, mArrayQ, 2)
+        'cTextFile.MakeASCTextFileAsParallel(mASCfpnFlowD, mASCHeaderStringAll, "-9999", mArrayQ) '이게 더 느리다.. 취합과정 땜에..
     End Sub
 
     Public Property ImgWidth As Integer

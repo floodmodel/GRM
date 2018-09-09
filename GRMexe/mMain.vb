@@ -92,8 +92,8 @@ Module mMain
 
     Private Sub StartSingleRun(ByVal currentPrjFPN As String, Optional bDeleteFilesExceptQ As Boolean = False)
         ''여기서 셀 정보를 미리 알 수 있다.
-        'Dim WSFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_watershed_reverse.asc"
-        'Dim SlopeFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Slope.asc"
+        'Dim WSFPN As String = "D:/Nakdong/watershed/ND_Watershed.asc"
+        'Dim SlopeFPN As String = "D:/Nakdong/watershed/ND_Slope.asc"
         'Dim FdirFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Fdr.asc"
         'Dim FacFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Fac.asc"
         'Dim streamFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Stream.asc"
@@ -126,6 +126,9 @@ Module mMain
             '여기서 셀 정보를 미리 알 수 있다.
             'Dim wsinfo As New cGetWatershedInfo(currentPrjFPN)
             'Dim mdwsid As List(Of Integer) = wsinfo.mostDownStreamWSIDs
+            ''Dim uswsid As List(Of Integer) = wsinfo.
+
+
             'Dim slp As Single = wsinfo.subwatershedPars(1).minSlopeChBed
             'Dim ukk As String = wsinfo.subwatershedPars(1).UKType
             'Dim cc As Integer = wsinfo.cellCountInWatershed

@@ -269,15 +269,64 @@ namespace gentle
         {
             List<string> lstFLselected = new List<string>();
             string[] lstFLallinSourcePath = Directory.GetFiles(folderPath);
-            foreach (string rfFN in lstFLallinSourcePath)
+            if (filePattern != "")
             {
-                if (rfFN.Contains(filePattern.ToString()) == true)
+                foreach (string rfFN in lstFLallinSourcePath)
                 {
-                    lstFLselected.Add(Path.GetFileName(rfFN));
+                    if (Path.GetExtension(rfFN) == filePattern.Trim())
+                    {
+                        lstFLselected.Add(Path.GetFileName(rfFN));
+                    }
+                }
+            }
+            else
+            {
+                lstFLselected = lstFLallinSourcePath.ToList();
+            }
+            return lstFLselected;
+        }
+
+        public static List<string> GetFileList(string folderPath, string fileNameFilter, string filePattern)
+        {
+            List<string> lstFLselected = new List<string>();
+            string[] lstFLallinSourcePath = Directory.GetFiles(folderPath);
+            if (filePattern != "" || fileNameFilter != "")
+            {
+                foreach (string fn in lstFLallinSourcePath)
+                {
+                    if (filePattern != "" && fileNameFilter == "")
+                    {
+                        if (Path.GetExtension(fn) == filePattern.Trim())
+                        {
+                            lstFLselected.Add(Path.GetFileName(fn));
+                        }
+                    }
+                    if (fileNameFilter != "" && filePattern == "")
+                    {
+                        if (fn.Contains(fileNameFilter) == true)
+                        {
+                            lstFLselected.Add(Path.GetFileName(fn));
+                        }
+                    }
+                    if (fileNameFilter != "" && filePattern != "")
+                    {
+                        if (fn.Contains(fileNameFilter) == true && Path.GetExtension(fn) == filePattern.Trim())
+                        {
+                            lstFLselected.Add(Path.GetFileName(fn));
+                        }
+                    }
+                }
+            }
+            else
+            {
+                foreach (string fn in lstFLallinSourcePath)
+                {
+                    lstFLselected.Add(Path.GetFileName(fn));
                 }
             }
             return lstFLselected;
         }
+
 
 
         public void AddToDataTable(string[] items, string SourceFilePath, DataTable dtTarget, string NameCol1, string NameCol2, string NameCol3)

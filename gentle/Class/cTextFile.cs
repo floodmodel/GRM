@@ -110,52 +110,143 @@ namespace gentle
             return true;
         }
 
-        public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, float cellSize, string nodataValue, double[,] array)
+        public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, float cellSize, string nodataValue, double[,] array, int decimalPartN)
         {
             string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, nodataValue);
             File.AppendAllText(fpn, header);
-            WriteTwoDimData(fpn, array);
-            //for (int nr = 0; nr <= nrows - 1; nr++)
-            //{
-            //    string arow = "";
-            //    for (int nc = 0; nc <= ncols - 1; nc++)
-            //    {
-            //        arow = arow + array[nc, nr].ToString() + " ";
-            //    }
-            //    arow = arow.Trim() + "\r\n";
-            //    File.AppendAllText(fpn, arow);
-            //}
+            WriteTwoDimData(fpn, array, decimalPartN);
             return true;
         }
 
-
-        public static bool MakeASCTextFile(string fpn, string allHeader, string nodataValue, double[,] array)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fpn"></param>
+        /// <param name="allHeader">모든 헤더. nodata 부분까지 포함</param>
+        /// <param name="array">래스터 값을 저장하고 있는 2차원 배열</param>
+        /// <param name="decimalPartN">소숫점 이하 출력 자리 수</param>
+        /// <returns></returns>
+        public static bool MakeASCTextFile(string fpn, string allHeader, double[,] array, int decimalPartN)
         {
             File.AppendAllText(fpn, allHeader);
-            WriteTwoDimData(fpn, array);
-            //string rows = "";
-            //for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
-            //{
-            //    string arow = "";
-            //    for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
-            //    {
-            //        arow = arow + array[nc, nr].ToString() + " ";
-            //    }
-            //    arow = arow.Trim() + "\r\n";
-            //    rows = rows + arow;
-            //    if (nr % 2 == 0)
-            //    {
-            //        File.AppendAllText(fpn, rows); 
-            //        rows = "";
-            //    }
-            //    //File.AppendAllText(fpn, arow); // 이방법이 더 빠르다.
-            //}
-            //File.AppendAllText(fpn, rows);
-            ////File.AppendAllText(fpn, rows); // 이방법이 더 느리다
+            WriteTwoDimData(fpn, array, decimalPartN);
             return true;
         }
-        
-        private static void WriteTwoDimData(string fpn, double [,] array)
+
+
+        public static double[,] addTwoDimArrayOfASCraster(double[,] inArray1, double[,] inArray2, double nodataValue, bool allowNegative = false)
+        {
+            double[,] array = new double[inArray1.GetLength(0), inArray1.GetLength(1)];
+
+            //for (int y = 0; y < array.GetLength(1) ; y++)
+            //{
+            //    for (int x = 0; x < array.GetLength(0); x++)
+            //    {
+            //        if (inArray1[x, y] == nodataValue || inArray2[x, y] == nodataValue)
+            //        {
+            //            if (inArray1[x, y] == nodataValue & inArray2[x, y] == nodataValue)
+            //            {
+            //                array[x, y] = nodataValue;//둘다 null 이면,  null
+            //            }
+            //            else
+            //            {
+            //                if (inArray1[x, y] == nodataValue)
+            //                {
+            //                    inArray1[x, y] = 0; //둘중 하나가 null이 아니면, 0으로
+            //                }
+            //                if (inArray2[x, y] == nodataValue)
+            //                {
+            //                    inArray2[x, y] = 0; //둘중 하나가 null이 아니면, 0으로
+            //                }
+            //                if (allowNegative == false)
+            //                {
+            //                    if (inArray1[x, y] < 0) { inArray1[x, y] = 0; }
+            //                    if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
+            //                }
+            //                array[x, y] = inArray1[x, y] + inArray2[x, y];
+            //            }
+            //        }
+            //        else
+            //        {
+            //            if (allowNegative == false)
+            //            {
+            //                if (inArray1[x, y] < 0) { inArray1[x, y] = 0; }
+            //                if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
+            //            }
+            //            array[x, y] = inArray1[x, y] + inArray2[x, y];
+
+            //        }
+            //    }
+            //}
+
+            var options = new ParallelOptions { MaxDegreeOfParallelism = Environment.ProcessorCount  };
+
+            Parallel.For(0, array.GetLength(1), options, delegate (int y)
+            {
+                for (int x = 0; x < array.GetLength(0); x++)
+                {
+                    if (inArray1[x, y] == nodataValue || inArray2[x, y] == nodataValue)
+                    {
+                        if (inArray1[x, y] == nodataValue & inArray2[x, y] == nodataValue)
+                        {
+                            array[x, y] = nodataValue;//둘다 null 이면,  null
+                        }
+                        else
+                        {
+                            if (inArray1[x, y] == nodataValue)
+                            {
+                                inArray1[x, y] = 0; //둘중 하나가 null이 아니면, 0으로
+                            }
+                            if (inArray2[x, y] == nodataValue)
+                            {
+                                inArray2[x, y] = 0; //둘중 하나가 null이 아니면, 0으로
+                            }
+                            if (allowNegative == false)
+                            {
+                                if (inArray1[x, y] < 0) { inArray1[x, y] = 0; }
+                                if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
+                            }
+                            array[x, y] = inArray1[x, y] + inArray2[x, y];
+                        }
+                    }
+                    else
+                    {
+                        if (allowNegative == false)
+                        {
+                            if (inArray1[x, y] < 0) { inArray1[x, y] = 0; }
+                            if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
+                        }
+                        array[x, y] = inArray1[x, y] + inArray2[x, y];
+
+                    }
+                }
+            });
+
+            return array;
+        }
+
+        private static void WriteTwoDimData(string fpn, double[,] array, int decimalPartNum)
+        {
+            string dpn = "";
+            if (decimalPartNum == 1) { dpn = "F1"; }
+            if (decimalPartNum == 2) { dpn = "F2"; }
+            if (decimalPartNum == 3) { dpn = "F3"; }
+            if (decimalPartNum == 4) { dpn = "F4"; }
+            if (decimalPartNum == 5) { dpn = "F5"; }
+            StringBuilder sbALL = new StringBuilder();
+            for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
+            {
+                for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
+                {
+                    sbALL.Append(array[nc, nr].ToString(dpn) +" ");
+                }
+                sbALL.Append("\r\n");
+            }
+            File.AppendAllText(fpn, sbALL.ToString());
+        }
+
+
+        private static void WriteTwoDimData_old(string fpn, double[,] array)
         {
             StringBuilder sbALL = new StringBuilder("");
             for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
@@ -190,13 +281,44 @@ namespace gentle
             }
             File.AppendAllText(fpn, rows);
         }
+
         
-        public static bool MakeASCTextFileAsParallel(string fpn, string allHeader, string nodataValue, double[,] array)
+        public static bool MakeASCTextFileAsParallel(string fpn, string allHeader, double[,] array)
+
         {
             File.AppendAllText(fpn, allHeader);
             int rowYcount = array.GetLength(1);
             int colXcount = array.GetLength(0);
-            var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+            //var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+            var options = new ParallelOptions { MaxDegreeOfParallelism = Environment .ProcessorCount*2 };
+            string[] rows = new string[rowYcount];
+            StringBuilder[] sbs= new StringBuilder[rowYcount];
+            Parallel.For(0, rowYcount, options, delegate (int ry)
+            {
+                sbs[ry] = new StringBuilder();
+                for (int cx = 0; cx < colXcount; cx++)
+                {
+                    sbs[ry].Append(array[cx, ry].ToString("F2") + " ");
+                }
+                sbs[ry].Append("\r\n");
+            });
+            StringBuilder sbALL = new StringBuilder();
+            for (int nr = 0; nr < rowYcount; nr++)
+            {
+                sbALL.Append(sbs[nr]);
+            }
+            File.AppendAllText(fpn, sbALL.ToString());
+            return true;
+        }
+
+
+        public static bool MakeASCTextFileAsParallel_old(string fpn, string allHeader, double[,] array)
+        {
+            File.AppendAllText(fpn, allHeader);
+            int rowYcount = array.GetLength(1);
+            int colXcount = array.GetLength(0);
+            //var options = new ParallelOptions { MaxDegreeOfParallelism = -1 };
+            var options = new ParallelOptions { MaxDegreeOfParallelism = Environment .ProcessorCount *4 };
             string[] rows = new string[rowYcount];
             Parallel.For(0, rowYcount, options, delegate (int ry)
             {
@@ -247,7 +369,7 @@ namespace gentle
             {
                 string line = reader.ReadLine();
                 string[] sep = GetTextFileValueSeparator(separator);
-                string[] parts = line.Split(sep, StringSplitOptions.RemoveEmptyEntries);
+                string[] parts = line.Split( sep, StringSplitOptions.RemoveEmptyEntries);
                 if (parts != null && parts.Length > 1)
                 {
                     int keyvalue = 0;
@@ -289,6 +411,94 @@ namespace gentle
             }
             return sepArray;
         }
+
+
+        public static void getTextInTextFile(string strSourceFPN, string strTagetFPN,
+            int startingLineIndex , int endingLineIndex , int colidx, bool onlyNumeric)
+        {
+            string[] seps = GetTextFileValueSeparator(ValueSeparator.ALL);
+            string[] Lines = System.IO.File.ReadAllLines(strSourceFPN);
+            StringBuilder sb = new StringBuilder();
+            if(startingLineIndex ==0 && endingLineIndex ==0)
+            {
+                endingLineIndex = Lines.Length;
+            }
+            for (int n = 0; n < Lines.Length ; n++)
+            {
+                if  (n>=startingLineIndex && n<= endingLineIndex )
+                {
+                    string[] texts = Lines[n].Split(seps, StringSplitOptions.RemoveEmptyEntries);
+                    string v="" ;
+                    if (texts.Length > colidx)
+                    {
+                        if (onlyNumeric = true && cComTools.IsNumeric(texts[colidx]) == true)
+                        {
+                            v = texts[colidx].Trim();
+                        }
+                        else
+                        {
+                            v = texts[colidx].Trim();
+                        }
+                    }
+                    if (v!="")
+                    {
+                        sb.Append(v + "\r\n");
+                    }
+                }
+                if (n==endingLineIndex )
+                {
+                    break;
+                }
+            }
+            File.AppendAllText(strTagetFPN, sb.ToString());
+        }
+
+        public static void getTextInTextFile(string strSourceFPN, string strTagetFPN, 
+          string startingText, string endingText, int colidx, bool onlyNumeric)
+        {
+
+            string[] seps = GetTextFileValueSeparator(ValueSeparator.ALL);
+            string[] Lines = System.IO.File.ReadAllLines(strSourceFPN);
+            StringBuilder sb = new StringBuilder();
+            bool started = false;
+            bool endingConditionApplied = true;
+            if (startingText == "") { started = true; }
+            if (endingText == "") { endingConditionApplied = false; }
+            for (int n = 0; n <= Lines.Length - 1; n++)
+            {
+                if (started==false && Lines[n].Contains(startingText))
+                {
+                    started = true;
+                }
+                if (started ==true)
+                {
+                    string[] texts = Lines[n].Split(seps, StringSplitOptions.RemoveEmptyEntries);
+                    string v="";
+                    if (texts.Length >colidx)
+                    {
+                        if (onlyNumeric = true && cComTools.IsNumeric(texts[colidx]) == true)
+                        {
+                            v = texts[colidx].Trim();
+                        }
+                        else
+                        {
+                            v = texts[colidx].Trim();
+                        }
+                    }
+                    if (v != "")
+                    {
+                        sb.Append(v + "\r\n");
+                    }
+                }
+                if (started==true && endingConditionApplied == true && Lines[n].Contains(endingText))
+                {
+                    break;
+                }
+            }
+            File.AppendAllText(strTagetFPN, sb.ToString());
+        }
+
+
         /// <summary>
         /// 이건 수정할 라인의 번호를 미리 알고 있거나, 포함된 문자 중 일부를 알고 있을때 사용
         /// </summary>
@@ -358,7 +568,8 @@ namespace gentle
             }
         }
 
-        public static void ReplaceTextInTextFile(string strSourceFNP, string strTagetFNP, string strTextToFind, string strTextToReplace)
+        public static void ReplaceTextInTextFile(string strSourceFNP, string strTagetFNP, string strTextToFind, string strTextToReplace,
+            int startingLineIndex = 0, int endingLineIndex = 0)
         {
             try
             {
@@ -368,8 +579,15 @@ namespace gentle
                 string strOneLine = null;
                 for (intNLine = 0; intNLine <= intTotCountLine - 1; intNLine++)
                 {
-                    strOneLine = Convert.ToString(strLines[intNLine]);
-                    strLines[intNLine] = strOneLine.Replace(strTextToFind, strTextToReplace);
+                    if (endingLineIndex > 0 && intNLine > endingLineIndex)
+                    {
+                        break;
+                    }
+                    if (intNLine >= startingLineIndex)
+                    {
+                        strOneLine = Convert.ToString(strLines[intNLine]);
+                        strLines[intNLine] = strOneLine.Replace(strTextToFind, strTextToReplace);
+                    }
                 }
                 System.IO.File.WriteAllLines(strTagetFNP, strLines);
             }
@@ -379,7 +597,8 @@ namespace gentle
             }
         }
 
-        public static void ReplaceTextInTextFile(string strSourceFNP, string strTextToFind, string strTextToReplace)
+        public static void ReplaceTextInTextFile(string strSourceFNP, string strTextToFind, string strTextToReplace,
+             int startingLineIndex = 0, int endingLineIndex = 0)
         {
             try
             {
@@ -389,8 +608,15 @@ namespace gentle
                 string strOneLine = null;
                 for (intNLine = 0; intNLine <= intTotCountLine - 1; intNLine++)
                 {
-                    strOneLine = Convert.ToString(strLines[intNLine]);
-                    strLines[intNLine] = strOneLine.Replace(strTextToFind, strTextToReplace);
+                    if (endingLineIndex > 0 && intNLine > endingLineIndex)
+                    {
+                        break;
+                    }
+                    if (intNLine >= startingLineIndex)
+                    {
+                        strOneLine = Convert.ToString(strLines[intNLine]);
+                        strLines[intNLine] = strOneLine.Replace(strTextToFind, strTextToReplace);
+                    }
                 }
                 System.IO.File.WriteAllLines(strSourceFNP, strLines);
             }
@@ -399,6 +625,131 @@ namespace gentle
                 throw ex;
             }
         }
+
+
+        public static void ReplaceTextInASCiiRasterRange(cTextFileReaderASC inAscRaster, string strTagetFNP,
+            string strTextToFind, string strTextToReplace,
+             int tlXcol, int tlYrow, int lrXcol, int lrYrow)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(inAscRaster.HeaderStringAll+"\r\n");
+            for (int r = 0; r < inAscRaster.Header.numberRows; r++)
+            {
+                if (r >= tlYrow && r <= lrYrow)
+                {
+                    string[] valuesInaRow = inAscRaster.ValuesInOneRowFromTopLeft(r);
+
+                    for (int c = tlXcol; c <= lrXcol; c++)
+                    {
+                        if (valuesInaRow[c] == strTextToFind)
+                        {
+                            valuesInaRow[c] = strTextToReplace;
+                        }
+                    }
+
+                    StringBuilder sbAline = new StringBuilder();
+                    for (int c = 0; c < valuesInaRow.Length; c++)
+                    {
+                        sbAline.Append(valuesInaRow[c]+" ");
+                    }
+                    sb.Append(sbAline.ToString()+ "\r\n");
+                }
+                else
+                {
+                    sb.Append(inAscRaster.OneRowContainsValuesFromTop(r)+ "\r\n");
+                }
+            }
+            File.AppendAllText(strTagetFNP,sb.ToString());
+
+        }
+
+        public static void ReplaceLineByLineInTextFile(string strSourceFNP, string strTagetFNP, string strTextToFind, string strTextToReplace,
+            int startingLineIndex = 0, int endingLineIndex = 0)
+        {
+            try
+            {
+                string[] strLines = System.IO.File.ReadAllLines(strSourceFNP);
+                int intTotCountLine = strLines.Length;
+                int intNLine = 0;
+                string strOneLine = null;
+                for (intNLine = 0; intNLine <= intTotCountLine - 1; intNLine++)
+                {
+                    if (endingLineIndex > 0 && intNLine > endingLineIndex)
+                    {
+                        break;
+                    }
+                    if (intNLine >= startingLineIndex)
+                    {
+                        if (strLines[intNLine].Trim () == strTextToFind .Trim ())
+                        {
+                            strLines[intNLine] = strTextToReplace.Trim();
+                        }
+                    }
+                }
+                System.IO.File.WriteAllLines(strTagetFNP, strLines);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        public static void RemoveAlineFromTextFile(string strSourceFNP, string strTagetFNP, int lineIndexToStart = 0, int lineIdexToEnd=0)
+        {
+            try
+            {
+                string[] lines = System.IO.File.ReadAllLines(strSourceFNP);
+               List<string> lst = lines.ToList();
+                for (int r=lineIndexToStart; r<= lineIdexToEnd;r++)
+                {
+                    lst.RemoveAt(lineIndexToStart); // 인덱스 개수가 계속 줄어드니까.. 이렇게 해야한다.
+                }
+                string[] newLines = lst.ToArray();
+                System.IO.File.WriteAllLines(strTagetFNP, newLines);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+
+        public static void InsertAlineIntoTextFile(string strSourceFNP, string strTagetFNP, string txtToInsert,
+    int lineIndexToInsert = 0)
+        {
+            try
+            {
+                string[] lines = System.IO.File.ReadAllLines(strSourceFNP);
+                string[] newLines = new string[lines.Length+1];
+                bool inserted = false;
+                for (int y = 0; y<lines.Length+1;y++)
+                {
+                    if (y==lineIndexToInsert )
+                    {
+                        newLines[y] = txtToInsert;
+                        inserted = true;
+                    }
+                    else
+                    {
+                        if (inserted ==true )
+                        {
+                            newLines[y] = lines[y-1];
+                        }
+                        else
+                        {
+                            newLines[y] = lines[y];
+                        }
+                    }
+                }
+                System.IO.File.WriteAllLines(strTagetFNP, newLines);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+
 
         public static DataTable ReadTextFileAndSetDataTable(string FPNsource, cTextFile.ValueSeparator valueSeparator, int fieldCount = 0)
         {
@@ -458,8 +809,8 @@ namespace gentle
 
 
         public static string[] ReadGRMoutFileAndMakeStringArray(string[] BaseString, string FPNsource, 
-            int rowNmuberToBeginRead, int columnNumberToRead, string columnName, string[] ValueSeparatorInSourceFile, 
-            string valueSeparatorInReturnArray, bool valueAsInteger)
+            int rowNtoBeginRead, int colNtoRead, string colName, string[] SeparatorInSourceFile, 
+            string SeparatorInReturnArray, bool valueAsInteger)
         {
             if (string.IsNullOrEmpty(FPNsource) || File.Exists(FPNsource) == false)
             {
@@ -470,15 +821,15 @@ namespace gentle
             int nr = 0;
             if (BaseString[0] == null || string.IsNullOrEmpty(BaseString[0].ToString().Trim()))
             {
-                BaseString[nr] = columnName;
+                BaseString[nr] = colName;
             }
             else
             {
-                BaseString[0] = BaseString[0] + valueSeparatorInReturnArray + columnName;
+                BaseString[0] = BaseString[0] + SeparatorInReturnArray + colName;
             }
             for (int nl = 0; nl <= Lines.Length - 1; nl++)
             {
-                if (nl >= rowNmuberToBeginRead - 1)
+                if (nl >= rowNtoBeginRead - 1)
                 {
                     nr += 1;
                     if ((nr + 1) > BaseString.Length)
@@ -487,16 +838,16 @@ namespace gentle
                         break; 
                     }
                     string aLine = Lines[nl];
-                    string[] parts = aLine.Split(ValueSeparatorInSourceFile, StringSplitOptions.RemoveEmptyEntries);
+                    string[] parts = aLine.Split(SeparatorInSourceFile, StringSplitOptions.RemoveEmptyEntries);
                     string value = null;
                     StringBuilder stbAline = new StringBuilder();
                     if (valueAsInteger == true)
                     {
-                        value = Convert.ToInt32(parts[columnNumberToRead - 1]).ToString().Trim();
+                        value = Convert.ToInt32(parts[colNtoRead - 1]).ToString().Trim();
                     }
                     else
                     {
-                        value = parts[columnNumberToRead - 1].ToString().Trim();
+                        value = parts[colNtoRead - 1].ToString().Trim();
                     }
                     if (BaseString[nr] == null || string.IsNullOrEmpty(BaseString[nr].ToString().Trim()))
                     {
@@ -504,7 +855,7 @@ namespace gentle
                     }
                     else
                     {
-                        BaseString[nr] = BaseString[nr] + valueSeparatorInReturnArray + value;
+                        BaseString[nr] = BaseString[nr] + SeparatorInReturnArray + value;
                     }
                 }
             }
