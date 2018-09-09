@@ -32,7 +32,7 @@ Public Class cRTStarter
     Public Sub New(fpn_REF As String, strGUID As String, dtStart As DateTime, Optional RTStartDateTime As String = "")
         mFPN_RTEnv = fpn_REF
         UpdateRTVariablesUsingEnvFile(mFPN_RTEnv, RTStartDateTime) '여기서 파일로 설정
-        g_performance_log_GUID = strGUID
+        g_GUID_from_monitorEXE = strGUID
         g_dtStart_from_MonitorEXE = dtStart
     End Sub
 
@@ -92,6 +92,54 @@ Public Class cRTStarter
         GRMRT = cRealTime.Current
         GRMRT.SetupGRM(mProjectFPN)
         RTProject = cProject.Current
+
+        If True Then    'runmeta 정보 처리. 2018.8.
+
+            Dim oSQLCon As New System.Data.SqlClient.SqlConnection(g_strDBMSCnn)
+            If oSQLCon.State = ConnectionState.Closed Then oSQLCon.Open()
+
+            'Dim x As New Xml.Serialization.XmlSerializer(RTProject.GetType)
+            'The Serialize method Is used To serialize an Object To XML. Serialize Is overloaded And can send output To a TextWriter, Stream, Or XmlWriter Object. In this example, you send the output to the console
+            'x.Serialize(Console.Out, RTProject)
+            'x.Serialize()
+
+            'monitor에서 id 를 넘겨줄 필요 없다.
+            Dim strGMPALL As String = File.ReadAllText(mProjectFPN)
+
+            'Dim strSql As String = String.Format("insert into runmeta ([runmeta],[who],gmp) values('{0}','{1}')", "누가 언제 어디서 어떻게 run 했는지..", "user1")
+            'Dim oSQLCMD As New SqlClient.SqlCommand(strSql, oSQLCon)
+
+            Dim oSQLCMD As SqlClient.SqlCommand = New SqlClient.SqlCommand("INSERT INTO runmeta (runmeta, [who], gmp,run_starttime) VALUES (@runmeta, @who, @gmp,@run_starttime)", oSQLCon)
+            oSQLCMD.Parameters.AddWithValue("@runmeta", "누가 언제 어디서 어떻게 run 했는지..")
+            oSQLCMD.Parameters.AddWithValue("@who", "user1")
+            oSQLCMD.Parameters.AddWithValue("@gmp", strGMPALL)
+            oSQLCMD.Parameters.AddWithValue("@run_starttime", mSimulationStartingTime)
+
+
+            Dim intRetVal As Integer = oSQLCMD.ExecuteNonQuery()
+
+            If intRetVal = 1 Then
+                Dim dt1 As DataTable = New DataTable()
+                Dim strSQL1 As String = "select top 1 runid from runmeta order by runid desc"
+                Dim oSqlDataAdapter As New SqlClient.SqlDataAdapter(strSQL1, g_strDBMSCnn)
+                oSqlDataAdapter.Fill(dt1)
+                Dim intID As Integer = CInt(dt1.Rows(0).Item(0))
+
+                If g_GUID_from_monitorEXE = intID.ToString() Then
+                    '2018.8. 원 : g_GUID_from_monitorEXE 이건 monitor 가 넘겨준것.  intID 이건 DB에서 확인된 것 . 일치해야 함. 검증용도 
+                Else
+                    Console.WriteLine("Warning : If g_performance_log_GUID <> intID.ToString() Then")
+                End If
+
+                g_RunID = intID 'monitor 에서 받은거 보다. DB 우선 
+                oSqlDataAdapter.Dispose()
+
+            Else
+                Console.WriteLine("runmeta logging error")
+            End If
+            oSQLCon.Close()
+        End If
+
     End Sub
 
 
@@ -127,6 +175,9 @@ Public Class cRTStarter
                 'End If
             End If
         End With
+
+        RTProject.GeneralSimulEnv.mSimStartDateTime = DateTime.ParseExact(GRMRT.mRFStartDateTimeRT, "yyyyMMddHHmm", System.Globalization.CultureInfo.InvariantCulture).ToString("yyyy-MM-dd HH:mm") ' 2018.8.11 원 : 중요 한 추가. 이 조치 안하면 0이고,  이후 포화도 등 png img 제작 등에서 time tag 계산에서 오류...
+
     End Sub
 
     ''' <summary>
