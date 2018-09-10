@@ -718,7 +718,7 @@ Public Class cProject
             Throw New FileNotFoundException(fpnWS)
             Return False
         End If
-        Dim gridWS As New cTextFileReaderASC(fpnWS)
+        Dim gridWS As New cAscRasterReader(fpnWS)
         mWatershed.mRowCount = gridWS.Header.numberRows
         mWatershed.mColCount = gridWS.Header.numberCols
         mWatershed.mCellSize = CInt(gridWS.Header.cellsize)
@@ -732,9 +732,9 @@ Public Class cProject
             Dim options As ParallelOptions = New ParallelOptions()
             options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
             Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                               Dim valuesInaLine() As String = gridWS.ValuesInOneRowFromTopLeft(ry)
+                                                               'Dim valuesInaLine() As String = gridWS.ValuesInOneRowFromTopLeft(ry)
                                                                For cx As Integer = 0 To mWatershed.mColCount - 1
-                                                                   Dim wsid As Integer = CInt(valuesInaLine(cx))
+                                                                   Dim wsid As Integer = CInt(gridWS.ValueFromTL(cx, ry))
                                                                    If wsid > 0 Then '유역 내부
                                                                        Dim cv As New cCVAttribute
                                                                        cv.WSID = wsid
@@ -770,9 +770,9 @@ Public Class cProject
             Next
         Else
             For ry As Integer = 0 To mWatershed.mRowCount - 1
-                Dim valuesInaLine() As String = gridWS.ValuesInOneRowFromTopLeft(ry)
+                'Dim valuesInaLine() As String = gridWS.ValuesInOneRowFromTopLeft(ry)
                 For cx As Integer = 0 To mWatershed.mColCount - 1
-                    Dim wsid As Integer = CInt(valuesInaLine(cx))
+                    Dim wsid As Integer = CInt(gridWS.ValueFromTL(cx, ry)) 'valuesInaLine(cx))
                     If wsid > 0 Then '유역 내부
                         Dim cv As New cCVAttribute
                         With cv
@@ -814,16 +814,16 @@ Public Class cProject
             Throw New FileNotFoundException(fpnSlope)
             Return False
         End If
-        Dim gridSlope As New cTextFileReaderASC(fpnSlope)
+        Dim gridSlope As New cAscRasterReader(fpnSlope)
         Dim bNoError As Boolean = True
         If isParallel = True Then
             Dim options As ParallelOptions = New ParallelOptions()
             options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
             Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                               Dim valuesInaLine() As String = gridSlope.ValuesInOneRowFromTopLeft(ry)
+                                                               'Dim valuesInaLine() As String = gridSlope.ValuesInOneRowFromTopLeft(ry)
                                                                For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                    If mWSCells(cx, ry) IsNot Nothing Then
-                                                                       mWSCells(cx, ry).Slope = CSng(valuesInaLine(cx))
+                                                                       mWSCells(cx, ry).Slope = gridSlope.ValueFromTL(cx, ry)
                                                                        If mWSCells(cx, ry).Slope <= 0.0 Then
                                                                            mWSCells(cx, ry).Slope = 0.0001
                                                                            bNoError = False
@@ -834,10 +834,10 @@ Public Class cProject
 
         Else
             For ry As Integer = 0 To Watershed.mRowCount - 1
-                Dim valuesInaLine() As String = gridSlope.ValuesInOneRowFromTopLeft(ry)
+                'Dim valuesInaLine() As String = gridSlope.ValuesInOneRowFromTopLeft(ry)
                 For cx As Integer = 0 To Watershed.mColCount - 1
                     If mWSCells(cx, ry) IsNot Nothing Then
-                        mWSCells(cx, ry).Slope = CSng(valuesInaLine(cx))
+                        mWSCells(cx, ry).Slope = gridSlope.ValueFromTL(cx, ry)
                         If mWSCells(cx, ry).Slope <= 0.0 Then
                             mWSCells(cx, ry).Slope = 0.0001
                             bNoError = False
@@ -859,24 +859,24 @@ Public Class cProject
             Throw New FileNotFoundException(fpnFdir)
             Return False
         End If
-        Dim gridFdir As New cTextFileReaderASC(fpnFdir)
+        Dim gridFdir As New cAscRasterReader(fpnFdir)
         If isParallel = True Then
             Dim options As ParallelOptions = New ParallelOptions()
             options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
             Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                               Dim valuesInaLine() As String = gridFdir.ValuesInOneRowFromTopLeft(ry)
+                                                               'Dim valuesInaLine() As String = gridFdir.ValuesInOneRowFromTopLeft(ry)
                                                                For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                    If mWSCells(cx, ry) IsNot Nothing Then
-                                                                       mWSCells(cx, ry).FDir = cHydroCom.GetFlowDirection(CInt(valuesInaLine(cx)), fdtype)
+                                                                       mWSCells(cx, ry).FDir = cHydroCom.GetFlowDirection(CInt(gridFdir.ValueFromTL(cx, ry)), fdtype)
                                                                    End If
                                                                Next
                                                            End Sub)
         Else
             For ry As Integer = 0 To Watershed.mRowCount - 1
-                Dim valuesInaLine() As String = gridFdir.ValuesInOneRowFromTopLeft(ry)
+                'Dim valuesInaLine() As String = gridFdir.ValuesInOneRowFromTopLeft(ry)
                 For cx As Integer = 0 To Watershed.mColCount - 1
                     If mWSCells(cx, ry) IsNot Nothing Then
-                        mWSCells(cx, ry).FDir = cHydroCom.GetFlowDirection(CInt(valuesInaLine(cx)), fdtype)
+                        mWSCells(cx, ry).FDir = cHydroCom.GetFlowDirection(CInt(gridFdir.ValueFromTL(cx, ry)), fdtype)
                     End If
                 Next cx
             Next ry
@@ -893,15 +893,15 @@ Public Class cProject
             Throw New FileNotFoundException(fpnFac)
             Return False
         End If
-        Dim gridFac As New cTextFileReaderASC(fpnFac)
+        Dim gridFac As New cAscRasterReader(fpnFac)
         If isParallel = True Then
             Dim options As ParallelOptions = New ParallelOptions()
             options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
             Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                               Dim valuesInaLine() As String = gridFac.ValuesInOneRowFromTopLeft(ry)
+                                                               'Dim valuesInaLine() As String = gridFac.ValuesInOneRowFromTopLeft(ry)
                                                                For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                    If mWSCells(cx, ry) IsNot Nothing Then
-                                                                       Dim v As Integer = CInt(valuesInaLine(cx))
+                                                                       Dim v As Integer = CInt(gridFac.ValueFromTL(cx, ry))
                                                                        If v < 0 Then
                                                                            mWSCells(cx, ry).FAc = 0
                                                                        Else
@@ -913,10 +913,10 @@ Public Class cProject
 
         Else
             For ry As Integer = 0 To Watershed.mRowCount - 1
-                Dim valuesInaLine() As String = gridFac.ValuesInOneRowFromTopLeft(ry)
+                'Dim valuesInaLine() As String = gridFac.ValuesInOneRowFromTopLeft(ry)
                 For cx As Integer = 0 To Watershed.mColCount - 1
                     If mWSCells(cx, ry) IsNot Nothing Then
-                        Dim v As Integer = CInt(valuesInaLine(cx))
+                        Dim v As Integer = CInt(gridFac.ValueFromTL(cx, ry))
                         If v < 0 Then
                             mWSCells(cx, ry).FAc = 0
                         Else
@@ -935,15 +935,15 @@ Public Class cProject
     ''' <remarks></remarks>
     Public Function ReadLayerStream(fpnStream As String, isParallel As Boolean) As Boolean
         Try
-            Dim gridStream As New cTextFileReaderASC(fpnStream)
+            Dim gridStream As New cAscRasterReader(fpnStream)
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
                 options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
                 Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                                   Dim valuesInaLine() As String = gridStream.ValuesInOneRowFromTopLeft(ry)
+                                                                   'Dim valuesInaLine() As String = gridStream.ValuesInOneRowFromTopLeft(ry)
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
-                                                                           Dim value As Integer = CInt(valuesInaLine(cx))
+                                                                           Dim value As Integer = CInt(gridStream.ValueFromTL(cx, ry))
                                                                            If value > 0 Then
                                                                                mWSCells(cx, ry).FlowType = cGRM.CellFlowType.ChannelFlow
                                                                                With mWSCells(cx, ry)
@@ -958,10 +958,13 @@ Public Class cProject
 
             Else
                 For ry As Integer = 0 To Watershed.mRowCount - 1
-                    Dim valuesInaLine() As String = gridStream.ValuesInOneRowFromTopLeft(ry)
+                    'Dim valuesInaLine() As String = gridStream.ValuesInOneRowFromTopLeft(ry)
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) IsNot Nothing Then
-                            Dim value As Integer = CInt(valuesInaLine(cx))
+                            Dim value As Integer = CInt(gridStream.ValueFromTL(cx, ry))
+                            'If cx = 21 AndAlso ry = 39 Then
+                            '    Dim a As Integer = 1
+                            'End If
                             If value > 0 Then
                                 mWSCells(cx, ry).FlowType = cGRM.CellFlowType.ChannelFlow
                                 With mWSCells(cx, ry)
@@ -986,16 +989,16 @@ Public Class cProject
     ''' <remarks></remarks>
     Private Function ReadLayerChannelWidth(fpnCHw As String, isParallel As Boolean) As Boolean
         Try
-            Dim gridCHWidth As New cTextFileReaderASC(fpnCHw)
+            Dim gridCHWidth As New cAscRasterReader(fpnCHw)
 
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
                 options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
                 Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                                   Dim valuesInaLine() As String = gridCHWidth.ValuesInOneRowFromTopLeft(ry)
+                                                                   'Dim valuesInaLine() As String = gridCHWidth.ValuesInOneRowFromTopLeft(ry)
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
-                                                                           Dim value As Single = CSng(valuesInaLine(cx))
+                                                                           Dim value As Single = CSng(gridCHWidth.ValueFromTL(cx, ry))
                                                                            If value < 0 Then
                                                                                mWSCells(cx, ry).mStreamAttr.ChBaseWidthByLayer = 0
                                                                            Else
@@ -1006,10 +1009,10 @@ Public Class cProject
                                                                End Sub)
             Else
                 For ry As Integer = 0 To Watershed.mRowCount - 1
-                    Dim valuesInaLine() As String = gridCHWidth.ValuesInOneRowFromTopLeft(ry)
+                    'Dim valuesInaLine() As String = gridCHWidth.ValuesInOneRowFromTopLeft(ry)
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) IsNot Nothing Then
-                            Dim value As Single = CSng(valuesInaLine(cx))
+                            Dim value As Single = CSng(gridCHWidth.ValueFromTL(cx, ry))
                             If value > 0 Then
                                 mWSCells(cx, ry).mStreamAttr.ChBaseWidthByLayer = value
                             Else
@@ -1029,7 +1032,7 @@ Public Class cProject
 
     Public Function ReadLayerInitialSoilSaturation(ByVal fpn As String, isParallel As Boolean) As Boolean
         Try
-            Dim ascIniSSR As New cTextFileReaderASC(fpn)
+            Dim ascIniSSR As New cAscRasterReader(fpn)
             Dim n As Integer = 0
             Dim sum As Single = 0
 
@@ -1037,10 +1040,10 @@ Public Class cProject
                 Dim options As ParallelOptions = New ParallelOptions()
                 options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
                 Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                                   Dim valuesInaLine() As String = ascIniSSR.ValuesInOneRowFromTopLeft(ry)
+                                                                   'Dim valuesInaLine() As String = ascIniSSR.ValuesInOneRowFromTopLeft(ry)
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                        If mWSCells(cx, ry) Is Nothing Then
-                                                                           Dim v As Single = CSng(valuesInaLine(cx))
+                                                                           Dim v As Single = CSng(ascIniSSR.ValueFromTL(cx, ry))
                                                                            If v < 0 Then v = 0
                                                                            If v > 1 Then v = 1
                                                                            mWSCells(cx, ry).InitialSaturation = v
@@ -1049,10 +1052,10 @@ Public Class cProject
                                                                End Sub)
             Else
                 For ry As Integer = 0 To Watershed.mRowCount - 1
-                    Dim valuesInaLine() As String = ascIniSSR.ValuesInOneRowFromTopLeft(ry)
+                    'Dim valuesInaLine() As String = ascIniSSR.ValuesInOneRowFromTopLeft(ry)
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) Is Nothing Then
-                            Dim v As Single = CSng(valuesInaLine(cx))
+                            Dim v As Single = CSng(ascIniSSR.ValueFromTL(cx, ry))
                             If v < 0 Then v = 0
                             If v > 1 Then v = 1
                             mWSCells(cx, ry).InitialSaturation = v
@@ -1068,15 +1071,15 @@ Public Class cProject
 
     Public Function ReadLayerInitialChannelFlow(ByVal fpn As String, isParallel As Boolean) As Boolean
         Try
-            Dim ascIniChFlow As New cTextFileReaderASC(fpn)
+            Dim ascIniChFlow As New cAscRasterReader(fpn)
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
                 options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
                 Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                                   Dim valuesInaLine() As String = ascIniChFlow.ValuesInOneRowFromTopLeft(ry)
+                                                                   'Dim valuesInaLine() As String = ascIniChFlow.ValuesInOneRowFromTopLeft(ry)
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
-                                                                           Dim value As Single = CSng(valuesInaLine(cx))
+                                                                           Dim value As Single = CSng(ascIniChFlow.ValueFromTL(cx, ry))
                                                                            If value > 0 Then
                                                                                mWSCells(cx, ry).mStreamAttr.initialQCVch_i_j_m3Ps = value
                                                                            Else
@@ -1087,10 +1090,10 @@ Public Class cProject
                                                                End Sub)
             Else
                 For ry As Integer = 0 To Watershed.mRowCount - 1
-                    Dim valuesInaLine() As String = ascIniChFlow.ValuesInOneRowFromTopLeft(ry)
+                    'Dim valuesInaLine() As String = ascIniChFlow.ValuesInOneRowFromTopLeft(ry)
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) IsNot Nothing Then
-                            Dim value As Single = CSng(valuesInaLine(cx))
+                            Dim value As Single = CSng(ascIniChFlow.ValueFromTL(cx, ry))
                             If value > 0 Then
                                 mWSCells(cx, ry).mStreamAttr.initialQCVch_i_j_m3Ps = value
                             Else
@@ -1108,17 +1111,17 @@ Public Class cProject
 
     Public Function ReadLandCoverFile(fpnLC As String, isParallel As Boolean) As Boolean
         Try
-            Dim gridLC As New cTextFileReaderASC(fpnLC)
+            Dim gridLC As New cAscRasterReader(fpnLC)
             Dim isnormal As Boolean = True
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
                 options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
                 Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                                   Dim valuesInaLine() As String = gridLC.ValuesInOneRowFromTopLeft(ry)
+                                                                   'Dim valuesInaLine() As String = gridLC.ValuesInOneRowFromTopLeft(ry)
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
                                                                            Dim cell As cCVAttribute = mWSCells(cx, ry)
-                                                                           Dim value As Integer = CInt(valuesInaLine(cx))
+                                                                           Dim value As Integer = CInt(gridLC.ValueFromTL(cx, ry))
                                                                            If value > 0 Then
                                                                                cell.LandCoverValue = value
                                                                            Else
@@ -1130,11 +1133,11 @@ Public Class cProject
                                                                End Sub)
             Else
                 For ry As Integer = 0 To Watershed.mRowCount - 1
-                    Dim valuesInaLine() As String = gridLC.ValuesInOneRowFromTopLeft(ry)
+                    'Dim valuesInaLine() As String = gridLC.ValuesInOneRowFromTopLeft(ry)
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) IsNot Nothing Then
                             Dim cell As cCVAttribute = mWSCells(cx, ry)
-                            Dim value As Integer = CInt(valuesInaLine(cx))
+                            Dim value As Integer = CInt(gridLC.ValueFromTL(cx, ry))
                             If value > 0 Then
                                 cell.LandCoverValue = value
                             Else
@@ -1174,7 +1177,7 @@ Public Class cProject
             End If
             vatLCcode.Add(CInt(row.GridValue), lcCode)
         Next
-        Dim gridLC As New cTextFileReaderASC(fpnLC)
+        Dim gridLC As New cAscRasterReader(fpnLC)
         'Dim isnormal As Boolean = True
         Dim vBak As Integer = vatRC.Keys(0) '여기서 기본값.
         Try
@@ -1182,13 +1185,13 @@ Public Class cProject
                 Dim options As ParallelOptions = New ParallelOptions()
                 options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
                 Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                                   Dim valuesInaLine() As String = gridLC.ValuesInOneRowFromTopLeft(ry)
+                                                                   'Dim valuesInaLine() As String = gridLC.ValuesInOneRowFromTopLeft(ry)
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
                                                                            Dim cell As cCVAttribute = mWSCells(cx, ry)
-                                                                           Dim value As Integer = CInt(valuesInaLine(cx))
-                                                                           vBak = value '여기서 최신 셀의 값
+                                                                           Dim value As Integer = CInt(gridLC.ValueFromTL(cx, ry))
                                                                            If value > 0 Then
+                                                                               vBak = value '여기서 최신 셀의 값
                                                                                cell.LandCoverValue = value
                                                                                cell.RoughnessCoeffOFori = vatRC(value)
                                                                                cell.ImperviousRatio = vatIR(value)
@@ -1198,7 +1201,7 @@ Public Class cProject
                                                                                cell.RoughnessCoeffOFori = vatRC(vBak)
                                                                                cell.ImperviousRatio = vatIR(vBak)
                                                                                cell.LandCoverCode = vatLCcode(vBak)
-                                                                               Console.WriteLine(String.Format("Landcover file {0} has an invalid value. {1} was applied.", Landcover.mGridLandCoverFPN, vBak), True, True)
+                                                                               cGRM.writelogAndConsole(String.Format("Landcover file {0} has an invalid value {1}. {2} was applied.", Landcover.mGridLandCoverFPN, value, vBak), True, True)
                                                                                'isnormal = False
                                                                            End If
                                                                        End If
@@ -1206,13 +1209,13 @@ Public Class cProject
                                                                End Sub)
             Else
                 For ry As Integer = 0 To Watershed.mRowCount - 1
-                    Dim valuesInaLine() As String = gridLC.ValuesInOneRowFromTopLeft(ry)
+                    'Dim valuesInaLine() As String = gridLC.ValuesInOneRowFromTopLeft(ry)
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) IsNot Nothing Then
                             Dim cell As cCVAttribute = mWSCells(cx, ry)
-                            Dim value As Integer = CInt(valuesInaLine(cx))
-                            vBak = value '여기서 최신 셀의 값
+                            Dim value As Integer = CInt(gridLC.ValueFromTL(cx, ry))
                             If value > 0 Then
+                                vBak = value '여기서 최신 셀의 값
                                 cell.LandCoverValue = value
                                 cell.RoughnessCoeffOFori = vatRC(value)
                                 cell.ImperviousRatio = vatIR(value)
@@ -1222,7 +1225,7 @@ Public Class cProject
                                 cell.RoughnessCoeffOFori = vatRC(vBak)
                                 cell.ImperviousRatio = vatIR(vBak)
                                 cell.LandCoverCode = vatLCcode(vBak)
-                                Console.WriteLine(String.Format("Landcover file {0} has an invalid value. {1} was applied.", Landcover.mGridLandCoverFPN, vBak), True, True)
+                                cGRM.writelogAndConsole(String.Format("Landcover file {0} has an invalid value {1}. {2} was applied.", Landcover.mGridLandCoverFPN, value, vBak), True, True)
                                 'isnormal = False
                                 'Throw New KeyNotFoundException
                             End If
@@ -1271,17 +1274,17 @@ Public Class cProject
 
     Public Function ReadSoilTextureFile(fpnST As String, isParallel As Boolean) As Boolean
         Try
-            Dim gridSTexture As New cTextFileReaderASC(fpnST)
+            Dim gridSTexture As New cAscRasterReader(fpnST)
             Dim isnormal As Boolean = True
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
                 options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
                 Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                                   Dim valuesInaLine() As String = gridSTexture.ValuesInOneRowFromTopLeft(ry)
+                                                                   'Dim valuesInaLine() As String = gridSTexture.ValuesInOneRowFromTopLeft(ry)
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
                                                                            Dim cell As cCVAttribute = mWSCells(cx, ry)
-                                                                           Dim value As Integer = CInt(valuesInaLine(cx))
+                                                                           Dim value As Integer = CInt(gridSTexture.ValueFromTL(cx, ry))
                                                                            If value > 0 Then
                                                                                cell.SoilTextureValue = value
                                                                            Else
@@ -1293,11 +1296,11 @@ Public Class cProject
                                                                End Sub)
             Else
                 For ry As Integer = 0 To Watershed.mRowCount - 1
-                    Dim valuesInaLine() As String = gridSTexture.ValuesInOneRowFromTopLeft(ry)
+                    'Dim valuesInaLine() As String = gridSTexture.ValuesInOneRowFromTopLeft(ry)
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) IsNot Nothing Then
                             Dim cell As cCVAttribute = mWSCells(cx, ry)
-                            Dim value As Integer = CInt(valuesInaLine(cx))
+                            Dim value As Integer = CInt(gridSTexture.ValueFromTL(cx, ry))
                             If value > 0 Then
                                 cell.SoilTextureValue = value
                             Else
@@ -1322,7 +1325,7 @@ Public Class cProject
     ''' <remarks></remarks>
     Private Function ReadLayerSoilTexture(fpnST As String, isParallel As Boolean) As Boolean
         If Not GreenAmpt.IsSet Then Return False
-        Dim gridSTexture As New cTextFileReaderASC(fpnST)
+        Dim gridSTexture As New cAscRasterReader(fpnST)
         Dim vatP As New SortedList(Of Integer, Single)
         Dim vatEP As New SortedList(Of Integer, Single)
         Dim vatWFSH As New SortedList(Of Integer, Single)
@@ -1349,11 +1352,11 @@ Public Class cProject
                 Dim options As ParallelOptions = New ParallelOptions()
                 options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
                 Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                                   Dim valuesInaLine() As String = gridSTexture.ValuesInOneRowFromTopLeft(ry)
+                                                                   'Dim valuesInaLine() As String = gridSTexture.ValuesInOneRowFromTopLeft(ry)
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
                                                                            Dim cell As cCVAttribute = mWSCells(cx, ry)
-                                                                           Dim value As Integer = CInt(valuesInaLine(cx))
+                                                                           Dim value As Integer = CInt(gridSTexture.ValueFromTL(cx, ry))
                                                                            If value > 0 Then
                                                                                vBak = value '여기서 최신 셀의 값
                                                                                cell.SoilTextureValue = value
@@ -1363,7 +1366,7 @@ Public Class cProject
                                                                                cell.HydraulicConductKori_mPsec = vatHC(value) / 100 / 3600    ' cm/hr -> m/s
                                                                                cell.SoilTextureCode = vatSTcode(value)
                                                                            Else
-                                                                               Console.WriteLine(String.Format("Soil texture file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.",
+                                                                               cGRM.writelogAndConsole(String.Format("Soil texture file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.",
                                                                                 GreenAmpt.mGridSoilTextureFPN, value, cx, ry, vBak), True, True)
                                                                                cell.SoilTextureValue = vBak
                                                                                cell.PorosityEtaOri = vatP(vBak)
@@ -1378,11 +1381,11 @@ Public Class cProject
                                                                End Sub)
             Else
                 For ry As Integer = 0 To Watershed.mRowCount - 1
-                    Dim valuesInaLine() As String = gridSTexture.ValuesInOneRowFromTopLeft(ry)
+                    'Dim valuesInaLine() As String = gridSTexture.ValuesInOneRowFromTopLeft(ry)
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) IsNot Nothing Then
                             Dim cell As cCVAttribute = mWSCells(cx, ry)
-                            Dim value As Integer = CInt(valuesInaLine(cx))
+                            Dim value As Integer = CInt(gridSTexture.ValueFromTL(cx, ry))
                             If value > 0 Then
                                 vBak = value '여기서 최신 셀의 값
                                 cell.SoilTextureValue = value
@@ -1392,7 +1395,7 @@ Public Class cProject
                                 cell.HydraulicConductKori_mPsec = vatHC(value) / 100 / 3600    ' cm/hr -> m/s
                                 cell.SoilTextureCode = vatSTcode(value)
                             Else
-                                Console.WriteLine(String.Format("Soil texture file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.", GreenAmpt.mGridSoilTextureFPN, value, cx, ry, vBak), True, True)
+                                cGRM.writelogAndConsole(String.Format("Soil texture file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.", GreenAmpt.mGridSoilTextureFPN, value, cx, ry, vBak), True, True)
                                 cell.SoilTextureValue = vBak
                                 cell.PorosityEtaOri = vatP(vBak)
                                 cell.EffectivePorosityThetaEori = vatEP(vBak)
@@ -1451,17 +1454,17 @@ Public Class cProject
     End Function
 
     Public Function ReadSoilDepthFile(fpnSD As String, isParallel As Boolean) As Boolean
-        Dim gridSDepth As New cTextFileReaderASC(fpnSD)
+        Dim gridSDepth As New cAscRasterReader(fpnSD)
         Dim isnormal As Boolean = True
         Try
             If isParallel = True Then
                 Dim options As ParallelOptions = New ParallelOptions()
                 options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
                 Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                                   Dim valuesInaLine() As String = gridSDepth.ValuesInOneRowFromTopLeft(ry)
+                                                                   'Dim valuesInaLine() As String = gridSDepth.ValuesInOneRowFromTopLeft(ry)
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
-                                                                           Dim value As Integer = CInt(valuesInaLine(cx))
+                                                                           Dim value As Integer = CInt(gridSDepth.ValueFromTL(cx, ry))
                                                                            If value > 0 Then
                                                                                mWSCells(cx, ry).SoilDepthTypeValue = CInt(value)
                                                                            Else
@@ -1474,10 +1477,10 @@ Public Class cProject
                                                                End Sub)
             Else
                 For ry As Integer = 0 To Watershed.mRowCount - 1
-                    Dim valuesInaLine() As String = gridSDepth.ValuesInOneRowFromTopLeft(ry)
+                    'Dim valuesInaLine() As String = gridSDepth.ValuesInOneRowFromTopLeft(ry)
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) IsNot Nothing Then
-                            Dim value As Integer = CInt(valuesInaLine(cx))
+                            Dim value As Integer = CInt(gridSDepth.ValueFromTL(cx, ry))
                             If value > 0 Then
                                 mWSCells(cx, ry).SoilDepthTypeValue = CInt(value)
                             Else
@@ -1502,7 +1505,7 @@ Public Class cProject
     ''' <remarks></remarks>
     Private Function ReadLayerSoilDepth(fpnSD As String, isParallel As Boolean) As Boolean
         If Not SoilDepth.IsSet Then Return False
-        Dim gridSDepth As New cTextFileReaderASC(fpnSD)
+        Dim gridSDepth As New cAscRasterReader(fpnSD)
         Dim vatSD As New SortedList(Of Integer, Single)
         Dim vatSDcode As New SortedList(Of Integer, cSetSoilDepth.SoilDepthCode)
         For Each row As GRMProject.SoilDepthRow In SoilDepth.mdtSoilDepthInfo
@@ -1523,17 +1526,17 @@ Public Class cProject
                 Dim options As ParallelOptions = New ParallelOptions()
                 options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
                 Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
-                                                                   Dim valuesInaLine() As String = gridSDepth.ValuesInOneRowFromTopLeft(ry)
+                                                                   'Dim valuesInaLine() As String = gridSDepth.ValuesInOneRowFromTopLeft(ry)
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
                                                                        If mWSCells(cx, ry) IsNot Nothing Then
-                                                                           Dim value As Integer = CInt(valuesInaLine(cx))
+                                                                           Dim value As Integer = CInt(gridSDepth.ValueFromTL(cx, ry))
                                                                            If value > 0 Then
                                                                                vBak = value '여기서 최신 셀의 값
                                                                                mWSCells(cx, ry).SoilDepthTypeValue = CInt(value)
                                                                                mWSCells(cx, ry).SoilDepthOri_m = vatSD(value) / 100     ' cm ->  m
                                                                                mWSCells(cx, ry).SoilDepthCode = vatSDcode(value)
                                                                            Else
-                                                                               Console.WriteLine(String.Format("Soil depth file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.",
+                                                                               cGRM.writelogAndConsole(String.Format("Soil depth file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.",
                                                                                                               SoilDepth.mGridSoilDepthFPN, value, cx, ry, vBak), True, True)
                                                                                mWSCells(cx, ry).SoilDepthTypeValue = CInt(vBak)
                                                                                mWSCells(cx, ry).SoilDepthOri_m = vatSD(vBak) / 100     ' cm ->  m
@@ -1545,17 +1548,17 @@ Public Class cProject
                                                                End Sub)
             Else
                 For ry As Integer = 0 To Watershed.mRowCount - 1
-                    Dim valuesInaLine() As String = gridSDepth.ValuesInOneRowFromTopLeft(ry)
+                    'Dim valuesInaLine() As String = gridSDepth.ValuesInOneRowFromTopLeft(ry)
                     For cx As Integer = 0 To Watershed.mColCount - 1
                         If mWSCells(cx, ry) IsNot Nothing Then
-                            Dim value As Integer = CInt(valuesInaLine(cx))
+                            Dim value As Integer = CInt(gridSDepth.ValueFromTL(cx, ry))
                             If value > 0 Then
                                 vBak = value '여기서 최신 셀의 값
                                 mWSCells(cx, ry).SoilDepthTypeValue = CInt(value)
                                 mWSCells(cx, ry).SoilDepthOri_m = vatSD(value) / 100     ' cm ->  m
                                 mWSCells(cx, ry).SoilDepthCode = vatSDcode(value)
                             Else
-                                Console.WriteLine(String.Format("Soil depth file {0} has an invalid value{1} at ({2}, {3}). {4} was applied.",
+                                cGRM.writelogAndConsole(String.Format("Soil depth file {0} has an invalid value{1} at ({2}, {3}). {4} was applied.",
                                                                                                             SoilDepth.mGridSoilDepthFPN, value, cx, ry, vBak), True, True)
                                 mWSCells(cx, ry).SoilDepthTypeValue = CInt(vBak)
                                 mWSCells(cx, ry).SoilDepthOri_m = vatSD(vBak) / 100     ' cm ->  m

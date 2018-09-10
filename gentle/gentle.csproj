@@ -21,7 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <Prefer32Bit>false</Prefer32Bit>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -73,9 +73,9 @@
     <Compile Include="Class\cData.cs" />
     <Compile Include="Class\cFile.cs" />
     <Compile Include="Class\cImg.cs" />
-    <Compile Include="Class\cRasterHeader.cs" />
+    <Compile Include="Class\cAscRasterHeader.cs" />
     <Compile Include="Class\cTextFile.cs" />
-    <Compile Include="Class\cTextFileReaderASC.cs" />
+    <Compile Include="Class\cAscRasterReader.cs" />
     <Compile Include="Class\cTimeChecker.cs" />
     <Compile Include="Dialog\fProgressBar.cs">
       <SubType>Form</SubType>

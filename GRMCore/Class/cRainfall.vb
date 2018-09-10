@@ -119,18 +119,18 @@ Public Class cRainfall
         Try
             Select Case eRainfallDataType
                 Case cRainfall.RainfallDataType.TextFileASCgrid, cRainfall.RainfallDataType.TextFileASCgrid_mmPhr
-                    Dim ascReader As New cTextFileReaderASC(RFfpn)
+                    Dim ascReader As New cAscRasterReader(RFfpn)
                     Dim rowCount As Integer = project.Watershed.mRowCount
                     Dim colCount As Integer = project.Watershed.mColCount
                     If isparallel = True Then
                         Dim options As ParallelOptions = New ParallelOptions()
                         options.MaxDegreeOfParallelism = cThisSimulation.MaxDegreeOfParallelism
                         Parallel.For(0, rowCount, options, Sub(ry As Integer)
-                                                               Dim RFs As String() = ascReader.ValuesInOneRowFromTopLeft(ry)
+                                                               'Dim RFs As String() = ascReader.ValuesInOneRowFromTopLeft(ry)
                                                                For cx As Integer = 0 To colCount - 1
                                                                    If project.WSCell(cx, ry) Is Nothing OrElse project.WSCell(cx, ry).toBeSimulated = False Then Continue For
                                                                    Dim cvan As Integer = project.WSCell(cx, ry).CVID - 1
-                                                                   Dim inRF_mm As Single = CSng(RFs(cx))
+                                                                   Dim inRF_mm As Single = CSng(ascReader.ValueFromTL(cx, ry))
                                                                    If eRainfallDataType = cRainfall.RainfallDataType.TextFileASCgrid_mmPhr Then
                                                                        inRF_mm = inRF_mm / CSng(60 / RFinterval_MIN)
                                                                    End If
@@ -149,11 +149,11 @@ Public Class cRainfall
                         Next
                     Else
                         For ry As Integer = 0 To rowCount - 1
-                            Dim RFs As String() = ascReader.ValuesInOneRowFromTopLeft(ry)
+                            'Dim RFs As String() = ascReader.ValuesInOneRowFromTopLeft(ry)
                             For cx As Integer = 0 To colCount - 1
                                 If project.WSCell(cx, ry) Is Nothing OrElse project.WSCell(cx, ry).toBeSimulated = False Then Continue For
                                 Dim cvan As Integer = project.WSCell(cx, ry).CVID - 1
-                                Dim inRF_mm As Single = CSng(RFs(cx))
+                                Dim inRF_mm As Single = CSng(ascReader.ValueFromTL(cx, ry))
                                 If eRainfallDataType = cRainfall.RainfallDataType.TextFileASCgrid_mmPhr Then
                                     inRF_mm = inRF_mm / CSng(60 / RFinterval_MIN)
                                 End If

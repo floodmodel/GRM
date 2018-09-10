@@ -515,10 +515,10 @@ namespace gentle
 
 
 
-        public bool MakeImgFileUsingASCfileFromTL(string inASCFPN, string imgFpnToMake, RendererRange rangeType, float width, 
-            float height, Color defaultColor, double nullValue=-9999)
+        public bool MakeImgFileUsingASCfileFromTL(string inASCFPN, string imgFpnToMake, RendererRange rangeType, float width,
+            float height, Color defaultColor, double nullValue = -9999)
         {
-            gentle.cTextFileReaderASC ascF = new cTextFileReaderASC(inASCFPN);
+            gentle.cAscRasterReader ascF = new cAscRasterReader(inASCFPN);
             int LayerCellWcount = ascF.Header.numberRows;
             int LayerCellHcount = ascF.Header.numberRows;
             int CellCount = (LayerCellWcount * LayerCellHcount);
@@ -539,13 +539,13 @@ namespace gentle
             gr.Clear(Color.White);
             for (int r = 0; r <= LayerCellHcount - 1; r++)
             {
-                string[] aRow = ascF.ValuesInOneRowFromTopLeft(r);
+                //string[] aRow = ascF.ValuesInOneRowFromTopLeft(r);
                 for (int c = 0; c <= LayerCellWcount - 1; c++)
                 {
                     Rectangle rec = new Rectangle(c * CellWbmp, r * CellHbmp, CellWbmp, CellHbmp);
                     Color cToShow = default(Color);
                     cToShow = defaultColor;
-                    float value = Convert.ToSingle(aRow[c]);
+                    float value = Convert.ToSingle(ascF.ValueFromTL(c, r));
                     cToShow = GetColorFromMemoryRendererInDifferentInterval(value, rangeType, nullValue);
                     SolidBrush brsh = new SolidBrush(cToShow);
                     gr.FillRectangle(brsh, rec);
@@ -558,7 +558,7 @@ namespace gentle
 
         public bool MakeImgFileUsingASCfileFromTL(string inASCFPN, string imgFPNtoMake, RendererRange rangeType, double nullValue=-9999)
         {
-            cTextFileReaderASC ascF = new cTextFileReaderASC(inASCFPN);
+            cAscRasterReader ascF = new cAscRasterReader(inASCFPN);
             int LayerCellWcount = ascF.Header.numberCols;
             int LayerCellHcount = ascF.Header.numberRows;
             int CellCount = (LayerCellWcount * LayerCellHcount);
@@ -571,12 +571,12 @@ namespace gentle
             //int nrows = 0;
             for (int r = 0; r <= LayerCellHcount - 1; r++)
             {
-                string[] aRow = ascF.ValuesInOneRowFromTopLeft(r);
+                //string[] aRow = ascF.ValuesInOneRowFromTopLeft(r);
                 for (int c = 0; c <= LayerCellWcount - 1; c++)
                 {
                     Rectangle rec = new Rectangle(c * CellWbmp, r * CellHbmp, CellWbmp, CellHbmp);
                     Color cToShow = default(Color);
-                    double value = Convert.ToDouble(aRow[c]);
+                    double value = Convert.ToDouble(ascF .ValueFromTL (c,r));
                     cToShow = GetColorFromMemoryRendererInDifferentInterval(value, rangeType, nullValue);
                     SolidBrush brsh = new SolidBrush(cToShow);
                     gr.FillRectangle(brsh, rec);
