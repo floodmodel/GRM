@@ -91,6 +91,7 @@ namespace gentle
 
         public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, double cellSize, string nodataValue, string[] rowsArray)
         {
+            if (File.Exists(fpn) == true) { File.Delete(fpn); }
             string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, nodataValue);
             File.AppendAllText(fpn, header);
             for (int n = 0; n <= rowsArray.Length - 1; n++)
@@ -102,16 +103,25 @@ namespace gentle
 
         public static bool MakeASCTextFile(string fpn, string allHeader, string[] strArray)
         {
-            File.AppendAllText(fpn, allHeader);
-            for (int n = 0; n <= strArray.Length - 1; n++)
+            if (File.Exists(fpn) == true)
             {
-                File.AppendAllText(fpn, strArray[n] + "\r\n");
+                File.Delete(fpn);
+                int delayTime = 0;
+            }
+            if (File.Exists(fpn) == false)
+            {
+                File.AppendAllText(fpn, allHeader);
+                for (int n = 0; n <= strArray.Length - 1; n++)
+                {
+                    File.AppendAllText(fpn, strArray[n] + "\r\n");
+                }
             }
             return true;
         }
 
         public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, float cellSize, string nodataValue, double[,] array, int decimalPartN)
         {
+            if (File.Exists(fpn) == true) { File.Delete(fpn); }
             string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, nodataValue);
             File.AppendAllText(fpn, header);
             WriteTwoDimData(fpn, array, decimalPartN);
@@ -128,8 +138,16 @@ namespace gentle
         /// <returns></returns>
         public static bool MakeASCTextFile(string fpn, string allHeader, double[,] array, int decimalPartN)
         {
-            File.AppendAllText(fpn, allHeader);
-            WriteTwoDimData(fpn, array, decimalPartN);
+            if (File.Exists(fpn) == true)
+            {
+                File.Delete(fpn);
+                int delayTime = 0;
+            }
+            if (File.Exists (fpn)==false )
+            {
+                File.AppendAllText(fpn, allHeader);
+                WriteTwoDimData(fpn, array, decimalPartN);
+            }
             return true;
         }
 
@@ -217,7 +235,6 @@ namespace gentle
                             if (inArray2[x, y] < 0) { inArray2[x, y] = 0; }
                         }
                         array[x, y] = inArray1[x, y] + inArray2[x, y];
-
                     }
                 }
             });
@@ -225,6 +242,12 @@ namespace gentle
             return array;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fpn"></param>
+        /// <param name="array"></param>
+        /// <param name="decimalPartNum">0~7 이외의 숫자가 들어오면, 원본 값 그대로 저장</param>
         private static void WriteTwoDimData(string fpn, double[,] array, int decimalPartNum)
         {
             string dpn = "";
@@ -233,16 +256,27 @@ namespace gentle
             if (decimalPartNum == 3) { dpn = "F3"; }
             if (decimalPartNum == 4) { dpn = "F4"; }
             if (decimalPartNum == 5) { dpn = "F5"; }
-            StringBuilder sbALL = new StringBuilder();
+            if (decimalPartNum == 6) { dpn = "F6"; }
+            if (decimalPartNum == 7) { dpn = "F7"; }
+            //StringBuilder sbArow = new StringBuilder();
             for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
             {
+                StringBuilder sbArow = new StringBuilder();
                 for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
                 {
-                    sbALL.Append(array[nc, nr].ToString(dpn) +" ");
+                    if (decimalPartNum ==0 || array[nc, nr]==0)
+                    {
+                       sbArow.Append(((int)array[nc, nr]).ToString() + " ");
+                    }
+                    else
+                    {
+                        sbArow.Append(array[nc, nr].ToString(dpn) + " ");
+                    }
                 }
-                sbALL.Append("\r\n");
+                sbArow.Append("\r\n");
+                File.AppendAllText(fpn, sbArow.ToString());
             }
-            File.AppendAllText(fpn, sbALL.ToString());
+            //File.AppendAllText(fpn, sbALL.ToString());
         }
 
 
@@ -626,31 +660,32 @@ namespace gentle
             }
         }
 
-
         public static void ReplaceTextInASCiiRasterRange(cTextFileReaderASC inAscRaster, string strTagetFNP,
             string strTextToFind, string strTextToReplace,
              int tlXcol, int tlYrow, int lrXcol, int lrYrow)
         {
+            if (File.Exists (strTagetFNP )==true) { File.Delete(strTagetFNP); }
             StringBuilder sb = new StringBuilder();
-            sb.Append(inAscRaster.HeaderStringAll+"\r\n");
+            sb.Append(inAscRaster.HeaderStringAll);
+            decimal vToF = 0;
+            decimal.TryParse(strTextToFind, out vToF);
             for (int r = 0; r < inAscRaster.Header.numberRows; r++)
             {
                 if (r >= tlYrow && r <= lrYrow)
                 {
                     string[] valuesInaRow = inAscRaster.ValuesInOneRowFromTopLeft(r);
-
-                    for (int c = tlXcol; c <= lrXcol; c++)
-                    {
-                        if (valuesInaRow[c] == strTextToFind)
-                        {
-                            valuesInaRow[c] = strTextToReplace;
-                        }
-                    }
-
                     StringBuilder sbAline = new StringBuilder();
                     for (int c = 0; c < valuesInaRow.Length; c++)
                     {
-                        sbAline.Append(valuesInaRow[c]+" ");
+                        if (c >= tlXcol && c <= lrXcol)
+                        {
+                            decimal v = 0;
+                            if (decimal .TryParse (valuesInaRow[c], out v)==true  && v == vToF)
+                            {
+                                valuesInaRow[c] = strTextToReplace;
+                            }
+                        }
+                        sbAline.Append(valuesInaRow[c] + " ");
                     }
                     sb.Append(sbAline.ToString()+ "\r\n");
                 }
