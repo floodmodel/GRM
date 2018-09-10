@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
+
 
 namespace gentle
 {
@@ -19,7 +21,46 @@ namespace gentle
 
         public cTextFileReaderASC(string FPN)
         {
-            mLines = System.IO.File.ReadAllLines(FPN, System.Text.Encoding.Default);
+            //if (isBigText == true)
+            //{
+            //    int r = 0;
+            //    using (TextReader reader = File.OpenText(FPN))
+            //    {
+            //        while ((mLines[r] = reader.ReadLine()) != null)
+            //        {
+            //            r++;
+            //        }
+            //    }
+            //}
+            //else
+            //{
+            //    mLines = System.IO.File.ReadAllLines(FPN, System.Text.Encoding.Default);
+            //}
+
+            List<string > lines = new List<string>();
+            int r = 0;
+            //using (TextReader reader = File.OpenText(FPN))
+            //{
+            //    string al = "";
+            //    while ((al=reader.ReadLine()) != null)
+            //    {
+            //        lines.Add(al);
+            //        r++;
+            //    }
+            //}
+
+            mLines= new string [File.ReadLines(FPN).Count()];
+
+            foreach (string  line in File.ReadLines (FPN))
+            {
+                    //lines.Add(line);
+                mLines[r] = line;
+                r++;
+            }
+
+
+            //mLines = lines.ToArray();
+            //mLines = System.IO.File.ReadAllLines(FPN, System.Text.Encoding.Default);
             mLineCountAll = mLines.Length;
             mDataStartLineInASCfile = GetDataStartLineInASCfile();
 
@@ -32,6 +73,7 @@ namespace gentle
             mHeaderStringAll = cTextFile.MakeHeaderString(mHeader.numberCols, mHeader.numberRows,
                  mHeader.xllcorner, mHeader.yllcorner, mHeader.cellsize, mHeader.nodataValue.ToString());
         }
+
 
         private void GetHeaderInfo(int HeaderLineCount)
         {

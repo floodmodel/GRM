@@ -296,7 +296,7 @@ namespace gentle
                 {
                     if (filePattern != "" && fileNameFilter == "")
                     {
-                        if (Path.GetExtension(fn) == filePattern.Trim())
+                        if (Path.GetExtension(fn).ToLower () == filePattern.Trim().ToLower ())
                         {
                             lstFLselected.Add(Path.GetFileName(fn));
                         }
@@ -310,7 +310,7 @@ namespace gentle
                     }
                     if (fileNameFilter != "" && filePattern != "")
                     {
-                        if (fn.Contains(fileNameFilter) == true && Path.GetExtension(fn) == filePattern.Trim())
+                        if (fn.Contains(fileNameFilter) == true && Path.GetExtension(fn).ToLower() == filePattern.Trim().ToLower())
                         {
                             lstFLselected.Add(Path.GetFileName(fn));
                         }
