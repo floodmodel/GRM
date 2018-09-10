@@ -142,7 +142,7 @@ Public Class cRealTime
         If oSQLCon.State = ConnectionState.Closed Then oSQLCon.Open()
 
         'Dim strSQL As String = String.Format("delete [Q_CAL] where wscode='{0}'", strName)
-        Dim strSQL As String = String.Format("delete [Q_CAL] where runid={0}", g_GUID_from_monitorEXE)   ''2018.8.8 부터 임시 적용. 한시적
+        Dim strSQL As String = String.Format("delete [Q_CAL] where runid={0}", g_performance_log_GUID)   ''2018.8.8 부터 임시 적용. 한시적
 
         Dim oSQLCMD As New SqlClient.SqlCommand(strSQL, oSQLCon)
         Dim intAffectedRecords As Integer = oSQLCMD.ExecuteNonQuery()

@@ -32,7 +32,7 @@ Public Class cRTStarter
     Public Sub New(fpn_REF As String, strGUID As String, dtStart As DateTime, Optional RTStartDateTime As String = "")
         mFPN_RTEnv = fpn_REF
         UpdateRTVariablesUsingEnvFile(mFPN_RTEnv, RTStartDateTime) '여기서 파일로 설정
-        g_GUID_from_monitorEXE = strGUID
+        g_performance_log_GUID = strGUID
         g_dtStart_from_MonitorEXE = dtStart
     End Sub
 
@@ -125,7 +125,7 @@ Public Class cRTStarter
                 oSqlDataAdapter.Fill(dt1)
                 Dim intID As Integer = CInt(dt1.Rows(0).Item(0))
 
-                If g_GUID_from_monitorEXE = intID.ToString() Then
+                If g_performance_log_GUID = intID.ToString() Then
                     '2018.8. 원 : g_GUID_from_monitorEXE 이건 monitor 가 넘겨준것.  intID 이건 DB에서 확인된 것 . 일치해야 함. 검증용도 
                 Else
                     Console.WriteLine("Warning : If g_performance_log_GUID <> intID.ToString() Then")
