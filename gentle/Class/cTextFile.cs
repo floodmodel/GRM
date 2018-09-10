@@ -282,6 +282,21 @@ namespace gentle
 
         private static void WriteTwoDimData_old(string fpn, double[,] array)
         {
+            StringBuilder sbALL = new StringBuilder("");
+            for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
+            {
+                for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
+                {
+                    sbALL.Append(array[nc, nr].ToString("F2"));
+                    sbALL.Append(" ");
+                }
+                sbALL.Append("\r\n");
+            }
+            File.AppendAllText(fpn, sbALL.ToString());
+        }
+
+        private static void WriteTwoDimData_old_v20180627(string fpn, double [,] array)
+        {
             string rows = "";
             for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
             {
@@ -301,7 +316,9 @@ namespace gentle
             File.AppendAllText(fpn, rows);
         }
 
+        
         public static bool MakeASCTextFileAsParallel(string fpn, string allHeader, double[,] array)
+
         {
             File.AppendAllText(fpn, allHeader);
             int rowYcount = array.GetLength(1);
