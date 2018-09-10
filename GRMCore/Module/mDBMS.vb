@@ -1,8 +1,10 @@
 ﻿Imports System.Data.SqlClient
 Module mDBMS
 
-    Friend Const g_strDBMSCnn As String = "data source=REALGRM\SQLEXPRESS;Initial catalog=hydroradar;Integrated Security=true"  '2016.7.26. 신규 azure   . 2018.9.10에도 유효합니다.
-    Friend g_RunID As Integer
+    'Friend Const g_strDBMSCnn As String = "data source=REALGRM\SQLEXPRESS;Initial catalog=hydroradar;Integrated Security=true"  '2016.7.26. 신규 azure 
+    Friend Const g_strDBMSCnn As String = "data source=REALGRM\SQLEXPRESS;Initial catalog=RealTimeGRM;Integrated Security=true"  '2018.8.
+    Friend g_RunID As Integer ' 2018.8.6 임시 추가
+    '
 
     Sub Add_Log_toDBMS(strBasin As String, strItem As String)
         Try
