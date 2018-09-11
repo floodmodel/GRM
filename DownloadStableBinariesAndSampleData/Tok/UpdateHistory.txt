@@ -38,6 +38,10 @@ Tok의 특징과 주요 기능은 아래와 같습니다.
   - 래스터 계산기에서 소수점 자리수 지정하는 기능 추가
   - 매우 큰 텍스트 파일 처리 관련 오류 수정
 
+2018.09.10.
+  - 여러개 밴드를 가지는 GeoTIFF 파일에서 밴드를 지정해서 ASCII 파일로 변환하는 기능 추가
+
+
 
 파일 다운로드와 세팅 가이드는         https://github.com/floodmodel/GRM/blob/master/DownloadStableBinariesAndSampleData/Tok/Tok_SettingAndStarting_Guideline_20180904.pdf 
 
