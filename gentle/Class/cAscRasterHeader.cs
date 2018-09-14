@@ -13,7 +13,7 @@ namespace gentle
         public double xllcorner;
         public double yllcorner;
         public double cellsize;
-        public double nodataValue;
+        public int nodataValue;
         public int headerEndingLineIndex;
         public int dataStartingLineIndex;
     }

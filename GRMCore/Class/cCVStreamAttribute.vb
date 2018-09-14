@@ -18,7 +18,7 @@ Public Class cCVStreamAttribute
     ''' 하천의 바닥폭[m]
     ''' </summary>
     ''' <remarks></remarks>
-    Public ChBaseWidth As Single = 0.0F
+    Public ChBaseWidth As Single = 0
 
     ''' <summary>
     ''' 하폭레이어에서 받은 하폭[m]

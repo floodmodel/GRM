@@ -193,7 +193,7 @@ namespace gentle
                         {
                             if (double.TryParse(LineParts[1], out double v))
                             {
-                                header.nodataValue = v;
+                                header.nodataValue = (int) v;
                             }
                             else
                             {

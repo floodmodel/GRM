@@ -11,6 +11,7 @@ Public Class cRasterOutput
     Private mColCount As Integer
     Private mRowCount As Integer
     Private mASCHeaderStringAll As String
+    Private mascNodataValue As Integer = -9999
     Private mArraySSR As Double(,)
     'Private mArraySSRasOneD As Double()
 
@@ -52,7 +53,7 @@ Public Class cRasterOutput
         mColCount = mProject.Watershed.mColCount
         mRowCount = mProject.Watershed.mRowCount
         mASCHeaderStringAll = cTextFile.MakeHeaderString(mColCount, mRowCount,
-                                                 mProject.Watershed.mxllcorner, mProject.Watershed.myllcorner, mProject.Watershed.mCellSize, "-9999")
+                                                 mProject.Watershed.mxllcorner, mProject.Watershed.myllcorner, mProject.Watershed.mCellSize, mascNodataValue.ToString)
         mbMakeImgFile = mProject.GeneralSimulEnv.mbCreateImageFile
         mbMakeASCFile = mProject.GeneralSimulEnv.mbCreateASCFile
         mbMakeValueAry = False
@@ -267,7 +268,8 @@ Public Class cRasterOutput
         '                                           mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
         mImgSSR = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoSSR.PFN, mArraySSR,
                                                    mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
-
+        'mImgSSR = imgMaker.MakeImgFileAndGetImgSameIntervalUsingArrayFromTL_InParallel(mImgInfoSSR.PFN, mArraySSR,
+        '                                           mImgInfoSSR.width, mImgInfoSSR.height, 1, -9999)
     End Sub
 
     Private Sub StartMakeImgRFD()
@@ -287,6 +289,8 @@ Public Class cRasterOutput
         '                                           mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
         mImgRF = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoRF.PFN, mArrayRF,
                                                    mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
+        'mImgRF = imgMaker.MakeImgFileAndGetImgSameIntervalUsingArrayFromTL_InParallel(mImgInfoRF.PFN, mArrayRF,
+        '                                   mImgInfoRF.width, mImgInfoRF.height, 40, -9999)
 
     End Sub
 
@@ -308,6 +312,8 @@ Public Class cRasterOutput
         '                                           mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
         mImgRFacc = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoRFAcc.PFN, mArrayRFAcc,
                                                    mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
+        'mImgRFacc = imgMaker.MakeImgFileAndGetImgSameIntervalUsingArrayFromTL_InParallel(mImgInfoRFAcc.PFN, mArrayRFAcc,
+        '                                           mImgInfoRFAcc.width, mImgInfoRFAcc.height, 400, -9999)
 
     End Sub
 
@@ -328,6 +334,8 @@ Public Class cRasterOutput
         '                                           mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
         mImgFlow = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoFlow.PFN, mArrayQ,
                                                    mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
+        'mImgFlow = imgMaker.MakeImgFileAndGetImgSameIntervalUsingArrayFromTL_InParallel(mImgInfoFlow.PFN, mArrayQ,
+        '                                           mImgInfoFlow.width, mImgInfoFlow.height, 5000, -9999)
 
     End Sub
 
@@ -338,7 +346,7 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeASCTextFileInnerSSRD()
-        cTextFile.MakeASCTextFile(mASCfpnSSRD, mASCHeaderStringAll, mArraySSR, 2)
+        cTextFile.MakeASCTextFile(mASCfpnSSRD, mASCHeaderStringAll, mArraySSR, 2, mascNodataValue)
         'cTextFile.MakeASCTextFileAsParallel(mASCfpnSSRD, mASCHeaderStringAll, "-9999", mArraySSR) '이게 더 느리다.. 취합과정 땜에..
 
     End Sub
@@ -350,7 +358,7 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeASCTextFileInnerRFD()
-        cTextFile.MakeASCTextFile(mASCfpnRFD, mASCHeaderStringAll, mArrayRF, 2)
+        cTextFile.MakeASCTextFile(mASCfpnRFD, mASCHeaderStringAll, mArrayRF, 2, mascNodataValue)
         'cTextFile.MakeASCTextFileAsParallel(mASCfpnRFD, mASCHeaderStringAll, "-9999", mArrayRF)'이게 더 느리다.. 취합과정 땜에..
     End Sub
 
@@ -361,7 +369,7 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeASCTextFileInnerRFaccD()
-        cTextFile.MakeASCTextFile(mASCfpnRFaccD, mASCHeaderStringAll, mArrayRFAcc, 2)
+        cTextFile.MakeASCTextFile(mASCfpnRFaccD, mASCHeaderStringAll, mArrayRFAcc, 2, mascNodataValue)
         'cTextFile.MakeASCTextFileAsParallel(mASCfpnRFaccD, mASCHeaderStringAll, "-9999", mArrayRFAcc) '이게 더 느리다.. 취합과정 땜에..
     End Sub
 
@@ -372,7 +380,7 @@ Public Class cRasterOutput
     End Sub
 
     Private Sub MakeASCTextFileInnerFlowD()
-        cTextFile.MakeASCTextFile(mASCfpnFlowD, mASCHeaderStringAll, mArrayQ, 2)
+        cTextFile.MakeASCTextFile(mASCfpnFlowD, mASCHeaderStringAll, mArrayQ, 2, mascNodataValue)
         'cTextFile.MakeASCTextFileAsParallel(mASCfpnFlowD, mASCHeaderStringAll, "-9999", mArrayQ) '이게 더 느리다.. 취합과정 땜에..
     End Sub
 

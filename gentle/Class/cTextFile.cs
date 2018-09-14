@@ -119,12 +119,12 @@ namespace gentle
             return true;
         }
 
-        public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, float cellSize, string nodataValue, double[,] array, int decimalPartN)
+        public static bool MakeASCTextFile(string fpn, int ncols, int nrows, double xll, double yll, float cellSize, int nodataValue, double[,] array, int decimalPartN)
         {
             if (File.Exists(fpn) == true) { File.Delete(fpn); }
-            string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, nodataValue);
+            string header = cTextFile.MakeHeaderString(ncols, nrows, xll, yll, cellSize, nodataValue.ToString());
             File.AppendAllText(fpn, header);
-            WriteTwoDimData(fpn, array, decimalPartN);
+            WriteTwoDimData(fpn, array, decimalPartN, nodataValue);
             return true;
         }
 
@@ -136,7 +136,7 @@ namespace gentle
         /// <param name="array">래스터 값을 저장하고 있는 2차원 배열</param>
         /// <param name="decimalPartN">소숫점 이하 출력 자리 수</param>
         /// <returns></returns>
-        public static bool MakeASCTextFile(string fpn, string allHeader, double[,] array, int decimalPartN)
+        public static bool MakeASCTextFile(string fpn, string allHeader, double[,] array, int decimalPartN, int nodataValue)
         {
             if (File.Exists(fpn) == true)
             {
@@ -146,7 +146,7 @@ namespace gentle
             if (File.Exists (fpn)==false )
             {
                 File.AppendAllText(fpn, allHeader);
-                WriteTwoDimData(fpn, array, decimalPartN);
+                WriteTwoDimData(fpn, array, decimalPartN, nodataValue);
             }
             return true;
         }
@@ -248,7 +248,7 @@ namespace gentle
         /// <param name="fpn"></param>
         /// <param name="array"></param>
         /// <param name="decimalPartNum">0~7 이외의 숫자가 들어오면, 원본 값 그대로 저장</param>
-        private static void WriteTwoDimData(string fpn, double[,] array, int decimalPartNum)
+        private static void WriteTwoDimData(string fpn, double[,] array, int decimalPartNum, int nodataValue)
         {
             string dpn = "";
             if (decimalPartNum == 1) { dpn = "F1"; }
@@ -259,12 +259,14 @@ namespace gentle
             if (decimalPartNum == 6) { dpn = "F6"; }
             if (decimalPartNum == 7) { dpn = "F7"; }
             //StringBuilder sbArow = new StringBuilder();
-            for (int nr = 0; nr <= array.GetLength(1) - 1; nr++)
+            int nx = array.GetLength(0);
+            int ny = array.GetLength(1);
+            for (int nr = 0; nr < ny; nr++)
             {
                 StringBuilder sbArow = new StringBuilder();
-                for (int nc = 0; nc <= array.GetLength(0) - 1; nc++)
+                for (int nc = 0; nc < nx; nc++)
                 {
-                    if (decimalPartNum ==0 || array[nc, nr]==0)
+                    if (decimalPartNum ==0 || array[nc, nr]==0|| array[nc, nr] ==nodataValue )
                     {
                        sbArow.Append(((int)array[nc, nr]).ToString() + " ");
                     }
