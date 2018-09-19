@@ -4,12 +4,17 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.IO;
+using Microsoft.Win32.SafeHandles;
+using System.Runtime.InteropServices;
 
 
 namespace gentle
 {
-    public class cAscRasterReader
+    public  class cAscRasterReader : IDisposable 
     {
+        bool disposed = false;
+        // Instantiate a SafeHandle instance.
+        SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
         //private string[] mLines;
         private string[] mLinesForHeader;
         //private int mLineCountAll;
@@ -105,6 +110,30 @@ namespace gentle
 
         }
 
+
+        public void Dispose()
+        {
+            // Dispose of unmanaged resources.
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
+
+        // Protected implementation of Dispose pattern.
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+
+            if (disposing)
+            {
+                handle.Dispose();
+                // Free any other managed objects here.
+                //
+            }
+
+            disposed = true;
+        }
 
         public static cAscRasterHeader GetHeaderInfo(string inAscFPN)
         {

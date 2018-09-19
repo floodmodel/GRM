@@ -10,6 +10,15 @@ namespace gentle
 {
    public class cComTools
     {
+        public static void timeDelay()
+        {
+            int tmp = 0;
+            for (int a = 0; a < 10; a++)
+            {
+                tmp += 1;
+            }// time delay
+        }
+
         public static string GetTimeToPrintOut(bool bDateTimeFormat, string startDateTime, int nowT_MIN_elapsed)
         {
             if (bDateTimeFormat == true)

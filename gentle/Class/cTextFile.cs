@@ -266,7 +266,7 @@ namespace gentle
                 StringBuilder sbArow = new StringBuilder();
                 for (int nc = 0; nc < nx; nc++)
                 {
-                    if (decimalPartNum ==0 || array[nc, nr]==0|| array[nc, nr] ==nodataValue )
+                    if (decimalPartNum ==0 || array[nc, nr]==0|| array[nc, nr] == nodataValue )
                     {
                        sbArow.Append(((int)array[nc, nr]).ToString() + " ");
                     }
@@ -277,6 +277,7 @@ namespace gentle
                 }
                 sbArow.Append("\r\n");
                 File.AppendAllText(fpn, sbArow.ToString());
+                if (nr % 100 == 0) { GC.Collect(); }
             }
             //File.AppendAllText(fpn, sbALL.ToString());
         }
@@ -609,26 +610,63 @@ namespace gentle
         {
             try
             {
-                string[] strLines = System.IO.File.ReadAllLines(strSourceFNP);
-                int intTotCountLine = strLines.Length;
-                int intNLine = 0;
-                string strOneLine = null;
-                for (intNLine = 0; intNLine <= intTotCountLine - 1; intNLine++)
+                string sFPN = strSourceFNP.Trim().ToLower();
+                string tFPN = strTagetFNP.Trim().ToLower();
+                String tmpFPN = "";
+                if (sFPN == tFPN)
                 {
-                    if (endingLineIndex > 0 && intNLine > endingLineIndex)
+                    tmpFPN = Path.Combine(Path.GetDirectoryName(strSourceFNP), Path.GetFileNameWithoutExtension(strSourceFNP) + ".tmp");
+                }
+                else
+                {
+                    tmpFPN = strTagetFNP;
+                }
+
+                int ln = 0;
+                foreach (string line in File.ReadLines(strSourceFNP))
+                {
+                    if (endingLineIndex > 0 && ln > endingLineIndex)
                     {
                         break;
                     }
-                    if (intNLine >= startingLineIndex)
+                    if (ln >= startingLineIndex)
                     {
-                        strOneLine = Convert.ToString(strLines[intNLine]);
-                        strLines[intNLine] = strOneLine.Replace(strTextToFind, strTextToReplace);
+                        line.Replace(strTextToFind, strTextToReplace);
                     }
+                    System.IO.File.AppendAllText(tmpFPN, line);
+                    ln++;
                 }
-                System.IO.File.WriteAllLines(strTagetFNP, strLines);
+                if (sFPN == tFPN)
+                {
+                    File.Delete(strSourceFNP);
+                    int tmp = 0;
+                    cComTools.timeDelay();
+                    File.Move(tmpFPN, strTagetFNP);
+                }
+
+
+                //    string[] strLines = System.IO.File.ReadAllLines(strSourceFNP);
+                //    int intTotCountLine = strLines.Length;
+                //    int intNLine = 0;
+                //    string strOneLine = null;
+                //    for (intNLine = 0; intNLine <= intTotCountLine - 1; intNLine++)
+                //    {
+                //        if (endingLineIndex > 0 && intNLine > endingLineIndex)
+                //        {
+                //            break;
+                //        }
+                //        if (intNLine >= startingLineIndex)
+                //        {
+                //            strOneLine = Convert.ToString(strLines[intNLine]);
+                //            strLines[intNLine] = strOneLine.Replace(strTextToFind, strTextToReplace);
+                //        }
+                //    }
+                //    System.IO.File.WriteAllLines(strTagetFNP, strLines);
+                GC.Collect();
             }
             catch (Exception ex)
             {
+                GC.Collect();
                 throw ex;
             }
         }
@@ -638,26 +676,42 @@ namespace gentle
         {
             try
             {
+                String tmpFPN = "";
+                tmpFPN =Path.Combine (Path.GetDirectoryName (strSourceFNP ), Path.GetFileNameWithoutExtension(strSourceFNP ) + ".tmp");
+                if (File.Exists (tmpFPN)==true) { File.Delete(tmpFPN); }
                 string[] strLines = System.IO.File.ReadAllLines(strSourceFNP);
-                int intTotCountLine = strLines.Length;
-                int intNLine = 0;
-                string strOneLine = null;
-                for (intNLine = 0; intNLine <= intTotCountLine - 1; intNLine++)
+                foreach (string line in File.ReadLines(strSourceFNP))
                 {
-                    if (endingLineIndex > 0 && intNLine > endingLineIndex)
-                    {
-                        break;
-                    }
-                    if (intNLine >= startingLineIndex)
-                    {
-                        strOneLine = Convert.ToString(strLines[intNLine]);
-                        strLines[intNLine] = strOneLine.Replace(strTextToFind, strTextToReplace);
-                    }
+                    line.Replace(strTextToFind, strTextToReplace);
+                    System.IO.File.AppendAllText (tmpFPN , line+"\r\n");
                 }
-                System.IO.File.WriteAllLines(strSourceFNP, strLines);
+                File.Delete(strSourceFNP);
+                cComTools.timeDelay();
+                File.Move(tmpFPN, strSourceFNP);
+
+
+                //string[] strLines = System.IO.File.ReadAllLines(strSourceFNP);
+                //int intTotCountLine = strLines.Length;
+                //int intNLine = 0;
+                //string strOneLine = null;
+                //for (intNLine = 0; intNLine <= intTotCountLine - 1; intNLine++)
+                //{
+                //    if (endingLineIndex > 0 && intNLine > endingLineIndex)
+                //    {
+                //        break;
+                //    }
+                //    if (intNLine >= startingLineIndex)
+                //    {
+                //        strOneLine = Convert.ToString(strLines[intNLine]);
+                //        strLines[intNLine] = strOneLine.Replace(strTextToFind, strTextToReplace);
+                //    }
+                //}
+                //System.IO.File.WriteAllLines(strSourceFNP, strLines);
+                GC.Collect();
             }
             catch (Exception ex)
             {
+                GC.Collect();
                 throw ex;
             }
         }
@@ -667,16 +721,18 @@ namespace gentle
              int tlXcol, int tlYrow, int lrXcol, int lrYrow)
         {
             if (File.Exists (strTagetFNP )==true) { File.Delete(strTagetFNP); }
-            StringBuilder sb = new StringBuilder();
-            sb.Append(inAscRaster.HeaderStringAll);
+    
+            //sb.Append(inAscRaster.HeaderStringAll);
+            File.AppendAllText(strTagetFNP, inAscRaster.HeaderStringAll);
             double vToF = 0;
             double.TryParse(strTextToFind, out vToF);
             for (int r = 0; r < inAscRaster.Header.numberRows; r++)
             {
+                //StringBuilder sb = new StringBuilder();
                 if (r >= tlYrow && r <= lrYrow)
                 {
                     //string[] valuesInaRow = inAscRaster.ValuesInOneRowFromTopLeft(r);
-                    StringBuilder sbAline = new StringBuilder();
+                    StringBuilder sbInAline = new StringBuilder();
                     for (int c = 0; c < inAscRaster.Header .numberCols; c++)
                     {
                         double av = inAscRaster.ValueFromTL(c, r);
@@ -688,16 +744,19 @@ namespace gentle
                                 strv = strTextToReplace.Trim ();
                             }
                         }
-                        sbAline.Append(strv + " ");
+                        sbInAline.Append(strv + " ");
                     }
-                    sb.Append(sbAline.ToString()+ "\r\n");
+                    File.AppendAllText(strTagetFNP, sbInAline.ToString() + "\r\n");
+                    //sb.Append(sbInAline.ToString()+ "\r\n");
                 }
                 else
                 {
-                    sb.Append(inAscRaster.OneRowContainsValuesFromTop(r)+ "\r\n");
+                    //sb.Append(inAscRaster.OneRowContainsValuesFromTop(r)+ "\r\n");
+                    File.AppendAllText(strTagetFNP, inAscRaster.OneRowContainsValuesFromTop(r) + "\r\n");
                 }
+                
             }
-            File.AppendAllText(strTagetFNP,sb.ToString());
+            //File.AppendAllText(strTagetFNP,sb.ToString());
         }
 
         public static void ReplaceLineByLineInTextFile(string strSourceFNP, string strTagetFNP, string strTextToFind, string strTextToReplace,

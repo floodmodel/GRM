@@ -555,35 +555,167 @@ namespace gentle
             return true;
         }
 
-
-        public bool MakeImgFileUsingASCfileFromTL(string inASCFPN, string imgFPNtoMake, RendererRange rangeType, double nullValue=-9999)
+        public bool MakeImgFileUsingASCfileFromTL_InParallel(string inASCFPN, string imgFPNtoMake, RendererRange rangeType, double nullValue=-9999)
         {
-            cAscRasterReader ascF = new cAscRasterReader(inASCFPN);
-            int LayerCellWcount = ascF.Header.numberCols;
-            int LayerCellHcount = ascF.Header.numberRows;
-            int CellCount = (LayerCellWcount * LayerCellHcount);
-            int CellWbmp = 1;
-            int CellHbmp = 1;
-            Bitmap bm = new Bitmap(CellWbmp * LayerCellWcount, CellHbmp * LayerCellHcount);
-            Graphics gr = Graphics.FromImage(bm);
-            gr.Clear(Color.White);
-            //int ncols = 0;
-            //int nrows = 0;
-            for (int r = 0; r <= LayerCellHcount - 1; r++)
+            try
             {
-                //string[] aRow = ascF.ValuesInOneRowFromTopLeft(r);
-                for (int c = 0; c <= LayerCellWcount - 1; c++)
+                unsafe
                 {
-                    Rectangle rec = new Rectangle(c * CellWbmp, r * CellHbmp, CellWbmp, CellHbmp);
-                    Color cToShow = default(Color);
-                    double value = Convert.ToDouble(ascF .ValueFromTL (c,r));
-                    cToShow = GetColorFromMemoryRendererInDifferentInterval(value, rangeType, nullValue);
-                    SolidBrush brsh = new SolidBrush(cToShow);
-                    gr.FillRectangle(brsh, rec);
+                    cAscRasterReader ascF = new cAscRasterReader(inASCFPN);
+
+                    int colxCount = ascF.Header.numberCols;
+                    int rowyCount = ascF.Header.numberRows;
+
+                    int CellCount = (colxCount * rowyCount);
+                    int CellWbmp = 1;
+                    int CellHbmp = 1;
+                    Bitmap bm = new Bitmap(CellWbmp * colxCount, CellHbmp * rowyCount);
+                    BitmapData bitmapData = bm.LockBits(new Rectangle(0, 0, bm.Width, bm.Height), ImageLockMode.ReadWrite, bm.PixelFormat);
+                    int bytesPerPixel = System.Drawing.Bitmap.GetPixelFormatSize(bitmapData.PixelFormat) / 8;
+                    int heightInPixels = bitmapData.Height;
+                    int widthInBytes = bitmapData.Width * bytesPerPixel;
+                    byte* PtrFirstPixel = (byte*)bitmapData.Scan0;
+                    Parallel.For(0, rowyCount, y =>
+                    {
+                        byte* currentLine = PtrFirstPixel + (y * bitmapData.Stride);
+                        for (int x = 0; x < colxCount; x++)
+                        {
+                            Color cToShow = DefaultNullColor;
+                            if (double.TryParse(ascF .ValueFromTL(x, y).ToString(), out double dv) == true)
+                            {
+                                cToShow = GetColorFromMemoryRendererInDifferentInterval(dv, rangeType, nullValue);
+                            }
+                            currentLine[x * bytesPerPixel] = (byte)cToShow.B;
+                            currentLine[x * bytesPerPixel + 1] = (byte)cToShow.G;
+                            currentLine[x * bytesPerPixel + 2] = (byte)cToShow.R;
+                            currentLine[x * bytesPerPixel + 3] = (byte)255;
+                        }
+                    });
+                    bm.UnlockBits(bitmapData);
+                    bm.Save(imgFPNtoMake, ImageFormat.Png);
+                    return true;
+
+
+
+
+
+
+
+
+
+
+
+
+                    //        Graphics gr = Graphics.FromImage(bm);
+                    //        gr.Clear(Color.FromArgb(255, 255, 255, 255));
+
+                    //        for (int r = 0; r <= LayerCellHcount - 1; r++)
+                    //        {
+                    //            //string[] aRow = ascF.ValuesInOneRowFromTopLeft(r);
+                    //            for (int c = 0; c <= LayerCellWcount - 1; c++)
+                    //            {
+                    //                Rectangle rec = new Rectangle(c * CellWbmp, r * CellHbmp, CellWbmp, CellHbmp);
+                    //                Color cToShow = default(Color);
+                    //                double value = Convert.ToDouble(ascF.ValueFromTL(c, r));
+                    //                cToShow = GetColorFromMemoryRendererInDifferentInterval(value, rangeType, nullValue);
+                    //                SolidBrush brsh = new SolidBrush(cToShow);
+                    //                gr.FillRectangle(brsh, rec);
+                    //            }
+                    //        }
+                    //        bm.Save(imgFPNtoMake, ImageFormat.Png);
+
+
+
+
+
+
+                    //        int CellCount = (colxCount * rowyCount);
+                    //        int CellWbmp = 0;
+                    //        int CellHbmp = 0;
+                    //        CellWbmp = Convert.ToInt32(imgWidth / colxCount);
+                    //        CellHbmp = Convert.ToInt32(imgHeight / rowyCount);
+                    //        if (CellHbmp <= 0) { CellHbmp = 1; }
+                    //        if (CellWbmp <= 0) { CellWbmp = 1; }
+                    //        if (CellWbmp < CellHbmp)
+                    //        {
+                    //            CellHbmp = CellWbmp;
+                    //        }
+                    //        else
+                    //        {
+                    //            CellWbmp = CellHbmp;
+                    //        }
+                    //        Bitmap bm = new Bitmap(Convert.ToInt32(colxCount * CellWbmp) + 1, Convert.ToInt32(rowyCount * CellHbmp) + 1);
+                    //        BitmapData bitmapData = bm.LockBits(new Rectangle(0, 0, bm.Width, bm.Height), ImageLockMode.ReadWrite, bm.PixelFormat);
+                    //        int bytesPerPixel = System.Drawing.Bitmap.GetPixelFormatSize(bitmapData.PixelFormat) / 8;
+                    //        int heightInPixels = bitmapData.Height;
+                    //        int widthInBytes = bitmapData.Width * bytesPerPixel;
+                    //        byte* PtrFirstPixel = (byte*)bitmapData.Scan0;
+                    //        Parallel.For(0, rowyCount, y =>
+                    //        {
+                    //            byte* currentLine = PtrFirstPixel + (y * bitmapData.Stride);
+                    //            for (int x = 0; x < colxCount; x++)
+                    //            {
+                    //                Color cToShow = DefaultNullColor;
+                    //                if (double.TryParse(array[x, y].ToString(), out double dv) == true)
+                    //                {
+                    //                    cToShow = GetColorFromMemoryRendererInSameInterval(dv, rendererMaxV, nullValue);
+                    //                }
+                    //                currentLine[x * bytesPerPixel] = (byte)cToShow.B;
+                    //                currentLine[x * bytesPerPixel + 1] = (byte)cToShow.G;
+                    //                currentLine[x * bytesPerPixel + 2] = (byte)cToShow.R;
+                    //                currentLine[x * bytesPerPixel + 3] = (byte)255;
+                    //            }
+                    //        });
+
+                    //        bm.UnlockBits(bitmapData);
+                    //        bm.Save(imgFPNtoMake, ImageFormat.Png);
+                    //        return true ;
                 }
             }
-            bm.Save(imgFPNtoMake, ImageFormat.Png);
-            return true;
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
+
+
+
+            //int LayerCellWcount = ascF.Header.numberCols;
+            //int LayerCellHcount = ascF.Header.numberRows;
+            //int CellCount = (LayerCellWcount * LayerCellHcount);
+            //int CellWbmp = 1;
+            //int CellHbmp = 1;
+            //Bitmap bm = new Bitmap(CellWbmp * LayerCellWcount, CellHbmp * LayerCellHcount);
+            //Graphics gr = Graphics.FromImage(bm);
+            //gr.Clear(Color.FromArgb(255, 255, 255, 255));
+            ////int ncols = 0;
+            ////int nrows = 0;
+            //for (int r = 0; r <= LayerCellHcount - 1; r++)
+            //{
+            //    //string[] aRow = ascF.ValuesInOneRowFromTopLeft(r);
+            //    for (int c = 0; c <= LayerCellWcount - 1; c++)
+            //    {
+            //        Rectangle rec = new Rectangle(c * CellWbmp, r * CellHbmp, CellWbmp, CellHbmp);
+            //        Color cToShow = default(Color);
+            //        double value = Convert.ToDouble(ascF .ValueFromTL (c,r));
+            //        cToShow = GetColorFromMemoryRendererInDifferentInterval(value, rangeType, nullValue);
+            //        SolidBrush brsh = new SolidBrush(cToShow);
+            //        gr.FillRectangle(brsh, rec);
+            //    }
+            //}
+            //bm.Save(imgFPNtoMake, ImageFormat.Png);
+            //return true;
+
+
+
+
+
+
+
+
+
+
+
         }
 
         public static Image AutosizeImage(string ImagePN, PictureBox picBox, PictureBoxSizeMode pSizeMode = PictureBoxSizeMode.CenterImage)
