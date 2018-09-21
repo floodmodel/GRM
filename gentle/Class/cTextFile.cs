@@ -629,11 +629,14 @@ namespace gentle
                     {
                         break;
                     }
+                    string newL= line;
                     if (ln >= startingLineIndex)
                     {
-                        line.Replace(strTextToFind, strTextToReplace);
+                        //string lineString = line;
+
+                        newL = newL.Replace(strTextToFind, strTextToReplace);
                     }
-                    System.IO.File.AppendAllText(tmpFPN, line);
+                    System.IO.File.AppendAllText(tmpFPN, newL + "\r\n");
                     ln++;
                 }
                 if (sFPN == tFPN)
@@ -682,8 +685,8 @@ namespace gentle
                 string[] strLines = System.IO.File.ReadAllLines(strSourceFNP);
                 foreach (string line in File.ReadLines(strSourceFNP))
                 {
-                    line.Replace(strTextToFind, strTextToReplace);
-                    System.IO.File.AppendAllText (tmpFPN , line+"\r\n");
+                   string newL =  line.Replace(strTextToFind, strTextToReplace);
+                    System.IO.File.AppendAllText (tmpFPN , newL + "\r\n");
                 }
                 File.Delete(strSourceFNP);
                 cComTools.timeDelay();
