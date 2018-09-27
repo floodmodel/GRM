@@ -248,6 +248,7 @@ Module mMain
 
     Private Sub GRMconsoleHelp()
         Console.WriteLine()
+        Console.WriteLine("GRM v2018.09.")
         Console.WriteLine("Usage : GRM [Current project file full path and name to simulate]")
         Console.WriteLine()
         Console.WriteLine("**사용법")
