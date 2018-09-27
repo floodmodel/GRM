@@ -267,7 +267,7 @@ Public Class cRasterOutput
         'mImgSSR = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoSSR.PFN, mArraySSR,
         '                                           mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
         mImgSSR = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoSSR.PFN, mArraySSR,
-                                                   mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererRange.RendererFrom0to1)
+                                                   mImgInfoSSR.width, mImgInfoSSR.height, cImg.RendererIntervalType.Differentinterval, cImg.RendererRange.RendererFrom0to1)
         'mImgSSR = imgMaker.MakeImgFileAndGetImgSameIntervalUsingArrayFromTL_InParallel(mImgInfoSSR.PFN, mArraySSR,
         '                                           mImgInfoSSR.width, mImgInfoSSR.height, 1, -9999)
     End Sub
@@ -288,7 +288,7 @@ Public Class cRasterOutput
         'mImgRF = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRF.PFN, mArrayRF,
         '                                           mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
         mImgRF = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoRF.PFN, mArrayRF,
-                                                   mImgInfoRF.width, mImgInfoRF.height, cImg.RendererRange.RendererFrom0to50)
+                                                   mImgInfoRF.width, mImgInfoRF.height, cImg.RendererIntervalType.Differentinterval, cImg.RendererRange.RendererFrom0to50)
         'mImgRF = imgMaker.MakeImgFileAndGetImgSameIntervalUsingArrayFromTL_InParallel(mImgInfoRF.PFN, mArrayRF,
         '                                   mImgInfoRF.width, mImgInfoRF.height, 40, -9999)
 
@@ -311,7 +311,7 @@ Public Class cRasterOutput
         'mImgRFacc = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoRFAcc.PFN, mArrayRFAcc,
         '                                           mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
         mImgRFacc = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoRFAcc.PFN, mArrayRFAcc,
-                                                   mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererRange.RendererFrom0to500)
+                                                   mImgInfoRFAcc.width, mImgInfoRFAcc.height, cImg.RendererIntervalType.Differentinterval, cImg.RendererRange.RendererFrom0to500)
         'mImgRFacc = imgMaker.MakeImgFileAndGetImgSameIntervalUsingArrayFromTL_InParallel(mImgInfoRFAcc.PFN, mArrayRFAcc,
         '                                           mImgInfoRFAcc.width, mImgInfoRFAcc.height, 400, -9999)
 
@@ -333,7 +333,7 @@ Public Class cRasterOutput
         'mImgFlow = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL(mImgInfoFlow.PFN, mArrayQ,
         '                                           mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
         mImgFlow = imgMaker.MakeImgFileAndGetImgUsingArrayFromTL_InParallel(mImgInfoFlow.PFN, mArrayQ,
-                                                   mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererRange.RendererFrom0to10000)
+                                                   mImgInfoFlow.width, mImgInfoFlow.height, cImg.RendererIntervalType.Differentinterval, cImg.RendererRange.RendererFrom0to10000)
         'mImgFlow = imgMaker.MakeImgFileAndGetImgSameIntervalUsingArrayFromTL_InParallel(mImgInfoFlow.PFN, mArrayQ,
         '                                           mImgInfoFlow.width, mImgInfoFlow.height, 5000, -9999)
 
