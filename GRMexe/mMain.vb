@@ -271,11 +271,11 @@ Module mMain
         Console.WriteLine("               d:\GRMrun>grm test.gmp")
         Console.WriteLine("- /f 폴더경로")
         Console.WriteLine("         grm을 폴더 단위로 실행시킨다.")
-        Console.WriteLine("          ** 예문 : grmmp /f d:\GRMrun\TestProject")
+        Console.WriteLine("          ** 예문 : grm /f d:\GRMrun\TestProject")
         Console.WriteLine("- /fd 폴더경로")
         Console.WriteLine("         grm을 폴더 단위로 실행시킨다.")
         Console.WriteLine("         유량 모의결과인 *discharge.out을 제외한 파일을 지운다(*.gmp, *Depth.out, 등등...)")
-        Console.WriteLine("          ** 예문 : grmmp /fd d:\GRMrun\TestProject")
+        Console.WriteLine("          ** 예문 : grm /fd d:\GRMrun\TestProject")
     End Sub
 
 
