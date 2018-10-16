@@ -588,8 +588,6 @@ Partial Public Class GRMProject
         
         Private columnFlowDirectionType As Global.System.Data.DataColumn
         
-        Private columnGridCellSize As Global.System.Data.DataColumn
-        
         Private columnIsParallel As Global.System.Data.DataColumn
         
         Private columnMaxDegreeOfParallelism As Global.System.Data.DataColumn
@@ -944,14 +942,6 @@ Partial Public Class GRMProject
         Public ReadOnly Property FlowDirectionTypeColumn() As Global.System.Data.DataColumn
             Get
                 Return Me.columnFlowDirectionType
-            End Get
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public ReadOnly Property GridCellSizeColumn() As Global.System.Data.DataColumn
-            Get
-                Return Me.columnGridCellSize
             End Get
         End Property
         
@@ -1351,7 +1341,6 @@ Partial Public Class GRMProject
                     ByVal RainfallInterval As String,  _
                     ByVal RainfallDataFile As String,  _
                     ByVal FlowDirectionType As String,  _
-                    ByVal GridCellSize As String,  _
                     ByVal IsParallel As String,  _
                     ByVal MaxDegreeOfParallelism As String,  _
                     ByVal SimulStartingTime As String,  _
@@ -1394,7 +1383,7 @@ Partial Public Class GRMProject
                     ByVal ComputerUserName As String,  _
                     ByVal GRMVersion As String) As ProjectSettingsRow
             Dim rowProjectSettingsRow As ProjectSettingsRow = CType(Me.NewRow,ProjectSettingsRow)
-            Dim columnValuesArray() As Object = New Object() {ProjectFile, GRMSimulationType, WatershedFile, SlopeFile, FlowDirectionFile, FlowAccumFile, StreamFile, ChannelWidthFile, LandCoverDataType, LandCoverFile, LandCoverVATFile, ConstantRoughnessCoeff, ConstantImperviousRatio, SoilTextureDataType, SoilTextureFile, SoilTextureVATFile, ConstantSoilPorosity, ConstantSoilEffPorosity, ConstantSoilWettingFrontSuctionHead, ConstantSoilHydraulicConductivity, SoilDepthDataType, SoilDepthFile, SoilDepthVATFile, ConstantSoilDepth, InitialSoilSaturationRatioFile, InitialChannelFlowFile, RainfallDataType, RainfallInterval, RainfallDataFile, FlowDirectionType, GridCellSize, IsParallel, MaxDegreeOfParallelism, SimulStartingTime, SimulationDuration, ComputationalTimeStep, IsFixedTimeStep, OutputTimeStep, CrossSectionType, SingleCSChannelWidthType, ChannelWidthEQc, ChannelWidthEQd, ChannelWidthEQe, ChannelWidthMostDownStream, LowerRegionHeight, LowerRegionBaseWidth, UpperRegionBaseWidth, CompoundCSChannelWidthLimit, BankSideSlopeRight, BankSideSlopeLeft, SimulateInfiltration, SimulateSubsurfaceFlow, SimulateBaseFlow, SimulateFlowControl, MakeIMGFile, MakeASCFile, MakeSoilSaturationDistFile, MakeRfDistFile, MakeRFaccDistFile, MakeFlowDistFile, PrintOption, WriteLog, AboutThisProject, AboutWatershed, AboutLandCoverMap, AboutSoilMap, AboutSoilDepthMap, AboutRainfall, ProjectSavedTime, ComputerName, ComputerUserName, GRMVersion}
+            Dim columnValuesArray() As Object = New Object() {ProjectFile, GRMSimulationType, WatershedFile, SlopeFile, FlowDirectionFile, FlowAccumFile, StreamFile, ChannelWidthFile, LandCoverDataType, LandCoverFile, LandCoverVATFile, ConstantRoughnessCoeff, ConstantImperviousRatio, SoilTextureDataType, SoilTextureFile, SoilTextureVATFile, ConstantSoilPorosity, ConstantSoilEffPorosity, ConstantSoilWettingFrontSuctionHead, ConstantSoilHydraulicConductivity, SoilDepthDataType, SoilDepthFile, SoilDepthVATFile, ConstantSoilDepth, InitialSoilSaturationRatioFile, InitialChannelFlowFile, RainfallDataType, RainfallInterval, RainfallDataFile, FlowDirectionType, IsParallel, MaxDegreeOfParallelism, SimulStartingTime, SimulationDuration, ComputationalTimeStep, IsFixedTimeStep, OutputTimeStep, CrossSectionType, SingleCSChannelWidthType, ChannelWidthEQc, ChannelWidthEQd, ChannelWidthEQe, ChannelWidthMostDownStream, LowerRegionHeight, LowerRegionBaseWidth, UpperRegionBaseWidth, CompoundCSChannelWidthLimit, BankSideSlopeRight, BankSideSlopeLeft, SimulateInfiltration, SimulateSubsurfaceFlow, SimulateBaseFlow, SimulateFlowControl, MakeIMGFile, MakeASCFile, MakeSoilSaturationDistFile, MakeRfDistFile, MakeRFaccDistFile, MakeFlowDistFile, PrintOption, WriteLog, AboutThisProject, AboutWatershed, AboutLandCoverMap, AboutSoilMap, AboutSoilDepthMap, AboutRainfall, ProjectSavedTime, ComputerName, ComputerUserName, GRMVersion}
             rowProjectSettingsRow.ItemArray = columnValuesArray
             Me.Rows.Add(rowProjectSettingsRow)
             Return rowProjectSettingsRow
@@ -1447,7 +1436,6 @@ Partial Public Class GRMProject
             Me.columnRainfallInterval = MyBase.Columns("RainfallInterval")
             Me.columnRainfallDataFile = MyBase.Columns("RainfallDataFile")
             Me.columnFlowDirectionType = MyBase.Columns("FlowDirectionType")
-            Me.columnGridCellSize = MyBase.Columns("GridCellSize")
             Me.columnIsParallel = MyBase.Columns("IsParallel")
             Me.columnMaxDegreeOfParallelism = MyBase.Columns("MaxDegreeOfParallelism")
             Me.columnSimulStartingTime = MyBase.Columns("SimulStartingTime")
@@ -1554,8 +1542,6 @@ Partial Public Class GRMProject
             MyBase.Columns.Add(Me.columnRainfallDataFile)
             Me.columnFlowDirectionType = New Global.System.Data.DataColumn("FlowDirectionType", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnFlowDirectionType)
-            Me.columnGridCellSize = New Global.System.Data.DataColumn("GridCellSize", GetType(String), Nothing, Global.System.Data.MappingType.Element)
-            MyBase.Columns.Add(Me.columnGridCellSize)
             Me.columnIsParallel = New Global.System.Data.DataColumn("IsParallel", GetType(String), Nothing, Global.System.Data.MappingType.Element)
             MyBase.Columns.Add(Me.columnIsParallel)
             Me.columnMaxDegreeOfParallelism = New Global.System.Data.DataColumn("MaxDegreeOfParallelism", GetType(String), Nothing, Global.System.Data.MappingType.Element)
@@ -4822,21 +4808,6 @@ Partial Public Class GRMProject
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Property GridCellSize() As String
-            Get
-                Try 
-                    Return CType(Me(Me.tableProjectSettings.GridCellSizeColumn),String)
-                Catch e As Global.System.InvalidCastException
-                    Throw New Global.System.Data.StrongTypingException("'ProjectSettings' 테이블의 'GridCellSize' 열의 값이 DBNull입니다.", e)
-                End Try
-            End Get
-            Set
-                Me(Me.tableProjectSettings.GridCellSizeColumn) = value
-            End Set
-        End Property
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Property IsParallel() As String
             Get
                 Try 
@@ -5796,18 +5767,6 @@ Partial Public Class GRMProject
          Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
         Public Sub SetFlowDirectionTypeNull()
             Me(Me.tableProjectSettings.FlowDirectionTypeColumn) = Global.System.Convert.DBNull
-        End Sub
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Function IsGridCellSizeNull() As Boolean
-            Return Me.IsNull(Me.tableProjectSettings.GridCellSizeColumn)
-        End Function
-        
-        <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-         Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")>  _
-        Public Sub SetGridCellSizeNull()
-            Me(Me.tableProjectSettings.GridCellSizeColumn) = Global.System.Convert.DBNull
         End Sub
         
         <Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _

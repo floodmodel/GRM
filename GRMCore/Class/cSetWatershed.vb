@@ -70,7 +70,7 @@
             .ChannelWidthFile = mFPN_channelWidth
             .InitialSoilSaturationRatioFile = mFPN_initialSoilSaturationRatio
             .InitialChannelFlowFile = mFPN_initialChannelFlow
-            .GridCellSize = CStr(mCellSize)
+            '.GridCellSize = CStr(mCellSize)
             .FlowDirectionType = mFDType.ToString
         End With
     End Sub
@@ -102,11 +102,11 @@
             If .IsInitialSoilSaturationRatioFileNull = False Then
                 mFPN_initialSoilSaturationRatio = .InitialSoilSaturationRatioFile
             End If
-            If .IsGridCellSizeNull Then
-                mCellSize = -1
-            Else
-                mCellSize = CInt(.GridCellSize)
-            End If
+            'If .IsGridCellSizeNull Then
+            '    mCellSize = -1
+            'Else
+            '    mCellSize = CInt(.GridCellSize)
+            'End If
             If Not .IsFlowDirectionTypeNull Then
                 Select Case .FlowDirectionType
                     Case cGRM.FlowDirectionType.StartsFromN.ToString

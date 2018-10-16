@@ -2421,15 +2421,15 @@ Public Class cProject
             Return False
         End If
 
-        If Not r.IsGridCellSizeNull AndAlso r.GridCellSize <> "" Then
-            Dim v As Single
-            If Single.TryParse(r.GridCellSize, v) = False Then
-                Console.WriteLine(String.Format("Grid cell size is invalid!! {0} {1}", vbCrLf, r.GridCellSize))
-                Return False
-            End If
-        Else
-            Return False
-        End If
+        'If Not r.IsGridCellSizeNull AndAlso r.GridCellSize <> "" Then
+        '    Dim v As Single
+        '    If Single.TryParse(r.GridCellSize, v) = False Then
+        '        Console.WriteLine(String.Format("Grid cell size is invalid!! {0} {1}", vbCrLf, r.GridCellSize))
+        '        Return False
+        '    End If
+        'Else
+        '    Return False
+        'End If
 
         If Not r.IsIsParallelNull AndAlso r.IsParallel = "" Then
             Console.WriteLine(String.Format("IsParallel option is invalid!!"))
@@ -2444,10 +2444,10 @@ Public Class cProject
             End If
         End If
 
-        If r.IsSimulStartingTimeNull OrElse r.SimulStartingTime = "" Then
-            Console.WriteLine(String.Format("Simulation starting time is invalid!! Simulation starting time will be set to '0'"))
-            Return False
-        End If
+        'If r.IsSimulStartingTimeNull OrElse r.SimulStartingTime = "" Then
+        '    Console.WriteLine(String.Format("Simulation starting time is invalid!! Simulation starting time will be set to '0'"))
+        '    'Return False
+        'End If
 
         If Not r.IsSimulationDurationNull AndAlso r.SimulationDuration <> "" Then
             Dim v As Integer

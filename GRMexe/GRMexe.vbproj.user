@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>/f D:\GRM_ex\Parallel_evaluation\ND_run</StartArguments>
+    <StartArguments>"D:\GRM_ex\Parallel_evaluation\ND_run\110_NDOne500_serial - 복사본.gmp"</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <StartArguments>D:\GRM_ex\morocco_kjh\0_grm_morocco_cys.gmp</StartArguments>
+    <StartArguments>D:\GRM_ex\Parallel_evaluation\VD_simResult\105_ParallelPrj_fa50_mdp_8.gmp</StartArguments>
   </PropertyGroup>
 </Project>
