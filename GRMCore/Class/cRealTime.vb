@@ -355,7 +355,8 @@ Public Class cRealTime
             'dt.Merge(odt_auto)
 
             '경천DAM 처리
-            Dim strSpcealDams As String = "'경천댐'"       '2018.8.29 원 : 여기서 n 개 기입... 이건 추후 DB 등으로 이동되어야 함
+            '            Dim strSpcealDams As String = "'경천댐'"       '2018.8.29 원 : 여기서 n 개 기입... 이건 추후 DB 등으로 이동되어야 함
+            Dim strSpcealDams As String = "'경천댐','영주댐'"       '2018.8.29 원 : 여기서 n 개 기입... 이건 추후 DB 등으로 이동되어야 함..  2018.10/11 원 : 영주댐 추가
             Dim strSQL2 As String = String.Format("Select  w.name, 999 as cvid ,[Time] as datetime ,[QValue] AS VALUE From QStream_OBS_ht d , WatchPoint w  Where  d.GName in({1}) and  TIME ='{0}' and d.Gname=w.Gname ", TargetDateTime, strSpcealDams)
 
             Dim odt2 As New Data.DataTable
@@ -363,7 +364,11 @@ Public Class cRealTime
             oSqlDataAdapter2.SelectCommand.CommandTimeout = 60
             oSqlDataAdapter2.Fill(odt2)
 
-            If odt2.Rows.Count <> 1 Then Stop
+            If odt2.Rows.Count <> 2 Then
+                'Stop   '2018.10.11 까지는 stop 이었슴
+                cGRM.writelogAndConsole(strSpcealDams + " 의 data가 2건이 아님!", False, True)
+            End If
+
             For Each oDR2 As DataRow In odt2.Rows
                 Dim oDR_Target2 As DataRow = mRTProject.FCGrid.mdtFCGridInfo.Select(String.Format("Name='{0}'", oDR2.Item("NAME").ToString)).FirstOrDefault
                 Dim strCVID2 As String = oDR_Target2.Item("CVID").ToString
