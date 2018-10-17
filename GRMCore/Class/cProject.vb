@@ -1202,7 +1202,7 @@ Public Class cProject
                                                                                cell.RoughnessCoeffOFori = vatRC(vBak)
                                                                                cell.ImperviousRatio = vatIR(vBak)
                                                                                cell.LandCoverCode = vatLCcode(vBak)
-                                                                               cGRM.writelogAndConsole(String.Format("Landcover file {0} has an invalid value {1}. {2} was applied.", Landcover.mGridLandCoverFPN, value, vBak), True, True)
+                                                                               cGRM.writelogAndConsole(String.Format("Landcover file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.", Landcover.mGridLandCoverFPN, value, cx, ry, vBak), False, True)
                                                                                'isnormal = False
                                                                            End If
                                                                        End If
@@ -1226,7 +1226,7 @@ Public Class cProject
                                 cell.RoughnessCoeffOFori = vatRC(vBak)
                                 cell.ImperviousRatio = vatIR(vBak)
                                 cell.LandCoverCode = vatLCcode(vBak)
-                                cGRM.writelogAndConsole(String.Format("Landcover file {0} has an invalid value {1}. {2} was applied.", Landcover.mGridLandCoverFPN, value, vBak), True, True)
+                                cGRM.writelogAndConsole(String.Format("Landcover file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.", Landcover.mGridLandCoverFPN, value, cx, ry, vBak), False, True)
                                 'isnormal = False
                                 'Throw New KeyNotFoundException
                             End If
@@ -1368,7 +1368,7 @@ Public Class cProject
                                                                                cell.SoilTextureCode = vatSTcode(value)
                                                                            Else
                                                                                cGRM.writelogAndConsole(String.Format("Soil texture file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.",
-                                                                                GreenAmpt.mGridSoilTextureFPN, value, cx, ry, vBak), True, True)
+                                                                                GreenAmpt.mGridSoilTextureFPN, value, cx, ry, vBak), False, True)
                                                                                cell.SoilTextureValue = vBak
                                                                                cell.PorosityEtaOri = vatP(vBak)
                                                                                cell.EffectivePorosityThetaEori = vatEP(vBak)
@@ -1396,7 +1396,7 @@ Public Class cProject
                                 cell.HydraulicConductKori_mPsec = vatHC(value) / 100 / 3600    ' cm/hr -> m/s
                                 cell.SoilTextureCode = vatSTcode(value)
                             Else
-                                cGRM.writelogAndConsole(String.Format("Soil texture file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.", GreenAmpt.mGridSoilTextureFPN, value, cx, ry, vBak), True, True)
+                                cGRM.writelogAndConsole(String.Format("Soil texture file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.", GreenAmpt.mGridSoilTextureFPN, value, cx, ry, vBak), False, True)
                                 cell.SoilTextureValue = vBak
                                 cell.PorosityEtaOri = vatP(vBak)
                                 cell.EffectivePorosityThetaEori = vatEP(vBak)
@@ -1538,7 +1538,7 @@ Public Class cProject
                                                                                mWSCells(cx, ry).SoilDepthCode = vatSDcode(value)
                                                                            Else
                                                                                cGRM.writelogAndConsole(String.Format("Soil depth file {0} has an invalid value {1} at ({2}, {3}). {4} was applied.",
-                                                                                                              SoilDepth.mGridSoilDepthFPN, value, cx, ry, vBak), True, True)
+                                                                                                              SoilDepth.mGridSoilDepthFPN, value, cx, ry, vBak), False, True)
                                                                                mWSCells(cx, ry).SoilDepthTypeValue = CInt(vBak)
                                                                                mWSCells(cx, ry).SoilDepthOri_m = vatSD(vBak) / 100     ' cm ->  m
                                                                                mWSCells(cx, ry).SoilDepthCode = vatSDcode(vBak)
@@ -1560,7 +1560,7 @@ Public Class cProject
                                 mWSCells(cx, ry).SoilDepthCode = vatSDcode(value)
                             Else
                                 cGRM.writelogAndConsole(String.Format("Soil depth file {0} has an invalid value{1} at ({2}, {3}). {4} was applied.",
-                                                                                                            SoilDepth.mGridSoilDepthFPN, value, cx, ry, vBak), True, True)
+                                                                                                            SoilDepth.mGridSoilDepthFPN, value, cx, ry, vBak), False, True)
                                 mWSCells(cx, ry).SoilDepthTypeValue = CInt(vBak)
                                 mWSCells(cx, ry).SoilDepthOri_m = vatSD(vBak) / 100     ' cm ->  m
                                 mWSCells(cx, ry).SoilDepthCode = vatSDcode(vBak)
@@ -2171,7 +2171,7 @@ Public Class cProject
 
     Public Function SetupModelParametersAfterProjectFileWasOpened() As Boolean
         If cProject.Current.SetBasicCVInfo() = False Then Return False
-        cProject.Current.WatchPoint.UpdatesWatchPointCVIDs(cProject.Current)
+        If cProject.Current.WatchPoint.UpdatesWatchPointCVIDs(cProject.Current) = False Then Return False
         If mProject.GeneralSimulEnv.mbSimulateFlowControl = True Then
             cProject.Current.FCGrid.UpdateFCGridInfoAndData(cProject.Current)
         End If

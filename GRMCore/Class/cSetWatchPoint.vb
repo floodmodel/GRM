@@ -120,7 +120,7 @@ Public Class cSetWatchPoint
     ''' Watchpoint CVid 리스트를 설정한다.
     ''' </summary>
     ''' <remarks></remarks>
-    Public Sub UpdatesWatchPointCVIDs(prj As cProject)
+    Public Function UpdatesWatchPointCVIDs(prj As cProject) As Boolean
 
         mRFReadIntensitySumUpWs_mPs.Clear()
         mRFUpWsMeanForDt_mm.Clear()
@@ -140,6 +140,12 @@ Public Class cSetWatchPoint
         For Each row As GRMProject.WatchPointsRow In mdtWatchPointInfo
             row.CVID = prj.WSCell(row.ColX, row.RowY).CVID
             Dim cvid As Integer = row.CVID
+            If mWatchPointCVidList.Contains(cvid) Then
+                cGRM.writelogAndConsole("Two or more watch points were set at the same cell !!!", True, True)
+                Return False
+            Else
+                mWatchPointCVidList.Add(cvid)
+            End If
             mRFReadIntensitySumUpWs_mPs.Add(cvid, Nothing)
             mRFUpWsMeanForDt_mm.Add(cvid, Nothing)
             mRFUpWsMeanForDtPrintout_mm.Add(cvid, Nothing)
@@ -154,9 +160,9 @@ Public Class cSetWatchPoint
             mMaxDepthTime.Add(cvid, Nothing)
             mQfromFCDataCMS.Add(cvid, Nothing)
             mFpnWpOut.Add(cvid, Nothing)
-            mWatchPointCVidList.Add(cvid)
         Next
-    End Sub
+        Return True
+    End Function
 
     Public ReadOnly Property IsSet() As Boolean
         Get
