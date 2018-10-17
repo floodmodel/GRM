@@ -659,6 +659,7 @@ Public Class cProject
                     Else
                         .DownCellidToFlow = -1
                         .DeltaXDownHalf_m = deltaXe
+                        mWSNetwork.SetWSoutletCVID(.WSID, .CVID)
                     End If
 
                 End With
