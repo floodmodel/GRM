@@ -141,7 +141,7 @@ Public Class cSetWatchPoint
             row.CVID = prj.WSCell(row.ColX, row.RowY).CVID
             Dim cvid As Integer = row.CVID
             If mWatchPointCVidList.Contains(cvid) Then
-                cGRM.writelogAndConsole("Two or more watch points were set at the same cell !!!", True, True)
+                cGRM.writelogAndConsole("ERROR : Two or more watch points were set at the same cell !!!", True, True)
                 Return False
             Else
                 mWatchPointCVidList.Add(cvid)

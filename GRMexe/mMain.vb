@@ -111,6 +111,9 @@ Module mMain
         If Path.GetDirectoryName(currentPrjFPN) = "" Then
             currentPrjFPN = Path.Combine(My.Application.Info.DirectoryPath, currentPrjFPN)
         End If
+        Dim fpnLog = Path.Combine(Path.GetDirectoryName(currentPrjFPN), Path.GetFileNameWithoutExtension(currentPrjFPN) + ".log")
+        If File.Exists(fpnLog) = True Then File.Delete(fpnLog)
+
         Try
             cProject.OpenProject(currentPrjFPN, False)
             cProject.ValidateProjectFile(cProject.Current)
