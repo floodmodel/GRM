@@ -17,6 +17,8 @@ Module mMain
     Sub main()
         Try
             Dim prjFPN As String = ""
+            Dim fi As New FileInfo(Path.Combine(My.Application.Info.DirectoryPath, "GRM.exe"))
+            Console.WriteLine(String.Format("{0} v{1}. Modified in {2}", My.Application.Info.AssemblyName, My.Application.Info.Version.ToString(), fi.LastWriteTime.ToString()))
             Select Case My.Application.CommandLineArgs.Count
                 Case 1
                     Dim arg0 As String = Trim(My.Application.CommandLineArgs(0).ToString)
@@ -94,17 +96,18 @@ Module mMain
         ''여기서 셀 정보를 미리 알 수 있다.
         'Dim WSFPN As String = "D:/Nakdong/watershed/ND_Watershed.asc"
         'Dim SlopeFPN As String = "D:/Nakdong/watershed/ND_Slope.asc"
-        'Dim FdirFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Fdr.asc"
-        'Dim FacFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Fac.asc"
-        'Dim streamFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Stream.asc"
-        'Dim lcFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/GHG500_lc.asc"
-        'Dim stFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_SoilTexture.asc"
-        'Dim sdFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_SoilDepth.asc"
+        'Dim FdirFPN As String = "D:/Nakdong/watershed/ND_Fdr.asc"
+        'Dim FacFPN As String = "D:/Nakdong/watershed/ND_Fac.asc"
+        'Dim streamFPN As String = "D:/Nakdong/watershed/ND_stream.asc"
+        'Dim lcFPN As String = "D:/Nakdong/watershed/ND_lc.asc"
+        'Dim stFPN As String = "D:/Nakdong/watershed/ND_stexture.asc"
+        'Dim sdFPN As String = "D:/Nakdong/watershed/ND_sdepth.asc"
 
         'Dim wsinfo As New cGetWatershedInfo(cGRM.FlowDirectionType.StartsFromE_TauDEM.ToString, WSFPN, SlopeFPN, FdirFPN, FacFPN, streamFPN, lcFPN, stFPN, sdFPN,,)
-        'Dim cc As Integer = wsinfo.cellCountInWatershed
-        'Dim a As Integer = wsinfo.WSIDsAll.Count
-        'Dim aa As List(Of Integer) = wsinfo.upStreamWSIDs(1)
+        ''Dim cc As Integer = wsinfo.cellCountInWatershed
+        ''Dim a As Integer = wsinfo.WSIDsAll.Count
+        ''Dim aa As List(Of Integer) = wsinfo.upStreamWSIDs(1)
+        'Dim cs As Single = wsinfo.cellSize
 
 
         Dim wpNames As New List(Of String)

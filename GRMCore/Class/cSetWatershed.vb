@@ -12,7 +12,7 @@
     ''' 격자의 크기[m]
     ''' </summary>
     ''' <remarks></remarks>
-    Public mCellSize As Integer = -1
+    Public mCellSize As Single = -1
     Public mFDType As cGRM.FlowDirectionType
 
     ''' <summary>

@@ -94,7 +94,7 @@
     End Function
 
 
-    Public Shared Function getDTsec(cfln As Single, dx As Integer,
+    Public Shared Function getDTsec(cfln As Single, dx As Single,
                                     vMax As Single, dtPrint_min As Integer) As Integer
         If vMax <= 0 Then
             Return cThisSimulation.dtMaxLimit_sec

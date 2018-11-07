@@ -193,7 +193,7 @@ Public Class cFlowControl
         Dim fcRow As GRMProject.FlowControlGridRow = CType(Rows(0), GRMProject.FlowControlGridRow)
         Dim rowOrder As Integer
         Dim QforSinkOrSourceFlow As Single = 0
-        Dim cellsize As Integer = project.Watershed.mCellSize
+        Dim cellsize As Single = project.Watershed.mCellSize
         With project.CV(cvan)
             If .FCType = cFlowControl.FlowControlType.SinkFlow OrElse .FCType = cFlowControl.FlowControlType.SourceFlow Then
                 rowOrder = CInt((nowT_MIN - 1) \ CInt(fcRow.DT))
@@ -233,7 +233,7 @@ Public Class cFlowControl
 
     End Sub
 
-    Sub ApplyReservoirAutoROM(ByVal cv As cCVAttribute, ByVal cellsize As Integer, ByVal MaxStorageApp As Single)
+    Sub ApplyReservoirAutoROM(ByVal cv As cCVAttribute, ByVal cellsize As Single, ByVal MaxStorageApp As Single)
         Dim sngQout_cms As Single
         Dim sngDY_m As Single = cellsize
         With cv
@@ -249,7 +249,7 @@ Public Class cFlowControl
     End Sub
 
 
-    Sub ApplyReservoirRigidROM(ByVal cv As cCVAttribute, ByVal cellsize As Integer,
+    Sub ApplyReservoirRigidROM(ByVal cv As cCVAttribute, ByVal cellsize As Single,
                                ByVal maxStorageApp As Single, ByVal RoQ_CONST_CMS As Single)
         Dim dy_m As Single = cellsize
         Dim sngQout_cms As Single
@@ -279,7 +279,7 @@ Public Class cFlowControl
     End Sub
 
 
-    Sub ApplyReservoirConstantDischarge(ByVal cv As cCVAttribute, cellsize As Integer, ByVal RoQ_CONST_CMS As Single,
+    Sub ApplyReservoirConstantDischarge(ByVal cv As cCVAttribute, cellsize As Single, ByVal RoQ_CONST_CMS As Single,
                                         ByVal maxStorageApp As Single, ByVal bOutflowDuration As Boolean)
         Dim dy_m As Single = cellsize
         Dim sngQout_cms As Single

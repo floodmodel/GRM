@@ -269,7 +269,7 @@ Public Class cSimulator
 
 
     Public Sub SimulateRunoff(ByVal project As cProject, ByVal nowT_MIN As Integer)
-        Dim cellsize As Integer = project.Watershed.mCellSize
+        Dim cellsize As Single = project.Watershed.mCellSize
         Dim dtsec As Integer = cThisSimulation.dtsec
         If cThisSimulation.IsParallel = True Then
             For fac As Integer = 0 To project.Watershed.mFacMax

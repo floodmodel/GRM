@@ -327,6 +327,10 @@
         End Try
     End Function
 
+
+    Public Function cellSize() As Single
+        Return grmPrj.Watershed.mCellSize
+    End Function
     '여기에 필요한 내용 계속 추가
     ' function으로  return 한다.
     ' property로 하니까, 파이썬에서 앞에 get_이라는 문구가 붙어서 번거롭다.
