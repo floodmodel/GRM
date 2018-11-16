@@ -95,7 +95,7 @@ Public Class cRasterOutput
                 If mbMakeAryRF = True Then mArrayRF = New Double(mColCount - 1, mRowCount - 1) {}
                 If mbMakeAryRFAcc = True Then mArrayRFAcc = New Double(mColCount - 1, mRowCount - 1) {}
                 If mbMakeAryQ = True Then mArrayQ = New Double(mColCount - 1, mRowCount - 1) {}
-                GetStringArrayUsingCVAttribute(mProject.WSCells, True)
+                GetTwoDimArrayUsingCVAttribute(mProject.WSCells, True)
             End If
 
             If mbMakeArySSR = True Then
@@ -158,8 +158,8 @@ Public Class cRasterOutput
         End Try
     End Sub
 
-    Private Function GetStringArrayUsingCVAttribute(inCells As cCVAttribute(,), isparallel As Boolean) As Boolean
-        Dim sformat As String = "#0.##"
+    Private Function GetTwoDimArrayUsingCVAttribute(inCells As cCVAttribute(,), isparallel As Boolean) As Boolean
+        'Dim sformat As String = "#0.##"
         If isparallel = False Then
             For nr As Integer = 0 To inCells.GetLength(1) - 1
                 For nc As Integer = 0 To inCells.GetLength(0) - 1

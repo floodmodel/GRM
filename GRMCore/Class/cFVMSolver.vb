@@ -72,7 +72,8 @@ Public Class cFVMSolver
                             hChCVw_i_jP1, .mStreamAttr.chIsCompoundCS, .mStreamAttr.chLowerRHeight,
                            .mStreamAttr.chLowerRArea_m2, .mStreamAttr.chUpperRBaseWidth_m)
                 HRch = CSAchCVw_i_jP1 / CSPerCh
-                uCVw_n = GetFlowVelocityByManningEq(HRch, .mStreamAttr.chBedSlope, .mStreamAttr.RoughnessCoeffCH)
+                uCVw_n = GetFlowVelocityByManningEq(HRch, .mStreamAttr.chBedSlope,
+                                                    .mStreamAttr.RoughnessCoeffCH)
                 cChCVw_n = uCVw_n * CONST_DtPDx * CSAchCVw_i_jP1
             End If
 
@@ -88,7 +89,8 @@ Public Class cFVMSolver
                                 hChCVe_n, .mStreamAttr.chIsCompoundCS, .mStreamAttr.chLowerRHeight,
                                 .mStreamAttr.chLowerRArea_m2, .mStreamAttr.chUpperRBaseWidth_m)
                 HRch = CSAChCVe_n / CSPerCh
-                Dim u_n As Single = GetFlowVelocityByManningEq(HRch, .mStreamAttr.chBedSlope, .mStreamAttr.RoughnessCoeffCH)
+                Dim u_n As Single = GetFlowVelocityByManningEq(HRch, .mStreamAttr.chBedSlope,
+                                                               .mStreamAttr.RoughnessCoeffCH)
                 Dim cChCVe_n As Single = u_n * CONST_DtPDx * CSAChCVe_n
                 'Newton-Raphson
                 Dim Fx As Single = CSAp_n - cChCVw_n + cChCVe_n - constCSAchCVp_j
@@ -102,7 +104,8 @@ Public Class cFVMSolver
                 End If
                 Dim Qn As Single = u_n * CSAp_n
                 HRch = CSAch_nP1 / CSPerCh
-                Dim u_nP1 As Single = GetFlowVelocityByManningEq(HRch, .mStreamAttr.chBedSlope, .mStreamAttr.RoughnessCoeffCH)
+                Dim u_nP1 As Single = GetFlowVelocityByManningEq(HRch, .mStreamAttr.chBedSlope,
+                                                                 .mStreamAttr.RoughnessCoeffCH)
                 Dim QnP1 As Single = u_nP1 * CSAch_nP1
                 Dim tolerance As Single = CSng(Qn * cGRM.CONST_TOLERANCE)
                 Dim err As Single = Abs(Qn - QnP1)

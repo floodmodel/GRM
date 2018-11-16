@@ -1043,7 +1043,7 @@ Public Class cProject
                 Parallel.For(0, mWatershed.mRowCount, options, Sub(ry As Integer)
                                                                    'Dim valuesInaLine() As String = ascIniSSR.ValuesInOneRowFromTopLeft(ry)
                                                                    For cx As Integer = 0 To mWatershed.mColCount - 1
-                                                                       If mWSCells(cx, ry) Is Nothing Then
+                                                                       If mWSCells(cx, ry) IsNot Nothing Then
                                                                            Dim v As Single = CSng(ascIniSSR.ValueFromTL(cx, ry))
                                                                            If v < 0 Then v = 0
                                                                            If v > 1 Then v = 1
@@ -1055,7 +1055,7 @@ Public Class cProject
                 For ry As Integer = 0 To Watershed.mRowCount - 1
                     'Dim valuesInaLine() As String = ascIniSSR.ValuesInOneRowFromTopLeft(ry)
                     For cx As Integer = 0 To Watershed.mColCount - 1
-                        If mWSCells(cx, ry) Is Nothing Then
+                        If mWSCells(cx, ry) IsNot Nothing Then
                             Dim v As Single = CSng(ascIniSSR.ValueFromTL(cx, ry))
                             If v < 0 Then v = 0
                             If v > 1 Then v = 1

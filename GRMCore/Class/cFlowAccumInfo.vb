@@ -20,7 +20,7 @@ Public Class cFlowAccumInfo
 
 
     ''' <summary>
-    ''' 현재의 흐름누적수와 상류의 셀 개수에 해당하는 CVID 목록을 반환함
+    ''' 현재의 흐름누적수 값을 가지는 cv의 배열 번호들을 반환함
     ''' </summary>
     ''' <param name="accum"></param>
     ''' <value></value>
