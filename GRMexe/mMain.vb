@@ -1,7 +1,4 @@
 ﻿Imports System.IO
-Imports System.Threading
-Imports GRMCore
-
 
 ''' <summary>
 ''' 이건 console 실행 코드
@@ -13,6 +10,7 @@ Module mMain
     Private mSimDurationHour As Integer
     Private mRaterFileOutput As cRasterOutput
     Private mbCreateDistributionFiles As Boolean = False
+    'Private mGRM As cGRM
 
     Sub main()
         Try
@@ -170,7 +168,7 @@ Module mMain
                 mRaterFileOutput = New cRasterOutput(cProject.Current)
             End If
             cGRM.writelogAndConsole(currentPrjFPN + " -> Model setup completed.", cGRM.bwriteLog, True)
-            For Each row As GRMProject.WatchPointsRow In cProject.Current.WatchPoint.mdtWatchPointInfo
+            For Each row As GRMCore.Dataset.GRMProject.WatchPointsRow In cProject.Current.watchPoint.mdtWatchPointInfo
                 wpNames.Add(row.Name)
             Next
             mSimulator = New cSimulator
@@ -203,7 +201,7 @@ Module mMain
                 Next
                 File.Delete(currentPrjFPN)
             End If
-            cProject.Current.Dispose()
+            'cProject.Current.Dispose()
             GC.Collect()
         Catch ex As Exception
             Console.WriteLine(String.Format("ERROR : [{0}] project could not be deleted!!!", currentPrjFPN))

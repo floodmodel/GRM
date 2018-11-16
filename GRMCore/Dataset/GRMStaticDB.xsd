@@ -3,9 +3,7 @@
   <xs:annotation>
     <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
       <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
-        <Connections>
-          <Connection AppSettingsObjectName="MySettings" AppSettingsPropertyName="GRMStaticDatabase_ConnectionString" IsAppSettingsProperty="true" Modifier="Assembly" Name="GRMStaticDatabase_ConnectionString (MySettings)" PropertyReference="ApplicationSettings.GRMCore.My.MySettings.GlobalReference.Default.GRMStaticDatabase_ConnectionString" Provider="System.Data.OleDb" />
-        </Connections>
+        <Connections />
         <Tables />
         <Sources />
       </DataSource>

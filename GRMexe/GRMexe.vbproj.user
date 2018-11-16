@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <StartArguments>D:\Github\GRMCS\test\NDvb.gmp</StartArguments>
+    <StartArguments>D:\Github\GRMCS\test\ND.gmp</StartArguments>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
     <StartArguments>D:\GRM_ex\Parallel_evaluation\VD_simResult\105_ParallelPrj_fa50_mdp_8.gmp</StartArguments>
