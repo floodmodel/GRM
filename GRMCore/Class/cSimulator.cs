@@ -125,7 +125,8 @@ namespace GRMCore
                 int nowT_MIN =nowTsec / 60;
                 SimulateRunoff(mProject, nowT_MIN);
                 cRainfall.CalCumulativeRFDuringDTPrintOut(mProject, dtsec);
-                WriteCurrentResultAndInitializeNextStep(mProject, nowTsec, dtsec, dTRFintervalSEC, dTPrint_MIN, wpCount, ref targetCalTtoPrint_MIN, ref mSEC_tm1, ref Project_tm1, mProject.mSimulationType, nowRFOrder);
+                WriteCurrentResultAndInitializeNextStep(mProject, nowTsec, dtsec, dTRFintervalSEC, dTPrint_MIN, wpCount, 
+                    ref targetCalTtoPrint_MIN, ref mSEC_tm1, ref Project_tm1, mProject.mSimulationType, nowRFOrder);
                 // nowTsec = nowTsec + dtsec 'dtsec 만큼 전진
 
                 // cThisSimulation.dtsec_usedtoForwardToThisTime = dtsec
@@ -688,10 +689,10 @@ namespace GRMCore
             {
                 if (mNowTsec < targetCalTtoPrint_MIN * 60 && (mNowTsec + dtsec) > (targetCalTtoPrint_MIN) * 60)
                 {
-                    if (Project_tm1.CVs == null)
+                    if (Project_tm1.isSet == false)
                     {
                         mSEC_tm1 = mNowTsec;
-                        //Project_tm1 = new cProjectBAK();
+                        Project_tm1 = new cProjectBAK();
                         Project_tm1.SetCloneUsingCurrentProject(project);
                     }
                 }
@@ -703,6 +704,7 @@ namespace GRMCore
                     OutputProcessManagerBySimType(timeToPrint_MIN, wpCount, sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m, coeffInterpolation, Project_tm1, SimType);
                     targetCalTtoPrint_MIN = targetCalTtoPrint_MIN + dTPrint_MIN;
                     Project_tm1.CVs = null;
+                    Project_tm1.isSet = false;
                 }
             }
         }

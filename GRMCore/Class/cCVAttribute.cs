@@ -426,7 +426,8 @@ namespace GRMCore
                 cln.mStreamAttr.QCVch_i_j_m3Ps = mStreamAttr.QCVch_i_j_m3Ps;
             }
             else
-                cln.QCVof_i_j_m3Ps = QCVof_i_j_m3Ps;
+            { cln.QCVof_i_j_m3Ps = QCVof_i_j_m3Ps; }
+
             cln.hUAQfromChannelBed_m = hUAQfromChannelBed_m;
             cln.soilSaturationRatio = soilSaturationRatio;
             cln.soilWaterContent_m = soilWaterContent_m;

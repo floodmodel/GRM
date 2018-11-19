@@ -224,7 +224,7 @@ Module mMain
                 Next
                 File.Delete(currentPrjFPN)
             End If
-            'cProject.Current.Dispose()
+            cProject.Current.Dispose()
             GC.Collect()
         Catch ex As Exception
             Console.WriteLine(String.Format("ERROR : [{0}] project could not be deleted!!!", currentPrjFPN))

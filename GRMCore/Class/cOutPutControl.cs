@@ -66,7 +66,7 @@ namespace GRMCore
                             }
                     }
                 }
-                else if (project_tm1 != null)
+                else if (project_tm1.CVs[cvan] != null)
                 {
                     switch (cv.FlowType)
                     {
@@ -117,14 +117,17 @@ namespace GRMCore
                         sbFCStorage.Append("\t" + project.CVs[fcCvid - 1].StorageCumulative_m3.ToString("F2"));
                     }
                 }
-                else if (project_tm1 != null)
+                else 
                 {
                     foreach (int fcCvid in project.fcGrid.FCGridCVidList)
                     {
-                        sbFCFlow.Append("\t" +cHydroCom.GetInterpolatedValueLinear(project_tm1.fcGrid.mFCdataToApplyNowT[fcCvid],
-                            project.fcGrid.mFCdataToApplyNowT[fcCvid], interCoef).ToString("F2"));
-                        sbFCStorage.Append("\t" +cHydroCom.GetInterpolatedValueLinear(project_tm1.CV(fcCvid - 1).StorageCumulative_m3, 
-                            project.CVs[fcCvid - 1].StorageCumulative_m3, interCoef).ToString("F2"));
+                        if (project_tm1.CVs[fcCvid - 1] != null)
+                        {
+                            sbFCFlow.Append("\t" + cHydroCom.GetInterpolatedValueLinear(project_tm1.fcGrid.mFCdataToApplyNowT[fcCvid],
+                                project.fcGrid.mFCdataToApplyNowT[fcCvid], interCoef).ToString("F2"));
+                            sbFCStorage.Append("\t" + cHydroCom.GetInterpolatedValueLinear(project_tm1.CV(fcCvid - 1).StorageCumulative_m3,
+                                project.CVs[fcCvid - 1].StorageCumulative_m3, interCoef).ToString("F2"));
+                        }
                     }
                 }
                 sbFCFlow.Append("\r\n");
@@ -156,7 +159,7 @@ namespace GRMCore
                 sbWP.Append(project.watchPoint.QfromFCDataCMS[wpcvid].ToString("F2")+ "\t");
                 sbWP.Append(project.CVs[cvan].StorageCumulative_m3.ToString("F2") + "\r\n");
             }
-            else if (project_tm1 != null)
+            else if (project_tm1.CVs[cvan] != null)
             {
                 sbWP.Append(cHydroCom.GetInterpolatedValueLinear(project_tm1.CVs[cvan].hUAQfromChannelBed_m, project.CVs[cvan].hUAQfromChannelBed_m, interCoef).ToString("F4") + "\t");
                 sbWP.Append(cHydroCom.GetInterpolatedValueLinear(project_tm1.CVs[cvan].soilWaterContent_m, project.CVs[cvan].soilWaterContent_m, interCoef).ToString("F4") + "\t");
@@ -197,7 +200,7 @@ namespace GRMCore
                             }
                     }
                 }
-                else if (project_tm1 != null)
+                else if (project_tm1.CVs[cvan] != null)
                 {
                     switch (project.CVs[cvan].FlowType)
                     {
@@ -239,7 +242,7 @@ namespace GRMCore
                     else
                         strL = project.CVs[cvanWP].mStreamAttr.QCVch_i_j_m3Ps.ToString("F2") + "\r\n";
                 }
-                else if (project_tm1 != null)
+                else if (project_tm1.CVs [cvanWP] != null)
                 {
                     if (project.CVs[cvanWP].FlowType == cGRM.CellFlowType.OverlandFlow)
                         strL = cHydroCom.GetInterpolatedValueLinear(project_tm1.CV(cvanWP).QCVof_i_j_m3Ps, project.CVs[cvanWP].QCVof_i_j_m3Ps, interCoef).ToString("F2") + "\r\n";
