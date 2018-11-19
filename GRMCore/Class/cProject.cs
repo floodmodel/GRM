@@ -746,29 +746,6 @@ namespace GRMCore
             }
         }
 
-        /// <summary>
-        ///   
-        ///   </summary>
-        ///   <param name="colx"></param>
-        ///   <param name="rowy"></param>
-        ///   <returns></returns>
-        //public cCVAttribute WSCell(int colx, int rowy)
-        //{
-        //    return WSCells[colx, rowy];
-        //}
-
-        //public cCVAttribute[,] WSCells
-        //{
-        //    get
-        //    {
-        //        return WSCells;
-        //    }
-        //}
-
-        //public cCVAttribute CV(int index)
-        //{
-        //    return CVs[index];
-        //}
 
         /// <summary>
         ///   모델링 대상 영역의 검사체적 개수
@@ -833,8 +810,8 @@ namespace GRMCore
         ///   <remarks></remarks>
         public static bool OpenProject(string prjFPN, bool forceRealTime)
         {
-            try
-            {
+            //try
+            //{
                 if (string.IsNullOrEmpty(prjFPN) || !File.Exists(prjFPN))
                 {
                     throw new FileNotFoundException();
@@ -881,10 +858,10 @@ namespace GRMCore
                 // mProject.mEstimatedDist.GetValues(mProject.mPrjFile)
 
                 if (mProject.mSimulationType == cGRM.SimulationType.SingleEvent)
-                    mProject.rainfall.GetValues(mProject);
+                { mProject.rainfall.GetValues(mProject); }
 
                 if (mProject.generalSimulEnv.mbSimulateFlowControl == true)
-                    mProject.fcGrid.GetValues(mProject);
+                { mProject.fcGrid.GetValues(mProject); }
 
                 sThisSimulation.dtsec = System.Convert.ToInt32(row.ComputationalTimeStep) * 60;
                 if (sThisSimulation.dtsec > System.Convert.ToInt32(mProject.generalSimulEnv.mPrintOutTimeStepMIN * 30))
@@ -920,13 +897,13 @@ namespace GRMCore
                         File.Delete(cGRM.fpnlog);
                 }
                 return true;
-            }
-            catch (Exception ex)
-            {
-                cGRM.writelogAndConsole("Open project failed.", true, true);
-                Console.WriteLine(ex.ToString());
-                return false;
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    cGRM.writelogAndConsole("Open project failed.", true, true);
+            //    Console.WriteLine(ex.ToString());
+            //    return false;
+            //}
         }
 
         private static bool changeOutputFileDisk(char targetDisk)
