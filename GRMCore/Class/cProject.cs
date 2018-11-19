@@ -20,9 +20,6 @@ namespace GRMCore
         public cSetGreenAmpt GreenAmpt;
         public cSetSoilDepth soilDepth;
         public cRainfall rainfall;
-
-
-
         /// <summary>
         ///   SetupGRM tab에서 설정되는 정보
         ///   </summary>
