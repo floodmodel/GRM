@@ -1,4 +1,7 @@
 ﻿Imports System.IO
+Imports System.IO.File
+
+
 
 ''' <summary>
 ''' 이건 console 실행 코드
@@ -10,13 +13,24 @@ Module mMain
     Private mSimDurationHour As Integer
     Private mRaterFileOutput As cRasterOutput
     Private mbCreateDistributionFiles As Boolean = False
-    'Private mGRM As cGRM
+
+    Private mFileInfos As String
 
     Sub main()
         Try
             Dim prjFPN As String = ""
-            Dim fi As New FileInfo(Path.Combine(My.Application.Info.DirectoryPath, "GRM.exe"))
-            Console.WriteLine(String.Format("{0} v{1}. Modified in {2}", My.Application.Info.AssemblyName, My.Application.Info.Version.ToString(), fi.LastWriteTime.ToString()))
+            Dim fiExe As New FileInfo(Path.Combine(My.Application.Info.DirectoryPath, "GRM.exe"))
+            Dim fiCore As New FileInfo(Path.Combine(My.Application.Info.DirectoryPath, "GRMCore.dll"))
+            Dim fiGentle As New FileInfo(Path.Combine(My.Application.Info.DirectoryPath, "gentle.dll"))
+            Dim fvExe As String = FileVersionInfo.GetVersionInfo(fiExe.FullName).FileMajorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiExe.FullName).FileMinorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiExe.FullName).FileBuildPart.ToString
+            Dim fvCore As String = FileVersionInfo.GetVersionInfo(fiCore.FullName).FileMajorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiCore.FullName).FileMinorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiCore.FullName).FileBuildPart.ToString
+            Dim fvGentle As String = FileVersionInfo.GetVersionInfo(fiGentle.FullName).FileMajorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiGentle.FullName).FileMinorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiGentle.FullName).FileBuildPart.ToString
+
+            Dim fileInfoLogExe As String = String.Format("{0} v{1}. Built in {2}", fiExe.Name.ToString(), fvExe, fiExe.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
+            Dim fileInfoLogCore As String = String.Format("{0} v{1}. Built in {2}", fiCore.Name.ToString(), fvCore, fiCore.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
+            Dim fileInfoLogGentle As String = String.Format("{0} v{1}. Built in {2}", fiGentle.Name.ToString(), fvGentle, fiGentle.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
+            mFileInfos = fileInfoLogExe + ", " + fileInfoLogCore + ", " + fileInfoLogGentle
+            Console.WriteLine(mFileInfos)
             Select Case My.Application.CommandLineArgs.Count
                 Case 1
                     Dim arg0 As String = Trim(My.Application.CommandLineArgs(0).ToString)
@@ -117,6 +131,7 @@ Module mMain
 
         Try
             cProject.OpenProject(currentPrjFPN, False)
+            cGRM.writelogAndConsole(mFileInfos, True, False)
             cProject.ValidateProjectFile(cProject.Current)
             mSimDurationHour = CInt(cProject.Current.GeneralSimulEnv.mSimDurationHOUR)
             If cProject.Current.SetupModelParametersAfterProjectFileWasOpened() = False Then

@@ -885,9 +885,9 @@ namespace GRMCore
                 foreach (int id in mProject.subWSPar.userPars.Keys)
                     mProject.watershed.WSIDList.Add(id);
 
-                cGRM.bwriteLog = false;
-                cGRM.fpnlog = prjFPN.Replace(".gmp", ".log");
-                if (row.IsWriteLogNull() == false && row.WriteLog.ToString() == "true")
+            cGRM.bwriteLog = false;
+            cGRM.fpnlog = prjFPN.Replace(".gmp", ".log");
+            if (row.IsWriteLogNull() == false && row.WriteLog.ToString() == "true")
                 {
                     cGRM.bwriteLog = true;
                     if (File.Exists(cGRM.fpnlog))

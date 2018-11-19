@@ -688,10 +688,10 @@ namespace GRMCore
             {
                 if (mNowTsec < targetCalTtoPrint_MIN * 60 && (mNowTsec + dtsec) > (targetCalTtoPrint_MIN) * 60)
                 {
-                    if (Project_tm1 == null)
+                    if (Project_tm1.CVs == null)
                     {
                         mSEC_tm1 = mNowTsec;
-                        Project_tm1 = new cProjectBAK();
+                        //Project_tm1 = new cProjectBAK();
                         Project_tm1.SetCloneUsingCurrentProject(project);
                     }
                 }
@@ -702,7 +702,7 @@ namespace GRMCore
                     timeToPrint_MIN = targetCalTtoPrint_MIN - dTPrint_MIN;
                     OutputProcessManagerBySimType(timeToPrint_MIN, wpCount, sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m, coeffInterpolation, Project_tm1, SimType);
                     targetCalTtoPrint_MIN = targetCalTtoPrint_MIN + dTPrint_MIN;
-                    Project_tm1 = null;
+                    Project_tm1.CVs = null;
                 }
             }
         }
