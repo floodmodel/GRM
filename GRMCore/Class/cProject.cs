@@ -3,14 +3,18 @@ using System.Collections.Generic;
 using System.IO;
 using System.Data;
 using gentle;
+using Microsoft.Win32.SafeHandles;
+using System.Runtime.InteropServices;
 
 namespace GRMCore
 {
     public class cProject //: IDisposable
     {
+
+        bool disposed = false;
+        SafeHandle handle = new SafeFileHandle(IntPtr.Zero, true);
         private static cProject mProject;
         public cGRM.SimulationType mSimulationType;
-
         public cSetWatershed watershed;
         public cSetLandcover landcover;
         public cSetGreenAmpt GreenAmpt;
@@ -128,32 +132,28 @@ namespace GRMCore
 
         }
 
-        //protected bool disposed = false;
-        //protected virtual new void Dispose(bool disposing)
-        //{
-        //    if (!disposed)
-        //    {
-        //        if (disposing)
-        //        {
-        //            mProject = null;
-        //            //base.Finalize();
-        //            GC.Collect();
-        //        }
-        //    }
-        //    this.disposed = true;
-        //}
+        public void Dispose()
+        {
+            Dispose(true);
+            // Suppress finalization.
+            GC.SuppressFinalize(this);
+        }
 
-        //public new void Dispose()
-        //{
-        //    Dispose(true);
-        //    GC.SuppressFinalize(this);
-        //}
+        // Protected implementation of Dispose pattern.
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
 
-        //~cProject()
-        //{
-        //    Dispose(false);
-        //    //base.Finalize();
-        //}
+            if (disposing)
+            {
+                handle.Dispose();
+                // Free any other managed objects here.
+                //
+            }
+
+            disposed = true;
+        }
 
         public static cProject Current
         {
