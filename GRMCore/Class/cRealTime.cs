@@ -225,8 +225,7 @@ namespace GRMCore
         // GName, strDate))
         // End If
         // End Sub
-
-
+        
         public void UpdateRainfallInformationGRMRT(string strDate)
         {
             TimeSpan tsTotalSim = DateTime.Now - sThisSimulation.mTimeThisSimulationStarted;

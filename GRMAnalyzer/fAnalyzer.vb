@@ -1,8 +1,6 @@
 ﻿Imports System.Windows.Forms.DataVisualization.Charting
 Imports System.Math
 Imports System.IO
-Imports System.Drawing
-Imports System.Drawing.Imaging
 Imports System.Threading
 
 Public Class fAnalyzer
