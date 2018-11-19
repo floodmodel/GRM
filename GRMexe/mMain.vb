@@ -13,7 +13,9 @@ Module mMain
     Private mSimDurationHour As Integer
     Private mRaterFileOutput As cRasterOutput
     Private mbCreateDistributionFiles As Boolean = False
-
+    Dim mFileInfoLogExe As String
+    Dim mFileInfoLogCore As String
+    Dim mFileInfoLogGentle As String
     Private mFileInfos As String
 
     Sub main()
@@ -26,11 +28,14 @@ Module mMain
             Dim fvCore As String = FileVersionInfo.GetVersionInfo(fiCore.FullName).FileMajorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiCore.FullName).FileMinorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiCore.FullName).FileBuildPart.ToString
             Dim fvGentle As String = FileVersionInfo.GetVersionInfo(fiGentle.FullName).FileMajorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiGentle.FullName).FileMinorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiGentle.FullName).FileBuildPart.ToString
 
-            Dim fileInfoLogExe As String = String.Format("{0} v{1}. Built in {2}", fiExe.Name.ToString(), fvExe, fiExe.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
-            Dim fileInfoLogCore As String = String.Format("{0} v{1}. Built in {2}", fiCore.Name.ToString(), fvCore, fiCore.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
-            Dim fileInfoLogGentle As String = String.Format("{0} v{1}. Built in {2}", fiGentle.Name.ToString(), fvGentle, fiGentle.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
-            mFileInfos = fileInfoLogExe + ", " + fileInfoLogCore + ", " + fileInfoLogGentle
-            Console.WriteLine(mFileInfos)
+            mFileInfoLogExe = String.Format("{0} v{1}. Built in {2}", fiExe.Name.ToString(), fvExe, fiExe.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
+            mFileInfoLogCore = String.Format("{0} v{1}. Built in {2}", fiCore.Name.ToString(), fvCore, fiCore.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
+            mFileInfoLogGentle = String.Format("{0} v{1}. Built in {2}", fiGentle.Name.ToString(), fvGentle, fiGentle.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
+            mFileInfos = mFileInfoLogExe + ", " + mFileInfoLogCore + ", " + mFileInfoLogGentle
+            Console.WriteLine(mFileInfoLogExe + ".")
+            Console.WriteLine(mFileInfoLogCore + ".")
+            Console.WriteLine(mFileInfoLogGentle + ".")
+            'Console.WriteLine(mFileInfos)
             Select Case My.Application.CommandLineArgs.Count
                 Case 1
                     Dim arg0 As String = Trim(My.Application.CommandLineArgs(0).ToString)
@@ -131,7 +136,10 @@ Module mMain
 
         Try
             cProject.OpenProject(currentPrjFPN, False)
-            cGRM.writelogAndConsole(mFileInfos, True, False)
+            cGRM.writelogAndConsole(mFileInfoLogExe, True, False)
+            cGRM.writelogAndConsole(mFileInfoLogCore, True, False)
+            cGRM.writelogAndConsole(mFileInfoLogGentle, True, False)
+            'cGRM.writelogAndConsole(mFileInfos, True, False)
             cProject.ValidateProjectFile(cProject.Current)
             mSimDurationHour = CInt(cProject.Current.GeneralSimulEnv.mSimDurationHOUR)
             If cProject.Current.SetupModelParametersAfterProjectFileWasOpened() = False Then
