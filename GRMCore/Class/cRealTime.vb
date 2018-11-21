@@ -54,7 +54,7 @@ Public Class cRealTime
         'mFPNFcData = FPNfcdata
         If cProject.OpenProject(FPNprj, True) = False Then
             RaiseEvent RTStatus("모형 설정 실패.")
-            If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(IO.Path.GetFileName(FPNprj), "모형 설정 실패.")
+            If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(IO.Path.GetFileName(FPNprj), "Fail in Model Setting")  '모형 설정 실패.  2018.11.20 문구 수정함
             Exit Sub
         End If
         'mRTProject = New cProject
@@ -69,7 +69,7 @@ Public Class cRealTime
         End If
 
         RaiseEvent RTStatus("모형 설정 완료.")
-        If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(mRTProject.ProjectNameOnly, "모형 설정 완료.")
+        If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(mRTProject.ProjectNameOnly, "Model Setting Completed.") '모형 설정 완료. 2018.11.20 문구 수정
     End Sub
 
     Public Sub RunGRMRT()
@@ -100,8 +100,8 @@ Public Class cRealTime
             End If
         End If
 
-        RaiseEvent RTStatus("실시간 유출해석 시작..")
-        If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(mRTProject.ProjectNameOnly, "실시간 유출해석 시작..")
+        RaiseEvent RTStatus("RealTime Rainall Runoff Start..") '실시간 유출해석 시작.. 2018.11.20 한글 -> 영문 변경함
+        If CONST_bUseDBMS_FOR_RealTimeSystem Then Call Add_Log_toDBMS(mRTProject.ProjectNameOnly, "RealTime Rainall Runoff Start..")
 
         mSimul = New cSimulator
         If CreateNewOutputFilesRT() = False Then Exit Sub
@@ -354,29 +354,32 @@ Public Class cRealTime
             'Next
             'dt.Merge(odt_auto)
 
-            '경천DAM 처리
-            '            Dim strSpcealDams As String = "'경천댐'"       '2018.8.29 원 : 여기서 n 개 기입... 이건 추후 DB 등으로 이동되어야 함
-            Dim strSpcealDams As String = "'경천댐','영주댐'"       '2018.8.29 원 : 여기서 n 개 기입... 이건 추후 DB 등으로 이동되어야 함..  2018.10/11 원 : 영주댐 추가
-            Dim strSQL2 As String = String.Format("Select  w.name, 999 as cvid ,[Time] as datetime ,[QValue] AS VALUE From QStream_OBS_ht d , WatchPoint w  Where  d.GName in({1}) and  TIME ='{0}' and d.Gname=w.Gname ", TargetDateTime, strSpcealDams)
+            '경천DAM 처리.영주댐 처리 부분 인데... 너무 지엽적인 예외 조치 라서... 배제하는시도를 2018.10.12 원,안 하고 있슴
+            If False Then
+                'Dim strSpcealDams As String = "'경천댐'"       '2018.8.29 원 : 여기서 n 개 기입... 이건 추후 DB 등으로 이동되어야 함
+                Dim strSpcealDams As String = "'경천댐','영주댐'"       '2018.8.29 원 : 여기서 n 개 기입... 이건 추후 DB 등으로 이동되어야 함..  2018.10/11 원 : 영주댐 추가
+                Dim strSQL2 As String = String.Format("Select  w.name, 999 as cvid ,[Time] as datetime ,[QValue] AS VALUE From QStream_OBS_ht d , WatchPoint w  Where  d.GName in({1}) and  TIME ='{0}' and d.Gname=w.Gname ", TargetDateTime, strSpcealDams)
 
-            Dim odt2 As New Data.DataTable
-            Dim oSqlDataAdapter2 As New SqlClient.SqlDataAdapter(strSQL2, g_strDBMSCnn)
-            oSqlDataAdapter2.SelectCommand.CommandTimeout = 60
-            oSqlDataAdapter2.Fill(odt2)
+                Dim odt2 As New Data.DataTable
+                Dim oSqlDataAdapter2 As New SqlClient.SqlDataAdapter(strSQL2, g_strDBMSCnn)
+                oSqlDataAdapter2.SelectCommand.CommandTimeout = 60
+                oSqlDataAdapter2.Fill(odt2)
 
-            If odt2.Rows.Count <> 2 Then
-                'Stop   '2018.10.11 까지는 stop 이었슴
-                cGRM.writelogAndConsole(strSpcealDams + " 의 data가 2건이 아님!", False, True)
+                If odt2.Rows.Count <> 2 Then
+                    'Stop   '2018.10.11 까지는 stop 이었슴
+                    cGRM.writelogAndConsole(strSpcealDams + " 의 data가 2건이 아님!", False, True)
+                End If
+
+                For Each oDR2 As DataRow In odt2.Rows
+                    Dim oDR_Target2 As DataRow = mRTProject.FCGrid.mdtFCGridInfo.Select(String.Format("Name='{0}'", oDR2.Item("NAME").ToString)).FirstOrDefault
+                    Dim strCVID2 As String = oDR_Target2.Item("CVID").ToString
+                    oDR2.Item("CVID") = strCVID2
+                    Debug.Print(strCVID2)
+                Next
+
+                dt.Merge(odt2)
+
             End If
-
-            For Each oDR2 As DataRow In odt2.Rows
-                Dim oDR_Target2 As DataRow = mRTProject.FCGrid.mdtFCGridInfo.Select(String.Format("Name='{0}'", oDR2.Item("NAME").ToString)).FirstOrDefault
-                Dim strCVID2 As String = oDR_Target2.Item("CVID").ToString
-                oDR2.Item("CVID") = strCVID2
-                Debug.Print(strCVID2)
-            Next
-
-            dt.Merge(odt2)
 
             cProject.Current.FCGrid.mdtFCFlowData = dt
 
