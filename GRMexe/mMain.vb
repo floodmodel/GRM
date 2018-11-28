@@ -1,6 +1,6 @@
 ﻿Imports System.IO
-Imports System.Threading
-Imports GRMCore
+Imports System.IO.File
+
 
 
 ''' <summary>
@@ -13,10 +13,29 @@ Module mMain
     Private mSimDurationHour As Integer
     Private mRaterFileOutput As cRasterOutput
     Private mbCreateDistributionFiles As Boolean = False
+    Dim mFileInfoLogExe As String
+    Dim mFileInfoLogCore As String
+    Dim mFileInfoLogGentle As String
+    Private mFileInfos As String
 
     Sub main()
         Try
             Dim prjFPN As String = ""
+            Dim fiExe As New FileInfo(Path.Combine(My.Application.Info.DirectoryPath, "GRM.exe"))
+            Dim fiCore As New FileInfo(Path.Combine(My.Application.Info.DirectoryPath, "GRMCore.dll"))
+            Dim fiGentle As New FileInfo(Path.Combine(My.Application.Info.DirectoryPath, "gentle.dll"))
+            Dim fvExe As String = FileVersionInfo.GetVersionInfo(fiExe.FullName).FileMajorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiExe.FullName).FileMinorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiExe.FullName).FileBuildPart.ToString
+            Dim fvCore As String = FileVersionInfo.GetVersionInfo(fiCore.FullName).FileMajorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiCore.FullName).FileMinorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiCore.FullName).FileBuildPart.ToString
+            Dim fvGentle As String = FileVersionInfo.GetVersionInfo(fiGentle.FullName).FileMajorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiGentle.FullName).FileMinorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiGentle.FullName).FileBuildPart.ToString
+
+            mFileInfoLogExe = String.Format("{0} v{1}. Built in {2}", fiExe.Name.ToString(), fvExe, fiExe.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
+            mFileInfoLogCore = String.Format("{0} v{1}. Built in {2}", fiCore.Name.ToString(), fvCore, fiCore.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
+            mFileInfoLogGentle = String.Format("{0} v{1}. Built in {2}", fiGentle.Name.ToString(), fvGentle, fiGentle.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
+            mFileInfos = mFileInfoLogExe + ", " + mFileInfoLogCore + ", " + mFileInfoLogGentle
+            Console.WriteLine(mFileInfoLogExe + ".")
+            Console.WriteLine(mFileInfoLogCore + ".")
+            Console.WriteLine(mFileInfoLogGentle + ".")
+            'Console.WriteLine(mFileInfos)
             Select Case My.Application.CommandLineArgs.Count
                 Case 1
                     Dim arg0 As String = Trim(My.Application.CommandLineArgs(0).ToString)
@@ -94,25 +113,33 @@ Module mMain
         ''여기서 셀 정보를 미리 알 수 있다.
         'Dim WSFPN As String = "D:/Nakdong/watershed/ND_Watershed.asc"
         'Dim SlopeFPN As String = "D:/Nakdong/watershed/ND_Slope.asc"
-        'Dim FdirFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Fdr.asc"
-        'Dim FacFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Fac.asc"
-        'Dim streamFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_DEM_Stream.asc"
-        'Dim lcFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/GHG500_lc.asc"
-        'Dim stFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_SoilTexture.asc"
-        'Dim sdFPN As String = "C:\GRM_Projects\GHG500_qgis_reverse/watershed/ghg500_SoilDepth.asc"
+        'Dim FdirFPN As String = "D:/Nakdong/watershed/ND_Fdr.asc"
+        'Dim FacFPN As String = "D:/Nakdong/watershed/ND_Fac.asc"
+        'Dim streamFPN As String = "D:/Nakdong/watershed/ND_stream.asc"
+        'Dim lcFPN As String = "D:/Nakdong/watershed/ND_lc.asc"
+        'Dim stFPN As String = "D:/Nakdong/watershed/ND_stexture.asc"
+        'Dim sdFPN As String = "D:/Nakdong/watershed/ND_sdepth.asc"
 
         'Dim wsinfo As New cGetWatershedInfo(cGRM.FlowDirectionType.StartsFromE_TauDEM.ToString, WSFPN, SlopeFPN, FdirFPN, FacFPN, streamFPN, lcFPN, stFPN, sdFPN,,)
-        'Dim cc As Integer = wsinfo.cellCountInWatershed
-        'Dim a As Integer = wsinfo.WSIDsAll.Count
-        'Dim aa As List(Of Integer) = wsinfo.upStreamWSIDs(1)
+        ''Dim cc As Integer = wsinfo.cellCountInWatershed
+        ''Dim a As Integer = wsinfo.WSIDsAll.Count
+        ''Dim aa As List(Of Integer) = wsinfo.upStreamWSIDs(1)
+        'Dim cs As Single = wsinfo.cellSize
 
 
         Dim wpNames As New List(Of String)
         If Path.GetDirectoryName(currentPrjFPN) = "" Then
             currentPrjFPN = Path.Combine(My.Application.Info.DirectoryPath, currentPrjFPN)
         End If
+        Dim fpnLog = Path.Combine(Path.GetDirectoryName(currentPrjFPN), Path.GetFileNameWithoutExtension(currentPrjFPN) + ".log")
+        If File.Exists(fpnLog) = True Then File.Delete(fpnLog)
+
         Try
             cProject.OpenProject(currentPrjFPN, False)
+            cGRM.writelogAndConsole(mFileInfoLogExe, True, False)
+            cGRM.writelogAndConsole(mFileInfoLogCore, True, False)
+            cGRM.writelogAndConsole(mFileInfoLogGentle, True, False)
+            'cGRM.writelogAndConsole(mFileInfos, True, False)
             cProject.ValidateProjectFile(cProject.Current)
             mSimDurationHour = CInt(cProject.Current.GeneralSimulEnv.mSimDurationHOUR)
             If cProject.Current.SetupModelParametersAfterProjectFileWasOpened() = False Then
@@ -164,7 +191,7 @@ Module mMain
                 mRaterFileOutput = New cRasterOutput(cProject.Current)
             End If
             cGRM.writelogAndConsole(currentPrjFPN + " -> Model setup completed.", cGRM.bwriteLog, True)
-            For Each row As GRMProject.WatchPointsRow In cProject.Current.WatchPoint.mdtWatchPointInfo
+            For Each row As GRMCore.Dataset.GRMProject.WatchPointsRow In cProject.Current.watchPoint.mdtWatchPointInfo
                 wpNames.Add(row.Name)
             Next
             mSimulator = New cSimulator
@@ -271,11 +298,11 @@ Module mMain
         Console.WriteLine("               d:\GRMrun>grm test.gmp")
         Console.WriteLine("- /f 폴더경로")
         Console.WriteLine("         grm을 폴더 단위로 실행시킨다.")
-        Console.WriteLine("          ** 예문 : grmmp /f d:\GRMrun\TestProject")
+        Console.WriteLine("          ** 예문 : grm /f d:\GRMrun\TestProject")
         Console.WriteLine("- /fd 폴더경로")
         Console.WriteLine("         grm을 폴더 단위로 실행시킨다.")
         Console.WriteLine("         유량 모의결과인 *discharge.out을 제외한 파일을 지운다(*.gmp, *Depth.out, 등등...)")
-        Console.WriteLine("          ** 예문 : grmmp /fd d:\GRMrun\TestProject")
+        Console.WriteLine("          ** 예문 : grm /fd d:\GRMrun\TestProject")
     End Sub
 
 

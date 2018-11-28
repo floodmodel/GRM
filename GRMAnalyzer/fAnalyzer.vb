@@ -1,8 +1,6 @@
 ﻿Imports System.Windows.Forms.DataVisualization.Charting
 Imports System.Math
 Imports System.IO
-Imports System.Drawing
-Imports System.Drawing.Imaging
 Imports System.Threading
 
 Public Class fAnalyzer
@@ -38,7 +36,7 @@ Public Class fAnalyzer
     Private Sub fAnalyzer_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
         'Me.tbGMPfpn.Text = "D:\Github\TestSet_GRM\AnalyzerTest\SampleProject.gmp"
         'Me.tbFPNObsData.Text = "D:\Github\TestSet_GRM\AnalyzerTest\Qobs - 복사본.txt"
-        cThisSimulation.mAnalyzerSet = False
+        sThisSimulation.mAnalyzerSet = False
         Me.tbChart.Width = 470
     End Sub
 
@@ -123,12 +121,12 @@ Public Class fAnalyzer
     Private Sub SetupChart()
         Dim FPNobs As String = Trim(Me.tbFPNObsData.Text)
         Dim FPNsim As String = Trim(Me.tbFPNSimData.Text)
-        Dim Qobss As New Dictionary(Of Integer, List(Of Single))
+        Dim Qobss As New Dictionary(Of Integer, List(Of Nullable(Of Double)))
         Dim LegendsObs As New List(Of String)
         Dim LegendsSim As New List(Of String)
         Dim xLabels As Dictionary(Of Integer, String)
-        Dim Qsims As Dictionary(Of Integer, List(Of Single))
-        Dim RFsims As Dictionary(Of Integer, Single)
+        Dim Qsims As Dictionary(Of Integer, List(Of Nullable(Of Double)))
+        Dim RFsims As Dictionary(Of Integer, Double)
         Try
 
             If mbShowObsData = True Then
@@ -139,11 +137,22 @@ Public Class fAnalyzer
             mMaxPrintoutCount = CInt(mSimDuration_HR * 60 / mproject.GeneralSimulEnv.mPrintOutTimeStepMIN) + 1
             If ObsDataCount > mMaxPrintoutCount Then
                 mMaxPrintoutCount = ObsDataCount
+            ElseIf (ObsDataCount < mMaxPrintoutCount) Then
+                For i As Integer = ObsDataCount To mMaxPrintoutCount - 1
+                    Qobss.Add(i, New List(Of Nullable(Of Double)))
+                    'Dim values As New List(Of Nullable(Of Double))
+                    For n As Integer = 0 To LegendsObs.Count - 1
+
+                        Qobss(i).Add(Nothing)
+                        'values.Add(Nothing)
+                    Next
+                    'Qobss(i) = values
+                Next
             End If
 
             If mbShowSimData = True Then
-                Qsims = New Dictionary(Of Integer, List(Of Single))
-                RFsims = New Dictionary(Of Integer, Single)
+                Qsims = New Dictionary(Of Integer, List(Of Nullable(Of Double)))
+                RFsims = New Dictionary(Of Integer, Double)
                 Dim strLines() As String = System.IO.File.ReadAllLines(FPNsim, System.Text.Encoding.Default)
                 xLabels = New Dictionary(Of Integer, String)
                 '3번행이 열 이름
@@ -173,22 +182,32 @@ Public Class fAnalyzer
                     Exit Sub
                 End If
                 ''여기서 키를 만들고
-                For n As Integer = 4 To strLines.Length - 1 '4번 부터 값이 있음.
-                    Dim LineParts() As String = strLines(n).Split(New String() {vbTab, ","}, StringSplitOptions.RemoveEmptyEntries)
+                For n As Integer = 4 To mMaxPrintoutCount + 4 - 1 '4번 부터 값이 있음.
                     Dim i As Integer = n - 4
-                    xLabels.Add(i, LineParts(colindexTime))
-                    Dim qsim As New List(Of Single)
-                    For qn As Integer = 0 To IndexQsim.Count - 1
-                        qsim.Add(CSng(LineParts(IndexQsim(qn))))
-                    Next
-                    Qsims.Add(i, qsim)
-                    RFsims.Add(i, CSng(LineParts(colindexRf)))
+                    If (n < strLines.Length) Then
+                        Dim LineParts() As String = strLines(n).Split(New String() {vbTab, ","}, StringSplitOptions.RemoveEmptyEntries)
+                        xLabels.Add(i, LineParts(colindexTime))
+                        Dim qsim As New List(Of Nullable(Of Double))
+                        For qn As Integer = 0 To IndexQsim.Count - 1
+                            qsim.Add(CSng(LineParts(IndexQsim(qn))))
+                        Next
+                        Qsims.Add(i, qsim)
+                        RFsims.Add(i, CSng(LineParts(colindexRf)))
+                    Else
+                        xLabels.Add(i, "")
+                        Dim simNull As New List(Of Nullable(Of Double))
+                        For qn As Integer = 0 To IndexQsim.Count - 1
+                            simNull.Add(Nothing)
+                        Next
+                        Qsims.Add(i, simNull)
+                        RFsims.Add(i, 0)
+                    End If
                 Next
                 mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, Qsims, LegendsSim, RFsims, xLabels, mMaxPrintoutCount)
 
-                Dim dt As New GRMCore.GRMProject.WatchPointsDataTable
+                Dim dt As New GRMCore.Dataset.GRMProject.WatchPointsDataTable
                 For rn As Integer = 0 To LegendsSim.Count - 1
-                    Dim r As GRMProject.WatchPointsRow = dt.NewWatchPointsRow
+                    Dim r As GRMCore.Dataset.GRMProject.WatchPointsRow = dt.NewWatchPointsRow
                     r.Name = LegendsSim(rn)
                     dt.Rows.Add(r)
                 Next
@@ -210,7 +229,7 @@ Public Class fAnalyzer
                     xLabels = Nothing
                 End If
                 If mproject.WatchPoint.WPCount > 0 Then
-                    For Each row As GRMProject.WatchPointsRow In mproject.WatchPoint.mdtWatchPointInfo.Rows
+                    For Each row As GRMCore.Dataset.GRMProject.WatchPointsRow In mproject.watchPoint.mdtWatchPointInfo.Rows
                         LegendsSim.Add(row.Name)
                     Next
                 End If
@@ -225,7 +244,7 @@ Public Class fAnalyzer
             Me.pbChartMain.Controls.Clear()
             Me.pbChartRF.Controls.Clear()
             mChart.DrawChart()
-            cThisSimulation.mAnalyzerSet = True
+            sThisSimulation.mAnalyzerSet = True
         Catch ex As Exception
             MsgBox("err", MsgBoxStyle.Exclamation, cGRM.BuildInfo.ProductName)
         End Try
@@ -281,7 +300,7 @@ Public Class fAnalyzer
 
 
     Private Delegate Sub RasterOutputDelegate(ByVal nowTtoPrint_MIN As Integer, imgWidth As Integer, imgHeight As Integer, usingOtherThread As Boolean)
-    Private Delegate Sub DrawChartDelegate(ByVal nowT_Min As Integer, interCoef As Single)
+    Private Delegate Sub DrawChartDelegate(ByVal nowT_Min As Integer, interCoef As Double)
 
     Private Sub Simulator_MakeRasterOutput(sender As cSimulator,
                                         nowTtoPrint_MIN As Integer) Handles mSimulator.MakeRasterOutput
@@ -320,11 +339,11 @@ Public Class fAnalyzer
     End Sub
 
 
-    Private Sub mSimulator_SendQToAnalyzer(sender As cSimulator, nowTtoPrint_MIN As Integer, interCoef As Single) Handles mSimulator.SendQToAnalyzer
+    Private Sub mSimulator_SendQToAnalyzer(sender As cSimulator, nowTtoPrint_MIN As Integer, interCoef As Double) Handles mSimulator.SendQToAnalyzer
         DrawChart(nowTtoPrint_MIN, interCoef)
     End Sub
 
-    Private Sub DrawChart(nowTtoPrint_MIN As Integer, interCoef As Single)
+    Private Sub DrawChart(nowTtoPrint_MIN As Integer, interCoef As Double)
         If Me.pbChartMain.InvokeRequired = True Then
             Dim d As New DrawChartDelegate(AddressOf AddDataAndUpdateChart)
             Me.pbChartMain.Invoke(d, nowTtoPrint_MIN, interCoef)
@@ -335,21 +354,21 @@ Public Class fAnalyzer
 
 
 
-    Public Sub AddDataAndUpdateChart(ByVal nowT_Min As Integer, interCoef As Single)
-        Dim Qs As New List(Of Single)
-        Dim qsim As Single = 0
-        Dim qSimforEachWP As New Dictionary(Of Integer, Single)
-        For Each cvid As Integer In cProject.Current.WatchPoint.WPCVidList
+    Public Sub AddDataAndUpdateChart(ByVal nowT_Min As Integer, interCoef As Double)
+        Dim Qs As New List(Of Nullable(Of Double))
+        Dim qsim As Double = 0
+        Dim qSimforEachWP As New Dictionary(Of Integer, Double)
+        For Each cvid As Integer In cProject.Current.watchPoint.WPCVidList
             Dim cvan As Integer = cvid - 1
-            qsim = mproject.CV(cvan).Qprint_cms
+            qsim = mproject.watchPoint.Qprint_cms(cvid)
             qSimforEachWP.Add(cvid, qsim)
             Qs.Add(qsim)
         Next
-        mChart.AddQsimAndRFpointAndUpdateChart(CSng(cThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m) * 1000, Qs)
+        mChart.AddQsimAndRFpointAndUpdateChart(CSng(sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m) * 1000, Qs)
         Dim timeToPrintOut As String
-        If mproject.GeneralSimulEnv.mIsDateTimeFormat = True Then
-            timeToPrintOut = cComTools.GetTimeToPrintOut(mproject.GeneralSimulEnv.mIsDateTimeFormat,
-                                                         mproject.GeneralSimulEnv.mSimStartDateTime, nowT_Min)
+        If mproject.generalSimulEnv.mIsDateTimeFormat = True Then
+            timeToPrintOut = cComTools.GetTimeToPrintOut(mproject.generalSimulEnv.mIsDateTimeFormat,
+                                                         mproject.generalSimulEnv.mSimStartDateTime, nowT_Min)
         Else
             timeToPrintOut = CStr(nowT_Min)
         End If
@@ -433,7 +452,7 @@ Public Class fAnalyzer
         'ClearPictureBoxAndDrawNewImgwithImgFile(Me.pbSSRimg)
         'pbSSRimg = Nothing
         clearPictureBoxes(True)
-        cThisSimulation.mAnalyzerSet = False
+        sThisSimulation.mAnalyzerSet = False
     End Sub
 
 
@@ -694,9 +713,9 @@ Public Class fAnalyzer
         End Try
     End Function
 
-    Private Sub UpdateDgvWithSimDataFile(ByVal wpcount As Integer, ByVal Qsims As Dictionary(Of Integer, List(Of Single)),
+    Private Sub UpdateDgvWithSimDataFile(ByVal wpcount As Integer, ByVal Qsims As Dictionary(Of Integer, List(Of Nullable(Of Double))),
                                         ByVal xLabels As Dictionary(Of Integer, String),
-                                        ByVal RFsims As Dictionary(Of Integer, Single))
+                                        ByVal RFsims As Dictionary(Of Integer, Double))
         mdtData.Clear()
         mdtData.BeginLoadData()
         For n As Integer = 0 To Qsims.Count - 1
@@ -711,12 +730,12 @@ Public Class fAnalyzer
         mdtData.EndLoadData()
     End Sub
 
-    Public Sub AddDataAndUpdateDataGridView(qSimforEachWP As Dictionary(Of Integer, Single), timeToPrintOut As String)
+    Public Sub AddDataAndUpdateDataGridView(qSimforEachWP As Dictionary(Of Integer, Double), timeToPrintOut As String)
         mEventType = Nothing
         Dim row As Data.DataRow = mdtData.NewRow
         row.Item(0) = timeToPrintOut
-        For Each r As GRMProject.WatchPointsRow In mproject.WatchPoint.mdtWatchPointInfo.Rows
-            Dim v As Single = qSimforEachWP(r.CVID)
+        For Each r As GRMCore.Dataset.GRMProject.WatchPointsRow In mproject.watchPoint.mdtWatchPointInfo.Rows
+            Dim v As Double = qSimforEachWP(r.CVID)
             'If project.CV(r.CVID - 1).FlowType = cGRM.CellFlowType.OverlandFlow Then
             '    v = project.CV(r.CVID - 1).QCVof_i_j_m3Ps '배열번호는 cvid-1
             'Else
@@ -725,7 +744,7 @@ Public Class fAnalyzer
             row.Item(r.Name) = Format(v, "#0.#0")
         Next
 
-        row.Item(mdtData.Columns.Count - 1) = Format(cThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m * 1000, "#0.#0")
+        row.Item(mdtData.Columns.Count - 1) = Format(sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m * 1000, "#0.#0")
         mdtData.Rows.Add(row)
         Me.dgvResults.CurrentCell = Me.dgvResults.Rows(Me.dgvResults.RowCount - 1).Cells(0)
         Me.dgvResults.CurrentRow.Selected = False '여기서는 선택하지 않게..
@@ -1010,12 +1029,12 @@ Public Class fAnalyzer
         End If
     End Sub
 
-    Private Sub CreatDataTableAndSetDataGridView(ByVal dtWatchPoint As GRMProject.WatchPointsDataTable)
+    Private Sub CreatDataTableAndSetDataGridView(ByVal dtWatchPoint As GRMCore.Dataset.GRMProject.WatchPointsDataTable)
         If dtWatchPoint IsNot Nothing Then
             If dtWatchPoint.Rows.Count > 0 Then
                 mdtData = New DataTable
                 mdtData.Columns.Add("Time") '이건 라벨. 시간
-                For Each row As GRMProject.WatchPointsRow In dtWatchPoint.Rows
+                For Each row As GRMCore.Dataset.GRMProject.WatchPointsRow In dtWatchPoint.Rows
                     mdtData.Columns.Add(row.Name)
                 Next
                 mdtData.Columns.Add("Rainfall") '이건 강우
@@ -1027,9 +1046,9 @@ Public Class fAnalyzer
     End Sub
 
 
-    Public Sub UpdateWatchpointINfo(ByVal inputWPdataTable As GRMProject.WatchPointsDataTable)
-        mproject.WatchPoint.mdtWatchPointInfo = inputWPdataTable
-        Call CreatDataTableAndSetDataGridView(mproject.WatchPoint.mdtWatchPointInfo)
+    Public Sub UpdateWatchpointINfo(ByVal inputWPdataTable As GRMCore.Dataset.GRMProject.WatchPointsDataTable)
+        mproject.watchPoint.mdtWatchPointInfo = inputWPdataTable
+        Call CreatDataTableAndSetDataGridView(mproject.watchPoint.mdtWatchPointInfo)
     End Sub
 
 
@@ -1050,7 +1069,30 @@ Public Class fAnalyzer
         If fod.ShowDialog = Windows.Forms.DialogResult.OK Then
             Me.tbGMPfpn.Text = fod.FileName
         End If
+        'mbShowSimData = False
+        'CheckPrjFileAndSetUI()
     End Sub
+
+    Private Sub tbGMPfpn_TextChanged(sender As Object, e As EventArgs) Handles tbGMPfpn.TextChanged
+        'mbShowSimData = False
+        'CheckPrjFileAndSetUI()
+    End Sub
+
+    'Private Sub CheckPrjFileAndSetUI()
+    '    If File.Exists(Me.tbGMPfpn.Text.Trim) Then
+    '        Dim outfpn As String = Me.tbGMPfpn.Text.Trim.Replace(".gmp", "")
+    '        outfpn = outfpn + "Discharge.out"
+    '        If File.Exists(outfpn) Then
+    '            If InitializeAndCheckErr() = False Then
+    '                Exit Sub
+    '            End If
+    '            mbShowSimData = True
+    '            setupProject()
+    '            SetupChart()
+    '            SetDistributedPictureFilesAndRenderer(Me)
+    '        End If
+    '    End If
+    'End Sub
 
     Private Sub btLoadObsQ_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btLoadObsData.Click
         Dim fod As New OpenFileDialog
@@ -1211,16 +1253,17 @@ Public Class fAnalyzer
         Dim ofrmTextBox As New fTextBox
         Dim strOut As String
 
-        strOut = "GaugeName" + vbCrLf
-        strOut = strOut + "Value" + vbCrLf
-        strOut = strOut + "Value" + vbCrLf
-        strOut = strOut + "   .   " + vbCrLf
-        strOut = strOut + "   .   " + vbCrLf + vbCrLf
+        strOut = "GaugeName1, GaugeName2 GaugeName3" + vbCrLf
+        strOut = strOut + "Value, Value Value" + vbCrLf
+        strOut = strOut + "Value Value, Value" + vbCrLf
+        strOut = strOut + "   .        .         .   " + vbCrLf
+        strOut = strOut + "   .        .         .   " + vbCrLf + vbCrLf
 
         strOut = strOut + "Make observed data file as TEXT file type(using notepad, etc.)" + vbCrLf
-        strOut = strOut + "GaugeName : observatory name. Variant data type" + vbCrLf
-        strOut = strOut + "Value : observed data value. Integer or float data type." + vbCrLf
-        strOut = strOut + "*******  Do not use comma(,) in value string."
+        strOut = strOut + "GaugeName : observatory name. String data type" + vbCrLf
+        strOut = strOut + "Value : observed data value. Numeric data type." + vbCrLf
+        strOut = strOut + "All gauge names and values are separated by using comma(,) or space( )." + vbCrLf
+        strOut = strOut + "*******  Do not use comma(,) in value text."
 
         ofrmTextBox.txtTextBox.Text = strOut
         ofrmTextBox.txtTextBox.ReadOnly = True
@@ -1277,4 +1320,7 @@ Public Class fAnalyzer
         btStopSimulation.Enabled = False
     End Sub
 
+    Private Sub tbFPNSimData_TextChanged(sender As Object, e As EventArgs) Handles tbFPNSimData.TextChanged
+
+    End Sub
 End Class
