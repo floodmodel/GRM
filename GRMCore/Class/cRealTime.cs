@@ -60,6 +60,8 @@ namespace GRMCore
             }
             CONST_Output_File_Target_DISK = System.Convert.ToChar(strTmp);
             mGRMRT = new cRealTime();
+
+            mGRMRT.RTStatus += new RTStatusEventHandler(mGRMRT.cRealTime_RTStatus);
         }
 
         public void SetupGRM(string FPNprj) // fc 자료는 항상 db를 사용하는 것으로 수정, Optional FPNfcdata As String = "")
@@ -103,11 +105,11 @@ namespace GRMCore
             int timeH = 0;
             int timeM = 0;
             int v = 0;
-            if (int.TryParse(mRFStartDateTimeRT.Substring(1, 4), out v) == true) { dateY = v; }
-            if (int.TryParse(mRFStartDateTimeRT.Substring(5, 2), out v) == true) { dateM = v; }
-            if (int.TryParse(mRFStartDateTimeRT.Substring(7, 2), out v) == true) { dateD = v; }
-            if (int.TryParse(mRFStartDateTimeRT.Substring(9, 2), out v) == true) { timeH = v; }
-            if (int.TryParse(mRFStartDateTimeRT.Substring(11, 2), out v) == true) { timeM = v; }
+            if (int.TryParse(mRFStartDateTimeRT.Substring(0, 4), out v) == true) { dateY = v; }
+            if (int.TryParse(mRFStartDateTimeRT.Substring(4, 2), out v) == true) { dateM = v; }
+            if (int.TryParse(mRFStartDateTimeRT.Substring(6, 2), out v) == true) { dateD = v; }
+            if (int.TryParse(mRFStartDateTimeRT.Substring(8, 2), out v) == true) { timeH = v; }
+            if (int.TryParse(mRFStartDateTimeRT.Substring(10, 2), out v) == true) { timeM = v; }
             mDateTimeStartRT = new DateTime(dateY, dateM, dateD, timeH, timeM, 0);
             //mDateTimeStartRT = new DateTime((int)mRFStartDateTimeRT.Substring(1, 4), (int)mRFStartDateTimeRT.Substring(5, 2), (int)mRFStartDateTimeRT.Substring (7, 2), 
             //    (int)mRFStartDateTimeRT.Substring(9, 2), (int)mRFStartDateTimeRT.Substring(11, 2), 0);
@@ -231,7 +233,7 @@ namespace GRMCore
             TimeSpan tsTotalSim = DateTime.Now - sThisSimulation.mTimeThisSimulationStarted;
             //long lngTimeDiffFromStarting_SEC = DateDiff(DateInterval.Second, cThisSimulation.mTimeThisSimulationStarted, DateTime.Now);
             long lngTimeDiffFromStarting_SEC = (long)tsTotalSim.TotalSeconds;
-            string tFromStart = String.Format((lngTimeDiffFromStarting_SEC / (double)60).ToString(), "#0.00");
+            string tFromStart = (lngTimeDiffFromStarting_SEC / (double)60).ToString("#0.00");
 
             if (mRFLayerCountToApply_RT > 0 & mbNewRFAddedRT == true)
             {
@@ -406,7 +408,8 @@ namespace GRMCore
                 foreach (DataRow oDR in odt.Rows)
                 {
                     DataRow oDR_Target = mRTProject.fcGrid.mdtFCGridInfo.Select(string.Format("Name='{0}'", oDR.Field<string>("NAME"))).FirstOrDefault();
-                    string strCVID = oDR_Target.Field<string>("CVID");
+                    //string strCVID = oDR_Target.Field<string>("CVID");
+                    string strCVID = oDR_Target.Field<Int32>("CVID").ToString();
                     oDR["CVID"] = strCVID;
                     //Debug.Print(strCVID);
                 }
@@ -579,7 +582,8 @@ namespace GRMCore
 
         private string GetYearAndMonthFromyyyyMMddHHmm(string INPUTyyyyMMddHHmm)
         {
-            return INPUTyyyyMMddHHmm.Substring(1, 6);
+            //return INPUTyyyyMMddHHmm.Substring(1, 6);
+            return INPUTyyyyMMddHHmm.Substring(0, 6);
         }
 
         public static cRealTime Current
@@ -620,6 +624,7 @@ namespace GRMCore
 
         private void cRealTime_RTStatus(string strMSG)
         {
+            //cGRM.writelogAndConsole(strMSG, cGRM.bwriteLog, true);    //2018.11.29 원 : 임시 console log 위한 사용. 추후 event 받는 측에서 조치해야함 
         }
 
     }

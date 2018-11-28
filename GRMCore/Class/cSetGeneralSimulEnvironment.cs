@@ -160,7 +160,7 @@ namespace GRMCore
                     row.AboutSoilDepthMap = mAboutSoilDepthMap;
                 if (mAboutRainfall != "")
                     row.AboutRainfall = mAboutRainfall;
-                row.ProjectSavedTime = String.Format(DateTime.Now.ToString(), "yyyy/MM/dd HH:mm");
+                row.ProjectSavedTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm") ;
                 row.ComputerName = Environment.MachineName;
                 row.ComputerUserName = Environment.UserName;
                 row.GRMVersion = cGRM.BuildInfo.ProductVersion;

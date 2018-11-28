@@ -78,9 +78,9 @@ namespace GRMCore
                 strFNP = project.ProjectPath + @"\" + project.ProjectNameOnly + "RealTime_" + strWPName + ".out";
                 strFNP = cRealTime_Common.IO_Path_ChangeDrive(cRealTime.CONST_Output_File_Target_DISK, strFNP);
                 strOutPutLine = strNowTimeToPrintOut
-                                      + "\t" + string.Format(project.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID].ToString(), "#0.00")
-                                      + "\t" + String.Format(sngQobs.ToString (), "#0.00") + "\t" + vToPrint
-                                      + "\t" + String.Format((lngTimeDiffFromStarting_SEC / (double) 60).ToString(), "#0.00") + "\r\n";
+                                      + "\t" + project.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID].ToString("#0.00") 
+                                      + "\t" + sngQobs.ToString ("#0.00")  + "\t" + vToPrint
+                                      + "\t" + (lngTimeDiffFromStarting_SEC / (double) 60).ToString("#0.00")  + "\r\n";
 
                 if (!System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(strFNP)))
                     System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(strFNP));

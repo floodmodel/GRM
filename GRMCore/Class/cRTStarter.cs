@@ -124,7 +124,8 @@ namespace GRMCore
                     string strSQL1 = "select top 1 runid from runmeta order by runid desc";
                     SqlDataAdapter oSqlDataAdapter = new SqlDataAdapter(strSQL1, cRealTime_DBMS.g_strDBMSCnn);
                     oSqlDataAdapter.Fill(dt1);
-                    int intID = dt1.Rows[0].Field<int>(0);
+                    long lngID= (long)dt1.Rows[0][0];
+                    int intID = Convert.ToInt32(lngID); //int intID = dt1.Rows[0].Field<int>(0);    // by ice. 2018.11.21
 
                     if (cRealTime_Common.g_performance_log_GUID == intID.ToString())
                     {

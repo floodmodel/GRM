@@ -206,8 +206,12 @@ namespace GRMCore
                 {
                     // 신규 강우자료 검색
                     string TargetRFLayerTime;
-                    TargetRFLayerTime = string.Format(mRealTime.mDateTimeStartRT.Add
-                                                  (new System.TimeSpan(0, (int)(nowRFLayerOrder * dTRFintervalSEC / 60.0), 0)).ToString(), "yyyyMMddHHmm");
+                    //TargetRFLayerTime = string.Format(mRealTime.mDateTimeStartRT.Add
+                    //                              (new System.TimeSpan(0, (int)(nowRFLayerOrder * dTRFintervalSEC / 60.0), 0)).ToString(), "yyyyMMddHHmm");
+
+                    DateTime dtTargetRFLayerTime = mRealTime.mDateTimeStartRT.Add(new System.TimeSpan(0, (int)(nowRFLayerOrder * dTRFintervalSEC / 60.0), 0));
+                    TargetRFLayerTime = dtTargetRFLayerTime.ToString("yyyyMMddHHmm");
+
                     do
                     {
                         if (mStop == true)
@@ -239,8 +243,7 @@ namespace GRMCore
                                 if (nowTsec > dt_MIN * 60 * mRealTime.mdicFCDataOrder[cvid] || mRealTime.mdicFCDataOrder[cvid] == 0)
                                 {
                                     string TargetDataTime;
-                                    TargetDataTime = string.Format(mRealTime.mDateTimeStartRT.Add
-                                     (new System.TimeSpan(0, (int)(mRealTime.mdicFCDataOrder[cvid] * dt_MIN), 0)).ToString(), "yyyyMMddHHmm");
+                                    TargetDataTime = mRealTime.mDateTimeStartRT.Add(new System.TimeSpan(0, (int)(mRealTime.mdicFCDataOrder[cvid] * dt_MIN), 0)).ToString("yyyyMMddHHmm");
                                     bool bAfterSleep = false;
                                     do
                                     {

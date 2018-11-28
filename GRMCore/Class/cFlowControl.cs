@@ -430,12 +430,14 @@ namespace GRMCore
             else
             {
                 double v = 0;
-                if (double.TryParse(fcDataRows[rowOrder].Field<double>("value").ToString(), out v) == false)
+                if (double.TryParse(fcDataRows[rowOrder].Field<string>("value").ToString(), out v) == false)
 
-                //if (fcDataRows[rowOrder].Field<string>("value") == "-")
-                { cv.mStreamAttr.QCVch_i_j_m3Ps = 0; }
+                    //if (fcDataRows[rowOrder].Field<string>("value") == "-")
+                    { cv.mStreamAttr.QCVch_i_j_m3Ps = 0; }
                 else
-                { cv.mStreamAttr.QCVch_i_j_m3Ps = fcDataRows[rowOrder].Field<double>("value"); }
+                {
+                    double.TryParse( fcDataRows[rowOrder].Field<string>("value"), out cv.mStreamAttr.QCVch_i_j_m3Ps);
+                }
 
                 cv.mStreamAttr.CSAch_i_j = mFVMsolver.CalChCSAFromQbyIteration(project.CVs[cvan], cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.QCVch_i_j_m3Ps);
                 // Dim csa1 As Single = .mStreamAttr.CSAch_i_j

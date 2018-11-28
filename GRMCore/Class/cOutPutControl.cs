@@ -343,7 +343,7 @@ namespace GRMCore
                     string strOutPutLine;
                     string strOutputCommonHeader;
                     strOutputCommonHeader = string.Format("Project name : {0} {1} {2} {3} by {4}{5}", project.ProjectNameWithExtension, "\t", 
-                        string.Format(DateTime.Now.ToString(), "yyyy/MM/dd HH:mm"), "\t", cGRM.BuildInfo.ProductName, "\r\n");
+                        DateTime.Now.ToString("yyyy/MM/dd HH:mm") , "\t", cGRM.BuildInfo.ProductName, "\r\n");
                     string strLTime_WPName;
                     strLTime_WPName = cGRM.CONST_OUTPUT_TABLE_TIME_FIELD_NAME;
 
