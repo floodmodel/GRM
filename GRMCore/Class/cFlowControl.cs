@@ -430,13 +430,13 @@ namespace GRMCore
             else
             {
                 double v = 0;
-                if (double.TryParse(fcDataRows[rowOrder].Field<string>("value").ToString(), out v) == false)
-
+                if (double.TryParse(fcDataRows[rowOrder].Field<Single>("value").ToString(), out v) == false)
                     //if (fcDataRows[rowOrder].Field<string>("value") == "-")
                     { cv.mStreamAttr.QCVch_i_j_m3Ps = 0; }
                 else
                 {
-                    double.TryParse( fcDataRows[rowOrder].Field<string>("value"), out cv.mStreamAttr.QCVch_i_j_m3Ps);
+                    //double.TryParse( fcDataRows[rowOrder].Field<Single>("value"), out cv.mStreamAttr.QCVch_i_j_m3Ps);
+                    cv.mStreamAttr.QCVch_i_j_m3Ps = fcDataRows[rowOrder].Field<Single>("value");
                 }
 
                 cv.mStreamAttr.CSAch_i_j = mFVMsolver.CalChCSAFromQbyIteration(project.CVs[cvan], cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.QCVch_i_j_m3Ps);
