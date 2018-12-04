@@ -401,7 +401,9 @@ namespace GRMCore
                 Dataset.GRMProject.FlowControlGridRow[] rows =
                     (Dataset.GRMProject.FlowControlGridRow[])project.fcGrid.mdtFCGridInfo.Select("CVID = " + (cvan + 1));
                 Dataset.GRMProject.FlowControlGridRow row = rows[0];
-                if (System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR) == 0)
+                double v;
+                if (double.TryParse(row.MaxStorage,out v)==false || double.TryParse(row.MaxStorageR ,out v)==false ||
+                    System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR) == 0)
                 {
                     mFC.CalFCSinkOrSourceFlow(project, nowT_min, cvan);
                 }

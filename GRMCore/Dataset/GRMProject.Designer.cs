@@ -524,8 +524,6 @@ namespace GRMCore.Dataset {
         [global::System.Xml.Serialization.XmlSchemaProviderAttribute("GetTypedTableSchema")]
         public partial class ProjectSettingsDataTable : global::System.Data.TypedTableBase<ProjectSettingsRow> {
             
-            private global::System.Data.DataColumn columnProjectFile;
-            
             private global::System.Data.DataColumn columnGRMSimulationType;
             
             private global::System.Data.DataColumn columnWatershedFile;
@@ -697,14 +695,6 @@ namespace GRMCore.Dataset {
             protected ProjectSettingsDataTable(global::System.Runtime.Serialization.SerializationInfo info, global::System.Runtime.Serialization.StreamingContext context) : 
                     base(info, context) {
                 this.InitVars();
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")]
-            public global::System.Data.DataColumn ProjectFileColumn {
-                get {
-                    return this.columnProjectFile;
-                }
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -1305,7 +1295,6 @@ namespace GRMCore.Dataset {
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")]
             public ProjectSettingsRow AddProjectSettingsRow(
-                        string ProjectFile, 
                         string GRMSimulationType, 
                         string WatershedFile, 
                         string SlopeFile, 
@@ -1378,7 +1367,6 @@ namespace GRMCore.Dataset {
                         string GRMVersion) {
                 ProjectSettingsRow rowProjectSettingsRow = ((ProjectSettingsRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
-                        ProjectFile,
                         GRMSimulationType,
                         WatershedFile,
                         SlopeFile,
@@ -1471,7 +1459,6 @@ namespace GRMCore.Dataset {
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")]
             internal void InitVars() {
-                this.columnProjectFile = base.Columns["ProjectFile"];
                 this.columnGRMSimulationType = base.Columns["GRMSimulationType"];
                 this.columnWatershedFile = base.Columns["WatershedFile"];
                 this.columnSlopeFile = base.Columns["SlopeFile"];
@@ -1547,8 +1534,6 @@ namespace GRMCore.Dataset {
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")]
             private void InitClass() {
-                this.columnProjectFile = new global::System.Data.DataColumn("ProjectFile", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnProjectFile);
                 this.columnGRMSimulationType = new global::System.Data.DataColumn("GRMSimulationType", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnGRMSimulationType);
                 this.columnWatershedFile = new global::System.Data.DataColumn("WatershedFile", typeof(string), null, global::System.Data.MappingType.Element);
@@ -1689,7 +1674,6 @@ namespace GRMCore.Dataset {
                 base.Columns.Add(this.columnComputerUserName);
                 this.columnGRMVersion = new global::System.Data.DataColumn("GRMVersion", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnGRMVersion);
-                this.columnProjectFile.AllowDBNull = false;
                 this.columnFlowDirectionType.Caption = "GridCellSize";
                 this.columnMaxDegreeOfParallelism.Caption = "IsParallel";
                 this.columnIsFixedTimeStep.Caption = "MakeASCFile";
@@ -4444,17 +4428,6 @@ namespace GRMCore.Dataset {
             internal ProjectSettingsRow(global::System.Data.DataRowBuilder rb) : 
                     base(rb) {
                 this.tableProjectSettings = ((ProjectSettingsDataTable)(this.Table));
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "15.0.0.0")]
-            public string ProjectFile {
-                get {
-                    return ((string)(this[this.tableProjectSettings.ProjectFileColumn]));
-                }
-                set {
-                    this[this.tableProjectSettings.ProjectFileColumn] = value;
-                }
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]

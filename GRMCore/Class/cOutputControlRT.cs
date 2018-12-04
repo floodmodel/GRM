@@ -83,7 +83,7 @@ namespace GRMCore
                                       + "\t" + (lngTimeDiffFromStarting_SEC / (double) 60).ToString("#0.00")  + "\r\n";
 
                 if (!System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(strFNP)))
-                    System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(strFNP));
+                { System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(strFNP)); }
                 System.IO.File.AppendAllText(strFNP, strOutPutLine, Encoding.Default);
                 Log_Performance_data(project.ProjectNameOnly, strWPName, strNowTimeToPrintOut, lngTimeDiffFromStarting_SEC / 60.0); // 성능 비교 분석용 정보 수집
 
@@ -91,7 +91,7 @@ namespace GRMCore
                 {
                     SqlConnection oSQLCon = new SqlConnection(cRealTime_DBMS.g_strDBMSCnn);
                     if (oSQLCon.State == ConnectionState.Closed)
-                        oSQLCon.Open();
+                    { oSQLCon.Open(); }
                     int intPos = row.Name.IndexOf('_');
                     string strGaugeCode = row.Name.Substring(intPos + 1);
 
@@ -129,13 +129,13 @@ namespace GRMCore
             // 성능 비교 용도. 개별 프로세스. launcher .exe 에 집중. 머신 전체는 monitor에서 측정하도록함
            SqlConnection oSQLCon = new SqlConnection(cRealTime_DBMS.g_strDBMSCnn);
             if (oSQLCon.State == ConnectionState.Closed)
-                oSQLCon.Open();
+            { oSQLCon.Open(); }
             string strSQL = string.Format("insert into run_perf ([basin],[RainfallDataCompleted],[ElapsedTime_Min],[net_process_PrivateMemorySize64],[run_meta_guid],[OutputDrive],[tag]) values('{0}','{1}',{2},{3},'{4}','{5}','{6}')", 
                 strBasin, strDataTime, dblElapTime, Process.GetCurrentProcess().PrivateMemorySize64 / (double)1024 / 1024 / 1024, cRealTime_DBMS.g_RunID, cRealTime.CONST_Output_File_Target_DISK, strTag);
             System.Data.SqlClient.SqlCommand oSQLCMD = new System.Data.SqlClient.SqlCommand(strSQL, oSQLCon);
             int intRetVal = oSQLCMD.ExecuteNonQuery();
             if (intRetVal != 1)
-                Console.WriteLine("perf logging error");
+            { Console.WriteLine("perf logging error"); }
             oSQLCon.Close();
         }
 
@@ -194,7 +194,6 @@ namespace GRMCore
                 Console.WriteLine(ex.ToString());
                 return false;
             }
-            return true;
         }
     }
 }

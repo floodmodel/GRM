@@ -221,7 +221,7 @@ namespace GRMCore
                 {
                     if (!landcover.IsSet) { return false; }
                     FPNlc = row.LandCoverFile;
-                    if (cReadGeoFileAndSetInfo.ReadLayerLandCover(row.LandCoverFile, landcover,
+                    if (cReadGeoFileAndSetInfo.ReadLandCoverFileAndSetVAT(row.LandCoverFile, landcover,
                         WSCells, watershed.colCount, watershed.rowCount,
                         sThisSimulation.IsParallel) == false)
                         return false;
@@ -234,7 +234,7 @@ namespace GRMCore
                 {
                     if (!GreenAmpt.IsSet) { return false; }
                     FPNst = row.SoilTextureFile;
-                    if (cReadGeoFileAndSetInfo.ReadLayerSoilTexture(row.SoilTextureFile, GreenAmpt,
+                    if (cReadGeoFileAndSetInfo.ReadSoilTextureFileAndSetVAT(row.SoilTextureFile, GreenAmpt,
                         WSCells, watershed.colCount, watershed.rowCount, 
                         sThisSimulation.IsParallel) == false)
                         return false;
@@ -247,7 +247,7 @@ namespace GRMCore
                 {
                     if (!soilDepth.IsSet) { return false; }
                     FPNsd = row.SlopeFile;
-                    if (cReadGeoFileAndSetInfo.ReadLayerSoilDepth(row.SoilDepthFile, soilDepth,
+                    if (cReadGeoFileAndSetInfo.ReadSoilDepthFileAndSetVAT(row.SoilDepthFile, soilDepth,
                         WSCells, watershed.colCount, watershed.rowCount, 
                         sThisSimulation.IsParallel) == false)
                         return false;
@@ -818,7 +818,7 @@ namespace GRMCore
                 mProject.PrjFile.ReadXml(prjFPN);
                 Dataset.GRMProject.ProjectSettingsDataTable dtPrjSettings = mProject.PrjFile.ProjectSettings;
                 Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)dtPrjSettings.Rows[0];
-                    mProject.ProjectNameWithExtension = Path.GetFileName(prjFPN);
+            mProject.ProjectNameWithExtension = Path.GetFileName(prjFPN);
                     mProject.ProjectPathName = prjFPN;
                     mProject.ProjectPath = Path.GetDirectoryName(prjFPN);
                     mProject.ProjectNameOnly = Path.GetFileNameWithoutExtension(prjFPN);
@@ -1050,7 +1050,7 @@ namespace GRMCore
             {
                 Dataset.GRMProject.ProjectSettingsDataTable dtSettings = TargetProject.PrjFile.ProjectSettings;
                 Dataset.GRMProject.ProjectSettingsRow settings = (Dataset.GRMProject.ProjectSettingsRow)dtSettings.Rows[0];
-                settings.ProjectFile = TargetPrjPathName;
+                //settings.ProjectFile = TargetPrjPathName;
             }
         }
 

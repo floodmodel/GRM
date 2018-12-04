@@ -20,16 +20,11 @@ namespace GRMCore
 
         public enum FlowControlType
         {
-            ReservoirOutflow // 상류모의, 저류량 고려하지 않고, 댐에서의 방류량만 고려함
-    ,
-            Inlet  // 상류 모의하지 않는것. 저류량 고려하지 않고, inlet grid에서의 outfow 만 고려함.
-    ,
-            SinkFlow // 상류모의, 입력된 sink flow data 고려함. 저수지 고려안함.
-    ,
-            SourceFlow // 상류모의, 입력된 source flow data 고려함. 저수지 고려안함.
-    ,
-            ReservoirOperation // 상류모의, 저수지 고려, 방류량은 operation rule에 의해서 결정됨. 사용자 입력 인터페이스 구현하지 않음.
-    ,
+            ReservoirOutflow, // 상류모의, 저류량 고려하지 않고, 댐에서의 방류량만 고려함
+            Inlet,  // 상류 모의하지 않는것. 저류량 고려하지 않고, inlet grid에서의 outfow 만 고려함.
+            SinkFlow, // 상류모의, 입력된 sink flow data 고려함. 저수지 고려안함.
+            SourceFlow, // 상류모의, 입력된 source flow data 고려함. 저수지 고려안함.
+            ReservoirOperation, // 상류모의, 저수지 고려, 방류량은 operation rule에 의해서 결정됨. 사용자 입력 인터페이스 구현하지 않음.
             // 저류량-방류량, 유입량-방류량 관계식을 이용해서 소스코드에 반영 가능
             NONE
         }
@@ -102,9 +97,9 @@ namespace GRMCore
             get
             {
                 if (mdtFCGridInfo == null)
-                    return false;
+                { return false; }
                 if (mdtFCGridInfo.Rows.Count > 0)
-                    return true;
+                { return true; }
                 return false;
             }
         }
@@ -123,7 +118,7 @@ namespace GRMCore
                 r.CVID = prj.WSCells[r.ColX, r.RowY].CVID;
                 mFCGridCVidList.Add(r.CVID);
                 if (r.ControlType.ToString() == FlowControlType.Inlet.ToString())
-                    mInletList.Add(r.CVID);
+                { mInletList.Add(r.CVID); }
                 mFCdataToApplyNowT.Add(r.CVID, 0);
                 if (prj.mSimulationType == cGRM.SimulationType.SingleEvent)
                 {
@@ -148,7 +143,7 @@ namespace GRMCore
                 }
             }
             if (mInletList.Count > 0)
-                mInletExisted = true;
+            { mInletExisted = true; }
         }
 
 
@@ -193,7 +188,7 @@ namespace GRMCore
             foreach (Dataset.GRMProject.FlowControlGridRow r in mdtFCGridInfo.Rows)
             {
                 if (r.CVID == cvid)
-                    return r.Name;
+                { return r.Name; }
             }
             return "";
         }
@@ -213,7 +208,7 @@ namespace GRMCore
                 cln.mFCdataToApplyNowT = new SortedList<int, double>();
                 cln.mdtFCGridInfo = (Dataset.GRMProject.FlowControlGridDataTable)mdtFCGridInfo.Clone();
                 if (mdtFCFlowData != null)
-                    cln.mdtFCFlowData = (DataTable)mdtFCFlowData.Clone();
+                { cln.mdtFCFlowData = (DataTable)mdtFCFlowData.Clone(); }
                 if (this.mFCdataToApplyNowT != null)
                 {
                     foreach (int k in this.mFCdataToApplyNowT.Keys)
@@ -335,7 +330,7 @@ namespace GRMCore
                 cv.StorageCumulative_m3 = 0;
             }
             else
-                sngQout_cms = RoQ_CONST_CMS;
+            { sngQout_cms = RoQ_CONST_CMS; }
             CalReservoirOutFlowInReservoirOperation(cv, sngQout_cms, dy_m);
         }
 
@@ -352,9 +347,9 @@ namespace GRMCore
                     // 즉 dt 시간에서 저류된 모든 양이 유출되는 유량으로 현재 저수지에서의 유출량을 계산해야 한다.
                     double sngStorage_tM1 = (RoQ_CONST_CMS * sThisSimulation.dtsec) + cv.StorageCumulative_m3;
                     if (sngStorage_tM1 < 0)
-                        sngQout_cms = 0;
+                    { sngQout_cms = 0; }
                     else
-                        sngQout_cms = sngStorage_tM1 / (double)sThisSimulation.dtsec;
+                    { sngQout_cms = sngStorage_tM1 / (double)sThisSimulation.dtsec; }
                     cv.StorageCumulative_m3 = 0;
                 }
                 else
@@ -362,9 +357,9 @@ namespace GRMCore
                     sngQout_cms = RoQ_CONST_CMS;
                     cv.StorageCumulative_m3 = cv.StorageCumulative_m3 - RoQ_CONST_CMS;
                     if (cv.StorageCumulative_m3 >= maxStorageApp)
-                        // Constant dischrage에서는 계속 누가 시킨다. 
-                        // 누가저류량이 최대저류량 보다 같거나 크면, 더이상 누가되지 않고, 최대저류량을 유지한다.
-                        cv.StorageCumulative_m3 = maxStorageApp;
+                    // Constant dischrage에서는 계속 누가 시킨다. 
+                    // 누가저류량이 최대저류량 보다 같거나 크면, 더이상 누가되지 않고, 최대저류량을 유지한다.
+                    { cv.StorageCumulative_m3 = maxStorageApp; }
                 }
             }
             else
@@ -426,17 +421,17 @@ namespace GRMCore
             if (rowOrder >= fcDataRows.Length) { rowOrder = fcDataRows.Length - 1; }
             cCVAttribute cv = project.CVs[cvan];
             if (cv.FlowType == cGRM.CellFlowType.OverlandFlow)
-                System.Console.WriteLine("ERROR: Reservoir outflow is simulated only in channel flow!!!    ");
+            { System.Console.WriteLine("ERROR: Reservoir outflow is simulated only in channel flow!!!"); }
             else
             {
                 double v = 0;
-                if (double.TryParse(fcDataRows[rowOrder].Field<string>("value").ToString(), out v) == false)
+                if (double.TryParse(fcDataRows[rowOrder].Field<double>("value").ToString(), out v) == false)
 
-                    //if (fcDataRows[rowOrder].Field<string>("value") == "-")
-                    { cv.mStreamAttr.QCVch_i_j_m3Ps = 0; }
+                //if (fcDataRows[rowOrder].Field<string>("value") == "-")
+                { cv.mStreamAttr.QCVch_i_j_m3Ps = 0; }
                 else
                 {
-                    double.TryParse( fcDataRows[rowOrder].Field<string>("value"), out cv.mStreamAttr.QCVch_i_j_m3Ps);
+                    double.TryParse(fcDataRows[rowOrder].Field<double>("value").ToString(), out cv.mStreamAttr.QCVch_i_j_m3Ps);
                 }
 
                 cv.mStreamAttr.CSAch_i_j = mFVMsolver.CalChCSAFromQbyIteration(project.CVs[cvan], cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.QCVch_i_j_m3Ps);
@@ -457,7 +452,7 @@ namespace GRMCore
             Dataset.GRMProject.FlowControlGridRow fcRow = (Dataset.GRMProject.FlowControlGridRow)Rows[0];
             int rowOrder = System.Convert.ToInt32((nowT_MIN - 1) / System.Convert.ToInt32(fcRow.DT));
             DataView dv;
-            dv = new DataView(project.fcGrid.mdtFCFlowData, string.Format("cvid={0}", fcCVid), " datetime asc", DataViewRowState.CurrentRows);
+            dv = new DataView(project.fcGrid.mdtFCFlowData, string.Format("cvid={0}", fcCVid), " datatime asc", DataViewRowState.CurrentRows);
             DataTable dt = dv.Table;
             DataTable fcdt = (DataTable)dt;
             if (rowOrder < fcdt.Rows.Count)
@@ -481,7 +476,7 @@ namespace GRMCore
                             }
                     }
                     if (cv.QCVof_i_j_m3Ps < 0)
-                        cv.QCVof_i_j_m3Ps = 0;
+                    { cv.QCVof_i_j_m3Ps = 0; }
                     cv.hCVof_i_j = Math.Pow(cv.RoughnessCoeffOF * cv.QCVof_i_j_m3Ps / cellsize / Math.Pow(cv.SlopeOF, 0.5), 0.6);
                     cv.CSAof_i_j = cv.hCVof_i_j * cellsize;
                     cv.mStreamAttr.uCVch_i_j = cv.QCVof_i_j_m3Ps / (double)cv.CSAof_i_j;
@@ -503,7 +498,7 @@ namespace GRMCore
                             }
                     }
                     if (cv.mStreamAttr.QCVch_i_j_m3Ps < 0)
-                        cv.mStreamAttr.QCVch_i_j_m3Ps = 0;
+                    { cv.mStreamAttr.QCVch_i_j_m3Ps = 0; }
                     cv.mStreamAttr.CSAch_i_j = mFVMsolver.CalChCSAFromQbyIteration(cv, cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.QCVch_i_j_m3Ps);
                     cv.mStreamAttr.hCVch_i_j = mFVMsolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, 
                         cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.chIsCompoundCS, cv.mStreamAttr.chUpperRBaseWidth_m, 

@@ -440,10 +440,13 @@ namespace GRMCore
                                 strSourceDT = strSourceDT + "\t" + "NONE";
                                 if (!row.IsMaxStorageNull() && !row.IsMaxStorageRNull())
                                 {
-                                    if (System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR) > 0)
-                                        strResOperation = strResOperation + "\t" + "TRUE";
-                                    else
-                                        strResOperation = strResOperation + "\t" + "FALSE";
+                                    double v;
+                                    if (double.TryParse(row.MaxStorage, out v) == false || double.TryParse(row.MaxStorageR, out v) == false ||
+                   System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR) <= 0)
+
+                                        { strResOperation = strResOperation + "\t" + "FALSE";  }
+                                        else
+                                        { strResOperation = strResOperation + "\t" + "TRUE"; }
                                 }
                             }
                             if (!row.IsIniStorageNull() && row.IniStorage != "")
