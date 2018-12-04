@@ -60,7 +60,9 @@ namespace GRMCore
                 {
                     mdtLandCoverInfo.AcceptChanges();
                     foreach (DataRow r in mdtLandCoverInfo.Rows)
+                    {
                         r.SetAdded();
+                    }
                 }
             }
         }
@@ -122,7 +124,9 @@ namespace GRMCore
                 return rows[0]["GRMLandCoverE"].ToString();
             }
             else
+            {
                 return "[CONST]";
+            }
         }
 
         public static LandCoverCode GetLandCoverCode(string inName)

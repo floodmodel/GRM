@@ -84,7 +84,7 @@ namespace GRMCore
                     }
                 }
                 else
-                    vToPrint = "0";
+                { vToPrint = "0"; }
                  
                 // lineToPrint = lineToPrint + vbTab + vToPrint.Trim
                 sbQ.Append("\t" + vToPrint.Trim());
@@ -137,7 +137,7 @@ namespace GRMCore
             }
             // ===================================================================
             if (nowT_MIN == System.Convert.ToInt32(project.generalSimulEnv.mSimDurationHOUR * 60))
-                project.generalSimulEnv.mEndingTimeToPrint = strNowTimeToPrintOut;
+            { project.generalSimulEnv.mEndingTimeToPrint = strNowTimeToPrintOut; }
         }
 
 
@@ -218,12 +218,14 @@ namespace GRMCore
                     }
                 }
                 else
-                { vToPrint = "0"; }
+                {
+                    vToPrint = "0";
+                }
                 project.watchPoint.Qprint_cms[wpcvid] = System.Convert.ToDouble(vToPrint);
                 if (sbQ.ToString().Trim() == "")
-                    sbQ.Append(vToPrint.Trim());
+                { sbQ.Append(vToPrint.Trim()); }
                 else
-                    sbQ.Append("\t" + vToPrint.Trim());
+                { sbQ.Append("\t" + vToPrint.Trim()); }
             }
             sbQ.Append("\r\n");
             System.IO.File.AppendAllText(strFNPDischarge, sbQ.ToString(), Encoding.Default);
@@ -238,16 +240,20 @@ namespace GRMCore
                 if (interCoef == 1)
                 {
                     if (project.CVs[cvanWP].FlowType == cGRM.CellFlowType.OverlandFlow)
-                        strL = project.CVs[cvanWP].QCVof_i_j_m3Ps.ToString("F2") + "\r\n";
+                    { strL = project.CVs[cvanWP].QCVof_i_j_m3Ps.ToString("F2") + "\r\n"; }
                     else
-                        strL = project.CVs[cvanWP].mStreamAttr.QCVch_i_j_m3Ps.ToString("F2") + "\r\n";
+                    { strL = project.CVs[cvanWP].mStreamAttr.QCVch_i_j_m3Ps.ToString("F2") + "\r\n"; }
                 }
                 else if (project_tm1.CVs [cvanWP] != null)
                 {
                     if (project.CVs[cvanWP].FlowType == cGRM.CellFlowType.OverlandFlow)
+                    {
                         strL = cHydroCom.GetInterpolatedValueLinear(project_tm1.CV(cvanWP).QCVof_i_j_m3Ps, project.CVs[cvanWP].QCVof_i_j_m3Ps, interCoef).ToString("F2") + "\r\n";
+                    }
                     else
+                    {
                         strL = cHydroCom.GetInterpolatedValueLinear(project_tm1.CV(cvanWP).mStreamAttr.QCVch_i_j_m3Ps, project.CVs[cvanWP].mStreamAttr.QCVch_i_j_m3Ps, interCoef).ToString("F2") + "\r\n";
+                    }
                 }
                 project.watchPoint.Qprint_cms[wpcvid] = System.Convert.ToDouble(strL);
                 string wpName = project.watchPoint.wpName(wpcvid);
@@ -311,16 +317,23 @@ namespace GRMCore
                     {
                         List<string> Dpath = new List<string>();
                         if (project.generalSimulEnv.mbShowSoilSaturation == true)
+                        {
                             Dpath.Add(project.OFPSSRDistribution);
-
+                        }
                         if (project.generalSimulEnv.mbShowRFdistribution == true)
+                        {
                             Dpath.Add(project.OFPRFDistribution);
+                        }
 
                         if (project.generalSimulEnv.mbShowRFaccDistribution == true)
+                        {
                             Dpath.Add(project.OFPRFAccDistribution);
+                        }
 
                         if (project.generalSimulEnv.mbShowFlowDistribution == true)
+                        {
                             Dpath.Add(project.OFPFlowDistribution);
+                        }
 
                         if (Dpath.Count > 0)
                         {
@@ -337,7 +350,9 @@ namespace GRMCore
                         }
                     }
                     if (beenRun == true)
+                    {
                         Console.WriteLine("completed. ");
+                    }
 
                     // 해더
                     string strOutPutLine;
@@ -370,7 +385,9 @@ namespace GRMCore
                     // ----------------------------------------------------
                     // 이건 유량
                     if (!System.IO.Directory.Exists(System.IO.Path.GetDirectoryName(strFNPDischarge)))
+                    {
                         System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(strFNPDischarge));
+                    }
                     System.IO.File.AppendAllText(strFNPDischarge, strOutputCommonHeader, Encoding.Default);
                     strOutPutLine = "Output data : " + "Discharge[CMS]" + "\r\n" + "\r\n";
                     System.IO.File.AppendAllText(strFNPDischarge, strOutPutLine, Encoding.Default);
@@ -450,19 +467,34 @@ namespace GRMCore
                                 }
                             }
                             if (!row.IsIniStorageNull() && row.IniStorage != "")
+                            {
                                 strROiniStorage = strROiniStorage + "\t" + row.IniStorage;
+                            }
                             if (!row.IsMaxStorageNull() && row.MaxStorage != "")
+                            {
                                 strROmaxStorage = strROmaxStorage + "\t" + row.MaxStorage;
+                            }
                             if (!row.IsMaxStorageRNull() && row.MaxStorageR != "")
+                            {
                                 strROmaxStorageRatio = strROmaxStorageRatio + "\t" + row.MaxStorageR;
+                            }
                             if (!row.IsMaxStorageRNull() && row.MaxStorageR != "")
-                                strROmaxStorageApp = strROmaxStorageApp + "\t" + System.Convert.ToString(System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR));
+                            {
+                                strROmaxStorageApp = strROmaxStorageApp + "\t" +
+                                    System.Convert.ToString(System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR));
+                            }
                             if (!row.IsROTypeNull() && row.ROType != "")
+                            {
                                 strROType = strROType + "\t" + row.ROType;
+                            }
                             if (!row.IsROConstQNull() && row.ROConstQ != "")
+                            {
                                 strROConstQ = strROConstQ + "\t" + row.ROConstQ;
+                            }
                             if (!row.IsROConstQDurationNull() && row.ROConstQDuration != "")
+                            {
                                 strROConstQduration = strROConstQduration + "\t" + row.ROConstQDuration;
+                            }
                         }
 
                         // FCApp - flow control data
@@ -496,7 +528,6 @@ namespace GRMCore
                 Console.WriteLine(ex.ToString());
                 return false;
             }
-
             return true;
         }
     }

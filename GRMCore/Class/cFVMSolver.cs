@@ -188,7 +188,7 @@ namespace GRMCore
                 CSAw_nP1 = CSAw_n - Fx / dFx;
                 double err = Math.Abs(CSAw_nP1 - CSAw_n) / CSAw_n;
                 if (err < cGRM.CONST_TOLERANCE)
-                    return CSAw_nP1;
+                { return CSAw_nP1; }
                 CSAw_n = CSAw_nP1;
             }
             return CSAw_nP1;
@@ -207,9 +207,9 @@ namespace GRMCore
             double bwUpperRegion = cv.mStreamAttr.chUpperRBaseWidth_m;
             double CSA_n;
             if (CSAini > 0)
-                CSA_n = CSAini;
+            { CSA_n = CSAini; }
             else
-                CSA_n = Q_m3Ps / cv.CVDeltaX_m;
+            { CSA_n = Q_m3Ps / cv.CVDeltaX_m; }
             double Fx;
             double dFx;
             double ChCrossSecPer;
@@ -225,7 +225,7 @@ namespace GRMCore
                 double toler = CSA_n * cGRM.CONST_TOLERANCE;
                 double err = Math.Abs(CSA_nP1 - CSA_n);
                 if (err < toler)
-                    return CSA_nP1;
+                { return CSA_nP1; }
                 CSA_n = CSA_nP1;
             }
             return CSA_nP1;
@@ -257,7 +257,7 @@ namespace GRMCore
                     + project.CVs[cvid - 1].QCVof_i_j_m3Ps * sThisSimulation.dtsec;
             }
             if (effCellCountFlowToCViW < 1)
-                effCellCountFlowToCViW = 1;
+            { effCellCountFlowToCViW = 1; }
             project.CVs[cvan].effCVCountFlowINTOCViW = effCellCountFlowToCViW;
             qWn_i = Math.Pow(project.CVs[cvan].RoughnessCoeffOF * qSumToCViM1 / Math.Sqrt(project.CVs[cvan].SlopeOF), 0.6);
             return qWn_i;
@@ -291,7 +291,7 @@ namespace GRMCore
                 {
                     double highFlowDepth = crossSectionDepth - lowerRegionHeight;
                     if (highFlowDepth < 0)
-                        highFlowDepth = 0;
+                    { highFlowDepth = 0; }
                     double sngHighFlowArea = (upperRegionBaseWidth + chBankConst * highFlowDepth / (double)2) * highFlowDepth;
                     return (lowerRegionArea + sngHighFlowArea);
                 }

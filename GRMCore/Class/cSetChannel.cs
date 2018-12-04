@@ -27,9 +27,13 @@ namespace GRMCore
                 if (double.TryParse(row.BankSideSlopeLeft, out v) == true) { mLeftBankSlope = v; }
                 if (double.TryParse(row.BankSideSlopeRight, out v) == true) { mRightBankSlope = v; }
                 if (row.CrossSectionType.ToString() == cSetCrossSection.CSTypeEnum.CSCompound.ToString())
+                {
                     mCrossSection = new cSetCSCompound();
+                }
                 else
+                {
                     mCrossSection = new cSetCSSingle();
+                }
                 mCrossSection.GetValues(prjDB);
             }
         }

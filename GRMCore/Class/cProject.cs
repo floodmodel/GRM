@@ -60,7 +60,9 @@ namespace GRMCore
                     if (mProject.subWSPar.userPars[id].isUserSet == true && mProject.subWSPar.userPars[id].iniFlow > 0)
                     {
                         if (max < mProject.subWSPar.userPars[id].iniFlow)
-                        { max = mProject.subWSPar.userPars[id].iniFlow; }
+                        {
+                            max = mProject.subWSPar.userPars[id].iniFlow;
+                        }
                     }
                 }
                 return max;
@@ -140,7 +142,7 @@ namespace GRMCore
         protected virtual void Dispose(bool disposing)
         {
             if (disposed)
-                return;
+            { return; }
 
             if (disposing)
             {
@@ -172,9 +174,9 @@ namespace GRMCore
             try
             {
                 if (!watershed.IsSet || !landcover.IsSet || !GreenAmpt.IsSet || !soilDepth.IsSet)
-                    throw new InvalidOperationException();
+                { throw new InvalidOperationException(); }
                 if (mProject.mSimulationType == cGRM.SimulationType.SingleEvent & !rainfall.IsSet)
-                    throw new InvalidOperationException();
+                { throw new InvalidOperationException(); }
                 Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)PrjFile.ProjectSettings.Rows[0];
                 cReadGeoFileAndSetInfo.ReadLayerWSandSetBasicInfo(row.WatershedFile, watershed, ref WSCells, ref CVs, ref dmInfo, ref WSNetwork, ref subWSPar);
                 cReadGeoFileAndSetInfo.ReadLayerSlope(row.SlopeFile, WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel);
@@ -190,31 +192,41 @@ namespace GRMCore
                 if (row.IsStreamFileNull() == false && File.Exists(row.StreamFile) == true)
                 {
                     FPNstream = row.StreamFile;
-                    if (cReadGeoFileAndSetInfo.ReadLayerStream(row.StreamFile, 
+                    if (cReadGeoFileAndSetInfo.ReadLayerStream(row.StreamFile,
                         WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel) == false)
+                    {
                         cGRM.writelogAndConsole(string.Format("Some errors were occurred while reading stream file.. {0}", row.StreamFile.ToString()), true, true);
+                    }
                 }
                 if (row.IsChannelWidthFileNull() == false && File.Exists(row.ChannelWidthFile) == true)
                 {
                     FPNchannelWidth = row.ChannelWidthFile;
-                    if (cReadGeoFileAndSetInfo.ReadLayerChannelWidth(row.ChannelWidthFile, 
+                    if (cReadGeoFileAndSetInfo.ReadLayerChannelWidth(row.ChannelWidthFile,
                         WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel) == false)
+                    {
                         Console.WriteLine(string.Format("Some errors were occurred while reading channel width file.. {0}", row.ChannelWidthFile.ToString()), true, true);
+                    }
                 }
                 if (row.IsInitialSoilSaturationRatioFileNull() == false && File.Exists(row.InitialSoilSaturationRatioFile) == true)
                 {
                     FPNiniSSR = row.InitialSoilSaturationRatioFile;
-                    if (cReadGeoFileAndSetInfo.ReadLayerInitialSoilSaturation(row.InitialSoilSaturationRatioFile, 
+                    if (cReadGeoFileAndSetInfo.ReadLayerInitialSoilSaturation(row.InitialSoilSaturationRatioFile,
                         WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel) == false)
-                        cGRM.writelogAndConsole(string.Format("Some errors were occurred while reading initial soil saturation file.. {0}", row.InitialSoilSaturationRatioFile.ToString()), true, true);
+                    {
+                        cGRM.writelogAndConsole(string.Format("Some errors were occurred while reading initial soil saturation file.. {0}",
+                            row.InitialSoilSaturationRatioFile.ToString()), true, true);
+                    }
                 }
                 if (row.IsInitialChannelFlowFileNull() == false && File.Exists(row.InitialChannelFlowFile) == true)
                 {
                     FPNiniChannelFlow = row.InitialChannelFlowFile;
                     if (cReadGeoFileAndSetInfo.ReadLayerInitialChannelFlow(row.InitialChannelFlowFile,
-                        WSCells, watershed.colCount, watershed.rowCount, 
+                        WSCells, watershed.colCount, watershed.rowCount,
                         sThisSimulation.IsParallel) == false)
-                        cGRM.writelogAndConsole(string.Format("Some errors were occurred while reading initial channel flow file.. {0}", row.InitialChannelFlowFile.ToString()), true, true);
+                    {
+                        cGRM.writelogAndConsole(string.Format("Some errors were occurred while reading initial channel flow file.. {0}",
+                            row.InitialChannelFlowFile.ToString()), true, true);
+                    }
                 }
 
                 if (landcover.mLandCoverDataType.Equals(cGRM.FileOrConst.File) && row.IsLandCoverFileNull() == false && File.Exists(row.LandCoverFile))
@@ -224,37 +236,52 @@ namespace GRMCore
                     if (cReadGeoFileAndSetInfo.ReadLandCoverFileAndSetVAT(row.LandCoverFile, landcover,
                         WSCells, watershed.colCount, watershed.rowCount,
                         sThisSimulation.IsParallel) == false)
+                    {
                         return false;
+                    }
                 }
                 else if (cReadGeoFileAndSetInfo.SetLandCoverAttUsingConstant(landcover,
                     WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel) == false)
-                { return false; }
+                {
+                    return false;
+                }
 
                 if (GreenAmpt.mSoilTextureDataType.Equals(cGRM.FileOrConst.File) && row.IsSoilTextureFileNull() == false && File.Exists(row.SoilTextureFile))
                 {
                     if (!GreenAmpt.IsSet) { return false; }
                     FPNst = row.SoilTextureFile;
                     if (cReadGeoFileAndSetInfo.ReadSoilTextureFileAndSetVAT(row.SoilTextureFile, GreenAmpt,
-                        WSCells, watershed.colCount, watershed.rowCount, 
+                        WSCells, watershed.colCount, watershed.rowCount,
                         sThisSimulation.IsParallel) == false)
+                    {
                         return false;
+                    }
                 }
                 else if (cReadGeoFileAndSetInfo.SetSoilTextureAttUsingConstant(GreenAmpt,
                         WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel) == false)
+                {
                     return false;
+                }
 
                 if (soilDepth.mSoilDepthDataType.Equals(cGRM.FileOrConst.File) && row.IsSoilDepthFileNull() == false && File.Exists(row.SoilDepthFile))
                 {
-                    if (!soilDepth.IsSet) { return false; }
+                    if (!soilDepth.IsSet)
+                    {
+                        return false;
+                    }
                     FPNsd = row.SlopeFile;
                     if (cReadGeoFileAndSetInfo.ReadSoilDepthFileAndSetVAT(row.SoilDepthFile, soilDepth,
-                        WSCells, watershed.colCount, watershed.rowCount, 
+                        WSCells, watershed.colCount, watershed.rowCount,
                         sThisSimulation.IsParallel) == false)
+                    {
                         return false;
+                    }
                 }
                 else if (cReadGeoFileAndSetInfo.SetSoilDepthAttUsingConstant(soilDepth,
                         WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel) == false)
+                {
                     return false;
+                }
                 SetGridNetworkFlowInformation();
                 InitControlVolumeAttribute();
                 return true;
@@ -283,13 +310,16 @@ namespace GRMCore
                 acv.DownStreamWPCVids = new List<int>();
                 double deltaXw;
                 if (acv.NeighborCVidFlowIntoMe.Count > 0)
+                {
                     deltaXw = acv.deltaXwSum / (double)acv.NeighborCVidFlowIntoMe.Count;
+                }
                 else
+                {
                     deltaXw = acv.DeltaXDownHalf_m;
+                }
                 acv.CVDeltaX_m = acv.DeltaXDownHalf_m * 2;
                 // FA별 cvid 저장
                 mCVANsForEachFA.Add(acv.FAc, cvan);
-
                 if (acv.FAc > watershed.mFacMax)
                 {
                     watershed.mFacMax = acv.FAc;
@@ -297,13 +327,17 @@ namespace GRMCore
                 }
 
                 if (acv.FAc < watershed.mFacMin)
+                {
                     watershed.mFacMin = acv.FAc;
+                }
 
                 // 하도 매개변수 받고
                 if (acv.FlowType == cGRM.CellFlowType.ChannelFlow)
                 {
                     if (acv.FAc < watershed.mFacMostUpChannelCell)
+                    {
                         watershed.mFacMostUpChannelCell = acv.FAc;
+                    }
                 }
             }
         }
@@ -322,11 +356,12 @@ namespace GRMCore
             {
                 for (int col = 0; col < watershed.colCount; col++)
                 {
-                    if (WSCells[col, row] == null)
-                        continue;
+                    if (WSCells[col, row] == null) { continue; }
                     cCVAttribute cell = WSCells[col, row];
                     if (cell.NeighborCVidFlowIntoMe == null)
+                    {
                         cell.NeighborCVidFlowIntoMe = new List<int>();
+                    }
                     cCVAttribute targetCell = new cCVAttribute() ;
                     double deltaXe;
                     int targetC;
@@ -417,7 +452,9 @@ namespace GRMCore
                         {
                             targetCell = WSCells[targetC, targetR];
                             if (targetCell == null)
+                            {
                                 WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
+                            }
                             else
                             {
                                 if (targetCell.NeighborCVidFlowIntoMe == null)
@@ -434,7 +471,9 @@ namespace GRMCore
                                     }
                                     // If cell.XCol = 97 AndAlso cell.YRow = 17 Then 
                                     if (!WSNetwork.WSIDsNearbyUp(targetCell.WSID).Contains(cell.WSID))
+                                    {
                                         WSNetwork.AddWSIDup(targetCell.WSID, cell.WSID);
+                                    }
                                 }
                             }
                             cell.DeltaXDownHalf_m = deltaXe;
@@ -507,20 +546,25 @@ namespace GRMCore
             {
                 for (int intC = 0; intC < watershed.colCount ; intC++)
                 {
-                    if (WSCells[intC, intR] == null)
-                        continue;
+                    if (WSCells[intC, intR] == null) { continue; }
                     cCVAttribute cell = WSCells[intC, intR];
                     int wsid = cell.WSID;
                     cUserParameters ups = subWSPar.userPars[wsid];
                     cell.DownStreamWPCVids.Clear();
                     cell.toBeSimulated = 1;
                     if (cell.FlowType == cGRM.CellFlowType.ChannelNOverlandFlow)
+                    {
                         cell.FlowType = cGRM.CellFlowType.ChannelFlow;
+                    }
                     // 지표면 경사
                     if (cell.Slope < ups.minSlopeOF)
+                    {
                         cell.SlopeOF = ups.minSlopeOF;
+                    }
                     else
+                    {
                         cell.SlopeOF = cell.Slope;
+                    }
                     cell.RoughnessCoeffOF = cell.RoughnessCoeffOFori * ups.ccLCRoughness;
 
                     // 하천
@@ -531,21 +575,31 @@ namespace GRMCore
                         cell.mStreamAttr.chSideSlopeRight =channel.mRightBankSlope;
                         cell.mStreamAttr.mChBankCoeff = 1 /channel.mLeftBankSlope + 1 / channel.mRightBankSlope;
                         if (cell.Slope < ups.minSlopeChBed)
+                        {
                             cell.mStreamAttr.chBedSlope = ups.minSlopeChBed;
+                        }
                         else
+                        {
                             cell.mStreamAttr.chBedSlope = cell.Slope;
+                        }
 
                         if (channel.mCrossSectionType == cSetCrossSection.CSTypeEnum.CSSingle)
                         {
                             cSetCSSingle cs = new cSetCSSingle();
                             cs = (cSetCSSingle)channel.mCrossSection;
                             if (cs.mCSSingleWidthType == cSetCSSingle.CSSingleChannelWidthType.CWEquation)
+                            {
                                 cell.mStreamAttr.ChBaseWidth = cs.mCWEc * Math.Pow((cell.FAc + 1) * (watershed.mCellSize * watershed.mCellSize / 1000000.0), cs.mCWEd)
-/ Math.Pow(cell.mStreamAttr.chBedSlope, cs.mCWEe);
+  / Math.Pow(cell.mStreamAttr.chBedSlope, cs.mCWEe);
+                            }
                             else
+                            {
                                 cell.mStreamAttr.ChBaseWidth = cell.FAc * cs.mMaxChannelWidthSingleCS / (double)FacMax;
+                            }
                             if (!string.IsNullOrEmpty(watershed.mFPN_channelWidth) && cell.mStreamAttr.ChBaseWidthByLayer > 0)
+                            {
                                 cell.mStreamAttr.ChBaseWidth = cell.mStreamAttr.ChBaseWidthByLayer;
+                            }
                             cell.mStreamAttr.chUpperRBaseWidth_m = 0;
                             cell.mStreamAttr.chIsCompoundCS = false;
                             cell.mStreamAttr.chLowerRArea_m2 = 0;
@@ -573,19 +627,27 @@ namespace GRMCore
                         }
                         // 최소 하폭
                         if (cell.mStreamAttr.ChBaseWidth < ups.minChBaseWidth)
+                        {
                             cell.mStreamAttr.ChBaseWidth = ups.minChBaseWidth;
+                        }
                         if (cell.mStreamAttr.ChBaseWidth < watershed.mCellSize)
+                        {
                             cell.FlowType = cGRM.CellFlowType.ChannelNOverlandFlow;
+                        }
                     }
 
                     // 토양
                     if (watershed.mFPN_initialSoilSaturationRatio == "" || File.Exists(watershed.mFPN_initialSoilSaturationRatio) == false)
+                    {
                         cell.InitialSaturation = ups.iniSaturation;
+                    }
                     else
                     {
                     }
                     if (cell.FlowType == cGRM.CellFlowType.ChannelFlow || cell.LandCoverCode == cSetLandcover.LandCoverCode.WATR || cell.LandCoverCode == cSetLandcover.LandCoverCode.WTLD)
+                    {
                         cell.soilSaturationRatio = 1;
+                    }
                     else { cell.soilSaturationRatio = cell.InitialSaturation; }
 
                     cell.UKType = cGRM.UnSaturatedKType.Linear;
@@ -598,15 +660,11 @@ namespace GRMCore
 
                     cell.coefUK = ups.coefUK;
                     cell.porosityEta = cell.PorosityEtaOri * ups.ccPorosity;
-                    if (cell.porosityEta >= 1)
-                        cell.porosityEta = 0.99;
-                    if (cell.porosityEta <= 0)
-                        cell.porosityEta = 0.01;
+                    if (cell.porosityEta >= 1) { cell.porosityEta = 0.99; }
+                    if (cell.porosityEta <= 0) { cell.porosityEta = 0.01; }
                     cell.effectivePorosityThetaE = cell.EffectivePorosityThetaEori * ups.ccPorosity;   // 유효 공극율의 보정은 공극률 보정계수를 함께 사용한다.
-                    if (cell.effectivePorosityThetaE >= 1)
-                        cell.effectivePorosityThetaE = 0.99;
-                    if (cell.effectivePorosityThetaE <= 0)
-                        cell.effectivePorosityThetaE = 0.01;
+                    if (cell.effectivePorosityThetaE >= 1) { cell.effectivePorosityThetaE = 0.99; }
+                    if (cell.effectivePorosityThetaE <= 0) { cell.effectivePorosityThetaE = 0.01; }
                     cell.wettingFrontSuctionHeadPsi_m = cell.WettingFrontSuctionHeadPsiOri_m * ups.ccWFSuctionHead;
                     cell.hydraulicConductK_mPsec = cell.HydraulicConductKori_mPsec * ups.ccHydraulicK;
                     cell.soilDepth_m = cell.SoilDepthOri_m * ups.ccSoilDepth;
@@ -616,7 +674,9 @@ namespace GRMCore
 
                     cell.SoilDepthToBedrock_m = cGRM.CONST_DEPTH_TO_BEDROCK; // 암반까지의 깊이를 20m로 가정, 산악지역에서는 5m
                     if (cell.LandCoverCode == cSetLandcover.LandCoverCode.FRST)
+                    {
                         cell.SoilDepthToBedrock_m = cGRM.CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN;
+                    }
                 }
             }
 
@@ -754,10 +814,8 @@ namespace GRMCore
         {
             get
             {
-                if (WSCells == null)
-                    return -1;
-                else
-                    return CVs.Length;
+                if (WSCells == null) { return -1; }
+                else { return CVs.Length; }
             }
         }
 
@@ -765,10 +823,8 @@ namespace GRMCore
         {
             get
             {
-                if (watershed == null)
-                    return -1;
-                else
-                    return watershed.mFacMax;
+                if (watershed == null) { return -1; }
+                else { return watershed.mFacMax; }
             }
         }
 
@@ -777,10 +833,8 @@ namespace GRMCore
         {
             get
             {
-                if (watershed == null)
-                    return -1;
-                else
-                    return watershed.mFacMin;
+                if (watershed == null) { return -1; }
+                else { return watershed.mFacMin; }
             }
         }
 
@@ -807,8 +861,8 @@ namespace GRMCore
         ///   <remarks></remarks>
         public static bool OpenProject(string prjFPN, bool forceRealTime)
         {
-            //try
-            //{
+            try
+            {
                 if (string.IsNullOrEmpty(prjFPN) || !File.Exists(prjFPN))
                 {
                     throw new FileNotFoundException();
@@ -818,32 +872,40 @@ namespace GRMCore
                 mProject.PrjFile.ReadXml(prjFPN);
                 Dataset.GRMProject.ProjectSettingsDataTable dtPrjSettings = mProject.PrjFile.ProjectSettings;
                 Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)dtPrjSettings.Rows[0];
-            mProject.ProjectNameWithExtension = Path.GetFileName(prjFPN);
-                    mProject.ProjectPathName = prjFPN;
-                    mProject.ProjectPath = Path.GetDirectoryName(prjFPN);
-                    mProject.ProjectNameOnly = Path.GetFileNameWithoutExtension(prjFPN);
-                    if (!row.IsGRMSimulationTypeNull())
+                mProject.ProjectNameWithExtension = Path.GetFileName(prjFPN);
+                mProject.ProjectPathName = prjFPN;
+                mProject.ProjectPath = Path.GetDirectoryName(prjFPN);
+                mProject.ProjectNameOnly = Path.GetFileNameWithoutExtension(prjFPN);
+                if (!row.IsGRMSimulationTypeNull())
+                {
+                    if (row.GRMSimulationType == cGRM.SimulationType.SingleEvent.ToString())
                     {
-                        if (row.GRMSimulationType == cGRM.SimulationType.SingleEvent.ToString())
-                            mProject.mSimulationType = cGRM.SimulationType.SingleEvent;
-                        else if (row.GRMSimulationType == cGRM.SimulationType.RealTime.ToString())
-                            mProject.mSimulationType = cGRM.SimulationType.RealTime;
+                        mProject.mSimulationType = cGRM.SimulationType.SingleEvent;
                     }
-                    if (forceRealTime == true)
+                    else if (row.GRMSimulationType == cGRM.SimulationType.RealTime.ToString())
+                    {
                         mProject.mSimulationType = cGRM.SimulationType.RealTime;
-                    mProject.OFNPDischarge = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_DISCHARGE);
-                    mProject.OFNPDepth = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_DEPTH);
-                    mProject.OFNPRFGrid = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_RFGRID);
-                    mProject.OFNPRFMean = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_RFMEAN);
-                    mProject.OFNPFCData = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_FCAPP);
-                    mProject.OFNPFCStorage = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_FCSTORAGE);
-                    mProject.OFNPSwsPars = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_SWSPARSTEXTFILE);
-                    mProject.OFPSSRDistribution = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + "_" + cGRM.CONST_DIST_SSR_DIRECTORY_TAG);
-                    mProject.OFPRFDistribution = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + "_" + cGRM.CONST_DIST_RF_DIRECTORY_TAG);
-                    mProject.OFPRFAccDistribution = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + "_" + cGRM.CONST_DIST_RFACC_DIRECTORY_TAG);
-                    mProject.OFPFlowDistribution = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + "_" + cGRM.CONST_DIST_FLOW_DIRECTORY_TAG);
+                    }
+                }
+                if (forceRealTime == true)
+                {
+                    mProject.mSimulationType = cGRM.SimulationType.RealTime;
+                }
+                mProject.OFNPDischarge = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_DISCHARGE);
+                mProject.OFNPDepth = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_DEPTH);
+                mProject.OFNPRFGrid = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_RFGRID);
+                mProject.OFNPRFMean = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_RFMEAN);
+                mProject.OFNPFCData = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_FCAPP);
+                mProject.OFNPFCStorage = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_FCSTORAGE);
+                mProject.OFNPSwsPars = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + cGRM.CONST_TAG_SWSPARSTEXTFILE);
+                mProject.OFPSSRDistribution = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + "_" + cGRM.CONST_DIST_SSR_DIRECTORY_TAG);
+                mProject.OFPRFDistribution = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + "_" + cGRM.CONST_DIST_RF_DIRECTORY_TAG);
+                mProject.OFPRFAccDistribution = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + "_" + cGRM.CONST_DIST_RFACC_DIRECTORY_TAG);
+                mProject.OFPFlowDistribution = Path.Combine(mProject.ProjectPath, mProject.ProjectNameOnly + "_" + cGRM.CONST_DIST_FLOW_DIRECTORY_TAG);
                 if (mProject.mSimulationType == cGRM.SimulationType.RealTime)
+                {
                     changeOutputFileDisk(cRealTime.CONST_Output_File_Target_DISK);
+                }
                 mProject.generalSimulEnv.GetValues(mProject.PrjFile);
                 mProject.subWSPar.GetValues(mProject.PrjFile);
                 mProject.watershed.GetValues(mProject.PrjFile);
@@ -862,11 +924,15 @@ namespace GRMCore
 
                 sThisSimulation.dtsec = System.Convert.ToInt32(row.ComputationalTimeStep) * 60;
                 if (sThisSimulation.dtsec > System.Convert.ToInt32(mProject.generalSimulEnv.mPrintOutTimeStepMIN * 30))
+                {
                     sThisSimulation.dtsec = System.Convert.ToInt32(mProject.generalSimulEnv.mPrintOutTimeStepMIN * 30);
+                }
                 sThisSimulation.IsParallel = false;
                 sThisSimulation.MaxDegreeOfParallelism = 0;
                 if (row.IsIsParallelNull() == false && row.IsParallel.ToLower() == "true")
+                {
                     sThisSimulation.IsParallel = true;
+                }
                 if (sThisSimulation.IsParallel == true && row.IsMaxDegreeOfParallelismNull() == false)
                 {
                     sThisSimulation.MaxDegreeOfParallelism = System.Convert.ToInt32(row.MaxDegreeOfParallelism);
@@ -879,28 +945,34 @@ namespace GRMCore
 
                 sThisSimulation.IsFixedTimeStep = true;
                 if (row.IsIsFixedTimeStepNull() == false && row.IsFixedTimeStep.ToLower() == "false")
+                {
                     sThisSimulation.IsFixedTimeStep = false;
+                }
 
                 mProject.watershed.WSIDList.Clear();
                 foreach (int id in mProject.subWSPar.userPars.Keys)
+                {
                     mProject.watershed.WSIDList.Add(id);
+                }
 
-            cGRM.bwriteLog = false;
-            cGRM.fpnlog = prjFPN.Replace(".gmp", ".log");
-            if (row.IsWriteLogNull() == false && row.WriteLog.ToString() == "true")
+                cGRM.bwriteLog = false;
+                cGRM.fpnlog = prjFPN.Replace(".gmp", ".log");
+                if (row.IsWriteLogNull() == false && row.WriteLog.ToString() == "true")
                 {
                     cGRM.bwriteLog = true;
                     if (File.Exists(cGRM.fpnlog))
+                    {
                         File.Delete(cGRM.fpnlog);
+                    }
                 }
                 return true;
-            //}
-            //catch (Exception ex)
-            //{
-            //    cGRM.writelogAndConsole("Open project failed.", true, true);
-            //    Console.WriteLine(ex.ToString());
-            //    return false;
-            //}
+            }
+            catch (Exception ex)
+            {
+                cGRM.writelogAndConsole("Open project failed.", true, true);
+                Console.WriteLine(ex.ToString());
+                return false;
+            }
         }
 
         private static bool changeOutputFileDisk(char targetDisk)
@@ -940,7 +1012,9 @@ namespace GRMCore
                 mProject.PrjFile.WriteXml(mProject.ProjectPathName);
 
                 if (mProject.mSimulationType == cGRM.SimulationType.SingleEvent)
+                {
                     Console.WriteLine(cProject.Current.ProjectPathName + " Is saved.  " + cGRM.BuildInfo.ProductName);
+                }
             }
             else
             {
@@ -1353,7 +1427,9 @@ namespace GRMCore
                 }
             }
             else
+            {
                 return false;
+            }
 
             if (r.IsFlowDirectionTypeNull() || r.FlowDirectionType == "")
             {
@@ -1394,7 +1470,7 @@ namespace GRMCore
 
             if (!r.IsSimulationDurationNull() && r.SimulationDuration != "")
             {
-                int v=0;
+                int v = 0;
                 if (int.TryParse(r.SimulationDuration, out v) == false)
                 {
                     Console.WriteLine(string.Format("Simulation duration is invalid!! {0} {1}", "\r\n", r.SimulationDuration));
@@ -1402,11 +1478,13 @@ namespace GRMCore
                 }
             }
             else
+            {
                 return false;
+            }
 
             if (!r.IsComputationalTimeStepNull() && r.ComputationalTimeStep != "")
             {
-                int v=0;
+                int v = 0;
                 if (int.TryParse(r.ComputationalTimeStep, out v) == false)
                 {
                     Console.WriteLine(string.Format("Computational time step is invalid!! {0} {1}", "\r\n", r.ComputationalTimeStep));
@@ -1414,7 +1492,9 @@ namespace GRMCore
                 }
             }
             else
+            {
                 return false;
+            }
 
             if (!r.IsIsFixedTimeStepNull() && r.IsFixedTimeStep == "")
             {
@@ -1424,7 +1504,7 @@ namespace GRMCore
 
             if (!r.IsOutputTimeStepNull() && r.OutputTimeStep != "")
             {
-                int v=0;
+                int v = 0;
                 if (int.TryParse(r.OutputTimeStep, out v) == false)
                 {
                     Console.WriteLine(string.Format("Output time step is invalid!! {0} {1}", "\r\n", r.OutputTimeStep));
@@ -1432,7 +1512,9 @@ namespace GRMCore
                 }
             }
             else
+            {
                 return false;
+            }
 
             if (!r.IsCrossSectionTypeNull() && r.CrossSectionType == "")
             {

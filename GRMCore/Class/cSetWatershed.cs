@@ -84,21 +84,37 @@ namespace GRMCore
         {
             Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjdb.ProjectSettings.Rows[0];
             if (!row.IsWatershedFileNull())
+            {
                 mFPN_watershed = row.WatershedFile;
+            }
             if (!row.IsSlopeFileNull())
+            {
                 mFPN_slope = row.SlopeFile;
+            }
             if (!row.IsFlowDirectionFileNull())
+            {
                 mFPN_fdir = row.FlowDirectionFile;
+            }
             if (!row.IsFlowAccumFileNull())
+            {
                 mFPN_fac = row.FlowAccumFile;
+            }
             if (!row.IsStreamFileNull())
+            {
                 mFPN_stream = row.StreamFile;
+            }
             if (row.IsChannelWidthFileNull() == false)
+            {
                 mFPN_channelWidth = row.ChannelWidthFile;
+            }
             if (row.IsInitialChannelFlowFileNull() == false)
+            {
                 mFPN_initialChannelFlow = row.InitialChannelFlowFile;
+            }
             if (row.IsInitialSoilSaturationRatioFileNull() == false)
+            {
                 mFPN_initialSoilSaturationRatio = row.InitialSoilSaturationRatioFile;
+            }
             // If .IsGridCellSizeNull Then
             // mCellSize = -1
             // Else
@@ -136,7 +152,9 @@ namespace GRMCore
                 }
             }
             else
-            { mFDType = cGRM.FlowDirectionType.StartsFromE_TauDEM; }
+            {
+                mFDType = cGRM.FlowDirectionType.StartsFromE_TauDEM;
+            }
         }
 
         public bool HasStreamLayer

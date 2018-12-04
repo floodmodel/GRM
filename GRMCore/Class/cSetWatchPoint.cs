@@ -157,7 +157,9 @@ namespace GRMCore
                     return false;
                 }
                 else
+                {
                     mWatchPointCVidList.Add(cvid);
+                }
                 RFReadIntensitySumUpWs_mPs.Add(cvid, default(Double));
                 RFUpWsMeanForDt_mm.Add(cvid, default(Double));
                 RFUpWsMeanForDtPrintout_mm.Add(cvid, default(Double));
@@ -205,7 +207,9 @@ namespace GRMCore
                 if (mdtWatchPointInfo.Rows.Count > 0)
                 {
                     foreach (Dataset.GRMProject.WatchPointsRow r in mdtWatchPointInfo.Rows)
+                    {
                         r.SetAdded();
+                    }
                 }
             }
         }
@@ -216,7 +220,9 @@ namespace GRMCore
             foreach (Dataset.GRMProject.WatchPointsRow row in mdtWatchPointInfo.Rows)
             {
                 if (row.CVID == cvid)
+                {
                     return row.Name.Replace(",", "_");
+                }
             }
             return "-9999";
         }
@@ -227,9 +233,13 @@ namespace GRMCore
             get
             {
                 if (mdtWatchPointInfo == null)
+                {
                     return 0;
+                }
                 else
+                {
                     return mdtWatchPointInfo.Rows.Count;
+                }
             }
         }
 
@@ -257,35 +267,63 @@ namespace GRMCore
                 foreach (int k in mWatchPointCVidList)
                 {
                     if (this.RFReadIntensitySumUpWs_mPs != null && RFReadIntensitySumUpWs_mPs.Keys.Contains(k))
+                    {
                         cln.RFReadIntensitySumUpWs_mPs.Add(k, RFReadIntensitySumUpWs_mPs[k]);
+                    }
                     if (this.RFUpWsMeanForDt_mm != null && RFUpWsMeanForDt_mm.Keys.Contains(k))
+                    {
                         cln.RFUpWsMeanForDt_mm.Add(k, RFUpWsMeanForDt_mm[k]);
+                    }
                     if (this.RFUpWsMeanForDtPrintout_mm != null && RFUpWsMeanForDtPrintout_mm.Keys.Contains(k))
+                    {
                         cln.RFUpWsMeanForDtPrintout_mm.Add(k, RFUpWsMeanForDtPrintout_mm[k]);
+                    }
                     if (this.RFUpWsMeanTotal_mm != null && RFUpWsMeanTotal_mm.Keys.Contains(k))
+                    {
                         cln.RFUpWsMeanTotal_mm.Add(k, RFUpWsMeanTotal_mm[k]);
+                    }
                     if (this.RFWPGridForDtPrintout_mm != null && RFWPGridForDtPrintout_mm.Keys.Contains(k))
+                    {
                         cln.RFWPGridForDtPrintout_mm.Add(k, RFWPGridForDtPrintout_mm[k]);
+                    }
                     if (this.RFWPGridTotal_mm != null && RFWPGridTotal_mm.Keys.Contains(k))
+                    {
                         cln.RFWPGridTotal_mm.Add(k, RFWPGridTotal_mm[k]);
+                    }
                     if (this.mTotalFlow_cms != null && mTotalFlow_cms.Keys.Contains(k))
+                    {
                         cln.mTotalFlow_cms.Add(k, mTotalFlow_cms[k]);
+                    }
                     if (this.mTotalDepth_m != null && mTotalDepth_m.Keys.Contains(k))
+                    {
                         cln.mTotalDepth_m.Add(k, mTotalDepth_m[k]);
+                    }
                     if (this.MaxFlow_cms != null && MaxFlow_cms.Keys.Contains(k))
+                    {
                         cln.MaxFlow_cms.Add(k, MaxFlow_cms[k]);
+                    }
                     if (this.MaxDepth_m != null && MaxDepth_m.Keys.Contains(k))
+                    {
                         cln.MaxDepth_m.Add(k, MaxDepth_m[k]);
+                    }
                     if (this.MaxFlowTime != null && MaxFlowTime.Keys.Contains(k))
+                    {
                         cln.MaxFlowTime.Add(k, MaxFlowTime[k]);
+                    }
                     if (this.MaxDepthTime != null && MaxDepthTime.Keys.Contains(k))
+                    {
                         cln.MaxDepthTime.Add(k, MaxDepthTime[k]);
+                    }
                     if (this.QfromFCDataCMS != null && QfromFCDataCMS.Keys.Contains(k))
+                    {
                         cln.QfromFCDataCMS.Add(k, QfromFCDataCMS[k]);
+                    }
                     if (this.Qprint_cms != null && Qprint_cms.Keys.Contains(k))
+                    {
                         cln.Qprint_cms.Add(k, Qprint_cms[k]);
+                    }
                     if (this.FpnWpOut != null && FpnWpOut.Keys.Contains(k))
-                        cln.FpnWpOut.Add(k, FpnWpOut[k]);
+                    { cln.FpnWpOut.Add(k, FpnWpOut[k]); }
                     cln.mWatchPointCVidList.Add(k);
                 }
             }

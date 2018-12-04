@@ -183,18 +183,24 @@ namespace GRMCore
         public static int getDTsec(double cfln, double dx, double vMax, int dtPrint_min)
         {
             if (vMax <= 0)
+            {
                 return sThisSimulation.dtMaxLimit_sec;
+            }
             double dtsecNext = cGRM.CONST_CFL_NUMBER * dx / (double)vMax;
             dtsecNext = System.Convert.ToDouble(Math.Truncate(dtsecNext));
 
             if (dtsecNext > sThisSimulation.dtMaxLimit_sec)
+            {
                 dtsecNext = sThisSimulation.dtMaxLimit_sec;
+            }
             if (dtsecNext < sThisSimulation.dtMinLimit_sec)
+            {
                 dtsecNext = sThisSimulation.dtMinLimit_sec;
-
+            }
             if (dtsecNext > (dtPrint_min * 60 / (double)2))
+            {
                 dtsecNext = dtPrint_min * 60 / (double)2;
-
+            }
             return System.Convert.ToInt32(dtsecNext);
         }
 

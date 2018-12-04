@@ -50,9 +50,13 @@ namespace GRMCore
                         dm.XCol = cx;
                         dm.YRow = ry;
                         if (!watershed.WSIDList.Contains(cv.WSID))
+                        {
                             watershed.WSIDList.Add(cv.WSID);
+                        }
                         if (watershed.mCVidListForEachWS.ContainsKey(wsid) == false)
+                        {
                             watershed.mCVidListForEachWS.Add(wsid, new List<int>());
+                        }
                         watershed.mCVidListForEachWS[wsid].Add(cv.CVID);
                         cv.toBeSimulated = 1;
                         wsCells[cx, ry] = cv;
@@ -144,7 +148,9 @@ namespace GRMCore
                     for (int cx = 0; cx < colxCount; cx++)
                     {
                         if (WSCells[cx, ry] != null)
+                        {
                             WSCells[cx, ry].FDir = cHydroCom.GetFlowDirection(System.Convert.ToInt32(gridFdir.ValueFromTL(cx, ry)), fdtype);
+                        }
                     }
                 });
             }
@@ -154,7 +160,9 @@ namespace GRMCore
                     for (int cx = 0; cx < colxCount; cx++)
                     {
                         if (WSCells[cx, ry] != null)
+                        {
                             WSCells[cx, ry].FDir = cHydroCom.GetFlowDirection(System.Convert.ToInt32(gridFdir.ValueFromTL(cx, ry)), fdtype);
+                        }
                     }
                 }
             return true;
@@ -184,9 +192,13 @@ namespace GRMCore
                         {
                             int v = System.Convert.ToInt32(gridFac.ValueFromTL(cx, ry));
                             if (v < 0)
+                            {
                                 WSCells[cx, ry].FAc = 0;
+                            }
                             else
+                            {
                                 WSCells[cx, ry].FAc = v;
+                            }
                         }
                     }
                 });
@@ -200,9 +212,13 @@ namespace GRMCore
                         {
                             int v = System.Convert.ToInt32(gridFac.ValueFromTL(cx, ry));
                             if (v < 0)
+                            {
                                 WSCells[cx, ry].FAc = 0;
+                            }
                             else
+                            {
                                 WSCells[cx, ry].FAc = v;
+                            }
                         }
                     }
                 }
@@ -290,9 +306,13 @@ namespace GRMCore
                             {
                                 double value = gridCHWidth.ValueFromTL(cx, ry);
                                 if (value < 0)
+                                {
                                     WSCells[cx, ry].mStreamAttr.ChBaseWidthByLayer = 0;
+                                }
                                 else
+                                {
                                     WSCells[cx, ry].mStreamAttr.ChBaseWidthByLayer = value;
+                                }
                             }
                         }
                     });
@@ -306,7 +326,9 @@ namespace GRMCore
                             {
                                 double value = gridCHWidth.ValueFromTL(cx, ry);
                                 if (value > 0)
-                                { WSCells[cx, ry].mStreamAttr.ChBaseWidthByLayer = value; }
+                                {
+                                    WSCells[cx, ry].mStreamAttr.ChBaseWidthByLayer = value;
+                                }
                                 //else
                                 //    WSCells[cx, ry].mStreamAttr.ChBaseWidthByLayer = Watershed.mCellSize / (double)10;
                             }
@@ -340,10 +362,8 @@ namespace GRMCore
                             if (WSCells[cx, ry] != null)
                             {
                                 double v = ascIniSSR.ValueFromTL(cx, ry);
-                                if (v < 0)
-                                    v = 0;
-                                if (v > 1)
-                                    v = 1;
+                                if (v < 0) { v = 0; }
+                                if (v > 1) { v = 1; }
                                 WSCells[cx, ry].InitialSaturation = v;
                             }
                         }
@@ -357,10 +377,8 @@ namespace GRMCore
                             if (WSCells[cx, ry] != null)
                             {
                                 double v = ascIniSSR.ValueFromTL(cx, ry);
-                                if (v < 0)
-                                    v = 0;
-                                if (v > 1)
-                                    v = 1;
+                                if (v < 0) { v = 0; }
+                                if (v > 1) { v = 1; }
                                 WSCells[cx, ry].InitialSaturation = v;
                             }
                         }
@@ -451,7 +469,9 @@ namespace GRMCore
                                 cCVAttribute cell = WSCells[cx, ry];
                                 int value = System.Convert.ToInt32(gridLC.ValueFromTL(cx, ry));
                                 if (value > 0)
+                                {
                                     cell.LandCoverValue = value;
+                                }
                                 else
                                 {
                                     Console.WriteLine(string.Format("Landcover file {0} has an invalid value.", fpnLC), true, true);
@@ -471,7 +491,9 @@ namespace GRMCore
                                 cCVAttribute cell = WSCells[cx, ry];
                                 int value = System.Convert.ToInt32(gridLC.ValueFromTL(cx, ry));
                                 if (value > 0)
+                                {
                                     cell.LandCoverValue = value;
+                                }
                                 else
                                 {
                                     isnormal = false;
@@ -505,7 +527,9 @@ namespace GRMCore
                 vatIR.Add(System.Convert.ToInt32(row.GridValue), row.ImperviousRatio);
                 cSetLandcover.LandCoverCode lcCode;
                 if (!row.IsGRMCodeNull())
+                {
                     lcCode = cSetLandcover.GetLandCoverCode(row.GRMCode);
+                }
                 else
                 {
                     cGRM.writelogAndConsole(string.Format("Landcover attribute code was not set for {0}. ", row.GridValue), true, true);
@@ -667,7 +691,9 @@ namespace GRMCore
                                 cCVAttribute cell = WSCells[cx, ry];
                                 int value = System.Convert.ToInt32(gridSTexture.ValueFromTL(cx, ry));
                                 if (value > 0)
+                                {
                                     cell.SoilTextureValue = value;
+                                }
                                 else
                                 {
                                     Console.WriteLine(string.Format("Soil texture file {0} has an invalid value.", fpnST), true, true);
@@ -687,7 +713,9 @@ namespace GRMCore
                                 cCVAttribute cell = WSCells[cx, ry];
                                 int value = System.Convert.ToInt32(gridSTexture.ValueFromTL(cx, ry));
                                 if (value > 0)
+                                {
                                     cell.SoilTextureValue = value;
+                                }
                                 else
                                 {
                                     isnormal = false;
@@ -726,7 +754,9 @@ namespace GRMCore
                 vatHC.Add(System.Convert.ToInt32(row.GridValue), row.HydraulicConductivity);
                 cSetGreenAmpt.SoilTextureCode stCode;
                 if (!row.IsGRMCodeNull())
+                {
                     stCode = cSetGreenAmpt.GetSoilTextureCode(row.GRMCode.ToString());
+                }
                 else
                 {
                     cGRM.writelogAndConsole(string.Format("Soil texture attribute code was not set for {0}. ", row.GridValue), true, true);
@@ -896,7 +926,9 @@ namespace GRMCore
                             {
                                 int value = System.Convert.ToInt32(gridSDepth.ValueFromTL(cx, ry));
                                 if (value > 0)
+                                {
                                     WSCells[cx, ry].SoilDepthTypeValue = System.Convert.ToInt32(value);
+                                }
                                 else
                                 {
                                     Console.WriteLine(string.Format("Soil depth file {0} has an invalid value.", fpnSD), true, true);
@@ -915,7 +947,9 @@ namespace GRMCore
                             {
                                 int value = System.Convert.ToInt32(gridSDepth.ValueFromTL(cx, ry));
                                 if (value > 0)
+                                {
                                     WSCells[cx, ry].SoilDepthTypeValue = System.Convert.ToInt32(value);
+                                }
                                 else
                                 {
                                     isnormal = false;

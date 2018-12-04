@@ -130,7 +130,9 @@ namespace GRMCore
                     // 유속이 작을 경우.. 발산 가능성 있으므로.. 기존 단면적 보다 큰 단면적으로 유입될 경우.. 기존 단면적으로 유입되는 것으로 설정..
                     // 즉, 지표하 유출의 기여 단면적은 기존 하천단면적보다 클수 없음.
                     if (chCSA > CVs[cvan].mStreamAttr.CSAch_i_j)
+                    {
                         chCSA = CVs[cvan].mStreamAttr.CSAch_i_j;
+                    }
                     return chCSA;
                 }
             }
@@ -156,20 +158,28 @@ namespace GRMCore
             foreach (int cvid in CVs[cvan].NeighborCVidFlowIntoMe)
             {
                 if (CVs[cvid - 1].FlowType == cGRM.CellFlowType.OverlandFlow)
+                {
                     cumulBFq_m3Ps = cumulBFq_m3Ps + CVs[cvid - 1].baseflow_Q_m3Ps;// 수두경사가 셀의 지표면 경사와 같은 것으로 가정
+                }
             }
 
             if (CVs[cvan].FAc == FacMin)
+            {
                 dX_m = dX_m / (double)2;
+            }
             // sngDhUAQ_m = sngCumulativeBFq_m3Ps * intDTSec / (sngDeltaY_m * sngDeltaX_m)
             dhUAQ_m = cumulBFq_m3Ps * dTSec / (dY_m * dX_m) / CVs[cvan].effectivePorosityThetaE;  // 이건 검사체적에 균질하게 퍼져 있는 수위변화분
             CVs[cvan].hUAQfromBedrock_m = CVs[cvan].hUAQfromBedrock_m + dhUAQ_m; // 이건 지하수대의 토양 깊이 변화
             if (CVs[cvan].hUAQfromBedrock_m > (CVs[cvan].SoilDepthToBedrock_m - CVs[cvan].soilDepth_m))
+            {
                 CVs[cvan].hUAQfromBedrock_m = CVs[cvan].SoilDepthToBedrock_m - CVs[cvan].soilDepth_m;
+            }
             // 기저유출 계산에서는 포화수리전도도 적용. 포화된 영역에서 발생
             CVs[cvan].baseflow_Q_m3Ps = CVs[cvan].hUAQfromBedrock_m * CVs[cvan].hydraulicConductK_mPsec * Math.Sin(Math.Atan(CVs[cvan].SlopeOF)) * dY_m;
             if (CVs[cvan].baseflow_Q_m3Ps < 0)
+            {
                 CVs[cvan].baseflow_Q_m3Ps = 0;
+            }
         }
 
 
@@ -206,7 +216,9 @@ namespace GRMCore
             if ((cv.FlowType == cGRM.CellFlowType.ChannelFlow && cv.mStreamAttr.ChStrOrder > project.subWSPar.userPars[cv.WSID].dryStreamOrder)
                 || cv.LandCoverCode == cSetLandcover.LandCoverCode.WATR || cv.LandCoverCode == cSetLandcover.LandCoverCode.WTLD)
             // 이조건에서는 항상 포화상태, 침누있음, 강우에 의한 침투량 없음. 대신 지표면 저류량에 의한 침투는 항상 있음
-            { cInfiltration.SetWaterAreaInfiltrationParameters(project.CVs[cvan]); }
+            {
+                cInfiltration.SetWaterAreaInfiltrationParameters(project.CVs[cvan]);
+            }
             else if (cv.soilDepth_m == soilDepthPercolated_m)
             { cv.soilWaterContent_tM1_m = 0; } // 이전시간에 침투된 모든 양이 B 층으로 침누된 경우이므로..
             else
@@ -214,13 +226,19 @@ namespace GRMCore
                 waterDepthPercolated_m = soilDepthPercolated_m * cv.effectivePorosityThetaE;
                 cv.soilWaterContent_tM1_m = cv.soilWaterContent_tM1_m - waterDepthPercolated_m;
                 if (cv.soilWaterContent_tM1_m < 0)
+                {
                     cv.soilWaterContent_tM1_m = 0;
+                }
             }
             cv.hUAQfromBedrock_m = cv.hUAQfromBedrock_m + soilDepthPercolated_m;
             if (cv.hUAQfromBedrock_m > (cv.SoilDepthToBedrock_m - cv.soilDepth_m))
+            {
                 cv.hUAQfromBedrock_m = (cv.SoilDepthToBedrock_m - cv.soilDepth_m);
+            }
             if (cv.FlowType == cGRM.CellFlowType.OverlandFlow)
-            { GetBaseflowInputDepthAndCalculateLateralMovement(project.CVs, cvan,  project.FacMin , cv.CVDeltaX_m, cellSize_m, dtsec); }
+            {
+                GetBaseflowInputDepthAndCalculateLateralMovement(project.CVs, cvan,  project.FacMin , cv.CVDeltaX_m, cellSize_m, dtsec);
+            }
             else
             {
                 if (cv.mStreamAttr.hCVch_i_j > 0)
@@ -228,7 +246,9 @@ namespace GRMCore
                     // 하천 수심보다 더 많은 양이 침누되었을 경우, 하천 수심만큼만 침누된 것으로 한다.
                     double dHinUAQ_m = soilDepthPercolated_m * cv.porosityEta;
                     if (dHinUAQ_m > cv.mStreamAttr.hCVch_i_j)
+                    {
                         dHinUAQ_m = cv.mStreamAttr.hCVch_i_j;
+                    }
                     cv.hUAQfromChannelBed_m = cv.hUAQfromChannelBed_m + dHinUAQ_m;
                     if (cv.hUAQfromChannelBed_m > 0)
                     {
@@ -239,7 +259,9 @@ namespace GRMCore
                                 / cv.mStreamAttr.hCVch_i_j * cv.mStreamAttr.ChBaseWidth * dtsec;
                         }
                         else
-                        { csa = cv.hydraulicConductK_mPsec * (cv.hUAQfromChannelBed_m - cv.mStreamAttr.hCVch_i_j) * dtsec; }
+                        {
+                            csa = cv.hydraulicConductK_mPsec * (cv.hUAQfromChannelBed_m - cv.mStreamAttr.hCVch_i_j) * dtsec;
+                        }
                     }
                     else
                     { csa = 0; }
@@ -249,9 +271,13 @@ namespace GRMCore
                 cv.hUAQfromChannelBed_m = cv.hUAQfromChannelBed_m - csa / (double)cv.mStreamAttr.ChBaseWidth / (double)cv.porosityEta;
                 cv.hUAQfromBedrock_m = cv.hUAQfromBedrock_m - csa / (double)cv.mStreamAttr.ChBaseWidth / (double)cv.porosityEta;
                 if (cv.hUAQfromChannelBed_m < 0)
+                {
                     cv.hUAQfromChannelBed_m = 0;
+                }
                 if (cv.hUAQfromBedrock_m < 0)
+                {
                     cv.hUAQfromBedrock_m = 0;
+                }
             }
             return csa;
         }

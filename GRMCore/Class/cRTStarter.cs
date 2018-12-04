@@ -53,10 +53,14 @@ namespace GRMCore
             mProjectFPN = r.ProjectFPN;
             mFP_RFLayerFP = r.RTRFfolderName;
             if (r.IsFC == true)
+            {
                 mbIsFC = true;
+            }
             else
-                // mFPN_FCData = ""
+            // mFPN_FCData = ""
+            {
                 mbIsFC = false;
+            }
             mbDWS_EXIST = r.IsDWSExist;
             if (mbDWS_EXIST == true)
             {
@@ -96,7 +100,9 @@ namespace GRMCore
             {
                 System.Data.SqlClient.SqlConnection oSQLCon = new System.Data.SqlClient.SqlConnection(cRealTime_DBMS.g_strDBMSCnn);
                 if (oSQLCon.State == ConnectionState.Closed)
+                {
                     oSQLCon.Open();
+                }
 
                 // Dim x As New Xml.Serialization.XmlSerializer(RTProject.GetType)
                 // The Serialize method Is used To serialize an Object To XML. Serialize Is overloaded And can send output To a TextWriter, Stream, Or XmlWriter Object. In this example, you send the output to the console
@@ -124,20 +130,24 @@ namespace GRMCore
                     string strSQL1 = "select top 1 runid from runmeta order by runid desc";
                     SqlDataAdapter oSqlDataAdapter = new SqlDataAdapter(strSQL1, cRealTime_DBMS.g_strDBMSCnn);
                     oSqlDataAdapter.Fill(dt1);
-                    long lngID= (long)dt1.Rows[0][0];
+                    long lngID = (long)dt1.Rows[0][0];
                     int intID = Convert.ToInt32(lngID); //int intID = dt1.Rows[0].Field<int>(0);    // by ice. 2018.11.21
 
                     if (cRealTime_Common.g_performance_log_GUID == intID.ToString())
                     {
                     }
                     else
+                    {
                         Console.WriteLine("Warning : If g_performance_log_GUID <> intID.ToString() Then");
+                    }
 
                     cRealTime_DBMS.g_RunID = intID; // monitor 에서 받은거 보다. DB 우선 
                     oSqlDataAdapter.Dispose();
                 }
                 else
+                {
                     Console.WriteLine("runmeta logging error");
+                }
                 oSQLCon.Close();
             }
         }

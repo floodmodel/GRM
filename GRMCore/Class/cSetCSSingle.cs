@@ -38,7 +38,9 @@ namespace GRMCore
             {
                 mCSSingleWidthType = CSSingleChannelWidthType.CWGeneration;
                 if (row.ChannelWidthMostDownStream != "")
+                {
                     mMaxChannelWidthSingleCS = System.Convert.ToDouble(row.ChannelWidthMostDownStream);
+                }
             }
         }
 

@@ -824,32 +824,48 @@ namespace GRMCore
                 for (int n = 0; n < Lines.Length; n++)
                 {
                     if (mParsChecked.ISSRisChecked == true && Lines[n].Contains("IniSaturation") == true)
-                        Lines[n] = "    <IniSaturation>#ISSR      #</IniSaturation>";
+                    { Lines[n] = "    <IniSaturation>#ISSR      #</IniSaturation>"; }
                     if (mParsChecked.MSLSisChecked == true && Lines[n].Contains("MinSlopeOF") == true)
-                        Lines[n] = "    <MinSlopeOF>#MSLS      #</MinSlopeOF>";
+                    { Lines[n] = "    <MinSlopeOF>#MSLS      #</MinSlopeOF>"; }
                     if (mParsChecked.MSCBisChecked == true && Lines[n].Contains("MinSlopeChBed") == true)
+                    {
                         Lines[n] = "    <MinSlopeChBed>#MSCB      #</MinSlopeChBed>";
+                    }
                     if (mParsChecked.MCWisChecked == true && Lines[n].Contains("MinChBaseWidth") == true)
+                    {
                         Lines[n] = "    <MinChBaseWidth>#MCW       #</MinChBaseWidth>";
+                    }
                     if (mParsChecked.CRCisChecked == true && Lines[n].Contains("ChRoughness") == true)
+                    {
                         Lines[n] = "    <ChRoughness>#CRC       #</ChRoughness>";
+                    }
                     if (mParsChecked.IDSOisChecked == true && Lines[n].Contains("DryStreamOrder") == true)
+                    {
                         Lines[n] = "    <DryStreamOrder>#IDSO      #</DryStreamOrder>";
+                    }
                     if (mParsChecked.LCRCisChecked == true && Lines[n].Contains("CalCoefLCRoughness") == true)
+                    {
                         Lines[n] = "    <CalCoefLCRoughness>#LCRC      #</CalCoefLCRoughness>";
+                    }
                     if (mParsChecked.SPisChecked == true && Lines[n].Contains("CalCoefPorosity") == true)
+                    {
                         Lines[n] = "    <CalCoefPorosity>#SP        #</CalCoefPorosity>";
+                    }
                     if (mParsChecked.SWFSHisChecked == true && Lines[n].Contains("CalCoefWFSuctionHead") == true)
+                    {
                         Lines[n] = "    <CalCoefWFSuctionHead>#SWFSH     #</CalCoefWFSuctionHead>";
+                    }
                     if (mParsChecked.SHCisChecked == true && Lines[n].Contains("CalCoefHydraulicK") == true)
+                    {
                         Lines[n] = "    <CalCoefHydraulicK>#SHC       #</CalCoefHydraulicK>";
+                    }
                     if (mParsChecked.SDisChecked == true && Lines[n].Contains("CalCoefSoilDepth") == true)
-                        Lines[n] = "    <CalCoefSoilDepth>#SD        #</CalCoefSoilDepth>";
+                    { Lines[n] = "    <CalCoefSoilDepth>#SD        #</CalCoefSoilDepth>"; }
                 }
                 string[] newLines = new string[Lines.Length + 1];
                 newLines[0] = "ptf #";
                 for (int n = 0; n < Lines.Length; n++)
-                    newLines[n+1] = Lines[n];
+                    newLines[n + 1] = Lines[n];
                 System.IO.File.WriteAllLines(ptfFPN, newLines);
                 return true;
             }
@@ -910,20 +926,20 @@ namespace GRMCore
         private void RunPESTInner()
         {
             if (mbPPEST == false)
-                RunBatchCopy();
+            { RunBatchCopy(); }
             System.Diagnostics.Process psPEST = new System.Diagnostics.Process();
             ProcessStartInfo psInfo = new ProcessStartInfo();
             psInfo.FileName = mFPNPestBatRun;
             if (mbShowConsole == true)
-                psInfo.WindowStyle = ProcessWindowStyle.Normal;
+            { psInfo.WindowStyle = ProcessWindowStyle.Normal; }
             else
-                psInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            { psInfo.WindowStyle = ProcessWindowStyle.Hidden; }
             psPEST.StartInfo = psInfo;
             psPEST.Start();
             psPEST.WaitForExit();
             psPEST.Dispose();
             if (mbPPEST == true)
-                CloseSlaveProcess();
+            { CloseSlaveProcess(); }
             Thread.Sleep(2000); // 프로세스 종료 완료 잠깐 시간지연, 관련 실행파일 삭제를 위해 
             PESTEnded(this);
         }

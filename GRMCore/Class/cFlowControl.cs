@@ -335,7 +335,8 @@ namespace GRMCore
         }
 
 
-        public void ApplyReservoirConstantDischarge(cCVAttribute cv, double cellsize, double RoQ_CONST_CMS, double maxStorageApp, bool bOutflowDuration)
+        public void ApplyReservoirConstantDischarge(cCVAttribute cv, double cellsize, 
+            double RoQ_CONST_CMS, double maxStorageApp, bool bOutflowDuration)
         {
             double dy_m = cellsize;
             double sngQout_cms;
@@ -437,7 +438,9 @@ namespace GRMCore
                 cv.mStreamAttr.CSAch_i_j = mFVMsolver.CalChCSAFromQbyIteration(project.CVs[cvan], cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.QCVch_i_j_m3Ps);
                 // Dim csa1 As Single = .mStreamAttr.CSAch_i_j
                 // Dim chCSAini2 As Single = mFVMsolver.CalChCSAFromManningEQ(project.CVs[cvan], .mStreamAttr.CSAch_i_j, .mStreamAttr.QCVch_i_j_m3Ps)
-                cv.mStreamAttr.hCVch_i_j = mFVMsolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.chIsCompoundCS, cv.mStreamAttr.chUpperRBaseWidth_m, cv.mStreamAttr.chLowerRArea_m2, cv.mStreamAttr.chLowerRHeight, cv.mStreamAttr.mChBankCoeff);
+                cv.mStreamAttr.hCVch_i_j = mFVMsolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, 
+                    cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.chIsCompoundCS, cv.mStreamAttr.chUpperRBaseWidth_m, 
+                    cv.mStreamAttr.chLowerRArea_m2, cv.mStreamAttr.chLowerRHeight, cv.mStreamAttr.mChBankCoeff);
                 cv.mStreamAttr.uCVch_i_j = cv.mStreamAttr.QCVch_i_j_m3Ps / (double)cv.mStreamAttr.CSAch_i_j;
             }
             project.fcGrid.mFCdataToApplyNowT[fcCVid] = cv.mStreamAttr.QCVch_i_j_m3Ps;   // 2018.9.3 원 : 다시 fcDataRows(rowOrder).Item("value") 가져오는거 보다 낳다고 판단했슴 
@@ -452,7 +455,8 @@ namespace GRMCore
             Dataset.GRMProject.FlowControlGridRow fcRow = (Dataset.GRMProject.FlowControlGridRow)Rows[0];
             int rowOrder = System.Convert.ToInt32((nowT_MIN - 1) / System.Convert.ToInt32(fcRow.DT));
             DataView dv;
-            dv = new DataView(project.fcGrid.mdtFCFlowData, string.Format("cvid={0}", fcCVid), " datatime asc", DataViewRowState.CurrentRows);
+            dv = new DataView(project.fcGrid.mdtFCFlowData, string.Format("cvid={0}", fcCVid), " datatime asc", 
+                DataViewRowState.CurrentRows);
             DataTable dt = dv.Table;
             DataTable fcdt = (DataTable)dt;
             if (rowOrder < fcdt.Rows.Count)
@@ -477,7 +481,8 @@ namespace GRMCore
                     }
                     if (cv.QCVof_i_j_m3Ps < 0)
                     { cv.QCVof_i_j_m3Ps = 0; }
-                    cv.hCVof_i_j = Math.Pow(cv.RoughnessCoeffOF * cv.QCVof_i_j_m3Ps / cellsize / Math.Pow(cv.SlopeOF, 0.5), 0.6);
+                    cv.hCVof_i_j = Math.Pow(cv.RoughnessCoeffOF * cv.QCVof_i_j_m3Ps / cellsize 
+                        / Math.Pow(cv.SlopeOF, 0.5), 0.6);
                     cv.CSAof_i_j = cv.hCVof_i_j * cellsize;
                     cv.mStreamAttr.uCVch_i_j = cv.QCVof_i_j_m3Ps / (double)cv.CSAof_i_j;
                 }

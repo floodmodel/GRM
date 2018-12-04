@@ -56,7 +56,9 @@ namespace GRMCore
             {
                 mdtSoilDepthInfo.AcceptChanges();
                 foreach (DataRow r in mdtSoilDepthInfo.Rows)
+                {
                     r.SetAdded();
+                }
             }
         }
 

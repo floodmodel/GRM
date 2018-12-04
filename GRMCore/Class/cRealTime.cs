@@ -119,8 +119,7 @@ namespace GRMCore
             mRFLayerCountToApply_RT = 0;
             if (CONST_bUseDBMS_FOR_RealTimeSystem)
             {
-                bool doit = true;
-                if (doit == false)//'2018.8 부터 이제 과거 분석 기록은 보존됨..그래서 삭제 code는 미수행.
+                if (false)//'2018.8 부터 이제 과거 분석 기록은 보존됨..그래서 삭제 code는 미수행.
                 {
                     Clear_DBMS_Table_Qwatershed(mRTProject.ProjectNameOnly);
                     RTStatus("DBMS [Q_CAL] Table Cleared");
@@ -328,9 +327,13 @@ namespace GRMCore
                                 strSourceName = oDR.Field<string>("SourceWSCode");
                                 strFieldTarget = "WSCode";
                                 if (strSourceName.Trim() == "GM" | strSourceName.Trim() == "EB")
+                                {
                                     strWhereGage = string.Format("gaugecode='{0}' and", strSourceName);
+                                }
                                 else
+                                {
                                     strWhereGage = "gaugecode='md' and";
+                                }
                                 break;
                             }
 
@@ -351,8 +354,7 @@ namespace GRMCore
                     dt.Merge(odt_TS);
                 }
                 cProject.Current.fcGrid.mdtFCFlowData = dt;
-                bool doit = true;
-                if (doit == false)
+                if (false)
                 {
                     mRTProject.fcGrid.mdtFCFlowData.TableName = "tmp";
                     mRTProject.fcGrid.mdtFCFlowData.WriteXml(@"C:\temp\read_method_" + cProject.Current.ProjectNameOnly + "_" + DateTime.Now.ToString("yyMMddHHmmss") + "grm.xml");
@@ -440,8 +442,8 @@ namespace GRMCore
                     oSqlDataAdapter2.Fill(odt2);
 
                     if (odt2.Rows.Count != 2)
-                        // Stop   '2018.10.11 까지는 stop 이었슴
-                        cGRM.writelogAndConsole(strSpcealDams + " 의 data가 2건이 아님!", false, true);
+                    // Stop   '2018.10.11 까지는 stop 이었슴
+                    { cGRM.writelogAndConsole(strSpcealDams + " 의 data가 2건이 아님!", false, true); }
 
                     foreach (DataRow oDR2 in odt2.Rows)
                     {
@@ -470,7 +472,7 @@ namespace GRMCore
                     string[] parts = aLine.Split(new string[] { "," }, StringSplitOptions.RemoveEmptyEntries);
 
                     if (parts[0].Trim() == "")
-                        break;
+                    { break; }
 
                     int nFieldCount = parts.Length;
                     if (intL > 0 && parts[1] == TargetDateTime)
@@ -623,7 +625,9 @@ namespace GRMCore
         private void mSimul_CallAnalyzer(cSimulator sender, int nowTtoPrint_MIN)
         {
             if (mRTProject.generalSimulEnv.mbMakeRasterOutput == true)
+            {
                 mRasterFileOutput.MakeDistributionFiles(nowTtoPrint_MIN, mRasterFileOutput.ImgWidth, mRasterFileOutput.ImgHeight, true);
+            }
         }
 
         private void cRealTime_RTStatus(string strMSG)

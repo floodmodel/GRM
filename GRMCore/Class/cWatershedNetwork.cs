@@ -44,9 +44,13 @@ namespace GRMCore
                 mWSIDsAllUps.Add(i, new List<int>());
                 mWSIDsAllDowns.Add(i, new List<int>());
                 foreach (int id in mWSIDsNearbyUp[i])
+                {
                     mWSIDsAllUps[i].Add(id);
+                }
                 foreach (int id in mWSIDsNearbyDown[i])
+                {
                     mWSIDsAllDowns[i].Add(id);
+                }
             }
 
             foreach (int nowID in mWSidList)
@@ -60,16 +64,22 @@ namespace GRMCore
                     foreach (int downID in downIDs)
                     {
                         if (!mWSIDsAllUps[downID].Contains(upID))
+                        {
                             mWSIDsAllUps[downID].Add(upID);
+                        }
                         if (!mWSIDsAllDowns[upID].Contains(downID))
+                        {
                             mWSIDsAllDowns[upID].Add(downID);
+                        }
                     }
                 }
             }
             foreach (int nowID in mWSidList)
             {
                 if (mWSIDsNearbyDown[nowID].Count == 0)
+                {
                     mMostDownstreamWSIDs.Add(nowID);
+                }
             }
         }
 

@@ -31,7 +31,7 @@ namespace GRMCore
                 foreach (int k in userPars.Keys)
                 {
                     if (userPars[k].isUserSet == true)
-                        return true;
+                    { return true; }
                 }
                 return false;
             }
@@ -44,7 +44,7 @@ namespace GRMCore
                 foreach (int k in userPars.Keys)
                 {
                     if (userPars[k].iniSaturation == 0)
-                        return false;
+                    { return false; }
                 }
                 return true;
             }
@@ -85,22 +85,38 @@ namespace GRMCore
                         if (!row.IsUnsaturatedKTypeNull() && row.UnsaturatedKType.ToString() != "")
                         {
                             upars.UKType = cGRM.UnSaturatedKType.Linear.ToString();
-                            if (row.UnsaturatedKType.ToString().ToLower() == cGRM.UnSaturatedKType.Linear.ToString().ToLower()) { upars.UKType = cGRM.UnSaturatedKType.Linear.ToString(); }
-                            else if (row.UnsaturatedKType.ToString().ToLower() == cGRM.UnSaturatedKType.Exponential.ToString().ToLower()) { upars.UKType = cGRM.UnSaturatedKType.Exponential.ToString(); }
-                            else if (row.UnsaturatedKType.ToString().ToLower() == cGRM.UnSaturatedKType.Constant.ToString().ToLower()) { upars.UKType = cGRM.UnSaturatedKType.Constant.ToString(); }
+                            if (row.UnsaturatedKType.ToString().ToLower() == cGRM.UnSaturatedKType.Linear.ToString().ToLower())
+                            { upars.UKType = cGRM.UnSaturatedKType.Linear.ToString(); }
+                            else if (row.UnsaturatedKType.ToString().ToLower() == cGRM.UnSaturatedKType.Exponential.ToString().ToLower())
+                            { upars.UKType = cGRM.UnSaturatedKType.Exponential.ToString(); }
+                            else if (row.UnsaturatedKType.ToString().ToLower() == cGRM.UnSaturatedKType.Constant.ToString().ToLower())
+                            { upars.UKType = cGRM.UnSaturatedKType.Constant.ToString(); }
 
                         }
                         else
                         { upars.UKType = cGRM.UnSaturatedKType.Linear.ToString(); }
 
                         if (!row.IsCoefUnsaturatedKNull() && row.CoefUnsaturatedK != "")
+                        {
                             upars.coefUK = System.Convert.ToDouble(row.CoefUnsaturatedK);
+                        }
                         else
-                            // set defalut value
+                        // set defalut value
+                        {
                             upars.coefUK = 0.2;
-                        if (upars.UKType.ToLower() == cGRM.UnSaturatedKType.Linear.ToString().ToLower()) { upars.coefUK = 0.2; }
-                        else if (upars.UKType.ToLower() == cGRM.UnSaturatedKType.Exponential.ToString().ToLower()) { upars.coefUK = 6.4; }
-                        else if (upars.UKType.ToLower() == cGRM.UnSaturatedKType.Constant.ToString().ToLower()) { upars.coefUK = 0.1; }
+                        }
+                        if (upars.UKType.ToLower() == cGRM.UnSaturatedKType.Linear.ToString().ToLower())
+                        {
+                            upars.coefUK = 0.2;
+                        }
+                        else if (upars.UKType.ToLower() == cGRM.UnSaturatedKType.Exponential.ToString().ToLower())
+                        {
+                            upars.coefUK = 6.4;
+                        }
+                        else if (upars.UKType.ToLower() == cGRM.UnSaturatedKType.Constant.ToString().ToLower())
+                        {
+                            upars.coefUK = 0.1;
+                        }
                     }
                     upars.minSlopeChBed = row.MinSlopeChBed;
                     upars.minChBaseWidth = row.MinChBaseWidth;
@@ -164,11 +180,11 @@ namespace GRMCore
                         if (prj.subWSPar.userPars[upsid].isUserSet == true)
                         {
                             if (!wsidToExclude.Contains(upsid))
-                                wsidToExclude.Add(upsid);
+                            { wsidToExclude.Add(upsid); }
                             foreach (int upupID in prj.WSNetwork.WSIDsAllUps(upsid))
                             {
                                 if (!wsidToExclude.Contains(upupID))
-                                    wsidToExclude.Add(upupID);
+                                { wsidToExclude.Add(upupID); }
                             }
                         }
                     }
@@ -176,7 +192,7 @@ namespace GRMCore
                     foreach (int upsid in prj.WSNetwork.WSIDsAllUps(wsid))
                     {
                         if (wsidToExclude.Contains(upsid) == false)
-                            SetWSParametersWithAnotherWatershedParameterSet(prj, upsid, wsid);
+                        { SetWSParametersWithAnotherWatershedParameterSet(prj, upsid, wsid); }
                     }
                 }
             }

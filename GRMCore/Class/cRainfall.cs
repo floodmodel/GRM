@@ -107,9 +107,13 @@ namespace GRMCore
                             }
                     }
                     if (prj.generalSimulEnv.mIsDateTimeFormat == true)
+                    {
                         r.DataTime = cComTools.GetTimeToPrintOut(true, prj.generalSimulEnv.mSimStartDateTime, System.Convert.ToInt32(mRainfallinterval * n));
+                    }
                     else
+                    {
                         r.DataTime = System.Convert.ToString(mRainfallinterval * n);
+                    }
                     mlstRainfallData.Add(r);
                 }
             }
@@ -166,11 +170,15 @@ namespace GRMCore
                             for (int cx = 0; cx < colCount; cx++)
                             {
                                 if (project.WSCells[cx, ry] == null || project.WSCells[cx, ry].toBeSimulated == -1)
+                                {
                                     continue;
+                                }
                                 int cvan = project.WSCells[cx, ry].CVID - 1;
                                 double inRF_mm = ascReader.ValueFromTL(cx, ry);
                                 if (eRainfallDataType == cRainfall.RainfallDataType.TextFileASCgrid_mmPhr)
+                                {
                                     inRF_mm = inRF_mm / (60.0 / (double)RFinterval_MIN);
+                                }
                                 CalRFintensity_mPsec(project.CVs[cvan], inRF_mm, rfIntervalSEC);
                             }
                         });
@@ -196,7 +204,9 @@ namespace GRMCore
                             for (int cx = 0; cx < colCount; cx++)
                             {
                                 if (project.WSCells[cx, ry] == null || project.WSCells[cx, ry].toBeSimulated == -1)
+                                {
                                     continue;
+                                }
                                 int cvan = project.WSCells[cx, ry].CVID - 1;
                                 double inRF_mm = ascReader.ValueFromTL(cx, ry);
                                 if (eRainfallDataType == cRainfall.RainfallDataType.TextFileASCgrid_mmPhr)
@@ -353,10 +363,14 @@ namespace GRMCore
         {
             get
             {
-                if (IsSet==true)
+                if (IsSet == true)
+                {
                     return mRainfallinterval.Value * mlstRainfallData.Count;
+                }
                 else
+                {
                     throw new InvalidOperationException();
+                }
             }
         }
 
@@ -374,9 +388,13 @@ namespace GRMCore
             get
             {
                 if (mlstRainfallData.Count > 0)
+                {
                     return mlstRainfallData[0].FilePath;
+                }
                 else
+                {
                     return null;
+                }
             }
         }
 
