@@ -70,7 +70,7 @@ namespace GRMCore
             {
                 RTStatus("모형 설정 실패.");
                 if (CONST_bUseDBMS_FOR_RealTimeSystem)
-                    cRealTime_DBMS.Add_Log_toDBMS(System.IO.Path.GetFileName(FPNprj), "모형 설정 실패.");
+                    cRealTime_DBMS.Add_Log_toDBMS(System.IO.Path.GetFileName(FPNprj), "Fail in Model Setting"); //  '모형 설정 실패.  2018.11.20 문구 수정함
                 return;
             }
             mRTProject = cProject.Current;
@@ -85,7 +85,7 @@ namespace GRMCore
 
             RTStatus("모형 설정 완료.");
             if (CONST_bUseDBMS_FOR_RealTimeSystem)
-                cRealTime_DBMS.Add_Log_toDBMS(mRTProject.ProjectNameOnly, "모형 설정 완료.");
+                cRealTime_DBMS.Add_Log_toDBMS(mRTProject.ProjectNameOnly, "Model Setting Completed."); //'모형 설정 완료. 2018.11.20 문구 수정
         }
 
         public void RunGRMRT()
@@ -128,9 +128,9 @@ namespace GRMCore
                 }
             }
 
-            RTStatus("실시간 유출해석 시작..");
+            RTStatus("RealTime Rainall Runoff Start.."); // '실시간 유출해석 시작.. 2018.11.20 한글 -> 영문 변경함
             if (CONST_bUseDBMS_FOR_RealTimeSystem)
-                cRealTime_DBMS.Add_Log_toDBMS(mRTProject.ProjectNameOnly, "실시간 유출해석 시작..");
+                cRealTime_DBMS.Add_Log_toDBMS(mRTProject.ProjectNameOnly, "RealTime Rainall Runoff Start..");
 
             mSimul = new cSimulator();
             if (CreateNewOutputFilesRT() == false)
@@ -201,7 +201,7 @@ namespace GRMCore
             if (drs.Length > 0)
             {
                 mdicBNewFCdataAddedRT[cvid] = true;
-                RTStatus(string.Format("  FC Data 입력완료...({3} {0}, CVID={1}, Value={2})", fcname.PadRight(13), cvid.ToString().PadLeft(5), drs[0].Field<string>("value").ToString().PadLeft(8), strDate));
+                RTStatus(string.Format("  FC Data 입력완료...({3} {0}, CVID={1}, Value={2})", fcname.PadRight(13), cvid.ToString().PadLeft(5), drs[0].Field<Single>("value").ToString().PadLeft(8), strDate));
             }
             else
             {
@@ -427,29 +427,33 @@ namespace GRMCore
                 // Next
                 // dt.Merge(odt_auto)
 
-                // 경천DAM 처리
-                // Dim strSpcealDams As String = "'경천댐'"       '2018.8.29 원 : 여기서 n 개 기입... 이건 추후 DB 등으로 이동되어야 함
-                string strSpcealDams = "'경천댐','영주댐'";       // 2018.8.29 원 : 여기서 n 개 기입... 이건 추후 DB 등으로 이동되어야 함..  2018.10/11 원 : 영주댐 추가
-                string strSQL2 = string.Format("Select  w.name, 999 as cvid ,[Time] as datetime ,[QValue] AS VALUE From QStream_OBS_ht d , WatchPoint w  Where  d.GName in({1}) and  TIME ='{0}' and d.Gname=w.Gname ", TargetDateTime, strSpcealDams);
-
-                System.Data.DataTable odt2 = new System.Data.DataTable();
-                SqlDataAdapter oSqlDataAdapter2 = new SqlDataAdapter(strSQL2, cRealTime_DBMS.g_strDBMSCnn);
-                oSqlDataAdapter2.SelectCommand.CommandTimeout = 60;
-                oSqlDataAdapter2.Fill(odt2);
-
-                if (odt2.Rows.Count != 2)
-                    // Stop   '2018.10.11 까지는 stop 이었슴
-                    cGRM.writelogAndConsole(strSpcealDams + " 의 data가 2건이 아님!", false, true);
-
-                foreach (DataRow oDR2 in odt2.Rows)
+                //경천DAM 처리.영주댐 처리 부분 인데... 너무 지엽적인 예외 조치 라서... 배제하는시도를 2018.10.12 원,안 하고 있슴
+                if (false)
                 {
-                    DataRow oDR_Target2 = mRTProject.fcGrid.mdtFCGridInfo.Select(string.Format("Name='{0}'", oDR2["NAME"].ToString())).FirstOrDefault();
-                    string strCVID2 = oDR_Target2["CVID"].ToString();
-                    oDR2["CVID"] = strCVID2;
-                    //Debug.Print(strCVID2);
+                    // Dim strSpcealDams As String = "'경천댐'"       '2018.8.29 원 : 여기서 n 개 기입... 이건 추후 DB 등으로 이동되어야 함
+                    string strSpcealDams = "'경천댐','영주댐'";       // 2018.8.29 원 : 여기서 n 개 기입... 이건 추후 DB 등으로 이동되어야 함..  2018.10/11 원 : 영주댐 추가
+                    string strSQL2 = string.Format("Select  w.name, 999 as cvid ,[Time] as datetime ,[QValue] AS VALUE From QStream_OBS_ht d , WatchPoint w  Where  d.GName in({1}) and  TIME ='{0}' and d.Gname=w.Gname ", TargetDateTime, strSpcealDams);
+
+                    System.Data.DataTable odt2 = new System.Data.DataTable();
+                    SqlDataAdapter oSqlDataAdapter2 = new SqlDataAdapter(strSQL2, cRealTime_DBMS.g_strDBMSCnn);
+                    oSqlDataAdapter2.SelectCommand.CommandTimeout = 60;
+                    oSqlDataAdapter2.Fill(odt2);
+
+                    if (odt2.Rows.Count != 2)
+                        // Stop   '2018.10.11 까지는 stop 이었슴
+                        cGRM.writelogAndConsole(strSpcealDams + " 의 data가 2건이 아님!", false, true);
+
+                    foreach (DataRow oDR2 in odt2.Rows)
+                    {
+                        DataRow oDR_Target2 = mRTProject.fcGrid.mdtFCGridInfo.Select(string.Format("Name='{0}'", oDR2["NAME"].ToString())).FirstOrDefault();
+                        string strCVID2 = oDR_Target2["CVID"].ToString();
+                        oDR2["CVID"] = strCVID2;
+                        //Debug.Print(strCVID2);
+                    }
+
+                    dt.Merge(odt2);
                 }
 
-                dt.Merge(odt2);
 
                 cProject.Current.fcGrid.mdtFCFlowData = dt;
             }
@@ -624,7 +628,7 @@ namespace GRMCore
 
         private void cRealTime_RTStatus(string strMSG)
         {
-            //cGRM.writelogAndConsole(strMSG, cGRM.bwriteLog, true);    //2018.11.29 원 : 임시 console log 위한 사용. 추후 event 받는 측에서 조치해야함 
+            cGRM.writelogAndConsole(strMSG, cGRM.bwriteLog, true);    //2018.11.29 원 : 임시 console log 위한 사용. 추후 event 받는 측에서 조치해야함 
         }
 
     }
