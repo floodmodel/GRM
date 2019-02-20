@@ -40,7 +40,7 @@ namespace GRMCore
         ///   <remarks></remarks>
         public double mRFMeanForDt_m;
 
-        public void GetValues(cProject prj)
+        public bool GetValues(cProject prj)
         {
             Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prj.PrjFile.ProjectSettings.Rows[0];
             if (row.IsRainfallDataTypeNull() == false)
@@ -73,6 +73,11 @@ namespace GRMCore
 
             }
             mRainfallDataFilePathName = row.RainfallDataFile;
+            if (File.Exists(mRainfallDataFilePathName) == false)
+            {
+                cGRM.writelogAndConsole(String.Format("Rainfall file ({0})is invalid!!!", mRainfallDataFilePathName), true, true);
+                return false;
+            }
             if (mRainfallDataType.HasValue == true)
             {
                 mlstRainfallData = new List<RainfallData>();
@@ -117,6 +122,7 @@ namespace GRMCore
                     mlstRainfallData.Add(r);
                 }
             }
+            return true;
         }
 
         // Public Sub SetValues(ByVal prjdb As GRMProject)

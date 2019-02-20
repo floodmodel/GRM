@@ -15,8 +15,8 @@ namespace GRMCore
         public void SetSubWSkeys(List<int> WSList)
         {
             foreach (int wsid in WSList)
-            {
-                if (userPars.ContainsKey(wsid) == false)
+            {                
+                if (userPars.ContainsKey(wsid) == false )
                 {
                     cUserParameters upars = new cUserParameters();
                     userPars.Add(wsid, upars);

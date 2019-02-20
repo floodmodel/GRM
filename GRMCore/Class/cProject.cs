@@ -917,7 +917,12 @@ namespace GRMCore
                 // mProject.mEstimatedDist.GetValues(mProject.mPrjFile)
 
                 if (mProject.mSimulationType == cGRM.SimulationType.SingleEvent)
-                { mProject.rainfall.GetValues(mProject); }
+                {
+                    if (mProject.rainfall.GetValues(mProject) == false)
+                    {
+                        return false;
+                    }
+                }
 
                 if (mProject.generalSimulEnv.mbSimulateFlowControl == true)
                 { mProject.fcGrid.GetValues(mProject); }
