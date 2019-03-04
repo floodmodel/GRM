@@ -38,6 +38,11 @@ Public Class fAnalyzer
         'Me.tbFPNObsData.Text = "D:\Github\TestSet_GRM\AnalyzerTest\Qobs - 복사본.txt"
         sThisSimulation.mAnalyzerSet = False
         Me.tbChart.Width = 470
+        Dim fiExe As New FileInfo(Path.Combine(My.Application.Info.DirectoryPath, "GRMAnalyzer.exe"))
+        Dim fvExe As String = FileVersionInfo.GetVersionInfo(fiExe.FullName).FileMajorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiExe.FullName).FileMinorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiExe.FullName).FileBuildPart.ToString
+        Dim FileInfoLogExe As String = String.Format("{0} v{1}. Built in {2}", fiExe.Name.ToString(), fvExe, fiExe.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
+        Me.Text = FileInfoLogExe
+
     End Sub
 
     Private Sub btStartGRMorApplySettings_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btStartGRMorApplySettings.Click
@@ -203,7 +208,7 @@ Public Class fAnalyzer
                         RFsims.Add(i, 0)
                     End If
                 Next
-                mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, Qsims, LegendsSim, RFsims, xLabels, mMaxPrintoutCount)
+                mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, Qsims, LegendsSim, RFsims, xLabels, mMaxPrintoutCount, mproject.generalSimulEnv.mIsDateTimeFormat)
 
                 Dim dt As New GRMCore.Dataset.GRMProject.WatchPointsDataTable
                 For rn As Integer = 0 To LegendsSim.Count - 1
@@ -226,18 +231,21 @@ Public Class fAnalyzer
                         xLabels(n) = labelList(n)
                     Next
                 Else
-                    xLabels = Nothing
+                    xLabels = New Dictionary(Of Integer, String)
+                    For n As Integer = 0 To mMaxPrintoutCount - 1
+                        xLabels(n) = ((mproject.generalSimulEnv.mPrintOutTimeStepMIN * n) / 60).ToString()
+                    Next
+                    'xLabels = Nothing
                 End If
                 If mproject.WatchPoint.WPCount > 0 Then
                     For Each row As GRMCore.Dataset.GRMProject.WatchPointsRow In mproject.watchPoint.mdtWatchPointInfo.Rows
                         LegendsSim.Add(row.Name)
                     Next
                 End If
-                If mproject.GeneralSimulEnv.mIsDateTimeFormat = True Then
-                    mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, LegendsSim, xLabels, mMaxPrintoutCount)
-                Else
-                    mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, LegendsSim, mMaxPrintoutCount)
-                End If
+                'If mproject.GeneralSimulEnv.mIsDateTimeFormat = True Then
+                mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, LegendsSim, xLabels, mMaxPrintoutCount, mproject.generalSimulEnv.mIsDateTimeFormat)               'Else
+                '    mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, LegendsSim, mMaxPrintoutCount)
+                'End If
             End If
             Call SetTrackBar(mMaxPrintoutCount)
             'Call SetTrackBar(mChart.MaxCountOfData)
