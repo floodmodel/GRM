@@ -12,13 +12,15 @@ namespace GRMCore
         ///   <remarks></remarks>
         public static bool mGRMSetupIsNormal;
 
+        public static int ZeroTimePrinted; // -1 : false, 1 : true
+
         /// <summary>
         ///   현재 모델링 대상 이벤트(강우)에 포함된 자료의 개수
         ///   </summary>
         ///   <remarks></remarks>
         public static int mRFDataCountInThisEvent;
 
-
+               
 
         /// <summary>
         ///   기존의 강우 레이어 위치. RGD 파일 커낵션 갱신을 위해 필요

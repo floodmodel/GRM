@@ -103,6 +103,7 @@ namespace GRMCore
             int nowRFOrder = 0;
             int nowTsec = sThisSimulation.dtsec;
             sThisSimulation.dtsec_usedtoForwardToThisTime = sThisSimulation.dtsec;
+            sThisSimulation.ZeroTimePrinted = -1;
             int dtsec;
             // CVid의 값은 1부터 시작함. 
             int simulationTimeLimitSEC = endingTimeSEC + sThisSimulation.dtsec;
@@ -203,6 +204,7 @@ namespace GRMCore
             int nowRFLayerOrder = 0;
             int nowTsec = sThisSimulation.dtsec;
             sThisSimulation.dtsec_usedtoForwardToThisTime = sThisSimulation.dtsec;
+            sThisSimulation.ZeroTimePrinted = -1;
             int dtsec = 0;
             int simulationTimeLimitSEC = EndingT_SEC + dtsec + 1;
             while (nowTsec < simulationTimeLimitSEC)
@@ -709,10 +711,19 @@ namespace GRMCore
                 timeToPrint_MIN = 0;
                 double RFmeanForFirstLayer = sThisSimulation.mRFMeanForDT_m / dtmin * dTRFintervalMIN;
                 OutputProcessManagerBySimType(timeToPrint_MIN, wpCount, RFmeanForFirstLayer, 1, null, SimType);
+                sThisSimulation.ZeroTimePrinted = 1;
             }
-            else if (mNowTsec > 0 && (mNowTsec % dTPrint_SEC) == 0)
+            else if (mNowTsec > 0 && (mNowTsec % dTPrint_SEC) == 0) 
             {
-                timeToPrint_MIN = targetCalTtoPrint_MIN - dTPrint_MIN;
+                if (sThisSimulation.ZeroTimePrinted ==-1)
+                {
+                    timeToPrint_MIN = targetCalTtoPrint_MIN - dTPrint_MIN;
+                }
+                else
+                {
+                    timeToPrint_MIN = targetCalTtoPrint_MIN;
+                }
+                
                 OutputProcessManagerBySimType(timeToPrint_MIN, wpCount, sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m, 1, null, SimType);
                 targetCalTtoPrint_MIN = targetCalTtoPrint_MIN + dTPrint_MIN;
             }
@@ -788,7 +799,8 @@ namespace GRMCore
                 mProject.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID] = 0;
                 mProject.watchPoint.RFWPGridForDtPrintout_mm[row.CVID] = 0;
             }
-            if (mProject.generalSimulEnv.mbShowRFdistribution == true)
+            if( (mProject.generalSimulEnv.mbCreateImageFile==true || mProject.generalSimulEnv.mbCreateASCFile==true) &&
+                mProject.generalSimulEnv.mbShowRFdistribution == true)
             {
                 for (int cvan = 0; cvan < cProject.Current.CVCount; cvan++)
                 { cProject.Current.CVs[cvan].RF_dtPrintOut_meter = 0; }
