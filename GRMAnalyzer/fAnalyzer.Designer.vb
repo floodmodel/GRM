@@ -2366,14 +2366,15 @@ Partial Class fAnalyzer
         '
         'tcDistribution
         '
+        Me.tcDistribution.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.tcDistribution.Controls.Add(Me.tpFlow)
         Me.tcDistribution.Controls.Add(Me.tpRF)
         Me.tcDistribution.Controls.Add(Me.tbRFAcc)
         Me.tcDistribution.Controls.Add(Me.tpSoilSaturation)
-        Me.tcDistribution.Location = New System.Drawing.Point(389, 396)
+        Me.tcDistribution.Location = New System.Drawing.Point(389, 392)
         Me.tcDistribution.Name = "tcDistribution"
         Me.tcDistribution.SelectedIndex = 0
-        Me.tcDistribution.Size = New System.Drawing.Size(583, 433)
+        Me.tcDistribution.Size = New System.Drawing.Size(583, 434)
         Me.tcDistribution.TabIndex = 42
         '
         'tpFlow
@@ -2382,7 +2383,7 @@ Partial Class fAnalyzer
         Me.tpFlow.Location = New System.Drawing.Point(4, 22)
         Me.tpFlow.Name = "tpFlow"
         Me.tpFlow.Padding = New System.Windows.Forms.Padding(3)
-        Me.tpFlow.Size = New System.Drawing.Size(575, 407)
+        Me.tpFlow.Size = New System.Drawing.Size(575, 408)
         Me.tpFlow.TabIndex = 3
         Me.tpFlow.Text = "Flow"
         Me.tpFlow.UseVisualStyleBackColor = True
@@ -2645,6 +2646,8 @@ Partial Class fAnalyzer
         '
         Me.dgvResults.AllowUserToAddRows = False
         Me.dgvResults.AllowUserToDeleteRows = False
+        Me.dgvResults.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.dgvResults.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.dgvResults.Location = New System.Drawing.Point(12, 291)
         Me.dgvResults.MultiSelect = False
@@ -2654,11 +2657,13 @@ Partial Class fAnalyzer
         Me.dgvResults.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.DisableResizing
         Me.dgvResults.RowTemplate.Height = 23
         Me.dgvResults.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect
-        Me.dgvResults.Size = New System.Drawing.Size(367, 538)
+        Me.dgvResults.Size = New System.Drawing.Size(367, 533)
         Me.dgvResults.TabIndex = 41
         '
         'gbHydrograph
         '
+        Me.gbHydrograph.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.gbHydrograph.Controls.Add(Me.Chart1)
         Me.gbHydrograph.Controls.Add(Me.btTBrepeat)
         Me.gbHydrograph.Controls.Add(Me.btTBstart)
@@ -2671,7 +2676,7 @@ Partial Class fAnalyzer
         Me.gbHydrograph.Controls.Add(Me.pbChartContain)
         Me.gbHydrograph.Location = New System.Drawing.Point(389, 12)
         Me.gbHydrograph.Name = "gbHydrograph"
-        Me.gbHydrograph.Size = New System.Drawing.Size(583, 376)
+        Me.gbHydrograph.Size = New System.Drawing.Size(583, 370)
         Me.gbHydrograph.TabIndex = 37
         Me.gbHydrograph.TabStop = False
         Me.gbHydrograph.Text = "Hydrograph"
@@ -2682,7 +2687,7 @@ Partial Class fAnalyzer
         Me.Chart1.ChartAreas.Add(ChartArea1)
         Legend1.Name = "Legend1"
         Me.Chart1.Legends.Add(Legend1)
-        Me.Chart1.Location = New System.Drawing.Point(89, 238)
+        Me.Chart1.Location = New System.Drawing.Point(35, 94)
         Me.Chart1.Name = "Chart1"
         Series1.ChartArea = "ChartArea1"
         Series1.Legend = "Legend1"
@@ -2695,8 +2700,9 @@ Partial Class fAnalyzer
         '
         'btTBrepeat
         '
+        Me.btTBrepeat.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btTBrepeat.Image = CType(resources.GetObject("btTBrepeat.Image"), System.Drawing.Image)
-        Me.btTBrepeat.Location = New System.Drawing.Point(547, 340)
+        Me.btTBrepeat.Location = New System.Drawing.Point(547, 330)
         Me.btTBrepeat.Name = "btTBrepeat"
         Me.btTBrepeat.Size = New System.Drawing.Size(24, 24)
         Me.btTBrepeat.TabIndex = 37
@@ -2704,8 +2710,9 @@ Partial Class fAnalyzer
         '
         'btTBstart
         '
+        Me.btTBstart.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btTBstart.Font = New System.Drawing.Font("굴림", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(129, Byte))
-        Me.btTBstart.Location = New System.Drawing.Point(55, 343)
+        Me.btTBstart.Location = New System.Drawing.Point(55, 333)
         Me.btTBstart.Name = "btTBstart"
         Me.btTBstart.Size = New System.Drawing.Size(20, 20)
         Me.btTBstart.TabIndex = 35
@@ -2714,8 +2721,9 @@ Partial Class fAnalyzer
         '
         'btTBStop
         '
+        Me.btTBStop.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btTBStop.Font = New System.Drawing.Font("굴림", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(129, Byte))
-        Me.btTBStop.Location = New System.Drawing.Point(35, 343)
+        Me.btTBStop.Location = New System.Drawing.Point(35, 333)
         Me.btTBStop.Name = "btTBStop"
         Me.btTBStop.Size = New System.Drawing.Size(20, 20)
         Me.btTBStop.TabIndex = 34
@@ -2724,8 +2732,9 @@ Partial Class fAnalyzer
         '
         'btTBInitialize
         '
+        Me.btTBInitialize.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btTBInitialize.Font = New System.Drawing.Font("굴림", 8.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(129, Byte))
-        Me.btTBInitialize.Location = New System.Drawing.Point(15, 343)
+        Me.btTBInitialize.Location = New System.Drawing.Point(15, 333)
         Me.btTBInitialize.Name = "btTBInitialize"
         Me.btTBInitialize.Size = New System.Drawing.Size(20, 20)
         Me.btTBInitialize.TabIndex = 33
@@ -2743,9 +2752,10 @@ Partial Class fAnalyzer
         '
         'tbChart
         '
+        Me.tbChart.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.tbChart.AutoSize = False
         Me.tbChart.BackColor = System.Drawing.SystemColors.Control
-        Me.tbChart.Location = New System.Drawing.Point(73, 343)
+        Me.tbChart.Location = New System.Drawing.Point(73, 333)
         Me.tbChart.Margin = New System.Windows.Forms.Padding(0)
         Me.tbChart.Maximum = 100
         Me.tbChart.Name = "tbChart"
@@ -2756,7 +2766,8 @@ Partial Class fAnalyzer
         '
         'pbTrackBar
         '
-        Me.pbTrackBar.Location = New System.Drawing.Point(10, 336)
+        Me.pbTrackBar.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
+        Me.pbTrackBar.Location = New System.Drawing.Point(10, 326)
         Me.pbTrackBar.Name = "pbTrackBar"
         Me.pbTrackBar.Size = New System.Drawing.Size(564, 34)
         Me.pbTrackBar.TabIndex = 37
@@ -2764,25 +2775,28 @@ Partial Class fAnalyzer
         '
         'pbChartMain
         '
+        Me.pbChartMain.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.pbChartMain.BackColor = System.Drawing.SystemColors.ControlLightLight
         Me.pbChartMain.Location = New System.Drawing.Point(10, 87)
         Me.pbChartMain.Name = "pbChartMain"
-        Me.pbChartMain.Size = New System.Drawing.Size(564, 250)
+        Me.pbChartMain.Size = New System.Drawing.Size(564, 240)
         Me.pbChartMain.TabIndex = 31
         Me.pbChartMain.TabStop = False
         '
         'pbChartContain
         '
+        Me.pbChartContain.Anchor = CType(((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
+            Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.pbChartContain.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D
         Me.pbChartContain.Location = New System.Drawing.Point(8, 20)
         Me.pbChartContain.Name = "pbChartContain"
-        Me.pbChartContain.Size = New System.Drawing.Size(568, 350)
+        Me.pbChartContain.Size = New System.Drawing.Size(568, 344)
         Me.pbChartContain.TabIndex = 30
         Me.pbChartContain.TabStop = False
         '
         'btStopSimulation
         '
-        Me.btStopSimulation.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btStopSimulation.Enabled = False
         Me.btStopSimulation.Location = New System.Drawing.Point(265, 231)
         Me.btStopSimulation.Name = "btStopSimulation"
@@ -2793,7 +2807,6 @@ Partial Class fAnalyzer
         '
         'btClose
         '
-        Me.btClose.Anchor = CType((System.Windows.Forms.AnchorStyles.Bottom Or System.Windows.Forms.AnchorStyles.Left), System.Windows.Forms.AnchorStyles)
         Me.btClose.BackColor = System.Drawing.SystemColors.Control
         Me.btClose.Location = New System.Drawing.Point(265, 258)
         Me.btClose.Name = "btClose"
@@ -2816,7 +2829,7 @@ Partial Class fAnalyzer
         Me.Controls.Add(Me.gbHydrograph)
         Me.MaximizeBox = False
         Me.MaximumSize = New System.Drawing.Size(996, 875)
-        Me.MinimumSize = New System.Drawing.Size(996, 875)
+        Me.MinimumSize = New System.Drawing.Size(996, 600)
         Me.Name = "fAnalyzer"
         Me.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide
         Me.Text = "GRM analyzer"
