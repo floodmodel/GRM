@@ -110,6 +110,10 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\gentle\gentle.csproj">
+      <Project>{4b541740-6dba-4832-82a8-eaf356960d89}</Project>
+      <Name>gentle</Name>
+    </ProjectReference>
     <ProjectReference Include="..\GRMCore\GRMCore.csproj">
       <Project>{91b9bf5b-038a-47be-abcb-4678ee72c4f6}</Project>
       <Name>GRMCore</Name>

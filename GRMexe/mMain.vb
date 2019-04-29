@@ -1,5 +1,8 @@
 ﻿Imports System.IO
 Imports System.IO.File
+Imports System.Text.RegularExpressions
+Imports gentle
+
 
 
 
@@ -69,7 +72,7 @@ Module mMain
                                 waitUserKey()
                                 Exit Select
                             End If
-                            Dim fpnBAT As String = ""
+                            'Dim fpnBAT As String = ""
                             Dim bDelete As Boolean = False
                             Select Case LCase(arg0)
                                 Case "/f"
@@ -78,9 +81,13 @@ Module mMain
                                     bDelete = True
                             End Select
                             For n As Integer = 0 To gmpFiles.Length - 1
-                                mMessage = String.Format("Total progress: {0}/{1} ({2}%). ",
+                                If File.Exists(gmpFiles(n)) = True Then
+                                    mMessage = String.Format("Total progress: {0}/{1} ({2}%). ",
                                                                  (n + 1), gmpFiles.Length, Format(((n + 1) / gmpFiles.Length * 100), "#0.00"))
-                                StartSingleRun(gmpFiles(n), bDelete)
+                                    StartSingleRun(gmpFiles(n), bDelete)
+                                Else
+                                    Console.WriteLine(String.Format("{0} file is not exist.", gmpFiles(n)))
+                                End If
                                 If ((n + 1) Mod 100) = 0 Then Console.Clear()
                             Next
                             Exit Select
@@ -232,20 +239,23 @@ Module mMain
     End Sub
 
     Private Function GetGMPFileList(path As String) As String()
-        Dim fileList() As String
-        fileList = Directory.GetFiles(path, "*.gmp")
-        Dim bN As Boolean = True
-        For Each fs As String In fileList
-            Dim n As Integer
-            If Integer.TryParse(IO.Path.GetFileNameWithoutExtension(fs).Split(CChar("_")).First, n) = False Then
-                bN = False
-                Exit For
-            End If
-        Next
-        If bN = True Then '모든 파일명의 머리글을 숫자로 변환할 수 있으면..  숫자 순으로 정렬
-            fileList = fileList.OrderBy(Function(fn) Int32.Parse(IO.Path.GetFileNameWithoutExtension(fn).Split(CChar("_")).First)).ToArray
-        End If
-        Return fileList
+        Dim fileList As New List(Of String)
+        Dim naCom As New NaturalComparer
+        fileList = Directory.GetFiles(path, "*.gmp").ToList
+        fileList.Sort(naCom)
+
+        'Dim bN As Boolean = True
+        'For Each fs As String In fileList
+        '    Dim n As Integer
+        '    If Integer.TryParse(IO.Path.GetFileNameWithoutExtension(fs).Split(CChar("_")).First, n) = False Then
+        '        bN = False
+        '        Exit For
+        '    End If
+        'Next
+        'If bN = True Then '모든 파일명의 머리글을 숫자로 변환할 수 있으면..  숫자 순으로 정렬
+        '    fileList = fileList.OrderBy(Function(fn) Int32.Parse(IO.Path.GetFileNameWithoutExtension(fn).Split(CChar("_")).First)).ToArray
+        'End If
+        Return fileList.ToArray
     End Function
 
     Private Sub mSimulator_SimulationStep(sender As cSimulator, elapsedMinutes As Integer) Handles mSimulator.SimulationStep
