@@ -14,6 +14,7 @@ namespace GRMCore
         private List<int> mMostDownstreamWSIDs;
 
         private Dictionary<int, int> mWSoutletCVids = new Dictionary<int, int>();
+        public Dictionary<int, int> mMostDownStreamWSIDofCurrentWS = new Dictionary<int, int>();
 
         /// <summary>
         ///   모든 유역에 대해서 상하류 셀 리스트를 0으로 초기화
@@ -79,6 +80,19 @@ namespace GRMCore
                 if (mWSIDsNearbyDown[nowID].Count == 0)
                 {
                     mMostDownstreamWSIDs.Add(nowID);
+                }
+            }
+
+            foreach (int nowID in mWSidList)
+            {
+                foreach (int mdwsid in mMostDownstreamWSIDs)
+                {
+                    if (nowID == mdwsid
+                        || mWSIDsAllUps[mdwsid].Contains(nowID) == true)
+                    {
+                        mMostDownStreamWSIDofCurrentWS.Add(nowID, mdwsid);
+                        break;
+                    }
                 }
             }
         }

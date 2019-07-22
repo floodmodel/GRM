@@ -37,14 +37,17 @@ namespace GRMCore
             }
         }
 
-        public override void GetValues(Dataset.GRMProject prjDB)
+        public override void GetValues(Dataset.GRMProject.ChannelSettingsRow row)
         {
-            Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjDB.ProjectSettings.Rows[0];
+            //Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjDB.ProjectSettings.Rows[0];
             mLowerRegionBaseWidth = System.Convert.ToDouble(row.LowerRegionBaseWidth);
             mLowerRegionHeight = System.Convert.ToDouble(row.LowerRegionHeight);
             mUpperRegionBaseWidth = System.Convert.ToDouble(row.UpperRegionBaseWidth);
             mCompoundCSCriteriaChannelWidth = System.Convert.ToDouble(row.CompoundCSChannelWidthLimit);
-            throw new NotImplementedException();
+            double v = 0;
+            if (double.TryParse(row.BankSideSlopeLeft, out v) == true) { LeftBankSlope = v; }
+            if (double.TryParse(row.BankSideSlopeRight, out v) == true) { RightBankSlope = v; }
+
         }
 
         public override bool IsSet
@@ -55,20 +58,52 @@ namespace GRMCore
             }
         }
 
-        public override void SetValues(Dataset.GRMProject prjDB)
+        public override void SetValues(Dataset.GRMProject prjDB, int rowindex)
         {
-            Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjDB.ProjectSettings.Rows[0];
+            Dataset.GRMProject.ChannelSettingsRow row = 
+                (Dataset.GRMProject.ChannelSettingsRow)prjDB.ChannelSettings.Rows[rowindex];
             row.CrossSectionType = CSTypeEnum.CSCompound.ToString();
             row.LowerRegionBaseWidth = System.Convert.ToString(mLowerRegionBaseWidth);
             row.LowerRegionHeight = System.Convert.ToString(mLowerRegionHeight);
             row.UpperRegionBaseWidth = System.Convert.ToString(mUpperRegionBaseWidth);
             row.CompoundCSChannelWidthLimit = System.Convert.ToString(mCompoundCSCriteriaChannelWidth);
+            row.BankSideSlopeRight = RightBankSlope.ToString();
+            row.BankSideSlopeLeft = LeftBankSlope.ToString();
             row.SingleCSChannelWidthType = null;
             row.ChannelWidthEQc = null;
             row.ChannelWidthEQd = null;
             row.ChannelWidthEQe = null;
             row.ChannelWidthMostDownStream = null;
-            throw new NotImplementedException();
         }
+
+
+        //public override void GetValues(Dataset.GRMProject prjDB)
+        //{
+        //    Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjDB.ProjectSettings.Rows[0];
+        //    mLowerRegionBaseWidth = System.Convert.ToDouble(row.LowerRegionBaseWidth);
+        //    mLowerRegionHeight = System.Convert.ToDouble(row.LowerRegionHeight);
+        //    mUpperRegionBaseWidth = System.Convert.ToDouble(row.UpperRegionBaseWidth);
+        //    mCompoundCSCriteriaChannelWidth = System.Convert.ToDouble(row.CompoundCSChannelWidthLimit);
+        //    double v = 0;
+        //    if (double.TryParse(row.BankSideSlopeLeft, out v) == true) { LeftBankSlope = v; }
+        //    if (double.TryParse(row.BankSideSlopeRight, out v) == true) { RightBankSlope = v; }
+        //    //throw new NotImplementedException();
+        //}
+
+        //public override void SetValues(Dataset.GRMProject prjDB)
+        //{
+        //    Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjDB.ProjectSettings.Rows[0];
+        //    row.CrossSectionType = CSTypeEnum.CSCompound.ToString();
+        //    row.LowerRegionBaseWidth = System.Convert.ToString(mLowerRegionBaseWidth);
+        //    row.LowerRegionHeight = System.Convert.ToString(mLowerRegionHeight);
+        //    row.UpperRegionBaseWidth = System.Convert.ToString(mUpperRegionBaseWidth);
+        //    row.CompoundCSChannelWidthLimit = System.Convert.ToString(mCompoundCSCriteriaChannelWidth);
+        //    row.SingleCSChannelWidthType = null;
+        //    row.ChannelWidthEQc = null;
+        //    row.ChannelWidthEQd = null;
+        //    row.ChannelWidthEQe = null;
+        //    row.ChannelWidthMostDownStream = null;
+        //    //throw new NotImplementedException();
+        //}
     }
 }

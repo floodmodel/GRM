@@ -298,7 +298,7 @@ namespace GRMCore
         ///   <remarks></remarks>
         public void InitControlVolumeAttribute()
         {
-            watershed.mFacMostUpChannelCell = CVCount;
+            watershed.mFacMostUpChannelCell = CVCount;//우선 최대값으로 초기화
             mCVANsForEachFA.Clear();
             watershed.mFacMax = 0;
             watershed.mFacMin = int.MaxValue;
@@ -453,7 +453,11 @@ namespace GRMCore
                             targetCell = WSCells[targetC, targetR];
                             if (targetCell == null)
                             {
-                                WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
+                                //WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
+                                if (WSNetwork.WSoutletCVID(cell.WSID) < 0 || cell.FAc > CVs[WSNetwork.WSoutletCVID(cell.WSID)-1].FAc)
+                                {
+                                    WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
+                                }
                             }
                             else
                             {
@@ -462,7 +466,7 @@ namespace GRMCore
                                 targetCell.NeighborCVidFlowIntoMe.Add(cell.CVID); // 현재의 cellid를 하류셀의 정보에 기록
                                 targetCell.deltaXwSum = targetCell.deltaXwSum + deltaXe;
                                 cell.DownCellidToFlow = targetCell.CVID;  // 흘러갈 방향의 cellid를 현재 셀의 정보에 기록
-                                if (!(cell.WSID == targetCell.WSID))
+                                if (cell.WSID != targetCell.WSID)
                                 {
                                     if (WSNetwork.WSIDsNearbyDown(cell.WSID) != targetCell.WSID)
                                     {
@@ -482,7 +486,11 @@ namespace GRMCore
                         {
                             cell.DownCellidToFlow = -1;
                             cell.DeltaXDownHalf_m = deltaXe;
-                            WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
+                            //WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
+                            if (WSNetwork.WSoutletCVID(cell.WSID) < 0 || cell.FAc > CVs[WSNetwork.WSoutletCVID(cell.WSID)-1].FAc)
+                            {
+                                WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
+                            }                            
                         }
                     }
                 }
@@ -570,10 +578,15 @@ namespace GRMCore
                     // 하천
                     if (watershed.HasStreamLayer && cell.FlowType == cGRM.CellFlowType.ChannelFlow)
                     {
+                        int mdWSid = WSNetwork.mMostDownStreamWSIDofCurrentWS[wsid]; //여기서 임의 셀(유역)의 최하류 wsid가 필요하다..
                         cell.mStreamAttr.RoughnessCoeffCH = ups.chRoughness;
-                        cell.mStreamAttr.chSideSlopeLeft = channel.mLeftBankSlope;
-                        cell.mStreamAttr.chSideSlopeRight =channel.mRightBankSlope;
-                        cell.mStreamAttr.mChBankCoeff = 1 /channel.mLeftBankSlope + 1 / channel.mRightBankSlope;
+                        cell.mStreamAttr.chSideSlopeLeft = channel.CrossSections[mdWSid].LeftBankSlope;
+                        cell.mStreamAttr.chSideSlopeRight = channel.CrossSections[mdWSid].RightBankSlope;
+                        cell.mStreamAttr.mChBankCoeff = 1 / channel.CrossSections[mdWSid].LeftBankSlope 
+                                                                    + 1 / channel.CrossSections[mdWSid].RightBankSlope;
+                        //cell.mStreamAttr.chSideSlopeLeft = channel.mCrossSection.LeftBankSlope;
+                        //cell.mStreamAttr.chSideSlopeRight = channel.mCrossSection.RightBankSlope;
+                        //cell.mStreamAttr.mChBankCoeff = 1 / channel.mCrossSection.LeftBankSlope + 1 / channel.mCrossSection.RightBankSlope;
                         if (cell.Slope < ups.minSlopeChBed)
                         {
                             cell.mStreamAttr.chBedSlope = ups.minSlopeChBed;
@@ -582,19 +595,22 @@ namespace GRMCore
                         {
                             cell.mStreamAttr.chBedSlope = cell.Slope;
                         }
-
-                        if (channel.mCrossSectionType == cSetCrossSection.CSTypeEnum.CSSingle)
+                        //if (channel.mCrossSection.CSType == cSetCrossSection.CSTypeEnum.CSSingle)
+                        if (channel.CrossSections[mdWSid].CSType == cSetCrossSection.CSTypeEnum.CSSingle) //Single CS에서는 두 가지 방법을 이용해서 하폭을 계산
                         {
                             cSetCSSingle cs = new cSetCSSingle();
-                            cs = (cSetCSSingle)channel.mCrossSection;
+                            cs = (cSetCSSingle)channel.CrossSections[mdWSid];
+                            //cs = (cSetCSSingle)channel.mCrossSection;
                             if (cs.mCSSingleWidthType == cSetCSSingle.CSSingleChannelWidthType.CWEquation)
                             {
                                 cell.mStreamAttr.ChBaseWidth = cs.mCWEc * Math.Pow((cell.FAc + 1) * (watershed.mCellSize * watershed.mCellSize / 1000000.0), cs.mCWEd)
-  / Math.Pow(cell.mStreamAttr.chBedSlope, cs.mCWEe);
+                                                                            / Math.Pow(cell.mStreamAttr.chBedSlope, cs.mCWEe);
                             }
                             else
                             {
-                                cell.mStreamAttr.ChBaseWidth = cell.FAc * cs.mMaxChannelWidthSingleCS / (double)FacMax;
+                                //cell.mStreamAttr.ChBaseWidth = cell.FAc * cs.mMaxChannelWidthSingleCS / (double)FacMax;
+                                int facMax_inMDWS = CVs[WSNetwork.WSoutletCVID(mdWSid) - 1].FAc;
+                                cell.mStreamAttr.ChBaseWidth = cell.FAc * cs.mMaxChannelWidthSingleCS / (double)facMax_inMDWS;
                             }
                             if (!string.IsNullOrEmpty(watershed.mFPN_channelWidth) && cell.mStreamAttr.ChBaseWidthByLayer > 0)
                             {
@@ -604,11 +620,15 @@ namespace GRMCore
                             cell.mStreamAttr.chIsCompoundCS = false;
                             cell.mStreamAttr.chLowerRArea_m2 = 0;
                         }
-                        else
+                        else // Compound CS에서는 사용자가 입력한 재원을 이용해서 하폭 계산
                         {
                             cSetCSCompound cs = new cSetCSCompound();
-                            cs = (cSetCSCompound)channel.mCrossSection;
-                            cell.mStreamAttr.ChBaseWidth = cell.FAc * cs.mLowerRegionBaseWidth / (double)FacMax;
+                            //cs = (cSetCSCompound)channel.mCrossSection;
+                            //cell.mStreamAttr.ChBaseWidth = cell.FAc * cs.mLowerRegionBaseWidth / (double)FacMax;
+                            cs = (cSetCSCompound)channel.CrossSections[mdWSid];
+                            int facMax_inMDWS = CVs[WSNetwork.WSoutletCVID(mdWSid) - 1].FAc;
+                            cell.mStreamAttr.ChBaseWidth = cell.FAc * cs.mLowerRegionBaseWidth / (double)facMax_inMDWS;
+
                             if (cell.mStreamAttr.ChBaseWidth < cs.mCompoundCSCriteriaChannelWidth)
                             {
                                 cell.mStreamAttr.chIsCompoundCS = false;
@@ -619,10 +639,14 @@ namespace GRMCore
                             else
                             {
                                 cell.mStreamAttr.chIsCompoundCS = true;
-                                cell.mStreamAttr.chUpperRBaseWidth_m = cell.FAc * cs.mUpperRegionBaseWidth / (double)FacMax;
-                                cell.mStreamAttr.chLowerRHeight = cell.FAc * cs.mLowerRegionHeight / (double)FacMax;
+                                //cell.mStreamAttr.chUpperRBaseWidth_m = cell.FAc * cs.mUpperRegionBaseWidth / (double)FacMax;
+                                //cell.mStreamAttr.chLowerRHeight = cell.FAc * cs.mLowerRegionHeight / (double)FacMax;
+                                cell.mStreamAttr.chUpperRBaseWidth_m = cell.FAc * cs.mUpperRegionBaseWidth / (double)facMax_inMDWS;
+                                cell.mStreamAttr.chLowerRHeight = cell.FAc * cs.mLowerRegionHeight / (double)facMax_inMDWS;
                                 cFVMSolver mFVMSolver = new cFVMSolver();
-                                cell.mStreamAttr.chLowerRArea_m2 = mFVMSolver.GetChannelCrossSectionAreaUsingChannelFlowDepth(cell.mStreamAttr.ChBaseWidth, cell.mStreamAttr.mChBankCoeff, cell.mStreamAttr.chLowerRHeight, false, cell.mStreamAttr.chLowerRHeight, cell.mStreamAttr.chLowerRArea_m2, 0);
+                                cell.mStreamAttr.chLowerRArea_m2 = mFVMSolver.GetChannelCrossSectionAreaUsingChannelFlowDepth
+                                                                                (cell.mStreamAttr.ChBaseWidth, cell.mStreamAttr.mChBankCoeff, cell.mStreamAttr.chLowerRHeight,
+                                                                                false, cell.mStreamAttr.chLowerRHeight, cell.mStreamAttr.chLowerRArea_m2, 0);
                             }
                         }
                         // 최소 하폭
@@ -644,7 +668,9 @@ namespace GRMCore
                     else
                     {
                     }
-                    if (cell.FlowType == cGRM.CellFlowType.ChannelFlow || cell.LandCoverCode == cSetLandcover.LandCoverCode.WATR || cell.LandCoverCode == cSetLandcover.LandCoverCode.WTLD)
+                    if (cell.FlowType == cGRM.CellFlowType.ChannelFlow 
+                        || cell.LandCoverCode == cSetLandcover.LandCoverCode.WATR 
+                        || cell.LandCoverCode == cSetLandcover.LandCoverCode.WTLD)
                     {
                         cell.soilSaturationRatio = 1;
                     }
@@ -914,6 +940,7 @@ namespace GRMCore
                 mProject.soilDepth.GetValues(mProject.PrjFile);
                 mProject.watchPoint.GetValues(mProject.PrjFile);
                 mProject.channel.GetValues(mProject.PrjFile);
+
                 // mProject.mEstimatedDist.GetValues(mProject.mPrjFile)
 
                 if (mProject.mSimulationType == cGRM.SimulationType.SingleEvent)
@@ -1137,6 +1164,17 @@ namespace GRMCore
         {
             if (cProject.Current.SetBasicCVInfo() == false) { return false; }
             if (cProject.Current.watchPoint.UpdatesWatchPointCVIDs(cProject.Current) == false) { return false; }
+            if (channel .CrossSections.Count >0)
+            {
+                foreach (int wsid in channel.CrossSections.Keys)
+                {
+                    if (WSNetwork.MostDownstreamWSIDs.Contains(wsid) == false)
+                    {
+                        cGRM.writelogAndConsole(string.Format("{0} is not most downstream watershed ID.", wsid), cGRM.bwriteLog, true);
+                        return false;
+                    }
+                }
+            }
             if (mProject.generalSimulEnv.mbSimulateFlowControl == true)
             { cProject.Current.fcGrid.UpdateFCGridInfoAndData(cProject.Current); }
             cProject.Current.UpdateCVbyUserSettings();

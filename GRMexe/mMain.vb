@@ -157,10 +157,10 @@ Module mMain
                 cGRM.writelogAndConsole("Making new output files were failed !!!", True, True)
             End If
 
-            '여기서 셀 정보를 미리 알 수 있다.
+            ''여기서 셀 정보를 미리 알 수 있다.
             'Dim wsinfo As New cGetWatershedInfo(currentPrjFPN)
             'Dim mdwsid As List(Of Integer) = wsinfo.mostDownStreamWSIDs
-            ''Dim uswsid As List(Of Integer) = wsinfo.
+            'Dim uswsid As List(Of Integer) = wsinfo.
 
 
             'Dim slp As Single = wsinfo.subwatershedPars(1).minSlopeChBed
