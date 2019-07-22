@@ -942,7 +942,6 @@ namespace GRMCore
                 mProject.channel.GetValues(mProject.PrjFile);
 
                 // mProject.mEstimatedDist.GetValues(mProject.mPrjFile)
-
                 if (mProject.mSimulationType == cGRM.SimulationType.SingleEvent)
                 {
                     if (mProject.rainfall.GetValues(mProject) == false)
