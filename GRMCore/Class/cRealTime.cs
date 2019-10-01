@@ -50,6 +50,8 @@ namespace GRMCore
         private cSimulator mSimul = new cSimulator();
         private DataTable m_odt_flowcontrolinfo;
 
+        private bool mIsPrediction = false;//2019.10.01. 최. prediction 관련
+
         public static void InitializeGRMRT()
         {
             string strTmp = File.ReadAllText(@"C:\Nakdong\outputDrive.txt");
@@ -64,7 +66,7 @@ namespace GRMCore
             mGRMRT.RTStatus += new RTStatusEventHandler(mGRMRT.cRealTime_RTStatus);
         }
 
-        public void SetupGRM(string FPNprj) // fc 자료는 항상 db를 사용하는 것으로 수정, Optional FPNfcdata As String = "")
+        public void SetupGRM(string FPNprj, bool isPrediction) // fc 자료는 항상 db를 사용하는 것으로 수정, Optional FPNfcdata As String = "")
         {
             if (cProject.OpenProject(FPNprj, true) == false)
             {
@@ -75,6 +77,7 @@ namespace GRMCore
             }
             mRTProject = cProject.Current;
             mRTProject.mSimulationType = cGRM.SimulationType.RealTime;
+            mIsPrediction = isPrediction;
             if (mRTProject.SetupModelParametersAfterProjectFileWasOpened() == false)
             {
                 cGRM.writelogAndConsole("GRM setup was failed !!!", true, true);
@@ -166,7 +169,7 @@ namespace GRMCore
                     RTStatus("유출해석 시작시간과 댐방류량, inlet 자료 등 flow control 자료를 확인하시길 바랍니다.");
                 }
             }
-            mSimul.SimulateRT(mRTProject, this);
+            mSimul.SimulateRT(mRTProject, this,mIsPrediction);
         }
 
         // 2018.8.8 이제 부터는 과거  run 도 보존 . 그래서 이 함수는 미사용됨.
@@ -193,7 +196,7 @@ namespace GRMCore
             return true;
         }
 
-        public void UpdateFcDatainfoGRMRT(string strDate, int cvid, int previousOrder, int dtMIN)
+        public void UpdateFcDatainfoGRMRT(string strDate, int cvid)//, int previousOrder, int dtMIN)
         {
             string fcname = mRTProject.fcGrid.GetFCName(cvid);
             DataRow[] drs = mRTProject.fcGrid.mdtFCFlowData.Select(string.Format("CVID = {0} and datetime={1}", cvid, strDate));
@@ -226,7 +229,14 @@ namespace GRMCore
         // GName, strDate))
         // End If
         // End Sub
-        
+
+        public void ConvertFCinfoToAutoROM(string strDate, int cvid)//2019.10.01. 최. prediction 관련
+        {
+            mRTProject.fcGrid.ConvertFCTypeToAutoROM(cvid);
+            string fcname = mRTProject.fcGrid.GetFCName(cvid);
+            RTStatus(string.Format("FC 자료({0}, CVID={1}, {2}) AutoROM 으로 변경됨...", fcname, cvid, strDate));
+        }
+
         public void UpdateRainfallInformationGRMRT(string strDate)
         {
             TimeSpan tsTotalSim = DateTime.Now - sThisSimulation.mTimeThisSimulationStarted;

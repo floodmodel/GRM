@@ -59,6 +59,7 @@
     <Reference Include="System.Data.DataSetExtensions" />
   </ItemGroup>
   <ItemGroup>
+    <Import Include="gentle" />
     <Import Include="GRMCore" />
     <Import Include="GRMCore.GRMProjectTableAdapters" />
     <Import Include="Microsoft.VisualBasic" />
@@ -110,7 +111,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\gentle\gentle.csproj">
+    <ProjectReference Include="..\..\..\gentle\gentle.csproj">
       <Project>{4b541740-6dba-4832-82a8-eaf356960d89}</Project>
       <Name>gentle</Name>
     </ProjectReference>

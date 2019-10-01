@@ -195,7 +195,7 @@ namespace GRMCore
         }
 
 
-        public double CalChCSAFromQbyIteration(cCVAttribute cv, double CSAini, double Q_m3Ps)
+        public static double CalChCSAFromQbyIteration(cCVAttribute cv, double CSAini, double Q_m3Ps)
         {
             if (Q_m3Ps <= 0) { return 0; }
             double CSA_nP1 = 0;
@@ -312,7 +312,7 @@ namespace GRMCore
         /// <param name="upperRegionBaseWidth"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public double GetChannelCrossSectionPerimeter(double lowerRegionBaseWidth, double sideSlopeRightBank, 
+        public static double GetChannelCrossSectionPerimeter(double lowerRegionBaseWidth, double sideSlopeRightBank, 
             double sideSlopeLeftBank, double crossSectionDepth, bool isCompoundCrossSection, 
             double lowerRegionHeight, double lowerRegionArea, double upperRegionBaseWidth)
         {
@@ -346,7 +346,7 @@ namespace GRMCore
         /// <param name="chBankConst"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public double GetChannelDepthUsingArea(double baseWidthLowerRegion, double chCSAinput, 
+        public static double GetChannelDepthUsingArea(double baseWidthLowerRegion, double chCSAinput, 
             bool bIsCompoundCrossSection, double baseWidthUpperRegion, 
             double dblLowerRegionArea, double lowerRegionHeight, double chBankConst)
         {

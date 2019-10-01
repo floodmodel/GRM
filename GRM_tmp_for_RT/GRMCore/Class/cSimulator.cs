@@ -50,6 +50,7 @@ namespace GRMCore
 
         private cProject mProject;
         private cRealTime mRealTime;
+        private bool mIsPrediction=false;//2019.10.01. 최. prediction 관련
 
         public cOutputControlRT OutputControlRT
         {
@@ -172,10 +173,11 @@ namespace GRMCore
             }
         }
 
-        public void SimulateRT(cProject project, cRealTime realTime)
+        public void SimulateRT(cProject project, cRealTime realTime, bool isPredicion)
         {
             mProject = project;
             mRealTime = realTime;
+            mIsPrediction = isPredicion;
             ThreadStart ts = new ThreadStart(SimulateRTInner);
             Thread th = new Thread(ts);
             th.Start();
@@ -191,7 +193,7 @@ namespace GRMCore
             bool bRainfallisEnded;
             int nowT_MIN;
             int targetCalTtoPrint_MIN = 0;
-            cProjectBAK project_tm1 = new cProjectBAK ();
+            cProjectBAK project_tm1 = new cProjectBAK();
             //bool bBAKdata = false;
             int dTPrint_MIN = mRealTime.mDtPrintOutRT_min;
             int dtPrint_SEC = dTPrint_MIN * 60;
@@ -239,37 +241,44 @@ namespace GRMCore
                 {
                     // 신규 fc 자료 검색 조건
                     string ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous = "";
-                    for (int nfc = 0; nfc < mProject.fcGrid.FCCellCount ; nfc++)
+                    for (int nfc = 0; nfc < mProject.fcGrid.FCCellCount; nfc++)
                     {
                         Dataset.GRMProject.FlowControlGridRow r = (Dataset.GRMProject.FlowControlGridRow)mProject.fcGrid.mdtFCGridInfo.Rows[nfc];
                         int cvid = r.CVID;
                         if (r.ControlType.ToString() != cFlowControl.FlowControlType.ReservoirOperation.ToString())
+                            //2019.10.01. 최. prediction 관련.
+                            //prediction에서 db의 관측자료가 없으면,  ReservoirOperation,  AutoROM으로 변경되고, 다시 여기 들어오지 않는다.
                         {
                             int dt_MIN = System.Convert.ToInt32(r.DT);
-                            if (r.ControlType.ToString() != cFlowControl.FlowControlType.ReservoirOperation.ToString())
+                            //if (r.ControlType.ToString() != cFlowControl.FlowControlType.ReservoirOperation.ToString())//2019.10.01. 최. 이건 중복. 삭제 
+                            //{
+                            if (nowTsec > dt_MIN * 60 * mRealTime.mdicFCDataOrder[cvid] || mRealTime.mdicFCDataOrder[cvid] == 0)
                             {
-                                if (nowTsec > dt_MIN * 60 * mRealTime.mdicFCDataOrder[cvid] || mRealTime.mdicFCDataOrder[cvid] == 0)
+                                string TargetDataTime;
+                                TargetDataTime = mRealTime.mDateTimeStartRT.Add(new System.TimeSpan(0, (int)(mRealTime.mdicFCDataOrder[cvid] * dt_MIN), 0)).ToString("yyyyMMddHHmm");
+                                bool bAfterSleep = false;
+                                do
                                 {
-                                    string TargetDataTime;
-                                    TargetDataTime = mRealTime.mDateTimeStartRT.Add(new System.TimeSpan(0, (int)(mRealTime.mdicFCDataOrder[cvid] * dt_MIN), 0)).ToString("yyyyMMddHHmm");
-                                    bool bAfterSleep = false;
-                                    do
+                                    if (ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous != TargetDataTime | bAfterSleep)
                                     {
-                                        if (ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous != TargetDataTime | bAfterSleep)
-                                        {
-                                            mRealTime.ReadDBorCSVandMakeFCdataTableForRealTime_v2018(TargetDataTime);
-                                        }
-                                        ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous = TargetDataTime;
-                                        if (mStop == true) { return; }
-                                        mRealTime.UpdateFcDatainfoGRMRT(TargetDataTime, cvid, mRealTime.mdicFCDataOrder[cvid], dt_MIN);
-                                        if (mRealTime.mdicBNewFCdataAddedRT[cvid] == true) { break; }
-                                        Thread.Sleep(2000);
-                                        bAfterSleep = true;
+                                        mRealTime.ReadDBorCSVandMakeFCdataTableForRealTime_v2018(TargetDataTime);
                                     }
-                                    while (true);
-                                    mRealTime.mdicFCDataOrder[cvid] += 1;
+                                    ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous = TargetDataTime;
+                                    if (mStop == true) { return; }
+                                    //mRealTime.UpdateFcDatainfoGRMRT(TargetDataTime, cvid, mRealTime.mdicFCDataOrder[cvid], dt_MIN);
+                                    mRealTime.UpdateFcDatainfoGRMRT(TargetDataTime, cvid); //2019.10.01. 최. prediction 관련
+                                    if (mIsPrediction == false && mRealTime.mdicBNewFCdataAddedRT[cvid] == true) { break; }//2019.10.01. 최. prediction 관련
+                                    if (mIsPrediction == true && mRealTime.mdicBNewFCdataAddedRT[cvid] == false)//2019.10.01. 최. prediction 관련
+                                    {// 2019.10.01. 최. prediction 관련. 한번 여기 지나가면, 데이터로 모델링 하던 것은 모두 ReservoirOperation,  AutoROM으로 변경됨
+                                        mRealTime.ConvertFCinfoToAutoROM(TargetDataTime, cvid);
+                                        break;
+                                    }
+                                    Thread.Sleep(2000);
+                                    bAfterSleep = true;
                                 }
-                            }
+                                while (true);
+                                mRealTime.mdicFCDataOrder[cvid] += 1;                            }
+                            //}
                         }
                     }
                 }

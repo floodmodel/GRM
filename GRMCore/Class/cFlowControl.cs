@@ -193,6 +193,14 @@ namespace GRMCore
             return "";
         }
 
+        public void ConvertFCTypeToAutoROM(int cvid)//2019.10.01. 최. prediction 관련
+        {
+            DataRow[] drs = mdtFCGridInfo.Select(string.Format("CVID = {0}", cvid));
+            Dataset.GRMProject.FlowControlGridRow r = (Dataset.GRMProject.FlowControlGridRow)drs[0];
+            r.ControlType = cFlowControl.FlowControlType.ReservoirOperation.ToString();
+            r.ROType = cFlowControl.ROType.AutoROM.ToString();
+        }
+
         /// <summary>
         /// 계산하면서 업데이트 되는 자료만 백업한다.
         /// </summary>
@@ -219,7 +227,7 @@ namespace GRMCore
         }
 
 
-        public void CalFCReservoirOperation(cProject project, int cvan, int nowT_MIN)
+        public static void CalFCReservoirOperation(cProject project, int cvan, int nowT_MIN)
         {
             int dtsec = sThisSimulation.dtsec;
             cCVAttribute cv = project.CVs[cvan];
@@ -289,7 +297,7 @@ namespace GRMCore
             }
         }
 
-        public void ApplyReservoirAutoROM(cCVAttribute cv, double cellsize, double MaxStorageApp)
+        public static void ApplyReservoirAutoROM(cCVAttribute cv, double cellsize, double MaxStorageApp)
         {
             double sngQout_cms;
             double sngDY_m = cellsize;
@@ -307,7 +315,7 @@ namespace GRMCore
         }
 
 
-        public void ApplyReservoirRigidROM(cCVAttribute cv, double cellsize, double maxStorageApp, double RoQ_CONST_CMS)
+        public static void ApplyReservoirRigidROM(cCVAttribute cv, double cellsize, double maxStorageApp, double RoQ_CONST_CMS)
         {
             double dy_m = cellsize;
             double sngQout_cms;
@@ -335,7 +343,7 @@ namespace GRMCore
         }
 
 
-        public void ApplyReservoirConstantDischarge(cCVAttribute cv, double cellsize, 
+        public static void ApplyReservoirConstantDischarge(cCVAttribute cv, double cellsize, 
             double RoQ_CONST_CMS, double maxStorageApp, bool bOutflowDuration)
         {
             double dy_m = cellsize;
@@ -369,7 +377,7 @@ namespace GRMCore
         }
 
 
-        private void CalReservoirOutFlowInReservoirOperation(cCVAttribute cv, double sngQout_cms, double sngDY_m)
+        private static void CalReservoirOutFlowInReservoirOperation(cCVAttribute cv, double sngQout_cms, double sngDY_m)
         {
             if (sngQout_cms > 0)
             {
@@ -389,9 +397,9 @@ namespace GRMCore
                     cv.QCVof_i_j_m3Ps = 0;
                     cv.hCVof_i_j = 0;
                     cv.mStreamAttr.QCVch_i_j_m3Ps = sngQout_cms;
-                    cv.mStreamAttr.CSAch_i_j = mFVMsolver.CalChCSAFromQbyIteration(cv, cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.QCVch_i_j_m3Ps);
+                    cv.mStreamAttr.CSAch_i_j = cFVMSolver.CalChCSAFromQbyIteration(cv, cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.QCVch_i_j_m3Ps);
                     cv.mStreamAttr.uCVch_i_j = cv.mStreamAttr.QCVch_i_j_m3Ps / cv.mStreamAttr.CSAch_i_j;
-                    cv.mStreamAttr.hCVch_i_j = mFVMsolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, cv.mStreamAttr.CSAch_i_j,
+                    cv.mStreamAttr.hCVch_i_j = cFVMSolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, cv.mStreamAttr.CSAch_i_j,
                         cv.mStreamAttr.chIsCompoundCS, cv.mStreamAttr.chUpperRBaseWidth_m, cv.mStreamAttr.chLowerRArea_m2, cv.mStreamAttr.chLowerRHeight,
                         cv.mStreamAttr.mChBankCoeff);
                 }
@@ -410,7 +418,7 @@ namespace GRMCore
         }
 
 
-        public void CalFCReservoirOutFlow(cProject project, int nowT_MIN, int cvan)
+        public static void CalFCReservoirOutFlow(cProject project, int nowT_MIN, int cvan)
         {
             int fcCVid = project.CVs[cvan].CVID;
             DataRow[] Rows = project.fcGrid.mdtFCGridInfo.Select(string.Format("cvid = {0}", fcCVid));
@@ -435,10 +443,10 @@ namespace GRMCore
                     double.TryParse(fcDataRows[rowOrder].Field<double>("value").ToString(), out cv.mStreamAttr.QCVch_i_j_m3Ps);
                 }
 
-                cv.mStreamAttr.CSAch_i_j = mFVMsolver.CalChCSAFromQbyIteration(project.CVs[cvan], cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.QCVch_i_j_m3Ps);
+                cv.mStreamAttr.CSAch_i_j = cFVMSolver.CalChCSAFromQbyIteration(project.CVs[cvan], cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.QCVch_i_j_m3Ps);
                 // Dim csa1 As Single = .mStreamAttr.CSAch_i_j
                 // Dim chCSAini2 As Single = mFVMsolver.CalChCSAFromManningEQ(project.CVs[cvan], .mStreamAttr.CSAch_i_j, .mStreamAttr.QCVch_i_j_m3Ps)
-                cv.mStreamAttr.hCVch_i_j = mFVMsolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, 
+                cv.mStreamAttr.hCVch_i_j = cFVMSolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, 
                     cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.chIsCompoundCS, cv.mStreamAttr.chUpperRBaseWidth_m, 
                     cv.mStreamAttr.chLowerRArea_m2, cv.mStreamAttr.chLowerRHeight, cv.mStreamAttr.mChBankCoeff);
                 cv.mStreamAttr.uCVch_i_j = cv.mStreamAttr.QCVch_i_j_m3Ps / (double)cv.mStreamAttr.CSAch_i_j;
@@ -447,7 +455,7 @@ namespace GRMCore
         }
 
 
-        public void CalFCSinkOrSourceFlow(cProject project, int nowT_MIN, int cvan)
+        public static void CalFCSinkOrSourceFlow(cProject project, int nowT_MIN, int cvan)
         {
             double cellsize = project.watershed.mCellSize;
             int fcCVid = project.CVs[cvan].CVID;
@@ -504,8 +512,8 @@ namespace GRMCore
                     }
                     if (cv.mStreamAttr.QCVch_i_j_m3Ps < 0)
                     { cv.mStreamAttr.QCVch_i_j_m3Ps = 0; }
-                    cv.mStreamAttr.CSAch_i_j = mFVMsolver.CalChCSAFromQbyIteration(cv, cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.QCVch_i_j_m3Ps);
-                    cv.mStreamAttr.hCVch_i_j = mFVMsolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, 
+                    cv.mStreamAttr.CSAch_i_j = cFVMSolver.CalChCSAFromQbyIteration(cv, cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.QCVch_i_j_m3Ps);
+                    cv.mStreamAttr.hCVch_i_j = cFVMSolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, 
                         cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.chIsCompoundCS, cv.mStreamAttr.chUpperRBaseWidth_m, 
                         cv.mStreamAttr.chLowerRArea_m2, cv.mStreamAttr.chLowerRHeight, cv.mStreamAttr.mChBankCoeff);
                     cv.mStreamAttr.uCVch_i_j = cv.mStreamAttr.QCVch_i_j_m3Ps / (double)cv.mStreamAttr.CSAch_i_j;

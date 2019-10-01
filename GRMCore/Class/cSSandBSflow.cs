@@ -191,11 +191,12 @@ namespace GRMCore
             double csa = 0;
             deltaSoilDepthofUAQ_m = 0;
             cCVAttribute cv = project.CVs[cvan];
-            // 토양의 포화 상태와 상관없이 침누가 발생한다. 토양포화도가 상승 및 하강한다.
+            // 토양의 포화 상태와 상관없이 침누가 발생한다. 토양포화도가 상승 및 하강한다. 포화도가 0 이면 침누 발생 안한다.
             if (cv.soilSaturationRatio > 0)
             { soilDepthPercolated_m = cInfiltration.Kunsaturated(cv) * dtsec; }
             else
             { soilDepthPercolated_m = 0; }
+
             if (cv.soilDepth_m < soilDepthPercolated_m)
             { soilDepthPercolated_m = cv.soilDepth_m; }
             // If .FlowType <> cGRM.CellFlowType.ChannelFlow AndAlso

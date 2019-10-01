@@ -193,6 +193,14 @@ namespace GRMCore
             return "";
         }
 
+        public void ConvertFCTypeToAutoROM(int cvid)//2019.10.01. 최. prediction 관련
+        {
+            DataRow[] drs = mdtFCGridInfo.Select(string.Format("CVID = {0}", cvid));
+            Dataset.GRMProject.FlowControlGridRow r = (Dataset.GRMProject.FlowControlGridRow)drs[0];
+            r.ControlType = cFlowControl.FlowControlType.ReservoirOperation.ToString();
+            r.ROType = cFlowControl.ROType.AutoROM.ToString();
+        }
+
         /// <summary>
         /// 계산하면서 업데이트 되는 자료만 백업한다.
         /// </summary>

@@ -152,7 +152,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\gentle\gentle.csproj">
+    <ProjectReference Include="..\..\..\gentle\gentle.csproj">
       <Project>{4b541740-6dba-4832-82a8-eaf356960d89}</Project>
       <Name>gentle</Name>
     </ProjectReference>

@@ -30,6 +30,8 @@ namespace GRMCore
         private int mRFInterval_MIN;
         private int mOutPutInterval_MIN;
 
+        private bool mIsPrediction = false;//2019.10.01. 최. prediction 관련
+
         /// <summary>
         /// 외부 코드에서 ref 파일만 가지고 RT 실행시킬때 이거 호출하면 됨
         /// </summary>
@@ -37,12 +39,13 @@ namespace GRMCore
         /// <param name="dtStart">런타임 확인을 위해 사용되는 모델링 시작 시간</param>
         /// <param name="RTStartDateTime">GUI 등으로 부터 모의기간 시작시간 설정된 것을 받을때 사용</param>
         /// <remarks></remarks>
-        public cRTStarter(string fpn_REF, string strGUID, DateTime dtStart, string RTStartDateTime = "")
+        public cRTStarter(string fpn_REF, string strGUID, DateTime dtStart, bool isPrediction, string RTStartDateTime = "")
         {
             mFPN_RTEnv = fpn_REF;
             UpdateRTVariablesUsingEnvFile(mFPN_RTEnv, RTStartDateTime); // 여기서 파일로 설정
             cRealTime_Common.g_performance_log_GUID = strGUID;
             cRealTime_Common.g_dtStart_from_MonitorEXE = dtStart;
+            mIsPrediction = isPrediction;
         }
 
         private bool UpdateRTVariablesUsingEnvFile(string rtEnvFPN, string RTStartDateTime = "")
@@ -93,7 +96,7 @@ namespace GRMCore
             RTProject = null;
             cRealTime.InitializeGRMRT();
             GRMRT = cRealTime.Current;
-            GRMRT.SetupGRM(mProjectFPN);
+            GRMRT.SetupGRM(mProjectFPN, mIsPrediction);
             RTProject = cProject.Current;
 
             if (true)

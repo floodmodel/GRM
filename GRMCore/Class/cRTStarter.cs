@@ -30,6 +30,8 @@ namespace GRMCore
         private int mRFInterval_MIN;
         private int mOutPutInterval_MIN;
 
+        private bool mIsPrediction = false;//2019.10.01. 최. prediction 관련
+
         /// <summary>
         /// 외부 코드에서 ref 파일만 가지고 RT 실행시킬때 이거 호출하면 됨
         /// </summary>
@@ -93,7 +95,7 @@ namespace GRMCore
             RTProject = null;
             cRealTime.InitializeGRMRT();
             GRMRT = cRealTime.Current;
-            GRMRT.SetupGRM(mProjectFPN);
+            GRMRT.SetupGRM(mProjectFPN, mIsPrediction);
             RTProject = cProject.Current;
 
             if (true)

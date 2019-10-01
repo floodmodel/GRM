@@ -42,7 +42,7 @@ namespace GRMCore
         private cHydroCom mHydroCom = new cHydroCom();
         private cFVMSolver mFVMSolver = new cFVMSolver();
         private cInfiltration mInfiltration = new cInfiltration();
-        private cFlowControl mFC = new cFlowControl();
+        //private cFlowControl mFC = new cFlowControl();
         private cSSandBSflow mSSnBS = new cSSandBSflow();
 
         private cOutPutControl mOutputControl = new cOutPutControl();
@@ -50,6 +50,7 @@ namespace GRMCore
 
         private cProject mProject;
         private cRealTime mRealTime;
+        private bool mIsPrediction = false;//2019.10.01. 최. prediction 관련
 
         public cOutputControlRT OutputControlRT
         {
@@ -172,10 +173,11 @@ namespace GRMCore
             }
         }
 
-        public void SimulateRT(cProject project, cRealTime realTime)
+        public void SimulateRT(cProject project, cRealTime realTime, bool isPredicion)
         {
             mProject = project;
             mRealTime = realTime;
+            mIsPrediction = isPredicion;
             ThreadStart ts = new ThreadStart(SimulateRTInner);
             Thread th = new Thread(ts);
             th.Start();
@@ -191,7 +193,7 @@ namespace GRMCore
             bool bRainfallisEnded;
             int nowT_MIN;
             int targetCalTtoPrint_MIN = 0;
-            cProjectBAK project_tm1 = new cProjectBAK ();
+            cProjectBAK project_tm1 = new cProjectBAK();
             //bool bBAKdata = false;
             int dTPrint_MIN = mRealTime.mDtPrintOutRT_min;
             int dtPrint_SEC = dTPrint_MIN * 60;
@@ -239,37 +241,42 @@ namespace GRMCore
                 {
                     // 신규 fc 자료 검색 조건
                     string ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous = "";
-                    for (int nfc = 0; nfc < mProject.fcGrid.FCCellCount ; nfc++)
+                    for (int nfc = 0; nfc < mProject.fcGrid.FCCellCount; nfc++)
                     {
                         Dataset.GRMProject.FlowControlGridRow r = (Dataset.GRMProject.FlowControlGridRow)mProject.fcGrid.mdtFCGridInfo.Rows[nfc];
                         int cvid = r.CVID;
                         if (r.ControlType.ToString() != cFlowControl.FlowControlType.ReservoirOperation.ToString())
                         {
                             int dt_MIN = System.Convert.ToInt32(r.DT);
-                            if (r.ControlType.ToString() != cFlowControl.FlowControlType.ReservoirOperation.ToString())
+                            //if (r.ControlType.ToString() != cFlowControl.FlowControlType.ReservoirOperation.ToString())
+                            //{
+                            if (nowTsec > dt_MIN * 60 * mRealTime.mdicFCDataOrder[cvid] || mRealTime.mdicFCDataOrder[cvid] == 0)
                             {
-                                if (nowTsec > dt_MIN * 60 * mRealTime.mdicFCDataOrder[cvid] || mRealTime.mdicFCDataOrder[cvid] == 0)
+                                string TargetDataTime;
+                                TargetDataTime = mRealTime.mDateTimeStartRT.Add(new System.TimeSpan(0, (int)(mRealTime.mdicFCDataOrder[cvid] * dt_MIN), 0)).ToString("yyyyMMddHHmm");
+                                bool bAfterSleep = false;
+                                do
                                 {
-                                    string TargetDataTime;
-                                    TargetDataTime = mRealTime.mDateTimeStartRT.Add(new System.TimeSpan(0, (int)(mRealTime.mdicFCDataOrder[cvid] * dt_MIN), 0)).ToString("yyyyMMddHHmm");
-                                    bool bAfterSleep = false;
-                                    do
+                                    if (ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous != TargetDataTime | bAfterSleep)
                                     {
-                                        if (ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous != TargetDataTime | bAfterSleep)
-                                        {
-                                            mRealTime.ReadDBorCSVandMakeFCdataTableForRealTime_v2018(TargetDataTime);
-                                        }
-                                        ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous = TargetDataTime;
-                                        if (mStop == true) { return; }
-                                        mRealTime.UpdateFcDatainfoGRMRT(TargetDataTime, cvid, mRealTime.mdicFCDataOrder[cvid], dt_MIN);
-                                        if (mRealTime.mdicBNewFCdataAddedRT[cvid] == true) { break; }
-                                        Thread.Sleep(2000);
-                                        bAfterSleep = true;
+                                        mRealTime.ReadDBorCSVandMakeFCdataTableForRealTime_v2018(TargetDataTime);
                                     }
-                                    while (true);
-                                    mRealTime.mdicFCDataOrder[cvid] += 1;
+                                    ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous = TargetDataTime;
+                                    if (mStop == true) { return; }
+                                    mRealTime.UpdateFcDatainfoGRMRT(TargetDataTime, cvid);//, mRealTime.mdicFCDataOrder[cvid], dt_MIN);
+                                    if (mIsPrediction == false && mRealTime.mdicBNewFCdataAddedRT[cvid] == true) { break; }//2019.10.01. 최. prediction 관련
+                                    if (mIsPrediction == true && mRealTime.mdicBNewFCdataAddedRT[cvid] == false)//2019.10.01. 최. prediction 관련
+                                    {// 2019.10.01. 최. prediction 관련. 한번 여기 지나가면, 데이터로 모델링 하던 것은 모두 ReservoirOperation,  AutoROM으로 변경됨
+                                        mRealTime.ConvertFCinfoToAutoROM(TargetDataTime, cvid);
+                                        break;
+                                    }
+                                    Thread.Sleep(2000);
+                                    bAfterSleep = true;
                                 }
+                                while (true);
+                                mRealTime.mdicFCDataOrder[cvid] += 1;
                             }
+                            //}
                         }
                     }
                 }
@@ -378,7 +385,7 @@ namespace GRMCore
                 (project.CVs[cvan].FCType == cFlowControl.FlowControlType.ReservoirOutflow ||
                 project.CVs[cvan].FCType == cFlowControl.FlowControlType.Inlet))
             {
-                mFC.CalFCReservoirOutFlow(project, nowT_min, cvan);
+               cFlowControl.CalFCReservoirOutFlow(project, nowT_min, cvan);
             }
             else
             {
@@ -429,11 +436,11 @@ namespace GRMCore
                 if (double.TryParse(row.MaxStorage,out v)==false || double.TryParse(row.MaxStorageR ,out v)==false ||
                     System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR) == 0)
                 {
-                    mFC.CalFCSinkOrSourceFlow(project, nowT_min, cvan);
+                    cFlowControl.CalFCSinkOrSourceFlow(project, nowT_min, cvan);
                 }
                 else
                 {
-                    mFC.CalFCReservoirOperation(project, cvan, nowT_min);
+                    cFlowControl.CalFCReservoirOperation(project, cvan, nowT_min);
                 }
             }
         }
@@ -624,8 +631,8 @@ namespace GRMCore
                         if (qChCVini > 0)
                         {
                             double sngCAS_ini = qChCVini / (double)cv.CVDeltaX_m; // 초기값 설정
-                            chCSAini = mFVMSolver.CalChCSAFromQbyIteration(project.CVs[cvan], sngCAS_ini, qChCVini);
-                            hChCVini = mFVMSolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, chCSAini,
+                            chCSAini = cFVMSolver.CalChCSAFromQbyIteration(project.CVs[cvan], sngCAS_ini, qChCVini);
+                            hChCVini = cFVMSolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, chCSAini,
                                 cv.mStreamAttr.chIsCompoundCS, cv.mStreamAttr.chUpperRBaseWidth_m,
                                 cv.mStreamAttr.chLowerRArea_m2, cv.mStreamAttr.chLowerRHeight, cv.mStreamAttr.mChBankCoeff);
                         }
