@@ -1,0 +1,272 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="GRMProject" targetNamespace="http://tempuri.org/GRMProject.xsd" xmlns:mstns="http://tempuri.org/GRMProject.xsd" xmlns="http://tempuri.org/GRMProject.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections />
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="GRMProject" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="GRMProject" msprop:Generator_UserDSName="GRMProject">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="ProjectSettings" msprop:Generator_TableClassName="ProjectSettingsDataTable" msprop:Generator_TableVarName="tableProjectSettings" msprop:Generator_RowChangedName="ProjectSettingsRowChanged" msprop:Generator_TablePropName="ProjectSettings" msprop:Generator_RowDeletingName="ProjectSettingsRowDeleting" msprop:Generator_RowChangingName="ProjectSettingsRowChanging" msprop:Generator_RowEvHandlerName="ProjectSettingsRowChangeEventHandler" msprop:Generator_RowDeletedName="ProjectSettingsRowDeleted" msprop:Generator_RowClassName="ProjectSettingsRow" msprop:Generator_UserTableName="ProjectSettings" msprop:Generator_RowEvArgName="ProjectSettingsRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="GRMSimulationType" msprop:Generator_ColumnVarNameInTable="columnGRMSimulationType" msprop:Generator_ColumnPropNameInRow="GRMSimulationType" msprop:Generator_ColumnPropNameInTable="GRMSimulationTypeColumn" msprop:Generator_UserColumnName="GRMSimulationType" type="xs:string" minOccurs="0" />
+              <xs:element name="WatershedFile" msprop:Generator_ColumnVarNameInTable="columnWatershedFile" msprop:Generator_ColumnPropNameInRow="WatershedFile" msprop:Generator_ColumnPropNameInTable="WatershedFileColumn" msprop:Generator_UserColumnName="WatershedFile" type="xs:string" minOccurs="0" />
+              <xs:element name="SlopeFile" msprop:Generator_ColumnVarNameInTable="columnSlopeFile" msprop:Generator_ColumnPropNameInRow="SlopeFile" msprop:Generator_ColumnPropNameInTable="SlopeFileColumn" msprop:Generator_UserColumnName="SlopeFile" type="xs:string" minOccurs="0" />
+              <xs:element name="FlowDirectionFile" msprop:Generator_ColumnVarNameInTable="columnFlowDirectionFile" msprop:Generator_ColumnPropNameInRow="FlowDirectionFile" msprop:Generator_ColumnPropNameInTable="FlowDirectionFileColumn" msprop:Generator_UserColumnName="FlowDirectionFile" type="xs:string" minOccurs="0" />
+              <xs:element name="FlowAccumFile" msprop:Generator_ColumnVarNameInTable="columnFlowAccumFile" msprop:Generator_ColumnPropNameInRow="FlowAccumFile" msprop:Generator_ColumnPropNameInTable="FlowAccumFileColumn" msprop:Generator_UserColumnName="FlowAccumFile" type="xs:string" minOccurs="0" />
+              <xs:element name="StreamFile" msprop:Generator_ColumnVarNameInTable="columnStreamFile" msprop:Generator_ColumnPropNameInRow="StreamFile" msprop:Generator_ColumnPropNameInTable="StreamFileColumn" msprop:Generator_UserColumnName="StreamFile" type="xs:string" minOccurs="0" />
+              <xs:element name="ChannelWidthFile" msprop:Generator_ColumnVarNameInTable="columnChannelWidthFile" msprop:Generator_ColumnPropNameInRow="ChannelWidthFile" msprop:Generator_ColumnPropNameInTable="ChannelWidthFileColumn" msprop:Generator_UserColumnName="ChannelWidthFile" type="xs:string" minOccurs="0" />
+              <xs:element name="LandCoverDataType" msprop:Generator_ColumnVarNameInTable="columnLandCoverDataType" msprop:Generator_ColumnPropNameInRow="LandCoverDataType" msprop:Generator_ColumnPropNameInTable="LandCoverDataTypeColumn" msprop:Generator_UserColumnName="LandCoverDataType" type="xs:string" minOccurs="0" />
+              <xs:element name="LandCoverFile" msprop:Generator_ColumnVarNameInTable="columnLandCoverFile" msprop:Generator_ColumnPropNameInRow="LandCoverFile" msprop:Generator_ColumnPropNameInTable="LandCoverFileColumn" msprop:Generator_UserColumnName="LandCoverFile" type="xs:string" minOccurs="0" />
+              <xs:element name="LandCoverVATFile" msprop:Generator_ColumnVarNameInTable="columnLandCoverVATFile" msprop:Generator_ColumnPropNameInRow="LandCoverVATFile" msprop:Generator_ColumnPropNameInTable="LandCoverVATFileColumn" msprop:Generator_UserColumnName="LandCoverVATFile" type="xs:string" minOccurs="0" />
+              <xs:element name="ConstantRoughnessCoeff" msprop:Generator_ColumnVarNameInTable="columnConstantRoughnessCoeff" msprop:Generator_ColumnPropNameInRow="ConstantRoughnessCoeff" msprop:Generator_ColumnPropNameInTable="ConstantRoughnessCoeffColumn" msprop:Generator_UserColumnName="ConstantRoughnessCoeff" type="xs:string" minOccurs="0" />
+              <xs:element name="ConstantImperviousRatio" msprop:Generator_ColumnVarNameInTable="columnConstantImperviousRatio" msprop:Generator_ColumnPropNameInRow="ConstantImperviousRatio" msprop:Generator_ColumnPropNameInTable="ConstantImperviousRatioColumn" msprop:Generator_UserColumnName="ConstantImperviousRatio" type="xs:string" minOccurs="0" />
+              <xs:element name="SoilTextureDataType" msprop:Generator_ColumnVarNameInTable="columnSoilTextureDataType" msprop:Generator_ColumnPropNameInRow="SoilTextureDataType" msprop:Generator_ColumnPropNameInTable="SoilTextureDataTypeColumn" msprop:Generator_UserColumnName="SoilTextureDataType" type="xs:string" minOccurs="0" />
+              <xs:element name="SoilTextureFile" msprop:Generator_ColumnVarNameInTable="columnSoilTextureFile" msprop:Generator_ColumnPropNameInRow="SoilTextureFile" msprop:Generator_ColumnPropNameInTable="SoilTextureFileColumn" msprop:Generator_UserColumnName="SoilTextureFile" type="xs:string" minOccurs="0" />
+              <xs:element name="SoilTextureVATFile" msprop:Generator_ColumnVarNameInTable="columnSoilTextureVATFile" msprop:Generator_ColumnPropNameInRow="SoilTextureVATFile" msprop:Generator_ColumnPropNameInTable="SoilTextureVATFileColumn" msprop:Generator_UserColumnName="SoilTextureVATFile" type="xs:string" minOccurs="0" />
+              <xs:element name="ConstantSoilPorosity" msprop:Generator_ColumnVarNameInTable="columnConstantSoilPorosity" msprop:Generator_ColumnPropNameInRow="ConstantSoilPorosity" msprop:Generator_ColumnPropNameInTable="ConstantSoilPorosityColumn" msprop:Generator_UserColumnName="ConstantSoilPorosity" type="xs:string" minOccurs="0" />
+              <xs:element name="ConstantSoilEffPorosity" msprop:Generator_ColumnVarNameInTable="columnConstantSoilEffPorosity" msprop:Generator_ColumnPropNameInRow="ConstantSoilEffPorosity" msprop:Generator_ColumnPropNameInTable="ConstantSoilEffPorosityColumn" msprop:Generator_UserColumnName="ConstantSoilEffPorosity" type="xs:string" minOccurs="0" />
+              <xs:element name="ConstantSoilWettingFrontSuctionHead" msprop:Generator_ColumnVarNameInTable="columnConstantSoilWettingFrontSuctionHead" msprop:Generator_ColumnPropNameInRow="ConstantSoilWettingFrontSuctionHead" msprop:Generator_ColumnPropNameInTable="ConstantSoilWettingFrontSuctionHeadColumn" msprop:Generator_UserColumnName="ConstantSoilWettingFrontSuctionHead" type="xs:string" minOccurs="0" />
+              <xs:element name="ConstantSoilHydraulicConductivity" msprop:Generator_ColumnVarNameInTable="columnConstantSoilHydraulicConductivity" msprop:Generator_ColumnPropNameInRow="ConstantSoilHydraulicConductivity" msprop:Generator_ColumnPropNameInTable="ConstantSoilHydraulicConductivityColumn" msprop:Generator_UserColumnName="ConstantSoilHydraulicConductivity" type="xs:string" minOccurs="0" />
+              <xs:element name="SoilDepthDataType" msprop:Generator_ColumnVarNameInTable="columnSoilDepthDataType" msprop:Generator_ColumnPropNameInRow="SoilDepthDataType" msprop:Generator_ColumnPropNameInTable="SoilDepthDataTypeColumn" msprop:Generator_UserColumnName="SoilDepthDataType" type="xs:string" minOccurs="0" />
+              <xs:element name="SoilDepthFile" msprop:Generator_ColumnVarNameInTable="columnSoilDepthFile" msprop:Generator_ColumnPropNameInRow="SoilDepthFile" msprop:Generator_ColumnPropNameInTable="SoilDepthFileColumn" msprop:Generator_UserColumnName="SoilDepthFile" type="xs:string" minOccurs="0" />
+              <xs:element name="SoilDepthVATFile" msprop:Generator_ColumnVarNameInTable="columnSoilDepthVATFile" msprop:Generator_ColumnPropNameInRow="SoilDepthVATFile" msprop:Generator_ColumnPropNameInTable="SoilDepthVATFileColumn" msprop:Generator_UserColumnName="SoilDepthVATFile" type="xs:string" minOccurs="0" />
+              <xs:element name="ConstantSoilDepth" msprop:Generator_ColumnVarNameInTable="columnConstantSoilDepth" msprop:Generator_ColumnPropNameInRow="ConstantSoilDepth" msprop:Generator_ColumnPropNameInTable="ConstantSoilDepthColumn" msprop:Generator_UserColumnName="ConstantSoilDepth" type="xs:string" minOccurs="0" />
+              <xs:element name="InitialSoilSaturationRatioFile" msprop:Generator_ColumnVarNameInTable="columnInitialSoilSaturationRatioFile" msprop:Generator_ColumnPropNameInRow="InitialSoilSaturationRatioFile" msprop:Generator_ColumnPropNameInTable="InitialSoilSaturationRatioFileColumn" msprop:Generator_UserColumnName="InitialSoilSaturationRatioFile" type="xs:string" minOccurs="0" />
+              <xs:element name="InitialChannelFlowFile" msprop:Generator_ColumnVarNameInTable="columnInitialChannelFlowFile" msprop:Generator_ColumnPropNameInRow="InitialChannelFlowFile" msprop:Generator_ColumnPropNameInTable="InitialChannelFlowFileColumn" msprop:Generator_UserColumnName="InitialChannelFlowFile" type="xs:string" minOccurs="0" />
+              <xs:element name="RainfallDataType" msprop:Generator_ColumnVarNameInTable="columnRainfallDataType" msprop:Generator_ColumnPropNameInRow="RainfallDataType" msprop:Generator_ColumnPropNameInTable="RainfallDataTypeColumn" msprop:Generator_UserColumnName="RainfallDataType" type="xs:string" minOccurs="0" />
+              <xs:element name="RainfallInterval" msprop:Generator_ColumnVarNameInTable="columnRainfallInterval" msprop:Generator_ColumnPropNameInRow="RainfallInterval" msprop:Generator_ColumnPropNameInTable="RainfallIntervalColumn" msprop:Generator_UserColumnName="RainfallInterval" type="xs:string" minOccurs="0" />
+              <xs:element name="RainfallDataFile" msprop:Generator_ColumnVarNameInTable="columnRainfallDataFile" msprop:Generator_ColumnPropNameInRow="RainfallDataFile" msprop:Generator_ColumnPropNameInTable="RainfallDataFileColumn" msprop:Generator_UserColumnName="RainfallDataFile" type="xs:string" minOccurs="0" />
+              <xs:element name="FlowDirectionType" msdata:Caption="GridCellSize" msprop:Generator_ColumnVarNameInTable="columnFlowDirectionType" msprop:Generator_ColumnPropNameInRow="FlowDirectionType" msprop:Generator_ColumnPropNameInTable="FlowDirectionTypeColumn" msprop:Generator_UserColumnName="FlowDirectionType" type="xs:string" minOccurs="0" />
+              <xs:element name="IsParallel" msprop:Generator_ColumnVarNameInTable="columnIsParallel" msprop:Generator_ColumnPropNameInRow="IsParallel" msprop:Generator_ColumnPropNameInTable="IsParallelColumn" msprop:Generator_UserColumnName="IsParallel" type="xs:string" minOccurs="0" />
+              <xs:element name="MaxDegreeOfParallelism" msdata:Caption="IsParallel" msprop:Generator_ColumnVarNameInTable="columnMaxDegreeOfParallelism" msprop:Generator_ColumnPropNameInRow="MaxDegreeOfParallelism" msprop:Generator_ColumnPropNameInTable="MaxDegreeOfParallelismColumn" msprop:Generator_UserColumnName="MaxDegreeOfParallelism" type="xs:string" minOccurs="0" />
+              <xs:element name="SimulStartingTime" msprop:Generator_ColumnVarNameInTable="columnSimulStartingTime" msprop:Generator_ColumnPropNameInRow="SimulStartingTime" msprop:Generator_ColumnPropNameInTable="SimulStartingTimeColumn" msprop:Generator_UserColumnName="SimulStartingTime" type="xs:string" minOccurs="0" />
+              <xs:element name="SimulationDuration" msprop:Generator_ColumnVarNameInTable="columnSimulationDuration" msprop:Generator_ColumnPropNameInRow="SimulationDuration" msprop:Generator_ColumnPropNameInTable="SimulationDurationColumn" msprop:Generator_UserColumnName="SimulationDuration" type="xs:string" minOccurs="0" />
+              <xs:element name="ComputationalTimeStep" msprop:Generator_ColumnVarNameInTable="columnComputationalTimeStep" msprop:Generator_ColumnPropNameInRow="ComputationalTimeStep" msprop:Generator_ColumnPropNameInTable="ComputationalTimeStepColumn" msprop:Generator_UserColumnName="ComputationalTimeStep" type="xs:string" minOccurs="0" />
+              <xs:element name="IsFixedTimeStep" msdata:Caption="MakeASCFile" msprop:Generator_ColumnVarNameInTable="columnIsFixedTimeStep" msprop:Generator_ColumnPropNameInRow="IsFixedTimeStep" msprop:Generator_ColumnPropNameInTable="IsFixedTimeStepColumn" msprop:Generator_UserColumnName="IsFixedTimeStep" type="xs:string" minOccurs="0" />
+              <xs:element name="OutputTimeStep" msprop:Generator_ColumnVarNameInTable="columnOutputTimeStep" msprop:Generator_ColumnPropNameInRow="OutputTimeStep" msprop:Generator_ColumnPropNameInTable="OutputTimeStepColumn" msprop:Generator_UserColumnName="OutputTimeStep" type="xs:string" minOccurs="0" />
+              <xs:element name="CrossSectionType" msprop:Generator_ColumnVarNameInTable="columnCrossSectionType" msprop:Generator_ColumnPropNameInRow="CrossSectionType" msprop:Generator_ColumnPropNameInTable="CrossSectionTypeColumn" msprop:Generator_UserColumnName="CrossSectionType" type="xs:string" minOccurs="0" />
+              <xs:element name="SingleCSChannelWidthType" msprop:Generator_ColumnVarNameInTable="columnSingleCSChannelWidthType" msprop:Generator_ColumnPropNameInRow="SingleCSChannelWidthType" msprop:Generator_ColumnPropNameInTable="SingleCSChannelWidthTypeColumn" msprop:Generator_UserColumnName="SingleCSChannelWidthType" type="xs:string" minOccurs="0" />
+              <xs:element name="ChannelWidthEQc" msprop:Generator_ColumnVarNameInTable="columnChannelWidthEQc" msprop:Generator_ColumnPropNameInRow="ChannelWidthEQc" msprop:Generator_ColumnPropNameInTable="ChannelWidthEQcColumn" msprop:Generator_UserColumnName="ChannelWidthEQc" type="xs:string" minOccurs="0" />
+              <xs:element name="ChannelWidthEQd" msprop:Generator_ColumnVarNameInTable="columnChannelWidthEQd" msprop:Generator_ColumnPropNameInRow="ChannelWidthEQd" msprop:Generator_ColumnPropNameInTable="ChannelWidthEQdColumn" msprop:Generator_UserColumnName="ChannelWidthEQd" type="xs:string" minOccurs="0" />
+              <xs:element name="ChannelWidthEQe" msprop:Generator_ColumnVarNameInTable="columnChannelWidthEQe" msprop:Generator_ColumnPropNameInRow="ChannelWidthEQe" msprop:Generator_ColumnPropNameInTable="ChannelWidthEQeColumn" msprop:Generator_UserColumnName="ChannelWidthEQe" type="xs:string" minOccurs="0" />
+              <xs:element name="ChannelWidthMostDownStream" msprop:Generator_ColumnVarNameInTable="columnChannelWidthMostDownStream" msprop:Generator_ColumnPropNameInRow="ChannelWidthMostDownStream" msprop:Generator_ColumnPropNameInTable="ChannelWidthMostDownStreamColumn" msprop:Generator_UserColumnName="ChannelWidthMostDownStream" type="xs:string" minOccurs="0" />
+              <xs:element name="LowerRegionHeight" msprop:Generator_ColumnVarNameInTable="columnLowerRegionHeight" msprop:Generator_ColumnPropNameInRow="LowerRegionHeight" msprop:Generator_ColumnPropNameInTable="LowerRegionHeightColumn" msprop:Generator_UserColumnName="LowerRegionHeight" type="xs:string" minOccurs="0" />
+              <xs:element name="LowerRegionBaseWidth" msprop:Generator_ColumnVarNameInTable="columnLowerRegionBaseWidth" msprop:Generator_ColumnPropNameInRow="LowerRegionBaseWidth" msprop:Generator_ColumnPropNameInTable="LowerRegionBaseWidthColumn" msprop:Generator_UserColumnName="LowerRegionBaseWidth" type="xs:string" minOccurs="0" />
+              <xs:element name="UpperRegionBaseWidth" msprop:Generator_ColumnVarNameInTable="columnUpperRegionBaseWidth" msprop:Generator_ColumnPropNameInRow="UpperRegionBaseWidth" msprop:Generator_ColumnPropNameInTable="UpperRegionBaseWidthColumn" msprop:Generator_UserColumnName="UpperRegionBaseWidth" type="xs:string" minOccurs="0" />
+              <xs:element name="CompoundCSChannelWidthLimit" msprop:Generator_ColumnVarNameInTable="columnCompoundCSChannelWidthLimit" msprop:Generator_ColumnPropNameInRow="CompoundCSChannelWidthLimit" msprop:Generator_ColumnPropNameInTable="CompoundCSChannelWidthLimitColumn" msprop:Generator_UserColumnName="CompoundCSChannelWidthLimit" type="xs:string" minOccurs="0" />
+              <xs:element name="BankSideSlopeRight" msprop:Generator_ColumnVarNameInTable="columnBankSideSlopeRight" msprop:Generator_ColumnPropNameInRow="BankSideSlopeRight" msprop:Generator_ColumnPropNameInTable="BankSideSlopeRightColumn" msprop:Generator_UserColumnName="BankSideSlopeRight" type="xs:string" minOccurs="0" />
+              <xs:element name="BankSideSlopeLeft" msprop:Generator_ColumnVarNameInTable="columnBankSideSlopeLeft" msprop:Generator_ColumnPropNameInRow="BankSideSlopeLeft" msprop:Generator_ColumnPropNameInTable="BankSideSlopeLeftColumn" msprop:Generator_UserColumnName="BankSideSlopeLeft" type="xs:string" minOccurs="0" />
+              <xs:element name="SimulateInfiltration" msprop:Generator_ColumnVarNameInTable="columnSimulateInfiltration" msprop:Generator_ColumnPropNameInRow="SimulateInfiltration" msprop:Generator_ColumnPropNameInTable="SimulateInfiltrationColumn" msprop:Generator_UserColumnName="SimulateInfiltration" type="xs:string" minOccurs="0" />
+              <xs:element name="SimulateSubsurfaceFlow" msprop:Generator_ColumnVarNameInTable="columnSimulateSubsurfaceFlow" msprop:Generator_ColumnPropNameInRow="SimulateSubsurfaceFlow" msprop:Generator_ColumnPropNameInTable="SimulateSubsurfaceFlowColumn" msprop:Generator_UserColumnName="SimulateSubsurfaceFlow" type="xs:string" minOccurs="0" />
+              <xs:element name="SimulateBaseFlow" msprop:Generator_ColumnVarNameInTable="columnSimulateBaseFlow" msprop:Generator_ColumnPropNameInRow="SimulateBaseFlow" msprop:Generator_ColumnPropNameInTable="SimulateBaseFlowColumn" msprop:Generator_UserColumnName="SimulateBaseFlow" type="xs:string" minOccurs="0" />
+              <xs:element name="SimulateFlowControl" msprop:Generator_ColumnVarNameInTable="columnSimulateFlowControl" msprop:Generator_ColumnPropNameInRow="SimulateFlowControl" msprop:Generator_ColumnPropNameInTable="SimulateFlowControlColumn" msprop:Generator_UserColumnName="SimulateFlowControl" type="xs:string" minOccurs="0" />
+              <xs:element name="MakeIMGFile" msprop:Generator_ColumnVarNameInTable="columnMakeIMGFile" msprop:Generator_ColumnPropNameInRow="MakeIMGFile" msprop:Generator_ColumnPropNameInTable="MakeIMGFileColumn" msprop:Generator_UserColumnName="MakeIMGFile" type="xs:string" minOccurs="0" />
+              <xs:element name="MakeASCFile" msprop:Generator_ColumnVarNameInTable="columnMakeASCFile" msprop:Generator_ColumnPropNameInRow="MakeASCFile" msprop:Generator_ColumnPropNameInTable="MakeASCFileColumn" msprop:Generator_UserColumnName="MakeASCFile" type="xs:string" minOccurs="0" />
+              <xs:element name="MakeSoilSaturationDistFile" msdata:Caption="DataColumn1" msprop:Generator_ColumnVarNameInTable="columnMakeSoilSaturationDistFile" msprop:Generator_ColumnPropNameInRow="MakeSoilSaturationDistFile" msprop:Generator_ColumnPropNameInTable="MakeSoilSaturationDistFileColumn" msprop:Generator_UserColumnName="MakeSoilSaturationDistFile" type="xs:string" minOccurs="0" />
+              <xs:element name="MakeRfDistFile" msdata:Caption="DataColumn2" msprop:Generator_ColumnVarNameInTable="columnMakeRfDistFile" msprop:Generator_ColumnPropNameInRow="MakeRfDistFile" msprop:Generator_ColumnPropNameInTable="MakeRfDistFileColumn" msprop:Generator_UserColumnName="MakeRfDistFile" type="xs:string" minOccurs="0" />
+              <xs:element name="MakeRFaccDistFile" msdata:Caption="DataColumn3" msprop:Generator_ColumnVarNameInTable="columnMakeRFaccDistFile" msprop:Generator_ColumnPropNameInRow="MakeRFaccDistFile" msprop:Generator_ColumnPropNameInTable="MakeRFaccDistFileColumn" msprop:Generator_UserColumnName="MakeRFaccDistFile" type="xs:string" minOccurs="0" />
+              <xs:element name="MakeFlowDistFile" msdata:Caption="DataColumn4" msprop:Generator_ColumnVarNameInTable="columnMakeFlowDistFile" msprop:Generator_ColumnPropNameInRow="MakeFlowDistFile" msprop:Generator_ColumnPropNameInTable="MakeFlowDistFileColumn" msprop:Generator_UserColumnName="MakeFlowDistFile" type="xs:string" minOccurs="0" />
+              <xs:element name="PrintOption" msprop:Generator_ColumnVarNameInTable="columnPrintOption" msprop:Generator_ColumnPropNameInRow="PrintOption" msprop:Generator_ColumnPropNameInTable="PrintOptionColumn" msprop:Generator_UserColumnName="PrintOption" type="xs:string" minOccurs="0" />
+              <xs:element name="WriteLog" msprop:Generator_ColumnVarNameInTable="columnWriteLog" msprop:Generator_ColumnPropNameInRow="WriteLog" msprop:Generator_ColumnPropNameInTable="WriteLogColumn" msprop:Generator_UserColumnName="WriteLog" type="xs:string" minOccurs="0" />
+              <xs:element name="AboutThisProject" msprop:Generator_ColumnVarNameInTable="columnAboutThisProject" msprop:Generator_ColumnPropNameInRow="AboutThisProject" msprop:Generator_ColumnPropNameInTable="AboutThisProjectColumn" msprop:Generator_UserColumnName="AboutThisProject" type="xs:string" minOccurs="0" />
+              <xs:element name="AboutWatershed" msprop:Generator_ColumnVarNameInTable="columnAboutWatershed" msprop:Generator_ColumnPropNameInRow="AboutWatershed" msprop:Generator_ColumnPropNameInTable="AboutWatershedColumn" msprop:Generator_UserColumnName="AboutWatershed" type="xs:string" minOccurs="0" />
+              <xs:element name="AboutLandCoverMap" msprop:Generator_ColumnVarNameInTable="columnAboutLandCoverMap" msprop:Generator_ColumnPropNameInRow="AboutLandCoverMap" msprop:Generator_ColumnPropNameInTable="AboutLandCoverMapColumn" msprop:Generator_UserColumnName="AboutLandCoverMap" type="xs:string" minOccurs="0" />
+              <xs:element name="AboutSoilMap" msprop:Generator_ColumnVarNameInTable="columnAboutSoilMap" msprop:Generator_ColumnPropNameInRow="AboutSoilMap" msprop:Generator_ColumnPropNameInTable="AboutSoilMapColumn" msprop:Generator_UserColumnName="AboutSoilMap" type="xs:string" minOccurs="0" />
+              <xs:element name="AboutSoilDepthMap" msprop:Generator_ColumnVarNameInTable="columnAboutSoilDepthMap" msprop:Generator_ColumnPropNameInRow="AboutSoilDepthMap" msprop:Generator_ColumnPropNameInTable="AboutSoilDepthMapColumn" msprop:Generator_UserColumnName="AboutSoilDepthMap" type="xs:string" minOccurs="0" />
+              <xs:element name="AboutRainfall" msprop:Generator_ColumnVarNameInTable="columnAboutRainfall" msprop:Generator_ColumnPropNameInRow="AboutRainfall" msprop:Generator_ColumnPropNameInTable="AboutRainfallColumn" msprop:Generator_UserColumnName="AboutRainfall" type="xs:string" minOccurs="0" />
+              <xs:element name="ProjectSavedTime" msprop:Generator_ColumnVarNameInTable="columnProjectSavedTime" msprop:Generator_ColumnPropNameInRow="ProjectSavedTime" msprop:Generator_ColumnPropNameInTable="ProjectSavedTimeColumn" msprop:Generator_UserColumnName="ProjectSavedTime" type="xs:string" minOccurs="0" />
+              <xs:element name="ComputerName" msprop:Generator_ColumnVarNameInTable="columnComputerName" msprop:Generator_ColumnPropNameInRow="ComputerName" msprop:Generator_ColumnPropNameInTable="ComputerNameColumn" msprop:Generator_UserColumnName="ComputerName" type="xs:string" minOccurs="0" />
+              <xs:element name="ComputerUserName" msprop:Generator_ColumnVarNameInTable="columnComputerUserName" msprop:Generator_ColumnPropNameInRow="ComputerUserName" msprop:Generator_ColumnPropNameInTable="ComputerUserNameColumn" msprop:Generator_UserColumnName="ComputerUserName" type="xs:string" minOccurs="0" />
+              <xs:element name="GRMVersion" msprop:Generator_ColumnVarNameInTable="columnGRMVersion" msprop:Generator_ColumnPropNameInRow="GRMVersion" msprop:Generator_ColumnPropNameInTable="GRMVersionColumn" msprop:Generator_UserColumnName="GRMVersion" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="RTenv" msprop:Generator_TableClassName="RTenvDataTable" msprop:Generator_TableVarName="tableRTenv" msprop:Generator_RowChangedName="RTenvRowChanged" msprop:Generator_TablePropName="RTenv" msprop:Generator_RowDeletingName="RTenvRowDeleting" msprop:Generator_RowChangingName="RTenvRowChanging" msprop:Generator_RowEvHandlerName="RTenvRowChangeEventHandler" msprop:Generator_RowDeletedName="RTenvRowDeleted" msprop:Generator_RowClassName="RTenvRow" msprop:Generator_UserTableName="RTenv" msprop:Generator_RowEvArgName="RTenvRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ProjectFPN" msprop:Generator_ColumnVarNameInTable="columnProjectFPN" msprop:Generator_ColumnPropNameInRow="ProjectFPN" msprop:Generator_ColumnPropNameInTable="ProjectFPNColumn" msprop:Generator_UserColumnName="ProjectFPN" type="xs:string" minOccurs="0" />
+              <xs:element name="RTRFfolderName" msprop:Generator_ColumnVarNameInTable="columnRTRFfolderName" msprop:Generator_ColumnPropNameInRow="RTRFfolderName" msprop:Generator_ColumnPropNameInTable="RTRFfolderNameColumn" msprop:Generator_UserColumnName="RTRFfolderName" type="xs:string" minOccurs="0" />
+              <xs:element name="IsFC" msprop:Generator_ColumnVarNameInTable="columnIsFC" msprop:Generator_ColumnPropNameInRow="IsFC" msprop:Generator_ColumnPropNameInTable="IsFCColumn" msprop:Generator_UserColumnName="IsFC" type="xs:boolean" minOccurs="0" />
+              <xs:element name="IsDWSExist" msprop:Generator_ColumnVarNameInTable="columnIsDWSExist" msprop:Generator_ColumnPropNameInRow="IsDWSExist" msprop:Generator_ColumnPropNameInTable="IsDWSExistColumn" msprop:Generator_UserColumnName="IsDWSExist" type="xs:boolean" minOccurs="0" />
+              <xs:element name="CWCellColXToConnectDW" msdata:Caption="CWSSCVIDtoConnectWithDWSS" msprop:Generator_ColumnVarNameInTable="columnCWCellColXToConnectDW" msprop:Generator_ColumnPropNameInRow="CWCellColXToConnectDW" msprop:Generator_ColumnPropNameInTable="CWCellColXToConnectDWColumn" msprop:Generator_UserColumnName="CWCellColXToConnectDW" type="xs:int" minOccurs="0" />
+              <xs:element name="CWCellRowYToConnectDW" msprop:Generator_ColumnVarNameInTable="columnCWCellRowYToConnectDW" msprop:Generator_ColumnPropNameInRow="CWCellRowYToConnectDW" msprop:Generator_ColumnPropNameInTable="CWCellRowYToConnectDWColumn" msprop:Generator_UserColumnName="CWCellRowYToConnectDW" type="xs:int" minOccurs="0" />
+              <xs:element name="DWCellColXToConnectCW" msdata:Caption="DWSSCVIDtoConnectWithUWSS" msprop:Generator_ColumnVarNameInTable="columnDWCellColXToConnectCW" msprop:Generator_ColumnPropNameInRow="DWCellColXToConnectCW" msprop:Generator_ColumnPropNameInTable="DWCellColXToConnectCWColumn" msprop:Generator_UserColumnName="DWCellColXToConnectCW" type="xs:int" minOccurs="0" />
+              <xs:element name="DWCellRowYToConnectCW" msprop:Generator_ColumnVarNameInTable="columnDWCellRowYToConnectCW" msprop:Generator_ColumnPropNameInRow="DWCellRowYToConnectCW" msprop:Generator_ColumnPropNameInTable="DWCellRowYToConnectCWColumn" msprop:Generator_UserColumnName="DWCellRowYToConnectCW" type="xs:int" minOccurs="0" />
+              <xs:element name="RFInterval_min" msprop:Generator_ColumnVarNameInTable="columnRFInterval_min" msprop:Generator_ColumnPropNameInRow="RFInterval_min" msprop:Generator_ColumnPropNameInTable="RFInterval_minColumn" msprop:Generator_UserColumnName="RFInterval_min" type="xs:int" minOccurs="0" />
+              <xs:element name="OutputInterval_min" msprop:Generator_ColumnVarNameInTable="columnOutputInterval_min" msprop:Generator_ColumnPropNameInRow="OutputInterval_min" msprop:Generator_ColumnPropNameInTable="OutputInterval_minColumn" msprop:Generator_UserColumnName="OutputInterval_min" type="xs:int" minOccurs="0" />
+              <xs:element name="RTstartingTime" msprop:Generator_ColumnVarNameInTable="columnRTstartingTime" msprop:Generator_ColumnPropNameInRow="RTstartingTime" msprop:Generator_ColumnPropNameInTable="RTstartingTimeColumn" msprop:Generator_UserColumnName="RTstartingTime" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="SubWatershedSettings" msprop:Generator_TableClassName="SubWatershedSettingsDataTable" msprop:Generator_TableVarName="tableSubWatershedSettings" msprop:Generator_RowChangedName="SubWatershedSettingsRowChanged" msprop:Generator_TablePropName="SubWatershedSettings" msprop:Generator_RowDeletingName="SubWatershedSettingsRowDeleting" msprop:Generator_RowChangingName="SubWatershedSettingsRowChanging" msprop:Generator_RowEvHandlerName="SubWatershedSettingsRowChangeEventHandler" msprop:Generator_RowDeletedName="SubWatershedSettingsRowDeleted" msprop:Generator_RowClassName="SubWatershedSettingsRow" msprop:Generator_UserTableName="SubWatershedSettings" msprop:Generator_RowEvArgName="SubWatershedSettingsRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="ID" msprop:Generator_ColumnVarNameInTable="columnID" msprop:Generator_ColumnPropNameInRow="ID" msprop:Generator_ColumnPropNameInTable="IDColumn" msprop:Generator_UserColumnName="ID" type="xs:int" minOccurs="0" />
+              <xs:element name="IniSaturation" msprop:Generator_ColumnVarNameInTable="columnIniSaturation" msprop:Generator_ColumnPropNameInRow="IniSaturation" msprop:Generator_ColumnPropNameInTable="IniSaturationColumn" msprop:Generator_UserColumnName="IniSaturation" type="xs:double" />
+              <xs:element name="MinSlopeOF" msprop:Generator_ColumnVarNameInTable="columnMinSlopeOF" msprop:Generator_ColumnPropNameInRow="MinSlopeOF" msprop:Generator_ColumnPropNameInTable="MinSlopeOFColumn" msprop:Generator_UserColumnName="MinSlopeOF" type="xs:double" minOccurs="0" />
+              <xs:element name="UnsaturatedKType" msdata:Caption="CalCoefUnSaturatedK" msprop:Generator_ColumnVarNameInTable="columnUnsaturatedKType" msprop:Generator_ColumnPropNameInRow="UnsaturatedKType" msprop:Generator_ColumnPropNameInTable="UnsaturatedKTypeColumn" msprop:Generator_UserColumnName="UnsaturatedKType" type="xs:string" minOccurs="0" />
+              <xs:element name="CoefUnsaturatedK" msdata:Caption="CalCoefUnSaturatedK" msprop:Generator_ColumnVarNameInTable="columnCoefUnsaturatedK" msprop:Generator_ColumnPropNameInRow="CoefUnsaturatedK" msprop:Generator_ColumnPropNameInTable="CoefUnsaturatedKColumn" msprop:Generator_UserColumnName="CoefUnsaturatedK" type="xs:string" minOccurs="0" />
+              <xs:element name="MinSlopeChBed" msprop:Generator_ColumnVarNameInTable="columnMinSlopeChBed" msprop:Generator_ColumnPropNameInRow="MinSlopeChBed" msprop:Generator_ColumnPropNameInTable="MinSlopeChBedColumn" msprop:Generator_UserColumnName="MinSlopeChBed" type="xs:double" minOccurs="0" />
+              <xs:element name="MinChBaseWidth" msprop:Generator_ColumnVarNameInTable="columnMinChBaseWidth" msprop:Generator_ColumnPropNameInRow="MinChBaseWidth" msprop:Generator_ColumnPropNameInTable="MinChBaseWidthColumn" msprop:Generator_UserColumnName="MinChBaseWidth" type="xs:double" minOccurs="0" />
+              <xs:element name="ChRoughness" msprop:Generator_ColumnVarNameInTable="columnChRoughness" msprop:Generator_ColumnPropNameInRow="ChRoughness" msprop:Generator_ColumnPropNameInTable="ChRoughnessColumn" msprop:Generator_UserColumnName="ChRoughness" type="xs:double" minOccurs="0" />
+              <xs:element name="DryStreamOrder" msprop:Generator_ColumnVarNameInTable="columnDryStreamOrder" msprop:Generator_ColumnPropNameInRow="DryStreamOrder" msprop:Generator_ColumnPropNameInTable="DryStreamOrderColumn" msprop:Generator_UserColumnName="DryStreamOrder" type="xs:int" minOccurs="0" />
+              <xs:element name="IniFlow" msprop:Generator_ColumnVarNameInTable="columnIniFlow" msprop:Generator_ColumnPropNameInRow="IniFlow" msprop:Generator_ColumnPropNameInTable="IniFlowColumn" msprop:Generator_UserColumnName="IniFlow" type="xs:double" minOccurs="0" />
+              <xs:element name="CalCoefLCRoughness" msprop:Generator_ColumnVarNameInTable="columnCalCoefLCRoughness" msprop:Generator_ColumnPropNameInRow="CalCoefLCRoughness" msprop:Generator_ColumnPropNameInTable="CalCoefLCRoughnessColumn" msprop:Generator_UserColumnName="CalCoefLCRoughness" type="xs:double" minOccurs="0" />
+              <xs:element name="CalCoefPorosity" msprop:Generator_ColumnVarNameInTable="columnCalCoefPorosity" msprop:Generator_ColumnPropNameInRow="CalCoefPorosity" msprop:Generator_ColumnPropNameInTable="CalCoefPorosityColumn" msprop:Generator_UserColumnName="CalCoefPorosity" type="xs:double" minOccurs="0" />
+              <xs:element name="CalCoefWFSuctionHead" msprop:Generator_ColumnVarNameInTable="columnCalCoefWFSuctionHead" msprop:Generator_ColumnPropNameInRow="CalCoefWFSuctionHead" msprop:Generator_ColumnPropNameInTable="CalCoefWFSuctionHeadColumn" msprop:Generator_UserColumnName="CalCoefWFSuctionHead" type="xs:double" minOccurs="0" />
+              <xs:element name="CalCoefHydraulicK" msprop:Generator_ColumnVarNameInTable="columnCalCoefHydraulicK" msprop:Generator_ColumnPropNameInRow="CalCoefHydraulicK" msprop:Generator_ColumnPropNameInTable="CalCoefHydraulicKColumn" msprop:Generator_UserColumnName="CalCoefHydraulicK" type="xs:double" minOccurs="0" />
+              <xs:element name="CalCoefSoilDepth" msprop:Generator_ColumnVarNameInTable="columnCalCoefSoilDepth" msprop:Generator_ColumnPropNameInRow="CalCoefSoilDepth" msprop:Generator_ColumnPropNameInTable="CalCoefSoilDepthColumn" msprop:Generator_UserColumnName="CalCoefSoilDepth" type="xs:double" minOccurs="0" />
+              <xs:element name="UserSet" msprop:Generator_ColumnVarNameInTable="columnUserSet" msprop:Generator_ColumnPropNameInRow="UserSet" msprop:Generator_ColumnPropNameInTable="UserSetColumn" msprop:Generator_UserColumnName="UserSet" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="WatchPoints" msprop:Generator_TableClassName="WatchPointsDataTable" msprop:Generator_TableVarName="tableWatchPoints" msprop:Generator_RowChangedName="WatchPointsRowChanged" msprop:Generator_TablePropName="WatchPoints" msprop:Generator_RowDeletingName="WatchPointsRowDeleting" msprop:Generator_RowChangingName="WatchPointsRowChanging" msprop:Generator_RowEvHandlerName="WatchPointsRowChangeEventHandler" msprop:Generator_RowDeletedName="WatchPointsRowDeleted" msprop:Generator_RowClassName="WatchPointsRow" msprop:Generator_UserTableName="WatchPoints" msprop:Generator_RowEvArgName="WatchPointsRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CVID" msprop:Generator_ColumnVarNameInTable="columnCVID" msprop:Generator_ColumnPropNameInRow="CVID" msprop:Generator_ColumnPropNameInTable="CVIDColumn" msprop:Generator_UserColumnName="CVID" type="xs:int" minOccurs="0" />
+              <xs:element name="Name" msprop:Generator_ColumnVarNameInTable="columnName" msprop:Generator_ColumnPropNameInRow="Name" msprop:Generator_ColumnPropNameInTable="NameColumn" msprop:Generator_UserColumnName="Name" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ColX" msprop:Generator_ColumnVarNameInTable="columnColX" msprop:Generator_ColumnPropNameInRow="ColX" msprop:Generator_ColumnPropNameInTable="ColXColumn" msprop:Generator_UserColumnName="ColX" type="xs:int" minOccurs="0" />
+              <xs:element name="RowY" msprop:Generator_ColumnVarNameInTable="columnRowY" msprop:Generator_ColumnPropNameInRow="RowY" msprop:Generator_ColumnPropNameInTable="RowYColumn" msprop:Generator_UserColumnName="RowY" type="xs:int" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="FlowControlGrid" msprop:Generator_TableClassName="FlowControlGridDataTable" msprop:Generator_TableVarName="tableFlowControlGrid" msprop:Generator_RowChangedName="FlowControlGridRowChanged" msprop:Generator_TablePropName="FlowControlGrid" msprop:Generator_RowDeletingName="FlowControlGridRowDeleting" msprop:Generator_RowChangingName="FlowControlGridRowChanging" msprop:Generator_RowEvHandlerName="FlowControlGridRowChangeEventHandler" msprop:Generator_RowDeletedName="FlowControlGridRowDeleted" msprop:Generator_RowClassName="FlowControlGridRow" msprop:Generator_UserTableName="FlowControlGrid" msprop:Generator_RowEvArgName="FlowControlGridRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="CVID" msprop:Generator_ColumnVarNameInTable="columnCVID" msprop:Generator_ColumnPropNameInRow="CVID" msprop:Generator_ColumnPropNameInTable="CVIDColumn" msprop:Generator_UserColumnName="CVID" type="xs:int" minOccurs="0" />
+              <xs:element name="Name" msprop:Generator_ColumnVarNameInTable="columnName" msprop:Generator_ColumnPropNameInRow="Name" msprop:Generator_ColumnPropNameInTable="NameColumn" msprop:Generator_UserColumnName="Name" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ColX" msprop:Generator_ColumnVarNameInTable="columnColX" msprop:Generator_ColumnPropNameInRow="ColX" msprop:Generator_ColumnPropNameInTable="ColXColumn" msprop:Generator_UserColumnName="ColX" type="xs:int" minOccurs="0" />
+              <xs:element name="RowY" msprop:Generator_ColumnVarNameInTable="columnRowY" msprop:Generator_ColumnPropNameInRow="RowY" msprop:Generator_ColumnPropNameInTable="RowYColumn" msprop:Generator_UserColumnName="RowY" type="xs:int" minOccurs="0" />
+              <xs:element name="ControlType" msprop:Generator_ColumnVarNameInTable="columnControlType" msprop:Generator_ColumnPropNameInRow="ControlType" msprop:Generator_ColumnPropNameInTable="ControlTypeColumn" msprop:Generator_UserColumnName="ControlType" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="DT" msprop:Generator_ColumnVarNameInTable="columnDT" msprop:Generator_ColumnPropNameInRow="DT" msprop:Generator_ColumnPropNameInTable="DTColumn" msprop:Generator_UserColumnName="DT" type="xs:string" minOccurs="0" />
+              <xs:element name="FlowDataFile" msprop:Generator_ColumnVarNameInTable="columnFlowDataFile" msprop:Generator_ColumnPropNameInRow="FlowDataFile" msprop:Generator_ColumnPropNameInTable="FlowDataFileColumn" msprop:Generator_UserColumnName="FlowDataFile" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="536870910" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="IniStorage" msprop:Generator_ColumnVarNameInTable="columnIniStorage" msprop:Generator_ColumnPropNameInRow="IniStorage" msprop:Generator_ColumnPropNameInTable="IniStorageColumn" msprop:Generator_UserColumnName="IniStorage" type="xs:string" minOccurs="0" />
+              <xs:element name="MaxStorage" msprop:Generator_ColumnVarNameInTable="columnMaxStorage" msprop:Generator_ColumnPropNameInRow="MaxStorage" msprop:Generator_ColumnPropNameInTable="MaxStorageColumn" msprop:Generator_UserColumnName="MaxStorage" type="xs:string" minOccurs="0" />
+              <xs:element name="MaxStorageR" msprop:Generator_ColumnVarNameInTable="columnMaxStorageR" msprop:Generator_ColumnPropNameInRow="MaxStorageR" msprop:Generator_ColumnPropNameInTable="MaxStorageRColumn" msprop:Generator_UserColumnName="MaxStorageR" type="xs:string" minOccurs="0" />
+              <xs:element name="ROType" msprop:Generator_ColumnVarNameInTable="columnROType" msprop:Generator_ColumnPropNameInRow="ROType" msprop:Generator_ColumnPropNameInTable="ROTypeColumn" msprop:Generator_UserColumnName="ROType" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="ROConstQ" msprop:Generator_ColumnVarNameInTable="columnROConstQ" msprop:Generator_ColumnPropNameInRow="ROConstQ" msprop:Generator_ColumnPropNameInTable="ROConstQColumn" msprop:Generator_UserColumnName="ROConstQ" type="xs:string" minOccurs="0" />
+              <xs:element name="ROConstQDuration" msprop:Generator_ColumnVarNameInTable="columnROConstQDuration" msprop:Generator_ColumnPropNameInRow="ROConstQDuration" msprop:Generator_ColumnPropNameInTable="ROConstQDurationColumn" msprop:Generator_UserColumnName="ROConstQDuration" type="xs:string" minOccurs="0" />
+              <xs:element name="ROSDEqA" msprop:Generator_ColumnVarNameInTable="columnROSDEqA" msprop:Generator_ColumnPropNameInRow="ROSDEqA" msprop:Generator_ColumnPropNameInTable="ROSDEqAColumn" msprop:Generator_UserColumnName="ROSDEqA" type="xs:float" minOccurs="0" />
+              <xs:element name="ROSDEqB" msprop:Generator_ColumnVarNameInTable="columnROSDEqB" msprop:Generator_ColumnPropNameInRow="ROSDEqB" msprop:Generator_ColumnPropNameInTable="ROSDEqBColumn" msprop:Generator_UserColumnName="ROSDEqB" type="xs:float" minOccurs="0" />
+              <xs:element name="ROSDEqC" msprop:Generator_ColumnVarNameInTable="columnROSDEqC" msprop:Generator_ColumnPropNameInRow="ROSDEqC" msprop:Generator_ColumnPropNameInTable="ROSDEqCColumn" msprop:Generator_UserColumnName="ROSDEqC" type="xs:float" minOccurs="0" />
+              <xs:element name="ROSDEqD" msprop:Generator_ColumnVarNameInTable="columnROSDEqD" msprop:Generator_ColumnPropNameInRow="ROSDEqD" msprop:Generator_ColumnPropNameInTable="ROSDEqDColumn" msprop:Generator_UserColumnName="ROSDEqD" type="xs:float" minOccurs="0" />
+              <xs:element name="ROSDEqE" msprop:Generator_ColumnVarNameInTable="columnROSDEqE" msprop:Generator_ColumnPropNameInRow="ROSDEqE" msprop:Generator_ColumnPropNameInTable="ROSDEqEColumn" msprop:Generator_UserColumnName="ROSDEqE" type="xs:float" minOccurs="0" />
+              <xs:element name="ROSDEqF" msprop:Generator_ColumnVarNameInTable="columnROSDEqF" msprop:Generator_ColumnPropNameInRow="ROSDEqF" msprop:Generator_ColumnPropNameInTable="ROSDEqFColumn" msprop:Generator_UserColumnName="ROSDEqF" type="xs:float" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="GreenAmptParameter" msprop:Generator_TableClassName="GreenAmptParameterDataTable" msprop:Generator_TableVarName="tableGreenAmptParameter" msprop:Generator_RowChangedName="GreenAmptParameterRowChanged" msprop:Generator_TablePropName="GreenAmptParameter" msprop:Generator_RowDeletingName="GreenAmptParameterRowDeleting" msprop:Generator_RowChangingName="GreenAmptParameterRowChanging" msprop:Generator_RowEvHandlerName="GreenAmptParameterRowChangeEventHandler" msprop:Generator_RowDeletedName="GreenAmptParameterRowDeleted" msprop:Generator_RowClassName="GreenAmptParameterRow" msprop:Generator_UserTableName="GreenAmptParameter" msprop:Generator_RowEvArgName="GreenAmptParameterRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="GridValue" msprop:Generator_ColumnVarNameInTable="columnGridValue" msprop:Generator_ColumnPropNameInRow="GridValue" msprop:Generator_ColumnPropNameInTable="GridValueColumn" msprop:Generator_UserColumnName="GridValue" type="xs:int" minOccurs="0" />
+              <xs:element name="USERSoil" msprop:Generator_ColumnVarNameInTable="columnUSERSoil" msprop:Generator_ColumnPropNameInRow="USERSoil" msprop:Generator_ColumnPropNameInTable="USERSoilColumn" msprop:Generator_UserColumnName="USERSoil" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="GRMCode" msprop:nullValue="_throw" msprop:Generator_ColumnPropNameInRow="GRMCode" msprop:Generator_ColumnVarNameInTable="columnGRMCode" msprop:Generator_ColumnPropNameInTable="GRMCodeColumn" msprop:Generator_UserColumnName="GRMCode" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="Porosity" msprop:Generator_ColumnVarNameInTable="columnPorosity" msprop:Generator_ColumnPropNameInRow="Porosity" msprop:Generator_ColumnPropNameInTable="PorosityColumn" msprop:Generator_UserColumnName="Porosity" type="xs:double" minOccurs="0" />
+              <xs:element name="EffectivePorosity" msprop:Generator_ColumnVarNameInTable="columnEffectivePorosity" msprop:Generator_ColumnPropNameInRow="EffectivePorosity" msprop:Generator_ColumnPropNameInTable="EffectivePorosityColumn" msprop:Generator_UserColumnName="EffectivePorosity" type="xs:double" minOccurs="0" />
+              <xs:element name="WFSoilSuctionHead" msprop:Generator_ColumnVarNameInTable="columnWFSoilSuctionHead" msprop:Generator_ColumnPropNameInRow="WFSoilSuctionHead" msprop:Generator_ColumnPropNameInTable="WFSoilSuctionHeadColumn" msprop:Generator_UserColumnName="WFSoilSuctionHead" type="xs:double" minOccurs="0" />
+              <xs:element name="HydraulicConductivity" msprop:Generator_ColumnVarNameInTable="columnHydraulicConductivity" msprop:Generator_ColumnPropNameInRow="HydraulicConductivity" msprop:Generator_ColumnPropNameInTable="HydraulicConductivityColumn" msprop:Generator_UserColumnName="HydraulicConductivity" type="xs:double" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="SoilDepth" msprop:Generator_TableClassName="SoilDepthDataTable" msprop:Generator_TableVarName="tableSoilDepth" msprop:Generator_RowChangedName="SoilDepthRowChanged" msprop:Generator_TablePropName="SoilDepth" msprop:Generator_RowDeletingName="SoilDepthRowDeleting" msprop:Generator_RowChangingName="SoilDepthRowChanging" msprop:Generator_RowEvHandlerName="SoilDepthRowChangeEventHandler" msprop:Generator_RowDeletedName="SoilDepthRowDeleted" msprop:Generator_RowClassName="SoilDepthRow" msprop:Generator_UserTableName="SoilDepth" msprop:Generator_RowEvArgName="SoilDepthRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="GridValue" msprop:Generator_ColumnVarNameInTable="columnGridValue" msprop:Generator_ColumnPropNameInRow="GridValue" msprop:Generator_ColumnPropNameInTable="GridValueColumn" msprop:Generator_UserColumnName="GridValue" type="xs:int" minOccurs="0" />
+              <xs:element name="UserDepthClass" msprop:nullValue="_null" msprop:Generator_ColumnPropNameInRow="UserDepthClass" msprop:Generator_ColumnVarNameInTable="columnUserDepthClass" msprop:Generator_ColumnPropNameInTable="UserDepthClassColumn" msprop:Generator_UserColumnName="UserDepthClass" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="GRMCode" msprop:nullValue="_throw" msprop:Generator_ColumnPropNameInRow="GRMCode" msprop:Generator_ColumnVarNameInTable="columnGRMCode" msprop:Generator_ColumnPropNameInTable="GRMCodeColumn" msprop:Generator_UserColumnName="GRMCode" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="SoilDepth" msprop:Generator_ColumnVarNameInTable="columnSoilDepth" msprop:Generator_ColumnPropNameInRow="SoilDepth" msprop:Generator_ColumnPropNameInTable="SoilDepthColumn" msprop:Generator_UserColumnName="SoilDepth" type="xs:float" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="LandCover" msprop:Generator_TableClassName="LandCoverDataTable" msprop:Generator_TableVarName="tableLandCover" msprop:Generator_RowChangedName="LandCoverRowChanged" msprop:Generator_TablePropName="LandCover" msprop:Generator_RowDeletingName="LandCoverRowDeleting" msprop:Generator_RowChangingName="LandCoverRowChanging" msprop:Generator_RowEvHandlerName="LandCoverRowChangeEventHandler" msprop:Generator_RowDeletedName="LandCoverRowDeleted" msprop:Generator_RowClassName="LandCoverRow" msprop:Generator_UserTableName="LandCover" msprop:Generator_RowEvArgName="LandCoverRowChangeEvent">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="GridValue" msprop:Generator_ColumnVarNameInTable="columnGridValue" msprop:Generator_ColumnPropNameInRow="GridValue" msprop:Generator_ColumnPropNameInTable="GridValueColumn" msprop:Generator_UserColumnName="GridValue" type="xs:int" minOccurs="0" />
+              <xs:element name="UserLandCover" msprop:nullValue="_null" msprop:Generator_ColumnPropNameInRow="UserLandCover" msprop:Generator_ColumnVarNameInTable="columnUserLandCover" msprop:Generator_ColumnPropNameInTable="UserLandCoverColumn" msprop:Generator_UserColumnName="UserLandCover" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="GRMCode" msprop:nullValue="_throw" msprop:Generator_ColumnPropNameInRow="GRMCode" msprop:Generator_ColumnVarNameInTable="columnGRMCode" msprop:Generator_ColumnPropNameInTable="GRMCodeColumn" msprop:Generator_UserColumnName="GRMCode" minOccurs="0">
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:maxLength value="50" />
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:element>
+              <xs:element name="RoughnessCoefficient" msprop:Generator_ColumnVarNameInTable="columnRoughnessCoefficient" msprop:Generator_ColumnPropNameInRow="RoughnessCoefficient" msprop:Generator_ColumnPropNameInTable="RoughnessCoefficientColumn" msprop:Generator_UserColumnName="RoughnessCoefficient" type="xs:float" minOccurs="0" />
+              <xs:element name="ImperviousRatio" msprop:Generator_ColumnVarNameInTable="columnImperviousRatio" msprop:Generator_ColumnPropNameInRow="ImperviousRatio" msprop:Generator_ColumnPropNameInTable="ImperviousRatioColumn" msprop:Generator_UserColumnName="ImperviousRatio" type="xs:float" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+    <xs:unique name="WatershedSettingsKey1">
+      <xs:selector xpath=".//mstns:SubWatershedSettings" />
+      <xs:field xpath="mstns:ID" />
+    </xs:unique>
+  </xs:element>
+</xs:schema>
