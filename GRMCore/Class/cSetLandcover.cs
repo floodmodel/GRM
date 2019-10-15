@@ -76,29 +76,25 @@ namespace GRMCore
             Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjDB.ProjectSettings.Rows[0];
             if (!row.IsLandCoverDataTypeNull())
             {
-                switch (row.LandCoverDataType)
+                if (row.LandCoverDataType.ToLower() == cGRM.FileOrConst.File.ToString().ToLower())
                 {
-                    case nameof(cGRM.FileOrConst.File):
-                        {
-                            mLandCoverDataType = cGRM.FileOrConst.File;
-                            mGridLandCoverFPN = row.LandCoverFile;
-                            mLandCoverVATFPN = row.LandCoverVATFile;
-                            break;
-                        }
-                    case nameof(cGRM.FileOrConst.Constant):
-                        {
-                            mLandCoverDataType = cGRM.FileOrConst.Constant;
-                            double v = 0;
-                            if (double.TryParse(row.ConstantImperviousRatio, out v)) { mConstImperviousRatio = v; }
-                            else if (double.TryParse(row.ConstantRoughnessCoeff, out v)) { mConstRoughnessCoefficient = v; }
-                            break;
-                        }
-                    default:
-                        {
-                            throw new InvalidOperationException();
-                        }
+                    mLandCoverDataType = cGRM.FileOrConst.File;
+                    mGridLandCoverFPN = row.LandCoverFile;
+                    mLandCoverVATFPN = row.LandCoverVATFile;
+                }
+                else if (row.LandCoverDataType.ToLower() == cGRM.FileOrConst.Constant.ToString().ToLower())
+                {
+                    mLandCoverDataType = cGRM.FileOrConst.Constant;
+                    double v = 0;
+                    if (double.TryParse(row.ConstantImperviousRatio, out v)) { mConstImperviousRatio = v; }
+                    else if (double.TryParse(row.ConstantRoughnessCoeff, out v)) { mConstRoughnessCoefficient = v; }
+                }
+                else
+                {
+                    throw new InvalidOperationException();
                 }
             }
+
             if (mLandCoverDataType.Equals(cGRM.FileOrConst.File))
             {
                 mdtLandCoverInfo = new Dataset.GRMProject.LandCoverDataTable();

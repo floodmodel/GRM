@@ -45,31 +45,28 @@ namespace GRMCore
             Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prj.PrjFile.ProjectSettings.Rows[0];
             if (row.IsRainfallDataTypeNull() == false)
             {
-                switch (row.RainfallDataType)
+                if (row.RainfallDataType.ToLower() == RainfallDataType.TextFileMAP.ToString().ToLower())
+                        {
+                    mRainfallDataType = RainfallDataType.TextFileMAP;
+                }
+
+                else if (row.RainfallDataType.ToLower() == RainfallDataType.TextFileASCgrid.ToString().ToLower())
                 {
-                    case nameof(RainfallDataType.TextFileMAP):
-                        {
-                            mRainfallDataType = RainfallDataType.TextFileMAP;
-                            break;
-                        }
+                    mRainfallDataType = RainfallDataType.TextFileASCgrid;
+                }
 
-                    case nameof(RainfallDataType.TextFileASCgrid):
-                        {
-                            mRainfallDataType = RainfallDataType.TextFileASCgrid;
-                            break;
-                        }
-
-                    case nameof(RainfallDataType.TextFileASCgrid_mmPhr):
-                        {
-                            mRainfallDataType = RainfallDataType.TextFileASCgrid_mmPhr;
-                            break;
-                        }
+                else if (row.RainfallDataType.ToLower() == RainfallDataType.TextFileASCgrid_mmPhr.ToString().ToLower())
+                {
+                    mRainfallDataType = RainfallDataType.TextFileASCgrid_mmPhr;
                 }
                 int v = 0;
                 if (int.TryParse(row.RainfallInterval, out v) == true)
                 { mRainfallinterval = v; }
                 else
-                { mRainfallinterval = 0; }
+                {
+                    cGRM.writelogAndConsole(String.Format("Rainfall interval is invalid!!!"), true, true);
+                    return false;
+                }
 
             }
             mRainfallDataFilePathName = row.RainfallDataFile;

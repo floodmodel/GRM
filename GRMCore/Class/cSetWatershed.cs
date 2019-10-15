@@ -122,33 +122,26 @@ namespace GRMCore
             // End If
             if (!row.IsFlowDirectionTypeNull())
             {
-                switch (row.FlowDirectionType)
+                if (row.FlowDirectionType.ToLower() == cGRM.FlowDirectionType.StartsFromN.ToString().ToLower())
                 {
-                    case nameof(cGRM.FlowDirectionType.StartsFromN):
-                        {
-                            mFDType = cGRM.FlowDirectionType.StartsFromN;
-                            break;
-                        }
-                    case nameof(cGRM.FlowDirectionType.StartsFromNE):
-                        {
-                            mFDType = cGRM.FlowDirectionType.StartsFromNE;
-                            break;
-                        }
-                    case nameof(cGRM.FlowDirectionType.StartsFromE):
-                        {
-                            mFDType = cGRM.FlowDirectionType.StartsFromE;
-                            break;
-                        }
-                    case nameof(cGRM.FlowDirectionType.StartsFromE_TauDEM):
-                        {
-                            mFDType = cGRM.FlowDirectionType.StartsFromE_TauDEM;
-                            break;
-                        }
-                    default:
-                        {
-                            mFDType = cGRM.FlowDirectionType.StartsFromE_TauDEM;
-                            break;
-                        }
+                    mFDType = cGRM.FlowDirectionType.StartsFromN;
+                }
+                else if (row.FlowDirectionType.ToLower() == cGRM.FlowDirectionType.StartsFromNE.ToString().ToLower())
+                {
+                    mFDType = cGRM.FlowDirectionType.StartsFromNE;
+
+                }
+                else if (row.FlowDirectionType.ToLower() == cGRM.FlowDirectionType.StartsFromE.ToString().ToLower())
+                {
+                    mFDType = cGRM.FlowDirectionType.StartsFromE;
+                }
+                else if (row.FlowDirectionType.ToLower() == cGRM.FlowDirectionType.StartsFromE_TauDEM.ToString().ToLower())
+                {
+                    mFDType = cGRM.FlowDirectionType.StartsFromE_TauDEM;
+                }
+                else
+                {
+                    mFDType = cGRM.FlowDirectionType.StartsFromE_TauDEM;
                 }
             }
             else

@@ -81,13 +81,13 @@ namespace GRMCore
             Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjdb.ProjectSettings.Rows[0];
             if (!row.IsSoilTextureDataTypeNull())
             {
-                if (row.SoilTextureDataType == cGRM.FileOrConst.File.ToString())
+                if (row.SoilTextureDataType.ToLower() == cGRM.FileOrConst.File.ToString().ToLower())
                 {
                     mSoilTextureDataType = cGRM.FileOrConst.File;
                     mGridSoilTextureFPN = row.SoilTextureFile;
                     mSoilTextureVATFPN = row.SoilTextureVATFile;
                 }
-                else if (row.SoilTextureDataType == cGRM.FileOrConst.Constant.ToString())
+                else if (row.SoilTextureDataType.ToLower() == cGRM.FileOrConst.Constant.ToString().ToLower())
                 {
                     mSoilTextureDataType = cGRM.FileOrConst.Constant;
                     double v = 0;

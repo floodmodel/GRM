@@ -904,11 +904,11 @@ namespace GRMCore
                 mProject.ProjectNameOnly = Path.GetFileNameWithoutExtension(prjFPN);
                 if (!row.IsGRMSimulationTypeNull())
                 {
-                    if (row.GRMSimulationType == cGRM.SimulationType.SingleEvent.ToString())
+                    if (row.GRMSimulationType.ToLower() == cGRM.SimulationType.SingleEvent.ToString().ToLower())
                     {
                         mProject.mSimulationType = cGRM.SimulationType.SingleEvent;
                     }
-                    else if (row.GRMSimulationType == cGRM.SimulationType.RealTime.ToString())
+                    else if (row.GRMSimulationType.ToLower() == cGRM.SimulationType.RealTime.ToString().ToLower())
                     {
                         mProject.mSimulationType = cGRM.SimulationType.RealTime;
                     }
