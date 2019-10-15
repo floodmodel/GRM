@@ -16,7 +16,7 @@ namespace GRMCore
             Constant,
             TextFile,
             ReservoirOperation
-        }
+        } 
 
         public enum FlowControlType
         {
