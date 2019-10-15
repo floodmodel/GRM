@@ -26,7 +26,7 @@ namespace GRMCore
                 if (!row.IsCrossSectionTypeNull())
                 {
 
-                    if (row.CrossSectionType.ToString() == cSetCrossSection.CSTypeEnum.CSCompound.ToString())
+                    if (row.CrossSectionType.ToString().ToLower() == cSetCrossSection.CSTypeEnum.CSCompound.ToString().ToLower())
                     {
                         aCrossSection = new cSetCSCompound();
                     }

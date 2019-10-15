@@ -28,7 +28,7 @@ namespace GRMCore
         {
             //Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjdb.ProjectSettings.Rows[0];
 
-            if (row.SingleCSChannelWidthType == cSetCSSingle.CSSingleChannelWidthType.CWEquation.ToString())
+            if (row.SingleCSChannelWidthType.ToLower() == cSetCSSingle.CSSingleChannelWidthType.CWEquation.ToString().ToLower())
             {
                 mCSSingleWidthType = CSSingleChannelWidthType.CWEquation;
                 mCWEc = System.Convert.ToDouble(row.ChannelWidthEQc);
