@@ -16,17 +16,17 @@ namespace GRMCore
         }
 
         public event SimulationStepEventHandler SimulationStep;
-        public delegate void SimulationStepEventHandler(cSimulator sender, int elapsedMinutes);
+        public delegate void SimulationStepEventHandler(int elapsedMinutes);
         public event SimulationStopEventHandler SimulationStop;
         public delegate void SimulationStopEventHandler(cSimulator sender);
         public event SimulationCompleteEventHandler SimulationComplete;
-        public delegate void SimulationCompleteEventHandler(cSimulator sender);
+        public delegate void SimulationCompleteEventHandler();
         public event SimulationRaiseErrorEventHandler SimulationRaiseError;
-        public delegate void SimulationRaiseErrorEventHandler(cSimulator sender, SimulationErrors simulError, object erroData);
+        public delegate void SimulationRaiseErrorEventHandler(SimulationErrors simulError, object erroData);
         public event SimulationMultiEventStepEventHandler SimulationMultiEventStep;
         public delegate void SimulationMultiEventStepEventHandler(cSimulator sender, int eventOrder);
         public event MakeRasterOutputEventHandler MakeRasterOutput;
-        public delegate void MakeRasterOutputEventHandler(cSimulator sender, int nowTtoPrint_MIN);
+        public delegate void MakeRasterOutputEventHandler(int nowTtoPrint_MIN);
         public event SendQToAnalyzerEventHandler SendQToAnalyzer;
         public delegate void SendQToAnalyzerEventHandler(cSimulator sender, int nowTtoPrint_MIN, double interCoef);
 
@@ -169,7 +169,7 @@ namespace GRMCore
             else
             {
                 cGRM.writelogAndConsole("Simulation was completed.", cGRM.bwriteLog, false);
-                SimulationComplete(this);
+                SimulationComplete();
             }
         }
 
@@ -295,7 +295,7 @@ namespace GRMCore
                 if (mStop == true) { break; }
             }
             if (mStop == true) { SimulationStop(this); }
-            else { SimulationComplete(this); }
+            else { SimulationComplete(); }
         }
 
 
@@ -765,7 +765,7 @@ namespace GRMCore
             {
                 case cGRM.SimulationType.SingleEvent:
                     {
-                        if (SimulationStep != null) { SimulationStep(this, nowTtoPrint_MIN); }
+                        if (SimulationStep != null) { SimulationStep(nowTtoPrint_MIN); }
                         if (mProject.generalSimulEnv.mPrintOption == cGRM.GRMPrintType.All)
                         {
                             mOutputControl.WriteSimResultsToTextFileForSingleEvent(mProject, wpCount, nowTtoPrint_MIN, SumRFMeanForDTprintOut_m, coeffInterpolation, Project_tm1);
@@ -797,7 +797,7 @@ namespace GRMCore
             }
             if (mProject.generalSimulEnv.mbMakeRasterOutput == true)
             {
-                MakeRasterOutput(this, nowTtoPrint_MIN);
+                MakeRasterOutput(nowTtoPrint_MIN);
             }
 
             sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0;

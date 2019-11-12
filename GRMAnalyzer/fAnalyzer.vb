@@ -310,32 +310,31 @@ Public Class fAnalyzer
     Private Delegate Sub RasterOutputDelegate(ByVal nowTtoPrint_MIN As Integer, imgWidth As Integer, imgHeight As Integer, usingOtherThread As Boolean)
     Private Delegate Sub DrawChartDelegate(ByVal nowT_Min As Integer, interCoef As Double)
 
-    Private Sub Simulator_MakeRasterOutput(sender As cSimulator,
-                                        nowTtoPrint_MIN As Integer) Handles mSimulator.MakeRasterOutput
+    Private Sub Simulator_MakeRasterOutput(nowTtoPrint_MIN As Integer) Handles mSimulator.MakeRasterOutput
         If mbCreateDistributionFiles = True Then
             mRasterOutput.MakeDistributionFiles(nowTtoPrint_MIN, mRasterOutput.ImgWidth, mRasterOutput.ImgHeight, False)
-            Dim strNowTimeToPrintOut As String = cComTools.GetTimeToPrintOut(mproject.GeneralSimulEnv.mIsDateTimeFormat,
-                                                                             mproject.GeneralSimulEnv.mSimStartDateTime, nowTtoPrint_MIN)
+            Dim strNowTimeToPrintOut As String = cComTools.GetTimeToPrintOut(mproject.generalSimulEnv.mIsDateTimeFormat,
+                                                                             mproject.generalSimulEnv.mSimStartDateTime, nowTtoPrint_MIN)
             strNowTimeToPrintOut = cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut)
-            If mproject.GeneralSimulEnv.mbShowSoilSaturation = True Then
+            If mproject.generalSimulEnv.mbShowSoilSaturation = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPSSRDistribution, cGRM.CONST_DIST_SSR_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_SSR.Add(mIMGfpn)
                 'DrawPictureBoxUsingNewImgFile(Me.pbSSRimg, mIMGfpn)
                 DrawPictureBoxUsingBitmap(Me.pbSSRimg, mRasterOutput.mImgSSR, mIMGfpn)
             End If
-            If mproject.GeneralSimulEnv.mbShowRFdistribution = True Then
+            If mproject.generalSimulEnv.mbShowRFdistribution = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPRFDistribution, cGRM.CONST_DIST_RF_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_RF.Add(mIMGfpn)
                 'DrawPictureBoxUsingNewImgFile(Me.pbRFimg, mIMGfpn)
                 DrawPictureBoxUsingBitmap(Me.pbRFimg, mRasterOutput.mImgRF, mIMGfpn)
             End If
-            If mproject.GeneralSimulEnv.mbShowRFaccDistribution = True Then
+            If mproject.generalSimulEnv.mbShowRFaccDistribution = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPRFAccDistribution, cGRM.CONST_DIST_RFACC_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_RFAcc.Add(mIMGfpn)
                 'DrawPictureBoxUsingNewImgFile(Me.pbRFACCimg, mIMGfpn)
                 DrawPictureBoxUsingBitmap(Me.pbRFACCimg, mRasterOutput.mImgRFacc, mIMGfpn)
             End If
-            If mproject.GeneralSimulEnv.mbShowFlowDistribution = True Then
+            If mproject.generalSimulEnv.mbShowFlowDistribution = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPFlowDistribution, cGRM.CONST_DIST_FLOW_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_Flow.Add(mIMGfpn)
                 'DrawPictureBoxUsingNewImgFile(Me.pbFLOWimg, mIMGfpn)
@@ -1297,7 +1296,7 @@ Public Class fAnalyzer
 
     Private Delegate Sub CompleteSimulationActionDelegate()
 
-    Private Sub mSimulator_SimulationComplete(sender As cSimulator) Handles mSimulator.SimulationComplete
+    Private Sub mSimulator_SimulationComplete() Handles mSimulator.SimulationComplete
         If Me.InvokeRequired Then
             Dim d As New CompleteSimulationActionDelegate(AddressOf SimulationCompletedAction)
             Me.Invoke(d)

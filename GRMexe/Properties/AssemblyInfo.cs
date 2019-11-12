@@ -5,22 +5,22 @@ using System.Runtime.InteropServices;
 // 어셈블리에 대한 일반 정보는 다음 특성 집합을 통해 
 // 제어됩니다. 어셈블리와 관련된 정보를 수정하려면
 // 이러한 특성 값을 변경하세요.
-[assembly: AssemblyTitle("GRMCore")]
-[assembly: AssemblyDescription("Grid based Rainfall-runoff Model core dll")]
+[assembly: AssemblyTitle("GRM")]
+[assembly: AssemblyDescription("Grid based Rainfall-runoff Model executable file")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("KICT")]
-[assembly: AssemblyProduct("GRMCore")]
-[assembly: AssemblyCopyright("Copyright © KICT 2017")]
-[assembly: AssemblyTrademark("GRMCore")]
+[assembly: AssemblyProduct("GRM")]
+[assembly: AssemblyCopyright("Copyright ©  2017")]
+[assembly: AssemblyTrademark("GRM")]
 [assembly: AssemblyCulture("")]
 
 // ComVisible을 false로 설정하면 이 어셈블리의 형식이 COM 구성 요소에 
 // 표시되지 않습니다. COM에서 이 어셈블리의 형식에 액세스하려면
 // 해당 형식에 대해 ComVisible 특성을 true로 설정하세요.
-[assembly: ComVisible(true)]
+[assembly: ComVisible(false)]
 
 // 이 프로젝트가 COM에 노출되는 경우 다음 GUID는 typelib의 ID를 나타냅니다.
-[assembly: Guid("91b9bf5b-038a-47be-abcb-4678ee72c4f6")]
+[assembly: Guid("a643b74f-14f7-453f-9ddf-cee27f6d2bae")]
 
 // 어셈블리의 버전 정보는 다음 네 가지 값으로 구성됩니다.
 //
