@@ -66,11 +66,11 @@ namespace GRMexe
                 //mFileInfoLogCore = string.Format("{0} v{1}. Built in {2}",
                 //    anCore.Name, fvCore, fiCore.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
                 mFileInfoLogExe = string.Format("{0} v{1}. Built in {2}",
-                    fviExe.ProductName, fvExe, fiExe.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
+                   "GRM.exe", fvExe, fiExe.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
                 mFileInfoLogCore = string.Format("{0} v{1}. Built in {2}",
-                    fviCore.ProductName, fvCore, fiCore.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
+                   "GRMCore.dll", fvCore, fiCore.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
                 mFileInfoLogGentle = string.Format("{0} v{1}. Built in {2}",
-                    fviGentle.ProductName.ToString(), fvGentle, fiGentle.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
+                    "gentle.dll", fvGentle, fiGentle.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
                 Console.Write(mFileInfoLogExe + "\r\n");
                 Console.Write(mFileInfoLogCore + "\r\n");
                 Console.Write(mFileInfoLogGentle + "\r\n");
@@ -263,7 +263,7 @@ namespace GRMexe
                     mRaterFileOutput = new cRasterOutput(cProject.Current);
                 }
 
-                cGRM.writelogAndConsole(currentPrjFPN + " -> Model setup completed.", cGRM.bwriteLog, true);
+                cGRM.writelogAndConsole(currentPrjFPN + " -> Model setup completed.", true, true);
                 foreach (GRMCore.Dataset.GRMProject.WatchPointsRow row in cProject.Current.watchPoint.mdtWatchPointInfo)
                 {
                     wpNames.Add(row.Name);
@@ -378,14 +378,16 @@ namespace GRMexe
         {
             double nowStep;
             string currentProgress = "";
-            nowStep = elapsedMinutes / (double)(mSimDurationHour * 60) * 100;
+            double simDur_min = mSimDurationHour * 60.0;
+            nowStep = elapsedMinutes / simDur_min * 100;
             currentProgress = nowStep.ToString("#0");
             Console.Write("\r" + "Current progress: " + currentProgress + "%. " + mMessage);
+            cGRM.writelogAndConsole(string.Format("Current step (min) : {0} / {1}", elapsedMinutes, simDur_min), cGRM.bwriteLog, false);
         }
 
         private void simulationCompleted()
         {
-            Console.WriteLine("Simulation was completed!!");
+            cGRM.writelogAndConsole("Simulation was completed!!", true, true);
         }
 
         private void simulationRaiseError(cSimulator.SimulationErrors simulError, object erroData)
