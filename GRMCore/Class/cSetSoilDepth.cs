@@ -70,8 +70,8 @@ namespace GRMCore
             Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjdb.ProjectSettings.Rows[0];
             if (!row.IsSoilDepthDataTypeNull())
             {
-                if (row.SoilDepthDataType.ToLower() == cGRM.FileOrConst.File.ToString().ToLower()
-                        {
+                if (row.SoilDepthDataType.ToLower() == cGRM.FileOrConst.File.ToString().ToLower())
+                {
                     mSoilDepthDataType = cGRM.FileOrConst.File;
                     mGridSoilDepthFPN = row.SoilDepthFile;
                     mSoilDepthVATFPN = row.SoilDepthVATFile;
