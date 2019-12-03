@@ -289,9 +289,14 @@ namespace GRMCore
             if (bwriteConsole == true)
             { Console.WriteLine(string.Format(logtxt)); }
             if (bwriteLog == true)
-            // File.AppendAllText(fpnlog,
-            // string.Format("{0:yyyy-MM-dd HH:mm ss}", DateTime.Now) + " " + logtxt + vbCrLf)
-            { File.AppendAllText(fpnlog, logtxt + "\r\n"); }
+            //File.AppendAllText(fpnlog,
+            //string.Format("{0:yyyy-MM-dd HH:mm ss}", DateTime.Now) + " " + logtxt + vbCrLf)
+            //{ File.AppendAllText(fpnlog, logtxt + "\r\n"); }
+            {
+                File.AppendAllText(fpnlog,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}, ", DateTime.Now)
+                    + logtxt + "\r\n");
+            }
         }
 
 

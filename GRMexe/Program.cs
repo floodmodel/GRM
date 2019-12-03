@@ -25,17 +25,16 @@ namespace GRMexe
         private string mFileInfoLogCore;
         private string mFileInfoLogGentle;
         private string mFileInfos;
+        //static 
 
-
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
             Program MainRun = new Program();
             MainRun.RunGRM(args);
-            Console.ReadKey();
         }
 
 
-        public void RunGRM(string[] args)
+        private void RunGRM(string[] args)
         {
             try
             {
@@ -45,11 +44,13 @@ namespace GRMexe
                 string fpnGentle = Path.Combine(fp, "gentle.dll");
                 projectPath = fp;
                 //System.Reflection.Assembly aCore = System.Reflection.Assembly.LoadFrom(fpnCore);
-                FileVersionInfo fviGentle = FileVersionInfo.GetVersionInfo(fpnGentle);
-                FileVersionInfo fviExe = FileVersionInfo.GetVersionInfo(aExe.Location);
-                FileVersionInfo fviCore = FileVersionInfo.GetVersionInfo(fpnCore);
                 //System.Reflection.AssemblyName anExe = aExe.GetName();
                 //System.Reflection.AssemblyName anCore = aCore.GetName();
+
+
+                FileVersionInfo fviExe = FileVersionInfo.GetVersionInfo(aExe.Location);
+                FileVersionInfo fviCore = FileVersionInfo.GetVersionInfo(fpnCore);
+                FileVersionInfo fviGentle = FileVersionInfo.GetVersionInfo(fpnGentle);
                 //string fvExe = anExe.Version.Major.ToString() + "."
                 //    + anExe.Version.Minor.ToString() + "." + anExe.Version.Build.ToString();
                 //string fvCore = anCore.Version.Major.ToString() + "."
@@ -60,12 +61,16 @@ namespace GRMexe
                 FileInfo fiExe = new FileInfo(aExe.Location);
                 FileInfo fiCore = new FileInfo(fpnCore);
                 FileInfo fiGentle = new FileInfo(fpnGentle);
+                //mFileInfoLogExe = string.Format("{0} v{1}. Built in {2}",
+                //    anExe.Name, fvExe, fiExe.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
+                //mFileInfoLogCore = string.Format("{0} v{1}. Built in {2}",
+                //    anCore.Name, fvCore, fiCore.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
                 mFileInfoLogExe = string.Format("{0} v{1}. Built in {2}",
-                    fviExe.ProductName , fvExe, fiExe.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
+                   "GRM.exe", fvExe, fiExe.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
                 mFileInfoLogCore = string.Format("{0} v{1}. Built in {2}",
-                    fviCore.ProductName.ToString(), fvCore, fiCore.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
+                   "GRMCore.dll", fvCore, fiCore.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
                 mFileInfoLogGentle = string.Format("{0} v{1}. Built in {2}",
-                    fviGentle.ProductName.ToString(), fvGentle, fiGentle.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
+                    "gentle.dll", fvGentle, fiGentle.LastWriteTime.ToString("yyyy-MM-dd HH:mm"));
                 Console.Write(mFileInfoLogExe + "\r\n");
                 Console.Write(mFileInfoLogCore + "\r\n");
                 Console.Write(mFileInfoLogGentle + "\r\n");
@@ -89,10 +94,10 @@ namespace GRMexe
                     if (File.Exists(args[0].Trim()) == true)
                     {
                         prjFPN = args[0].Trim();
+
                         StartSingleRun(prjFPN, false);
                         return;
                     }
-
                     else
                     {
                         Console.WriteLine("Current project file is inavlid!!!");
@@ -170,8 +175,24 @@ namespace GRMexe
             }
         }
 
-        void StartSingleRun(string currentPrjFPN, bool bDeleteFilesExceptQ = false)
+        private void StartSingleRun(string currentPrjFPN, bool bDeleteFilesExceptQ = false)
         {
+            //    ''여기서 셀 정보를 미리 알 수 있다.
+            //'Dim WSFPN As String = "D:/Nakdong/watershed/ND_Watershed.asc"
+            //'Dim SlopeFPN As String = "D:/Nakdong/watershed/ND_Slope.asc"
+            //'Dim FdirFPN As String = "D:/Nakdong/watershed/ND_Fdr.asc"
+            //'Dim FacFPN As String = "D:/Nakdong/watershed/ND_Fac.asc"
+            //'Dim streamFPN As String = "D:/Nakdong/watershed/ND_stream.asc"
+            //'Dim lcFPN As String = "D:/Nakdong/watershed/ND_lc.asc"
+            //'Dim stFPN As String = "D:/Nakdong/watershed/ND_stexture.asc"
+            //'Dim sdFPN As String = "D:/Nakdong/watershed/ND_sdepth.asc"
+
+            //'Dim wsinfo As New cGetWatershedInfo(cGRM.FlowDirectionType.StartsFromE_TauDEM.ToString, WSFPN, SlopeFPN, FdirFPN, FacFPN, streamFPN, lcFPN, stFPN, sdFPN,,)
+            //    ''Dim cc As Integer = wsinfo.cellCountInWatershed
+            //''Dim a As Integer = wsinfo.WSIDsAll.Count
+            //''Dim aa As List(Of Integer) = wsinfo.upStreamWSIDs(1)
+            //'Dim cs As Single = wsinfo.cellSize
+
             List<string> wpNames = new List<string>();
             if (Path.GetDirectoryName(currentPrjFPN) == "")
             {
@@ -184,9 +205,10 @@ namespace GRMexe
             try
             {
                 cProject.OpenProject(currentPrjFPN, false);
-                GRMCore.cGRM.writelogAndConsole(mFileInfoLogExe, true, false);
+                cGRM.writelogAndConsole(mFileInfoLogExe, true, false);
                 cGRM.writelogAndConsole(mFileInfoLogCore, true, false);
                 cGRM.writelogAndConsole(mFileInfoLogGentle, true, false);
+                //'cGRM.writelogAndConsole(mFileInfos, true, false)
                 cProject.ValidateProjectFile(cProject.Current);
                 mSimDurationHour = (int)(cProject.Current.generalSimulEnv.mSimDurationHOUR);
                 if (cProject.Current.SetupModelParametersAfterProjectFileWasOpened() == false)
@@ -200,6 +222,40 @@ namespace GRMexe
                     cGRM.writelogAndConsole("Making new output files were failed !!!", true, true);
                 }
 
+
+                //''여기서 셀 정보를 미리 알 수 있다.
+                //'Dim wsinfo As New cGetWatershedInfo(currentPrjFPN)
+                //'Dim mdwsid As List(Of Integer) = wsinfo.mostDownStreamWSIDs
+                //'Dim uswsid As List(Of Integer) = wsinfo.
+
+                //'Dim slp As Single = wsinfo.subwatershedPars(1).minSlopeChBed
+                //'Dim ukk As String = wsinfo.subwatershedPars(1).UKType
+                //'Dim cc As Integer = wsinfo.cellCountInWatershed
+                //'wsinfo.UpdateAllSubWatershedParametersUsingNetwork()
+
+                //'Dim aa As Single = wsinfo.subwatershedPars(2).coefUK
+                //'Dim a As Integer = 1
+                //''혹은 아래의 방법
+                //'Dim WSFPN As String = cProject.Current.Watershed.mFPN_watershed
+                //'Dim SlopeFPN As String = cProject.Current.Watershed.mFPN_slope
+                //'Dim FdirFPN As String = cProject.Current.Watershed.mFPN_fdir
+                //'Dim FacFPN As String = cProject.Current.Watershed.mFPN_fac
+                //'Dim streamFPN As String = cProject.Current.Watershed.mFPN_stream
+                //'Dim lcFPN As String = cProject.Current.Landcover.mGridLandCoverFPN
+                //'Dim stFPN As String = cProject.Current.GreenAmpt.mGridSoilTextureFPN
+                //'Dim sdFPN As String = cProject.Current.SoilDepth.mGridSoilDepthFPN
+                //'wsinfo.SetOneSWSParametersAndUpdateAllSWSUsingNetwork(1, 1, 0.0001, 0.0001, 30, 0.045, 0, 1, 1, 1, 1, 1, true, 30)
+                //'Dim v As Single = wsinfo.grmPrj.SubWSPar.userPars(1).iniSaturation
+                //'Dim vv As Single = wsinfo.subwatershedPars(1).iniSaturation
+                //'Dim x As Integer = wsinfo.mostDownStreamCellArrayXColPosition
+                //'Dim y As Integer = wsinfo.mostDownStreamCellArrayYRowPosition
+                //'Dim isIn As Boolean = wsinfo.IsInWatershedArea(x, y)
+                //'Dim array() As String = wsinfo.allCellsInUpstreamArea(x, y)
+                //'Dim fd As String = wsinfo.flowDirection(x, y)
+                //'Dim lcv As Integer = wsinfo.landCoverValue(x, y)
+                //'Dim wsCount As Integer = wsinfo.WScount
+                //'Dim intStreamValue As Integer = wsinfo.streamValue(x, y)
+
                 if (cProject.Current.generalSimulEnv.mbCreateASCFile == true ||
                     cProject.Current.generalSimulEnv.mbCreateImageFile == true)
                 {
@@ -207,7 +263,7 @@ namespace GRMexe
                     mRaterFileOutput = new cRasterOutput(cProject.Current);
                 }
 
-                cGRM.writelogAndConsole(currentPrjFPN + " -> Model setup completed.", cGRM.bwriteLog, true);
+                cGRM.writelogAndConsole(currentPrjFPN + " -> Model setup completed.", true, true);
                 foreach (GRMCore.Dataset.GRMProject.WatchPointsRow row in cProject.Current.watchPoint.mdtWatchPointInfo)
                 {
                     wpNames.Add(row.Name);
@@ -231,7 +287,6 @@ namespace GRMexe
                 cGRM.writelogAndConsole(String.Format("Starting GRM project ({0}) is failed !!!", currentPrjFPN), true, true);
                 throw (ex);
             }
-
 
             try
             {
@@ -279,16 +334,16 @@ namespace GRMexe
         }
 
 
-        void waitUserKey()
+        private void waitUserKey()
         {
             Console.Write("Press any key to continue..");
             Console.ReadKey();
         }
 
-        void GRMconsoleHelp()
+        private static void GRMconsoleHelp()
         {
             Console.WriteLine();
-            Console.WriteLine("GRM v2019.");
+            Console.WriteLine("GRM v2018.09.");
             Console.WriteLine("Usage : GRM [Current project file full path and name to simulate]");
             Console.WriteLine();
             Console.WriteLine("**사용법");
@@ -323,14 +378,16 @@ namespace GRMexe
         {
             double nowStep;
             string currentProgress = "";
-            nowStep = elapsedMinutes / (double)(mSimDurationHour * 60) * 100;
+            double simDur_min = mSimDurationHour * 60.0;
+            nowStep = elapsedMinutes / simDur_min * 100;
             currentProgress = nowStep.ToString("#0");
             Console.Write("\r" + "Current progress: " + currentProgress + "%. " + mMessage);
+            cGRM.writelogAndConsole(string.Format("Current step (min) : {0} / {1}", elapsedMinutes, simDur_min), cGRM.bwriteLog, false);
         }
 
         private void simulationCompleted()
         {
-            Console.WriteLine("Simulation was completed!!");
+            cGRM.writelogAndConsole("Simulation was completed!!", true, true);
         }
 
         private void simulationRaiseError(cSimulator.SimulationErrors simulError, object erroData)

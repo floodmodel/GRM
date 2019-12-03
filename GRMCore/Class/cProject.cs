@@ -902,6 +902,7 @@ namespace GRMCore
                 mProject.ProjectPathName = prjFPN;
                 mProject.ProjectPath = Path.GetDirectoryName(prjFPN);
                 mProject.ProjectNameOnly = Path.GetFileNameWithoutExtension(prjFPN);
+                cGRM.fpnlog = prjFPN.Replace(".gmp", ".log");
                 if (!row.IsGRMSimulationTypeNull())
                 {
                     if (row.GRMSimulationType.ToLower() == cGRM.SimulationType.SingleEvent.ToString().ToLower())
@@ -987,7 +988,6 @@ namespace GRMCore
                 }
 
                 cGRM.bwriteLog = false;
-                cGRM.fpnlog = prjFPN.Replace(".gmp", ".log");
                 if (row.IsWriteLogNull() == false && row.WriteLog.ToString() == "true")
                 {
                     cGRM.bwriteLog = true;

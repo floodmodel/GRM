@@ -9,7 +9,7 @@ namespace GRMCore
     public class cOutPutControl
     {
         public static event ProcessTextEventHandler ProcessText;
-        public  delegate void ProcessTextEventHandler(string pText);
+        public delegate void ProcessTextEventHandler(string pText);
         public static event ProcessValueEventHandler ProcessValue;
         public delegate void ProcessValueEventHandler(int pValue);
 
@@ -31,7 +31,7 @@ namespace GRMCore
             meanRFSumForPrintoutTime_mm = meanRainfallSumToPrintOut_m * 1000;
             timeNow = DateTime.Now;
             TimeSpan tsTotalSim = timeNow - sThisSimulation.mTimeThisSimulationStarted;
-            lngTimeDiffFromStarting_SEC = (long) tsTotalSim.TotalSeconds;// .Seconds;//DateDiff(DateInterval.Second, cThisSimulation.mTimeThisSimulationStarted, timeNow);
+            lngTimeDiffFromStarting_SEC = (long)tsTotalSim.TotalSeconds;// .Seconds;//DateDiff(DateInterval.Second, cThisSimulation.mTimeThisSimulationStarted, timeNow);
             strNowTimeToPrintOut = cComTools.GetTimeToPrintOut(project.generalSimulEnv.mIsDateTimeFormat, project.generalSimulEnv.mSimStartDateTime, nowT_MIN);
 
             strFNPDischarge = project.OFNPDischarge;
@@ -85,7 +85,7 @@ namespace GRMCore
                 }
                 else
                 { vToPrint = "0"; }
-                 
+
                 // lineToPrint = lineToPrint + vbTab + vToPrint.Trim
                 sbQ.Append("\t" + vToPrint.Trim());
                 double sv = System.Convert.ToDouble(vToPrint);
@@ -117,7 +117,7 @@ namespace GRMCore
                         sbFCStorage.Append("\t" + project.CVs[fcCvid - 1].StorageCumulative_m3.ToString("F2"));
                     }
                 }
-                else 
+                else
                 {
                     foreach (int fcCvid in project.fcGrid.FCGridCVidList)
                     {
@@ -155,8 +155,8 @@ namespace GRMCore
                 sbWP.Append(project.CVs[cvan].soilWaterContent_m.ToString("F4") + "\t");
                 sbWP.Append(project.CVs[cvan].soilSaturationRatio.ToString("F4") + "\t");
                 sbWP.Append(project.watchPoint.RFWPGridForDtPrintout_mm[wpcvid].ToString("F2") + "\t");
-                sbWP.Append(project.watchPoint.RFUpWsMeanForDtPrintout_mm[wpcvid].ToString("F2")+ "\t");
-                sbWP.Append(project.watchPoint.QfromFCDataCMS[wpcvid].ToString("F2")+ "\t");
+                sbWP.Append(project.watchPoint.RFUpWsMeanForDtPrintout_mm[wpcvid].ToString("F2") + "\t");
+                sbWP.Append(project.watchPoint.QfromFCDataCMS[wpcvid].ToString("F2") + "\t");
                 sbWP.Append(project.CVs[cvan].StorageCumulative_m3.ToString("F2") + "\r\n");
             }
             else if (project_tm1.CVs[cvan] != null)
@@ -167,8 +167,8 @@ namespace GRMCore
                 sbWP.Append(cHydroCom.GetInterpolatedValueLinear(project_tm1.CVs[cvan].soilSaturationRatio, project.CVs[cvan].soilSaturationRatio, interCoef).ToString("F4") + "\t");
                 sbWP.Append(cHydroCom.GetInterpolatedValueLinear(project_tm1.watchPoint.RFWPGridForDtPrintout_mm[wpcvid], project.watchPoint.RFWPGridForDtPrintout_mm[wpcvid], interCoef).ToString("F2") + "\t");
                 sbWP.Append(cHydroCom.GetInterpolatedValueLinear(project_tm1.watchPoint.RFUpWsMeanForDtPrintout_mm[wpcvid], project.watchPoint.RFUpWsMeanForDtPrintout_mm[wpcvid], interCoef).ToString("F2") + "\t");
-                sbWP.Append(cHydroCom.GetInterpolatedValueLinear(project_tm1.watchPoint.QfromFCDataCMS[wpcvid], project.watchPoint.QfromFCDataCMS[wpcvid], interCoef).ToString("F2")+ "\t");
-                sbWP.Append(cHydroCom.GetInterpolatedValueLinear(project_tm1.CVs[cvan].StorageCumulative_m3, project.CVs[cvan].StorageCumulative_m3, interCoef).ToString("F2")+ "\r\n");
+                sbWP.Append(cHydroCom.GetInterpolatedValueLinear(project_tm1.watchPoint.QfromFCDataCMS[wpcvid], project.watchPoint.QfromFCDataCMS[wpcvid], interCoef).ToString("F2") + "\t");
+                sbWP.Append(cHydroCom.GetInterpolatedValueLinear(project_tm1.CVs[cvan].StorageCumulative_m3, project.CVs[cvan].StorageCumulative_m3, interCoef).ToString("F2") + "\r\n");
             }
             System.IO.File.AppendAllText(project.watchPoint.FpnWpOut[wpcvid], sbWP.ToString(), Encoding.Default);
         }
@@ -244,7 +244,7 @@ namespace GRMCore
                     else
                     { strL = project.CVs[cvanWP].mStreamAttr.QCVch_i_j_m3Ps.ToString("F2") + "\r\n"; }
                 }
-                else if (project_tm1.CVs [cvanWP] != null)
+                else if (project_tm1.CVs[cvanWP] != null)
                 {
                     if (project.CVs[cvanWP].FlowType == cGRM.CellFlowType.OverlandFlow)
                     {
@@ -275,18 +275,18 @@ namespace GRMCore
                 string strFNPFCData = project.OFNPFCData;
                 string strFNPFCStorage = project.OFNPFCStorage;
                 List<string> FPNs = new List<string>();
-                    FPNs.Add(strFNPDischarge);
-                    FPNs.Add(strFNPDepth);
-                    FPNs.Add(strFNPRFGrid);
-                    FPNs.Add(strFNPRFMean);
-                    FPNs.Add(strFNPFCData);
-                    FPNs.Add(strFNPFCStorage);
-                    foreach (Dataset.GRMProject.WatchPointsRow row in project.watchPoint.mdtWatchPointInfo.Rows)
-                    {
-                        string wpName = row.Name.ToString().Replace(",", "_");
-                        string wpfpn = Path.Combine(project.ProjectPath, project.ProjectNameOnly + "WP_" + wpName + ".out");
-                        FPNs.Add(wpfpn);
-                    }
+                FPNs.Add(strFNPDischarge);
+                FPNs.Add(strFNPDepth);
+                FPNs.Add(strFNPRFGrid);
+                FPNs.Add(strFNPRFMean);
+                FPNs.Add(strFNPFCData);
+                FPNs.Add(strFNPFCStorage);
+                foreach (Dataset.GRMProject.WatchPointsRow row in project.watchPoint.mdtWatchPointInfo.Rows)
+                {
+                    string wpName = row.Name.ToString().Replace(",", "_");
+                    string wpfpn = Path.Combine(project.ProjectPath, project.ProjectNameOnly + "WP_" + wpName + ".out");
+                    FPNs.Add(wpfpn);
+                }
 
                 bool beenRun = false;
                 foreach (string fpn in FPNs)
@@ -309,7 +309,7 @@ namespace GRMCore
                 }
 
                 if (deleteOnly == true)
-                    return true;
+                { return true; }
 
                 if (cProject.Current.generalSimulEnv.mPrintOption == cGRM.GRMPrintType.All)
                 {
@@ -345,20 +345,24 @@ namespace GRMCore
                             if (cFile.ConfirmCreateDirectory(Dpath) == false)
                             {
                                 sThisSimulation.mGRMSetupIsNormal = false;
-                                return false ;
+                                return false;
                             }
                         }
                     }
-                    if (beenRun == true)
-                    {
-                        Console.WriteLine("completed. ");
-                    }
+                }
 
+                if (beenRun == true)
+                {
+                    Console.WriteLine("completed. ");
+                }
+
+                if (cProject.Current.generalSimulEnv.mPrintOption == cGRM.GRMPrintType.All)
+                {
                     // 해더
                     string strOutPutLine;
                     string strOutputCommonHeader;
-                    strOutputCommonHeader = string.Format("Project name : {0} {1} {2} {3} by {4}{5}", project.ProjectNameWithExtension, "\t", 
-                        DateTime.Now.ToString("yyyy/MM/dd HH:mm") , "\t", cGRM.BuildInfo.ProductName, "\r\n");
+                    strOutputCommonHeader = string.Format("Project name : {0} {1} {2} {3} by {4}{5}", project.ProjectNameWithExtension, "\t",
+                        DateTime.Now.ToString("yyyy/MM/dd HH:mm"), "\t", cGRM.BuildInfo.ProductName, "\r\n");
                     string strLTime_WPName;
                     strLTime_WPName = cGRM.CONST_OUTPUT_TABLE_TIME_FIELD_NAME;
 
@@ -461,9 +465,9 @@ namespace GRMCore
                                     if (double.TryParse(row.MaxStorage, out v) == false || double.TryParse(row.MaxStorageR, out v) == false ||
                    System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR) <= 0)
 
-                                        { strResOperation = strResOperation + "\t" + "FALSE";  }
-                                        else
-                                        { strResOperation = strResOperation + "\t" + "TRUE"; }
+                                    { strResOperation = strResOperation + "\t" + "FALSE"; }
+                                    else
+                                    { strResOperation = strResOperation + "\t" + "TRUE"; }
                                 }
                             }
                             if (!row.IsIniStorageNull() && row.IniStorage != "")
