@@ -71,11 +71,11 @@ namespace GRMCore
             if (sThisSimulation.IsParallel == true)
             {
                 cGRM.writelogAndConsole(string.Format("IsParallel : {0}, Max degree of parallelism : {1}",
-                  sThisSimulation.IsParallel.ToString(), sThisSimulation.MaxDegreeOfParallelism), cGRM.bwriteLog, true);
+                  sThisSimulation.IsParallel.ToString(), sThisSimulation.MaxDegreeOfParallelism), true, true);
             }
             else
             {
-                cGRM.writelogAndConsole(string.Format("IsParallel : {0}", sThisSimulation.IsParallel.ToString()), cGRM.bwriteLog, true);
+                cGRM.writelogAndConsole(string.Format("IsParallel : {0}", sThisSimulation.IsParallel.ToString()), true, true);
             }
         }
 
