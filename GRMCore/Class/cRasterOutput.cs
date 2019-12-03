@@ -61,7 +61,7 @@ namespace GRMCore
             mImgWidth = 370; // 583
             mColCount = mProject.watershed.colCount;
             mRowCount = mProject.watershed.rowCount;
-            mASCHeaderStringAll = cTextFile.MakeHeaderString(mColCount, mRowCount, mProject.watershed.mxllcorner, mProject.watershed.myllcorner, mProject.watershed.mCellSize, mascNodataValue.ToString());
+            mASCHeaderStringAll = cTextFile.MakeHeaderString(mColCount, mRowCount, mProject.watershed.mxllcorner, mProject.watershed.myllcorner, mProject.watershed.mCellSize, 0, 0, mascNodataValue.ToString());
             mbMakeImgFile = mProject.generalSimulEnv.mbCreateImageFile;
             mbMakeASCFile = mProject.generalSimulEnv.mbCreateASCFile;
             mbMakeValueAry = false;
