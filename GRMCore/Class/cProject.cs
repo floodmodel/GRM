@@ -362,7 +362,7 @@ namespace GRMCore
                     {
                         cell.NeighborCVidFlowIntoMe = new List<int>();
                     }
-                    cCVAttribute targetCell = new cCVAttribute() ;
+                    cCVAttribute targetCell = new cCVAttribute();
                     double deltaXe;
                     int targetC;
                     int targetR;
@@ -370,7 +370,7 @@ namespace GRMCore
                         // 좌상단이 0,0 이다... 즉, 북쪽이면, row-1, 동쪽이면 col +1
                         switch (cell.FDir)
                         {
-                            case  cGRM.GRMFlowDirectionD8.NE:
+                            case cGRM.GRMFlowDirectionD8.NE:
                                 {
                                     targetC = col + 1;
                                     targetR = row - 1;
@@ -378,7 +378,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.E:
+                            case cGRM.GRMFlowDirectionD8.E:
                                 {
                                     targetC = col + 1;
                                     targetR = row;
@@ -386,7 +386,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.SE:
+                            case cGRM.GRMFlowDirectionD8.SE:
                                 {
                                     targetC = col + 1;
                                     targetR = row + 1;
@@ -394,7 +394,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.S:
+                            case cGRM.GRMFlowDirectionD8.S:
                                 {
                                     targetC = col;
                                     targetR = row + 1;
@@ -402,7 +402,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.SW:
+                            case cGRM.GRMFlowDirectionD8.SW:
                                 {
                                     targetC = col - 1;
                                     targetR = row + 1;
@@ -410,7 +410,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.W:
+                            case cGRM.GRMFlowDirectionD8.W:
                                 {
                                     targetC = col - 1;
                                     targetR = row;
@@ -418,7 +418,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.NW:
+                            case cGRM.GRMFlowDirectionD8.NW:
                                 {
                                     targetC = col - 1;
                                     targetR = row - 1;
@@ -426,7 +426,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.N:
+                            case cGRM.GRMFlowDirectionD8.N:
                                 {
                                     targetC = col;
                                     targetR = row - 1;
@@ -434,7 +434,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.NONE:
+                            case cGRM.GRMFlowDirectionD8.NONE:
                                 {
                                     targetC = -1;
                                     targetR = -1;
@@ -454,7 +454,7 @@ namespace GRMCore
                             if (targetCell == null)
                             {
                                 //WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
-                                if (WSNetwork.WSoutletCVID(cell.WSID) < 0 || cell.FAc > CVs[WSNetwork.WSoutletCVID(cell.WSID)-1].FAc)
+                                if (WSNetwork.WSoutletCVID(cell.WSID) < 0 || cell.FAc > CVs[WSNetwork.WSoutletCVID(cell.WSID) - 1].FAc)
                                 {
                                     WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
                                 }
@@ -487,10 +487,10 @@ namespace GRMCore
                             cell.DownCellidToFlow = -1;
                             cell.DeltaXDownHalf_m = deltaXe;
                             //WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
-                            if (WSNetwork.WSoutletCVID(cell.WSID) < 0 || cell.FAc > CVs[WSNetwork.WSoutletCVID(cell.WSID)-1].FAc)
+                            if (WSNetwork.WSoutletCVID(cell.WSID) < 0 || cell.FAc > CVs[WSNetwork.WSoutletCVID(cell.WSID) - 1].FAc)
                             {
                                 WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
-                            }                            
+                            }
                         }
                     }
                 }
@@ -546,13 +546,13 @@ namespace GRMCore
         private bool IsInBound(int colIdx, int rowIdy)
         {
             return colIdx >= 0 && colIdx < watershed.colCount && rowIdy >= 0 && rowIdy < watershed.rowCount;
-        }        
+        }
 
         public void UpdateCVbyUserSettings()
         {
-            for (int intR = 0; intR < watershed.rowCount ; intR++)
+            for (int intR = 0; intR < watershed.rowCount; intR++)
             {
-                for (int intC = 0; intC < watershed.colCount ; intC++)
+                for (int intC = 0; intC < watershed.colCount; intC++)
                 {
                     if (WSCells[intC, intR] == null) { continue; }
                     cCVAttribute cell = WSCells[intC, intR];
@@ -582,7 +582,7 @@ namespace GRMCore
                         cell.mStreamAttr.RoughnessCoeffCH = ups.chRoughness;
                         cell.mStreamAttr.chSideSlopeLeft = channel.CrossSections[mdWSid].LeftBankSlope;
                         cell.mStreamAttr.chSideSlopeRight = channel.CrossSections[mdWSid].RightBankSlope;
-                        cell.mStreamAttr.mChBankCoeff = 1 / channel.CrossSections[mdWSid].LeftBankSlope 
+                        cell.mStreamAttr.mChBankCoeff = 1 / channel.CrossSections[mdWSid].LeftBankSlope
                                                                     + 1 / channel.CrossSections[mdWSid].RightBankSlope;
                         //cell.mStreamAttr.chSideSlopeLeft = channel.mCrossSection.LeftBankSlope;
                         //cell.mStreamAttr.chSideSlopeRight = channel.mCrossSection.RightBankSlope;
@@ -668,8 +668,8 @@ namespace GRMCore
                     else
                     {
                     }
-                    if (cell.FlowType == cGRM.CellFlowType.ChannelFlow 
-                        || cell.LandCoverCode == cSetLandcover.LandCoverCode.WATR 
+                    if (cell.FlowType == cGRM.CellFlowType.ChannelFlow
+                        || cell.LandCoverCode == cSetLandcover.LandCoverCode.WATR
                         || cell.LandCoverCode == cSetLandcover.LandCoverCode.WTLD)
                     {
                         cell.soilSaturationRatio = 1;
@@ -716,7 +716,7 @@ namespace GRMCore
                     row = (Dataset.GRMProject.FlowControlGridRow)rows[0];
                     switch (row.ControlType)
                     {
-                        case  nameof(cFlowControl.FlowControlType.Inlet):
+                        case nameof(cFlowControl.FlowControlType.Inlet):
                             {
                                 CVs[cvid - 1].FCType = cFlowControl.FlowControlType.Inlet;
                                 break;
@@ -1163,7 +1163,7 @@ namespace GRMCore
         {
             if (cProject.Current.SetBasicCVInfo() == false) { return false; }
             if (cProject.Current.watchPoint.UpdatesWatchPointCVIDs(cProject.Current) == false) { return false; }
-            if (channel .CrossSections.Count >0)
+            if (channel.CrossSections.Count > 0)
             {
                 foreach (int wsid in channel.CrossSections.Keys)
                 {
@@ -1300,7 +1300,7 @@ namespace GRMCore
 
             if (!r.IsConstantRoughnessCoeffNull() && r.ConstantRoughnessCoeff != "")
             {
-                double v=0;
+                double v = 0;
                 if (double.TryParse(r.ConstantRoughnessCoeff, out v) == false)
                 {
                     Console.WriteLine(string.Format("ConstantRoughnessCoeff is invalid!! {0} {1}", "\r\n", r.ConstantRoughnessCoeff));
@@ -1348,7 +1348,7 @@ namespace GRMCore
 
             if (!r.IsConstantSoilPorosityNull() && r.ConstantSoilPorosity != "")
             {
-                double v=0;
+                double v = 0;
                 if (double.TryParse(r.ConstantSoilPorosity, out v) == false)
                 {
                     Console.WriteLine(string.Format("ConstantSoilPorosity is invalid!! {0} {1}", "\r\n", r.ConstantSoilPorosity));
@@ -1450,7 +1450,7 @@ namespace GRMCore
 
             if (!r.IsRainfallIntervalNull() && r.RainfallInterval != "")
             {
-                int v=0;
+                int v = 0;
                 if (int.TryParse(r.RainfallInterval, out v) == false)
                 {
                     Console.WriteLine(string.Format("Rainfall data interval is invalid!! {0} {1}", "\r\n", r.RainfallInterval));
@@ -1497,7 +1497,7 @@ namespace GRMCore
 
             if (!r.IsMaxDegreeOfParallelismNull() && r.MaxDegreeOfParallelism != "")
             {
-                int v=0;
+                int v = 0;
                 if (int.TryParse(r.MaxDegreeOfParallelism, out v) == false)
                 {
                     Console.WriteLine(string.Format("Grid cell size is invalid!! {0} {1}", "\r\n", r.MaxDegreeOfParallelism));
