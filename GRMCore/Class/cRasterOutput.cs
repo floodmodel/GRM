@@ -61,7 +61,7 @@ namespace GRMCore
             mImgWidth = 370; // 583
             mColCount = mProject.watershed.colCount;
             mRowCount = mProject.watershed.rowCount;
-            mASCHeaderStringAll = cTextFile.MakeHeaderString(mColCount, mRowCount, mProject.watershed.mxllcorner, mProject.watershed.myllcorner, mProject.watershed.mCellSize, mascNodataValue.ToString());
+            mASCHeaderStringAll = cTextFile.MakeHeaderString(mColCount, mRowCount, mProject.watershed.mxllcorner, mProject.watershed.myllcorner, mProject.watershed.mCellSize, 0, 0, mascNodataValue.ToString());
             mbMakeImgFile = mProject.generalSimulEnv.mbCreateImageFile;
             mbMakeASCFile = mProject.generalSimulEnv.mbCreateASCFile;
             mbMakeValueAry = false;
@@ -100,20 +100,26 @@ namespace GRMCore
                 if (mbMakeValueAry == true)
                 {
                     if (mbMakeArySSR == true)
+                    {
                         mArraySSR = new double[mColCount - 1 + 1, mRowCount - 1 + 1];
+                    }
                     if (mbMakeAryRF == true)
+                    {
                         mArrayRF = new double[mColCount - 1 + 1, mRowCount - 1 + 1];
+                    }
                     if (mbMakeAryRFAcc == true)
+                    {
                         mArrayRFAcc = new double[mColCount - 1 + 1, mRowCount - 1 + 1];
+                    }
                     if (mbMakeAryQ == true)
-                        mArrayQ = new double[mColCount - 1 + 1, mRowCount - 1 + 1];
+                    { mArrayQ = new double[mColCount - 1 + 1, mRowCount - 1 + 1]; }
                     GetStringArrayUsingCVAttribute(mProject.WSCells, true);
                 }
 
                 if (mbMakeArySSR == true)
                 {
                     if (Directory.Exists(mProject.OFPSSRDistribution) == false)
-                        return;
+                    { return; }
                     if (mbMakeImgFile == true)
                     {
                         mImgInfoSSR.PFN = Path.Combine(mProject.OFPSSRDistribution, cGRM.CONST_DIST_SSR_FILE_HEAD + strNowTimeToPrintOut + ".png");
@@ -131,7 +137,7 @@ namespace GRMCore
                 if (mbMakeAryRF == true)
                 {
                     if (Directory.Exists(mProject.OFPRFDistribution) == false)
-                        return;
+                    { return; }
                     if (mbMakeImgFile == true)
                     {
                         mImgInfoRF.PFN = Path.Combine(mProject.OFPRFDistribution, cGRM.CONST_DIST_RF_FILE_HEAD + strNowTimeToPrintOut + ".png");
@@ -149,7 +155,7 @@ namespace GRMCore
                 if (mbMakeAryRFAcc == true)
                 {
                     if (Directory.Exists(mProject.OFPRFAccDistribution) == false)
-                        return;
+                    { return; }
                     if (mbMakeImgFile == true)
                     {
                         mImgInfoRFAcc.PFN = Path.Combine(mProject.OFPRFAccDistribution, cGRM.CONST_DIST_RFACC_FILE_HEAD + strNowTimeToPrintOut + ".png");
@@ -167,7 +173,7 @@ namespace GRMCore
                 if (mbMakeAryQ == true)
                 {
                     if (Directory.Exists(mProject.OFPFlowDistribution) == false)
-                        return;
+                    { return; }
                     if (mbMakeImgFile == true)
                     {
                         mImgInfoFlow.PFN = Path.Combine(mProject.OFPFlowDistribution, cGRM.CONST_DIST_FLOW_FILE_HEAD + strNowTimeToPrintOut + ".png");
@@ -193,7 +199,7 @@ namespace GRMCore
             string sformat = "#0.##";
             if (isparallel == false)
             {
-                for (int nr = 0; nr < inCells.GetLength(1) ; nr++)
+                for (int nr = 0; nr < inCells.GetLength(1); nr++)
                 {
                     for (int nc = 0; nc < inCells.GetLength(0); nc++)
                     {
@@ -202,18 +208,24 @@ namespace GRMCore
                             if (inCells[nc, nr].toBeSimulated == 1)
                             {
                                 if (mbMakeArySSR == true)
-                                    mArraySSR[nc, nr] = inCells[nc, nr].soilSaturationRatio;
+                                { mArraySSR[nc, nr] = inCells[nc, nr].soilSaturationRatio; }
                                 if (mbMakeAryRF == true)
+                                {
                                     mArrayRF[nc, nr] = (inCells[nc, nr].RF_dtPrintOut_meter * 1000);
+                                }
                                 if (mbMakeAryRFAcc == true)
+                                {
                                     mArrayRFAcc[nc, nr] = (inCells[nc, nr].RFAcc_FromStartToNow_meter * 1000);
+                                }
                                 if (mbMakeAryQ == true)
                                 {
                                     double v;
                                     if (inCells[nc, nr].FlowType == cGRM.CellFlowType.OverlandFlow)
+                                    {
                                         v = inCells[nc, nr].QCVof_i_j_m3Ps;
+                                    }
                                     else
-                                        v = inCells[nc, nr].mStreamAttr.QCVch_i_j_m3Ps;
+                                    { v = inCells[nc, nr].mStreamAttr.QCVch_i_j_m3Ps; }
                                     mArrayQ[nc, nr] = v;
                                 }
                             }
@@ -221,13 +233,19 @@ namespace GRMCore
                         else
                         {
                             if (mbMakeArySSR == true)
+                            {
                                 mArraySSR[nc, nr] = -9999;
+                            }
                             if (mbMakeAryRF == true)
+                            {
                                 mArrayRF[nc, nr] = -9999;
+                            }
                             if (mbMakeAryRFAcc == true)
+                            {
                                 mArrayRFAcc[nc, nr] = -9999;
+                            }
                             if (mbMakeAryQ == true)
-                                mArrayQ[nc, nr] = -9999;
+                            { mArrayQ[nc, nr] = -9999; }
                         }
                     }
                 }
@@ -236,30 +254,44 @@ namespace GRMCore
             {
                 ParallelOptions options = new ParallelOptions();
                 if (sThisSimulation.IsParallel == true)
-                    options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
-                else
-                    options.MaxDegreeOfParallelism = -1;
-                Parallel.For(0, inCells.GetLength(1), options, delegate(int nr)
                 {
-                    for (int nc = 0; nc < inCells.GetLength(0) ; nc++)
+                    options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
+                }
+                else
+                {
+                    options.MaxDegreeOfParallelism = -1;
+                }
+                Parallel.For(0, inCells.GetLength(1), options, delegate (int nr)
+                {
+                    for (int nc = 0; nc < inCells.GetLength(0); nc++)
                     {
                         if (inCells[nc, nr] != null)
                         {
                             if (inCells[nc, nr].toBeSimulated == 1)
                             {
                                 if (mbMakeArySSR == true)
+                                {
                                     mArraySSR[nc, nr] = inCells[nc, nr].soilSaturationRatio;
+                                }
                                 if (mbMakeAryRF == true)
+                                {
                                     mArrayRF[nc, nr] = (inCells[nc, nr].RF_dtPrintOut_meter * 1000);
+                                }
                                 if (mbMakeAryRFAcc == true)
+                                {
                                     mArrayRFAcc[nc, nr] = (inCells[nc, nr].RFAcc_FromStartToNow_meter * 1000);
+                                }
                                 if (mbMakeAryQ == true)
                                 {
                                     double v;
                                     if (inCells[nc, nr].FlowType == cGRM.CellFlowType.OverlandFlow)
+                                    {
                                         v = inCells[nc, nr].QCVof_i_j_m3Ps;
+                                    }
                                     else
+                                    {
                                         v = inCells[nc, nr].mStreamAttr.QCVch_i_j_m3Ps;
+                                    }
                                     mArrayQ[nc, nr] = v;
                                 }
                             }
@@ -267,13 +299,19 @@ namespace GRMCore
                         else
                         {
                             if (mbMakeArySSR == true)
+                            {
                                 mArraySSR[nc, nr] = -9999;
+                            }
                             if (mbMakeAryRF == true)
+                            {
                                 mArrayRF[nc, nr] = -9999;
+                            }
                             if (mbMakeAryRFAcc == true)
+                            {
                                 mArrayRFAcc[nc, nr] = -9999;
+                            }
                             if (mbMakeAryQ == true)
-                                mArrayQ[nc, nr] = -9999;
+                            { mArrayQ[nc, nr] = -9999; }
                         }
                     }
                 });
@@ -291,7 +329,9 @@ namespace GRMCore
                 th.Start();
             }
             else
+            {
                 MakeImgSSRDInner();
+            }
         }
 
         private void MakeImgSSRDInner()
@@ -312,7 +352,9 @@ namespace GRMCore
                 th.Start();
             }
             else
+            {
                 MakeImgRFDInner();
+            }
         }
 
         private void MakeImgRFDInner()
@@ -334,7 +376,9 @@ namespace GRMCore
                 th.Start();
             }
             else
+            {
                 MakeImgRFAccDInner();
+            }
         }
 
         private void MakeImgRFAccDInner()
@@ -355,7 +399,9 @@ namespace GRMCore
                 th.Start();
             }
             else
+            {
                 MakeImgFlowDInner();
+            }
         }
 
         private void MakeImgFlowDInner()

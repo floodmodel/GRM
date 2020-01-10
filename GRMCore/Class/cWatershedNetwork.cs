@@ -14,6 +14,7 @@ namespace GRMCore
         private List<int> mMostDownstreamWSIDs;
 
         private Dictionary<int, int> mWSoutletCVids = new Dictionary<int, int>();
+        public Dictionary<int, int> mMostDownStreamWSIDofCurrentWS = new Dictionary<int, int>();
 
         /// <summary>
         ///   모든 유역에 대해서 상하류 셀 리스트를 0으로 초기화
@@ -44,9 +45,13 @@ namespace GRMCore
                 mWSIDsAllUps.Add(i, new List<int>());
                 mWSIDsAllDowns.Add(i, new List<int>());
                 foreach (int id in mWSIDsNearbyUp[i])
+                {
                     mWSIDsAllUps[i].Add(id);
+                }
                 foreach (int id in mWSIDsNearbyDown[i])
+                {
                     mWSIDsAllDowns[i].Add(id);
+                }
             }
 
             foreach (int nowID in mWSidList)
@@ -60,16 +65,35 @@ namespace GRMCore
                     foreach (int downID in downIDs)
                     {
                         if (!mWSIDsAllUps[downID].Contains(upID))
+                        {
                             mWSIDsAllUps[downID].Add(upID);
+                        }
                         if (!mWSIDsAllDowns[upID].Contains(downID))
+                        {
                             mWSIDsAllDowns[upID].Add(downID);
+                        }
                     }
                 }
             }
             foreach (int nowID in mWSidList)
             {
                 if (mWSIDsNearbyDown[nowID].Count == 0)
+                {
                     mMostDownstreamWSIDs.Add(nowID);
+                }
+            }
+
+            foreach (int nowID in mWSidList)
+            {
+                foreach (int mdwsid in mMostDownstreamWSIDs)
+                {
+                    if (nowID == mdwsid
+                        || mWSIDsAllUps[mdwsid].Contains(nowID) == true)
+                    {
+                        mMostDownStreamWSIDofCurrentWS.Add(nowID, mdwsid);
+                        break;
+                    }
+                }
             }
         }
 

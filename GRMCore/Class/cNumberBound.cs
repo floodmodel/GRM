@@ -32,7 +32,7 @@ namespace GRMCore
         {
             decimal value;
             if (!decimal.TryParse(strValue, out value))
-                return false;
+            { return false; }
             return Validate(value);
         }
 
@@ -41,18 +41,18 @@ namespace GRMCore
             if (IncludeMinvalue)
             {
                 if (value < Min)
-                    return false;
+                { return false; }
             }
             else if (value <= Min)
-                return false;
+            { return false; }
 
             if (IncludeMaxValue)
             {
                 if (value > Max)
-                    return false;
+                { return false; }
             }
             else if (value >= Max)
-                return false;
+            { return false; }
             return true;
         }
 
@@ -63,13 +63,13 @@ namespace GRMCore
                 string minSymbol;
                 string maxSymbol;
                 if (IncludeMinvalue)
-                    minSymbol = "≤";
+                { minSymbol = "≤"; }
                 else
-                    minSymbol = "<";
+                { minSymbol = "<"; }
                 if (IncludeMaxValue)
-                    maxSymbol = "≤";
+                { maxSymbol = "≤"; }
                 else
-                    maxSymbol = "<";
+                { maxSymbol = "<"; }
                 return string.Format("[{0}] is invalid. {3}  {1}{4}{0}{5}{2}", ValueName, Min, Max, "\r\n", minSymbol, maxSymbol);
             }
         }

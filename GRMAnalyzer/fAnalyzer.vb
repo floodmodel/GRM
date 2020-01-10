@@ -38,6 +38,11 @@ Public Class fAnalyzer
         'Me.tbFPNObsData.Text = "D:\Github\TestSet_GRM\AnalyzerTest\Qobs - 복사본.txt"
         sThisSimulation.mAnalyzerSet = False
         Me.tbChart.Width = 470
+        Dim fiExe As New FileInfo(Path.Combine(My.Application.Info.DirectoryPath, "GRMAnalyzer.exe"))
+        Dim fvExe As String = FileVersionInfo.GetVersionInfo(fiExe.FullName).FileMajorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiExe.FullName).FileMinorPart.ToString + "." + FileVersionInfo.GetVersionInfo(fiExe.FullName).FileBuildPart.ToString
+        Dim FileInfoLogExe As String = String.Format("{0} v{1}. Built in {2}", fiExe.Name.ToString(), fvExe, fiExe.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
+        Me.Text = FileInfoLogExe
+
     End Sub
 
     Private Sub btStartGRMorApplySettings_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btStartGRMorApplySettings.Click
@@ -203,7 +208,7 @@ Public Class fAnalyzer
                         RFsims.Add(i, 0)
                     End If
                 Next
-                mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, Qsims, LegendsSim, RFsims, xLabels, mMaxPrintoutCount)
+                mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, Qsims, LegendsSim, RFsims, xLabels, mMaxPrintoutCount, mproject.generalSimulEnv.mIsDateTimeFormat)
 
                 Dim dt As New GRMCore.Dataset.GRMProject.WatchPointsDataTable
                 For rn As Integer = 0 To LegendsSim.Count - 1
@@ -226,18 +231,21 @@ Public Class fAnalyzer
                         xLabels(n) = labelList(n)
                     Next
                 Else
-                    xLabels = Nothing
+                    xLabels = New Dictionary(Of Integer, String)
+                    For n As Integer = 0 To mMaxPrintoutCount - 1
+                        xLabels(n) = ((mproject.generalSimulEnv.mPrintOutTimeStepMIN * n) / 60).ToString()
+                    Next
+                    'xLabels = Nothing
                 End If
                 If mproject.WatchPoint.WPCount > 0 Then
                     For Each row As GRMCore.Dataset.GRMProject.WatchPointsRow In mproject.watchPoint.mdtWatchPointInfo.Rows
                         LegendsSim.Add(row.Name)
                     Next
                 End If
-                If mproject.GeneralSimulEnv.mIsDateTimeFormat = True Then
-                    mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, LegendsSim, xLabels, mMaxPrintoutCount)
-                Else
-                    mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, LegendsSim, mMaxPrintoutCount)
-                End If
+                'If mproject.GeneralSimulEnv.mIsDateTimeFormat = True Then
+                mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, LegendsSim, xLabels, mMaxPrintoutCount, mproject.generalSimulEnv.mIsDateTimeFormat)               'Else
+                '    mChart = New cChart(pbChartMain, pbChartRF, Qobss, LegendsObs, LegendsSim, mMaxPrintoutCount)
+                'End If
             End If
             Call SetTrackBar(mMaxPrintoutCount)
             'Call SetTrackBar(mChart.MaxCountOfData)
@@ -302,32 +310,31 @@ Public Class fAnalyzer
     Private Delegate Sub RasterOutputDelegate(ByVal nowTtoPrint_MIN As Integer, imgWidth As Integer, imgHeight As Integer, usingOtherThread As Boolean)
     Private Delegate Sub DrawChartDelegate(ByVal nowT_Min As Integer, interCoef As Double)
 
-    Private Sub Simulator_MakeRasterOutput(sender As cSimulator,
-                                        nowTtoPrint_MIN As Integer) Handles mSimulator.MakeRasterOutput
+    Private Sub Simulator_MakeRasterOutput(nowTtoPrint_MIN As Integer) Handles mSimulator.MakeRasterOutput
         If mbCreateDistributionFiles = True Then
             mRasterOutput.MakeDistributionFiles(nowTtoPrint_MIN, mRasterOutput.ImgWidth, mRasterOutput.ImgHeight, False)
-            Dim strNowTimeToPrintOut As String = cComTools.GetTimeToPrintOut(mproject.GeneralSimulEnv.mIsDateTimeFormat,
-                                                                             mproject.GeneralSimulEnv.mSimStartDateTime, nowTtoPrint_MIN)
+            Dim strNowTimeToPrintOut As String = cComTools.GetTimeToPrintOut(mproject.generalSimulEnv.mIsDateTimeFormat,
+                                                                             mproject.generalSimulEnv.mSimStartDateTime, nowTtoPrint_MIN)
             strNowTimeToPrintOut = cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut)
-            If mproject.GeneralSimulEnv.mbShowSoilSaturation = True Then
+            If mproject.generalSimulEnv.mbShowSoilSaturation = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPSSRDistribution, cGRM.CONST_DIST_SSR_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_SSR.Add(mIMGfpn)
                 'DrawPictureBoxUsingNewImgFile(Me.pbSSRimg, mIMGfpn)
                 DrawPictureBoxUsingBitmap(Me.pbSSRimg, mRasterOutput.mImgSSR, mIMGfpn)
             End If
-            If mproject.GeneralSimulEnv.mbShowRFdistribution = True Then
+            If mproject.generalSimulEnv.mbShowRFdistribution = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPRFDistribution, cGRM.CONST_DIST_RF_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_RF.Add(mIMGfpn)
                 'DrawPictureBoxUsingNewImgFile(Me.pbRFimg, mIMGfpn)
                 DrawPictureBoxUsingBitmap(Me.pbRFimg, mRasterOutput.mImgRF, mIMGfpn)
             End If
-            If mproject.GeneralSimulEnv.mbShowRFaccDistribution = True Then
+            If mproject.generalSimulEnv.mbShowRFaccDistribution = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPRFAccDistribution, cGRM.CONST_DIST_RFACC_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_RFAcc.Add(mIMGfpn)
                 'DrawPictureBoxUsingNewImgFile(Me.pbRFACCimg, mIMGfpn)
                 DrawPictureBoxUsingBitmap(Me.pbRFACCimg, mRasterOutput.mImgRFacc, mIMGfpn)
             End If
-            If mproject.GeneralSimulEnv.mbShowFlowDistribution = True Then
+            If mproject.generalSimulEnv.mbShowFlowDistribution = True Then
                 Dim mIMGfpn As String = Path.Combine(mproject.OFPFlowDistribution, cGRM.CONST_DIST_FLOW_FILE_HEAD + strNowTimeToPrintOut + ".png")
                 mImgFPN_dist_Flow.Add(mIMGfpn)
                 'DrawPictureBoxUsingNewImgFile(Me.pbFLOWimg, mIMGfpn)
@@ -339,7 +346,7 @@ Public Class fAnalyzer
     End Sub
 
 
-    Private Sub mSimulator_SendQToAnalyzer(sender As cSimulator, nowTtoPrint_MIN As Integer, interCoef As Double) Handles mSimulator.SendQToAnalyzer
+    Private Sub mSimulator_SendQToAnalyzer(nowTtoPrint_MIN As Integer, interCoef As Double) Handles mSimulator.SendQToAnalyzer
         DrawChart(nowTtoPrint_MIN, interCoef)
     End Sub
 
@@ -1289,7 +1296,7 @@ Public Class fAnalyzer
 
     Private Delegate Sub CompleteSimulationActionDelegate()
 
-    Private Sub mSimulator_SimulationComplete(sender As cSimulator) Handles mSimulator.SimulationComplete
+    Private Sub mSimulator_SimulationComplete() Handles mSimulator.SimulationComplete
         If Me.InvokeRequired Then
             Dim d As New CompleteSimulationActionDelegate(AddressOf SimulationCompletedAction)
             Me.Invoke(d)
@@ -1307,7 +1314,7 @@ Public Class fAnalyzer
 
 
     Private Delegate Sub StopSimulationActionDelegate()
-    Private Sub mSimulator_SimulationStop(sender As cSimulator) Handles mSimulator.SimulationStop
+    Private Sub mSimulator_SimulationStop() Handles mSimulator.SimulationStop
         If Me.InvokeRequired Then
             Dim d As New StopSimulationActionDelegate(AddressOf StopSimulationAction)
             Me.Invoke(d)

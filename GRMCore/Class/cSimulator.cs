@@ -16,19 +16,19 @@ namespace GRMCore
         }
 
         public event SimulationStepEventHandler SimulationStep;
-        public delegate void SimulationStepEventHandler(cSimulator sender, int elapsedMinutes);
+        public delegate void SimulationStepEventHandler(int elapsedMinutes);
         public event SimulationStopEventHandler SimulationStop;
-        public delegate void SimulationStopEventHandler(cSimulator sender);
+        public delegate void SimulationStopEventHandler();
         public event SimulationCompleteEventHandler SimulationComplete;
-        public delegate void SimulationCompleteEventHandler(cSimulator sender);
+        public delegate void SimulationCompleteEventHandler();
         public event SimulationRaiseErrorEventHandler SimulationRaiseError;
-        public delegate void SimulationRaiseErrorEventHandler(cSimulator sender, SimulationErrors simulError, object erroData);
+        public delegate void SimulationRaiseErrorEventHandler(SimulationErrors simulError, object erroData);
         public event SimulationMultiEventStepEventHandler SimulationMultiEventStep;
-        public delegate void SimulationMultiEventStepEventHandler(cSimulator sender, int eventOrder);
+        public delegate void SimulationMultiEventStepEventHandler(int eventOrder);
         public event MakeRasterOutputEventHandler MakeRasterOutput;
-        public delegate void MakeRasterOutputEventHandler(cSimulator sender, int nowTtoPrint_MIN);
+        public delegate void MakeRasterOutputEventHandler(int nowTtoPrint_MIN);
         public event SendQToAnalyzerEventHandler SendQToAnalyzer;
-        public delegate void SendQToAnalyzerEventHandler(cSimulator sender, int nowTtoPrint_MIN, double interCoef);
+        public delegate void SendQToAnalyzerEventHandler(int nowTtoPrint_MIN, double interCoef);
 
 
         private bool mStop;
@@ -42,7 +42,7 @@ namespace GRMCore
         private cHydroCom mHydroCom = new cHydroCom();
         private cFVMSolver mFVMSolver = new cFVMSolver();
         private cInfiltration mInfiltration = new cInfiltration();
-        private cFlowControl mFC = new cFlowControl();
+        //private cFlowControl mFC = new cFlowControl();
         private cSSandBSflow mSSnBS = new cSSandBSflow();
 
         private cOutPutControl mOutputControl = new cOutPutControl();
@@ -50,6 +50,7 @@ namespace GRMCore
 
         private cProject mProject;
         private cRealTime mRealTime;
+        private bool mIsPrediction = false;//2019.10.01. 최. prediction 관련
 
         public cOutputControlRT OutputControlRT
         {
@@ -68,9 +69,14 @@ namespace GRMCore
             sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0;
 
             if (sThisSimulation.IsParallel == true)
-                cGRM.writelogAndConsole(string.Format("IsParallel : {0}, Max degree of parallelism : {1}", sThisSimulation.IsParallel.ToString(), sThisSimulation.MaxDegreeOfParallelism), cGRM.bwriteLog, true);
+            {
+                cGRM.writelogAndConsole(string.Format("IsParallel : {0}, Max degree of parallelism : {1}",
+                  sThisSimulation.IsParallel.ToString(), sThisSimulation.MaxDegreeOfParallelism), true, true);
+            }
             else
-                cGRM.writelogAndConsole(string.Format("IsParallel : {0}", sThisSimulation.IsParallel.ToString()), cGRM.bwriteLog, true);
+            {
+                cGRM.writelogAndConsole(string.Format("IsParallel : {0}", sThisSimulation.IsParallel.ToString()), true, true);
+            }
         }
 
         public void SimulateSingleEvent(cProject project)
@@ -98,6 +104,7 @@ namespace GRMCore
             int nowRFOrder = 0;
             int nowTsec = sThisSimulation.dtsec;
             sThisSimulation.dtsec_usedtoForwardToThisTime = sThisSimulation.dtsec;
+            sThisSimulation.ZeroTimePrinted = -1;
             int dtsec;
             // CVid의 값은 1부터 시작함. 
             int simulationTimeLimitSEC = endingTimeSEC + sThisSimulation.dtsec;
@@ -146,7 +153,10 @@ namespace GRMCore
                     nowTsec = nowTsec + dtsec; // dtsec 만큼 전진
                     sThisSimulation.dtsec_usedtoForwardToThisTime = sThisSimulation.dtsec;
                     if (sThisSimulation.IsFixedTimeStep == false)
-                        sThisSimulation.dtsec = cHydroCom.getDTsec(cGRM.CONST_CFL_NUMBER, project.watershed.mCellSize, sThisSimulation.vMaxInThisStep, dTPrint_MIN);
+                    {
+                        sThisSimulation.dtsec = cHydroCom.getDTsec(cGRM.CONST_CFL_NUMBER,
+                          project.watershed.mCellSize, sThisSimulation.vMaxInThisStep, dTPrint_MIN);
+                    }
                 }
 
                 if (mStop == true) { break; }
@@ -154,19 +164,20 @@ namespace GRMCore
 
             if (mStop==true)
             {
-                SimulationStop(this);
+                SimulationStop();
             }
             else
             {
                 cGRM.writelogAndConsole("Simulation was completed.", cGRM.bwriteLog, false);
-                SimulationComplete(this);
+                SimulationComplete();
             }
         }
 
-        public void SimulateRT(cProject project, cRealTime realTime)
+        public void SimulateRT(cProject project, cRealTime realTime, bool isPredicion)
         {
             mProject = project;
             mRealTime = realTime;
+            mIsPrediction = isPredicion;
             ThreadStart ts = new ThreadStart(SimulateRTInner);
             Thread th = new Thread(ts);
             th.Start();
@@ -182,7 +193,7 @@ namespace GRMCore
             bool bRainfallisEnded;
             int nowT_MIN;
             int targetCalTtoPrint_MIN = 0;
-            cProjectBAK project_tm1 = new cProjectBAK ();
+            cProjectBAK project_tm1 = new cProjectBAK();
             //bool bBAKdata = false;
             int dTPrint_MIN = mRealTime.mDtPrintOutRT_min;
             int dtPrint_SEC = dTPrint_MIN * 60;
@@ -195,6 +206,7 @@ namespace GRMCore
             int nowRFLayerOrder = 0;
             int nowTsec = sThisSimulation.dtsec;
             sThisSimulation.dtsec_usedtoForwardToThisTime = sThisSimulation.dtsec;
+            sThisSimulation.ZeroTimePrinted = -1;
             int dtsec = 0;
             int simulationTimeLimitSEC = EndingT_SEC + dtsec + 1;
             while (nowTsec < simulationTimeLimitSEC)
@@ -214,11 +226,9 @@ namespace GRMCore
 
                     do
                     {
-                        if (mStop == true)
-                            return;
+                        if (mStop == true) { return; }
                         mRealTime.UpdateRainfallInformationGRMRT(TargetRFLayerTime);
-                        if (nowRFLayerOrder < sThisSimulation.mRFDataCountInThisEvent)
-                            break;
+                        if (nowRFLayerOrder < sThisSimulation.mRFDataCountInThisEvent) { break; }
                         Thread.Sleep(2000);
                     }
                     while (true)  // 2초 지연 적절함
@@ -231,37 +241,42 @@ namespace GRMCore
                 {
                     // 신규 fc 자료 검색 조건
                     string ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous = "";
-                    for (int nfc = 0; nfc < mProject.fcGrid.FCCellCount ; nfc++)
+                    for (int nfc = 0; nfc < mProject.fcGrid.FCCellCount; nfc++)
                     {
                         Dataset.GRMProject.FlowControlGridRow r = (Dataset.GRMProject.FlowControlGridRow)mProject.fcGrid.mdtFCGridInfo.Rows[nfc];
                         int cvid = r.CVID;
                         if (r.ControlType.ToString() != cFlowControl.FlowControlType.ReservoirOperation.ToString())
                         {
                             int dt_MIN = System.Convert.ToInt32(r.DT);
-                            if (r.ControlType.ToString() != cFlowControl.FlowControlType.ReservoirOperation.ToString())
+                            //if (r.ControlType.ToString() != cFlowControl.FlowControlType.ReservoirOperation.ToString())
+                            //{
+                            if (nowTsec > dt_MIN * 60 * mRealTime.mdicFCDataOrder[cvid] || mRealTime.mdicFCDataOrder[cvid] == 0)
                             {
-                                if (nowTsec > dt_MIN * 60 * mRealTime.mdicFCDataOrder[cvid] || mRealTime.mdicFCDataOrder[cvid] == 0)
+                                string TargetDataTime;
+                                TargetDataTime = mRealTime.mDateTimeStartRT.Add(new System.TimeSpan(0, (int)(mRealTime.mdicFCDataOrder[cvid] * dt_MIN), 0)).ToString("yyyyMMddHHmm");
+                                bool bAfterSleep = false;
+                                do
                                 {
-                                    string TargetDataTime;
-                                    TargetDataTime = mRealTime.mDateTimeStartRT.Add(new System.TimeSpan(0, (int)(mRealTime.mdicFCDataOrder[cvid] * dt_MIN), 0)).ToString("yyyyMMddHHmm");
-                                    bool bAfterSleep = false;
-                                    do
+                                    if (ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous != TargetDataTime | bAfterSleep)
                                     {
-                                        if (ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous != TargetDataTime | bAfterSleep)
-                                            mRealTime.ReadDBorCSVandMakeFCdataTableForRealTime_v2018(TargetDataTime);
-                                        ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous = TargetDataTime;
-                                        if (mStop == true)
-                                            return;
-                                        mRealTime.UpdateFcDatainfoGRMRT(TargetDataTime, cvid, mRealTime.mdicFCDataOrder[cvid], dt_MIN);
-                                        if (mRealTime.mdicBNewFCdataAddedRT[cvid] == true)
-                                            break;
-                                        Thread.Sleep(2000);
-                                        bAfterSleep = true;
+                                        mRealTime.ReadDBorCSVandMakeFCdataTableForRealTime_v2018(TargetDataTime);
                                     }
-                                    while (true);
-                                    mRealTime.mdicFCDataOrder[cvid] += 1;
+                                    ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous = TargetDataTime;
+                                    if (mStop == true) { return; }
+                                    mRealTime.UpdateFcDatainfoGRMRT(TargetDataTime, cvid);//, mRealTime.mdicFCDataOrder[cvid], dt_MIN);
+                                    if (mIsPrediction == false && mRealTime.mdicBNewFCdataAddedRT[cvid] == true) { break; }//2019.10.01. 최. prediction 관련
+                                    if (mIsPrediction == true && mRealTime.mdicBNewFCdataAddedRT[cvid] == false)//2019.10.01. 최. prediction 관련
+                                    {// 2019.10.01. 최. prediction 관련. 한번 여기 지나가면, 데이터로 모델링 하던 것은 모두 ReservoirOperation,  AutoROM으로 변경됨
+                                        mRealTime.ConvertFCinfoToAutoROM(TargetDataTime, cvid);
+                                        break;
+                                    }
+                                    Thread.Sleep(2000);
+                                    bAfterSleep = true;
                                 }
+                                while (true);
+                                mRealTime.mdicFCDataOrder[cvid] += 1;
                             }
+                            //}
                         }
                     }
                 }
@@ -273,14 +288,14 @@ namespace GRMCore
                 nowTsec = nowTsec + dtsec;
                 sThisSimulation.dtsec_usedtoForwardToThisTime = dtsec;
                 if (sThisSimulation.IsFixedTimeStep == false)
-                    sThisSimulation.dtsec = cHydroCom.getDTsec(cGRM.CONST_CFL_NUMBER, mProject.watershed.mCellSize, sThisSimulation.vMaxInThisStep, dTPrint_MIN);
-                if (mStop == true)
-                    break;
+                {
+                    sThisSimulation.dtsec = cHydroCom.getDTsec(cGRM.CONST_CFL_NUMBER,
+                        mProject.watershed.mCellSize, sThisSimulation.vMaxInThisStep, dTPrint_MIN);
+                }
+                if (mStop == true) { break; }
             }
-            if (mStop == true)
-                SimulationStop(this);
-            else
-                SimulationComplete(this);
+            if (mStop == true) { SimulationStop(); }
+            else { SimulationComplete(); }
         }
 
 
@@ -307,7 +322,9 @@ namespace GRMCore
                             {
                                 int cvan = cvans[i];
                                 if (project.CVs[cvan].toBeSimulated == 1)
-                                { simulateRunoffCore(project, fac, cvan, dtsec, nowT_MIN, cellsize); }
+                                {
+                                    simulateRunoffCore(project, fac, cvan, dtsec, nowT_MIN, cellsize);
+                                }
                             }
                         });
                     }
@@ -320,10 +337,14 @@ namespace GRMCore
                         if (icv.FlowType == cGRM.CellFlowType.OverlandFlow)
                         {
                             if (sThisSimulation.vMaxInThisStep < icv.uCVof_i_j)
+                            {
                                 sThisSimulation.vMaxInThisStep = icv.uCVof_i_j;
+                            }
                         }
                         else if (sThisSimulation.vMaxInThisStep < icv.mStreamAttr.uCVch_i_j)
+                        {
                             sThisSimulation.vMaxInThisStep = icv.mStreamAttr.uCVch_i_j;
+                        }
                     }
                 }
             }
@@ -341,10 +362,14 @@ namespace GRMCore
                                 if (project.CVs[cvan].FlowType == cGRM.CellFlowType.OverlandFlow)
                                 {
                                     if (sThisSimulation.vMaxInThisStep < project.CVs[cvan].uCVof_i_j)
+                                    {
                                         sThisSimulation.vMaxInThisStep = project.CVs[cvan].uCVof_i_j;
+                                    }
                                 }
                                 else if (sThisSimulation.vMaxInThisStep < project.CVs[cvan].mStreamAttr.uCVch_i_j)
+                                {
                                     sThisSimulation.vMaxInThisStep = project.CVs[cvan].mStreamAttr.uCVch_i_j;
+                                }
                             }
                         }
                     }
@@ -357,8 +382,11 @@ namespace GRMCore
         {
             cRainfall.CalRF_mPdt(project.CVs[cvan], dtsec, cellsize);
             if (project.generalSimulEnv.mbSimulateFlowControl == true &&
-                (project.CVs[cvan].FCType == cFlowControl.FlowControlType.ReservoirOutflow || project.CVs[cvan].FCType == cFlowControl.FlowControlType.Inlet))
-                mFC.CalFCReservoirOutFlow(project, nowT_min, cvan);
+                (project.CVs[cvan].FCType == cFlowControl.FlowControlType.ReservoirOutflow ||
+                project.CVs[cvan].FCType == cFlowControl.FlowControlType.Inlet))
+            {
+               cFlowControl.CalFCReservoirOutFlow(project, nowT_min, cvan);
+            }
             else
             {
                 InitializeCVForThisStep(project, cvan);
@@ -378,7 +406,8 @@ namespace GRMCore
                         mFVMSolver.SetNoFluxOverlandFlowCV(project.CVs[cvan]);
                     }
                 }
-                else if (project.CVs[cvan].FlowType == cGRM.CellFlowType.ChannelFlow || project.CVs[cvan].FlowType == cGRM.CellFlowType.ChannelNOverlandFlow)
+                else if (project.CVs[cvan].FlowType == cGRM.CellFlowType.ChannelFlow 
+                    || project.CVs[cvan].FlowType == cGRM.CellFlowType.ChannelNOverlandFlow)
                 {
                     double CSAchCVw_i_jP1 = 0;
                     if (fac > 0)
@@ -395,19 +424,23 @@ namespace GRMCore
                     }
                 }
             }
-            if (project.generalSimulEnv.mbSimulateFlowControl == true && (project.CVs[cvan].FCType == cFlowControl.FlowControlType.SinkFlow
-                || project.CVs[cvan].FCType == cFlowControl.FlowControlType.SourceFlow || project.CVs[cvan].FCType == cFlowControl.FlowControlType.ReservoirOperation))
+            if (project.generalSimulEnv.mbSimulateFlowControl == true 
+                && (project.CVs[cvan].FCType == cFlowControl.FlowControlType.SinkFlow
+                || project.CVs[cvan].FCType == cFlowControl.FlowControlType.SourceFlow 
+                || project.CVs[cvan].FCType == cFlowControl.FlowControlType.ReservoirOperation))
             {
                 Dataset.GRMProject.FlowControlGridRow[] rows =
                     (Dataset.GRMProject.FlowControlGridRow[])project.fcGrid.mdtFCGridInfo.Select("CVID = " + (cvan + 1));
                 Dataset.GRMProject.FlowControlGridRow row = rows[0];
-                if (System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR) == 0)
+                double v;
+                if (double.TryParse(row.MaxStorage,out v)==false || double.TryParse(row.MaxStorageR ,out v)==false ||
+                    System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR) == 0)
                 {
-                    mFC.CalFCSinkOrSourceFlow(project, nowT_min, cvan);
+                    cFlowControl.CalFCSinkOrSourceFlow(project, nowT_min, cvan);
                 }
                 else
                 {
-                    mFC.CalFCReservoirOperation(project, cvan, nowT_min);
+                    cFlowControl.CalFCReservoirOperation(project, cvan, nowT_min);
                 }
             }
         }
@@ -430,9 +463,13 @@ namespace GRMCore
             double ofDepthAddedByRFlow_m2 = 0;
             double chCSAAddedBySSFlow_m2 = 0;
             if (project.CVs[cvan].FlowType == cGRM.CellFlowType.ChannelNOverlandFlow)
-            { effOFdYinCHnOFcell = dY_m - project.CVs[cvan].mStreamAttr.ChBaseWidth; }
+            {
+                effOFdYinCHnOFcell = dY_m - project.CVs[cvan].mStreamAttr.ChBaseWidth;
+            }
             if (project.generalSimulEnv.mbSimulateBFlow == true)
-            { chCSAAddedByBFlow_m2 = mSSnBS.CalBFlowAndGetCSAAddedByBFlow(project, cvan, dTSEC, dY_m); }
+            {
+                chCSAAddedByBFlow_m2 = mSSnBS.CalBFlowAndGetCSAAddedByBFlow(project, cvan, dTSEC, dY_m);
+            }
             cCVAttribute cv = project.CVs[cvan];
             if (project.generalSimulEnv.mbSimulateSSFlow == true)
             {
@@ -594,8 +631,8 @@ namespace GRMCore
                         if (qChCVini > 0)
                         {
                             double sngCAS_ini = qChCVini / (double)cv.CVDeltaX_m; // 초기값 설정
-                            chCSAini = mFVMSolver.CalChCSAFromQbyIteration(project.CVs[cvan], sngCAS_ini, qChCVini);
-                            hChCVini = mFVMSolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, chCSAini,
+                            chCSAini = cFVMSolver.CalChCSAFromQbyIteration(project.CVs[cvan], sngCAS_ini, qChCVini);
+                            hChCVini = cFVMSolver.GetChannelDepthUsingArea(cv.mStreamAttr.ChBaseWidth, chCSAini,
                                 cv.mStreamAttr.chIsCompoundCS, cv.mStreamAttr.chUpperRBaseWidth_m,
                                 cv.mStreamAttr.chLowerRArea_m2, cv.mStreamAttr.chLowerRHeight, cv.mStreamAttr.mChBankCoeff);
                         }
@@ -681,10 +718,19 @@ namespace GRMCore
                 timeToPrint_MIN = 0;
                 double RFmeanForFirstLayer = sThisSimulation.mRFMeanForDT_m / dtmin * dTRFintervalMIN;
                 OutputProcessManagerBySimType(timeToPrint_MIN, wpCount, RFmeanForFirstLayer, 1, null, SimType);
+                sThisSimulation.ZeroTimePrinted = 1;
             }
-            else if (mNowTsec > 0 && (mNowTsec % dTPrint_SEC) == 0)
+            else if (mNowTsec > 0 && (mNowTsec % dTPrint_SEC) == 0) 
             {
-                timeToPrint_MIN = targetCalTtoPrint_MIN - dTPrint_MIN;
+                if (sThisSimulation.ZeroTimePrinted ==-1)
+                {
+                    timeToPrint_MIN = targetCalTtoPrint_MIN - dTPrint_MIN;
+                }
+                else
+                {
+                    timeToPrint_MIN = targetCalTtoPrint_MIN;
+                }
+                
                 OutputProcessManagerBySimType(timeToPrint_MIN, wpCount, sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m, 1, null, SimType);
                 targetCalTtoPrint_MIN = targetCalTtoPrint_MIN + dTPrint_MIN;
             }
@@ -719,7 +765,7 @@ namespace GRMCore
             {
                 case cGRM.SimulationType.SingleEvent:
                     {
-                        if (SimulationStep != null) { SimulationStep(this, nowTtoPrint_MIN); }
+                        if (SimulationStep != null) { SimulationStep( nowTtoPrint_MIN); }
                         if (mProject.generalSimulEnv.mPrintOption == cGRM.GRMPrintType.All)
                         {
                             mOutputControl.WriteSimResultsToTextFileForSingleEvent(mProject, wpCount, nowTtoPrint_MIN, SumRFMeanForDTprintOut_m, coeffInterpolation, Project_tm1);
@@ -747,11 +793,11 @@ namespace GRMCore
             if (mProject.generalSimulEnv.mbRunAanlyzer == true)
             // RaiseEvent SendQToAnalyzer(Me, mProject, Project_tm1, nowTtoPrint_MIN, coeffInterpolation)
             {
-                SendQToAnalyzer(this, nowTtoPrint_MIN, coeffInterpolation);
+                SendQToAnalyzer( nowTtoPrint_MIN, coeffInterpolation);
             }
             if (mProject.generalSimulEnv.mbMakeRasterOutput == true)
             {
-                MakeRasterOutput(this, nowTtoPrint_MIN);
+                MakeRasterOutput( nowTtoPrint_MIN);
             }
 
             sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0;
@@ -760,7 +806,8 @@ namespace GRMCore
                 mProject.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID] = 0;
                 mProject.watchPoint.RFWPGridForDtPrintout_mm[row.CVID] = 0;
             }
-            if (mProject.generalSimulEnv.mbShowRFdistribution == true)
+            if( (mProject.generalSimulEnv.mbCreateImageFile==true || mProject.generalSimulEnv.mbCreateASCFile==true) &&
+                mProject.generalSimulEnv.mbShowRFdistribution == true)
             {
                 for (int cvan = 0; cvan < cProject.Current.CVCount; cvan++)
                 { cProject.Current.CVs[cvan].RF_dtPrintOut_meter = 0; }

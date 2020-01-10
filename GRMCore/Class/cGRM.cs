@@ -52,24 +52,15 @@ namespace GRMCore
 
         public enum GRMParametersAbbreviation
         {
-            ISSR // Initial soil saturation ratio
-    ,
-            MSLS // Minimum slope of land surface
-    ,
-            MSCB // Minimum slope of channel bed
-    ,
-            MCW // Minimum channel width
-    ,
-            CRC // Channel roughness coefficient
-    ,
-            CLCRC // Calibration coefficient of Land cover roughness coefficient
-    ,
-            CSD // Calibration coefficient of soil depth
-    ,
-            CSP // Calibration coefficient of soil porosity
-    ,
-            CSWS // Calibration coefficient of soil wetting front suction head
-    ,
+            ISSR, // Initial soil saturation ratio
+            MSLS, // Minimum slope of land surface
+            MSCB, // Minimum slope of channel bed
+            MCW, // Minimum channel width
+            CRC, // Channel roughness coefficient
+            CLCRC, // Calibration coefficient of Land cover roughness coefficient
+            CSD, // Calibration coefficient of soil depth
+            CSP, // Calibration coefficient of soil porosity
+            CSWS, // Calibration coefficient of soil wetting front suction head
             CSHC // Calibration coefficient of soil hydraulic conductivity
         }
 
@@ -174,13 +165,10 @@ namespace GRMCore
         ///   <remarks></remarks>
         public const double CONST_UAQ_HEIGHT_FROM_BEDROCK = 5;
 
-
-        // Private Shared mRange As cParametersRange '이건 GUI에서 필요한 것
+         // Private Shared mRange As cParametersRange '이건 GUI에서 필요한 것
 
         private static bool mGrmStarted;
         private static string mStaticXmlFPN;
-
-
         
         public static void Start()
         {
@@ -299,11 +287,16 @@ namespace GRMCore
         public static void writelogAndConsole(string logtxt, bool bwriteLog = false, bool bwriteConsole = false)
         {
             if (bwriteConsole == true)
-                Console.WriteLine(string.Format(logtxt));
+            { Console.WriteLine(string.Format(logtxt)); }
             if (bwriteLog == true)
-                // File.AppendAllText(fpnlog,
-                // string.Format("{0:yyyy-MM-dd HH:mm ss}", DateTime.Now) + " " + logtxt + vbCrLf)
-                File.AppendAllText(fpnlog, logtxt + "\r\n");
+            //File.AppendAllText(fpnlog,
+            //string.Format("{0:yyyy-MM-dd HH:mm ss}", DateTime.Now) + " " + logtxt + vbCrLf)
+            //{ File.AppendAllText(fpnlog, logtxt + "\r\n"); }
+            {
+                File.AppendAllText(fpnlog,
+                    string.Format("{0:yyyy-MM-dd HH:mm:ss}, ", DateTime.Now)
+                    + logtxt + "\r\n");
+            }
         }
 
 

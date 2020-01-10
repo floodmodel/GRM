@@ -56,7 +56,9 @@ namespace GRMCore
             {
                 mdtSoilDepthInfo.AcceptChanges();
                 foreach (DataRow r in mdtSoilDepthInfo.Rows)
+                {
                     r.SetAdded();
+                }
             }
         }
 
@@ -68,26 +70,21 @@ namespace GRMCore
             Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjdb.ProjectSettings.Rows[0];
             if (!row.IsSoilDepthDataTypeNull())
             {
-                switch (row.SoilDepthDataType)
+                if (row.SoilDepthDataType.ToLower() == cGRM.FileOrConst.File.ToString().ToLower())
                 {
-                    case nameof(cGRM.FileOrConst.File):
-                        {
-                            mSoilDepthDataType = cGRM.FileOrConst.File;
-                            mGridSoilDepthFPN = row.SoilDepthFile;
-                            mSoilDepthVATFPN = row.SoilDepthVATFile;
-                            break;
-                        }
-                    case nameof(cGRM.FileOrConst.Constant):
-                        {
-                            mSoilDepthDataType = cGRM.FileOrConst.Constant;
-                            double v = 0;
-                            if (double.TryParse(row.ConstantSoilDepth, out v) == true) { mConstSoilDepth = v; }
-                            break;
-                        }
-                    default:
-                        {
-                            throw new InvalidOperationException();
-                        }
+                    mSoilDepthDataType = cGRM.FileOrConst.File;
+                    mGridSoilDepthFPN = row.SoilDepthFile;
+                    mSoilDepthVATFPN = row.SoilDepthVATFile;
+                }
+                else if (row.SoilDepthDataType.ToLower() == cGRM.FileOrConst.Constant.ToString().ToLower())
+                {
+                    mSoilDepthDataType = cGRM.FileOrConst.Constant;
+                    double v = 0;
+                    if (double.TryParse(row.ConstantSoilDepth, out v) == true) { mConstSoilDepth = v; }
+                }
+                else
+                {
+                    throw new InvalidOperationException();
                 }
             }
             if (mSoilDepthDataType.Equals(cGRM.FileOrConst.File))

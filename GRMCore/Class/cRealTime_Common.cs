@@ -13,7 +13,9 @@ namespace GRMCore
         public static string IO_Path_ChangeDrive(char strV, string strPath)
         {
             if (strPath.Substring(1, 1) != ":")
+            {
                 System.Diagnostics.Debugger.Break(); // 오류 유발 상황이므로 중단
+            }
             return strV + strPath.Substring(1);
         }
     }

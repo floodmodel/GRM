@@ -41,26 +41,24 @@ namespace GRMCore
             Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjdb.ProjectSettings.Rows[0];
             if (mSoilTextureDataType.HasValue)
             {
+                row.SoilTextureDataType = mSoilTextureDataType.Value.ToString();
+                if (mSoilTextureDataType.Value == cGRM.FileOrConst.File)
                 {
-                    row.SoilTextureDataType = mSoilTextureDataType.Value.ToString();
-                    if (mSoilTextureDataType.Value == cGRM.FileOrConst.File)
-                    {
-                        row.SoilTextureFile = mGridSoilTextureFPN;
-                        row.SoilTextureVATFile = mSoilTextureVATFPN;
-                        row.SetConstantSoilPorosityNull();
-                        row.SetConstantSoilEffPorosityNull();
-                        row.SetConstantSoilWettingFrontSuctionHeadNull();
-                        row.SetConstantSoilHydraulicConductivityNull();
-                    }
-                    else
-                    {
-                        row.SetSoilTextureFileNull();
-                        row.SetSoilTextureVATFileNull();
-                        row.ConstantSoilPorosity = System.Convert.ToString(mConstPorosity.Value);
-                        row.ConstantSoilEffPorosity = System.Convert.ToString(mConstEffectivePorosity.Value);
-                        row.ConstantSoilWettingFrontSuctionHead = System.Convert.ToString(mConstWFS.Value);
-                        row.ConstantSoilHydraulicConductivity = System.Convert.ToString(mConstHydraulicCond.Value);
-                    }
+                    row.SoilTextureFile = mGridSoilTextureFPN;
+                    row.SoilTextureVATFile = mSoilTextureVATFPN;
+                    row.SetConstantSoilPorosityNull();
+                    row.SetConstantSoilEffPorosityNull();
+                    row.SetConstantSoilWettingFrontSuctionHeadNull();
+                    row.SetConstantSoilHydraulicConductivityNull();
+                }
+                else
+                {
+                    row.SetSoilTextureFileNull();
+                    row.SetSoilTextureVATFileNull();
+                    row.ConstantSoilPorosity = System.Convert.ToString(mConstPorosity.Value);
+                    row.ConstantSoilEffPorosity = System.Convert.ToString(mConstEffectivePorosity.Value);
+                    row.ConstantSoilWettingFrontSuctionHead = System.Convert.ToString(mConstWFS.Value);
+                    row.ConstantSoilHydraulicConductivity = System.Convert.ToString(mConstHydraulicCond.Value);
                 }
             }
 
@@ -83,13 +81,13 @@ namespace GRMCore
             Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjdb.ProjectSettings.Rows[0];
             if (!row.IsSoilTextureDataTypeNull())
             {
-                if (row.SoilTextureDataType == cGRM.FileOrConst.File.ToString())
+                if (row.SoilTextureDataType.ToLower() == cGRM.FileOrConst.File.ToString().ToLower())
                 {
                     mSoilTextureDataType = cGRM.FileOrConst.File;
                     mGridSoilTextureFPN = row.SoilTextureFile;
                     mSoilTextureVATFPN = row.SoilTextureVATFile;
                 }
-                else if (row.SoilTextureDataType == cGRM.FileOrConst.Constant.ToString())
+                else if (row.SoilTextureDataType.ToLower() == cGRM.FileOrConst.Constant.ToString().ToLower())
                 {
                     mSoilTextureDataType = cGRM.FileOrConst.Constant;
                     double v = 0;
@@ -107,7 +105,9 @@ namespace GRMCore
                 mdtGreenAmptInfo = prjdb.GreenAmptParameter;
             }
             else
+            {
                 mdtGreenAmptInfo = null;
+            }
         }
 
         public bool IsSet
@@ -126,7 +126,9 @@ namespace GRMCore
                 return rows[0]["GRMTextureE"].ToString();
             }
             else
+            {
                 return "[CONST]";
+            }
         }
 
         public static SoilTextureCode GetSoilTextureCode(string inName)

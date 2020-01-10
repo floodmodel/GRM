@@ -37,7 +37,8 @@ namespace GRMCore
             // Console.WriteLine(File.Exists(iniSoilSaturationFPN).ToString)
             // Console.WriteLine(iniChannelFlowFPN + " iniChannelFlowFPN instancing argument file")
             // Console.WriteLine(File.Exists(iniChannelFlowFPN).ToString)
-            cReadGeoFileAndSetInfo.ReadLayerWSandSetBasicInfo(watershedFPN, grmPrj.watershed, ref grmPrj.WSCells, ref grmPrj.CVs , ref grmPrj.dmInfo,
+            cReadGeoFileAndSetInfo.ReadLayerWSandSetBasicInfo(watershedFPN, grmPrj.watershed, 
+                ref grmPrj.WSCells, ref grmPrj.CVs , ref grmPrj.dmInfo,
                 ref grmPrj.WSNetwork, ref grmPrj .subWSPar);
             //grmPrj.WSCells=cReadGeoFileAndSetInfo.ReadLayerWSandSetBasicInfo(watershedFPN, grmPrj.watershed);
             //grmPrj.WSNetwork = new cWatershedNetwork(grmPrj.watershed.WSIDList);
@@ -142,9 +143,9 @@ namespace GRMCore
         {
             int id = grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].WSID;
             if (id > 0)
-                return true;
+            { return true; }
             else
-                return false;
+            { return false; }
         }
 
         public int mostDownStreamCellArrayXColPosition()
@@ -206,9 +207,9 @@ namespace GRMCore
         public int watershedID(int colXArrayIdx, int rowYArrayIdx)
         {
             if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-                return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].WSID;
+            { return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].WSID; }
             else
-                return 0;
+            { return 0; }
         }
 
         public int cellCountInWatershed()
@@ -219,25 +220,25 @@ namespace GRMCore
         public string flowDirection(int colXArrayIdx, int rowYArrayIdx)
         {
             if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-                return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].FDir.ToString();
+            { return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].FDir.ToString(); }
             else
-                return null;
+            { return null; }
         }
 
         public int flowAccumulation(int colXArrayIdx, int rowYArrayIdx)
         {
             if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-                return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].FAc;
+            { return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].FAc; }
             else
-                return -1;
+            { return -1; }
         }
 
         public double slope(int colXArrayIdx, int rowYArrayIdx)
         {
             if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-                return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].Slope;
+            { return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].Slope; }
             else
-                return default(Double);
+            { return default(Double); }
         }
 
         public int streamValue(int colXArrayIdx, int rowYArrayIdx)
@@ -245,7 +246,7 @@ namespace GRMCore
             if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true && mstreamFPN != "")
             {
                 if (grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].IsStream)
-                    return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].mStreamAttr.ChStrOrder;
+                { return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].mStreamAttr.ChStrOrder; }
             }
             return -1;
         }
@@ -253,33 +254,33 @@ namespace GRMCore
         public string cellFlowType(int colXArrayIdx, int rowYArrayIdx)
         {
             if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-                return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].FlowType.ToString();
+            { return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].FlowType.ToString(); }
             else
-                return null;
+            { return null; }
         }
 
         public int landCoverValue(int colXArrayIdx, int rowYArrayIdx)
         {
             if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-                return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].LandCoverValue;
+            { return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].LandCoverValue; }
             else
-                return -1;
+            { return -1; }
         }
 
         public int soilTextureValue(int colXArrayIdx, int rowYArrayIdx)
         {
             if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-                return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].SoilTextureValue;
+            { return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].SoilTextureValue; }
             else
-                return -1;
+            { return -1; }
         }
 
         public int soilDepthValue(int colXArrayIdx, int rowYArrayIdx)
         {
             if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-                return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].SoilDepthTypeValue;
+            { return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].SoilDepthTypeValue; }
             else
-                return -1;
+            { return -1; }
         }
 
         /// <summary>
@@ -365,7 +366,7 @@ namespace GRMCore
         public void UpdateAllSubWatershedParametersUsingNetwork()
         {
             if (WScount() > 1)
-                cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(grmPrj);
+            { cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(grmPrj); }
         }
 
         public cUserParameters subwatershedPars(int wsid)

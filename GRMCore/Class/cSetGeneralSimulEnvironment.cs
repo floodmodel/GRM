@@ -55,75 +55,140 @@ namespace GRMCore
         public void GetValues(Dataset.GRMProject prjDB)
         {
             Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjDB.ProjectSettings.Rows[0];
+            if (!row.IsSimulStartingTimeNull())
+            {
+                mSimStartDateTime = row.SimulStartingTime;
+            }
+            else
+            {
+                mSimStartDateTime = "0";
+            }
+            int vi = 0;
+            if (int.TryParse(mSimStartDateTime, out vi) == true)
+            { mIsDateTimeFormat = false; }
+            else
+            { mIsDateTimeFormat = true; }
             if (!row.IsSimulationDurationNull())
             {
-                if (!row.IsSimulStartingTimeNull()) { mSimStartDateTime = row.SimulStartingTime; }
-                else { mSimStartDateTime = "0"; }
-                int vi = 0;
-                if (int.TryParse(mSimStartDateTime, out vi) == true)
-                { mIsDateTimeFormat = false; }
-                else
-                { mIsDateTimeFormat = true; }
-
-                if (int.TryParse(row.SimulationDuration, out vi) == true) { mSimDurationHOUR = vi; }
-                if (int.TryParse(row.OutputTimeStep, out vi) == true) { mPrintOutTimeStepMIN = vi; }
-
-                sThisSimulation.dtMaxLimit_sec = (int)mPrintOutTimeStepMIN / 2 * 60;
-                bool v = true;
-                if (bool.TryParse(row.SimulateBaseFlow, out v) == true) { mbSimulateBFlow = v; }
-                if (bool.TryParse(row.SimulateSubsurfaceFlow, out v) == true) { mbSimulateSSFlow = v; }
-                if (bool.TryParse(row.SimulateFlowControl, out v) == true) { mbSimulateFlowControl = v; }
-                if (bool.TryParse(row.SimulateInfiltration, out v) == true) { mbSimulateInfiltration = v; }
-
-                mbCreateASCFile = false;
-                if (!row.IsMakeASCFileNull() && row.MakeASCFile.ToLower() == "true")
-                    mbCreateASCFile = true;
-
-                mbCreateImageFile = false;
-                if (!row.IsMakeIMGFileNull() && row.MakeIMGFile.ToLower() == "true")
-                    mbCreateImageFile = true;
-
-                mbShowFlowDistribution = false;
-                if (!row.IsMakeFlowDistFileNull() && row.MakeFlowDistFile.ToLower() == "true")
-                    if (bool.TryParse(row.MakeFlowDistFile, out v) == true) { mbShowFlowDistribution = v; }
-
-                mbShowRFaccDistribution = false;
-                if (!row.IsMakeRFaccDistFileNull() && row.MakeRFaccDistFile.ToLower() == "true")
-                    mbShowRFaccDistribution = true;
-
-                mbShowRFdistribution = false;
-                if (!row.IsMakeRfDistFileNull() && row.MakeRfDistFile.ToLower() == "true")
-                    mbShowRFdistribution = true;
-
-                mbShowSoilSaturation = false;
-                if (!row.IsMakeSoilSaturationDistFileNull() && row.MakeSoilSaturationDistFile.ToLower() == "true")
-                    mbShowSoilSaturation = true;
-
-                if (mbCreateImageFile == true || mbCreateASCFile == true)
-                    mbMakeRasterOutput = true;
-                else
-                    mbMakeRasterOutput = false;
-                if (!row.IsPrintOptionNull())
+                if (int.TryParse(row.SimulationDuration, out vi) == true)
                 {
-                    mPrintOption = cGRM.GRMPrintType.All;
-                    if (row.PrintOption.ToString().ToLower() == cGRM.GRMPrintType.AllQ.ToString().ToLower()) { mPrintOption = cGRM.GRMPrintType.AllQ; }
-                    else if (row.PrintOption.ToString().ToLower() == cGRM.GRMPrintType.DischargeFileQ.ToString().ToLower()) { mPrintOption = cGRM.GRMPrintType.DischargeFileQ; }
+                    mSimDurationHOUR = vi;
                 }
                 else
-                    mPrintOption = cGRM.GRMPrintType.All;
-                if (!row.IsAboutThisProjectNull())
-                    mAboutThisProject = row.AboutThisProject;
-                if (!row.IsAboutWatershedNull())
-                    mAboutWatershed = row.AboutWatershed;
-                if (!row.IsAboutLandCoverMapNull())
-                    mAboutLandCoverMap = row.AboutLandCoverMap;
-                if (!row.IsAboutSoilMapNull())
-                    mAboutSoilMap = row.AboutSoilMap;
-                if (!row.IsAboutSoilDepthMapNull())
-                    mAboutSoilDepthMap = row.AboutSoilDepthMap;
-                if (!row.IsAboutRainfallNull())
-                    mAboutRainfall = row.AboutRainfall;
+                {
+                    cGRM.writelogAndConsole("Simulation duration is invalid.", cGRM.bwriteLog, true);
+                }
             }
+            else
+            {
+                cGRM.writelogAndConsole("Simulation duration is invalid.", cGRM.bwriteLog, true);
+            }
+            if (!row.IsOutputTimeStepNull())
+            {
+                if (int.TryParse(row.OutputTimeStep, out vi) == true)
+                {
+                    mPrintOutTimeStepMIN = vi;
+                }
+                else
+                {
+                    cGRM.writelogAndConsole("Output time step is invalid.", cGRM.bwriteLog, true);
+                }
+            }
+            else
+            {
+                cGRM.writelogAndConsole("Output time step is invalid.", cGRM.bwriteLog, true);
+            }                
+
+            sThisSimulation.dtMaxLimit_sec = (int)mPrintOutTimeStepMIN / 2 * 60;
+            bool v = true;
+            if (bool.TryParse(row.SimulateBaseFlow, out v) == true) { mbSimulateBFlow = v; }
+            if (bool.TryParse(row.SimulateSubsurfaceFlow, out v) == true) { mbSimulateSSFlow = v; }
+            if (bool.TryParse(row.SimulateFlowControl, out v) == true) { mbSimulateFlowControl = v; }
+            if (bool.TryParse(row.SimulateInfiltration, out v) == true) { mbSimulateInfiltration = v; }
+
+            mbCreateASCFile = false;
+            if (!row.IsMakeASCFileNull() && row.MakeASCFile.ToLower() == "true")
+            {
+                mbCreateASCFile = true;
+            }
+
+            mbCreateImageFile = false;
+            if (!row.IsMakeIMGFileNull() && row.MakeIMGFile.ToLower() == "true")
+            {
+                mbCreateImageFile = true;
+            }
+
+            mbShowFlowDistribution = false;
+            if (!row.IsMakeFlowDistFileNull() && row.MakeFlowDistFile.ToLower() == "true")
+            {
+                if (bool.TryParse(row.MakeFlowDistFile, out v) == true)
+                {
+                    mbShowFlowDistribution = v;
+                }
+            }
+
+            mbShowRFaccDistribution = false;
+            if (!row.IsMakeRFaccDistFileNull() && row.MakeRFaccDistFile.ToLower() == "true")
+            {
+                mbShowRFaccDistribution = true;
+            }
+
+            mbShowRFdistribution = false;
+            if (!row.IsMakeRfDistFileNull() && row.MakeRfDistFile.ToLower() == "true")
+            {
+                mbShowRFdistribution = true;
+            }
+
+            mbShowSoilSaturation = false;
+            if (!row.IsMakeSoilSaturationDistFileNull() && row.MakeSoilSaturationDistFile.ToLower() == "true")
+            {
+                mbShowSoilSaturation = true;
+            }
+
+            if (mbCreateImageFile == true || mbCreateASCFile == true)
+            {
+                mbMakeRasterOutput = true;
+            }
+            else
+            { mbMakeRasterOutput = false; }
+            if (!row.IsPrintOptionNull())
+            {
+                mPrintOption = cGRM.GRMPrintType.All;
+                if (row.PrintOption.ToString().ToLower() == cGRM.GRMPrintType.AllQ.ToString().ToLower())
+                {
+                    mPrintOption = cGRM.GRMPrintType.AllQ;
+                }
+                else if (row.PrintOption.ToString().ToLower() == cGRM.GRMPrintType.DischargeFileQ.ToString().ToLower())
+                {
+                    mPrintOption = cGRM.GRMPrintType.DischargeFileQ;
+                }
+            }
+            else
+            {
+                mPrintOption = cGRM.GRMPrintType.All;
+            }
+            if (!row.IsAboutThisProjectNull())
+            {
+                mAboutThisProject = row.AboutThisProject;
+            }
+            if (!row.IsAboutWatershedNull())
+            {
+                mAboutWatershed = row.AboutWatershed;
+            }
+            if (!row.IsAboutLandCoverMapNull())
+            {
+                mAboutLandCoverMap = row.AboutLandCoverMap;
+            }
+            if (!row.IsAboutSoilMapNull())
+            {
+                mAboutSoilMap = row.AboutSoilMap;
+            }
+            if (!row.IsAboutSoilDepthMapNull())
+            {
+                mAboutSoilDepthMap = row.AboutSoilDepthMap;
+            }
+            if (!row.IsAboutRainfallNull())
+            { mAboutRainfall = row.AboutRainfall; }
         }
 
         public bool IsSet
@@ -149,18 +214,28 @@ namespace GRMCore
                 row.MakeIMGFile = mbCreateImageFile.ToString();
                 row.PrintOption = mPrintOption.ToString();
                 if (mAboutThisProject != "")
+                {
                     row.AboutThisProject = mAboutThisProject;
+                }
                 if (mAboutWatershed != "")
+                {
                     row.AboutWatershed = mAboutWatershed;
+                }
                 if (mAboutLandCoverMap != "")
+                {
                     row.AboutLandCoverMap = mAboutLandCoverMap;
+                }
                 if (mAboutSoilMap != "")
+                {
                     row.AboutSoilMap = mAboutSoilMap;
+                }
                 if (mAboutSoilDepthMap != "")
+                {
                     row.AboutSoilDepthMap = mAboutSoilDepthMap;
+                }
                 if (mAboutRainfall != "")
-                    row.AboutRainfall = mAboutRainfall;
-                row.ProjectSavedTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm") ;
+                { row.AboutRainfall = mAboutRainfall; }
+                row.ProjectSavedTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm");
                 row.ComputerName = Environment.MachineName;
                 row.ComputerUserName = Environment.UserName;
                 row.GRMVersion = cGRM.BuildInfo.ProductVersion;

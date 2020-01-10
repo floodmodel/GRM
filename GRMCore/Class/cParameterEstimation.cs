@@ -53,10 +53,14 @@ namespace GRMCore
             {
                 mPrintOutStep_min = System.Convert.ToInt32(sThisSimulation.dtsec / (double)60);
                 if (mPrintOutStep_min < 1)
+                {
                     mPrintOutStep_min = 1;
+                }
             }
             else
+            {
                 mPrintOutStep_min = printoutStep_min;
+            }
             mSWScountToEstSS = SWScountsetIniFlow;
             SimulatePEiniSS();
         }
@@ -76,7 +80,9 @@ namespace GRMCore
                 cv.soilWaterContent_tM1_m = 0;
 
                 if ((cv.FlowType == cGRM.CellFlowType.ChannelFlow && cv.mStreamAttr.ChStrOrder > cProject.Current.subWSPar.userPars[cv.WSID].dryStreamOrder))
+                {
                     cv.soilSaturationRatio = 1;
+                }
                 cRainfall.CalRFintensity_mPsec(mProject.CVs[n], mPESSRuniformRFtoApply_mm, rfInterval_sec);
             }
         }
@@ -95,7 +101,9 @@ namespace GRMCore
             cSimulator simulator = new cSimulator();
             cOutPutControl outputControl = new cOutPutControl();
             if (!sThisSimulation.mGRMSetupIsNormal)
+            {
                 return;
+            }
             int nowiterForPrint = 0;
             mCompletedWSid = new Dictionary<int, PE_SS_Result>();
             mCVresult_SSR_IniFlow = new List<cCVAttribute>();
@@ -118,18 +126,24 @@ namespace GRMCore
                 {
                     outputControl.WriteSimResultsToTextFileForSingleEvent(mProject, wpCount, nowTmin, sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m, 1, null);
                     if (mProject.generalSimulEnv.mbMakeRasterOutput == true)
+                    {
                         CallAnalyzer(this, mProject, nowTmin, mProject.generalSimulEnv.mbCreateImageFile, mProject.generalSimulEnv.mbCreateASCFile);
+                    }
                     nowiterForPrint = 0;
                 }
                 PEiteration(this, niter);
                 nowiterForPrint += 1;
                 if (mbAfterAllSSRbeenOne == true)
+                {
                     PESS_CheckSatisfyToleranceAndSetCVatt();
+                }
                 else
                 {
                     PESSR_CheckSSRisOne();
                     if (mbAfterAllSSRbeenOne == true)
+                    {
                         NoRFcondition();
+                    }
                 }
 
                 if (mSWScountToEstSS == mCompletedWSid.Count)
@@ -186,9 +200,13 @@ namespace GRMCore
                             mCompletedWSid.Add(id, new PE_SS_Result());
                             PE_SS_Result results = new PE_SS_Result();
                             if (mProject.CVs[wsCVarrayNum].FlowType == cGRM.CellFlowType.OverlandFlow)
+                            {
                                 results.INI_FLOW = mProject.CVs[wsCVarrayNum].QCVof_i_j_m3Ps;
+                            }
                             else
+                            {
                                 results.INI_FLOW = mProject.CVs[wsCVarrayNum].mStreamAttr.QCVch_i_j_m3Ps;
+                            }
                             results.INI_SSR = mProject.CVs[wsCVarrayNum].soilSaturationRatio;
                             mCompletedWSid[id] = results;
                             SetCVattWithPEresult_SSR_IniFLOW(id);
@@ -241,9 +259,13 @@ namespace GRMCore
                     cv.CVID = cvid;
                     cv.InitialSaturation = mProject.CVs[cvid - 1].soilSaturationRatio;
                     if (cv.FlowType == cGRM.CellFlowType.OverlandFlow)
+                    {
                         cv.QCVof_i_j_m3Ps = mProject.CVs[cvid - 1].QCVof_i_j_m3Ps;
+                    }
                     else
+                    {
                         cv.mStreamAttr.QCVch_i_j_m3Ps = mProject.CVs[cvid - 1].mStreamAttr.QCVch_i_j_m3Ps;
+                    }
                     mCVresult_SSR_IniFlow.Add(cv);
                     // 여기서 이렇게 설정하더라도.. 실제 모델링에서는 inlet의 상류만 false로 설정됨
                     mProject.CVs[cvid - 1].toBeSimulated = -1;
@@ -263,11 +285,15 @@ namespace GRMCore
                     if (project.subWSPar.userPars[upsid].isUserSet == true && project.subWSPar.userPars[upsid].iniFlow > 0)
                     {
                         if (!wsidToExclude.Contains(upsid))
+                        {
                             wsidToExclude.Add(upsid);
+                        }
                         foreach (int upupID in project.WSNetwork.WSIDsAllUps(upsid))
                         {
                             if (!wsidToExclude.Contains(upupID))
+                            {
                                 wsidToExclude.Add(upupID);
+                            }
                         }
                     }
                 }
@@ -275,7 +301,9 @@ namespace GRMCore
                 foreach (int upsid in project.WSNetwork.WSIDsAllUps(baseWSID))
                 {
                     if (wsidToExclude.Contains(upsid) == false)
+                    {
                         upWSIDlistToSet.Add(upsid);
+                    }
                 }
             }
             return upWSIDlistToSet;
@@ -294,7 +322,9 @@ namespace GRMCore
                 foreach (int id in mProject.watershed.WSIDList)
                 {
                     if (mProject.subWSPar.userPars[id].iniFlow > 0)
+                    {
                         count += 1;
+                    }
                 }
                 return count;
             }

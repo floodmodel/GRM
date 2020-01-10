@@ -18,12 +18,14 @@ Public Class cChart
     Private mLabelsAxisX As List(Of String)
 
     Private mAxisXLabel As Dictionary(Of Integer, String)
+    Private mAxisXLabelList As List(Of String)
     Private mRFs As Dictionary(Of Integer, Double)
     Private mQobss As Dictionary(Of Integer, List(Of Nullable(Of Double)))
     Private mQsims As Dictionary(Of Integer, List(Of Nullable(Of Double)))
 
     Private mMaxValueInQsim As Single
     Private mMaxOutPrintCount As Integer
+    Private mIsDateTimeFormat As Boolean = False
 
     Public mAddedValueCount As Integer = 0
 
@@ -62,7 +64,7 @@ Public Class cChart
                ByVal inLegendObs As List(Of String),
                ByVal inLegendsSim As List(Of String),
                ByVal inputXLabels As Dictionary(Of Integer, String),
-               Optional ByVal maxPrintCount As Integer = 0)
+               Optional ByVal maxPrintCount As Integer = 0, Optional ByVal isDateTimeFormat As Boolean = False)
 
         'If inQobs Is Nothing OrElse inLegendObs Is Nothing OrElse inQobs.Values.Count < 1 Then
         '    MsgBox("Observed data is not selected. ")
@@ -74,10 +76,10 @@ Public Class cChart
             Exit Sub
         End If
         mMaxOutPrintCount = maxPrintCount
+        mIsDateTimeFormat = isDateTimeFormat
         Call initializeVariables(pbChartMain, pbChartRF, inQobs, inLegendObs, inLegendsSim, , , inputXLabels)
         setChartFormat()
     End Sub
-
 
     Public Sub New(ByVal pbChartMain As PictureBox, ByVal pbChartRF As PictureBox,
                ByVal inQobs As Dictionary(Of Integer, List(Of Nullable(Of Double))),
@@ -118,7 +120,7 @@ Public Class cChart
            ByVal inSimLegends As List(Of String),
            ByVal inRF As Dictionary(Of Integer, Double),
            ByVal inXLabels As Dictionary(Of Integer, String),
-           Optional ByVal maxPrintCount As Integer = 0)
+           Optional ByVal maxPrintCount As Integer = 0, Optional ByVal isDateTimeFormat As Boolean = False)
 
         If inQobs Is Nothing OrElse inObsLegends Is Nothing Then
             MsgBox("Observed data is not selected. ")
@@ -141,6 +143,7 @@ Public Class cChart
             inXLabels = Nothing
         End If
         mMaxOutPrintCount = maxPrintCount
+        mIsDateTimeFormat = isDateTimeFormat
         Call initializeVariables(pbChartMain, pbChartRF, inQobs, inObsLegends, inSimLegends, inQsim, inRF, inXLabels)
 
         'mQsims = inQsim
@@ -379,7 +382,8 @@ Public Class cChart
             For m As Integer = 0 To mQsims.Keys.Count - 1
                 l.Add(mQsims(m)(n))
             Next
-            mSQsim(n).Points.DataBindY(l)
+            mSQsim(n).Points.DataBindXY(mAxisXLabel.Values, l)
+            'mSQsim(n).Points.DataBindY(l)
             mChartMain.Series(mSQsim(n).Name) = mSQsim(n)
         Next
         mChartRF.Update()
@@ -442,7 +446,12 @@ Public Class cChart
     Private Function setChartFormat() As Boolean
         With mChartAreaMain
             .Name = "MainChart"
-            .AxisX.Title = "Time"
+            If mIsDateTimeFormat = False Then
+                .AxisX.Title = "Time (h)"
+            Else
+                .AxisX.Title = "Time"
+            End If
+
             .AxisX.IsStartedFromZero = True
             .AxisX.Minimum = 0
             .AxisX.Crossing = .AxisY.Minimum
@@ -496,7 +505,7 @@ Public Class cChart
             '.AxisX.IsLabelAutoFit = False
             '.AxisX.LabelStyle.Font = New Font(.AxisX.LabelStyle.Font, 10)
 
-            .AxisY.Title = "RF(mm)"
+            .AxisY.Title = "RF (mm)"
             .AxisY.TitleAlignment = StringAlignment.Center
             .AxisY.IsStartedFromZero = True
             .AxisY.IsReversed = False

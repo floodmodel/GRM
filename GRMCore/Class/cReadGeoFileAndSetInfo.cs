@@ -50,11 +50,16 @@ namespace GRMCore
                         dm.XCol = cx;
                         dm.YRow = ry;
                         if (!watershed.WSIDList.Contains(cv.WSID))
+                        {
                             watershed.WSIDList.Add(cv.WSID);
+                        }
                         if (watershed.mCVidListForEachWS.ContainsKey(wsid) == false)
+                        {
                             watershed.mCVidListForEachWS.Add(wsid, new List<int>());
+                        }
                         watershed.mCVidListForEachWS[wsid].Add(cv.CVID);
                         cv.toBeSimulated = 1;
+                        if (wsid != 3) { cv.toBeSimulated = -1; }//TODO:주석 2018.12.11
                         wsCells[cx, ry] = cv;
                         lstCV.Add(cv);
                         lstDM.Add(dm);
@@ -90,7 +95,6 @@ namespace GRMCore
                 options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                 Parallel.For(0, rowyCount, options, delegate (int ry)
                 {
-                    // Dim valuesInaLine() As String = gridSlope.ValuesInOneRowFromTopLeft(ry)
                     for (int cx = 0; cx < colxCount; cx++)
                     {
                         if (WSCells[cx, ry] != null)
@@ -108,7 +112,6 @@ namespace GRMCore
             else
                 for (int ry = 0; ry < rowyCount; ry++)
                 {
-                    // Dim valuesInaLine() As String = gridSlope.ValuesInOneRowFromTopLeft(ry)
                     for (int cx = 0; cx < colxCount; cx++)
                     {
                         if (WSCells[cx, ry] != null)
@@ -135,7 +138,6 @@ namespace GRMCore
             if (File.Exists(fpnFdir) == false)
             {
                 throw new FileNotFoundException(fpnFdir);
-                //return false;
             }
             cAscRasterReader gridFdir = new cAscRasterReader(fpnFdir);
             if (isParallel == true)
@@ -144,22 +146,24 @@ namespace GRMCore
                 options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                 Parallel.For(0, rowyCount, options, delegate (int ry)
                 {
-                    // Dim valuesInaLine() As String = gridFdir.ValuesInOneRowFromTopLeft(ry)
                     for (int cx = 0; cx < colxCount; cx++)
                     {
                         if (WSCells[cx, ry] != null)
+                        {
                             WSCells[cx, ry].FDir = cHydroCom.GetFlowDirection(System.Convert.ToInt32(gridFdir.ValueFromTL(cx, ry)), fdtype);
+                        }
                     }
                 });
             }
             else
                 for (int ry = 0; ry < rowyCount; ry++)
                 {
-                    // Dim valuesInaLine() As String = gridFdir.ValuesInOneRowFromTopLeft(ry)
                     for (int cx = 0; cx < colxCount; cx++)
                     {
                         if (WSCells[cx, ry] != null)
+                        {
                             WSCells[cx, ry].FDir = cHydroCom.GetFlowDirection(System.Convert.ToInt32(gridFdir.ValueFromTL(cx, ry)), fdtype);
+                        }
                     }
                 }
             return true;
@@ -183,16 +187,19 @@ namespace GRMCore
                 options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                 Parallel.For(0, rowyCount, options, delegate (int ry)
                 {
-                    // Dim valuesInaLine() As String = gridFac.ValuesInOneRowFromTopLeft(ry)
                     for (int cx = 0; cx < colxCount; cx++)
                     {
                         if (WSCells[cx, ry] != null)
                         {
                             int v = System.Convert.ToInt32(gridFac.ValueFromTL(cx, ry));
                             if (v < 0)
+                            {
                                 WSCells[cx, ry].FAc = 0;
+                            }
                             else
+                            {
                                 WSCells[cx, ry].FAc = v;
+                            }
                         }
                     }
                 });
@@ -206,9 +213,13 @@ namespace GRMCore
                         {
                             int v = System.Convert.ToInt32(gridFac.ValueFromTL(cx, ry));
                             if (v < 0)
+                            {
                                 WSCells[cx, ry].FAc = 0;
+                            }
                             else
+                            {
                                 WSCells[cx, ry].FAc = v;
+                            }
                         }
                     }
                 }
@@ -230,7 +241,6 @@ namespace GRMCore
                     options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                     Parallel.For(0, rowyCount, options, delegate (int ry)
                     {
-                        // Dim valuesInaLine() As String = gridStream.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -250,15 +260,11 @@ namespace GRMCore
                 else
                     for (int ry = 0; ry < rowyCount; ry++)
                     {
-                        // Dim valuesInaLine() As String = gridStream.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
                             {
                                 int value = System.Convert.ToInt32(gridStream.ValueFromTL(cx, ry));
-                                // If cx = 21 AndAlso ry = 39 Then
-                                // Dim a As Integer = 1
-                                // End If
                                 if (value > 0)
                                 {
                                     WSCells[cx, ry].FlowType = cGRM.CellFlowType.ChannelFlow;
@@ -295,16 +301,19 @@ namespace GRMCore
                     options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                     Parallel.For(0, rowyCount, options, delegate (int ry)
                     {
-                        // Dim valuesInaLine() As String = gridCHWidth.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
                             {
                                 double value = gridCHWidth.ValueFromTL(cx, ry);
                                 if (value < 0)
+                                {
                                     WSCells[cx, ry].mStreamAttr.ChBaseWidthByLayer = 0;
+                                }
                                 else
+                                {
                                     WSCells[cx, ry].mStreamAttr.ChBaseWidthByLayer = value;
+                                }
                             }
                         }
                     });
@@ -312,14 +321,15 @@ namespace GRMCore
                 else
                     for (int ry = 0; ry < rowyCount; ry++)
                     {
-                        // Dim valuesInaLine() As String = gridCHWidth.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
                             {
                                 double value = gridCHWidth.ValueFromTL(cx, ry);
                                 if (value > 0)
-                                { WSCells[cx, ry].mStreamAttr.ChBaseWidthByLayer = value; }
+                                {
+                                    WSCells[cx, ry].mStreamAttr.ChBaseWidthByLayer = value;
+                                }
                                 //else
                                 //    WSCells[cx, ry].mStreamAttr.ChBaseWidthByLayer = Watershed.mCellSize / (double)10;
                             }
@@ -348,16 +358,13 @@ namespace GRMCore
                     options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                     Parallel.For(0, rowyCount, options, delegate (int ry)
                     {
-                        // Dim valuesInaLine() As String = ascIniSSR.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
                             {
                                 double v = ascIniSSR.ValueFromTL(cx, ry);
-                                if (v < 0)
-                                    v = 0;
-                                if (v > 1)
-                                    v = 1;
+                                if (v < 0) { v = 0; }
+                                if (v > 1) { v = 1; }
                                 WSCells[cx, ry].InitialSaturation = v;
                             }
                         }
@@ -366,16 +373,13 @@ namespace GRMCore
                 else
                     for (int ry = 0; ry < rowyCount; ry++)
                     {
-                        // Dim valuesInaLine() As String = ascIniSSR.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
                             {
                                 double v = ascIniSSR.ValueFromTL(cx, ry);
-                                if (v < 0)
-                                    v = 0;
-                                if (v > 1)
-                                    v = 1;
+                                if (v < 0) { v = 0; }
+                                if (v > 1) { v = 1; }
                                 WSCells[cx, ry].InitialSaturation = v;
                             }
                         }
@@ -401,7 +405,6 @@ namespace GRMCore
                     options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                     Parallel.For(0, rowyCount, options, delegate (int ry)
                     {
-                        // Dim valuesInaLine() As String = ascIniChFlow.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -422,7 +425,6 @@ namespace GRMCore
                 else
                     for (int ry = 0; ry < rowyCount; ry++)
                     {
-                        // Dim valuesInaLine() As String = ascIniChFlow.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -461,7 +463,6 @@ namespace GRMCore
                     options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                     Parallel.For(0, rowyCount, options, (Action<int>)delegate (int ry)
                     {
-                        // Dim valuesInaLine() As String = gridLC.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -469,7 +470,9 @@ namespace GRMCore
                                 cCVAttribute cell = WSCells[cx, ry];
                                 int value = System.Convert.ToInt32(gridLC.ValueFromTL(cx, ry));
                                 if (value > 0)
+                                {
                                     cell.LandCoverValue = value;
+                                }
                                 else
                                 {
                                     Console.WriteLine(string.Format("Landcover file {0} has an invalid value.", fpnLC), true, true);
@@ -482,7 +485,6 @@ namespace GRMCore
                 else
                     for (int ry = 0; ry < rowyCount; ry++)
                     {
-                        // Dim valuesInaLine() As String = gridLC.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -490,7 +492,9 @@ namespace GRMCore
                                 cCVAttribute cell = WSCells[cx, ry];
                                 int value = System.Convert.ToInt32(gridLC.ValueFromTL(cx, ry));
                                 if (value > 0)
+                                {
                                     cell.LandCoverValue = value;
+                                }
                                 else
                                 {
                                     isnormal = false;
@@ -512,10 +516,9 @@ namespace GRMCore
         ///   토지피복레이어 값 읽기
         ///   </summary>
         ///   <remarks></remarks>
-        public static bool ReadLayerLandCover(string fpnLC, cSetLandcover Landcover, cCVAttribute[,] WSCells, int colxCount, int rowyCount, 
+        public static bool ReadLandCoverFileAndSetVAT(string fpnLC, cSetLandcover Landcover, cCVAttribute[,] WSCells, int colxCount, int rowyCount, 
             bool isParallel)
         {
-
             SortedList<int, float> vatRC = new SortedList<int, float>();
             SortedList<int, float> vatIR = new SortedList<int, float>();
             SortedList<int, cSetLandcover.LandCoverCode> vatLCcode = new SortedList<int, cSetLandcover.LandCoverCode>();
@@ -525,7 +528,9 @@ namespace GRMCore
                 vatIR.Add(System.Convert.ToInt32(row.GridValue), row.ImperviousRatio);
                 cSetLandcover.LandCoverCode lcCode;
                 if (!row.IsGRMCodeNull())
+                {
                     lcCode = cSetLandcover.GetLandCoverCode(row.GRMCode);
+                }
                 else
                 {
                     cGRM.writelogAndConsole(string.Format("Landcover attribute code was not set for {0}. ", row.GridValue), true, true);
@@ -536,6 +541,7 @@ namespace GRMCore
             cAscRasterReader gridLC = new cAscRasterReader(fpnLC);
             // Dim isnormal As Boolean = True
             int vBak = vatRC.Keys[0]; // 여기서 기본값.
+            bool isnormal = true;
             try
             {
                 if (isParallel == true)
@@ -544,7 +550,6 @@ namespace GRMCore
                     options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                     Parallel.For(0, rowyCount, options, (Action<int>)delegate (int ry)
                     {
-                        // Dim valuesInaLine() As String = gridLC.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -553,11 +558,19 @@ namespace GRMCore
                                 int value = System.Convert.ToInt32(gridLC.ValueFromTL(cx, ry));
                                 if (value > 0)
                                 {
+                                    if (vatLCcode.ContainsKey (value)==true )
+                                    {
                                     vBak = value; // 여기서 최신 셀의 값
                                     cell.LandCoverValue = value;
                                     cell.RoughnessCoeffOFori = vatRC[value];
                                     cell.ImperviousRatio = vatIR[value];
                                     cell.LandCoverCode = vatLCcode[value];
+                                    }
+                                    else
+                                    {
+                                        cGRM.writelogAndConsole(string.Format("Landcover VAT file ({0}) has not land cover value {1}. Check the land cover file or land cover VAT file.", Landcover.mLandCoverVATFPN, value), false, true);
+                                        isnormal = false;
+                                    }
                                 }
                                 else
                                 {
@@ -570,12 +583,12 @@ namespace GRMCore
                             }
                         }
                     });
+                    if (isnormal ==false) { return false; }
                 }
                 else
                 {
                     for (int ry = 0; ry < rowyCount; ry++)
                     {
-                        // Dim valuesInaLine() As String = gridLC.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -584,11 +597,19 @@ namespace GRMCore
                                 int value = System.Convert.ToInt32(gridLC.ValueFromTL(cx, ry));
                                 if (value > 0)
                                 {
-                                    vBak = value; // 여기서 최신 셀의 값
-                                    cell.LandCoverValue = value;
-                                    cell.RoughnessCoeffOFori = vatRC[value];
-                                    cell.ImperviousRatio = vatIR[value];
-                                    cell.LandCoverCode = vatLCcode[value];
+                                    if (vatLCcode .ContainsKey (value)==true )
+                                    {
+                                        vBak = value; // 여기서 최신 셀의 값
+                                        cell.LandCoverValue = value;
+                                        cell.RoughnessCoeffOFori = vatRC[value];
+                                        cell.ImperviousRatio = vatIR[value];
+                                        cell.LandCoverCode = vatLCcode[value];
+                                    }
+                                    else
+                                    {
+                                        cGRM.writelogAndConsole(string.Format("Landcover VAT file ({0}) has not land cover value {1}. Check the land cover file or land cover VAT file.", Landcover.mLandCoverVATFPN, value), false, true);
+                                        return false;
+                                    }
                                 }
                                 else
                                 {
@@ -664,7 +685,6 @@ namespace GRMCore
                     options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                     Parallel.For(0, rowyCount, options, (Action<int>)delegate (int ry)
                     {
-                        // Dim valuesInaLine() As String = gridSTexture.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -672,7 +692,9 @@ namespace GRMCore
                                 cCVAttribute cell = WSCells[cx, ry];
                                 int value = System.Convert.ToInt32(gridSTexture.ValueFromTL(cx, ry));
                                 if (value > 0)
+                                {
                                     cell.SoilTextureValue = value;
+                                }
                                 else
                                 {
                                     Console.WriteLine(string.Format("Soil texture file {0} has an invalid value.", fpnST), true, true);
@@ -685,7 +707,6 @@ namespace GRMCore
                 else
                     for (int ry = 0; ry < rowyCount; ry++)
                     {
-                        // Dim valuesInaLine() As String = gridSTexture.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -693,7 +714,9 @@ namespace GRMCore
                                 cCVAttribute cell = WSCells[cx, ry];
                                 int value = System.Convert.ToInt32(gridSTexture.ValueFromTL(cx, ry));
                                 if (value > 0)
+                                {
                                     cell.SoilTextureValue = value;
+                                }
                                 else
                                 {
                                     isnormal = false;
@@ -715,7 +738,7 @@ namespace GRMCore
         ///   토성레이어 값 읽기
         ///   </summary>
         ///   <remarks></remarks>
-        public static  bool ReadLayerSoilTexture(string fpnST, cSetGreenAmpt GreenAmpt,
+        public static  bool ReadSoilTextureFileAndSetVAT(string fpnST, cSetGreenAmpt GreenAmpt,
             cCVAttribute[,] WSCells, int colxCount, int rowyCount, bool isParallel)
         {            
             cAscRasterReader gridSTexture = new cAscRasterReader(fpnST);
@@ -732,7 +755,9 @@ namespace GRMCore
                 vatHC.Add(System.Convert.ToInt32(row.GridValue), row.HydraulicConductivity);
                 cSetGreenAmpt.SoilTextureCode stCode;
                 if (!row.IsGRMCodeNull())
+                {
                     stCode = cSetGreenAmpt.GetSoilTextureCode(row.GRMCode.ToString());
+                }
                 else
                 {
                     cGRM.writelogAndConsole(string.Format("Soil texture attribute code was not set for {0}. ", row.GridValue), true, true);
@@ -740,7 +765,7 @@ namespace GRMCore
                 }
                 vatSTcode.Add(System.Convert.ToInt32(row.GridValue), stCode);
             }
-            //bool isnormal = true;
+            bool isnormal = true;
             int vBak = vatP.Keys[0]; // 여기서 기본값.
             try
             {
@@ -750,7 +775,6 @@ namespace GRMCore
                     options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                     Parallel.For(0, rowyCount, options, (Action<int>)delegate (int ry)
                     {
-                        // Dim valuesInaLine() As String = gridSTexture.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -759,13 +783,21 @@ namespace GRMCore
                                 int value = System.Convert.ToInt32(gridSTexture.ValueFromTL(cx, ry));
                                 if (value > 0)
                                 {
-                                    vBak = value; // 여기서 최신 셀의 값
-                                    cell.SoilTextureValue = value;
-                                    cell.PorosityEtaOri = vatP[value];
-                                    cell.EffectivePorosityThetaEori = vatEP[value];
-                                    cell.WettingFrontSuctionHeadPsiOri_m = vatWFSH[value] / 100.0;  // cm -> m
-                                    cell.HydraulicConductKori_mPsec = vatHC[value] / 100.0 / 3600.0;    // cm/hr -> m/s
-                                    cell.SoilTextureCode = vatSTcode[value];
+                                    if (vatSTcode .ContainsKey (value)==true)
+                                    {
+                                        vBak = value; // 여기서 최신 셀의 값
+                                        cell.SoilTextureValue = value;
+                                        cell.PorosityEtaOri = vatP[value];
+                                        cell.EffectivePorosityThetaEori = vatEP[value];
+                                        cell.WettingFrontSuctionHeadPsiOri_m = vatWFSH[value] / 100.0;  // cm -> m
+                                        cell.HydraulicConductKori_mPsec = vatHC[value] / 100.0 / 3600.0;    // cm/hr -> m/s
+                                        cell.SoilTextureCode = vatSTcode[value];
+                                    }
+                                    else
+                                    {
+                                        cGRM.writelogAndConsole(string.Format("Soil texture VAT file ({0}) has not soil texture value {1}. Check the soil texture file or soil texture VAT file.", GreenAmpt.mSoilTextureVATFPN, value), false, true);
+                                        isnormal = false;
+                                    }
                                 }
                                 else
                                 {
@@ -780,11 +812,11 @@ namespace GRMCore
                             }
                         }
                     });
+                    if (isnormal == false) { return false; }
                 }
                 else
                     for (int ry = 0; ry < rowyCount; ry++)
                     {
-                        // Dim valuesInaLine() As String = gridSTexture.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -793,13 +825,21 @@ namespace GRMCore
                                 int value = System.Convert.ToInt32(gridSTexture.ValueFromTL(cx, ry));
                                 if (value > 0)
                                 {
-                                    vBak = value; // 여기서 최신 셀의 값
-                                    cell.SoilTextureValue = value;
-                                    cell.PorosityEtaOri = vatP[value];
-                                    cell.EffectivePorosityThetaEori = vatEP[value];
-                                    cell.WettingFrontSuctionHeadPsiOri_m = vatWFSH[value] / 100.0;  // cm -> m
-                                    cell.HydraulicConductKori_mPsec = vatHC[value] / 100.0 / 3600.0;    // cm/hr -> m/s
-                                    cell.SoilTextureCode = vatSTcode[value];
+                                    if (vatSTcode.ContainsKey(value) == true)
+                                    {
+                                        vBak = value; // 여기서 최신 셀의 값
+                                        cell.SoilTextureValue = value;
+                                        cell.PorosityEtaOri = vatP[value];
+                                        cell.EffectivePorosityThetaEori = vatEP[value];
+                                        cell.WettingFrontSuctionHeadPsiOri_m = vatWFSH[value] / 100.0;  // cm -> m
+                                        cell.HydraulicConductKori_mPsec = vatHC[value] / 100.0 / 3600.0;    // cm/hr -> m/s
+                                        cell.SoilTextureCode = vatSTcode[value];
+                                    }
+                                    else
+                                    {
+                                        cGRM.writelogAndConsole(string.Format("Soil texture VAT file ({0}) has not soil texture value {1}. Check the soil texture file or soil texture VAT file.", GreenAmpt.mSoilTextureVATFPN, value), false, true);
+                                        return false;
+                                    }
                                 }
                                 else
                                 {
@@ -881,14 +921,15 @@ namespace GRMCore
                     options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                     Parallel.For(0, rowyCount, options, (Action<int>)delegate (int ry)
                     {
-                        // Dim valuesInaLine() As String = gridSDepth.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
                             {
                                 int value = System.Convert.ToInt32(gridSDepth.ValueFromTL(cx, ry));
                                 if (value > 0)
+                                {
                                     WSCells[cx, ry].SoilDepthTypeValue = System.Convert.ToInt32(value);
+                                }
                                 else
                                 {
                                     Console.WriteLine(string.Format("Soil depth file {0} has an invalid value.", fpnSD), true, true);
@@ -901,14 +942,15 @@ namespace GRMCore
                 else
                     for (int ry = 0; ry < rowyCount; ry++)
                     {
-                        // Dim valuesInaLine() As String = gridSDepth.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
                             {
                                 int value = System.Convert.ToInt32(gridSDepth.ValueFromTL(cx, ry));
                                 if (value > 0)
+                                {
                                     WSCells[cx, ry].SoilDepthTypeValue = System.Convert.ToInt32(value);
+                                }
                                 else
                                 {
                                     isnormal = false;
@@ -930,7 +972,7 @@ namespace GRMCore
         ///   토양심 레이어 값 읽기
         ///   </summary>
         ///   <remarks></remarks>
-        public static bool ReadLayerSoilDepth(string fpnSD, cSetSoilDepth SoilDepth, cCVAttribute[,] WSCells, int colxCount, int rowyCount,
+        public static bool ReadSoilDepthFileAndSetVAT(string fpnSD, cSetSoilDepth SoilDepth, cCVAttribute[,] WSCells, int colxCount, int rowyCount,
             bool isParallel)
         {
 
@@ -960,7 +1002,6 @@ namespace GRMCore
                     options.MaxDegreeOfParallelism = sThisSimulation.MaxDegreeOfParallelism;
                     Parallel.For(0, rowyCount, options, (Action<int>)delegate (int ry)
                     {
-                        // Dim valuesInaLine() As String = gridSDepth.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -968,10 +1009,18 @@ namespace GRMCore
                                 int value = System.Convert.ToInt32(gridSDepth.ValueFromTL(cx, ry));
                                 if (value > 0)
                                 {
-                                    vBak = value; // 여기서 최신 셀의 값
-                                    WSCells[cx, ry].SoilDepthTypeValue = System.Convert.ToInt32(value);
-                                    WSCells[cx, ry].SoilDepthOri_m = vatSD[value] / (double)100;     // cm ->  m
-                                    WSCells[cx, ry].SoilDepthCode = vatSDcode[value];
+                                    if (vatSDcode.ContainsKey(value) == true)
+                                    {
+                                        vBak = value; // 여기서 최신 셀의 값
+                                        WSCells[cx, ry].SoilDepthTypeValue = System.Convert.ToInt32(value);
+                                        WSCells[cx, ry].SoilDepthOri_m = vatSD[value] / (double)100;     // cm ->  m
+                                        WSCells[cx, ry].SoilDepthCode = vatSDcode[value];
+                                    }
+                                    else
+                                    {
+                                        cGRM.writelogAndConsole(string.Format("Soil depth VAT file ({0}) has not soil depth class value {1}. Check the soil depth file or soil depth VAT file.", SoilDepth.mSoilDepthVATFPN, value), false, true);
+                                        isnormal = false;
+                                    }
                                 }
                                 else
                                 {
@@ -983,11 +1032,12 @@ namespace GRMCore
                             }
                         }
                     });
+                    if (isnormal == false) { return false; }
                 }
                 else
+                {
                     for (int ry = 0; ry < rowyCount; ry++)
                     {
-                        // Dim valuesInaLine() As String = gridSDepth.ValuesInOneRowFromTopLeft(ry)
                         for (int cx = 0; cx < colxCount; cx++)
                         {
                             if (WSCells[cx, ry] != null)
@@ -995,10 +1045,18 @@ namespace GRMCore
                                 int value = System.Convert.ToInt32(gridSDepth.ValueFromTL(cx, ry));
                                 if (value > 0)
                                 {
-                                    vBak = value; // 여기서 최신 셀의 값
-                                    WSCells[cx, ry].SoilDepthTypeValue = System.Convert.ToInt32(value);
-                                    WSCells[cx, ry].SoilDepthOri_m = vatSD[value] / (double)100;     // cm ->  m
-                                    WSCells[cx, ry].SoilDepthCode = vatSDcode[value];
+                                    if (vatSDcode.ContainsKey(value) == true)
+                                    {
+                                        vBak = value; // 여기서 최신 셀의 값
+                                        WSCells[cx, ry].SoilDepthTypeValue = System.Convert.ToInt32(value);
+                                        WSCells[cx, ry].SoilDepthOri_m = vatSD[value] / (double)100;     // cm ->  m
+                                        WSCells[cx, ry].SoilDepthCode = vatSDcode[value];
+                                    }
+                                    else
+                                    {
+                                        cGRM.writelogAndConsole(string.Format("Soil depth VAT file ({0}) has not soil depth class value {1}. Check the soil depth file or soil depth VAT file.", SoilDepth.mSoilDepthVATFPN, value), false, true);
+                                        return false;
+                                    }
                                 }
                                 else
                                 {
@@ -1010,6 +1068,7 @@ namespace GRMCore
                             }
                         }
                     }
+                }
                 return true;
             }
             catch (KeyNotFoundException ex)

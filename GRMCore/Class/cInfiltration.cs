@@ -53,18 +53,18 @@ namespace GRMCore
             {
                 residualMoistContentThetaR = cv.porosityEta - cv.effectivePorosityThetaE;
                 if (residualMoistContentThetaR < 0)
-                    residualMoistContentThetaR = 0;
-                cv.EffectiveSaturationSe = (cv.porosityEta * cv.InitialSaturation - residualMoistContentThetaR) / (double)(cv.porosityEta - residualMoistContentThetaR);
+                { residualMoistContentThetaR = 0; }
+                cv.EffectiveSaturationSe = (cv.porosityEta * cv.InitialSaturation - residualMoistContentThetaR) / (cv.porosityEta - residualMoistContentThetaR);
 
                 if (cv.EffectiveSaturationSe < 0)
-                    cv.EffectiveSaturationSe = 0;
+                { cv.EffectiveSaturationSe = 0; }
                 cv.SoilMoistureChangeDeltaTheta = (1 - cv.EffectiveSaturationSe) * cv.effectivePorosityThetaE;
                 CONSTGreenAmpt = cv.SoilMoistureChangeDeltaTheta * cv.wettingFrontSuctionHeadPsi_m;
                 double infiltrationF_mPdt_max;
-                bool beingPonding = false; 
+                bool beingPonding = false;
                 if (cv.InfiltrationRatef_tM1_mPsec >= cv.RFReadintensity_tM1_mPsec)
-                    // 이전 시간에서의 침투률이 이전 시간에서의 강우강도보다 컸다면, 모든 강우는 침투됨
-                    infiltrationF_mPdt_max = cv.RFApp_dt_meter;
+                // 이전 시간에서의 침투률이 이전 시간에서의 강우강도보다 컸다면, 모든 강우는 침투됨
+                { infiltrationF_mPdt_max = cv.RFApp_dt_meter; }
                 else
                 {
                     // 이전 시간에서의 침투률이 이전 시간에서의 강우강도보다 같거나 작았다면 ponding이 발생한 경우
@@ -81,18 +81,18 @@ namespace GRMCore
                     cv.soilWaterContent_m = 0;
                 }
                 else
-                    cv.InfiltrationRatef_mPsec = cv.hydraulicConductK_mPsec * (1 + CONSTGreenAmpt / (double)cv.soilWaterContent_m);
+                { cv.InfiltrationRatef_mPsec = cv.hydraulicConductK_mPsec * (1 + CONSTGreenAmpt / cv.soilWaterContent_m); }
 
                 // 이경우에는 침투는 있지만.. 강우는 모두 직접 유출.. 침투는 지표면 저류 상태에서 발생
                 if (cv.bAfterSaturated == true && (beingPonding == true || cv.soilSaturationRatio > 0.99))
-                    cv.EffRFCV_dt_meter = cv.RFApp_dt_meter;
+                { cv.EffRFCV_dt_meter = cv.RFApp_dt_meter; }
                 else
                 {
                     double effRF_dt_m = cv.RFApp_dt_meter - cv.InfiltrationF_mPdt;
                     if (effRF_dt_m > cv.RFApp_dt_meter)
-                        effRF_dt_m = cv.RFApp_dt_meter;
+                    { effRF_dt_m = cv.RFApp_dt_meter; }
                     if (effRF_dt_m < 0)
-                        effRF_dt_m = 0;
+                    { effRF_dt_m = 0; }
                     cv.EffRFCV_dt_meter = effRF_dt_m;
                     if (cv.ImperviousRatio < 1)
                     {
@@ -106,7 +106,7 @@ namespace GRMCore
             //cCVAttribute cv = project.CVs[cvan];
             cv.soilSaturationRatio = GetSoilSaturationRaito(cv.soilWaterContent_m, cv.SoilDepthEffectiveAsWaterDepth_m, cv.FlowType);
             if (cv.soilSaturationRatio == 1)
-                cv.bAfterSaturated = true;
+            { cv.bAfterSaturated = true; }
             cv.soilWaterContent_tM1_m = cv.soilWaterContent_m;
             cv.InfiltrationRatef_tM1_mPsec = cv.InfiltrationRatef_mPsec;
             cv.RFReadintensity_tM1_mPsec = cv.RFReadintensity_mPsec;
@@ -158,9 +158,9 @@ namespace GRMCore
             }
             double dFr = CI_n - constCI_tm1;
             if (dFr < 0)
-                return 0;
+            { return 0; }
             else
-                return dFr;
+            { return dFr; }
             //System.Console.WriteLine("[ColX=" + cProject.Current.CVs[cvan].XCol + ", RowY=" + cProject.Current.CVs[cvan].YRow + "] 에서 침투량이 수렴되지 않았습니다.   " + "\r\n" + "초기 침투률:" + cProject.Current.CVs[cvan].InfiltrationRatef_mPsec + "mm   ");
         }
 
@@ -176,13 +176,10 @@ namespace GRMCore
 
         private double WaterDepthCanBeInfiltrated(double preDepth, double maxDepth, double maxINFILbeCalculated)
         {
-            if (maxINFILbeCalculated <= 0)
-                return 0;
+            if (maxINFILbeCalculated <= 0) { return 0; }
             double dF = maxDepth - preDepth;
-            if (dF < 0)
-                dF = 0;
-            if (dF < maxINFILbeCalculated)
-                maxINFILbeCalculated = dF;
+            if (dF < 0) { dF = 0; }
+            if (dF < maxINFILbeCalculated) { maxINFILbeCalculated = dF; }
             return maxINFILbeCalculated;
         }
 
@@ -199,26 +196,22 @@ namespace GRMCore
         public static double GetSoilSaturationRaito(double cumulativeInfiltration, double effSoilDepth, cGRM.CellFlowType flowType)
 
         {
-            if (flowType == cGRM.CellFlowType.ChannelFlow)
-                return 1;
-            if (effSoilDepth <= 0)
-                return 1;
-            if (cumulativeInfiltration <= 0)
-                return 0;
+            if (flowType == cGRM.CellFlowType.ChannelFlow) { return 1; }
+            if (effSoilDepth <= 0) { return 1; }
+            if (cumulativeInfiltration <= 0) { return 0; }
             double SSR = cumulativeInfiltration / effSoilDepth;
-            if (SSR > 1)
-                return 1;
+            if (SSR > 1) { return 1; }
             return SSR;
         }
 
         public static double GetSoilSaturationRaito(double curssr, double cumulativeInfiltration, double effSoilDepth, cGRM.CellFlowType flowType)
         {
             if (flowType == cGRM.CellFlowType.ChannelFlow)
-                return 1;
+            { return 1; }
             if (effSoilDepth <= 0)
-                return 1;
+            { return 1; }
             if (cumulativeInfiltration <= 0)
-                return 0;
+            { return 0; }
             return curssr;
         }
 
@@ -234,7 +227,7 @@ namespace GRMCore
             if (CoefUnsaturatedK <= 0)
             { return Ks * 0.1; }
             if (ssr > 0.99)
-                return Ks;
+            { return Ks; }
             else
                 switch (uKType)
                 {

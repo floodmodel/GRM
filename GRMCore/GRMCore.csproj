@@ -11,6 +11,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>x64</PlatformTarget>
@@ -123,7 +124,7 @@
     <None Include="Dataset\GRMProject.xsd">
       <SubType>Designer</SubType>
       <Generator>MSDataSetGenerator</Generator>
-      <LastGenOutput>GRMProject.Designer.cs</LastGenOutput>
+      <LastGenOutput>GRMProject1.Designer.cs</LastGenOutput>
     </None>
     <None Include="Dataset\GRMProject.xss">
       <DependentUpon>GRMProject.xsd</DependentUpon>

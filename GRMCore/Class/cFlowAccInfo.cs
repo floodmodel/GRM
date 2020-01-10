@@ -39,9 +39,9 @@ namespace GRMCore
             {
                 if (mConvertedToArray == false) { convertListToArray(); }
                 if (mFacArrayIndices.ContainsKey(accum) == true)
-                    return mFacArrayIndices[accum];
+                { return mFacArrayIndices[accum]; }
                 else
-                    return null;
+                { return null; }
             }
         }
 //public Array GetCVANs(int accum)
