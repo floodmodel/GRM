@@ -561,7 +561,7 @@ namespace GRMCore.Dataset {
             
             private global::System.Data.DataColumn columnGRMSimulationType;
             
-            private global::System.Data.DataColumn columnWatershedFile;
+            private global::System.Data.DataColumn columnDomainFile;
             
             private global::System.Data.DataColumn columnSlopeFile;
             
@@ -630,30 +630,6 @@ namespace GRMCore.Dataset {
             private global::System.Data.DataColumn columnIsFixedTimeStep;
             
             private global::System.Data.DataColumn columnOutputTimeStep;
-            
-            private global::System.Data.DataColumn columnCrossSectionType;
-            
-            private global::System.Data.DataColumn columnSingleCSChannelWidthType;
-            
-            private global::System.Data.DataColumn columnChannelWidthEQc;
-            
-            private global::System.Data.DataColumn columnChannelWidthEQd;
-            
-            private global::System.Data.DataColumn columnChannelWidthEQe;
-            
-            private global::System.Data.DataColumn columnChannelWidthMostDownStream;
-            
-            private global::System.Data.DataColumn columnLowerRegionHeight;
-            
-            private global::System.Data.DataColumn columnLowerRegionBaseWidth;
-            
-            private global::System.Data.DataColumn columnUpperRegionBaseWidth;
-            
-            private global::System.Data.DataColumn columnCompoundCSChannelWidthLimit;
-            
-            private global::System.Data.DataColumn columnBankSideSlopeRight;
-            
-            private global::System.Data.DataColumn columnBankSideSlopeLeft;
             
             private global::System.Data.DataColumn columnSimulateInfiltration;
             
@@ -742,9 +718,9 @@ namespace GRMCore.Dataset {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn WatershedFileColumn {
+            public global::System.Data.DataColumn DomainFileColumn {
                 get {
-                    return this.columnWatershedFile;
+                    return this.columnDomainFile;
                 }
             }
             
@@ -1022,102 +998,6 @@ namespace GRMCore.Dataset {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn CrossSectionTypeColumn {
-                get {
-                    return this.columnCrossSectionType;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn SingleCSChannelWidthTypeColumn {
-                get {
-                    return this.columnSingleCSChannelWidthType;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn ChannelWidthEQcColumn {
-                get {
-                    return this.columnChannelWidthEQc;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn ChannelWidthEQdColumn {
-                get {
-                    return this.columnChannelWidthEQd;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn ChannelWidthEQeColumn {
-                get {
-                    return this.columnChannelWidthEQe;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn ChannelWidthMostDownStreamColumn {
-                get {
-                    return this.columnChannelWidthMostDownStream;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn LowerRegionHeightColumn {
-                get {
-                    return this.columnLowerRegionHeight;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn LowerRegionBaseWidthColumn {
-                get {
-                    return this.columnLowerRegionBaseWidth;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn UpperRegionBaseWidthColumn {
-                get {
-                    return this.columnUpperRegionBaseWidth;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn CompoundCSChannelWidthLimitColumn {
-                get {
-                    return this.columnCompoundCSChannelWidthLimit;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn BankSideSlopeRightColumn {
-                get {
-                    return this.columnBankSideSlopeRight;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public global::System.Data.DataColumn BankSideSlopeLeftColumn {
-                get {
-                    return this.columnBankSideSlopeLeft;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public global::System.Data.DataColumn SimulateInfiltrationColumn {
                 get {
                     return this.columnSimulateInfiltration;
@@ -1331,7 +1211,7 @@ namespace GRMCore.Dataset {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public ProjectSettingsRow AddProjectSettingsRow(
                         string GRMSimulationType, 
-                        string WatershedFile, 
+                        string DomainFile, 
                         string SlopeFile, 
                         string FlowDirectionFile, 
                         string FlowAccumFile, 
@@ -1366,18 +1246,6 @@ namespace GRMCore.Dataset {
                         string ComputationalTimeStep, 
                         string IsFixedTimeStep, 
                         string OutputTimeStep, 
-                        string CrossSectionType, 
-                        string SingleCSChannelWidthType, 
-                        string ChannelWidthEQc, 
-                        string ChannelWidthEQd, 
-                        string ChannelWidthEQe, 
-                        string ChannelWidthMostDownStream, 
-                        string LowerRegionHeight, 
-                        string LowerRegionBaseWidth, 
-                        string UpperRegionBaseWidth, 
-                        string CompoundCSChannelWidthLimit, 
-                        string BankSideSlopeRight, 
-                        string BankSideSlopeLeft, 
                         string SimulateInfiltration, 
                         string SimulateSubsurfaceFlow, 
                         string SimulateBaseFlow, 
@@ -1403,7 +1271,7 @@ namespace GRMCore.Dataset {
                 ProjectSettingsRow rowProjectSettingsRow = ((ProjectSettingsRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
                         GRMSimulationType,
-                        WatershedFile,
+                        DomainFile,
                         SlopeFile,
                         FlowDirectionFile,
                         FlowAccumFile,
@@ -1438,18 +1306,6 @@ namespace GRMCore.Dataset {
                         ComputationalTimeStep,
                         IsFixedTimeStep,
                         OutputTimeStep,
-                        CrossSectionType,
-                        SingleCSChannelWidthType,
-                        ChannelWidthEQc,
-                        ChannelWidthEQd,
-                        ChannelWidthEQe,
-                        ChannelWidthMostDownStream,
-                        LowerRegionHeight,
-                        LowerRegionBaseWidth,
-                        UpperRegionBaseWidth,
-                        CompoundCSChannelWidthLimit,
-                        BankSideSlopeRight,
-                        BankSideSlopeLeft,
                         SimulateInfiltration,
                         SimulateSubsurfaceFlow,
                         SimulateBaseFlow,
@@ -1495,7 +1351,7 @@ namespace GRMCore.Dataset {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             internal void InitVars() {
                 this.columnGRMSimulationType = base.Columns["GRMSimulationType"];
-                this.columnWatershedFile = base.Columns["WatershedFile"];
+                this.columnDomainFile = base.Columns["DomainFile"];
                 this.columnSlopeFile = base.Columns["SlopeFile"];
                 this.columnFlowDirectionFile = base.Columns["FlowDirectionFile"];
                 this.columnFlowAccumFile = base.Columns["FlowAccumFile"];
@@ -1530,18 +1386,6 @@ namespace GRMCore.Dataset {
                 this.columnComputationalTimeStep = base.Columns["ComputationalTimeStep"];
                 this.columnIsFixedTimeStep = base.Columns["IsFixedTimeStep"];
                 this.columnOutputTimeStep = base.Columns["OutputTimeStep"];
-                this.columnCrossSectionType = base.Columns["CrossSectionType"];
-                this.columnSingleCSChannelWidthType = base.Columns["SingleCSChannelWidthType"];
-                this.columnChannelWidthEQc = base.Columns["ChannelWidthEQc"];
-                this.columnChannelWidthEQd = base.Columns["ChannelWidthEQd"];
-                this.columnChannelWidthEQe = base.Columns["ChannelWidthEQe"];
-                this.columnChannelWidthMostDownStream = base.Columns["ChannelWidthMostDownStream"];
-                this.columnLowerRegionHeight = base.Columns["LowerRegionHeight"];
-                this.columnLowerRegionBaseWidth = base.Columns["LowerRegionBaseWidth"];
-                this.columnUpperRegionBaseWidth = base.Columns["UpperRegionBaseWidth"];
-                this.columnCompoundCSChannelWidthLimit = base.Columns["CompoundCSChannelWidthLimit"];
-                this.columnBankSideSlopeRight = base.Columns["BankSideSlopeRight"];
-                this.columnBankSideSlopeLeft = base.Columns["BankSideSlopeLeft"];
                 this.columnSimulateInfiltration = base.Columns["SimulateInfiltration"];
                 this.columnSimulateSubsurfaceFlow = base.Columns["SimulateSubsurfaceFlow"];
                 this.columnSimulateBaseFlow = base.Columns["SimulateBaseFlow"];
@@ -1571,8 +1415,8 @@ namespace GRMCore.Dataset {
             private void InitClass() {
                 this.columnGRMSimulationType = new global::System.Data.DataColumn("GRMSimulationType", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnGRMSimulationType);
-                this.columnWatershedFile = new global::System.Data.DataColumn("WatershedFile", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnWatershedFile);
+                this.columnDomainFile = new global::System.Data.DataColumn("DomainFile", typeof(string), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnDomainFile);
                 this.columnSlopeFile = new global::System.Data.DataColumn("SlopeFile", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnSlopeFile);
                 this.columnFlowDirectionFile = new global::System.Data.DataColumn("FlowDirectionFile", typeof(string), null, global::System.Data.MappingType.Element);
@@ -1641,30 +1485,6 @@ namespace GRMCore.Dataset {
                 base.Columns.Add(this.columnIsFixedTimeStep);
                 this.columnOutputTimeStep = new global::System.Data.DataColumn("OutputTimeStep", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnOutputTimeStep);
-                this.columnCrossSectionType = new global::System.Data.DataColumn("CrossSectionType", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnCrossSectionType);
-                this.columnSingleCSChannelWidthType = new global::System.Data.DataColumn("SingleCSChannelWidthType", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnSingleCSChannelWidthType);
-                this.columnChannelWidthEQc = new global::System.Data.DataColumn("ChannelWidthEQc", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnChannelWidthEQc);
-                this.columnChannelWidthEQd = new global::System.Data.DataColumn("ChannelWidthEQd", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnChannelWidthEQd);
-                this.columnChannelWidthEQe = new global::System.Data.DataColumn("ChannelWidthEQe", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnChannelWidthEQe);
-                this.columnChannelWidthMostDownStream = new global::System.Data.DataColumn("ChannelWidthMostDownStream", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnChannelWidthMostDownStream);
-                this.columnLowerRegionHeight = new global::System.Data.DataColumn("LowerRegionHeight", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnLowerRegionHeight);
-                this.columnLowerRegionBaseWidth = new global::System.Data.DataColumn("LowerRegionBaseWidth", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnLowerRegionBaseWidth);
-                this.columnUpperRegionBaseWidth = new global::System.Data.DataColumn("UpperRegionBaseWidth", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnUpperRegionBaseWidth);
-                this.columnCompoundCSChannelWidthLimit = new global::System.Data.DataColumn("CompoundCSChannelWidthLimit", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnCompoundCSChannelWidthLimit);
-                this.columnBankSideSlopeRight = new global::System.Data.DataColumn("BankSideSlopeRight", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnBankSideSlopeRight);
-                this.columnBankSideSlopeLeft = new global::System.Data.DataColumn("BankSideSlopeLeft", typeof(string), null, global::System.Data.MappingType.Element);
-                base.Columns.Add(this.columnBankSideSlopeLeft);
                 this.columnSimulateInfiltration = new global::System.Data.DataColumn("SimulateInfiltration", typeof(string), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnSimulateInfiltration);
                 this.columnSimulateSubsurfaceFlow = new global::System.Data.DataColumn("SimulateSubsurfaceFlow", typeof(string), null, global::System.Data.MappingType.Element);
@@ -4902,17 +4722,17 @@ namespace GRMCore.Dataset {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string WatershedFile {
+            public string DomainFile {
                 get {
                     try {
-                        return ((string)(this[this.tableProjectSettings.WatershedFileColumn]));
+                        return ((string)(this[this.tableProjectSettings.DomainFileColumn]));
                     }
                     catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'WatershedFile\' 열의 값이 DBNull입니다.", e);
+                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'DomainFile\' 열의 값이 DBNull입니다.", e);
                     }
                 }
                 set {
-                    this[this.tableProjectSettings.WatershedFileColumn] = value;
+                    this[this.tableProjectSettings.DomainFileColumn] = value;
                 }
             }
             
@@ -5462,198 +5282,6 @@ namespace GRMCore.Dataset {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string CrossSectionType {
-                get {
-                    try {
-                        return ((string)(this[this.tableProjectSettings.CrossSectionTypeColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'CrossSectionType\' 열의 값이 DBNull입니다.", e);
-                    }
-                }
-                set {
-                    this[this.tableProjectSettings.CrossSectionTypeColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string SingleCSChannelWidthType {
-                get {
-                    try {
-                        return ((string)(this[this.tableProjectSettings.SingleCSChannelWidthTypeColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'SingleCSChannelWidthType\' 열의 값이 DBNull입니다.", e);
-                    }
-                }
-                set {
-                    this[this.tableProjectSettings.SingleCSChannelWidthTypeColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string ChannelWidthEQc {
-                get {
-                    try {
-                        return ((string)(this[this.tableProjectSettings.ChannelWidthEQcColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'ChannelWidthEQc\' 열의 값이 DBNull입니다.", e);
-                    }
-                }
-                set {
-                    this[this.tableProjectSettings.ChannelWidthEQcColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string ChannelWidthEQd {
-                get {
-                    try {
-                        return ((string)(this[this.tableProjectSettings.ChannelWidthEQdColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'ChannelWidthEQd\' 열의 값이 DBNull입니다.", e);
-                    }
-                }
-                set {
-                    this[this.tableProjectSettings.ChannelWidthEQdColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string ChannelWidthEQe {
-                get {
-                    try {
-                        return ((string)(this[this.tableProjectSettings.ChannelWidthEQeColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'ChannelWidthEQe\' 열의 값이 DBNull입니다.", e);
-                    }
-                }
-                set {
-                    this[this.tableProjectSettings.ChannelWidthEQeColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string ChannelWidthMostDownStream {
-                get {
-                    try {
-                        return ((string)(this[this.tableProjectSettings.ChannelWidthMostDownStreamColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'ChannelWidthMostDownStream\' 열의 값이 DBNull입니다.", e);
-                    }
-                }
-                set {
-                    this[this.tableProjectSettings.ChannelWidthMostDownStreamColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string LowerRegionHeight {
-                get {
-                    try {
-                        return ((string)(this[this.tableProjectSettings.LowerRegionHeightColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'LowerRegionHeight\' 열의 값이 DBNull입니다.", e);
-                    }
-                }
-                set {
-                    this[this.tableProjectSettings.LowerRegionHeightColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string LowerRegionBaseWidth {
-                get {
-                    try {
-                        return ((string)(this[this.tableProjectSettings.LowerRegionBaseWidthColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'LowerRegionBaseWidth\' 열의 값이 DBNull입니다.", e);
-                    }
-                }
-                set {
-                    this[this.tableProjectSettings.LowerRegionBaseWidthColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string UpperRegionBaseWidth {
-                get {
-                    try {
-                        return ((string)(this[this.tableProjectSettings.UpperRegionBaseWidthColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'UpperRegionBaseWidth\' 열의 값이 DBNull입니다.", e);
-                    }
-                }
-                set {
-                    this[this.tableProjectSettings.UpperRegionBaseWidthColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string CompoundCSChannelWidthLimit {
-                get {
-                    try {
-                        return ((string)(this[this.tableProjectSettings.CompoundCSChannelWidthLimitColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'CompoundCSChannelWidthLimit\' 열의 값이 DBNull입니다.", e);
-                    }
-                }
-                set {
-                    this[this.tableProjectSettings.CompoundCSChannelWidthLimitColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string BankSideSlopeRight {
-                get {
-                    try {
-                        return ((string)(this[this.tableProjectSettings.BankSideSlopeRightColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'BankSideSlopeRight\' 열의 값이 DBNull입니다.", e);
-                    }
-                }
-                set {
-                    this[this.tableProjectSettings.BankSideSlopeRightColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public string BankSideSlopeLeft {
-                get {
-                    try {
-                        return ((string)(this[this.tableProjectSettings.BankSideSlopeLeftColumn]));
-                    }
-                    catch (global::System.InvalidCastException e) {
-                        throw new global::System.Data.StrongTypingException("\'ProjectSettings\' 테이블의 \'BankSideSlopeLeft\' 열의 값이 DBNull입니다.", e);
-                    }
-                }
-                set {
-                    this[this.tableProjectSettings.BankSideSlopeLeftColumn] = value;
-                }
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public string SimulateInfiltration {
                 get {
                     try {
@@ -6018,14 +5646,14 @@ namespace GRMCore.Dataset {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsWatershedFileNull() {
-                return this.IsNull(this.tableProjectSettings.WatershedFileColumn);
+            public bool IsDomainFileNull() {
+                return this.IsNull(this.tableProjectSettings.DomainFileColumn);
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetWatershedFileNull() {
-                this[this.tableProjectSettings.WatershedFileColumn] = global::System.Convert.DBNull;
+            public void SetDomainFileNull() {
+                this[this.tableProjectSettings.DomainFileColumn] = global::System.Convert.DBNull;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -6434,150 +6062,6 @@ namespace GRMCore.Dataset {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public void SetOutputTimeStepNull() {
                 this[this.tableProjectSettings.OutputTimeStepColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsCrossSectionTypeNull() {
-                return this.IsNull(this.tableProjectSettings.CrossSectionTypeColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetCrossSectionTypeNull() {
-                this[this.tableProjectSettings.CrossSectionTypeColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsSingleCSChannelWidthTypeNull() {
-                return this.IsNull(this.tableProjectSettings.SingleCSChannelWidthTypeColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetSingleCSChannelWidthTypeNull() {
-                this[this.tableProjectSettings.SingleCSChannelWidthTypeColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsChannelWidthEQcNull() {
-                return this.IsNull(this.tableProjectSettings.ChannelWidthEQcColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetChannelWidthEQcNull() {
-                this[this.tableProjectSettings.ChannelWidthEQcColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsChannelWidthEQdNull() {
-                return this.IsNull(this.tableProjectSettings.ChannelWidthEQdColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetChannelWidthEQdNull() {
-                this[this.tableProjectSettings.ChannelWidthEQdColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsChannelWidthEQeNull() {
-                return this.IsNull(this.tableProjectSettings.ChannelWidthEQeColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetChannelWidthEQeNull() {
-                this[this.tableProjectSettings.ChannelWidthEQeColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsChannelWidthMostDownStreamNull() {
-                return this.IsNull(this.tableProjectSettings.ChannelWidthMostDownStreamColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetChannelWidthMostDownStreamNull() {
-                this[this.tableProjectSettings.ChannelWidthMostDownStreamColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsLowerRegionHeightNull() {
-                return this.IsNull(this.tableProjectSettings.LowerRegionHeightColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetLowerRegionHeightNull() {
-                this[this.tableProjectSettings.LowerRegionHeightColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsLowerRegionBaseWidthNull() {
-                return this.IsNull(this.tableProjectSettings.LowerRegionBaseWidthColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetLowerRegionBaseWidthNull() {
-                this[this.tableProjectSettings.LowerRegionBaseWidthColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsUpperRegionBaseWidthNull() {
-                return this.IsNull(this.tableProjectSettings.UpperRegionBaseWidthColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetUpperRegionBaseWidthNull() {
-                this[this.tableProjectSettings.UpperRegionBaseWidthColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsCompoundCSChannelWidthLimitNull() {
-                return this.IsNull(this.tableProjectSettings.CompoundCSChannelWidthLimitColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetCompoundCSChannelWidthLimitNull() {
-                this[this.tableProjectSettings.CompoundCSChannelWidthLimitColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsBankSideSlopeRightNull() {
-                return this.IsNull(this.tableProjectSettings.BankSideSlopeRightColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetBankSideSlopeRightNull() {
-                this[this.tableProjectSettings.BankSideSlopeRightColumn] = global::System.Convert.DBNull;
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public bool IsBankSideSlopeLeftNull() {
-                return this.IsNull(this.tableProjectSettings.BankSideSlopeLeftColumn);
-            }
-            
-            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
-            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public void SetBankSideSlopeLeftNull() {
-                this[this.tableProjectSettings.BankSideSlopeLeftColumn] = global::System.Convert.DBNull;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]

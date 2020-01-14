@@ -178,7 +178,7 @@ namespace GRMCore
                 if (mProject.mSimulationType == cGRM.SimulationType.SingleEvent & !rainfall.IsSet)
                 { throw new InvalidOperationException(); }
                 Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)PrjFile.ProjectSettings.Rows[0];
-                cReadGeoFileAndSetInfo.ReadLayerWSandSetBasicInfo(row.WatershedFile, watershed, ref WSCells, ref CVs, ref dmInfo, ref WSNetwork, ref subWSPar);
+                cReadGeoFileAndSetInfo.ReadLayerWSandSetBasicInfo(row.DomainFile, watershed, ref WSCells, ref CVs, ref dmInfo, ref WSNetwork, ref subWSPar);
                 cReadGeoFileAndSetInfo.ReadLayerSlope(row.SlopeFile, WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel);
                 cReadGeoFileAndSetInfo.ReadLayerFdir(row.FlowDirectionFile, WSCells, watershed.colCount, watershed.rowCount, watershed.mFDType, sThisSimulation.IsParallel);
                 cReadGeoFileAndSetInfo.ReadLayerFAcc(row.FlowAccumFile, WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel);
@@ -1196,17 +1196,17 @@ namespace GRMCore
                 return false;
             }
 
-            if (!r.IsWatershedFileNull() && r.WatershedFile != "")
+            if (!r.IsDomainFileNull() && r.DomainFile != "")
             {
-                if (File.Exists(r.WatershedFile) == false)
+                if (File.Exists(r.DomainFile) == false)
                 {
-                    Console.WriteLine(string.Format("Watershed file is not exist!! {0} {1}", "\r\n", r.WatershedFile));
+                    Console.WriteLine(string.Format("Watershed file is not exist!! {0} {1}", "\r\n", r.DomainFile));
                     return false;
                 }
             }
             else
             {
-                Console.WriteLine(string.Format("Watershed file is not exist!! {0} {1}", "\r\n", r.WatershedFile));
+                Console.WriteLine(string.Format("Watershed file is not exist!! {0} {1}", "\r\n", r.DomainFile));
                 return false;
             }
 
@@ -1557,126 +1557,7 @@ namespace GRMCore
             {
                 return false;
             }
-
-            if (!r.IsCrossSectionTypeNull() && r.CrossSectionType == "")
-            {
-                Console.WriteLine(string.Format("CrossSectionType is invalid!!"));
-                return false;
-            }
-
-            if (!r.IsSingleCSChannelWidthTypeNull() && r.SingleCSChannelWidthType == "")
-            {
-                Console.WriteLine(string.Format("SingleCSChannelWidthType is invalid!!"));
-                return false;
-            }
-
-            if (!r.IsChannelWidthEQcNull() && r.ChannelWidthEQc != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.ChannelWidthEQc, out v) == false)
-                {
-                    Console.WriteLine(string.Format("ChannelWidthEQc is invalid!! {0} {1}", "\r\n", r.ChannelWidthEQc));
-                    return false;
-                }
-            }
-
-            if (!r.IsChannelWidthEQdNull() && r.ChannelWidthEQd != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.ChannelWidthEQd, out v) == false)
-                {
-                    Console.WriteLine(string.Format("ChannelWidthEQd is invalid!! {0} {1}", "\r\n", r.ChannelWidthEQd));
-                    return false;
-                }
-            }
-
-            if (!r.IsChannelWidthEQeNull() && r.ChannelWidthEQe != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.ChannelWidthEQe, out v) == false)
-                {
-                    Console.WriteLine(string.Format("ChannelWidthEQe is invalid!! {0} {1}", "\r\n", r.ChannelWidthEQe));
-                    return false;
-                }
-            }
-
-            if (!r.IsChannelWidthMostDownStreamNull() && r.ChannelWidthMostDownStream != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.ChannelWidthMostDownStream, out v) == false)
-                {
-                    Console.WriteLine(string.Format("ChannelWidthMostDownStream is invalid!! {0} {1}", "\r\n", r.ChannelWidthMostDownStream));
-                    return false;
-                }
-            }
-
-            if (!r.IsLowerRegionHeightNull() && r.LowerRegionHeight != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.LowerRegionHeight, out v) == false)
-                {
-                    Console.WriteLine(string.Format("LowerRegionHeight is invalid!! {0} {1}", "\r\n", r.LowerRegionHeight));
-                    return false;
-                }
-            }
-
-            if (!r.IsLowerRegionBaseWidthNull() && r.LowerRegionBaseWidth != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.LowerRegionBaseWidth, out v) == false)
-                {
-                    Console.WriteLine(string.Format("LowerRegionBaseWidth is invalid!! {0} {1}", "\r\n", r.LowerRegionBaseWidth));
-                    return false;
-                }
-            }
-
-            if (!r.IsUpperRegionBaseWidthNull() && r.UpperRegionBaseWidth != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.UpperRegionBaseWidth, out v) == false)
-                {
-                    Console.WriteLine(string.Format("UpperRegionBaseWidth is invalid!! {0} {1}", "\r\n", r.UpperRegionBaseWidth));
-                    return false;
-                }
-            }
-
-            // If Not r.IsCompoundCSIniFlowDepthNull() AndAlso r.CompoundCSIniFlowDepth <> "" Then
-            // Dim v As Single
-            // If Single.TryParse(r.CompoundCSIniFlowDepth, v) = False Then
-            // Console.WriteLine(String.Format("CompoundCSIniFlowDepth is invalid!! {0} {1}", vbCrLf, r.CompoundCSIniFlowDepth))
-            // Return False
-            // End If
-            // End If
-
-            if (!r.IsCompoundCSChannelWidthLimitNull() && r.CompoundCSChannelWidthLimit != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.CompoundCSChannelWidthLimit, out v) == false)
-                {
-                    Console.WriteLine(string.Format("CompoundCSChannelWidthLimit is invalid!! {0} {1}", "\r\n", r.CompoundCSChannelWidthLimit));
-                    return false;
-                }
-            }
-
-            if (!r.IsBankSideSlopeRightNull() && r.BankSideSlopeRight != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.BankSideSlopeRight, out v) == false)
-                {
-                    Console.WriteLine(string.Format("BankSideSlopeRight is invalid!! {0} {1}", "\r\n", r.BankSideSlopeRight));
-                    return false;
-                }
-            }
-
-            if (!r.IsBankSideSlopeLeftNull() && r.BankSideSlopeLeft != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.BankSideSlopeLeft, out v) == false)
-                {
-                    Console.WriteLine(string.Format("BankSideSlopeLeft is invalid!! {0} {1}", "\r\n", r.BankSideSlopeLeft));
-                    return false;
-                }
-            }
+                     
 
             if (r.IsSimulateInfiltrationNull() || r.SimulateInfiltration == "")
             {
