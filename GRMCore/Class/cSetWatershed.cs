@@ -68,7 +68,7 @@ namespace GRMCore
         public void SetValues(Dataset.GRMProject prjdb)
         {
             Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjdb.ProjectSettings.Rows[0];
-            row.WatershedFile = mFPN_watershed;
+            row.DomainFile = mFPN_watershed;
             row.SlopeFile = mFPN_slope;
             row.FlowDirectionFile = mFPN_fdir;
             row.FlowAccumFile = mFPN_fac;
@@ -83,9 +83,9 @@ namespace GRMCore
         public void GetValues(Dataset.GRMProject prjdb)
         {
             Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)prjdb.ProjectSettings.Rows[0];
-            if (!row.IsWatershedFileNull())
+            if (!row.IsDomainFileNull())
             {
-                mFPN_watershed = row.WatershedFile;
+                mFPN_watershed = row.DomainFile;
             }
             if (!row.IsSlopeFileNull())
             {
