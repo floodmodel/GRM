@@ -434,13 +434,14 @@ namespace GRMCore
             else
             {
                 double v = 0;
-                if (double.TryParse(fcDataRows[rowOrder].Field<double>("value").ToString(), out v) == false)
-
-                //if (fcDataRows[rowOrder].Field<string>("value") == "-")
-                { cv.mStreamAttr.QCVch_i_j_m3Ps = 0; }
+                //if (double.TryParse(fcDataRows[rowOrder].Field<double>("value").ToString(), out v)  == false)     //2020.1.13 원 : DB 에서 data type이 조정 된 것 같다. 그래서. 아래와 같이 수정함.
+                if (double.TryParse(fcDataRows[rowOrder]["value"].ToString(), out v) == false)
+                    //if (fcDataRows[rowOrder].Field<string>("value") == "-")
+                    { cv.mStreamAttr.QCVch_i_j_m3Ps = 0; }
                 else
                 {
-                    double.TryParse(fcDataRows[rowOrder].Field<double>("value").ToString(), out cv.mStreamAttr.QCVch_i_j_m3Ps);
+                    //2020.1.13 원 : DB 에서 data type이 조정 된 것 같다. 그래서. 아래와 같이 수정함.
+                    double.TryParse(fcDataRows[rowOrder]["value"].ToString(), out cv.mStreamAttr.QCVch_i_j_m3Ps);
                 }
 
                 cv.mStreamAttr.CSAch_i_j = cFVMSolver.CalChCSAFromQbyIteration(project.CVs[cvan], cv.mStreamAttr.CSAch_i_j, cv.mStreamAttr.QCVch_i_j_m3Ps);
