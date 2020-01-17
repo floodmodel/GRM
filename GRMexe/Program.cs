@@ -18,7 +18,7 @@ namespace GRMexe
         private GRMCore.cSimulator mSimulator;
         private string mMessage;
         private int mSimDurationHour;
-        private GRMCore.cRasterOutput mRaterFileOutput;
+        private GRMCore.cRasterOutput mRasterFileOutput;
         private bool mbCreateDistributionFiles = false;
         private string projectPath;
         private string mFileInfoLogExe;
@@ -260,7 +260,7 @@ namespace GRMexe
                     cProject.Current.generalSimulEnv.mbCreateImageFile == true)
                 {
                     mbCreateDistributionFiles = true;
-                    mRaterFileOutput = new cRasterOutput(cProject.Current);
+                    mRasterFileOutput = new cRasterOutput(cProject.Current);
                 }
 
                 cGRM.writelogAndConsole(currentPrjFPN + " -> Model setup completed.", true, true);
@@ -400,8 +400,8 @@ namespace GRMexe
         private void makeRasterOutput(int nowTtoPrint_MIN)
         {
             if (mbCreateDistributionFiles == true)
-                mRaterFileOutput.MakeDistributionFiles(nowTtoPrint_MIN, 
-                    mRaterFileOutput.ImgWidth, mRaterFileOutput.ImgHeight, true);
+                mRasterFileOutput.MakeDistributionFiles(nowTtoPrint_MIN, 
+                    mRasterFileOutput.ImgWidth, mRasterFileOutput.ImgHeight, true);
         }
     }
 }

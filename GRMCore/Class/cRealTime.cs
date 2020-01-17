@@ -39,6 +39,7 @@ namespace GRMCore
         // Public mFPNFcData As String
         public float mPicWidth;
         public float mPicHeight;
+        public bool mbCreateDistributionFiles=false;
         private cRasterOutput mRasterFileOutput;
 
         public bool mbIsDWSS;
@@ -100,6 +101,7 @@ namespace GRMCore
                 mRTProject.mImgFPN_dist_RF = new List<string>();
                 mRTProject.mImgFPN_dist_RFAcc = new List<string>();
                 mRTProject.mImgFPN_dist_SSR = new List<string>();
+                mbCreateDistributionFiles = true;
                 mRasterFileOutput = new cRasterOutput(mRTProject);
             }
             int dateY = 0;
@@ -135,6 +137,7 @@ namespace GRMCore
                 cRealTime_DBMS.Add_Log_toDBMS(mRTProject.ProjectNameOnly, "RealTime Rainall Runoff Start..");
 
             mSimul = new cSimulator();
+            mSimul.MakeRasterOutput += new cSimulator.MakeRasterOutputEventHandler(makeRasterOutput);
             if (CreateNewOutputFilesRT() == false)
                 return;
 
@@ -186,6 +189,13 @@ namespace GRMCore
                 }
             }
             mSimul.SimulateRT(mRTProject, this,mIsPrediction);
+        }
+
+        private void makeRasterOutput(int nowTtoPrint_MIN)
+        {
+            if (mbCreateDistributionFiles == true)
+                mRasterFileOutput.MakeDistributionFiles(nowTtoPrint_MIN,
+                    mRasterFileOutput.ImgWidth, mRasterFileOutput.ImgHeight, true);
         }
 
         // 2018.8.8 이제 부터는 과거  run 도 보존 . 그래서 이 함수는 미사용됨.
