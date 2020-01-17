@@ -765,7 +765,7 @@ namespace GRMCore
             {
                 case cGRM.SimulationType.SingleEvent:
                     {
-                        if (SimulationStep != null) { SimulationStep( nowTtoPrint_MIN); }
+                        if (SimulationStep != null) { SimulationStep(nowTtoPrint_MIN); }
                         if (mProject.generalSimulEnv.mPrintOption == cGRM.GRMPrintType.All)
                         {
                             mOutputControl.WriteSimResultsToTextFileForSingleEvent(mProject, wpCount, nowTtoPrint_MIN, SumRFMeanForDTprintOut_m, coeffInterpolation, Project_tm1);
@@ -793,11 +793,11 @@ namespace GRMCore
             if (mProject.generalSimulEnv.mbRunAanlyzer == true)
             // RaiseEvent SendQToAnalyzer(Me, mProject, Project_tm1, nowTtoPrint_MIN, coeffInterpolation)
             {
-                SendQToAnalyzer( nowTtoPrint_MIN, coeffInterpolation);
+                SendQToAnalyzer(nowTtoPrint_MIN, coeffInterpolation);
             }
             if (mProject.generalSimulEnv.mbMakeRasterOutput == true)
             {
-                MakeRasterOutput( nowTtoPrint_MIN);
+                MakeRasterOutput(nowTtoPrint_MIN);
             }
 
             sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0;
@@ -806,7 +806,7 @@ namespace GRMCore
                 mProject.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID] = 0;
                 mProject.watchPoint.RFWPGridForDtPrintout_mm[row.CVID] = 0;
             }
-            if( (mProject.generalSimulEnv.mbCreateImageFile==true || mProject.generalSimulEnv.mbCreateASCFile==true) &&
+            if ((mProject.generalSimulEnv.mbCreateImageFile == true || mProject.generalSimulEnv.mbCreateASCFile == true) &&
                 mProject.generalSimulEnv.mbShowRFdistribution == true)
             {
                 for (int cvan = 0; cvan < cProject.Current.CVCount; cvan++)
