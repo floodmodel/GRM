@@ -20,7 +20,7 @@ fs::path fpn_prj;
 fs::path fpn_log;
 fs::path fp_prj;
 
-//projectFile prj;
+projectFile prj;
 //generalEnv ge;
 //domaininfo di;
 //domainCell** dmcells;
