@@ -1,15 +1,15 @@
 
 #include <iostream>
 #include <stdio.h>
-#include <stdlib.h>
-#include <conio.h>
+//#include <stdlib.h>
+//#include <conio.h>
 #include <time.h>
 #include <io.h>
-#include <thread>
+//#include <thread>
 #include <filesystem>
 
 #include "gentle.h"
-//#include "g2d.h"
+#include "grm.h"
 
 #pragma comment(lib,"version.lib")
 
@@ -31,11 +31,11 @@ fs::path fp_prj;
 
 int main(int argc, char** args)
 {
-	string exeName = "G2D";
-	//version g2dVersion = getCurrentFileVersion();
+	string exeName = "GRM";
+	version grmVersion = getCurrentFileVersion();
 	char outString[200];
-	//sprintf_s(outString, "G2D v.%d.%d.%d. Built in %s.\n", g2dVersion.major, g2dVersion.minor,
-	//	g2dVersion.build, g2dVersion.LastWrittenTime);
+	sprintf_s(outString, "GRM v.%d.%d.%d. Built in %s.\n", grmVersion.major, grmVersion.minor,
+		grmVersion.build, grmVersion.LastWrittenTime);
 	printf(outString);
 
 	long elapseTime_Total_sec;
@@ -43,7 +43,7 @@ int main(int argc, char** args)
 	start_Total = clock();
 
 	if (argc == 1) {
-		printf("G2D project file was not entered.");
+		printf("GRM project file was not entered.");
 		grmHelp();
 		return -1;
 	}
@@ -56,7 +56,7 @@ int main(int argc, char** args)
 	int nResult = _access(args[1], 0);
 
 	if (nResult == -1) {
-		printf("G2D project file(%s) is invalid.", args[1]);
+		printf("GRM project file(%s) is invalid.", args[1]);
 		return -1;
 	}
 	else if (nResult == 0) {
@@ -65,14 +65,14 @@ int main(int argc, char** args)
 		fpn_log = fpn_prj;
 		fpn_log = fpn_log.replace_extension(".log");
 		writeNewLog(fpn_log, outString, 1, -1);
-		//if (openPrjAndSetupModel() == -1) {
-		//	writeNewLog(fpn_log, "Model setup failed !!!\n", 1, 1);
-		//	return -1;
-		//}
-		//if (runG2D() == -1) {
-		//	writeNewLog(fpn_log, "An error was occurred while simulation...\n", 1, 1);
-		//	return -1;
-		//}
+		if (openPrjAndSetupModel() == -1) {
+			writeNewLog(fpn_log, "Model setup failed !!!\n", 1, 1);
+			return -1;
+		}
+		if (runGRM() == -1) {
+			writeNewLog(fpn_log, "An error was occurred while simulation...\n", 1, 1);
+			return -1;
+		}
 	}
 
 	finish_Total = clock();
@@ -83,14 +83,14 @@ int main(int argc, char** args)
 	writeLog(fpn_log, outString, 1, 1);
 
 
-	//disposeDynamicVars();
+	disposeDynamicVars();
 	return 1;
 }
 
 
 
-//void disposeDynamicVars()
-//{
+void disposeDynamicVars()
+{
 //	if (dmcells != NULL)
 //	{
 //		for (int i = 0; i < di.nCols; ++i)
@@ -101,11 +101,11 @@ int main(int argc, char** args)
 //	if (cvs != NULL) { delete[] cvs; }
 //	if (cvsAA != NULL) { delete[] cvsAA; }
 //	if (bci != NULL) { delete[] bci; }
-//}
-//
-//
-//int openPrjAndSetupModel()
-//{
+}
+
+
+int openPrjAndSetupModel()
+{
 //	char outString[200];
 //	sprintf_s(outString, "G2D was started.\n");
 //	writeLog(fpn_log, outString, 1, 1);
@@ -181,43 +181,69 @@ int main(int argc, char** args)
 //
 //	sprintf_s(outString, "%s  -> Model setup was completed.\n", fpn_prj.string().c_str());
 //	writeLog(fpn_log, outString, 1, 1);
-//	return 1;
-//}
-//
-//int runG2D()
-//{
+	return 1;
+}
+
+int runGRM()
+{
 //	writeLog(fpn_log, "Calculation using CPU was started.\n", 1, 1);
 //	if (simulationControlUsingCPUnGPU() == -1) { return -1; }
-//	return 1;
-//}
+	return 1;
+}
 
 
 void grmHelp()
 {
 	printf("\n");
-	printf(" Usage : g2d.exe [The full path and name of the current project file to simulate]\n");
+	printf(" Usage : GRM [Current project file full path and name to simulate]\n");
 	printf("\n");
 	printf("** 사용법 (in Korean)\n");
-	printf("  1. G2D 모형의 입력자료(지형공간자료, 경계조건, 강우 등)를 준비하고,\n");
-	printf("     project 파일(.g2p)을 작성한다.\n");
-	printf("  2. 모델링 대상 프로젝트 이름을 argument로 하여 실행한다.\n");
-	printf("     - Console에서 [G2D.exe argument] 로 실행한다.\n");
-	printf("     ** 주의사항 : 장기간 모의할 경우, 컴퓨터 업데이트로 인해, 종료될 수 있으니, \n");
+	printf("  1. GRM 모형의 project 파일(.gmp)과 입력자료(지형공간자료, 강우, flow control 시계열 자료)를 준비한다. \n");
+	printf("  2. 모델링할 프로젝트 이름을 스위치(argument)로 넣고 실행한다.\n");
+	printf("      - Console에서 grm.exe [argument] 로 실행한다..\n");
+	printf("      ** 주의사항 : 장기간 모의할 경우, 컴퓨터 업데이트로 인해, 종료될 수 있으니, \n");
 	printf("                       네트워크를 차단하고, 자동업데이트 하지 않음으로 설정한다.\n");
 	printf("  3. argument\n");
 	printf("      - /?\n");
 	printf("          도움말\n");
 	printf("      - 프로젝트 파일경로와 이름\n");
-	printf("        G2D 모델을 파일단위로 실행시킨다.\n");
-	printf("        이때 full path, name을 넣어야 하지만, \n");
-	printf("        대상 프로젝트 파일이 G2D.exe 파일과 동일한 폴더에 있을 경우에는,\n");
-	printf("                 path는 입력하지 않아도 된다.\n");
-	printf("         대상 프로젝트 이름과 경로에 공백이 포함될 경우 큰따옴표로 묶어서 입력한다.\n\n");
-	printf("          ** 예문(G2D.exe가 d://G2Drun에 있을 경우)\n");
-	printf("              - Case 1. G2D.exe와 다른 폴더에 프로젝트 파일이 있을 경우\n");
-	printf("                d://G2Drun>G2D.exe D://G2DTest//TestProject//test.g2p\n\n");
-	printf("              - Case 2. G2D.exe와 같은 폴더에 프로젝트 파일이 있을 경우\n");
-	printf("                d://G2Drun>G2D.exe test.gmp\n");
+	printf("         -- GRM 모델을 파일단위로 실행시킨다.\n");
+	printf("         -- 이때 full path, name을 넣어야 하지만, \n");
+	printf("             프로젝트 파일이 GRM.exe 파일과 동일한 폴더에 있을 경우에는,\n");
+	printf("             path는 입력하지 않아도 된다.\n");
+	printf("         -- 프로젝트 이름과 경로에 공백이 포함될 경우 큰따옴표로 묶어서 입력한다.\n\n");
+	printf("         -- 예문(grm.exe가 d://GRMrun에 있을 경우)\n");
+	printf("           --- Case1. grm.exe와 다른 폴더에 프로젝트 파일이 있을 경우\n");
+	printf("               d://GRMrun>grm D://GRMTest//TestProject//test.gmp\n");
+	printf("           --- Case 2. grm.exe와 같은 폴더에 프로젝트 파일이 있을 경우\n");
+	printf("               d://GRMrun>grm test.gmp\n");
+	printf("       - /f 폴더경로\n");
+	printf("         -- grm을 폴더 단위로 실행시킨다.\n");
+	printf("         -- 예문 : grm /f d://GRMrun//TestProject\n");
+	printf("               d://GRMrun>grm test.gmp\n");
+
+	printf("               d://GRMrun>grm test.gmp\n");
+
+
+
+
+	Console.WriteLine("- /f 폴더경로");
+	Console.WriteLine("         grm을 폴더 단위로 실행시킨다.");
+	Console.WriteLine("          ** 예문 : grm /f d://GRMrun//TestProject");
+	Console.WriteLine("- /fd 폴더경로");
+	Console.WriteLine("         grm을 폴더 단위로 실행시킨다.");
+	Console.WriteLine("         유량 모의결과인 *discharge.out을 제외한 파일을 지운다(*.gmp, *Depth.out, 등등...)");
+	Console.WriteLine("          ** 예문 : grm /fd d://GRMrun//TestProject");
+
+
+
+
+
+
+
+
+
+
 	printf("\n");
 	printf("** land cover vat file \n");
 	printf("   - the first value is grid value, the second is land cover name,\n");

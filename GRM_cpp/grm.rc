@@ -51,8 +51,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2020,2,24,0
- PRODUCTVERSION 2020,2,24,0
+ FILEVERSION 2020,2,25,0
+ PRODUCTVERSION 2020,2,25,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -67,14 +67,14 @@ BEGIN
     BEGIN
         BLOCK "041204b0"
         BEGIN
-            VALUE "CompanyName", "TODO: <회사 이름>"
-            VALUE "FileDescription", "TODO: <파일 설명>"
-            VALUE "FileVersion", "2020.2.24.0"
+            VALUE "CompanyName", "KICT"
+            VALUE "FileDescription", "GRM model"
+            VALUE "FileVersion", "2020.2.25.0"
             VALUE "InternalName", "GRM_cpp.exe"
             VALUE "LegalCopyright", "Copyright (C) 2020"
             VALUE "OriginalFilename", "GRM_cpp.exe"
             VALUE "ProductName", "TODO: <제품 이름>"
-            VALUE "ProductVersion", "2020.2.24.0"
+            VALUE "ProductVersion", "2020.2.25.0"
         END
     END
     BLOCK "VarFileInfo"

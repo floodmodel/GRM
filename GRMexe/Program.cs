@@ -302,6 +302,9 @@ namespace GRMexe
                     File.Delete(fNameTmp);
                     fNameTmp = Path.Combine(prjPathOnly, prjNameOnlyWithoutExtsion + "RFUpMean.out");
                     File.Delete(fNameTmp);
+                    fNameTmp = Path.Combine(prjPathOnly, prjNameOnlyWithoutExtsion + ".log");
+                    File.Delete(fNameTmp);
+
                     foreach (string wpname in wpNames)
                     {
                         fNameTmp = Path.Combine(prjPathOnly, prjNameOnlyWithoutExtsion + "WP_" + wpname + ".out");
