@@ -200,7 +200,7 @@ void grmHelp()
 	printf("** 사용법 (in Korean)\n");
 	printf("  1. GRM 모형의 project 파일(.gmp)과 입력자료(지형공간자료, 강우, flow control 시계열 자료)를 준비한다. \n");
 	printf("  2. 모델링할 프로젝트 이름을 스위치(argument)로 넣고 실행한다.\n");
-	printf("      - Console에서 grm.exe [argument] 로 실행한다..\n");
+	printf("      - Console에서 grm.exe [argument] 로 실행한다.\n");
 	printf("      ** 주의사항 : 장기간 모의할 경우, 컴퓨터 업데이트로 인해, 종료될 수 있으니, \n");
 	printf("                       네트워크를 차단하고, 자동업데이트 하지 않음으로 설정한다.\n");
 	printf("  3. argument\n");
@@ -214,65 +214,39 @@ void grmHelp()
 	printf("         -- 프로젝트 이름과 경로에 공백이 포함될 경우 큰따옴표로 묶어서 입력한다.\n\n");
 	printf("         -- 예문(grm.exe가 d://GRMrun에 있을 경우)\n");
 	printf("           --- Case1. grm.exe와 다른 폴더에 프로젝트 파일이 있을 경우\n");
-	printf("               d://GRMrun>grm D://GRMTest//TestProject//test.gmp\n");
+	printf("               D://GRMrun>grm D://GRMTest//TestProject//test.gmp\n");
 	printf("           --- Case 2. grm.exe와 같은 폴더에 프로젝트 파일이 있을 경우\n");
-	printf("               d://GRMrun>grm test.gmp\n");
-	printf("       - /f 폴더경로\n");
+	printf("               D://GRMrun>grm test.gmp\n");
+	printf("      - /f 폴더경로\n");
 	printf("         -- grm을 폴더 단위로 실행시킨다.\n");
-	printf("         -- 예문 : grm /f d://GRMrun//TestProject\n");
-	printf("               d://GRMrun>grm test.gmp\n");
-
-	printf("               d://GRMrun>grm test.gmp\n");
-
-
-
-
-	Console.WriteLine("- /f 폴더경로");
-	Console.WriteLine("         grm을 폴더 단위로 실행시킨다.");
-	Console.WriteLine("          ** 예문 : grm /f d://GRMrun//TestProject");
-	Console.WriteLine("- /fd 폴더경로");
-	Console.WriteLine("         grm을 폴더 단위로 실행시킨다.");
-	Console.WriteLine("         유량 모의결과인 *discharge.out을 제외한 파일을 지운다(*.gmp, *Depth.out, 등등...)");
-	Console.WriteLine("          ** 예문 : grm /fd d://GRMrun//TestProject");
-
-
-
-
-
-
-
-
-
-
-	printf("\n");
-	printf("** land cover vat file \n");
-	printf("   - the first value is grid value, the second is land cover name,\n");
-	printf("     and the third is roughness coefficient.\n");
-	printf("\n");
+	printf("         -- 예문 : D://GRMrun>grm /f d://GRMrun//TestProject\n");
+	printf("      - /fd 폴더경로\n");
+	printf("         -- grm을 폴더 단위로 실행시킨다.\n");
+	printf("         -- 유량 모의결과인 *discharge.out을 제외한 모든 파일을 지운다(*.gmp, *Depth.out, 등)\n");
+	printf("         -- 예문 : D://GRMrun>grm /fd d://GRMrun//TestProject\n");
 	printf("\n");
 	printf("** Usage (in English)\n");
-	printf("  1. Prepare input data (geospatial data, boundary condition, rainfall, etc.) of G2D model\n");
-	printf("     and create a project file (.g2p).\n");
-	printf("  2. Run the G2D model using the project file (.g2p) as an argument.\n");
-	printf("     - Run [G2D.exe  argument] in the console window.\n");
-	printf("     ** NOTICE: If you simulate for a long time, it may be shut down due to computer update.\n");
-	printf("           So, it is safe to disconnect the network and set the computer not to update automatically.\n");
+	printf("  1. Make a gmp file by using a text editor or the QGIS-GRM.\n");
+	printf("  2. In the console window, the gmp file is entered as the argument to run GRM.exe.\n");
+	printf("      - In Console : grm.exe [argument]\n");
 	printf("  3. argument\n");
 	printf("      - /?\n");
 	printf("          Help\n");
 	printf("      - Project file path and name\n");
-	printf("        Run the G2D model on file-by-file basis.\n");
-	printf("        At this time, full path and name should be used, \n");
-	printf("            but if the target project file is in the same folder as G2D.exe file,\n");
-	printf("            you do not need to input the file path.\n");
-	printf("        If the target project name and path contain spaces, enclose them in double quotes.\n\n");
-	printf("          ** Examples (when G2D.exe is in d://G2Drun)\n");
-	printf("              - Case 1. The project file is in a folder other than G2D.exe\n");
-	printf("                d://G2Drun>g2d.exe D://G2DTest//TestProject//test.g2p\n");
-	printf("              - Case 2. The project file is in the same folder as G2D.exe\n\n");
-	printf("                d://G2Drun>g2d.exe test.gmp\n");
-	printf("\n");
-	printf("** land cover vat file\n ");
-	printf("   - the first value is grid value, the second is land cover name,\n");
-	printf("     and the third is roughness coefficient.\n");
+	printf("         -- Run the GRM model for a single gmp file.\n");
+	printf("         -- When the GRM.exe and gmp files are in the same folder,\n");
+	printf("             the project file path does not have to be entered.\n");
+	printf("         -- If there are spaces in the project file name or path, quotation marks “ ” are used to enclose it for input.\n\n");
+	printf("         -- Example(when grm.exe is in 'd://GRMrun' folder)\n");
+	printf("           --- Case1. gmp file is in different folder with grm.exe\n");
+	printf("               D://GRMrun>grm D://GRMTest//TestProject//test.gmp\n");
+	printf("           --- Case 2. gmp file is in the same folder with grm.exe\n");
+	printf("               D://GRMrun>grm test.gmp\n");
+	printf("      - /f [folder path]\n");
+	printf("         -- The GRM can run at once for all gmp files in the corresponding folder.\n");
+	printf("         -- Example : D://GRMrun>grm /f d://GRMrun//TestProject\n");
+	printf("      - /fd 폴더경로\n");
+	printf("         -- The GRM can run at once for all gmp files in the corresponding folder.\n");
+	printf("         -- And all files, except for the discharge file (*discharge.out), are deleted (*.gmp, *Depth.out, etc.).\n");
+	printf("         -- Example : D://GRMrun>grm /fd d://GRMrun//TestProject\n");
 }
