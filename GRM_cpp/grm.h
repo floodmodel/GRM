@@ -94,9 +94,9 @@ typedef struct _swsParameters
 
 typedef struct _watchPointInfo
 {
-	string wpName;
-	int wpColX;
-	int wpRowY;
+	string wpName = "";
+	int wpColX = -1;
+	int wpRowY = -1;
 } watchPointInfo;
 
 typedef struct _channelWidthInfo
@@ -104,26 +104,26 @@ typedef struct _channelWidthInfo
 	int mdWsid = 0;
 	CrossSectionType csType;
 	channelWidthType csWidthType;
-	double cwEQc;
-	double cwEQd;
-	double cwEQe;
-	double cwMostDownStream;
-	double lowRegionHeight;
-	double lowRegionBaseWidth;
-	double upRegionBaseWidth;
-	double compoundCSChannelWidthLimit;
-	double bankSlopeRight;
-	double bankSlopeLeft;
+	double cwEQc = 0.0;
+	double cwEQd = 0.0;
+	double cwEQe = 0.0;
+	double cwMostDownStream = 0.0;
+	double lowRegionHeight = 0.0;
+	double lowRegionBaseWidth = 0.0;
+	double upRegionBaseWidth = 0.0;
+	double compoundCSChannelWidthLimit = 0.0;
+	double bankSlopeRight = 0.0;
+	double bankSlopeLeft = 0.0;
 } channelWidthInfo;
 
 typedef struct _flowControlinfo
 {
-	string fcName;
+	string fcName = "";
 	int fcColX = 0;
 	int fcRowY = 0;
 	FlowControlType ControlType;
 	double fcDT = 0.0;
-	string fcDataFile;
+	string fcDataFile = "";
 	double iniStorage = 0.0;
 	double maxStorage = 0.0;
 	double maxStorageR = 0.0;
@@ -136,59 +136,59 @@ typedef struct _flowControlinfo
 typedef struct _soilTextureInfo
 {
 	int stGridValue;
-	string soilTextureName;
-	double porosity;
-	double effectivePorosity;
-	double wfSoilSuctionHead;
-	double hydraulicK;
+	string stName = "";
+	double porosity = 0.0;
+	double effectivePorosity = 0.0;
+	double wfSoilSuctionHead = 0.0;
+	double hydraulicK = 0.0;
 } soilTextureInfo;
 
 typedef struct _soilDepthInfo
 {
-	int sdGridValue;
-	string sdName;
-	double soilDepth;
+	int sdGridValue = 0;
+	string sdName = "";
+	double soilDepth = 0.0;
 } soilDepthInfo;
 
 typedef struct _landCoverInfo
 {
-	int lcGridValue;
-	string landCoverName;
-	double RoughnessCoefficient;
-	double ImperviousRatio;
+	int lcGridValue = 0;
+	string lcName = "";
+	double RoughnessCoefficient = 0.0;
+	double ImperviousRatio = 0.0;
 } landCoverInfo;
 
 
 typedef struct _projectFile
 {
 	simulationType simType;
-	string	domainFile;
-	string slopeFile;
-	string fdFile;
-	string faFile;
-	string streamFile;
-	string channelWidthFile;
-	string iniSSRFile;
+	string	domainFile = "";
+	string slopeFile = "";
+	string fdFile = "";
+	string faFile = "";
+	string streamFile = "";
+	string channelWidthFile = "";
+	string iniSSRFile = "";
 	fileOrConstant lcDataType;
-	string lcFile;
-	string lcVATFile;
-	double cnstRoughnessC;
-	double CnstImperviousR;
+	string lcFile = "";
+	string lcVATFile = "";
+	double cnstRoughnessC = 0.0;
+	double CnstImperviousR = 0.0;
 	fileOrConstant stDataType;
-	string stFile;
-	string stVATFile;
-	double cnstSoilPorosity;
-	double cnstSoilEffPorosity;
-	double cnstSoilWFSH;
-	double cnstSoilHydraulicK;
+	string stFile = "";
+	string stVATFile = "";
+	double cnstSoilPorosity = 0.0;
+	double cnstSoilEffPorosity = 0.0;
+	double cnstSoilWFSH = 0.0;
+	double cnstSoilHydraulicK = 0.0;
 	fileOrConstant sdDataType;
-	string sdFile;
-	string sdVATFile;
-	double cnstSoilDepth;
-	string iniChannelFlowFile;
+	string sdFile = "";
+	string sdVATFile = "";
+	double cnstSoilDepth = 0.0;
+	string iniChannelFlowFile = "";
 	rainfallDataType rfDataType;
-	double rfinterval_min;
-	string RainfallDataFile;
+	double rfinterval_min = 0.0;
+	string RainfallDataFile = "";
 	flowDirectionType fdType;
 	int MaxDegreeOfParallelism;
 	string SimulStartingTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
