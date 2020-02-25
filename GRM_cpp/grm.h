@@ -212,8 +212,8 @@ typedef struct _projectFile
 	int writeLog = 0;// true : 1, false : -1
 
 	vector <swsParameters> swps;
-	vector<watchPointInfo> wps;
-	vector<flowControlinfo> fcs;
+	vector <watchPointInfo> wps;
+	vector <flowControlinfo> fcs;
 	vector <channelWidthInfo> cws;
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;
