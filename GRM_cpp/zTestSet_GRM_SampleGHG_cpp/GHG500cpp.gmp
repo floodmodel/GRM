@@ -216,7 +216,7 @@
     <FCColX>107</FCColX>
     <FCRowY>42</FCRowY>
     <ControlType>Inlet</ControlType>
-    <DT>10</DT>
+    <FCDT>10</FCDT>
     <FlowDataFile>C:/GRM/SampleGHG/ghg_fc_ycd_201609021600.txt</FlowDataFile>
     <IniStorage />
     <MaxStorage />
@@ -228,146 +228,146 @@
   <GreenAmptParameter>
     <STGridValue>1</STGridValue>
     <USERSoil>미사질식양토</USERSoil>
-    <GRMCode>SiCL</GRMCode>
-    <Porosity>0.471</Porosity>
-    <EffectivePorosity>0.432</EffectivePorosity>
-    <WFSoilSuctionHead>27.3</WFSoilSuctionHead>
-    <HydraulicConductivity>0.1</HydraulicConductivity>
+    <GRMCodeST>SiCL</GRMCodeST>
+    <STPorosity>0.471</STPorosity>
+    <STEffectivePorosity>0.432</STEffectivePorosity>
+    <STWFSuctionHead>27.3</STWFSuctionHead>
+    <STHydraulicConductivity>0.1</STHydraulicConductivity>
   </GreenAmptParameter>
   <GreenAmptParameter>
     <STGridValue>2</STGridValue>
     <USERSoil>미사질양토</USERSoil>
-    <GRMCode>SiL</GRMCode>
-    <Porosity>0.501</Porosity>
-    <EffectivePorosity>0.486</EffectivePorosity>
-    <WFSoilSuctionHead>16.68</WFSoilSuctionHead>
-    <HydraulicConductivity>0.65</HydraulicConductivity>
+    <GRMCodeST>SiL</GRMCodeST>
+    <STPorosity>0.501</STPorosity>
+    <STEffectivePorosity>0.486</STEffectivePorosity>
+    <STWFSuctionHead>16.68</STWFSuctionHead>
+    <STHydraulicConductivity>0.65</STHydraulicConductivity>
   </GreenAmptParameter>
   <GreenAmptParameter>
     <STGridValue>3</STGridValue>
     <USERSoil>사양토</USERSoil>
-    <GRMCode>SL</GRMCode>
-    <Porosity>0.453</Porosity>
-    <EffectivePorosity>0.412</EffectivePorosity>
-    <WFSoilSuctionHead>11.01</WFSoilSuctionHead>
-    <HydraulicConductivity>1.09</HydraulicConductivity>
+    <GRMCodeST>SL</GRMCodeST>
+    <STPorosity>0.453</STPorosity>
+    <STEffectivePorosity>0.412</STEffectivePorosity>
+    <STWFSuctionHead>11.01</STWFSuctionHead>
+    <STHydraulicConductivity>1.09</STHydraulicConductivity>
   </GreenAmptParameter>
   <GreenAmptParameter>
     <STGridValue>4</STGridValue>
     <USERSoil>사토</USERSoil>
-    <GRMCode>S</GRMCode>
-    <Porosity>0.437</Porosity>
-    <EffectivePorosity>0.417</EffectivePorosity>
-    <WFSoilSuctionHead>4.95</WFSoilSuctionHead>
-    <HydraulicConductivity>11.78</HydraulicConductivity>
+    <GRMCodeST>S</GRMCodeST>
+    <STPorosity>0.437</STPorosity>
+    <STEffectivePorosity>0.417</STEffectivePorosity>
+    <STWFSuctionHead>4.95</STWFSuctionHead>
+    <STHydraulicConductivity>11.78</STHydraulicConductivity>
   </GreenAmptParameter>
   <GreenAmptParameter>
     <STGridValue>5</STGridValue>
     <USERSoil>식양토</USERSoil>
-    <GRMCode>CL</GRMCode>
-    <Porosity>0.464</Porosity>
-    <EffectivePorosity>0.309</EffectivePorosity>
-    <WFSoilSuctionHead>20.88</WFSoilSuctionHead>
-    <HydraulicConductivity>0.1</HydraulicConductivity>
+    <GRMCodeST>CL</GRMCodeST>
+    <STPorosity>0.464</STPorosity>
+    <STEffectivePorosity>0.309</STEffectivePorosity>
+    <STWFSuctionHead>20.88</STWFSuctionHead>
+    <STHydraulicConductivity>0.1</STHydraulicConductivity>
   </GreenAmptParameter>
   <GreenAmptParameter>
     <STGridValue>6</STGridValue>
     <USERSoil>식토</USERSoil>
-    <GRMCode>C</GRMCode>
-    <Porosity>0.475</Porosity>
-    <EffectivePorosity>0.385</EffectivePorosity>
-    <WFSoilSuctionHead>31.63</WFSoilSuctionHead>
-    <HydraulicConductivity>0.03</HydraulicConductivity>
+    <GRMCodeST>C</GRMCodeST>
+    <STPorosity>0.475</STPorosity>
+    <STEffectivePorosity>0.385</STEffectivePorosity>
+    <STWFSuctionHead>31.63</STWFSuctionHead>
+    <STHydraulicConductivity>0.03</STHydraulicConductivity>
   </GreenAmptParameter>
   <GreenAmptParameter>
     <STGridValue>7</STGridValue>
     <USERSoil>양질사토</USERSoil>
-    <GRMCode>LS</GRMCode>
-    <Porosity>0.437</Porosity>
-    <EffectivePorosity>0.401</EffectivePorosity>
-    <WFSoilSuctionHead>6.13</WFSoilSuctionHead>
-    <HydraulicConductivity>2.99</HydraulicConductivity>
+    <GRMCodeST>LS</GRMCodeST>
+    <STPorosity>0.437</STPorosity>
+    <STEffectivePorosity>0.401</STEffectivePorosity>
+    <STWFSuctionHead>6.13</STWFSuctionHead>
+    <STHydraulicConductivity>2.99</STHydraulicConductivity>
   </GreenAmptParameter>
   <GreenAmptParameter>
     <STGridValue>8</STGridValue>
     <USERSoil>양토</USERSoil>
-    <GRMCode>L</GRMCode>
-    <Porosity>0.463</Porosity>
-    <EffectivePorosity>0.434</EffectivePorosity>
-    <WFSoilSuctionHead>8.89</WFSoilSuctionHead>
-    <HydraulicConductivity>0.34</HydraulicConductivity>
+    <GRMCodeST>L</GRMCodeST>
+    <STPorosity>0.463</STPorosity>
+    <STEffectivePorosity>0.434</STEffectivePorosity>
+    <STWFSuctionHead>8.89</STWFSuctionHead>
+    <STHydraulicConductivity>0.34</STHydraulicConductivity>
   </GreenAmptParameter>
   <SoilDepth>
     <SDGridValue>1</SDGridValue>
     <UserDepthClass>깊음</UserDepthClass>
-    <GRMCode>D</GRMCode>
-    <SoilDepth>125</SoilDepth>
+    <GRMCodeSD>D</GRMCodeSD>
+    <SDSoilDepth>125</SDSoilDepth>
   </SoilDepth>
   <SoilDepth>
     <SDGridValue>2</SDGridValue>
     <UserDepthClass>매우얕음</UserDepthClass>
-    <GRMCode>VS</GRMCode>
-    <SoilDepth>10</SoilDepth>
+    <GRMCodeSD>VS</GRMCodeSD>
+    <SDSoilDepth>10</SDSoilDepth>
   </SoilDepth>
   <SoilDepth>
     <SDGridValue>3</SDGridValue>
     <UserDepthClass>보통</UserDepthClass>
-    <GRMCode>MDMS</GRMCode>
-    <SoilDepth>75</SoilDepth>
+    <GRMCodeSD>MDMS</GRMCodeSD>
+    <SDSoilDepth>75</SDSoilDepth>
   </SoilDepth>
   <SoilDepth>
     <SDGridValue>4</SDGridValue>
     <UserDepthClass>얕음</UserDepthClass>
-    <GRMCode>S</GRMCode>
-    <SoilDepth>25</SoilDepth>
+    <GRMCodeSD>S</GRMCodeSD>
+    <SDSoilDepth>25</SDSoilDepth>
   </SoilDepth>
   <LandCover>
     <LCGridValue>100</LCGridValue>
     <UserLandCover>시가화/건조지역</UserLandCover>
-    <GRMCode>URBN</GRMCode>
-    <RoughnessCoefficient>0.015</RoughnessCoefficient>
-    <ImperviousRatio>0.853</ImperviousRatio>
+    <GRMCodeLC>URBN</GRMCodeLC>
+    <LCRoughnessCoeff>0.015</LCRoughnessCoeff>
+    <LCImperviousR>0.853</LCImperviousR>
   </LandCover>
   <LandCover>
     <LCGridValue>200</LCGridValue>
     <UserLandCover>농업지역</UserLandCover>
-    <GRMCode>AGRL</GRMCode>
-    <RoughnessCoefficient>0.035</RoughnessCoefficient>
-    <ImperviousRatio>0.391</ImperviousRatio>
+    <GRMCodeLC>AGRL</GRMCodeLC>
+    <LCRoughnessCoeff>0.035</LCRoughnessCoeff>
+    <LCImperviousR>0.391</LCImperviousR>
   </LandCover>
   <LandCover>
     <LCGridValue>300</LCGridValue>
     <UserLandCover>산림지역</UserLandCover>
-    <GRMCode>FRST</GRMCode>
-    <RoughnessCoefficient>0.1</RoughnessCoefficient>
-    <ImperviousRatio>0.05</ImperviousRatio>
+    <GRMCodeLC>FRST</GRMCodeLC>
+    <LCRoughnessCoeff>0.1</LCRoughnessCoeff>
+    <LCImperviousR>0.05</LCImperviousR>
   </LandCover>
   <LandCover>
     <LCGridValue>400</LCGridValue>
     <UserLandCover>초지</UserLandCover>
-    <GRMCode>GRSS</GRMCode>
-    <RoughnessCoefficient>0.15</RoughnessCoefficient>
-    <ImperviousRatio>0.44</ImperviousRatio>
+    <GRMCodeLC>GRSS</GRMCodeLC>
+    <LCRoughnessCoeff>0.15</LCRoughnessCoeff>
+    <LCImperviousR>0.44</LCImperviousR>
   </LandCover>
   <LandCover>
     <LCGridValue>500</LCGridValue>
     <UserLandCover>습지</UserLandCover>
-    <GRMCode>WTLD</GRMCode>
-    <RoughnessCoefficient>0.07</RoughnessCoefficient>
-    <ImperviousRatio>1</ImperviousRatio>
+    <GRMCodeLC>WTLD</GRMCodeLC>
+    <LCRoughnessCoeff>0.07</LCRoughnessCoeff>
+    <LCImperviousR>1</LCImperviousR>
   </LandCover>
   <LandCover>
     <LCGridValue>600</LCGridValue>
     <UserLandCover>나지</UserLandCover>
-    <GRMCode>BARE</GRMCode>
-    <RoughnessCoefficient>0.02</RoughnessCoefficient>
-    <ImperviousRatio>0.442</ImperviousRatio>
+    <GRMCodeLC>BARE</GRMCodeLC>
+    <LCRoughnessCoeff>0.02</LCRoughnessCoeff>
+    <LCImperviousR>0.442</LCImperviousR>
   </LandCover>
   <LandCover>
     <LCGridValue>700</LCGridValue>
     <UserLandCover>수역</UserLandCover>
-    <GRMCode>WATR</GRMCode>
-    <RoughnessCoefficient>0.03</RoughnessCoefficient>
-    <ImperviousRatio>1</ImperviousRatio>
+    <GRMCodeLC>WATR</GRMCodeLC>
+    <LCRoughnessCoeff>0.03</LCRoughnessCoeff>
+    <LCImperviousR>1</LCImperviousR>
   </LandCover>
 </GRMProject>

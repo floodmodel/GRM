@@ -22,7 +22,9 @@
     <ClCompile Include="..\..\gentle\cpp\gentle.cpp" />
     <ClCompile Include="..\..\gentle\cpp\systemcommand.cpp" />
     <ClCompile Include="..\..\gentle\cpp\systeminfo.cpp" />
+    <ClCompile Include="grmFunctions.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="project.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\gentle\cpp\bitmap_image.hpp" />

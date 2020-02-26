@@ -1,12 +1,15 @@
 
 #include <iostream>
 #include <stdio.h>
-//#include <stdlib.h>
-//#include <conio.h>
+#include <stdlib.h>
+#include <conio.h>
 #include <time.h>
 #include <io.h>
 //#include <thread>
+#include <string>
 #include <filesystem>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "gentle.h"
 #include "grm.h"
@@ -16,9 +19,8 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-fs::path fpn_prj;
-fs::path fpn_log;
-fs::path fp_prj;
+projectFileInfo pfi;
+fs::path fpnLog;
 
 projectFile prj;
 //generalEnv ge;
@@ -29,12 +31,15 @@ projectFile prj;
 //vector<rainfallinfo> rf;
 //bcCellinfo* bci;
 
+string msgToScreen="";
+
 int main(int argc, char** args)
 {
 	string exeName = "GRM";
 	version grmVersion = getCurrentFileVersion();
 	char outString[200];
-	sprintf_s(outString, "GRM v.%d.%d.%d. Built in %s.\n", grmVersion.major, grmVersion.minor,
+	sprintf_s(outString, "GRM v.%d.%d.%d. Built in %s.\n", 
+		grmVersion.major, grmVersion.minor,
 		grmVersion.build, grmVersion.LastWrittenTime);
 	printf(outString);
 
@@ -43,36 +48,110 @@ int main(int argc, char** args)
 	start_Total = clock();
 
 	if (argc == 1) {
-		printf("GRM project file was not entered.");
+		printf("GRM project file was not entered or invalid arguments.\n");
 		grmHelp();
 		return -1;
 	}
-	if (args[1] == "/?" || args[1] == "/help"
-		|| args[1] == "/ ?" || args[1] == "/ help") {
-		grmHelp();
-		return -1;
-	}
-
-	int nResult = _access(args[1], 0);
-
-	if (nResult == -1) {
-		printf("GRM project file(%s) is invalid.", args[1]);
-		return -1;
-	}
-	else if (nResult == 0) {
-		fpn_prj = fs::path(args[1]);
-		fp_prj = fpn_prj.parent_path();
-		fpn_log = fpn_prj;
-		fpn_log = fpn_log.replace_extension(".log");
-		writeNewLog(fpn_log, outString, 1, -1);
-		if (openPrjAndSetupModel() == -1) {
-			writeNewLog(fpn_log, "Model setup failed !!!\n", 1, 1);
+	prj.deleteAllFilesExceptDischargeOut = -1;
+	if (argc == 2) {
+		string arg1(args[1]);
+		if (trim(arg1) == "/?" || toLower(trim(arg1)) == "/help") {
+			grmHelp();
 			return -1;
 		}
-		if (runGRM() == -1) {
-			writeNewLog(fpn_log, "An error was occurred while simulation...\n", 1, 1);
+		int nResult = _access(args[1], 0);
+		if (nResult == -1) {
+			printf("GRM project file(%s) is invalid.\n", args[1]);
+			waitEnterKey();
 			return -1;
 		}
+		else if (nResult == 0) {
+			pfi = getProjectFileInfo(arg1);
+			fpnLog = fs::path(pfi.fpn_prj.c_str()).replace_extension(".log");
+			writeNewLog(fpnLog, outString, 1, -1);
+			if (startSingleEventRun() == -1) { 
+				waitEnterKey();
+				return -1; 
+			}
+		}
+	}
+
+	if (argc == 3 || argc == 4) {
+		vector<string> gmpFiles;
+		if (argc == 3) {
+			string arg1(args[1]);
+			string arg2(args[2]);
+			arg1 = toLower(trim(arg1));
+			arg2 = toLower(trim(arg2));
+			if (arg1 == "/" && (arg2 == "?" || arg2 == "help")) {
+				grmHelp();
+				return -1;
+			}
+			if (arg1 == "/f" || arg1 == "/fd") {
+				struct stat finfo;
+				if (stat(arg2.c_str(), &finfo) == 0) { //폴더가 있으면
+					gmpFiles = getFileListInNaturalOrder(arg2, ".gmp");
+					if (gmpFiles.size() == 0) {
+						printf("There is no GRM project file in this directory.\n");
+						waitEnterKey();
+						return -1;
+					}
+					if (arg1 == "/fd") {
+						prj.deleteAllFilesExceptDischargeOut = 1;
+					}
+				}
+				else {
+					printf("Project folder is invalid!!\n");
+					waitEnterKey();
+					return -1;
+				}
+			}
+		}
+		else if (argc == 4) {
+			string arg1(args[1]);
+			string arg2(args[2]);
+			string arg3(args[3]);
+			arg1 = toLower(trim(arg1));
+			arg2 = toLower(trim(arg2));
+			arg3 = toLower(trim(arg3));
+			if (arg1 == "/" && (arg2 == "f" || arg2 == "fd")) {
+				struct stat finfo;
+				if (stat(arg3.c_str(), &finfo) == 0) { //폴더가 있으면
+					gmpFiles = getFileListInNaturalOrder(arg3, ".gmp");
+					if (gmpFiles.size() == 0) {
+						printf("There is no GRM project file in this directory.\n");
+						waitEnterKey();
+						return -1;
+					}
+					if (arg2 == "fd") {
+						prj.deleteAllFilesExceptDischargeOut = 1;
+					}
+				}
+				else {
+					printf("Project folder is invalid!!\n");
+					waitEnterKey();
+					return -1;
+				}
+			}
+		}
+		int nFiles = gmpFiles.size();
+		for (int n = 0; n < nFiles; n++) {
+			pfi = getProjectFileInfo(gmpFiles[n]);
+			fpnLog = fs::path(pfi.fpn_prj.c_str()).replace_extension(".log");
+			writeNewLog(fpnLog, outString, 1, -1);
+			string progF = to_string(n + 1) + '/' + to_string(gmpFiles.size());
+			string progR = forString(((n + 1) / nFiles * 100), 2);
+			msgToScreen = "Total progress: " + progF + "(" + progR + "%%). ";
+			if (startSingleEventRun() == -1) {
+				waitEnterKey();
+				return -1;
+			}
+			if ((n + 1) % 100 == 0) {
+				system("cls"); // On windows
+				//system("clear");// On linux
+			}
+		}
+		return 1;
 	}
 
 	finish_Total = clock();
@@ -80,9 +159,8 @@ int main(int argc, char** args)
 	tm ts_total = secToHHMMSS(elapseTime_Total_sec);
 	sprintf_s(outString, "Simulation was completed. Run time : %dhrs %dmin %dsec.\n",
 		ts_total.tm_hour, ts_total.tm_min, ts_total.tm_sec);
-	writeLog(fpn_log, outString, 1, 1);
-
-
+	writeLog(fpnLog, outString, 1, 1);
+	waitEnterKey();
 	disposeDynamicVars();
 	return 1;
 }
@@ -104,89 +182,70 @@ void disposeDynamicVars()
 }
 
 
+int startSingleEventRun()
+{
+	if (openPrjAndSetupModel() == -1) {
+		writeNewLog(fpnLog, "Model setup failed !!!\n", 1, 1);
+		return -1;
+	}
+	if (runGRM() == -1) {
+		writeNewLog(fpnLog, "An error was occurred while simulation...\n", 1, 1);
+		return -1;
+	}
+}
+
 int openPrjAndSetupModel()
 {
-//	char outString[200];
-//	sprintf_s(outString, "G2D was started.\n");
-//	writeLog(fpn_log, outString, 1, 1);
-//
-//	if (openProjectFile() < 0)
-//	{
-//		sprintf_s(outString, "Open %s was failed.\n", fpn_prj.string().c_str());
-//		writeLog(fpn_log, outString, 1, 1);
-//		return -1;
-//	}
-//
-//	sprintf_s(outString, "%s project was opened.\n", fpn_prj.string().c_str());
-//	writeLog(fpn_log, outString, 1, 1);
-//
-//	//if (prj.isParallel == 1)
-//	//{
-//	string usingGPU = "false";
-//	if (prj.usingGPU == 1) { usingGPU = "true"; }
-//	sprintf_s(outString, "Parallel : true. Max. degree of parallelism : %d. Using GPU : %s\n",
-//		prj.maxDegreeOfParallelism, usingGPU.c_str());
-//	writeLog(fpn_log, outString, 1, 1);
-//	prj.cpusi = getCPUinfo();
-//	writeLog(fpn_log, prj.cpusi.infoString, 1, 1);
-//	if (prj.usingGPU == 1)
-//	{
-//		string gpuinfo = getGPUinfo();
-//		writeLog(fpn_log, gpuinfo, 1, 1);
-//		sprintf_s(outString, "Threshold number of effective cells to convert to GPU calculation : %d\n",
-//			prj.effCellThresholdForGPU);
-//		writeLog(fpn_log, outString, 1, 1);
-//	}
-//	//}
-//	//else
-//	//{
-//	//	sprintf_s(outString, "Parallel : false. Using GPU : false\n");
-//	//	writeLog(fpn_log, outString, 1, 1);
-//	//}
-//
-//	if (setGenEnv() < 0) {
-//		writeLog(fpn_log, "Setting general environment variables was failed.\n", 1, 1);
-//		return -1;
-//	}
-//
-//	sprintf_s(outString, "iGS(all cells) max : %d, iNR(a cell) max : %d, tolerance : %f\n",
-//		prj.maxIterationAllCellsOnCPU, prj.maxIterationACellOnCPU, ge.convergenceConditionh);
-//	writeLog(fpn_log, outString, 1, 1);
-//
-//	if (setupDomainAndCVinfo() < 0) {
-//		writeLog(fpn_log, "Setting domain and control volume data were failed.\n", 1, 1);
-//		return -1;
-//	}
-//	if (prj.isRainfallApplied == 1) {
-//		if (setRainfallinfo() == -1) {
-//			writeLog(fpn_log, "Setting rainfall data was failed.\n", 1, 1);
-//			return -1;
-//		}
-//	}
-//	if (prj.isbcApplied == 1) {
-//		if (setBCinfo() == -1) {
-//			writeLog(fpn_log, "Setting boundary condition data was failed.\n", 1, 1);
-//			return -1;
-//		}
-//	}
-//	if (deleteAlloutputFiles() == -1) {
-//		writeLog(fpn_log, "Deleting previous output files was failed.\n", 1, 1);
-//		return -1;
-//	}
-//
-//	if (initializeOutputArray() == -1) {
-//		writeLog(fpn_log, "Initialize output arrays was failed.\n", 1, 1);
-//		return -1;
-//	}
-//
-//	sprintf_s(outString, "%s  -> Model setup was completed.\n", fpn_prj.string().c_str());
-//	writeLog(fpn_log, outString, 1, 1);
+	writeLog(fpnLog, "GRM was started.\n", 1, 1);
+	if (openProjectFile() < 0)	{
+		writeLog(fpnLog, "Open "+ pfi.fpn_prj+" was failed.\n", 1, 1);
+		return -1;
+	}
+	writeLog(fpnLog, pfi.fpn_prj+" project was opened.\n", 1, 1);
+	string isparallel = "true";
+	if (prj.maxDegreeOfParallelism = 1) { isparallel = "false"; }
+	writeLog(fpnLog, "Parallel : "+ isparallel +". Max. degree of parallelism : "
+		+ to_string(prj.maxDegreeOfParallelism) +".\n", 1, 1);
+	prj.cpusi = getCPUinfo();
+	writeLog(fpnLog, prj.cpusi.infoString, 1, 1);
+	//if (setGenEnv() < 0) {
+	//	writeLog(fpnLog, "Setting general environment variables was failed.\n", 1, 1);
+	//	return -1;
+	//}
+
+	//if (setupDomainAndCVinfo() < 0) {
+	//	writeLog(fpnLog, "Setting domain and control volume data were failed.\n", 1, 1);
+	//	return -1;
+	//}
+	//if (prj.isRainfallApplied == 1) {
+	//	if (setRainfallinfo() == -1) {
+	//		writeLog(fpnLog, "Setting rainfall data was failed.\n", 1, 1);
+	//		return -1;
+	//	}
+	//}
+	//if (prj.isbcApplied == 1) {
+	//	if (setBCinfo() == -1) {
+	//		writeLog(fpnLog, "Setting boundary condition data was failed.\n", 1, 1);
+	//		return -1;
+	//	}
+	//}
+	//if (deleteAlloutputFiles() == -1) {
+	//	writeLog(fpnLog, "Deleting previous output files was failed.\n", 1, 1);
+	//	return -1;
+	//}
+
+	//if (initializeOutputArray() == -1) {
+	//	writeLog(fpnLog, "Initialize output arrays was failed.\n", 1, 1);
+	//	return -1;
+	//}
+
+	writeLog(fpnLog, pfi.fpn_prj+"  -> Model setup was completed.\n", 1, 1);
 	return 1;
 }
 
 int runGRM()
 {
-//	writeLog(fpn_log, "Calculation using CPU was started.\n", 1, 1);
+	writeLog(fpnLog, "Calculation was started.\n", 1, 1);
 //	if (simulationControlUsingCPUnGPU() == -1) { return -1; }
 	return 1;
 }

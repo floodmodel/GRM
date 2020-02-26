@@ -2,17 +2,24 @@
 
 #include "gentle.h"
 
+using namespace std;
+namespace fs = std::filesystem;
+
+//const string CONST_GMP_FILE_EXTENSION = ".gmp";
+
 
 enum class channelWidthType
 {
 	CWEquation,
-	CWGeneration
+	CWGeneration,
+	NONE
 };
 
-enum class CrossSectionType
+enum class crossSectionType
 {
 	CSSingle,
-	CSCompound
+	CSCompound,
+	NONE
 };
 
 enum class fcDataSourceType
@@ -20,10 +27,11 @@ enum class fcDataSourceType
 	UserEdit,
 	Constant,
 	TextFile,
-	ReservoirOperation
+	ReservoirOperation,
+	NONE
 };
 
-enum class FlowControlType
+enum class flowControlType
 {
 	ReservoirOutflow, // 상류모의, 저류량 고려하지 않고, 댐에서의 방류량만 고려함
 	Inlet,  // 상류 모의하지 않는것. 저류량 고려하지 않고, inlet grid에서의 outfow 만 고려함.
@@ -34,12 +42,13 @@ enum class FlowControlType
 	NONE
 };
 
-enum class ReservoirOperationType
+enum class reservoirOperationType
 {
 	AutoROM,
 	RigidROM,
 	ConstantQ,
-	SDEqation
+	SDEqation,
+	NONE
 };
 
 enum class flowDirectionType
@@ -47,37 +56,50 @@ enum class flowDirectionType
 	StartsFromNE,
 	StartsFromN,
 	StartsFromE,
-	StartsFromE_TauDEM
+	StartsFromE_TauDEM,
+	NONE
 };
 
 enum class GRMPrintType
 {
 	All,
 	DischargeFileQ,
-	AllQ
+	AllQ,
+	NONE
 };
 
 enum class simulationType
 {
 	SingleEvent,
 	SingleEventPE_SSR,
-	RealTime
+	RealTime,
+	None
 };
 
 enum class unSaturatedKType
 {
 	Constant,
 	Linear,
-	Exponential
+	Exponential,
+	NONE
 };
 
+typedef struct _projectFileInfo
+{
+	string fpn_prj = "";
+	//string fpn_log = "";
+	string fp_prj = "";
+	string fn_withoutExt_prj = "";
+	string fn_prj = "";
+	fs::file_time_type prjfileSavedTime;
+} projectFileInfo;
 
 typedef struct _swsParameters
 {
 	int wsid = 0;
 	double iniSaturation = 0.0;
 	double minSlopeOF = 0.0;
-	unSaturatedKType unsaturatedKType;
+	unSaturatedKType unSatKType= unSaturatedKType::NONE;
 	double coefUnsaturatedK = 0.0;
 	double minSlopeChBed = 0.0;
 	double minChBaseWidth = 0.0;
@@ -102,8 +124,8 @@ typedef struct _watchPointInfo
 typedef struct _channelWidthInfo
 {
 	int mdWsid = 0;
-	CrossSectionType csType;
-	channelWidthType csWidthType;
+	crossSectionType csType = crossSectionType::NONE;
+	channelWidthType csWidthType= channelWidthType::NONE;
 	double cwEQc = 0.0;
 	double cwEQd = 0.0;
 	double cwEQe = 0.0;
@@ -121,13 +143,13 @@ typedef struct _flowControlinfo
 	string fcName = "";
 	int fcColX = 0;
 	int fcRowY = 0;
-	FlowControlType ControlType;
+	flowControlType fcType = flowControlType::NONE;
 	double fcDT = 0.0;
 	string fcDataFile = "";
 	double iniStorage = 0.0;
 	double maxStorage = 0.0;
 	double maxStorageR = 0.0;
-	ReservoirOperationType roType;
+	reservoirOperationType roType= reservoirOperationType::NONE;
 	double roConstQ = 0.0;
 	double roConstQDuration = 0.0;
 } flowControlinfo;
@@ -161,36 +183,36 @@ typedef struct _landCoverInfo
 
 typedef struct _projectFile
 {
-	simulationType simType;
-	string	domainFile = "";
-	string slopeFile = "";
-	string fdFile = "";
-	string faFile = "";
-	string streamFile = "";
-	string channelWidthFile = "";
-	string iniSSRFile = "";
-	fileOrConstant lcDataType;
-	string lcFile = "";
-	string lcVATFile = "";
+	simulationType simType = simulationType::None;
+	string	fpnDomain = "";
+	string fpnSlope = "";
+	string fpnFD = "";
+	string fpnFA = "";
+	string fpnStream = "";
+	string fpnChannelWidth = "";
+	string fpnIniSSR = "";
+	string fnpIniChannelFlow = "";
+	fileOrConstant lcDataType = fileOrConstant::None;
+	string fpnLC = "";
+	string fpnLCVat = "";
 	double cnstRoughnessC = 0.0;
 	double CnstImperviousR = 0.0;
-	fileOrConstant stDataType;
-	string stFile = "";
-	string stVATFile = "";
+	fileOrConstant stDataType = fileOrConstant::None;
+	string fpnST = "";
+	string fpnSTVat = "";
 	double cnstSoilPorosity = 0.0;
 	double cnstSoilEffPorosity = 0.0;
 	double cnstSoilWFSH = 0.0;
 	double cnstSoilHydraulicK = 0.0;
-	fileOrConstant sdDataType;
-	string sdFile = "";
-	string sdVATFile = "";
+	fileOrConstant sdDataType = fileOrConstant::None;
+	string fpnSD = "";
+	string fpnSDVat = "";
 	double cnstSoilDepth = 0.0;
-	string iniChannelFlowFile = "";
-	rainfallDataType rfDataType;
+	rainfallDataType rfDataType= rainfallDataType::NoneRF;
 	double rfinterval_min = 0.0;
 	string RainfallDataFile = "";
-	flowDirectionType fdType;
-	int MaxDegreeOfParallelism;
+	flowDirectionType fdType= flowDirectionType::NONE;
+	int maxDegreeOfParallelism = 0;
 	string SimulStartingTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
 	int isDateTimeFormat = 0;// true : 1, false : -1
 	double simDuration_hr = 0.0;
@@ -208,7 +230,7 @@ typedef struct _projectFile
 	int makeRfDistFile = 0;// true : 1, false : -1
 	int makeRFaccDistFile = 0;// true : 1, false : -1
 	int makeFlowDistFile = 0;// true : 1, false : -1
-	GRMPrintType printOption;
+	GRMPrintType printOption = GRMPrintType::NONE;
 	int writeLog = 0;// true : 1, false : -1
 
 	vector <swsParameters> swps;
@@ -218,11 +240,125 @@ typedef struct _projectFile
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;
 	vector <landCoverInfo> lcs;
+	
+	CPUsInfo cpusi;
+	int deleteAllFilesExceptDischargeOut = -1;
+
 } projectFile;
 
+typedef struct _projectFileFieldName
+{
+	const string GRMSimulationType = "GRMSimulationType";
+	const string DomainFile = "DomainFile";
+	const string SlopeFile = "SlopeFile";
+	const string FlowDirectionFile = "FlowDirectionFile";
+	const string FlowAccumFile = "FlowAccumFile";
+	const string StreamFile = "StreamFile";
+	const string ChannelWidthFile = "ChannelWidthFile";
+	const string InitialSoilSaturationRatioFile = "InitialSoilSaturationRatioFile";
+	const string InitialChannelFlowFile = "InitialChannelFlowFile";
+	const string LandCoverDataType = "LandCoverDataType";
+	const string LandCoverFile = "LandCoverFile";
+	const string LandCoverVatFile = "LandCoverVatFile";
+	const string ConstantRoughnessCoeff = "ConstantRoughnessCoeff";
+	const string ConstantImperviousRatio = "ConstantImperviousRatio";
+	const string SoilTextureDataType = "SoilTextureDataType";
+	const string SoilTextureFile = "SoilTextureFile";
+	const string SoilTextureVATFile = "SoilTextureVATFile";
+	const string ConstantSoilPorosity = "ConstantSoilPorosity";
+	const string ConstantSoilEffPorosity = "ConstantSoilEffPorosity";
+	const string ConstantSoilWettingFrontSuctionHead = "ConstantSoilWettingFrontSuctionHead";
+	const string ConstantSoilHydraulicConductivity = "ConstantSoilHydraulicConductivity";
+	const string SoilDepthDataType = "SoilDepthDataType";
+	const string SoilDepthFile = "SoilDepthFile";
+	const string SoilDepthVATFile = "SoilDepthVATFile";
+	const string ConstantSoilDepth = "ConstantSoilDepth";
+	const string RainfallDataType = "RainfallDataType";
+	const string RainfallInterval = "RainfallInterval_min";
+	const string RainfallDataFile = "RainfallDataFile";
+	const string FlowDirectionType = "FlowDirectionType";
+	const string MaxDegreeOfParallelism = "MaxDegreeOfParallelism";
+	const string SimulStartingTime = "SimulStartingTime"; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
+	const string SimulationDuration = "SimulationDuration_hr";
+	const string ComputationalTimeStep = "ComputationalTimeStep";
+	const string IsFixedTimeStep = "IsFixedTimeStep";
+	const string OutputTimeStep = "OutputTimeStep";
+	const string SimulateInfiltration = "SimulateInfiltration";
+	const string SimulateSubsurfaceFlow = "SimulateSubsurfaceFlow";
+	const string SimulateBaseFlow = "SimulateBaseFlow";
+	const string SimulateFlowControl = "SimulateFlowControl";
+	const string MakeIMGFile = "MakeIMGFile";
+	const string MakeASCFile = "MakeASCFile";
+	const string MakeSoilSaturationDistFile = "MakeSoilSaturationDistFile";
+	const string MakeRfDistFile = "MakeRfDistFile";
+	const string MakeRFaccDistFile = "MakeRFaccDistFile";
+	const string MakeFlowDistFile = "MakeFlowDistFile";
+	const string PrintOption = "PrintOption";
+	const string WriteLog = "WriteLog";
+	const string WSID = "WSID";
+	const string IniSaturation = "IniSaturation";
+	const string MinSlopeOF = "MinSlopeOF";
+	const string UnsaturatedKType = "UnsaturatedKType";
+	const string CoefUnsaturatedK = "CoefUnsaturatedK";
+	const string MinSlopeChBed = "MinSlopeChBed";
+	const string MinChBaseWidth = "MinChBaseWidth";
+	const string ChRoughness = "ChRoughness";
+	const string DryStreamOrder = "DryStreamOrder";
+	const string IniFlow = "IniFlow";
+	const string CalCoefLCRoughness = "CalCoefLCRoughness";
+	const string CalCoefPorosity = "CalCoefPorosity";
+	const string CalCoefWFSuctionHead = "CalCoefWFSuctionHead";
+	const string CalCoefHydraulicK = "CalCoefHydraulicK";
+	const string CalCoefSoilDepth = "CalCoefSoilDepth";
+	const string UserSet = "UserSet";
+	const string MDWSID = "MDWSID";
+	const string CrossSectionType = "CrossSectionType";
+	const string  SingleCSChannelWidthType = "SingleCSChannelWidthType";
+	const string  ChannelWidthEQc = "ChannelWidthEQc";
+	const string  ChannelWidthEQd = "ChannelWidthEQd";
+	const string  ChannelWidthEQe = "ChannelWidthEQe";
+	const string  ChannelWidthMostDownStream = "ChannelWidthMostDownStream";
+	const string  LowerRegionHeight = "LowerRegionHeight";
+	const string LowerRegionBaseWidth = "LowerRegionBaseWidth";
+	const string UpperRegionBaseWidth = "UpperRegionBaseWidth";
+	const string CompoundCSChannelWidthLimit = "CompoundCSChannelWidthLimit";
+	const string BankSideSlopeRight = "BankSideSlopeRight";
+	const string BankSideSlopeLeft = "BankSideSlopeLeft";
+	const string WPName = "WPName";
+	const string WPColX = "WPColX";
+	const string WPRowY = "WPRowY";
+	const string FCName = "FCName";
+	const string FCColX = "FCColX";
+	const string FCRowY = "FCRowY";
+	const string ControlType = "ControlType";
+	const string FCDT = "FCDT";
+	const string FlowDataFile = "FlowDataFile";
+	const string IniStorage = "IniStorage";
+	const string MaxStorage = "MaxStorage";
+	const string MaxStorageR = "MaxStorageR";
+	const string ROType = "ROType";
+	const string ROConstQ = "ROConstQ";
+	const string ROConstQDuration = "ROConstQDuration";
+	const string STGridValue = "STGridValue";
+	const string GRMCodeST = "GRMCodeST";
+	const string STPorosity = "STPorosity";
+	const string STEffectivePorosity = "STEffectivePorosity";
+	const string STWFSuctionHead = "STWFSuctionHead";
+	const string STHydraulicConductivity = "STHydraulicConductivity";
+	const string SDGridValue = "SDGridValue";
+	const string GRMCodeSD = "GRMCodeSD";
+	const string SDSoilDepth = "SDSoilDepth";
+	const string LCGridValue = "LCGridValue";
+	const string GRMCodeLC = "GRMCodeLC";
+	const string LCRoughnessCoeff = "LCRoughnessCoeff";
+	const string ImperviousRatio = "LCImperviousR";
+} projectFileFieldName;
 
 
 void disposeDynamicVars();
+projectFileInfo getProjectFileInfo(string fpn_prj);
 void grmHelp();
+int openProjectFile();
 int openPrjAndSetupModel();
 int runGRM();
+int startSingleEventRun();
