@@ -6,9 +6,9 @@ using namespace std;
 namespace fs = std::filesystem;
 
 
-projectFileInfo getProjectFileInfo(string fpn_prj)
+projectfilePathInfo getProjectFileInfo(string fpn_prj)
 {
-	projectFileInfo  pfi;
+	projectfilePathInfo  pfi;
 	fs::path fpn_prj_in = fs::path(fpn_prj.c_str());
 	pfi.fpn_prj = fpn_prj_in.string();
 	pfi.fp_prj = fpn_prj_in.parent_path().string();

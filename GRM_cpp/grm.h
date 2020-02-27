@@ -12,14 +12,14 @@ enum class channelWidthType
 {
 	CWEquation,
 	CWGeneration,
-	NONE
+	None
 };
 
 enum class crossSectionType
 {
 	CSSingle,
 	CSCompound,
-	NONE
+	None
 };
 
 enum class fcDataSourceType
@@ -28,7 +28,7 @@ enum class fcDataSourceType
 	Constant,
 	TextFile,
 	ReservoirOperation,
-	NONE
+	None
 };
 
 enum class flowControlType
@@ -39,7 +39,7 @@ enum class flowControlType
 	SourceFlow, // 상류모의, 입력된 source flow data 고려함. 저수지 고려안함.
 	ReservoirOperation, // 상류모의, 저수지 고려, 방류량은 operation rule에 의해서 결정됨. 사용자 입력 인터페이스 구현하지 않음.
 	// 저류량-방류량, 유입량-방류량 관계식을 이용해서 소스코드에 반영 가능
-	NONE
+	None
 };
 
 enum class reservoirOperationType
@@ -48,7 +48,7 @@ enum class reservoirOperationType
 	RigidROM,
 	ConstantQ,
 	SDEqation,
-	NONE
+	None
 };
 
 enum class flowDirectionType
@@ -57,7 +57,7 @@ enum class flowDirectionType
 	StartsFromN,
 	StartsFromE,
 	StartsFromE_TauDEM,
-	NONE
+	None
 };
 
 enum class GRMPrintType
@@ -65,7 +65,7 @@ enum class GRMPrintType
 	All,
 	DischargeFileQ,
 	AllQ,
-	NONE
+	None
 };
 
 enum class simulationType
@@ -81,7 +81,7 @@ enum class unSaturatedKType
 	Constant,
 	Linear,
 	Exponential,
-	NONE
+	None
 };
 
 typedef struct _projectFileInfo
@@ -92,27 +92,27 @@ typedef struct _projectFileInfo
 	string fn_withoutExt_prj = "";
 	string fn_prj = "";
 	fs::file_time_type prjfileSavedTime;
-} projectFileInfo;
+} projectfilePathInfo;
 
-typedef struct _swsParameters
-{
-	int wsid = 0;
-	double iniSaturation = 0.0;
-	double minSlopeOF = 0.0;
-	unSaturatedKType unSatKType= unSaturatedKType::NONE;
-	double coefUnsaturatedK = 0.0;
-	double minSlopeChBed = 0.0;
-	double minChBaseWidth = 0.0;
-	double chRoughness = 0.0;
-	int dryStreamOrder = 0;
-	double iniFlow = 0.0;
-	double ccLCRoughness = 0.0;
-	double ccPorosity = 0.0;
-	double ccWFSuctionHead = 0.0;
-	double ccHydraulicK = 0.0;
-	double ccSoilDepth = 0.0;
-	int userSet = 0;
-} swsParameters;
+//typedef struct _swsParameters
+//{
+//	int wsid = 0;
+//	double iniSaturation = 0.0;
+//	double minSlopeOF = 0.0;
+//	unSaturatedKType unSatKType= unSaturatedKType::None;
+//	double coefUnsaturatedK = 0.0;
+//	double minSlopeChBed = 0.0;
+//	double minChBaseWidth = 0.0;
+//	double chRoughness = 0.0;
+//	int dryStreamOrder = 0;
+//	double iniFlow = 0.0;
+//	double ccLCRoughness = 0.0;
+//	double ccPorosity = 0.0;
+//	double ccWFSuctionHead = 0.0;
+//	double ccHydraulicK = 0.0;
+//	double ccSoilDepth = 0.0;
+//	int userSet = 0;
+//} swsParameters;
 
 typedef struct _watchPointInfo
 {
@@ -124,8 +124,8 @@ typedef struct _watchPointInfo
 typedef struct _channelWidthInfo
 {
 	int mdWsid = 0;
-	crossSectionType csType = crossSectionType::NONE;
-	channelWidthType csWidthType= channelWidthType::NONE;
+	crossSectionType csType = crossSectionType::None;
+	channelWidthType csWidthType= channelWidthType::None;
 	double cwEQc = 0.0;
 	double cwEQd = 0.0;
 	double cwEQe = 0.0;
@@ -143,13 +143,13 @@ typedef struct _flowControlinfo
 	string fcName = "";
 	int fcColX = 0;
 	int fcRowY = 0;
-	flowControlType fcType = flowControlType::NONE;
+	flowControlType fcType = flowControlType::None;
 	double fcDT = 0.0;
 	string fcDataFile = "";
 	double iniStorage = 0.0;
 	double maxStorage = 0.0;
 	double maxStorageR = 0.0;
-	reservoirOperationType roType= reservoirOperationType::NONE;
+	reservoirOperationType roType= reservoirOperationType::None;
 	double roConstQ = 0.0;
 	double roConstQDuration = 0.0;
 } flowControlinfo;
@@ -196,7 +196,7 @@ typedef struct _projectFile
 	string fpnLC = "";
 	string fpnLCVat = "";
 	double cnstRoughnessC = 0.0;
-	double CnstImperviousR = 0.0;
+	double cnstImperviousR = 0.0;
 	fileOrConstant stDataType = fileOrConstant::None;
 	string fpnST = "";
 	string fpnSTVat = "";
@@ -209,14 +209,13 @@ typedef struct _projectFile
 	string fpnSDVat = "";
 	double cnstSoilDepth = 0.0;
 	rainfallDataType rfDataType= rainfallDataType::NoneRF;
-	double rfinterval_min = 0.0;
 	string RainfallDataFile = "";
-	flowDirectionType fdType= flowDirectionType::NONE;
+	double rfinterval_min = 0.0;
+	flowDirectionType fdType= flowDirectionType::None;
 	int maxDegreeOfParallelism = 0;
 	string SimulStartingTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
-	int isDateTimeFormat = 0;// true : 1, false : -1
 	double simDuration_hr = 0.0;
-	double calTimeStep_sec = 0.0;
+	double dtsec = 0.0;
 	int IsFixedTimeStep = 0;// true : 1, false : -1
 	double printTimeStep_min = 0.0;
 	int simInfiltration = 0;// true : 1, false : -1
@@ -230,10 +229,27 @@ typedef struct _projectFile
 	int makeRfDistFile = 0;// true : 1, false : -1
 	int makeRFaccDistFile = 0;// true : 1, false : -1
 	int makeFlowDistFile = 0;// true : 1, false : -1
-	GRMPrintType printOption = GRMPrintType::NONE;
+	GRMPrintType printOption = GRMPrintType::None;
 	int writeLog = 0;// true : 1, false : -1
 
-	vector <swsParameters> swps;
+	//vector <swsParameters> swps;
+	vector<int> wsid ;
+	vector<double> iniSaturation;
+	vector<double> minSlopeOF;
+	vector < unSaturatedKType> unSatKType;
+	vector<double> coefUnsaturatedK;
+	vector<double> minSlopeChBed;
+	vector<double> minChBaseWidth;
+	vector<double> chRoughness;
+	vector<int> dryStreamOrder;
+	vector<double> iniFlow;
+	vector<double>ccLCRoughness;
+	vector<double> ccPorosity;
+	vector<double> ccWFSuctionHead;
+	vector<double> ccHydraulicK;
+	vector<double> ccSoilDepth;
+	vector<int> userSet;// true : 1, false : -1
+
 	vector <watchPointInfo> wps;
 	vector <flowControlinfo> fcs;
 	vector <channelWidthInfo> cws;
@@ -241,6 +257,8 @@ typedef struct _projectFile
 	vector <soilDepthInfo> sds;
 	vector <landCoverInfo> lcs;
 	
+	int isDateTimeFormat = 0;// true : 1, false : -1
+
 	CPUsInfo cpusi;
 	int deleteAllFilesExceptDischargeOut = -1;
 
@@ -274,8 +292,8 @@ typedef struct _projectFileFieldName
 	const string SoilDepthVATFile = "SoilDepthVATFile";
 	const string ConstantSoilDepth = "ConstantSoilDepth";
 	const string RainfallDataType = "RainfallDataType";
-	const string RainfallInterval = "RainfallInterval_min";
 	const string RainfallDataFile = "RainfallDataFile";
+	const string RainfallInterval = "RainfallInterval_min";
 	const string FlowDirectionType = "FlowDirectionType";
 	const string MaxDegreeOfParallelism = "MaxDegreeOfParallelism";
 	const string SimulStartingTime = "SimulStartingTime"; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
@@ -356,7 +374,7 @@ typedef struct _projectFileFieldName
 
 
 void disposeDynamicVars();
-projectFileInfo getProjectFileInfo(string fpn_prj);
+projectfilePathInfo getProjectFileInfo(string fpn_prj);
 void grmHelp();
 int openProjectFile();
 int openPrjAndSetupModel();
