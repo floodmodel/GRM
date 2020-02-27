@@ -375,6 +375,7 @@ typedef struct _projectFileFieldName
 
 void disposeDynamicVars();
 projectfilePathInfo getProjectFileInfo(string fpn_prj);
+int getSwpsVectorIndex(int wsid);
 void grmHelp();
 int openProjectFile();
 int openPrjAndSetupModel();

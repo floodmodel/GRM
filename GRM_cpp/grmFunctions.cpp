@@ -19,3 +19,9 @@ projectfilePathInfo getProjectFileInfo(string fpn_prj)
 	return pfi;
 }
 
+int getSwpsVectorIndex(int wsid)
+{
+	int idx;
+
+	return idx;
+}

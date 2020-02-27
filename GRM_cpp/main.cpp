@@ -203,7 +203,7 @@ int openPrjAndSetupModel()
 	}
 	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, 1);
 	string isparallel = "true";
-	if (prj.maxDegreeOfParallelism = 1) { isparallel = "false"; }
+	if (prj.maxDegreeOfParallelism == 1) { isparallel = "false"; }
 	writeLog(fpnLog, "Parallel : "+ isparallel +". Max. degree of parallelism : "
 		+ to_string(prj.maxDegreeOfParallelism) +".\n", 1, 1);
 	prj.cpusi = getCPUinfo();
