@@ -56,7 +56,7 @@
     <AboutRainfall />
   </ProjectSettings>
   <SubWatershedSettings>
-    <WSID>1</WSID>
+    <SWSID>1</SWSID>
     <IniSaturation>0.93</IniSaturation>
     <MinSlopeOF>0.0001</MinSlopeOF>
     <UnsaturatedKType>Linear</UnsaturatedKType>
@@ -74,7 +74,7 @@
     <UserSet>True</UserSet>
   </SubWatershedSettings>
   <SubWatershedSettings>
-    <WSID>2</WSID>
+    <SWSID>2</SWSID>
     <IniSaturation>0.93</IniSaturation>
     <MinSlopeOF>0.0001</MinSlopeOF>
     <UnsaturatedKType>Linear</UnsaturatedKType>
@@ -92,7 +92,7 @@
     <UserSet>False</UserSet>
   </SubWatershedSettings>
   <SubWatershedSettings>
-    <WSID>3</WSID>
+    <SWSID>3</SWSID>
     <IniSaturation>0.93</IniSaturation>
     <MinSlopeOF>0.0001</MinSlopeOF>
     <UnsaturatedKType>Linear</UnsaturatedKType>
@@ -110,7 +110,7 @@
     <UserSet>False</UserSet>
   </SubWatershedSettings>
   <SubWatershedSettings>
-    <WSID>4</WSID>
+    <SWSID>4</SWSID>
     <IniSaturation>0.93</IniSaturation>
     <MinSlopeOF>0.0001</MinSlopeOF>
     <UnsaturatedKType>Linear</UnsaturatedKType>
@@ -128,7 +128,7 @@
     <UserSet>False</UserSet>
   </SubWatershedSettings>
   <SubWatershedSettings>
-    <WSID>5</WSID>
+    <SWSID>5</SWSID>
     <IniSaturation>0.93</IniSaturation>
     <MinSlopeOF>0.0001</MinSlopeOF>
     <UnsaturatedKType>Linear</UnsaturatedKType>
@@ -146,7 +146,7 @@
     <UserSet>True</UserSet>
   </SubWatershedSettings>
   <SubWatershedSettings>
-    <WSID>6</WSID>
+    <SWSID>6</SWSID>
     <IniSaturation>0.93</IniSaturation>
     <MinSlopeOF>0.0001</MinSlopeOF>
     <UnsaturatedKType>Linear</UnsaturatedKType>
@@ -164,7 +164,7 @@
     <UserSet>False</UserSet>
   </SubWatershedSettings>
   <SubWatershedSettings>
-    <WSID>7</WSID>
+    <SWSID>7</SWSID>
     <IniSaturation>0.93</IniSaturation>
     <MinSlopeOF>0.0001</MinSlopeOF>
     <UnsaturatedKType>Linear</UnsaturatedKType>

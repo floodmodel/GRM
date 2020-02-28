@@ -94,25 +94,25 @@ typedef struct _projectFileInfo
 	fs::file_time_type prjfileSavedTime;
 } projectfilePathInfo;
 
-//typedef struct _swsParameters
-//{
-//	int wsid = 0;
-//	double iniSaturation = 0.0;
-//	double minSlopeOF = 0.0;
-//	unSaturatedKType unSatKType= unSaturatedKType::None;
-//	double coefUnsaturatedK = 0.0;
-//	double minSlopeChBed = 0.0;
-//	double minChBaseWidth = 0.0;
-//	double chRoughness = 0.0;
-//	int dryStreamOrder = 0;
-//	double iniFlow = 0.0;
-//	double ccLCRoughness = 0.0;
-//	double ccPorosity = 0.0;
-//	double ccWFSuctionHead = 0.0;
-//	double ccHydraulicK = 0.0;
-//	double ccSoilDepth = 0.0;
-//	int userSet = 0;
-//} swsParameters;
+typedef struct _swsParameters
+{
+	int wsid = -1;
+	double iniSaturation =-1.0;
+	double minSlopeOF = -1.0;
+	unSaturatedKType unSatKType= unSaturatedKType::None;
+	double coefUnsaturatedK = -1.0;
+	double minSlopeChBed = -1.0;
+	double minChBaseWidth = -1.0;
+	double chRoughness = -1.0;
+	int dryStreamOrder = -1;
+	double iniFlow = -1.0;
+	double ccLCRoughness = -1.0;
+	double ccPorosity = -1.0;
+	double ccWFSuctionHead = -1.0;
+	double ccHydraulicK = -1.0;
+	double ccSoilDepth = -1.0;
+	int userSet = 0;
+} swsParameters;
 
 typedef struct _watchPointInfo
 {
@@ -121,22 +121,22 @@ typedef struct _watchPointInfo
 	int wpRowY = -1;
 } watchPointInfo;
 
-typedef struct _channelWidthInfo
+typedef struct _channelSettingInfo
 {
-	int mdWsid = 0;
+	int mdWsid = -1;
 	crossSectionType csType = crossSectionType::None;
 	channelWidthType csWidthType= channelWidthType::None;
-	double cwEQc = 0.0;
-	double cwEQd = 0.0;
-	double cwEQe = 0.0;
-	double cwMostDownStream = 0.0;
-	double lowRegionHeight = 0.0;
-	double lowRegionBaseWidth = 0.0;
-	double upRegionBaseWidth = 0.0;
-	double compoundCSChannelWidthLimit = 0.0;
-	double bankSlopeRight = 0.0;
-	double bankSlopeLeft = 0.0;
-} channelWidthInfo;
+	double cwEQc = -1.0;
+	double cwEQd = -1.0;
+	double cwEQe = -1.0;
+	double cwMostDownStream = -1.0;
+	double lowRegionHeight = -1.0;
+	double lowRegionBaseWidth = -1.0;
+	double upRegionBaseWidth = -1.0;
+	double compoundCSChannelWidthLimit = -1.0;
+	double bankSlopeRight = -1.0;
+	double bankSlopeLeft = -1.0;
+} channelSettingInfo;
 
 typedef struct _flowControlinfo
 {
@@ -208,10 +208,10 @@ typedef struct _projectFile
 	string fpnSD = "";
 	string fpnSDVat = "";
 	double cnstSoilDepth = 0.0;
-	rainfallDataType rfDataType= rainfallDataType::NoneRF;
+	rainfallDataType rfDataType = rainfallDataType::NoneRF;
 	string RainfallDataFile = "";
 	double rfinterval_min = 0.0;
-	flowDirectionType fdType= flowDirectionType::None;
+	flowDirectionType fdType = flowDirectionType::None;
 	int maxDegreeOfParallelism = 0;
 	string SimulStartingTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
 	double simDuration_hr = 0.0;
@@ -232,31 +232,31 @@ typedef struct _projectFile
 	GRMPrintType printOption = GRMPrintType::None;
 	int writeLog = 0;// true : 1, false : -1
 
-	//vector <swsParameters> swps;
-	vector<int> wsid ;
-	vector<double> iniSaturation;
-	vector<double> minSlopeOF;
-	vector < unSaturatedKType> unSatKType;
-	vector<double> coefUnsaturatedK;
-	vector<double> minSlopeChBed;
-	vector<double> minChBaseWidth;
-	vector<double> chRoughness;
-	vector<int> dryStreamOrder;
-	vector<double> iniFlow;
-	vector<double>ccLCRoughness;
-	vector<double> ccPorosity;
-	vector<double> ccWFSuctionHead;
-	vector<double> ccHydraulicK;
-	vector<double> ccSoilDepth;
-	vector<int> userSet;// true : 1, false : -1
+	vector <swsParameters> swps;
+	//vector<int> wsid;
+	//vector<double> iniSaturation;
+	//vector<double> minSlopeOF;
+	//vector<unSaturatedKType> unSatKType;
+	//vector<double> coefUnsaturatedK;
+	//vector<double> minSlopeChBed;
+	//vector<double> minChBaseWidth;
+	//vector<double> chRoughness;
+	//vector<int> dryStreamOrder;
+	//vector<double> iniFlow;
+	//vector<double>ccLCRoughness;
+	//vector<double> ccPorosity;
+	//vector<double> ccWFSuctionHead;
+	//vector<double> ccHydraulicK;
+	//vector<double> ccSoilDepth;
+	//vector<int> userSet;// true : 1, false : -1
 
-	vector <watchPointInfo> wps;
 	vector <flowControlinfo> fcs;
-	vector <channelWidthInfo> cws;
+	vector <channelSettingInfo> css;
+	vector <watchPointInfo> wps;
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;
 	vector <landCoverInfo> lcs;
-	
+
 	int isDateTimeFormat = 0;// true : 1, false : -1
 
 	CPUsInfo cpusi;
@@ -313,7 +313,7 @@ typedef struct _projectFileFieldName
 	const string MakeFlowDistFile = "MakeFlowDistFile";
 	const string PrintOption = "PrintOption";
 	const string WriteLog = "WriteLog";
-	const string WSID = "WSID";
+	const string SWSID = "SWSID";
 	const string IniSaturation = "IniSaturation";
 	const string MinSlopeOF = "MinSlopeOF";
 	const string UnsaturatedKType = "UnsaturatedKType";
@@ -331,20 +331,17 @@ typedef struct _projectFileFieldName
 	const string UserSet = "UserSet";
 	const string MDWSID = "MDWSID";
 	const string CrossSectionType = "CrossSectionType";
-	const string  SingleCSChannelWidthType = "SingleCSChannelWidthType";
-	const string  ChannelWidthEQc = "ChannelWidthEQc";
-	const string  ChannelWidthEQd = "ChannelWidthEQd";
-	const string  ChannelWidthEQe = "ChannelWidthEQe";
-	const string  ChannelWidthMostDownStream = "ChannelWidthMostDownStream";
-	const string  LowerRegionHeight = "LowerRegionHeight";
+	const string SingleCSChannelWidthType = "SingleCSChannelWidthType";
+	const string ChannelWidthEQc = "ChannelWidthEQc";
+	const string ChannelWidthEQd = "ChannelWidthEQd";
+	const string ChannelWidthEQe = "ChannelWidthEQe";
+	const string ChannelWidthMostDownStream = "ChannelWidthMostDownStream";
+	const string LowerRegionHeight = "LowerRegionHeight";
 	const string LowerRegionBaseWidth = "LowerRegionBaseWidth";
 	const string UpperRegionBaseWidth = "UpperRegionBaseWidth";
 	const string CompoundCSChannelWidthLimit = "CompoundCSChannelWidthLimit";
 	const string BankSideSlopeRight = "BankSideSlopeRight";
 	const string BankSideSlopeLeft = "BankSideSlopeLeft";
-	const string WPName = "WPName";
-	const string WPColX = "WPColX";
-	const string WPRowY = "WPRowY";
 	const string FCName = "FCName";
 	const string FCColX = "FCColX";
 	const string FCRowY = "FCRowY";
@@ -357,6 +354,9 @@ typedef struct _projectFileFieldName
 	const string ROType = "ROType";
 	const string ROConstQ = "ROConstQ";
 	const string ROConstQDuration = "ROConstQDuration";
+	const string WPName = "WPName";
+	const string WPColX = "WPColX";
+	const string WPRowY = "WPRowY";
 	const string STGridValue = "STGridValue";
 	const string GRMCodeST = "GRMCodeST";
 	const string STPorosity = "STPorosity";
@@ -377,6 +377,14 @@ void disposeDynamicVars();
 projectfilePathInfo getProjectFileInfo(string fpn_prj);
 int getSwpsVectorIndex(int wsid);
 void grmHelp();
+channelSettingInfo nullChannelSettingInfo();
+flowControlinfo nullFlowControlinfo();
+swsParameters nullSwsParameters();
+watchPointInfo nullWatchPointInfo();
+int isNormalChannelSettingInfo(channelSettingInfo aci);
+int isNormalFlowControlinfos(flowControlinfo afc);
+int isNormalSwsParameters(swsParameters assp);
+int isNormalWatchPointInfo(watchPointInfo awp);
 int openProjectFile();
 int openPrjAndSetupModel();
 int runGRM();

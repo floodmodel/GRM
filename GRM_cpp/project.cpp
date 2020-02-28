@@ -22,7 +22,11 @@ int openProjectFile()
 	if (prjfile.is_open() == false) { return -1; }
 	string aline;
 	projectFileFieldName fn;
-	prj.isDateTimeFormat = -1;
+	swsParameters assp;
+	channelSettingInfo aci;
+	watchPointInfo awp;
+
+
 	while (getline(prjfile, aline))
 	{
 		string vString = "";
@@ -345,7 +349,7 @@ int openProjectFile()
 
 		if (aline.find(fn.RainfallDataType) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.RainfallDataType);
-			prj.rfDataType =  rainfallDataType::NoneRF;
+			prj.rfDataType = rainfallDataType::NoneRF;
 			if (vString != "") {
 				if (toLower(vString) == "textfilemap") {
 					prj.rfDataType = rainfallDataType::TextFileMAP;
@@ -370,7 +374,7 @@ int openProjectFile()
 			if (vString != "" && _access(vString.c_str(), 0) == 0) {
 				prj.RainfallDataFile = vString;
 			}
-			else if (prj.simType== simulationType::SingleEvent) {
+			else if (prj.simType == simulationType::SingleEvent) {
 				writeLog(fpnLog, "Rainfall data file [" + vString + "] was not set.\n", 1, 1);
 				return -1;
 			}
@@ -382,13 +386,13 @@ int openProjectFile()
 			if (vString != "") {
 				prj.rfinterval_min = stod(vString);
 			}
-			else if(prj.simType == simulationType::SingleEvent) {
+			else if (prj.simType == simulationType::SingleEvent) {
 				writeLog(fpnLog, "Rainfall data time interval was not set.\n", 1, 1);
 				return -1;
 			}
 			continue;
 		}
-		
+
 		if (aline.find(fn.FlowDirectionType) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.FlowDirectionType);
 			prj.fdType = flowDirectionType::None;
@@ -452,7 +456,7 @@ int openProjectFile()
 			vString = getValueStringFromXmlLine(aline, fn.ComputationalTimeStep);
 			prj.dtsec = 1;
 			if (vString != "") {
-				prj.dtsec = stod(vString)*60.0;
+				prj.dtsec = stod(vString) * 60.0;
 			}
 			continue;
 		}
@@ -556,7 +560,7 @@ int openProjectFile()
 			}
 			continue;
 		}
-		
+
 		if (aline.find(fn.PrintOption) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.PrintOption);
 			prj.printOption = GRMPrintType::None;
@@ -591,10 +595,10 @@ int openProjectFile()
 		}
 
 		//subwatershed parameters. START ===========
-		if (aline.find(fn.WSID) != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fn.WSID);
+		if (aline.find(fn.SWSID) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.SWSID);
 			if (vString != "" && stoi(vString) > 0) {
-				prj.wsid.push_back(stoi(vString));
+				assp.wsid = stoi(vString);
 			}
 			else {
 				writeLog(fpnLog, "Watershed ID is invalid.\n", 1, 1);
@@ -605,12 +609,11 @@ int openProjectFile()
 		if (aline.find(fn.IniSaturation) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.IniSaturation);
 			if (vString != "" && stod(vString) >= 0) {
-				prj.iniSaturation.push_back(stod(vString));
+				assp.iniSaturation = stod(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.iniSaturation.size()];
 				writeLog(fpnLog, "Ini. saturation ratio in the watershed ["
-					+to_string(wsid)+"] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -618,12 +621,11 @@ int openProjectFile()
 		if (aline.find(fn.MinSlopeOF) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MinSlopeOF);
 			if (vString != "" && stod(vString) > 0) {
-				prj.minSlopeOF.push_back(stod(vString));
+				assp.minSlopeOF = stod(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.minSlopeOF.size()];
-				writeLog(fpnLog, "Minimum land surface slope for overland flow in the watershed [" 
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+				writeLog(fpnLog, "Minimum land surface slope for overland flow in the watershed ["
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -631,7 +633,6 @@ int openProjectFile()
 		if (aline.find(fn.UnsaturatedKType) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.UnsaturatedKType);
 			unSaturatedKType uskt = unSaturatedKType::None;
-			int wsid = prj.wsid[prj.minSlopeOF.size()];
 			if (vString != "") {
 				if (toLower(vString) == "constant") {
 					uskt = unSaturatedKType::Constant;
@@ -644,27 +645,26 @@ int openProjectFile()
 				}
 				else {
 					writeLog(fpnLog, "Unsaturated K type in the watershed ["
-						+ to_string(wsid) + "] is invalid.\n", 1, 1);
+						+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 					return -1;
 				}
 			}
 			else {
 				writeLog(fpnLog, "Unsaturated K type in the watershed ["
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			prj.unSatKType.push_back(uskt);
+			assp.unSatKType = uskt;
 			continue;
 		}
 		if (aline.find(fn.CoefUnsaturatedK) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.CoefUnsaturatedK);
 			if (vString != "" && stod(vString) > 0) {
-				prj.coefUnsaturatedK.push_back(stod(vString));
+				assp.coefUnsaturatedK = stod(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.coefUnsaturatedK.size()];
 				writeLog(fpnLog, "Hydraulic conductivity for unsaturated soil in the watershed ["
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -672,12 +672,11 @@ int openProjectFile()
 		if (aline.find(fn.MinSlopeChBed) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MinSlopeChBed);
 			if (vString != "" && stod(vString) > 0) {
-				prj.minSlopeChBed.push_back(stod(vString));
+				assp.minSlopeChBed = stod(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.minSlopeChBed.size()];
 				writeLog(fpnLog, "Minimum slope of channel bed in the watershed ["
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -685,12 +684,11 @@ int openProjectFile()
 		if (aline.find(fn.MinChBaseWidth) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MinChBaseWidth);
 			if (vString != "" && stod(vString) > 0) {
-				prj.minChBaseWidth.push_back(stod(vString));
+				assp.minChBaseWidth = stod(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.minChBaseWidth.size()];
 				writeLog(fpnLog, "Minimum value of channel width in the watershed ["
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -698,12 +696,11 @@ int openProjectFile()
 		if (aline.find(fn.ChRoughness) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.ChRoughness);
 			if (vString != "" && stod(vString) > 0) {
-				prj.chRoughness.push_back(stod(vString));
+				assp.chRoughness = stod(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.chRoughness.size()];
 				writeLog(fpnLog, "Roughness coefficient of channel in the watershed ["
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -711,12 +708,11 @@ int openProjectFile()
 		if (aline.find(fn.DryStreamOrder) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.DryStreamOrder);
 			if (vString != "" && stoi(vString) >= 0) {
-				prj.dryStreamOrder.push_back(stoi(vString));
+				assp.dryStreamOrder = stoi(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.dryStreamOrder.size()];
 				writeLog(fpnLog, "Dry stream order in the watershed ["
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -724,12 +720,11 @@ int openProjectFile()
 		if (aline.find(fn.IniFlow) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.IniFlow);
 			if (vString != "" && stod(vString) >= 0) {
-				prj.iniFlow.push_back(stod(vString));
+				assp.iniFlow = stod(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.iniFlow.size()];
 				writeLog(fpnLog, "Initial stream flow in the watershed ["
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -737,12 +732,11 @@ int openProjectFile()
 		if (aline.find(fn.CalCoefLCRoughness) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.CalCoefLCRoughness);
 			if (vString != "" && stod(vString) > 0) {
-				prj.ccLCRoughness.push_back(stod(vString));
+				assp.ccLCRoughness = stod(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.ccLCRoughness.size()];
 				writeLog(fpnLog, "Calibration coeff. of roughness in the watershed ["
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -750,12 +744,11 @@ int openProjectFile()
 		if (aline.find(fn.CalCoefPorosity) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.CalCoefPorosity);
 			if (vString != "" && stod(vString) > 0) {
-				prj.ccPorosity.push_back(stod(vString));
+				assp.ccPorosity = stod(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.ccPorosity.size()];
 				writeLog(fpnLog, "Calibration coeff. of porosity in the watershed ["
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -763,12 +756,11 @@ int openProjectFile()
 		if (aline.find(fn.CalCoefWFSuctionHead) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.CalCoefWFSuctionHead);
 			if (vString != "" && stod(vString) > 0) {
-				prj.ccWFSuctionHead.push_back(stod(vString));
+				assp.ccWFSuctionHead = stod(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.ccWFSuctionHead.size()];
 				writeLog(fpnLog, "Calibration coeff. of wetting front suction head in the watershed ["
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -776,12 +768,11 @@ int openProjectFile()
 		if (aline.find(fn.CalCoefHydraulicK) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.CalCoefHydraulicK);
 			if (vString != "" && stod(vString) > 0) {
-				prj.ccHydraulicK.push_back(stod(vString));
+				assp.ccHydraulicK = stod(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.ccHydraulicK.size()];
 				writeLog(fpnLog, "Calibration coeff. of hydraulic conductivity in the watershed ["
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -789,12 +780,11 @@ int openProjectFile()
 		if (aline.find(fn.CalCoefSoilDepth) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.CalCoefSoilDepth);
 			if (vString != "" && stod(vString) > 0) {
-				prj.ccSoilDepth.push_back(stod(vString));
+				assp.ccSoilDepth = stod(vString);
 			}
 			else {
-				int wsid = prj.wsid[prj.ccSoilDepth.size()];
 				writeLog(fpnLog, "Calibration coeff. of soil depth in the watershed ["
-					+ to_string(wsid) + "] is invalid.\n", 1, 1);
+					+ to_string(assp.wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -802,89 +792,442 @@ int openProjectFile()
 		if (aline.find(fn.UserSet) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.UserSet);
 			if (toLower(vString) == "true") {
-				prj.userSet.push_back(1);
+				assp.userSet = 1;
+			}
+			else if (toLower(vString) == "false") {
+				assp.userSet = -1;
+			}
+		}
+
+		if (isNormalSwsParameters(assp) == 1) {
+			prj.swps.push_back(assp);
+			assp = nullSwsParameters();
+			continue;
+		}
+		//subwatershed parameters ===========
+
+		// channel setting info ===============
+		if (aline.find(fn.MDWSID) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.MDWSID);
+			if (vString != "" && stoi(vString) > 0) {
+				aci.mdWsid = stoi(vString);
 			}
 			else {
-				prj.userSet.push_back(-1);
+				writeLog(fpnLog, "Most downstream watershed ID for channel setting is invalid.\n", 1, 1);
+				return -1;
 			}
 			continue;
 		}
-		//subwatershed parameters. END. ===========
+		if (aline.find(fn.CrossSectionType) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.CrossSectionType);
+			crossSectionType acst = crossSectionType::None;
+			if (vString != "") {
+				if (toLower(vString) == "cscompound") {
+					acst = crossSectionType::CSCompound;
+				}
+				else if (toLower(vString) == "cssingle") {
+					acst = crossSectionType::CSSingle;
+				}				
+				else {
+					writeLog(fpnLog, "Channel cross section type in the watershed ["
+						+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+					return -1;
+				}
+			}
+			else {
+				writeLog(fpnLog, "Channel cross section type in the watershed ["
+					+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			aci.csType = acst;
+			continue;
+		}
+		if (aline.find(fn.SingleCSChannelWidthType) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.SingleCSChannelWidthType);
+			channelWidthType  acw = channelWidthType::None;
+			if (vString != "") {
+				if (toLower(vString) == "cwequation") {
+					acw = channelWidthType::CWEquation;
+				}
+				else if (toLower(vString) == "cwgeneration") {
+					acw = channelWidthType::CWGeneration;
+				}
+				else {
+					writeLog(fpnLog, "Channel width type in the watershed ["
+						+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+					return -1;
+				}
+			}
+			else {
+				writeLog(fpnLog, "Channel width type in the watershed ["
+					+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			aci.csWidthType = acw;
+			continue;
+		}
+		if (aline.find(fn.ChannelWidthEQc) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.ChannelWidthEQc);
+			if (vString != "" && stod(vString) > 0) {
+				aci.cwEQc = stod(vString);
+			}
+			else if (aci.csWidthType==channelWidthType::CWEquation){
+				writeLog(fpnLog, "EQc parameter for channel width eq. in the watershed ["
+					+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			continue;
+		}
+		if (aline.find(fn.ChannelWidthEQd) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.ChannelWidthEQd);
+			if (vString != "" && stod(vString) > 0) {
+				aci.cwEQd = stod(vString);
+			}
+			else if (aci.csWidthType == channelWidthType::CWEquation) {
+				writeLog(fpnLog, "EQd parameter for channel width eq. in the watershed ["
+					+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			continue;
+		}
+		if (aline.find(fn.ChannelWidthEQe) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.ChannelWidthEQe);
+			if (vString != "" && stod(vString) > 0) {
+				aci.cwEQe = stod(vString);
+			}
+			else if (aci.csWidthType == channelWidthType::CWEquation) {
+				writeLog(fpnLog, "EQe parameter for channel width eq. in the watershed ["
+					+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			continue;
+		}
+		if (aline.find(fn.ChannelWidthMostDownStream) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.ChannelWidthMostDownStream);
+			if (vString != "" && stod(vString) > 0) {
+				aci.cwMostDownStream = stod(vString);
+			}
+			else if (aci.csWidthType == channelWidthType::CWGeneration) {
+				writeLog(fpnLog, "The channel width at the most down stream in the watershed ["
+					+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			continue;
+		}
+		if (aline.find(fn.LowerRegionHeight) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.LowerRegionHeight);
+			if (vString != "" && stod(vString) > 0) {
+				aci.lowRegionHeight = stod(vString);
+			}
+			else if (aci.csType == crossSectionType::CSCompound) {
+				writeLog(fpnLog, "Lower region height parameter in the watershed ["
+					+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			continue;
+		}
+		if (aline.find(fn.LowerRegionBaseWidth) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.LowerRegionBaseWidth);
+			if (vString != "" && stod(vString) > 0) {
+				aci.lowRegionBaseWidth = stod(vString);
+			}
+			else if (aci.csType == crossSectionType::CSCompound) {
+				writeLog(fpnLog, "Lower region base width parameter in the watershed ["
+					+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			continue;
+		}
+		if (aline.find(fn.UpperRegionBaseWidth) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.UpperRegionBaseWidth);
+			if (vString != "" && stod(vString) > 0) {
+				aci.upRegionBaseWidth = stod(vString);
+			}
+			else if (aci.csType == crossSectionType::CSCompound) {
+				writeLog(fpnLog, "Upper region base width parameter in the watershed ["
+					+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			continue;
+		}
+		if (aline.find(fn.CompoundCSChannelWidthLimit) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.CompoundCSChannelWidthLimit);
+			if (vString != "" && stod(vString) > 0) {
+				aci.compoundCSChannelWidthLimit = stod(vString);
+			}
+			else if (aci.csType == crossSectionType::CSCompound) {
+				writeLog(fpnLog, "Compound cross section width limit parameter in the watershed ["
+					+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			continue;
+		}
+		if (aline.find(fn.BankSideSlopeRight) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.BankSideSlopeRight);
+			if (vString != "" && stod(vString) > 0) {
+				aci.bankSlopeRight = stod(vString);
+			}
+			else {
+				writeLog(fpnLog, "Right bank side slope parameter in the watershed ["
+					+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			continue;
+		}
+		if (aline.find(fn.BankSideSlopeLeft) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.BankSideSlopeLeft);
+			if (vString != "" && stod(vString) > 0) {
+				aci.bankSlopeLeft = stod(vString);
+			}
+			else {
+				writeLog(fpnLog, "Left bank side slope parameter in the watershed ["
+					+ to_string(aci.mdWsid) + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+		}
+		if (isNormalChannelSettingInfo(aci) == 1) {
+			prj.css.push_back(aci);
+			aci = nullChannelSettingInfo();
+			continue;
+		}
+
+
+				// flow control info ================
+		//const string FCName = "FCName";
+		//const string FCColX = "FCColX";
+		//const string FCRowY = "FCRowY";
+		//const string ControlType = "ControlType";
+		//const string FCDT = "FCDT";
+		//const string FlowDataFile = "FlowDataFile";
+		//const string IniStorage = "IniStorage";
+		//const string MaxStorage = "MaxStorage";
+		//const string MaxStorageR = "MaxStorageR";
+		//const string ROType = "ROType";
+		//const string ROConstQ = "ROConstQ";
+		//const string ROConstQDuration = "ROConstQDuration";
+
+
+		// watch point ====================
+		if (aline.find(fn.WPName) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.WPName);
+			if (vString != "") {
+				awp.wpName = vString;
+			}
+			continue;
+		}
+
+		if (aline.find(fn.WPColX) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.WPColX);
+			if (vString != "") {
+				awp.wpColX = stoi(vString);
+			}
+			continue;
+		}
+
+		if (aline.find(fn.WPRowY) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.WPRowY);
+			if (vString != "") {
+				awp.wpRowY = stoi(vString);
+			}
+		}
+
+		if (isNormalWatchPointInfo(awp) == 1) {
+			prj.wps.push_back(awp);
+			awp = nullWatchPointInfo();
+			continue;
+		}
+		// watch point =====================
 
 
 
 
 
 	}
+
+
 
 	if (prj.printTimeStep_min * 30 < prj.dtsec) {
 		prj.dtsec = prj.printTimeStep_min * 30;
 	}
 
-	int nSWS = prj.wsid.size();
-	if (prj.iniSaturation.size() != nSWS) {
-		writeLog(fpnLog, "The number of [IniSaturation] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.minSlopeOF.size() != nSWS) {
-		writeLog(fpnLog, "The number of [MinSlopeOF] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.unSatKType.size() != nSWS) {
-		writeLog(fpnLog, "The number of [UnsaturatedKType] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.coefUnsaturatedK.size() != nSWS) {
-		writeLog(fpnLog, "The number of [CoefUnsaturatedK] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.minSlopeChBed.size() != nSWS) {
-		writeLog(fpnLog, "The number of [MinSlopeChBed] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.minChBaseWidth.size() != nSWS) {
-		writeLog(fpnLog, "The number of [MinChBaseWidth] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.chRoughness.size() != nSWS) {
-		writeLog(fpnLog, "The number of [ChRoughness] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.dryStreamOrder.size() != nSWS) {
-		writeLog(fpnLog, "The number of [DryStreamOrder] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.iniFlow.size() != nSWS) {
-		writeLog(fpnLog, "The number of [IniFlow] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.ccLCRoughness.size() != nSWS) {
-		writeLog(fpnLog, "The number of [CalCoefLCRoughness] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.ccPorosity.size() != nSWS) {
-		writeLog(fpnLog, "The number of [CalCoefPorosity] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.ccWFSuctionHead.size() != nSWS) {
-		writeLog(fpnLog, "The number of [CalCoefWFSuctionHead] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.ccHydraulicK.size() != nSWS) {
-		writeLog(fpnLog, "The number of [CalCoefHydraulicK] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.ccSoilDepth.size() != nSWS) {
-		writeLog(fpnLog, "The number of [CalCoefSoilDepth] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-	if (prj.userSet.size() != nSWS) {
-		writeLog(fpnLog, "The number of [UserSet] element is not equal to the number of subwatershed.\n", 1, 1);
-		return -1;
-	}
-
-
-
-
 	return 1;
 }
+
+projectfilePathInfo getProjectFileInfo(string fpn_prj)
+{
+	projectfilePathInfo  pfi;
+	fs::path fpn_prj_in = fs::path(fpn_prj.c_str());
+	pfi.fpn_prj = fpn_prj_in.string();
+	pfi.fp_prj = fpn_prj_in.parent_path().string();
+	fs::path fn = fpn_prj_in.filename();
+	pfi.fn_prj = fn.string();
+	pfi.fn_withoutExt_prj = fn.replace_extension().string();
+	pfi.prjfileSavedTime = fs::last_write_time(fpn_prj_in);
+	return pfi;
+}
+
+
+
+channelSettingInfo nullChannelSettingInfo()
+{
+	channelSettingInfo aci;
+	aci.mdWsid = -1;
+	aci.csType = crossSectionType::None;
+	aci.csWidthType = channelWidthType::None;
+	aci.cwEQc = -1.0;
+	aci.cwEQd = -1.0;
+	aci.cwEQe = -1.0;
+	aci.cwMostDownStream = -1.0;
+	aci.lowRegionHeight = -1.0;
+	aci.lowRegionBaseWidth = -1.0;
+	aci.upRegionBaseWidth = -1.0;
+	aci.compoundCSChannelWidthLimit = -1.0;
+	aci.bankSlopeRight = -1.0;
+	aci.bankSlopeLeft = -1.0;
+	return aci;
+}
+
+
+swsParameters nullSwsParameters()
+{
+	swsParameters assp;
+	assp.wsid = -1;
+	assp.iniSaturation = -1.0;
+	assp.minSlopeOF = -1.0;
+	assp.unSatKType = unSaturatedKType::None;
+	assp.coefUnsaturatedK = -1.0;
+	assp.minSlopeChBed = -1.0;
+	assp.minChBaseWidth = -1.0;
+	assp.chRoughness = -1.0;
+	assp.dryStreamOrder = -1;
+	assp.iniFlow = -1.0;
+	assp.ccLCRoughness = -1.0;
+	assp.ccPorosity = -1.0;
+	assp.ccWFSuctionHead = -1.0;
+	assp.ccHydraulicK = -1.0;
+	assp.ccSoilDepth = -1.0;
+	assp.userSet = 0;
+	return assp;
+}
+
+int isNormalChannelSettingInfo(channelSettingInfo aci)
+{
+	if (aci.mdWsid == -1.0) { return -1; }
+	if (aci.csType == crossSectionType::None) { return -1; }
+	if (aci.csWidthType == channelWidthType::None) { return -1; }
+	if (aci.cwEQc == -1.0) { return -1; }
+	if (aci.cwEQd == -1.0) { return -1; }
+	if (aci.cwEQe == -1.0) { return -1; }
+	if (aci.cwMostDownStream == -1.0) { return -1; }
+	if (aci.lowRegionHeight == -1.0) { return -1; }
+	if (aci.lowRegionBaseWidth == -1.0) { return -1; }
+	if (aci.upRegionBaseWidth == -1.0) { return -1; }
+	if (aci.compoundCSChannelWidthLimit = -1.0) { return -1; }
+	if (aci.bankSlopeRight == -1.0) { return -1; }
+	if (aci.bankSlopeLeft == -1.0) { return -1; }
+	return 1;
+}
+
+int isNormalSwsParameters(swsParameters assp)
+{
+	if (assp.wsid == -1.0) { return -1; }
+	if (assp.iniSaturation == -1.0) { return -1; }
+	if (assp.minSlopeOF == -1.0) { return -1; }
+	if (assp.unSatKType == unSaturatedKType::None) { return -1; }
+	if (assp.coefUnsaturatedK == -1.0) { return -1; }
+	if (assp.minSlopeChBed == -1.0) { return -1; }
+	if (assp.minChBaseWidth == -1.0) { return -1; }
+	if (assp.chRoughness == -1.0) { return -1; }
+	if (assp.dryStreamOrder == -1) { return -1; }
+	if (assp.iniFlow == -1.0) { return -1; }
+	if (assp.ccLCRoughness == -1.0) { return -1; }
+	if (assp.ccPorosity == -1.0) { return -1; }
+	if (assp.ccWFSuctionHead == -1.0) { return -1; }
+	if (assp.ccHydraulicK == -1.0) { return -1; }
+	if (assp.ccSoilDepth == -1.0) { return -1; }
+	if (assp.userSet == 0) { return -1; }
+	return 1;
+}
+
+watchPointInfo nullWatchPointInfo()
+{
+	watchPointInfo awp;
+	awp.wpName = "";
+	awp.wpColX = -1;
+	awp.wpRowY = -1;
+	return awp;
+}
+
+
+int isNormalWatchPointInfo(watchPointInfo awp)
+{
+	if (awp.wpName == "") { return -1; };
+	if (awp.wpColX == -1) { return -1; };
+	if (awp.wpRowY == -1) { return -1; };
+	return 1;
+}
+
+
+
+
+//int nSWS = prj.wsid.size();
+//if (prj.iniSaturation.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [IniSaturation] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.minSlopeOF.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [MinSlopeOF] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.unSatKType.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [UnsaturatedKType] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.coefUnsaturatedK.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [CoefUnsaturatedK] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.minSlopeChBed.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [MinSlopeChBed] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.minChBaseWidth.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [MinChBaseWidth] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.chRoughness.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [ChRoughness] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.dryStreamOrder.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [DryStreamOrder] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.iniFlow.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [IniFlow] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.ccLCRoughness.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [CalCoefLCRoughness] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.ccPorosity.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [CalCoefPorosity] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.ccWFSuctionHead.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [CalCoefWFSuctionHead] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.ccHydraulicK.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [CalCoefHydraulicK] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.ccSoilDepth.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [CalCoefSoilDepth] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
+//if (prj.userSet.size() != nSWS) {
+//	writeLog(fpnLog, "The number of [UserSet] element is not equal to the number of subwatershed.\n", 1, 1);
+//	return -1;
+//}
