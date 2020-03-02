@@ -24,7 +24,9 @@
     <ClCompile Include="..\..\gentle\cpp\systeminfo.cpp" />
     <ClCompile Include="grmFunctions.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="output.cpp" />
     <ClCompile Include="project.cpp" />
+    <ClCompile Include="realtime_common.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\gentle\cpp\bitmap_image.hpp" />

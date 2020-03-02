@@ -23,6 +23,9 @@ projectfilePathInfo ppi;
 fs::path fpnLog;
 
 projectFile prj;
+grmOutFiles ofs;
+
+realtimeCommon rc;
 //generalEnv ge;
 //domaininfo di;
 //domainCell** dmcells;
@@ -208,6 +211,12 @@ int openPrjAndSetupModel()
 		+ to_string(prj.maxDegreeOfParallelism) +".\n", 1, 1);
 	prj.cpusi = getCPUinfo();
 	writeLog(fpnLog, prj.cpusi.infoString, 1, 1);
+
+	if (initOutputFiles() == -1) {
+		writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
+		return -1;
+	}
+
 	//if (setGenEnv() < 0) {
 	//	writeLog(fpnLog, "Setting general environment variables was failed.\n", 1, 1);
 	//	return -1;

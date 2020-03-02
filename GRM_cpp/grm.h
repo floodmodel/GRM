@@ -6,7 +6,27 @@ using namespace std;
 namespace fs = std::filesystem;
 
 //const string CONST_GMP_FILE_EXTENSION = ".gmp";
+const string CONST_TAG_DISCHARGE = "Discharge.out";
+const string CONST_TAG_DEPTH = "Depth.out";
+const string CONST_TAG_RFGRID = "RFGrid.out";
+const string CONST_TAG_RFMEAN = "RFUpMean.out";
+//const string CONST_TAG_FCAPP = "FCData.out";
+const string CONST_TAG_FCSTORAGE = "FCStorage.out";
+//const string CONST_TAG_SWSPARSTEXTFILE = "SWSPars.out";
+const string CONST_DIST_SSR_DIRECTORY_TAG = "SSD";
+const string CONST_DIST_RF_DIRECTORY_TAG = "RFD";
+const string CONST_DIST_RFACC_DIRECTORY_TAG = "RFAccD";
+const string CONST_DIST_FLOW_DIRECTORY_TAG = "FlowD";
+const string CONST_DIST_SSR_FILE_HEAD = "ss_";
+const string CONST_DIST_RF_FILE_HEAD = "rf_";
+const string CONST_DIST_RFACC_FILE_HEAD = "rfc_";
+const string CONST_DIST_FLOW_FILE_HEAD = "flow_";
 
+const string CONST_OUTPUT_TABLE_TIME_FIELD_NAME = "DataTime";
+const string CONST_OUTPUT_TABLE_MEAN_RAINFALL_FIELD_NAME = "Rainfall_Mean";
+
+
+const double CONST_CFL_NUMBER = 1.0;
 
 enum class channelWidthType
 {
@@ -141,44 +161,69 @@ typedef struct _channelSettingInfo
 typedef struct _flowControlinfo
 {
 	string fcName = "";
-	int fcColX = 0;
-	int fcRowY = 0;
+	int fcColX = -1;
+	int fcRowY = -1;
 	flowControlType fcType = flowControlType::None;
 	double fcDT = 0.0;
 	string fcDataFile = "";
-	double iniStorage = 0.0;
-	double maxStorage = 0.0;
-	double maxStorageR = 0.0;
+	double iniStorage = -1.0;
+	double maxStorage = -1.0;
+	double maxStorageR = -1.0;
 	reservoirOperationType roType= reservoirOperationType::None;
-	double roConstQ = 0.0;
-	double roConstQDuration = 0.0;
+	double roConstQ = -1.0;
+	double roConstQDuration = -1.0;
 } flowControlinfo;
 
 
 typedef struct _soilTextureInfo
 {
-	int stGridValue;
+	int stGridValue=-1;
 	string stName = "";
-	double porosity = 0.0;
-	double effectivePorosity = 0.0;
-	double wfSoilSuctionHead = 0.0;
-	double hydraulicK = 0.0;
+	double porosity = -1.0;
+	double effectivePorosity = -1.0;
+	double WFSuctionHead = -1.0;
+	double hydraulicK = -1.0;
 } soilTextureInfo;
 
 typedef struct _soilDepthInfo
 {
-	int sdGridValue = 0;
+	int sdGridValue = -1;
 	string sdName = "";
-	double soilDepth = 0.0;
+	double soilDepth = -1.0;
 } soilDepthInfo;
 
 typedef struct _landCoverInfo
 {
-	int lcGridValue = 0;
+	int lcGridValue = -1;
 	string lcName = "";
-	double RoughnessCoefficient = 0.0;
-	double ImperviousRatio = 0.0;
+	double RoughnessCoefficient = -1;
+	double ImperviousRatio = -1;
 } landCoverInfo;
+
+typedef struct _grmOutFiles
+{
+	string ofnpDischarge;
+	string ofpnDepth;
+	string ofpnRFGrid;
+	string ofpnRFMean;
+	//string OFNPFCData;
+	string OFNPFCStorage;
+	//string OFNPSwsPars;
+	string OFPSSRDistribution;
+	string OFPRFDistribution;
+	string OFPRFAccDistribution;
+	string OFPFlowDistribution;
+} grmOutFiles;
+
+
+typedef struct _realtimeCommon
+{
+	string g_performance_log_GUID;         // 성능 측정 기록 용 
+	clock_t g_dtStart_from_MonitorEXE; // 성능 측정 기록 용 
+	string g_strModel;  //MODEL 구분용 2019.4.12   .LENS는 m00~m12
+	string g_strTimeTagBase_UCT;       //l030_v070_m00_h004.2016100300.gb2_1_clip.asc 의 경우 2016100300
+	string g_strTimeTagBase_KST;        // 상기의 경우 2016100300+9 즉 2016100309임.
+} realtimeCommon;
 
 
 typedef struct _projectFile
@@ -195,29 +240,29 @@ typedef struct _projectFile
 	fileOrConstant lcDataType = fileOrConstant::None;
 	string fpnLC = "";
 	string fpnLCVat = "";
-	double cnstRoughnessC = 0.0;
-	double cnstImperviousR = 0.0;
+	double cnstRoughnessC = -1.0;
+	double cnstImperviousR = -1.0;
 	fileOrConstant stDataType = fileOrConstant::None;
 	string fpnST = "";
 	string fpnSTVat = "";
-	double cnstSoilPorosity = 0.0;
-	double cnstSoilEffPorosity = 0.0;
-	double cnstSoilWFSH = 0.0;
-	double cnstSoilHydraulicK = 0.0;
+	double cnstSoilPorosity = -1.0;
+	double cnstSoilEffPorosity = -1.0;
+	double cnstSoilWFSH = -1.0;
+	double cnstSoilHydraulicK = -1;
 	fileOrConstant sdDataType = fileOrConstant::None;
 	string fpnSD = "";
 	string fpnSDVat = "";
-	double cnstSoilDepth = 0.0;
+	double cnstSoilDepth = -1.0;
 	rainfallDataType rfDataType = rainfallDataType::NoneRF;
 	string RainfallDataFile = "";
-	double rfinterval_min = 0.0;
+	double rfinterval_min = -1.0;
 	flowDirectionType fdType = flowDirectionType::None;
 	int maxDegreeOfParallelism = 0;
 	string SimulStartingTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
-	double simDuration_hr = 0.0;
-	double dtsec = 0.0;
+	double simDuration_hr = -1.0;
+	double dtsec = -1.0;
 	int IsFixedTimeStep = 0;// true : 1, false : -1
-	double printTimeStep_min = 0.0;
+	double printTimeStep_min = -1;
 	int simInfiltration = 0;// true : 1, false : -1
 	int simSubsurfaceFlow = 0;// true : 1, false : -1
 	int simBaseFlow = 0;// true : 1, false : -1
@@ -233,25 +278,8 @@ typedef struct _projectFile
 	int writeLog = 0;// true : 1, false : -1
 
 	vector <swsParameters> swps;
-	//vector<int> wsid;
-	//vector<double> iniSaturation;
-	//vector<double> minSlopeOF;
-	//vector<unSaturatedKType> unSatKType;
-	//vector<double> coefUnsaturatedK;
-	//vector<double> minSlopeChBed;
-	//vector<double> minChBaseWidth;
-	//vector<double> chRoughness;
-	//vector<int> dryStreamOrder;
-	//vector<double> iniFlow;
-	//vector<double>ccLCRoughness;
-	//vector<double> ccPorosity;
-	//vector<double> ccWFSuctionHead;
-	//vector<double> ccHydraulicK;
-	//vector<double> ccSoilDepth;
-	//vector<int> userSet;// true : 1, false : -1
-
-	vector <flowControlinfo> fcs;
 	vector <channelSettingInfo> css;
+	vector <flowControlinfo> fcs;
 	vector <watchPointInfo> wps;
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;
@@ -277,7 +305,7 @@ typedef struct _projectFileFieldName
 	const string InitialChannelFlowFile = "InitialChannelFlowFile";
 	const string LandCoverDataType = "LandCoverDataType";
 	const string LandCoverFile = "LandCoverFile";
-	const string LandCoverVatFile = "LandCoverVatFile";
+	const string LandCoverVATFile = "LandCoverVATFile";
 	const string ConstantRoughnessCoeff = "ConstantRoughnessCoeff";
 	const string ConstantImperviousRatio = "ConstantImperviousRatio";
 	const string SoilTextureDataType = "SoilTextureDataType";
@@ -374,18 +402,33 @@ typedef struct _projectFileFieldName
 
 
 void disposeDynamicVars();
+
 projectfilePathInfo getProjectFileInfo(string fpn_prj);
 int getSwpsVectorIndex(int wsid);
 void grmHelp();
+
+int initOutputFiles();
+int isNormalChannelSettingInfo(channelSettingInfo aci);
+int isNormalFlowControlinfo(flowControlinfo afc);
+int isNormalSwsParameter(swsParameters assp);
+int isNormalWatchPointInfo(watchPointInfo awp);
+int isNormalSoilTextureInfo(soilTextureInfo ast);
+int isNormalSoilDepthInfo(soilDepthInfo asd);
+int isNormalLandCoverInfo(landCoverInfo alc);
+
 channelSettingInfo nullChannelSettingInfo();
 flowControlinfo nullFlowControlinfo();
 swsParameters nullSwsParameters();
 watchPointInfo nullWatchPointInfo();
-int isNormalChannelSettingInfo(channelSettingInfo aci);
-int isNormalFlowControlinfos(flowControlinfo afc);
-int isNormalSwsParameters(swsParameters assp);
-int isNormalWatchPointInfo(watchPointInfo awp);
+soilTextureInfo nullSoilTextureInfo();
+soilDepthInfo nullSoilDepthInfo();
+landCoverInfo nullLandCoverInfo();
+
 int openProjectFile();
 int openPrjAndSetupModel();
 int runGRM();
 int startSingleEventRun();
+
+//real time ==========
+string IO_Path_ChangeDrive(char strV, string strPath);
+//real time ==========
