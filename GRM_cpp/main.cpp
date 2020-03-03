@@ -13,6 +13,7 @@
 
 #include "gentle.h"
 #include "grm.h"
+#include "realTime.h"
 
 #pragma comment(lib,"version.lib")
 
@@ -21,11 +22,11 @@ namespace fs = std::filesystem;
 
 projectfilePathInfo ppi;
 fs::path fpnLog;
-
 projectFile prj;
 grmOutFiles ofs;
 
-realtimeCommon rc;
+vector<rainfallData> rfs;
+
 //generalEnv ge;
 //domaininfo di;
 //domainCell** dmcells;
@@ -70,7 +71,6 @@ int main(int argc, char** args)
 		}
 		else if (nResult == 0) {
 			ppi = getProjectFileInfo(arg1);
-			fpnLog = fs::path(ppi.fpn_prj.c_str()).replace_extension(".log");
 			writeNewLog(fpnLog, outString, 1, -1);
 			if (startSingleEventRun() == -1) { 
 				waitEnterKey();
@@ -140,7 +140,6 @@ int main(int argc, char** args)
 		int nFiles = gmpFiles.size();
 		for (int n = 0; n < nFiles; n++) {
 			ppi = getProjectFileInfo(gmpFiles[n]);
-			fpnLog = fs::path(ppi.fpn_prj.c_str()).replace_extension(".log");
 			writeNewLog(fpnLog, outString, 1, -1);
 			string progF = to_string(n + 1) + '/' + to_string(gmpFiles.size());
 			string progR = forString(((n + 1) / nFiles * 100), 2);
@@ -187,7 +186,7 @@ void disposeDynamicVars()
 
 int startSingleEventRun()
 {
-	if (openPrjAndSetupModel() == -1) {
+	if (openPrjAndSetupModel(-1) == -1) {
 		writeNewLog(fpnLog, "Model setup failed !!!\n", 1, 1);
 		return -1;
 	}
@@ -195,9 +194,10 @@ int startSingleEventRun()
 		writeNewLog(fpnLog, "An error was occurred while simulation...\n", 1, 1);
 		return -1;
 	}
+	return 1;
 }
 
-int openPrjAndSetupModel()
+int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 {
 	writeLog(fpnLog, "GRM was started.\n", 1, 1);
 	if (openProjectFile() < 0)	{
@@ -215,6 +215,15 @@ int openPrjAndSetupModel()
 	if (initOutputFiles() == -1) {
 		writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
 		return -1;
+	}
+
+	if (forceRealTime == 1) {
+		prj.simType == simulationType::RealTime;
+		changeOutputFileDisk(cRealTime::CONST_Output_File_Target_DISK);
+	}
+
+	if (prj.simType == simulationType::SingleEvent) {
+
 	}
 
 	//if (setGenEnv() < 0) {

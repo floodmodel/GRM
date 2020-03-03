@@ -216,16 +216,6 @@ typedef struct _grmOutFiles
 } grmOutFiles;
 
 
-typedef struct _realtimeCommon
-{
-	string g_performance_log_GUID;         // 성능 측정 기록 용 
-	clock_t g_dtStart_from_MonitorEXE; // 성능 측정 기록 용 
-	string g_strModel;  //MODEL 구분용 2019.4.12   .LENS는 m00~m12
-	string g_strTimeTagBase_UCT;       //l030_v070_m00_h004.2016100300.gb2_1_clip.asc 의 경우 2016100300
-	string g_strTimeTagBase_KST;        // 상기의 경우 2016100300+9 즉 2016100309임.
-} realtimeCommon;
-
-
 typedef struct _projectFile
 {
 	simulationType simType = simulationType::None;
@@ -254,11 +244,11 @@ typedef struct _projectFile
 	string fpnSDVat = "";
 	double cnstSoilDepth = -1.0;
 	rainfallDataType rfDataType = rainfallDataType::NoneRF;
-	string RainfallDataFile = "";
+	string fpnRainfallData = "";
 	double rfinterval_min = -1.0;
 	flowDirectionType fdType = flowDirectionType::None;
 	int maxDegreeOfParallelism = 0;
-	string SimulStartingTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
+	string simulStartingTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
 	double simDuration_hr = -1.0;
 	double dtsec = -1.0;
 	int IsFixedTimeStep = 0;// true : 1, false : -1
@@ -400,10 +390,19 @@ typedef struct _projectFileFieldName
 	const string ImperviousRatio = "LCImperviousR";
 } projectFileFieldName;
 
+typedef struct _rainfallData
+{
+	int Order=-1;
+	string DataTime="";
+	string Rainfall = ""; // map 에서는 강우량 값, asc에서는 파일 이름
+	string FilePath = "";
+	string FileName = "";
+} rainfallData;
 
 void disposeDynamicVars();
 
 projectfilePathInfo getProjectFileInfo(string fpn_prj);
+int setRainfallData();
 int getSwpsVectorIndex(int wsid);
 void grmHelp();
 
@@ -425,10 +424,8 @@ soilDepthInfo nullSoilDepthInfo();
 landCoverInfo nullLandCoverInfo();
 
 int openProjectFile();
-int openPrjAndSetupModel();
+int openPrjAndSetupModel(int forceRealTime);//1:true, -1:false
 int runGRM();
 int startSingleEventRun();
 
-//real time ==========
-string IO_Path_ChangeDrive(char strV, string strPath);
-//real time ==========
+

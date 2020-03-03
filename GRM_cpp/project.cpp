@@ -16,6 +16,21 @@ extern projectFile prj;
 extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
 
+projectfilePathInfo getProjectFileInfo(string fpn_prj)
+{
+	projectfilePathInfo  pfi;
+	fs::path fpn_prj_in = fs::path(fpn_prj.c_str());
+	pfi.fpn_prj = fpn_prj_in.string();
+	pfi.fp_prj = fpn_prj_in.parent_path().string();
+	fs::path fn = fpn_prj_in.filename();
+	pfi.fn_prj = fn.string();
+	pfi.fn_withoutExt_prj = fn.replace_extension().string();
+	pfi.prjfileSavedTime = fs::last_write_time(fpn_prj_in);
+	fpnLog = fs::path(fpn_prj.c_str()).replace_extension(".log");
+	return pfi;
+}
+
+
 int openProjectFile()
 {
 	ifstream prjfile(ppi.fpn_prj);
@@ -347,9 +362,9 @@ int openProjectFile()
 		}
 		if (aline.find(fn.RainfallDataFile) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.RainfallDataFile);
-			prj.RainfallDataFile = "";
+			prj.fpnRainfallData = "";
 			if (vString != "" && _access(vString.c_str(), 0) == 0) {
-				prj.RainfallDataFile = vString;
+				prj.fpnRainfallData = vString;
 			}
 			else if (prj.simType == simulationType::SingleEvent) {
 				writeLog(fpnLog, "Rainfall data file [" + vString + "] was not set.\n", 1, 1);
@@ -411,11 +426,11 @@ int openProjectFile()
 		if (aline.find(fn.SimulStartingTime) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.SimulStartingTime);
 			if (vString != "") {
-				prj.SimulStartingTime = vString;
+				prj.simulStartingTime = vString;
 			}
 			else {
 				prj.isDateTimeFormat = 1;
-				prj.SimulStartingTime = "0";
+				prj.simulStartingTime = "0";
 			}
 			continue;
 		}
@@ -1416,21 +1431,6 @@ int openProjectFile()
 
 	return 1;
 }
-
-projectfilePathInfo getProjectFileInfo(string fpn_prj)
-{
-	projectfilePathInfo  pfi;
-	fs::path fpn_prj_in = fs::path(fpn_prj.c_str());
-	pfi.fpn_prj = fpn_prj_in.string();
-	pfi.fp_prj = fpn_prj_in.parent_path().string();
-	fs::path fn = fpn_prj_in.filename();
-	pfi.fn_prj = fn.string();
-	pfi.fn_withoutExt_prj = fn.replace_extension().string();
-	pfi.prjfileSavedTime = fs::last_write_time(fpn_prj_in);
-	return pfi;
-}
-
-
 
 channelSettingInfo nullChannelSettingInfo()
 {

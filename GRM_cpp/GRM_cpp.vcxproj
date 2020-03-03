@@ -26,7 +26,8 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="output.cpp" />
     <ClCompile Include="project.cpp" />
-    <ClCompile Include="realtime_common.cpp" />
+    <ClCompile Include="rainfall.cpp" />
+    <ClCompile Include="realTime.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\gentle\cpp\bitmap_image.hpp" />
@@ -37,6 +38,7 @@
     <ClInclude Include="..\..\gentle\cpp\gpuinfodelegate.h" />
     <ClInclude Include="..\..\gentle\cpp\systemcommand.h" />
     <ClInclude Include="grm.h" />
+    <ClInclude Include="realTime.h" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>

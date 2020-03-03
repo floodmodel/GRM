@@ -1,7 +1,9 @@
 
 #include "grm.h"
+#include "realTime.h"
 
 
+extern projectFile prj;
 extern grmOutFiles ofs;
 extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
@@ -20,7 +22,23 @@ int initOutputFiles()
 	ofs.OFPRFDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "_" + CONST_DIST_RF_DIRECTORY_TAG;
 	ofs.OFPRFAccDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "_" + CONST_DIST_RFACC_DIRECTORY_TAG;
 	ofs.OFPFlowDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "_" + CONST_DIST_FLOW_DIRECTORY_TAG;
-
 	return 1;
+}
 
+int changeOutputFileDisk(char targetDisk)
+{
+	int isnormal = -1;
+	ofs.ofnpDischarge = IO_Path_ChangeDrive(targetDisk, ofs.ofnpDischarge);
+	ofs.ofpnDepth = IO_Path_ChangeDrive(targetDisk, ofs.ofpnDepth);
+	ofs.ofpnRFGrid = IO_Path_ChangeDrive(targetDisk, ofs.ofpnRFGrid);
+	ofs.ofpnRFMean = IO_Path_ChangeDrive(targetDisk, ofs.ofpnRFMean);
+	//ofs.OFNPSwsPars = IO_Path_ChangeDrive(targetDisk, ofs.OFNPSwsPars);
+	//ofs.OFNPFCData = IO_Path_ChangeDrive(targetDisk, ofs.OFNPFCData);
+	ofs.OFNPFCStorage = IO_Path_ChangeDrive(targetDisk, ofs.OFNPFCStorage);
+	ofs.OFPSSRDistribution = IO_Path_ChangeDrive(targetDisk, ofs.OFPSSRDistribution);
+	ofs.OFPRFDistribution = IO_Path_ChangeDrive(targetDisk, ofs.OFPRFDistribution);
+	ofs.OFPRFAccDistribution = IO_Path_ChangeDrive(targetDisk, ofs.OFPRFAccDistribution);
+	ofs.OFPFlowDistribution = IO_Path_ChangeDrive(targetDisk, ofs.OFPFlowDistribution);
+	isnormal = 1;
+	return isnormal;
 }
