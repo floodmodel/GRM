@@ -22,7 +22,8 @@
     <ClCompile Include="..\..\gentle\cpp\gentle.cpp" />
     <ClCompile Include="..\..\gentle\cpp\systemcommand.cpp" />
     <ClCompile Include="..\..\gentle\cpp\systeminfo.cpp" />
-    <ClCompile Include="grmFunctions.cpp" />
+    <ClCompile Include="setupModel.cpp" />
+    <ClCompile Include="domain.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="output.cpp" />
     <ClCompile Include="project.cpp" />

@@ -25,6 +25,10 @@ fs::path fpnLog;
 projectFile prj;
 grmOutFiles ofs;
 
+domainCell cvxys;
+domaininfo di;
+cvAtt** cells;
+cvAtt* cvs;
 vector<rainfallData> rfs;
 
 //generalEnv ge;
@@ -59,7 +63,7 @@ int main(int argc, char** args)
 	prj.deleteAllFilesExceptDischargeOut = -1;
 	if (argc == 2) {
 		string arg1(args[1]);
-		if (trim(arg1) == "/?" || toLower(trim(arg1)) == "/help") {
+		if (trim(arg1) == "/?" || lower(trim(arg1)) == "/help") {
 			grmHelp();
 			return -1;
 		}
@@ -84,8 +88,8 @@ int main(int argc, char** args)
 		if (argc == 3) {
 			string arg1(args[1]);
 			string arg2(args[2]);
-			arg1 = toLower(trim(arg1));
-			arg2 = toLower(trim(arg2));
+			arg1 = lower(trim(arg1));
+			arg2 = lower(trim(arg2));
 			if (arg1 == "/" && (arg2 == "?" || arg2 == "help")) {
 				grmHelp();
 				return -1;
@@ -114,9 +118,9 @@ int main(int argc, char** args)
 			string arg1(args[1]);
 			string arg2(args[2]);
 			string arg3(args[3]);
-			arg1 = toLower(trim(arg1));
-			arg2 = toLower(trim(arg2));
-			arg3 = toLower(trim(arg3));
+			arg1 = lower(trim(arg1));
+			arg2 = lower(trim(arg2));
+			arg3 = lower(trim(arg3));
 			if (arg1 == "/" && (arg2 == "f" || arg2 == "fd")) {
 				struct stat finfo;
 				if (stat(arg3.c_str(), &finfo) == 0) { //폴더가 있으면
@@ -200,11 +204,18 @@ int startSingleEventRun()
 int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 {
 	writeLog(fpnLog, "GRM was started.\n", 1, 1);
-	if (openProjectFile() < 0)	{
+	if (openProjectFile(forceRealTime) < 0)	{
 		writeLog(fpnLog, "Open "+ ppi.fpn_prj+" was failed.\n", 1, 1);
 		return -1;
 	}
 	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, 1);
+	if (setupModelAfterOpenProjectFile() == -1) {
+		return -1;
+	}
+
+
+
+
 	string isparallel = "true";
 	if (prj.maxDegreeOfParallelism == 1) { isparallel = "false"; }
 	writeLog(fpnLog, "Parallel : "+ isparallel +". Max. degree of parallelism : "
@@ -212,19 +223,9 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 	prj.cpusi = getCPUinfo();
 	writeLog(fpnLog, prj.cpusi.infoString, 1, 1);
 
-	if (initOutputFiles() == -1) {
-		writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
-		return -1;
-	}
 
-	if (forceRealTime == 1) {
-		prj.simType == simulationType::RealTime;
-		changeOutputFileDisk(cRealTime::CONST_Output_File_Target_DISK);
-	}
 
-	if (prj.simType == simulationType::SingleEvent) {
 
-	}
 
 	//if (setGenEnv() < 0) {
 	//	writeLog(fpnLog, "Setting general environment variables was failed.\n", 1, 1);

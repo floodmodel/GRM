@@ -10,7 +10,7 @@ extern fs::path fpnLog;
 
 int initOutputFiles()
 {
-
+	int isnormal = -1;
 	ofs.ofnpDischarge= ppi.fp_prj +"\\"+ ppi.fn_withoutExt_prj+CONST_TAG_DISCHARGE;
 	ofs.ofpnDepth = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_DEPTH;
 	ofs.ofpnRFGrid = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_RFGRID;
@@ -22,7 +22,8 @@ int initOutputFiles()
 	ofs.OFPRFDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "_" + CONST_DIST_RF_DIRECTORY_TAG;
 	ofs.OFPRFAccDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "_" + CONST_DIST_RFACC_DIRECTORY_TAG;
 	ofs.OFPFlowDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "_" + CONST_DIST_FLOW_DIRECTORY_TAG;
-	return 1;
+	isnormal = 1;
+	return isnormal;
 }
 
 int changeOutputFileDisk(char targetDisk)

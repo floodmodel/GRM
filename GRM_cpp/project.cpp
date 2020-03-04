@@ -9,12 +9,15 @@
 
 #include "gentle.h"
 #include "grm.h"
+#include "realTime.h"
 
 using namespace std;
 
 extern projectFile prj;
 extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
+
+extern domaininfo di;
 
 projectfilePathInfo getProjectFileInfo(string fpn_prj)
 {
@@ -31,7 +34,7 @@ projectfilePathInfo getProjectFileInfo(string fpn_prj)
 }
 
 
-int openProjectFile()
+int openProjectFile(int forceRealTime)
 {
 	ifstream prjfile(ppi.fpn_prj);
 	if (prjfile.is_open() == false) { return -1; }
@@ -52,10 +55,10 @@ int openProjectFile()
 			vString = getValueStringFromXmlLine(aline, fn.GRMSimulationType);
 			//prj.simType = simulationType::None;
 			if (vString != "") {
-				if (toLower(vString) == "singleevent") {
+				if (lower(vString) == lower(ENUM_TO_STR(SingleEvent))) {
 					prj.simType = simulationType::SingleEvent;
 				}
-				else if (toLower(vString) == "realtime") {
+				else if (lower(vString) == lower(ENUM_TO_STR(RealTime))) {
 					prj.simType = simulationType::RealTime;
 				}
 				else {
@@ -174,10 +177,10 @@ int openProjectFile()
 			vString = getValueStringFromXmlLine(aline, fn.LandCoverDataType);
 			//prj.lcDataType = fileOrConstant::None;
 			if (vString != "") {
-				if (toLower(vString) == "file") {
+				if (lower(vString) == lower(ENUM_TO_STR(File))) {
 					prj.lcDataType = fileOrConstant::File;
 				}
-				else if (toLower(vString) == "constant") {
+				else if (lower(vString) == lower(ENUM_TO_STR(Constant))) {
 					prj.lcDataType = fileOrConstant::Constant;
 				}
 				else {
@@ -230,10 +233,10 @@ int openProjectFile()
 			vString = getValueStringFromXmlLine(aline, fn.SoilTextureDataType);
 			//prj.stDataType = fileOrConstant::None;
 			if (vString != "") {
-				if (toLower(vString) == "file") {
+				if (lower(vString) == lower(ENUM_TO_STR(File))) {
 					prj.stDataType = fileOrConstant::File;
 				}
-				else if (toLower(vString) == "constant") {
+				else if (lower(vString) == lower(ENUM_TO_STR(Constant))) {
 					prj.stDataType = fileOrConstant::Constant;
 				}
 				else {
@@ -299,10 +302,10 @@ int openProjectFile()
 			vString = getValueStringFromXmlLine(aline, fn.SoilDepthDataType);
 			//prj.sdDataType = fileOrConstant::None;
 			if (vString != "") {
-				if (toLower(vString) == "file") {
+				if (lower(vString) == lower(ENUM_TO_STR(File))) {
 					prj.sdDataType = fileOrConstant::File;
 				}
-				else if (toLower(vString) == "constant") {
+				else if (lower(vString) == lower(ENUM_TO_STR(Constant))) {
 					prj.sdDataType = fileOrConstant::Constant;
 				}
 				else {
@@ -343,10 +346,10 @@ int openProjectFile()
 		if (aline.find(fn.RainfallDataType) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.RainfallDataType);
 			if (vString != "") {
-				if (toLower(vString) == "textfilemap") {
+				if (lower(vString) == lower(ENUM_TO_STR(TextFileMAP))) {
 					prj.rfDataType = rainfallDataType::TextFileMAP;
 				}
-				else if (toLower(vString) == "textfileascgrid") {
+				else if (lower(vString) == lower(ENUM_TO_STR(TextFileASCgrid))) {
 					prj.rfDataType = rainfallDataType::TextFileASCgrid;
 				}
 				else {
@@ -372,8 +375,8 @@ int openProjectFile()
 			}
 			continue;
 		}
-		if (aline.find(fn.RainfallInterval) != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fn.RainfallInterval);
+		if (aline.find(fn.RainfallInterval_min) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.RainfallInterval_min);
 			if (vString != "") {
 				prj.rfinterval_min = stod(vString);
 			}
@@ -387,16 +390,16 @@ int openProjectFile()
 		if (aline.find(fn.FlowDirectionType) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.FlowDirectionType);
 			if (vString != "") {
-				if (toLower(vString) == "startsfromne") {
+				if (lower(vString) == lower(ENUM_TO_STR(StartsFromNE))) {
 					prj.fdType = flowDirectionType::StartsFromNE;
 				}
-				else if (toLower(vString) == "startsfromn") {
+				else if (lower(vString) == lower(ENUM_TO_STR(StartsFromN))) {
 					prj.fdType = flowDirectionType::StartsFromN;
 				}
-				else if (toLower(vString) == "startsfrome") {
+				else if (lower(vString) == lower(ENUM_TO_STR(StartsFromE))) {
 					prj.fdType = flowDirectionType::StartsFromE;
 				}
-				else if (toLower(vString) == "startsfrome_taudem") {
+				else if(lower(vString) == lower(ENUM_TO_STR(StartsFromE_TauDEM))) {
 					prj.fdType = flowDirectionType::StartsFromE_TauDEM;
 				}
 				else {
@@ -435,8 +438,8 @@ int openProjectFile()
 			continue;
 		}
 
-		if (aline.find(fn.SimulationDuration) != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fn.SimulationDuration);
+		if (aline.find(fn.SimulationDuration_hr) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.SimulationDuration_hr);
 			if (vString != "" && stod(vString)>=0) {
 				prj.simDuration_hr = stod(vString);
 			}
@@ -447,8 +450,8 @@ int openProjectFile()
 			continue;
 		}
 
-		if (aline.find(fn.ComputationalTimeStep) != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fn.ComputationalTimeStep);
+		if (aline.find(fn.ComputationalTimeStep_min) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.ComputationalTimeStep_min);
 			if (vString != "" && stod(vString) > 0) {
 				prj.dtsec = stod(vString) * 60.0;
 			}
@@ -458,14 +461,14 @@ int openProjectFile()
 		if (aline.find(fn.IsFixedTimeStep) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.IsFixedTimeStep);
 			prj.IsFixedTimeStep = -1;
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				prj.IsFixedTimeStep = 1;
 			}
 			continue;
 		}
 
-		if (aline.find(fn.OutputTimeStep) != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fn.OutputTimeStep);
+		if (aline.find(fn.OutputTimeStep_min) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.OutputTimeStep_min);
 			if (vString != "") {
 				prj.printTimeStep_min = stod(vString);
 			}
@@ -480,7 +483,7 @@ int openProjectFile()
 		if (aline.find(fn.SimulateInfiltration) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.SimulateInfiltration);
 			prj.simInfiltration = -1;
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				prj.simInfiltration = 1;
 			}
 			continue;
@@ -488,7 +491,7 @@ int openProjectFile()
 		if (aline.find(fn.SimulateSubsurfaceFlow) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.SimulateSubsurfaceFlow);
 			prj.simSubsurfaceFlow = -1;
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				prj.simSubsurfaceFlow = 1;
 			}
 			continue;
@@ -496,7 +499,7 @@ int openProjectFile()
 		if (aline.find(fn.SimulateBaseFlow) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.SimulateBaseFlow);
 			prj.simBaseFlow = -1;
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				prj.simBaseFlow = 1;
 			}
 			continue;
@@ -504,7 +507,7 @@ int openProjectFile()
 		if (aline.find(fn.SimulateFlowControl) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.SimulateFlowControl);
 			prj.simFlowControl = -1;
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				prj.simFlowControl = 1;
 			}
 			continue;
@@ -513,7 +516,7 @@ int openProjectFile()
 		if (aline.find(fn.MakeIMGFile) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MakeIMGFile);
 			prj.makeIMGFile = -1;
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				prj.makeIMGFile = 1;
 			}
 			continue;
@@ -521,7 +524,7 @@ int openProjectFile()
 		if (aline.find(fn.MakeASCFile) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MakeASCFile);
 			prj.makeASCFile = -1;
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				prj.makeASCFile = 1;
 			}
 			continue;
@@ -529,7 +532,7 @@ int openProjectFile()
 		if (aline.find(fn.MakeSoilSaturationDistFile) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MakeSoilSaturationDistFile);
 			prj.makeSoilSaturationDistFile = -1;
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				prj.makeSoilSaturationDistFile = 1;
 			}
 			continue;
@@ -537,7 +540,7 @@ int openProjectFile()
 		if (aline.find(fn.MakeRfDistFile) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MakeRfDistFile);
 			prj.makeRfDistFile = -1;
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				prj.makeRfDistFile = 1;
 			}
 			continue;
@@ -545,7 +548,7 @@ int openProjectFile()
 		if (aline.find(fn.MakeRFaccDistFile) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MakeRFaccDistFile);
 			prj.makeRFaccDistFile = -1;
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				prj.makeRFaccDistFile = 1;
 			}
 			continue;
@@ -553,7 +556,7 @@ int openProjectFile()
 		if (aline.find(fn.MakeFlowDistFile) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MakeFlowDistFile);
 			prj.makeFlowDistFile = -1;
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				prj.makeFlowDistFile = 1;
 			}
 			continue;
@@ -562,13 +565,13 @@ int openProjectFile()
 		if (aline.find(fn.PrintOption) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.PrintOption);
 			if (vString != "") {
-				if (toLower(vString) == "all") {
+				if (lower(vString) == "all") {
 					prj.printOption = GRMPrintType::All;
 				}
-				else if (toLower(vString) == "dischargefileq") {
+				else if (lower(vString) == "dischargefileq") {
 					prj.printOption = GRMPrintType::DischargeFileQ;
 				}
-				else if (toLower(vString) == "allq") {
+				else if (lower(vString) == "allq") {
 					prj.printOption = GRMPrintType::AllQ;
 				}
 				else {
@@ -585,7 +588,7 @@ int openProjectFile()
 		if (aline.find(fn.WriteLog) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.WriteLog);
 			prj.writeLog = -1;
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				prj.writeLog = 1;
 			}
 			continue;
@@ -628,13 +631,13 @@ int openProjectFile()
 			vString = getValueStringFromXmlLine(aline, fn.UnsaturatedKType);
 			unSaturatedKType uskt = unSaturatedKType::None;
 			if (vString != "") {
-				if (toLower(vString) == "constant") {
+				if (lower(vString) ==lower(ENUM_TO_STR(Constant))) {
 					uskt = unSaturatedKType::Constant;
 				}
-				else if (toLower(vString) == "linear") {
+				else if (lower(vString) == lower(ENUM_TO_STR(Linear))) {
 					uskt = unSaturatedKType::Linear;
 				}
-				else if (toLower(vString) == "exponential") {
+				else if (lower(vString) == lower(ENUM_TO_STR(Exponential))) {
 					uskt = unSaturatedKType::Exponential;
 				}
 				else {
@@ -773,10 +776,10 @@ int openProjectFile()
 		}
 		if (aline.find(fn.UserSet) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.UserSet);
-			if (toLower(vString) == "true") {
+			if (lower(vString) == "true") {
 				assp.userSet = 1;
 			}
-			else if (toLower(vString) == "false") {
+			else if (lower(vString) == "false") {
 				assp.userSet = -1;
 			}
 		}
@@ -803,10 +806,10 @@ int openProjectFile()
 			vString = getValueStringFromXmlLine(aline, fn.CrossSectionType);
 			crossSectionType acst = crossSectionType::None;
 			if (vString != "") {
-				if (toLower(vString) == "cscompound") {
+				if (lower(vString) ==lower(ENUM_TO_STR(CSCompound))) {
 					acst = crossSectionType::CSCompound;
 				}
-				else if (toLower(vString) == "cssingle") {
+				else if (lower(vString) == lower(ENUM_TO_STR(CSSingle))) {
 					acst = crossSectionType::CSSingle;
 				}				
 				else {
@@ -826,10 +829,10 @@ int openProjectFile()
 			vString = getValueStringFromXmlLine(aline, fn.SingleCSChannelWidthType);
 			channelWidthType  acwt = channelWidthType::None;
 			if (vString != "") {
-				if (toLower(vString) == "cwequation") {
+				if (lower(vString) == lower(ENUM_TO_STR(CWEquation))) {
 					acwt = channelWidthType::CWEquation;
 				}
-				else if (toLower(vString) == "cwgeneration") {
+				else if (lower(vString) == lower(ENUM_TO_STR(CWGeneration))) {
 					acwt = channelWidthType::CWGeneration;
 				}
 				else {
@@ -993,19 +996,19 @@ int openProjectFile()
 			vString = getValueStringFromXmlLine(aline, fn.ControlType);
 			flowControlType  afct =  flowControlType::None;
 			if (vString != "") {
-				if (toLower(vString) == "inlet") {
+				if (lower(vString) == "inlet") {
 					afct = flowControlType::Inlet;
 				}
-				else if (toLower(vString) == "reservoiroperation") {
+				else if (lower(vString) == lower(ENUM_TO_STR(ReservoirOperation))) {
 					afct = flowControlType::ReservoirOperation;
 				}
-				else if (toLower(vString) == "reservoiroutflow") {
+				else if (lower(vString) == lower(ENUM_TO_STR(ReservoirOutflow))) {
 					afct = flowControlType::ReservoirOutflow;
 				}
-				else if (toLower(vString) == "sinkflow") {
+				else if (lower(vString) == lower(ENUM_TO_STR(SinkFlow))) {
 					afct = flowControlType::SinkFlow;
 				}
-				else if (toLower(vString) == "sourceflow") {
+				else if (lower(vString) == lower(ENUM_TO_STR(SourceFlow))) {
 					afct = flowControlType::SourceFlow;
 				}
 				else {
@@ -1021,10 +1024,10 @@ int openProjectFile()
 			}
 			afc.fcType= afct;
 		}
-		if (aline.find(fn.FCDT) != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fn.FCDT);
+		if (aline.find(fn.FCDT_min) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.FCDT_min);
 			if (vString != "" && stod(vString) >= 0) {
-				afc.fcDT = stod(vString);
+				afc.fcDT_min = stod(vString);
 			}
 			else {
 				writeLog(fpnLog, "Flow control data time interval of [" 
@@ -1081,16 +1084,16 @@ int openProjectFile()
 				vString = getValueStringFromXmlLine(aline, fn.ROType);
 				reservoirOperationType  arot = reservoirOperationType::None;
 				if (vString != "") {
-					if (toLower(vString) == "autorom") {
+					if (lower(vString) == lower(ENUM_TO_STR(AutoROM))) {
 						arot = reservoirOperationType::AutoROM;
 					}
-					else if (toLower(vString) == "constantq") {
+					else if (lower(vString) == lower(ENUM_TO_STR(ConstantQ))) {
 						arot = reservoirOperationType::ConstantQ;
 					}
-					else if (toLower(vString) == "rigidrom") {
+					else if (lower(vString) == lower(ENUM_TO_STR(RigidROM))) {
 						arot = reservoirOperationType::RigidROM;
 					}
-					else if (toLower(vString) == "sdeqation") {
+					else if (lower(vString) == lower(ENUM_TO_STR(SDEqation))) {
 						arot = reservoirOperationType::SDEqation;
 					}
 					else {
@@ -1336,10 +1339,7 @@ int openProjectFile()
 		}
 		// land cover =================
 	}
-	   
-	if (prj.printTimeStep_min * 30 < prj.dtsec) {
-		prj.dtsec = prj.printTimeStep_min * 30;
-	}
+
 	if (prj.lcDataType == fileOrConstant::File) {
 		if (prj.fpnLC == "") {
 			writeLog(fpnLog, "Land cover file is invalid.\n", 1, 1);
@@ -1429,6 +1429,27 @@ int openProjectFile()
 		}
 	}
 
+	if (prj.printTimeStep_min * 30 < prj.dtsec) {
+		prj.dtsec = prj.printTimeStep_min * 30;
+	}
+	di.dmids.clear();
+	for (int n = 0; n < prj.swps.size(); n++) {
+		di.dmids.push_back(prj.swps[n].wsid);
+	}
+	if (initOutputFiles() == -1) {
+		writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
+		return -1;
+	}
+
+	if (prj.simType == simulationType::SingleEvent) {
+		if (setRainfallData() == -1) { return -1; }
+	}
+
+	if (forceRealTime == 1) {
+		prj.simType = simulationType::RealTime;
+		changeOutputFileDisk(cRealTime::CONST_Output_File_Target_DISK);
+	}
+
 	return 1;
 }
 
@@ -1508,7 +1529,7 @@ int isNormalFlowControlinfo(flowControlinfo afc)
 	if (afc.fcColX == afc_ini.fcColX) { return -1; }
 	if (afc.fcRowY == afc_ini.fcRowY) { return -1; }
 	if (afc.fcType == afc_ini.fcType) { return -1; }
-	if (afc.fcDT == afc_ini.fcDT) { return -1; }
+	if (afc.fcDT_min == afc_ini.fcDT_min) { return -1; }
 	if (afc.fcType == flowControlType::ReservoirOperation) {
 		if (afc.iniStorage == afc_ini.iniStorage) { return -1; }
 		if (afc.maxStorage == afc_ini.maxStorage) { return -1; }

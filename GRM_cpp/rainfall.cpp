@@ -61,4 +61,5 @@ int setRainfallData()
         }
         rfs.push_back(r);
     }
+    return 1;
 }

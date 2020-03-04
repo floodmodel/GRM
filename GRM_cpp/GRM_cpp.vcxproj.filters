@@ -27,9 +27,6 @@
     <ClCompile Include="..\..\gentle\cpp\systeminfo.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="grmFunctions.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="project.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -40,6 +37,12 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="rainfall.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="domain.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="setupModel.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

@@ -10,20 +10,21 @@ extern projectFile prj;
 extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
 
+char cRealTime::CONST_Output_File_Target_DISK = '?';
 cRealTime::cRealTime()
 {
-	CONST_Output_File_Target_DISK = '?';
     mDateTimeStartRT = clock();
+    mRainfallDataTypeRT = rainfallDataType::NoneRF;
 }
 
 void  cRealTime::InitializeGRMRT()
 {
     string strTmp = readTextFileToString("C:\\Nakdong\\outputDrive.txt");
-    if (toUpper(strTmp) != "C" &  toUpper(strTmp) != "D" & toUpper(strTmp) != "S")    {
+    if (upper(strTmp) != "C" &  upper(strTmp) != "D" & upper(strTmp) != "S")    {
         cout<<"Can not Read " + strTmp<<endl;
         return;
     }
-    CONST_Output_File_Target_DISK = strTmp.substr(0, 1).c_str()[0];
+    cRealTime::CONST_Output_File_Target_DISK = strTmp.substr(0, 1).c_str()[0];
     cRealTime mGRMRT;
     //mGRMRT.RTStatus += new RTStatusEventHandler(mGRMRT.cRealTime_RTStatus);
 }
