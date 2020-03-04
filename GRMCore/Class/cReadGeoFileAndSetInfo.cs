@@ -59,7 +59,7 @@ namespace GRMCore
                         }
                         watershed.mCVidListForEachWS[wsid].Add(cv.CVID);
                         cv.toBeSimulated = 1;
-                        //if (wsid != 3) { cv.toBeSimulated = -1; }//TODO:주석 2018.12.11
+                        //if (wsid != 3) { cv.toBeSimulated = -1; } //TODO:주석 2018.12.11
                         wsCells[cx, ry] = cv;
                         lstCV.Add(cv);
                         lstDM.Add(dm);

@@ -10,10 +10,10 @@ extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
 extern projectFile prj;
 
-domainCell cvxys;
-domaininfo di;
-cvAtt** cells;
-cvAtt* cvs;
+extern cellPosition cvps;
+extern domaininfo di;
+extern cvAtt** cells;
+extern cvAtt* cvs;
 
 int setupModelAfterOpenProjectFile()
 {
@@ -45,10 +45,9 @@ int setupModelAfterOpenProjectFile()
 	return 1;
 }
 
-int setBasicCVinfo()
+int setBasicCVInfo()
 {
-
-	readDomainFileAndSetupCV(row.DomainFile, watershed, ref WSCells, ref CVs, ref dmInfo, ref WSNetwork, ref subWSPar);
+	readDomainFileAndSetupCV();
 	//    cReadGeoFileAndSetInfo.ReadLayerSlope(row.SlopeFile, WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel);
 	//    cReadGeoFileAndSetInfo.ReadLayerFdir(row.FlowDirectionFile, WSCells, watershed.colCount, watershed.rowCount, watershed.mFDType, sThisSimulation.IsParallel);
 	//    cReadGeoFileAndSetInfo.ReadLayerFAcc(row.FlowAccumFile, WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel);

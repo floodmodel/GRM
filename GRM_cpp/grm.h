@@ -156,6 +156,13 @@ enum class landCoverCode
 	None
 };
 
+
+typedef struct _cellPosition
+{
+	int xCol;
+	int yRow;
+} cellPosition;
+
 typedef struct _projectFileInfo
 {
 	string fpn_prj = "";
@@ -185,6 +192,18 @@ typedef struct _swsParameters
 	double ccSoilDepth = -1.0;
 	int userSet = 0;
 } swsParameters;
+
+
+typedef struct _wsNetwork
+{
+	map <int, vector<int>> wsidsNearbyUp;
+	map <int, vector<int>> wsidsNearbyDown;
+	map <int, vector<int>> wsidsAllUp;
+	map <int, vector<int>> wsidsAllDown;
+	vector <int> mdWSIDs;
+	map <int, int> wsOutletCVids;
+	map <int, int> mdWSIDofCurrentWS;
+} wsNetwork;
 
 typedef struct _watchPointInfo
 {
@@ -280,13 +299,9 @@ typedef struct _domaininfo
 	int cellCountNotNull = 0;
 	vector <int> dmids;
 	map <int, vector<int>> cvidsInDM;
+	wsNetwork wsn;
 } domaininfo;
 
-typedef struct _domainCell
-{
-	int xCol;
-	int yRow;
-} domainCell;
 
 typedef struct _cvStreamAtt
 {
@@ -599,6 +614,7 @@ int runGRM();
 int setBasicCVInfo();
 int setRainfallData();
 int setupModelAfterOpenProjectFile();
+int initWatershedNetwork();
 int startSingleEventRun();
 
 

@@ -25,7 +25,7 @@ fs::path fpnLog;
 projectFile prj;
 grmOutFiles ofs;
 
-domainCell cvxys;
+cellPosition cvps;
 domaininfo di;
 cvAtt** cells;
 cvAtt* cvs;
