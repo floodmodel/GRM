@@ -25,9 +25,8 @@ fs::path fpnLog;
 projectFile prj;
 grmOutFiles ofs;
 
-cellPosition cvps;
 domaininfo di;
-cvAtt** cells;
+int** cellidx;
 cvAtt* cvs;
 vector<rainfallData> rfs;
 

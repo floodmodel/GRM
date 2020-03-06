@@ -25,7 +25,7 @@ const string CONST_DIST_FLOW_FILE_HEAD = "flow_";
 const string CONST_OUTPUT_TABLE_TIME_FIELD_NAME = "DataTime";
 const string CONST_OUTPUT_TABLE_MEAN_RAINFALL_FIELD_NAME = "Rainfall_Mean";
 
-
+const double CONST_MIN_SLOPE = 0.000001;
 const double CONST_CFL_NUMBER = 1.0;
 
 enum class channelWidthType
@@ -155,13 +155,6 @@ enum class landCoverCode
 	CONSTV,
 	None
 };
-
-
-typedef struct _cellPosition
-{
-	int xCol;
-	int yRow;
-} cellPosition;
 
 typedef struct _projectFileInfo
 {
@@ -298,7 +291,7 @@ typedef struct _domaininfo
 	string headerStringAll = "";
 	int cellCountNotNull = 0;
 	vector <int> dmids;
-	map <int, vector<int>> cvidsInDM;
+	map <int, vector<int>> cvidsInEachRegion;
 	wsNetwork wsn;
 } domaininfo;
 
@@ -323,12 +316,14 @@ typedef struct _cvStreamAtt
 	double chBankCoeff = -1.0;// 현재의 channel CV의 제방 계수. 계산 편의를 위해서 channel CV 별로 미리계산한 값
 	double chUpperRBaseWidth_m = -1.0;//현재 channel CV의 복단면 고수부지 바닥 폭[m]
 	double chLowerRHeight = -1.0;// 현재 channel CV의 복단면 고수부지의 수심[m]
-	int isCompoundCS = -1.0;//현재의 channel CV가 복단면인지(true), 단단면(false)인지를 나타내는 변수
+	int isCompoundCS = -1;//현재의 channel CV가 복단면인지(true), 단단면(false)인지를 나타내는 변수
 	double chLowerRArea_m2 = -1.0;// 복단면 channel 중 하층부의 면적[m^2]
 } cvStreamAtt;
 
 typedef struct _cvAtt
 {
+	//int x;// cellidx 검증용
+	//int y;// cellidx 검증용
 	int cvid = -1;//유역에 해당하는 셀에만 부여되는 일련번호    
 	int wsid = -1; //유역 ID, 해당 raster cell의 값
 	cellFlowType flowType;//셀의 종류, 지표면흐름, 하도흐름, 지표면+하도
@@ -344,7 +339,7 @@ typedef struct _cvAtt
 	double cvdx_m;//모델링에 적용할 검사체적의 X방향 길이
 	vector<int> downStreamWPCVIDs;//현재 CV 하류에 있는 watchpoint 들의 CVid 들
 	int toBeSimulated = 0; // -1 : false, 1 : true //현재의 CV가 모의할 셀인지 아닌지 표시
-	cvStreamAtt mStreamAttr;//현재 CV가 Stream 일경우 즉, eCellType이 Channel 혹은 OverlandAndChannel일 경우 부여되는 속성
+	cvStreamAtt stream;//현재 CV가 Stream 일경우 즉, eCellType이 Channel 혹은 OverlandAndChannel일 경우 부여되는 속성
 	int isStream = 0; // 현재 cv가 stream 인지 아닌지
 	double hOF_ori = -1.0;//t 시간에서 유출해석 시작 전 overland flow 검사체적의 수심
 	double uOF = -1.0;//t 시간에서 유출해석 결과 overland flow 검사체적의 유속
@@ -402,6 +397,11 @@ typedef struct _cvAtt
 	double StorageAddedForDTfromRF_m3 = -1.0;//현재 CV에서 flow control 모의시 dt 시간동안의 강우에 의해서 추가되는 저류량[m^3/dt]
 } cvAtt;
 
+typedef struct _globalVinner // 계산 루프로 전달하기 위한 최소한의 전역 변수. gpu 고려
+{
+	int mdp = 0;//-1일 경우는 최대 값으로 자동으로 설정, 1일 경우는 serial 계산
+} globalVinner;
+
 typedef struct _projectFile
 {
 	simulationType simType = simulationType::None;
@@ -411,8 +411,8 @@ typedef struct _projectFile
 	string fpnFA = "";
 	string fpnStream = "";
 	string fpnChannelWidth = "";
-	string fpnIniSSR = "";
-	string fnpIniChannelFlow = "";
+	string fpniniSSR = "";
+	string fpniniChannelFlow = "";
 	fileOrConstant lcDataType = fileOrConstant::None;
 	string fpnLC = "";
 	string fpnLCVat = "";
@@ -453,7 +453,7 @@ typedef struct _projectFile
 	GRMPrintType printOption = GRMPrintType::None;
 	int writeLog = 0;// true : 1, false : -1
 
-	vector <swsParameters> swps;
+	map <int, swsParameters> swps;
 	vector <channelSettingInfo> css;
 	vector <flowControlinfo> fcs;
 	vector <watchPointInfo> wps;
@@ -588,9 +588,11 @@ typedef struct _rainfallData
 void disposeDynamicVars();
 
 projectfilePathInfo getProjectFileInfo(string fpn_prj);
+flowDirection8 getFlowDirection(int fdirV, flowDirectionType fdType);
 void grmHelp();
 
 int initOutputFiles();
+int initWatershedNetwork();
 int isNormalChannelSettingInfo(channelSettingInfo aci);
 int isNormalFlowControlinfo(flowControlinfo afc);
 int isNormalSwsParameter(swsParameters assp);
@@ -609,12 +611,17 @@ landCoverInfo nullLandCoverInfo();
 
 int openProjectFile(int forceRealTime);
 int openPrjAndSetupModel(int forceRealTime);//1:true, -1:false
+
 int readDomainFileAndSetupCV();
+int readSlopeFdirFacStreamCWiniSSRiniCF();
+//int readFacFile();
+//int readFdirFile();
+//int readSlopeFile();
 int runGRM();
+
 int setBasicCVInfo();
 int setRainfallData();
 int setupModelAfterOpenProjectFile();
-int initWatershedNetwork();
 int startSingleEventRun();
 
 

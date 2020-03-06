@@ -151,9 +151,9 @@ int openProjectFile(int forceRealTime)
 
 		if (aline.find(fn.InitialSoilSaturationRatioFile) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.InitialSoilSaturationRatioFile);
-			prj.fpnIniSSR = "";
+			prj.fpniniSSR = "";
 			if (vString != "" && _access(vString.c_str(), 0) == 0) {
-				prj.fpnIniSSR = vString;
+				prj.fpniniSSR = vString;
 			}
 			else {
 				writeLog(fpnLog, "Soil saturation ratio file [" + vString + "] was not set.\n", 1, -1);
@@ -163,9 +163,9 @@ int openProjectFile(int forceRealTime)
 
 		if (aline.find(fn.InitialChannelFlowFile) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.InitialChannelFlowFile);
-			prj.fnpIniChannelFlow = "";
+			prj.fpniniChannelFlow = "";
 			if (vString != "" && _access(vString.c_str(), 0) == 0) {
-				prj.fnpIniChannelFlow = vString;
+				prj.fpniniChannelFlow = vString;
 			}
 			else {
 				writeLog(fpnLog, "Soil saturation ratio file [" + vString + "] was not set.\n", 1, -1);
@@ -785,8 +785,11 @@ int openProjectFile(int forceRealTime)
 		}
 
 		if (assp.wsid >0 && isNormalSwsParameter(assp) == 1) {
-			prj.swps.push_back(assp);
-			assp = nullSwsParameters();
+			//prj.swps.push_back(assp);
+			if (prj.swps.count(assp.wsid) == 0) {
+				prj.swps[assp.wsid] = assp;
+				assp = nullSwsParameters();
+			}			
 			continue;
 		}
 		//subwatershed parameters ===========

@@ -10,9 +10,8 @@ extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
 extern projectFile prj;
 
-extern cellPosition cvps;
 extern domaininfo di;
-extern cvAtt** cells;
+extern cvAtt** cellidx;
 extern cvAtt* cvs;
 
 int setupModelAfterOpenProjectFile()
@@ -48,7 +47,12 @@ int setupModelAfterOpenProjectFile()
 int setBasicCVInfo()
 {
 	readDomainFileAndSetupCV();
-	//    cReadGeoFileAndSetInfo.ReadLayerSlope(row.SlopeFile, WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel);
+	readSlopeFdirFacStreamCWiniSSRiniCF();
+
+	//readSlopeFile();
+	//readFdirFile();
+	//readFacFile();
+	
 	//    cReadGeoFileAndSetInfo.ReadLayerFdir(row.FlowDirectionFile, WSCells, watershed.colCount, watershed.rowCount, watershed.mFDType, sThisSimulation.IsParallel);
 	//    cReadGeoFileAndSetInfo.ReadLayerFAcc(row.FlowAccumFile, WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel);
 	//    string FPNstream = "";
