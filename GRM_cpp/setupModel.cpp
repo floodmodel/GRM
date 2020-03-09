@@ -48,6 +48,14 @@ int setBasicCVInfo()
 {
 	readDomainFileAndSetupCV();
 	readSlopeFdirFacStreamCWiniSSRiniCF();
+	if (prj.lcDataType == fileOrConstant::File)
+	{
+		readLandCoverFileAndSetCvLcByVAT();
+	}
+	else if (prj.lcDataType == fileOrConstant::Constant) {
+		setCvLcByConstant();
+		}
+
 
 	//readSlopeFile();
 	//readFdirFile();

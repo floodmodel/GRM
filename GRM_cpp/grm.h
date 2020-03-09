@@ -613,6 +613,7 @@ int openProjectFile(int forceRealTime);
 int openPrjAndSetupModel(int forceRealTime);//1:true, -1:false
 
 int readDomainFileAndSetupCV();
+int readLandCoverFileAndSetCvLcByVAT();
 int readSlopeFdirFacStreamCWiniSSRiniCF();
 //int readFacFile();
 //int readFdirFile();
@@ -620,6 +621,7 @@ int readSlopeFdirFacStreamCWiniSSRiniCF();
 int runGRM();
 
 int setBasicCVInfo();
+int setCvLcByConstant();
 int setRainfallData();
 int setupModelAfterOpenProjectFile();
 int startSingleEventRun();

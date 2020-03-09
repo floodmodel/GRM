@@ -73,8 +73,6 @@ int readDomainFileAndSetupCV()
         }
     }
     initWatershedNetwork();
-    //WSNetwork = new cWatershedNetwork(watershed.WSIDList);
-    //subWSPar.SetSubWSkeys(watershed.WSIDList);
     cvs = new cvAtt[cvsv.size()];
     copy(cvsv.begin(), cvsv.end(), cvs);
     return 1;
@@ -165,7 +163,7 @@ int readSlopeFdirFacStreamCWiniSSRiniCF()
         cwFile = &ascRasterFile(prj.fpnChannelWidth);
     }
     if (isCF == 1) {
-        cwFile = &ascRasterFile(prj.fpniniChannelFlow);
+        cfFile = &ascRasterFile(prj.fpniniChannelFlow);
     }
     if (isSSR == 1) {
         cwFile = &ascRasterFile(prj.fpniniSSR);
@@ -207,10 +205,61 @@ int readSlopeFdirFacStreamCWiniSSRiniCF()
                     cvs[idx].stream.chBaseWidthByLayer = -1;
                 }
                 if (isCF == 1) {
-                    cwFile = &ascR asterFile(prj.fpniniChannelFlow);
+                    double v = cfFile->valuesFromTL[cx][ry];
+                    if (v < 0) {
+                        cvs[idx].stream.iniQCH_m3Ps = 0;
+                    }
+                    else {
+                        cvs[idx].stream.iniQCH_m3Ps = v;
+                    }
                 }
                 if (isSSR == 1) {
-                    cwFile = &ascRa sterFile(prj.fpniniSSR);
+                    double v = ssrFile->valuesFromTL[cx][ry];
+                    if (v < 0) {
+                        cvs[idx].iniSR = 0;
+                    }
+                    else {
+                        cvs[idx].iniSR = v;
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+}
+
+
+int readLandCoverFileAndSetCvLcByVAT()
+{
+    if (prj.fpnLC == "" || _access(prj.fpnLC.c_str(), 0) != 0) {
+        string outstr = "Land cover file (" + prj.fpnLC + ") is invalid.\n";
+        writeLog(fpnLog, outstr, 1, 1);
+        return -1;
+    }
+    if (prj.fpnLCVat == "" || _access(prj.fpnLCVat.c_str(), 0) != 0) {
+        string outstr = "Land cover VAT file (" + prj.fpnLCVat + ") is invalid.\n";
+        writeLog(fpnLog, outstr, 1, 1);
+        return -1;
+    }
+    ascRasterFile lcFile = ascRasterFile(prj.fpnLC);
+    int nRy = di.nRows;
+    int nCx = di.nCols;
+    map<int, landCoverInfo> lcvat;
+    for (int n = 0; n < prj.lcs.size(); n++) {
+        int lckey= prj.lcs[n].lcGridValue;
+        if (lcvat.find(lckey) == lcvat.end()) {
+            lcvat[lckey]= prj.lc s[n];
+        }
+    }
+
+//오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
+    for (int ry = 0; ry < nRy; ry++) {
+        for (int cx = 0; cx < nCx; cx++) {
+            int idx = cellidx[cx][ry];
+            if (idx>= 0) {
+                cvs[idx].lcCellValue = lcFile.valuesFromTL[cx][ry];
+                if (cvs[idx].lcCellValue <= 0.0) {
+                    cvs[idx].lcCellValue = CONST_MIN_SLOPE;
                 }
             }
         }
@@ -316,7 +365,7 @@ flowDirection8 getFlowDirection(int fdirV, flowDirectionType fdt)
 
 
 
-int readSlopeFile()
+//int readSlopeFile()
 //{
 //    if (prj.fpnSlope == "" || _access(prj.fpnSlope.c_str(), 0) != 0) {
 //        string outstr = "Slope file (" + prj.fpnSlope + ") is invalid.\n";
