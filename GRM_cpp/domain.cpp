@@ -3,6 +3,7 @@
 #include <map>
 #include<vector>
 #include <omp.h>
+#include <string>
 
 #include "gentle.h"
 #include "grm.h"
@@ -228,8 +229,7 @@ int readSlopeFdirFacStreamCWiniSSRiniCF()
     return 1;
 }
 
-
-int readLandCoverFileAndSetCvLcByVAT()
+int readLandCoverFileAndSetCVbyVAT()
 {
     if (prj.fpnLC == "" || _access(prj.fpnLC.c_str(), 0) != 0) {
         string outstr = "Land cover file (" + prj.fpnLC + ") is invalid.\n";
@@ -246,24 +246,191 @@ int readLandCoverFileAndSetCvLcByVAT()
     int nCx = di.nCols;
     map<int, landCoverInfo> lcvat;
     for (int n = 0; n < prj.lcs.size(); n++) {
-        int lckey= prj.lcs[n].lcGridValue;
+        int lckey = prj.lcs[n].lcGridValue;
         if (lcvat.find(lckey) == lcvat.end()) {
-            lcvat[lckey]= prj.lc s[n];
+            lcvat[lckey] = prj.lcs[n];
         }
     }
-
-//오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
+    map<int, landCoverInfo>::iterator iter;
+    iter = lcvat.begin();
+    int vBak = iter->first;
+    //오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
             int idx = cellidx[cx][ry];
-            if (idx>= 0) {
-                cvs[idx].lcCellValue = lcFile.valuesFromTL[cx][ry];
-                if (cvs[idx].lcCellValue <= 0.0) {
-                    cvs[idx].lcCellValue = CONST_MIN_SLOPE;
+            int v = lcFile.valuesFromTL[cx][ry];
+            if (idx >= 0) {
+                if (v > 0) {
+                    if (lcvat.find(v) != lcvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
+                        landCoverInfo lc = lcvat[v];
+                        vBak = v; // 여기서 최신 셀의 값
+                        cvs[idx].lcCellValue = v;
+                        cvs[idx].roughnessCoeffOFori = lc.RoughnessCoefficient;
+                        cvs[idx].imperviousR = lc.ImperviousRatio;
+                        cvs[idx].lcCode = lc.lcCode;
+                    }
+                    else {
+                        string outstr = "Landcover VAT file [" + prj.fpnLCVat
+                            + "] or current project file do not have the land cover value (" 
+                            + to_string(v) + ").\n"
+                            + "Check the land cover file or land cover VAT file. \n";
+                        writeLog(fpnLog, outstr, -1, 1);
+                        return -1;
+                    }
+                }
+                else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
+                    landCoverInfo lc = lcvat[vBak];
+                    cvs[idx].lcCellValue = vBak;
+                    cvs[idx].roughnessCoeffOFori = lc.RoughnessCoefficient;
+                    cvs[idx].imperviousR = lc.ImperviousRatio;
+                    cvs[idx].lcCode = lc.lcCode;
                 }
             }
         }
     }
+    return 1;
+}
+
+int setCVbyLCConstant()
+{
+    if (prj.cnstImperviousR == -1) {
+        string outstr = "Land cover constant impervious ratio is invalid.\n";
+        writeLog(fpnLog, outstr, 1, 1);
+        return -1;
+    }
+    if (prj.cnstRoughnessC == -1) {
+        string outstr = "Land cover constant roughness coefficient is invalid.\n";
+        writeLog(fpnLog, outstr, 1, 1);
+        return -1;
+    }
+    int nRy = di.nRows;
+    int nCx = di.nCols;
+    omp_set_num_threads(prj.maxDegreeOfParallelism);
+#pragma omp parallel for schedule(guided)
+    for (int ry = 0; ry < nRy; ry++) {
+        for (int cx = 0; cx < nCx; cx++) {
+            int idx = cellidx[cx][ry];
+            if (idx >= 0) {
+                    cvs[idx].lcCellValue = 0; // 이 값은 상수를 의미하게 한다.
+                    cvs[idx].roughnessCoeffOFori = prj.cnstRoughnessC;
+                    cvs[idx].imperviousR = prj.cnstImperviousR;
+                    cvs[idx].lcCode = landCoverCode::CONSTV;
+            }
+        }
+    }
+    return 1;
+}
+
+int readLandCoverFile(string fpnLC, cvAtt* cells, int nColX, int nRowY)
+{
+    if (fpnLC == "" || _access(fpnLC.c_str(), 0) != 0) {
+        string outstr = "Land cover file (" + fpnLC + ") is invalid.\n";
+        writeLog(fpnLog, outstr, -1, 1);
+        return -1;
+    }
+    if (nColX < 1 || nRowY < 1)    {
+        writeLog(fpnLog, "The number of columns or rows have to be greater than 0.\n", -1, 1);
+        return -1;
+    }
+    ascRasterFile lcFile = ascRasterFile(fpnLC);
+    omp_set_num_threads(prj.maxDegreeOfParallelism);
+#pragma omp parallel for schedule(guided)
+    for (int ry = 0; ry < nRowY; ry++) {
+        for (int cx = 0; cx < nColX; cx++) {
+            int idx = cellidx[cx][ry];
+            if (idx >= 0) {
+                int v = lcFile.valuesFromTL[cx][ry];
+                cells[idx].lcCellValue = v; // 이 값은 상수를 의미하게 한다.
+            }
+        }
+    }
+    return 1;
+}
+
+
+int readSoilTextureFileAndSetCVbyVAT()
+{
+    if (prj.fpnST == "" || _access(prj.fpnST.c_str(), 0) != 0) {
+        string outstr = "Soil texture file (" + prj.fpnST + ") is invalid.\n";
+        writeLog(fpnLog, outstr, 1, 1);
+        return -1;
+    }
+    if (prj.fpnSTVat == "" || _access(prj.fpnSTVat.c_str(), 0) != 0) {
+        string outstr = "Soil texture VAT file (" + prj.fpnSTVat + ") is invalid.\n";
+        writeLog(fpnLog, outstr, 1, 1);
+        return -1;
+    }
+    ascRasterFile stFile = ascRasterFile(prj.fpnST);
+    int nRy = di.nRows;
+    int nCx = di.nCols;
+    map<int, soilTextureInfo> stvat;
+    for (int n = 0; n < prj.sts.size(); n++) {
+        int stkey = prj.sts[n].stGridValue;
+        if (stvat.find(stkey) == stvat.end()) {
+            stvat[stkey] = prj.sts[n];
+        }
+    }
+    map<int, soilTextureInfo>::iterator iter;
+    iter = stvat.begin();
+    int vBak = iter->first;
+    //오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
+    for (int ry = 0; ry < nRy; ry++) {
+        for (int cx = 0; cx < nCx; cx++) {
+            int idx = cellidx[cx][ry];
+            int v = stFile.valuesFromTL[cx][ry];
+    //        if (idx >= 0) {
+    //            if (v > 0) {
+    //                if (lcvat.find(v) != lcvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
+    //                    landCoverInfo lc = lcvat[v];
+    //                    vBak = v; // 여기서 최신 셀의 값
+    //                    cvs[idx].lcCellValue = v;
+    //                    cvs[idx].roughnessCoeffOFori = lc.RoughnessCoefficient;
+    //                    cvs[idx].imperviousR = lc.ImperviousRatio;
+    //                    cvs[idx].lcCode = lc.lcCode;
+    //                }
+    //                else {
+    //                    string outstr = "Landcover VAT file [" + prj.fpnLCVat
+    //                        + "] or current project file do not have the land cover value (" + to_string(v) + ").\n"
+    //                        + "Check the land cover file or land cover VAT file. \n";
+    //                    writeLog(fpnLog, outstr, -1, 1);
+    //                    return -1;
+    //                }
+    //            }
+    //            else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
+    //                landCoverInfo lc = lcvat[vBak];
+    //                cvs[idx].lcCellValue = vBak;
+    //                cvs[idx].roughnessCoeffOFori = lc.RoughnessCoefficient;
+    //                cvs[idx].imperviousR = lc.ImperviousRatio;
+    //                cvs[idx].lcCode = lc.lcCode;
+    //            }
+    //        }
+        }
+    }
+    return 1;
+}
+
+int setCVbySTConstant()
+{
+    return 1;
+}
+
+int readSoilTextureFile()
+{
+    return 1;
+}
+
+int readSoilDepthFileAndSetCVbyVAT()
+{
+    return 1;
+}
+
+int setCVbySDConstant()
+{
+    return 1;
+}
+
+int readSolDepthFile()
+{
     return 1;
 }
 

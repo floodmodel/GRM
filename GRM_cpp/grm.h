@@ -242,7 +242,7 @@ typedef struct _flowControlinfo
 typedef struct _soilTextureInfo
 {
 	int stGridValue=-1;
-	string stName = "";
+	soilTextureCode stCode = soilTextureCode::None;
 	double porosity = -1.0;
 	double effectivePorosity = -1.0;
 	double WFSuctionHead = -1.0;
@@ -252,14 +252,14 @@ typedef struct _soilTextureInfo
 typedef struct _soilDepthInfo
 {
 	int sdGridValue = -1;
-	string sdName = "";
+	soilDepthCode sdCode = soilDepthCode::None;
 	double soilDepth = -1.0;
 } soilDepthInfo;
 
 typedef struct _landCoverInfo
 {
 	int lcGridValue = -1;
-	string lcName = "";
+	landCoverCode lcCode = landCoverCode::None;
 	double RoughnessCoefficient = -1;
 	double ImperviousRatio = -1;
 } landCoverInfo;
@@ -388,10 +388,10 @@ typedef struct _cvAtt
 	double bfQ_m3Ps = -1.0;//현재 CV의 기저유출량 [m^3/s]
 	landCoverCode lcCode;
 	int lcCellValue = -1;//토지피복레이어의 값, VAT 참조
-	double ImperviousR = -1.0;//현재 CV 토지피복의 불투수율. 무차원, 0~1.
+	double imperviousR = -1.0;//현재 CV 토지피복의 불투수율. 무차원, 0~1.
 	double Interception_m = -1.0;//현재 CV 토지피복에서의 차단량 [m].
 	double roughnessCoeffOF = -1.0;//현재 CV 토지피복의 모델링 적용 지표면 조도계수
-	double RoughnessCoeffOFori = -1.0;//현재 CV 토지피복의 grm default 지표면 조도계수
+	double roughnessCoeffOFori = -1.0;//현재 CV 토지피복의 grm default 지표면 조도계수
 	flowControlType fcType;//현재 CV에 부여된 Flow control 종류
 	double storageCumulative_m3 = -1.0;//현재 CV에서 flow control 모의시 누적 저류량[m^3]
 	double StorageAddedForDTfromRF_m3 = -1.0;//현재 CV에서 flow control 모의시 dt 시간동안의 강우에 의해서 추가되는 저류량[m^3/dt]
@@ -613,17 +613,28 @@ int openProjectFile(int forceRealTime);
 int openPrjAndSetupModel(int forceRealTime);//1:true, -1:false
 
 int readDomainFileAndSetupCV();
-int readLandCoverFileAndSetCvLcByVAT();
 int readSlopeFdirFacStreamCWiniSSRiniCF();
+
+int readLandCoverFileAndSetCVbyVAT();
+int readSoilTextureFileAndSetCVbyVAT();
+int readSoilDepthFileAndSetCVbyVAT();
+
 //int readFacFile();
 //int readFdirFile();
 //int readSlopeFile();
 int runGRM();
 
 int setBasicCVInfo();
-int setCvLcByConstant();
+int setCVbyLCConstant();
+int setCVbySTConstant();
+int setCVbySDConstant();
 int setRainfallData();
 int setupModelAfterOpenProjectFile();
 int startSingleEventRun();
+
+// extern C
+static int readLandCoverFile(string fpnLC, cvAtt* cells, int nColX, int nRowY);
+int readSoilTextureFile();
+int readSolDepthFile();
 
 

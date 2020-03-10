@@ -1185,10 +1185,53 @@ int openProjectFile(int forceRealTime)
 			if (aline.find(fn.GRMCodeST) != string::npos) {
 				vString = getValueStringFromXmlLine(aline, fn.GRMCodeST);
 				if (vString != "") {
-					ast.stName = vString;
+					if (lower(vString) == lower(ENUM_TO_STR(C))) {
+						ast.stCode = soilTextureCode::C;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(CL))) {
+						ast.stCode = soilTextureCode::CL;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(L))) {
+						ast.stCode = soilTextureCode::L;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(LS))) {
+						ast.stCode = soilTextureCode::LS;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(S))) {
+						ast.stCode = soilTextureCode::S;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(SC))) {
+						ast.stCode = soilTextureCode::SC;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(SCL))) {
+						ast.stCode = soilTextureCode::SCL;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(SiC))) {
+						ast.stCode = soilTextureCode::SiC;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(SiCL))) {
+						ast.stCode = soilTextureCode::SiCL;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(SiL))) {
+						ast.stCode = soilTextureCode::SiL;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(SL))) {
+						ast.stCode = soilTextureCode::SL;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(USER))) {
+						ast.stCode = soilTextureCode::USER;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(CONSTV))) {
+						ast.stCode = soilTextureCode::CONSTV;
+					}
+					else {
+						writeLog(fpnLog, "Soil texture code name of the raster value ["
+							+ to_string(ast.stGridValue) + "] is invalid.\n", 1, 1);
+						return -1;
+					}
 				}
 				else {
-					writeLog(fpnLog, "Soil texture name of the raster value ["
+					writeLog(fpnLog, "Soil texture code name of the raster value ["
 						+ to_string(ast.stGridValue) + "] is invalid.\n", 1, 1);
 					return -1;
 				}
@@ -1261,10 +1304,35 @@ int openProjectFile(int forceRealTime)
 			if (aline.find(fn.GRMCodeSD) != string::npos) {
 				vString = getValueStringFromXmlLine(aline, fn.GRMCodeSD);
 				if (vString != "") {
-					asd.sdName = vString;
+					if (lower(vString) == lower(ENUM_TO_STR(D))) {
+						asd.sdCode = soilDepthCode::D;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(M))) {
+						asd.sdCode = soilDepthCode::M;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(S))) {
+						asd.sdCode = soilDepthCode::S;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(VD))) {
+						asd.sdCode = soilDepthCode::VD;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(VS))) {
+						asd.sdCode = soilDepthCode::VS;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(USER))) {
+						asd.sdCode = soilDepthCode::USER;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(CONSTV))) {
+						asd.sdCode = soilDepthCode::CONSTV;
+					}
+					else {
+						writeLog(fpnLog, "Soil depth code name of the raster value ["
+							+ to_string(asd.sdGridValue) + "] is invalid.\n", 1, 1);
+						return -1;
+					}
 				}
 				else {
-					writeLog(fpnLog, "Soil depth name of the raster value ["
+					writeLog(fpnLog, "Soil depth code name of the raster value ["
 						+ to_string(asd.sdGridValue) + "] is invalid.\n", 1, 1);
 					return -1;
 				}
@@ -1304,10 +1372,41 @@ int openProjectFile(int forceRealTime)
 			if (aline.find(fn.GRMCodeLC) != string::npos) {
 				vString = getValueStringFromXmlLine(aline, fn.GRMCodeLC);
 				if (vString != "") {
-					alc.lcName = vString;
+					if (lower(vString) == lower(ENUM_TO_STR(WATR))) {
+						alc.lcCode = landCoverCode::WATR;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(URBN))) {
+						alc.lcCode = landCoverCode::URBN;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(BARE))) {
+						alc.lcCode = landCoverCode::BARE;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(WTLD))) {
+						alc.lcCode = landCoverCode::WTLD;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(GRSS))) {
+						alc.lcCode = landCoverCode::GRSS;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(FRST))) {
+						alc.lcCode = landCoverCode::FRST;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(AGRL))) {
+						alc.lcCode = landCoverCode::AGRL;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(USER))) {
+						alc.lcCode = landCoverCode::USER;
+					}
+					else if (lower(vString) == lower(ENUM_TO_STR(CONSTV))) {
+						alc.lcCode = landCoverCode::CONSTV;
+					}
+					else {
+						writeLog(fpnLog, "Land cover code name of the raster value ["
+							+ to_string(alc.lcGridValue) + "] is invalid.\n", 1, 1);
+						return -1;
+					}
 				}
 				else {
-					writeLog(fpnLog, "Land cover name of the raster value ["
+					writeLog(fpnLog, "Land cover code name of the raster value ["
 						+ to_string(alc.lcGridValue) + "] is invalid.\n", 1, 1);
 					return -1;
 				}
@@ -1579,7 +1678,7 @@ int isNormalSoilTextureInfo(soilTextureInfo ast)
 {
 	soilTextureInfo sti;//여기서 생성된 초기값과 서로 비교
 	if (ast.stGridValue == sti.stGridValue) { return -1; }
-	if (ast.stName == sti.stName) { return -1; }
+	if (ast.stCode == sti.stCode) { return -1; }
 	if (ast.porosity == sti.porosity) { return -1; }
 	if (ast.effectivePorosity == sti.effectivePorosity) { return -1; }
 	if (ast.WFSuctionHead == sti.WFSuctionHead) { return -1; }
@@ -1591,7 +1690,7 @@ int isNormalSoilDepthInfo(soilDepthInfo asd)
 {
 	soilDepthInfo sdi;//여기서 생성된 초기값과 서로 비교
 	if (asd.sdGridValue == sdi.sdGridValue) { return -1; }
-	if (asd.sdName == sdi.sdName) { return -1; }
+	if (asd.sdCode == sdi.sdCode) { return -1; }
 	if (asd.soilDepth == sdi.soilDepth ) { return -1; }
 	return 1;
 }
@@ -1600,7 +1699,7 @@ int isNormalLandCoverInfo(landCoverInfo alc)
 {
 	landCoverInfo lci;//여기서 생성된 초기값과 서로 비교하는 것으로 수정 필요?
 	if(alc.lcGridValue == lci.lcGridValue) { return -1; }
-	if (alc.lcName == lci.lcName) { return -1; }
+	if (alc.lcCode == lci.lcCode) { return -1; }
 	if (alc.RoughnessCoefficient == lci.RoughnessCoefficient) { return -1; }
 	if (alc.ImperviousRatio == lci.ImperviousRatio) { return -1; }
 	return 1;
