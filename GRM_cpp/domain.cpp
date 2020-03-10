@@ -258,8 +258,8 @@ int readLandCoverFileAndSetCVbyVAT()
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
             int idx = cellidx[cx][ry];
-            int v = lcFile.valuesFromTL[cx][ry];
             if (idx >= 0) {
+                int v = lcFile.valuesFromTL[cx][ry];
                 if (v > 0) {
                     if (lcvat.find(v) != lcvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
                         landCoverInfo lc = lcvat[v];
@@ -377,33 +377,34 @@ int readSoilTextureFileAndSetCVbyVAT()
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
             int idx = cellidx[cx][ry];
-            int v = stFile.valuesFromTL[cx][ry];
-    //        if (idx >= 0) {
-    //            if (v > 0) {
-    //                if (lcvat.find(v) != lcvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
+            if (idx >= 0) {
+                int v = stFile.valuesFromTL[cx][ry];
+                if (v > 0) {
+                    //if (lcvat.find(v) != lcvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
     //                    landCoverInfo lc = lcvat[v];
     //                    vBak = v; // 여기서 최신 셀의 값
     //                    cvs[idx].lcCellValue = v;
     //                    cvs[idx].roughnessCoeffOFori = lc.RoughnessCoefficient;
     //                    cvs[idx].imperviousR = lc.ImperviousRatio;
     //                    cvs[idx].lcCode = lc.lcCode;
-    //                }
-    //                else {
+                    //}
+                    //else {
     //                    string outstr = "Landcover VAT file [" + prj.fpnLCVat
     //                        + "] or current project file do not have the land cover value (" + to_string(v) + ").\n"
     //                        + "Check the land cover file or land cover VAT file. \n";
     //                    writeLog(fpnLog, outstr, -1, 1);
     //                    return -1;
-    //                }
-    //            }
-    //            else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
+                    //}
+                //}
+                }
+                else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
     //                landCoverInfo lc = lcvat[vBak];
     //                cvs[idx].lcCellValue = vBak;
     //                cvs[idx].roughnessCoeffOFori = lc.RoughnessCoefficient;
     //                cvs[idx].imperviousR = lc.ImperviousRatio;
     //                cvs[idx].lcCode = lc.lcCode;
-    //            }
-    //        }
+                }
+            }
         }
     }
     return 1;
