@@ -26,17 +26,11 @@ projectFile prj;
 grmOutFiles ofs;
 
 domaininfo di;
-int** cellidx;
+int** cvans;
 cvAtt* cvs;
 vector<rainfallData> rfs;
+map<int, int*> cvansTofa; //fa별 cvan 목록
 
-//generalEnv ge;
-//domaininfo di;
-//domainCell** dmcells;
-//cvatt* cvs;
-//cvattAdd* cvsAA;
-//vector<rainfallinfo> rf;
-//bcCellinfo* bci;
 
 string msgToScreen="";
 
@@ -174,16 +168,25 @@ int main(int argc, char** args)
 
 void disposeDynamicVars()
 {
-//	if (dmcells != NULL)
-//	{
-//		for (int i = 0; i < di.nCols; ++i)
-//		{
-//			if (dmcells[i] != NULL) { delete[] dmcells[i]; }
-//		}
-//	}
-//	if (cvs != NULL) { delete[] cvs; }
-//	if (cvsAA != NULL) { delete[] cvsAA; }
-//	if (bci != NULL) { delete[] bci; }
+	if (cvans != NULL)
+	{
+		for (int i = 0; i < di.nCols; ++i)
+		{
+			if (cvans[i] != NULL) { delete[] cvans[i]; }
+		}
+	}
+	if (cvs != NULL) { delete[] cvs; }
+
+	if (cvansTofa.size() > 0) {
+		map<int, int*>::iterator iter;
+		map<int, int*> cvansTofa; //fa별 cvan 목록
+		for (iter = cvansTofa.begin(); iter != cvansTofa.end(); ++iter) {
+			if (cvansTofa[iter->first] != NULL) {
+				delete[] cvansTofa[iter->first];
+			}				
+		}
+	}
+	
 }
 
 

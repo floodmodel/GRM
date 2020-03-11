@@ -189,12 +189,13 @@ typedef struct _swsParameters
 
 typedef struct _wsNetwork
 {
-	map <int, vector<int>> wsidsNearbyUp;
-	map <int, vector<int>> wsidsNearbyDown;
+	map <int, vector<int>> wsidsNearbyUp; //상류는 여러개일 수 있다.
+	//map <int, vector<int>> wsidsNearbyDown; 
+	map <int, int> wsidNearbyDown; //하류는 하나다
 	map <int, vector<int>> wsidsAllUp;
 	map <int, vector<int>> wsidsAllDown;
 	vector <int> mdWSIDs;
-	map <int, int> wsOutletCVids;
+	map <int, int> wsOutletCVID;
 	map <int, int> mdWSIDofCurrentWS;
 } wsNetwork;
 
@@ -289,7 +290,12 @@ typedef struct _domaininfo
 	double cellSize = 0.0;
 	int nodata_value = -9999;
 	string headerStringAll = "";
+
+	int cvanMaxFac;//fac가 가장 큰 셀(최하류셀 등)의 1차원 배열 번호
 	int cellCountNotNull = 0;
+	int facMostUpChannelCell = -1;
+	int facMax = -1;
+	int facMin = -1;
 	vector <int> dmids;
 	map <int, vector<int>> cvidsInEachRegion;
 	wsNetwork wsn;
@@ -335,7 +341,7 @@ typedef struct _cvAtt
 	double dxWSum = -1.0;//격자 중심으로부터 상류방향 격자면까지의 거리합
 	vector<int> neighborCVIDsFlowIntoMe;//현재 셀로 흘러 들어오는 인접셀의 ID, 최대 7개
 	int downCellidToFlow = -1; //흘러갈 직하류셀의 ID
-	int effCVCountFlowINTOCViW = -1;//인접상류셀 중 실제 유출이 발생하는 셀들의 개수
+	int effCVCountFlowintoCViW = -1;//인접상류셀 중 실제 유출이 발생하는 셀들의 개수
 	double cvdx_m;//모델링에 적용할 검사체적의 X방향 길이
 	vector<int> downStreamWPCVIDs;//현재 CV 하류에 있는 watchpoint 들의 CVid 들
 	int toBeSimulated = 0; // -1 : false, 1 : true //현재의 CV가 모의할 셀인지 아닌지 표시
@@ -362,7 +368,7 @@ typedef struct _cvAtt
 	double InfiltrationF_mPdt = -1.0;//t 시간에서 계산된 dt 시간동안의 침투량[m/dt]
 	int isAfterSaturated = 0;// -1 : false, 1: true
 	soilTextureCode stCode;
-	int stCellValue = -1;//토성레이어의 값, VAT참조
+	int stCellValue = -1;//토성레이어의 값, VAT참조 // 0 값은 상수를 의미하게 한다.
 	double hydraulicC_K_mPsec = -1.0;//현재 CV 토양의 수리전도도[m/s] 모델링 적용값
 	double HydraulicC_Kori_mPsec = -1.0;//현재 CV 토양의 수리전도도[m/s] GRM default
 	double effPorosity_ThetaE = -1.0;//현재 CV 토양의 유효공극률 모델링 적용값. 무차원. 0~1
@@ -373,7 +379,7 @@ typedef struct _cvAtt
 	double wfsh_PsiOri_m = -1.0;//현재 CV 토양의 습윤전선흡인수두[m] grm default
 	double soilMoistureChange_DTheta = -1.0;//토양습윤변화량
 	soilDepthCode sdCode;
-	int sdCellValue = -1;//토심레이어의 값, VAT 참조 
+	int sdCellValue = -1;//토심레이어의 값, VAT 참조 // 0 값은 상수를 의미하게 한다.
 	double sd_m = -1.0;//현재 CV의 토양심 모델링 적용 값[m].
 	double sdOri_m = -1.0;//현재 CV의 토양심 GRM default 값[m].
 	double sdEffAsWaterDepth_m = -1.0;//현재 CV의 유효토양심 값[m]. 토양심에서 유효공극률을 곱한 값
@@ -387,7 +393,7 @@ typedef struct _cvAtt
 	double sdToBedrock_m = -1.0;//현재 CV 토양의 암반까지의 깊이[m]. 지표면에서 암반까지의 깊이임.
 	double bfQ_m3Ps = -1.0;//현재 CV의 기저유출량 [m^3/s]
 	landCoverCode lcCode;
-	int lcCellValue = -1;//토지피복레이어의 값, VAT 참조
+	int lcCellValue = -1;//토지피복레이어의 값, VAT 참조 // 0 값은 상수를 의미하게 한다.
 	double imperviousR = -1.0;//현재 CV 토지피복의 불투수율. 무차원, 0~1.
 	double Interception_m = -1.0;//현재 CV 토지피복에서의 차단량 [m].
 	double roughnessCoeffOF = -1.0;//현재 CV 토지피복의 모델링 적용 지표면 조도계수
@@ -591,6 +597,7 @@ projectfilePathInfo getProjectFileInfo(string fpn_prj);
 flowDirection8 getFlowDirection(int fdirV, flowDirectionType fdType);
 void grmHelp();
 
+int initControlVolume();
 int initOutputFiles();
 int initWatershedNetwork();
 int isNormalChannelSettingInfo(channelSettingInfo aci);
@@ -614,27 +621,30 @@ int openPrjAndSetupModel(int forceRealTime);//1:true, -1:false
 
 int readDomainFileAndSetupCV();
 int readSlopeFdirFacStreamCWiniSSRiniCF();
-
 int readLandCoverFileAndSetCVbyVAT();
 int readSoilTextureFileAndSetCVbyVAT();
 int readSoilDepthFileAndSetCVbyVAT();
 
-//int readFacFile();
-//int readFdirFile();
-//int readSlopeFile();
 int runGRM();
 
-int setBasicCVInfo();
+int setDomainAndCVBasicinfo();
 int setCVbyLCConstant();
 int setCVbySTConstant();
 int setCVbySDConstant();
+int setFlowNetwork();
 int setRainfallData();
 int setupModelAfterOpenProjectFile();
 int startSingleEventRun();
 
+int updateWatershedNetwork();
+
+
 // extern C
-static int readLandCoverFile(string fpnLC, cvAtt* cells, int nColX, int nRowY);
-int readSoilTextureFile();
-int readSolDepthFile();
+int readLandCoverFile(string fpnLC, 
+	int** cvAryidx, cvAtt* cvs1D, int nColX, int nRowY);
+int readSoilTextureFile(string fpnST, 
+	int** cvAryidx, cvAtt* cvs1D, int nColX, int nRowY);
+int readSoilDepthFile(string fpnSD, 
+	int** cvAryidx, cvAtt* cvs1D, int nColX, int nRowY);
 
 
