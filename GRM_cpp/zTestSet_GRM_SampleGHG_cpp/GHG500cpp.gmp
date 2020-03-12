@@ -27,15 +27,15 @@
     <InitialSoilSaturationRatioFile />
     <InitialChannelFlowFile />
     <RainfallDataType>TextFileASCgrid</RainfallDataType>
-    <RainfallInterval>10</RainfallInterval>
+    <RainfallInterval_min>10</RainfallInterval_min>
     <RainfallDataFile>C:/GRM/SampleGHG/ghg_rf_201609021600.txt</RainfallDataFile>
     <FlowDirectionType>StartsFromE_TauDEM</FlowDirectionType>
     <MaxDegreeOfParallelism>-1</MaxDegreeOfParallelism>
     <SimulStartingTime>2016-09-02 16:00</SimulStartingTime>
-    <SimulationDuration>56</SimulationDuration>
-    <ComputationalTimeStep>5</ComputationalTimeStep>
+    <SimulationDuration_hr>56</SimulationDuration_hr>
+    <ComputationalTimeStep_min>5</ComputationalTimeStep_min>
     <IsFixedTimeStep>false</IsFixedTimeStep>
-    <OutputTimeStep>10</OutputTimeStep>
+    <OutputTimeStep_min>10</OutputTimeStep_min>
     <SimulateInfiltration>true</SimulateInfiltration>
     <SimulateSubsurfaceFlow>true</SimulateSubsurfaceFlow>
     <SimulateBaseFlow>true</SimulateBaseFlow>
@@ -216,7 +216,7 @@
     <FCColX>107</FCColX>
     <FCRowY>42</FCRowY>
     <ControlType>Inlet</ControlType>
-    <FCDT>10</FCDT>
+    <FCDT_min>10</FCDT_min>
     <FlowDataFile>C:/GRM/SampleGHG/ghg_fc_ycd_201609021600.txt</FlowDataFile>
     <IniStorage />
     <MaxStorage />
@@ -312,7 +312,7 @@
   <SoilDepth>
     <SDGridValue>3</SDGridValue>
     <UserDepthClass>보통</UserDepthClass>
-    <GRMCodeSD>MDMS</GRMCodeSD>
+    <GRMCodeSD>M</GRMCodeSD>
     <SDSoilDepth>75</SDSoilDepth>
   </SoilDepth>
   <SoilDepth>

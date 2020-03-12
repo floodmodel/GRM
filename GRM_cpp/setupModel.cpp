@@ -49,7 +49,8 @@ int setupModelAfterOpenProjectFile()
 int setDomainAndCVBasicinfo()
 {
 	readDomainFileAndSetupCV();
-	readSlopeFdirFacStreamCWiniSSRiniCF();
+	readSlopeFdirFacStreamCwCfSsrFileAndSetCV();
+
 
 	if (prj.lcDataType == fileOrConstant::File)	{
 		if (readLandCoverFileAndSetCVbyVAT() == -1) {
@@ -126,7 +127,7 @@ int InitControlVolumeAttribute()
 	}
 
 	// fac cvan 정보를 전역변수 배열로 저장
-	cvansTofa.clear();
+	cvansTofa.clear(); 두번째 요소를 백터로 하면 어떨까?
 	map<int, vector<int>>::iterator iter;
 	for (iter = cvans_fav.begin(); iter != cvans_fav.end(); ++iter) {
 		cvansTofa[iter->first] = new int[iter->second.size()];

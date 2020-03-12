@@ -1531,13 +1531,19 @@ int openProjectFile(int forceRealTime)
 		}
 	}
 
+	if (prj.maxDegreeOfParallelism == -1) {
+		prj.maxDegreeOfParallelism = prj.cpusi.totalNumberOfLogicalProcessors;
+	}
+
 	if (prj.printTimeStep_min * 30 < prj.dtsec) {
 		prj.dtsec = prj.printTimeStep_min * 30;
 	}
-	di.dmids.clear();
-	for (int n = 0; n < prj.swps.size(); n++) {
-		di.dmids.push_back(prj.swps[n].wsid);
-	}
+	//di.dmids.clear();
+	//map<int, domaininfo>::iterator iter;
+	//for (int n = 0; n < prj.swps.size(); n++) {
+	//	di.dmids.push_back(prj.swps[n].wsid);
+	//}
+	
 	if (initOutputFiles() == -1) {
 		writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
 		return -1;

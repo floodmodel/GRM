@@ -206,6 +206,8 @@ int startSingleEventRun()
 int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 {
 	writeLog(fpnLog, "GRM was started.\n", 1, 1);
+	prj.cpusi = getCPUinfo();
+	writeLog(fpnLog, prj.cpusi.infoString, 1, 1);
 	if (openProjectFile(forceRealTime) < 0)	{
 		writeLog(fpnLog, "Open "+ ppi.fpn_prj+" was failed.\n", 1, 1);
 		return -1;
@@ -222,8 +224,6 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 	if (prj.maxDegreeOfParallelism == 1) { isparallel = "false"; }
 	writeLog(fpnLog, "Parallel : "+ isparallel +". Max. degree of parallelism : "
 		+ to_string(prj.maxDegreeOfParallelism) +".\n", 1, 1);
-	prj.cpusi = getCPUinfo();
-	writeLog(fpnLog, prj.cpusi.infoString, 1, 1);
 
 
 

@@ -421,19 +421,19 @@ typedef struct _projectFile
 	string fpniniChannelFlow = "";
 	fileOrConstant lcDataType = fileOrConstant::None;
 	string fpnLC = "";
-	string fpnLCVat = "";
+	string fpnLCVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
 	double cnstRoughnessC = -1.0;
 	double cnstImperviousR = -1.0;
 	fileOrConstant stDataType = fileOrConstant::None;
 	string fpnST = "";
-	string fpnSTVat = "";
+	string fpnSTVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
 	double cnstSoilPorosity = -1.0;
 	double cnstSoilEffPorosity = -1.0;
 	double cnstSoilWFSH = -1.0;
 	double cnstSoilHydraulicK = -1;
 	fileOrConstant sdDataType = fileOrConstant::None;
 	string fpnSD = "";
-	string fpnSDVat = "";
+	string fpnSDVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
 	double cnstSoilDepth = -1.0;
 	rainfallDataType rfDataType = rainfallDataType::NoneRF;
 	string fpnRainfallData = "";
@@ -620,7 +620,7 @@ int openProjectFile(int forceRealTime);
 int openPrjAndSetupModel(int forceRealTime);//1:true, -1:false
 
 int readDomainFileAndSetupCV();
-int readSlopeFdirFacStreamCWiniSSRiniCF();
+int readSlopeFdirFacStreamCwCfSsrFileAndSetCV();
 int readLandCoverFileAndSetCVbyVAT();
 int readSoilTextureFileAndSetCVbyVAT();
 int readSoilDepthFileAndSetCVbyVAT();

@@ -28,19 +28,22 @@ int readDomainFileAndSetupCV()
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
+    //여기서 di 일반사항 초기화, 설정===============
     ascRasterFile dmFile = ascRasterFile(prj.fpnDomain);
     di.nRows = dmFile.header.nRows;
     di.nCols = dmFile.header.nCols;
     di.cellSize = dmFile.header.cellsize;
     di.xll = dmFile.header.xllcorner;
     di.yll = dmFile.header.yllcorner;
-    // dim ary(n) 하면, vb.net에서는 0~n까지 n+1개의 배열요소 생성. c#에서는 0~(n-1) 까지 n 개의 요소 생성
+    di.headerStringAll = dmFile.headerStringAll;
+    di.cvidsInEachRegion.clear();
+    di.dmids.clear();
+    //====================================
     cvans = new int* [di.nCols];
     for (int i = 0; i < di.nCols; ++i) {
         cvans[i] = new int[di.nRows];
     }
     vector<cvAtt> cvsv;
-    di.cvidsInEachRegion.clear();
     int cvid = 0;
     // cvid를 순차적으로 부여하기 위해서, 이 과정은 병렬로 하지 않는다..
     for (int ry = 0; ry < di.nRows; ry++) {
@@ -52,7 +55,7 @@ int readDomainFileAndSetupCV()
                 cvid += 1;
                 cv.cvid = cvid; // CVid를 CV 리스트의 인덱스 번호 +1 의 값으로 입력. 즉. 1 부터 시작
                 cv.flowType = cellFlowType::OverlandFlow; // 우선 overland flow로 설정
-                if (getVectorIndex(di.dmids, wsid) != -1) {
+                if (getVectorIndex(di.dmids, wsid) == -1) {//wsid가 vector에 없으면, 추가한다.
                     di.dmids.push_back(wsid);
                 }
                 //if (di.cvidsInEachRegion.count(wsid) == 0) {
@@ -74,12 +77,13 @@ int readDomainFileAndSetupCV()
             }
         }
     }
+    di.cellCountNotNull = cvid;
     cvs = new cvAtt[cvsv.size()];
     copy(cvsv.begin(), cvsv.end(), cvs);
     return 1;
 }
 
-int readSlopeFdirFacStreamCWiniSSRiniCF()
+int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
 {
     if (prj.fpnSlope == "" || _access(prj.fpnSlope.c_str(), 0) != 0) {
         string outstr = "Slope file (" + prj.fpnSlope + ") is invalid.\n";
@@ -96,37 +100,37 @@ int readSlopeFdirFacStreamCWiniSSRiniCF()
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
-    int isStream = -1;
-    int isCW = -1;
-    int isCF = -1;
-    int isSSR = -1;
+    int streamFileApplied = -1;
+    int cwFileApplied = -1;
+    int cfFileApplied = -1;
+    int ssrFileApplied = -1;
     if (prj.fpnStream == "" || _access(prj.fpnStream.c_str(), 0) != 0) {
         string outstr = "Stream file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
     }
     else {
-        isStream = 1;
+        streamFileApplied = 1;
     }
     if (prj.fpnChannelWidth == "" || _access(prj.fpnChannelWidth.c_str(), 0) != 0) {
         string outstr = "Channel width file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
     }
     else {
-        isCW = 1;
+        cwFileApplied = 1;
     }
     if (prj.fpniniChannelFlow == "" || _access(prj.fpniniChannelFlow.c_str(), 0) != 0) {
         string outstr = "Initial stream flow file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
     }
     else {
-        isCF = 1;
+        cfFileApplied = 1;
     }
     if (prj.fpniniSSR == "" || _access(prj.fpniniSSR.c_str(), 0) != 0) {
         string outstr = "Initial soil saturation ratio file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
     }
     else {
-        isSSR = 1;
+        ssrFileApplied = 1;
     }
     ascRasterFile slopeFile = ascRasterFile(prj.fpnSlope);
     ascRasterFile fdirFile = ascRasterFile(prj.fpnFD);
@@ -135,18 +139,31 @@ int readSlopeFdirFacStreamCWiniSSRiniCF()
     ascRasterFile* cwFile;
     ascRasterFile* cfFile;
     ascRasterFile* ssrFile;
-    if (isStream == 1) {
-        streamFile = &ascRasterFile(prj.fpnStream);
+    if (streamFileApplied == 1) {
+        streamFile = new ascRasterFile(prj.fpnStream);
     }
-    if (isCW == 1) {
-        cwFile = &ascRasterFile(prj.fpnChannelWidth);
+    else{
+        streamFile = NULL;
     }
-    if (isCF == 1) {
-        cfFile = &ascRasterFile(prj.fpniniChannelFlow);
+    if (cwFileApplied == 1) {
+        cwFile = new ascRasterFile(prj.fpnChannelWidth);
     }
-    if (isSSR == 1) {
-        cwFile = &ascRasterFile(prj.fpniniSSR);
+    else {
+        cwFile = NULL;
     }
+    if (cfFileApplied == 1) {
+        cfFile = new ascRasterFile(prj.fpniniChannelFlow);
+    }
+    else {
+        cfFile = NULL;
+    }
+    if (ssrFileApplied == 1) {
+        ssrFile = new ascRasterFile(prj.fpniniSSR);
+    }
+    else {
+        ssrFile = NULL;
+    }
+
     int nRy = di.nRows;
     int nCx = di.nCols;
     omp_set_num_threads(prj.maxDegreeOfParallelism);
@@ -161,17 +178,18 @@ int readSlopeFdirFacStreamCWiniSSRiniCF()
                 }
                 cvs[idx].fdir = getFlowDirection((int)fdirFile.valuesFromTL[cx][ry], prj.fdType);
                 cvs[idx].fac = facFile.valuesFromTL[cx][ry];
-                if (isStream == 1) {
-                    cvs[idx].flowType = cellFlowType::ChannelFlow;
+                if (streamFileApplied == 1) {
                     cvs[idx].stream.chStrOrder = streamFile->valuesFromTL[cx][ry];
                     if (cvs[idx].stream.chStrOrder > 0) {
                         cvs[idx].isStream = 1;
+                        cvs[idx].flowType = cellFlowType::ChannelFlow;
                     }
                     else {
                         cvs[idx].isStream = -1;
+                        cvs[idx].flowType = cellFlowType::ChannelFlow;
                     }
                 }
-                if (isCW == 1) {
+                if (cwFileApplied == 1) {
                     double v = cwFile->valuesFromTL[cx][ry];
                     if (v < 0) {
                         cvs[idx].stream.chBaseWidthByLayer = 0;
@@ -183,7 +201,7 @@ int readSlopeFdirFacStreamCWiniSSRiniCF()
                 else {
                     cvs[idx].stream.chBaseWidthByLayer = -1;
                 }
-                if (isCF == 1) {
+                if (cfFileApplied == 1) {
                     double v = cfFile->valuesFromTL[cx][ry];
                     if (v < 0) {
                         cvs[idx].stream.iniQCH_m3Ps = 0;
@@ -192,7 +210,7 @@ int readSlopeFdirFacStreamCWiniSSRiniCF()
                         cvs[idx].stream.iniQCH_m3Ps = v;
                     }
                 }
-                if (isSSR == 1) {
+                if (ssrFileApplied == 1) {
                     double v = ssrFile->valuesFromTL[cx][ry];
                     if (v < 0) {
                         cvs[idx].iniSR = 0;
@@ -204,8 +222,22 @@ int readSlopeFdirFacStreamCWiniSSRiniCF()
             }
         }
     }
+
+    if (streamFileApplied == 1 && streamFile!=NULL) {
+        delete streamFile;
+    }
+    if (cwFileApplied == 1&& cwFile!=NULL) {
+        delete cwFile;
+    }
+    if (cfFileApplied == 1 && cfFile !=NULL) {
+        delete cfFile;
+    }
+    if (ssrFileApplied == 1 && ssrFile != NULL) {
+        delete ssrFile;
+    }
     return 1;
 }
+
 
 int readLandCoverFileAndSetCVbyVAT()
 {
@@ -214,10 +246,9 @@ int readLandCoverFileAndSetCVbyVAT()
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
-    if (prj.fpnLCVat == "" || _access(prj.fpnLCVat.c_str(), 0) != 0) {
+    if (prj.fpnLCVat == "" || _access(prj.fpnLCVat.c_str(), 0) != 0) {//속성 대응 참고를 위해 이파일 있는지 본다.
         string outstr = "Land cover VAT file (" + prj.fpnLCVat + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
-        return -1;
     }
     ascRasterFile lcFile = ascRasterFile(prj.fpnLC);
     int nRy = di.nRows;
@@ -341,10 +372,9 @@ int readSoilTextureFileAndSetCVbyVAT()
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
-    if (prj.fpnSTVat == "" || _access(prj.fpnSTVat.c_str(), 0) != 0) {
+    if (prj.fpnSTVat == "" || _access(prj.fpnSTVat.c_str(), 0) != 0) {//속성 대응 참고를 위해 이파일 있는지 본다.
         string outstr = "Soil texture VAT file (" + prj.fpnSTVat + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
-        return -1;
     }
     ascRasterFile stFile = ascRasterFile(prj.fpnST);
     int nRy = di.nRows;
@@ -384,15 +414,15 @@ int readSoilTextureFileAndSetCVbyVAT()
                         return -1;
                     }
                 }
-            }
-            else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
-                soilTextureInfo st = stvat[vBak];
-                cvs[idx].stCellValue = vBak;
-                cvs[idx].porosity_EtaOri = st.porosity;
-                cvs[idx].effPorosity_ThetaEori = st.effectivePorosity;
-                cvs[idx].wfsh_PsiOri_m = st.WFSuctionHead / 100.0;  // cm -> m
-                cvs[idx].HydraulicC_Kori_mPsec = st.hydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
-                cvs[idx].stCode = st.stCode;
+                else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
+                    soilTextureInfo st = stvat[vBak];
+                    cvs[idx].stCellValue = vBak;
+                    cvs[idx].porosity_EtaOri = st.porosity;
+                    cvs[idx].effPorosity_ThetaEori = st.effectivePorosity;
+                    cvs[idx].wfsh_PsiOri_m = st.WFSuctionHead / 100.0;  // cm -> m
+                    cvs[idx].HydraulicC_Kori_mPsec = st.hydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
+                    cvs[idx].stCode = st.stCode;
+                }
             }
         }
     }
@@ -484,10 +514,9 @@ int readSoilDepthFileAndSetCVbyVAT()
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
-    if (prj.fpnSDVat == "" || _access(prj.fpnSDVat.c_str(), 0) != 0) {
+    if (prj.fpnSDVat == "" || _access(prj.fpnSDVat.c_str(), 0) != 0) {//속성 대응 참고를 위해 이파일 있는지 본다.
         string outstr = "Soil depth VAT file (" + prj.fpnSDVat + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
-        return -1;
     }
     ascRasterFile sdFile = ascRasterFile(prj.fpnSD);
     int nRy = di.nRows;
@@ -616,11 +645,10 @@ int setFlowNetwork()
     halfDX_Diag_m = di.cellSize * sqrt(2) / 2.0;
     halfDXperp_m = di.cellSize / 2.0;
     for (int ry = 0; ry < di.nRows; ry++) {
-        for (int cx = 0; cx < di.nCols; cx++)
-        {
+        for (int cx = 0; cx < di.nCols; cx++) {
             int cidx = cvans[cx][ry];// current cell index
             if (cidx >= 0) {
-                double dxe;
+                double dxe = -1.0;
                 int tCx; // 하류방향 대상 셀의 x array index
                 int tRy; // 하류방향 대상 셀의 y array index
                 // 좌상단이 0,0 이다... 즉, 북쪽이면, row-1, 동쪽이면 col +1
@@ -741,16 +769,16 @@ int initWatershedNetwork()
     di.wsn.mdWSIDs.clear();
     di.wsn.wsOutletCVID.clear();
     di.wsn.mdWSIDofCurrentWS.clear();
-    for (int n = 0; n < di.dmids.size(); n++) {
-        vector<int> v;
-        int wsid = di.dmids[n];
-        di.wsn.wsidsNearbyUp[wsid] = v;
-        di.wsn.wsidNearbyDown[wsid] = -1;
-        di.wsn.wsidsAllUp[wsid] = v;
-        di.wsn.wsidsAllDown[wsid] = v;
-        di.wsn.wsOutletCVID[wsid] = -1;
-        di.wsn.mdWSIDofCurrentWS[wsid] = -1;
-    }
+    //for (int n = 0; n < di.dmids.size(); n++) {
+    //    vector<int> v;
+    //    int wsid = di.dmids[n];
+    //    di.wsn.wsidsNearbyUp[wsid] = v;
+    //    di.wsn.wsidNearbyDown[wsid] = -1;
+    //    di.wsn.wsidsAllUp[wsid] = v;
+    //    di.wsn.wsidsAllDown[wsid] = v;
+    //    di.wsn.wsOutletCVID[wsid] = -1;
+    //    di.wsn.mdWSIDofCurrentWS[wsid] = -1;
+    //}
     return 1;
 }
 
