@@ -85,11 +85,11 @@ int setDomainAndCVBasicinfo()
 	}
 
 	setFlowNetwork();
-	initControlVolume();
+	InitControlVolumeAttribute();
 	return 1;
 }
 
-void InitControlVolumeAttribute()
+int InitControlVolumeAttribute()
 {
 	di.facMostUpChannelCell = di.cellCountNotNull;//우선 최대값으로 초기화
 	map<int, vector<int>> cvans_fav;
@@ -132,4 +132,5 @@ void InitControlVolumeAttribute()
 		cvansTofa[iter->first] = new int[iter->second.size()];
 		copy(iter->second.begin(), iter->second.end(), cvansTofa[iter->first]);
 	}
+	return 1;
 }

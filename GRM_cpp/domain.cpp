@@ -686,7 +686,7 @@ int setFlowNetwork()
                     if (cvans[tCx][tRy] == -1) {// 하류 셀이 effect 셀 영역 외부에 있으면,
                         int wsidKey = cvs[cidx].wsid; // 이건 현재셀이 포함된 ws의 id
                         //di.wsn.wsOutletCVids 는 readDomainFileAndSetupCV() 에서 초기화 되어 있다.
-                        if (di.wsn.wsOutletCVID.find[wsidKey] == di.wsn.wsOutletCVID.end() ||
+                        if (di.wsn.wsOutletCVID.find(wsidKey) == di.wsn.wsOutletCVID.end() ||
                             cvs[cidx].fac > cvs[di.wsn.wsOutletCVID[wsidKey] - 1].fac) {
                             // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
                             //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
@@ -715,7 +715,7 @@ int setFlowNetwork()
                     cvs[cidx].downCellidToFlow = -1;
                     cvs[cidx].dxDownHalf_m = dxe;
                     int wsidKey = cvs[cidx].wsid; // 이건 현재셀이 포함된 ws의 id
-                    if (di.wsn.wsOutletCVID.find[wsidKey] == di.wsn.wsOutletCVID.end() ||
+                    if (di.wsn.wsOutletCVID.find(wsidKey) == di.wsn.wsOutletCVID.end() ||
                         cvs[cidx].fac > cvs[di.wsn.wsOutletCVID[wsidKey] - 1].fac) {
                         // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
                         //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면

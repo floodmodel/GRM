@@ -597,7 +597,7 @@ projectfilePathInfo getProjectFileInfo(string fpn_prj);
 flowDirection8 getFlowDirection(int fdirV, flowDirectionType fdType);
 void grmHelp();
 
-int initControlVolume();
+int InitControlVolumeAttribute();
 int initOutputFiles();
 int initWatershedNetwork();
 int isNormalChannelSettingInfo(channelSettingInfo aci);
