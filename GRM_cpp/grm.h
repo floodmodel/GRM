@@ -156,6 +156,13 @@ enum class landCoverCode
 	None
 };
 
+
+typedef struct _timeSeries
+{
+	string dataTime; // 분단위
+	double value;
+} timeSeries;
+
 typedef struct _projectFileInfo
 {
 	string fpn_prj = "";
@@ -199,12 +206,33 @@ typedef struct _wsNetwork
 	map <int, int> mdWSIDofCurrentWS;
 } wsNetwork;
 
-typedef struct _watchPointInfo
+typedef struct _wpLocationRC
 {
 	string wpName = "";
 	int wpColX = -1;
 	int wpRowY = -1;
-} watchPointInfo;
+} wpLocationRC;
+
+typedef struct _wpinfo {
+	vector<int> wpCVIDs;
+	map<int, double> rfReadIntensitySumUpWS_mPs;// 현재 wp 상류에 대해 원시자료에서 읽은 강우량.[m/s] 
+	map<int, double> rfUpWSAveForDt_mm; // 현재 wp 상류에 대해 dt(계산시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
+	map<int, double> rfUpWSAveForDtPrintout_mm;// 현재 wp 상류에 대해 출력시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
+	map<int, double> rfUpWSAveTotal_mm;//현재 watch point 상류의 평균강우량의 누적값[mm]
+	map<int, double> rfWPGridForDtPrintout_mm; // Watchpoint 격자에 대한 출력시간 간격 동안의 누적강우량. 원시자료를 이용해서 계산된값.[mm]
+	map<int, double> rfWPGridTotal_mm; // Watchpoint 격자에 대한 누적강우량[mm]
+	map<int, double> mTotalFlow_cms; // Watchpoint 격자에 대한 전체유량[cms]. 누적값.
+	//Todo : 사용되지 않으면, 삭제
+	map<int, double> mTotalDepth_m; // Watchpoint 격자에 총유출고[m] 
+	map<int, double> maxFlow_cms; // Watchpoint 격자에 대한 최대유량[cms]
+	map<int, double> maxDepth_m; // Watchpoint 격자에 대한 최고수심[m]
+	map<int, string> maxFlowTime; // Watchpoint 격자에 대한 최대유량 시간. 첨두시간.
+	map<int, string> maxDepthTime; // Watchpoint 격자에 대한 최고수심 시간. 첨두시간
+	map<int, double> qFromFCData_cms; // 해당 wp에서 Flow control에 의해서 계산되는 유량
+	map<int, double> qprint_cms;
+	map<int, string> FpnWpOut; // Watch point 별 모의결과 출력을 위한 파일 이름 저장
+} wpinfo;
+
 
 typedef struct _channelSettingInfo
 {
@@ -230,7 +258,7 @@ typedef struct _flowControlinfo
 	int fcRowY = -1;
 	flowControlType fcType = flowControlType::None;
 	double fcDT_min = 0.0;
-	string fcDataFile = "";
+	string fpnFCData = "";
 	double iniStorage = -1.0;
 	double maxStorage = -1.0;
 	double maxStorageR = -1.0;
@@ -239,6 +267,13 @@ typedef struct _flowControlinfo
 	double roConstQDuration = -1.0;
 } flowControlinfo;
 
+typedef struct _flowControlCellAndData
+{
+	map <int, double> fcDataAppliedNowT;// <cvid, value>현재의 모델링 시간(t)에 적용된 flow control data 값
+	vector<int> cvidsinlet;
+	vector<int> cvidsFCcell;
+	map<int, vector<timeSeries>> flowData; //<cvid, data>, 분단위
+} flowControlCellAndData;
 
 typedef struct _soilTextureInfo
 {
@@ -459,19 +494,20 @@ typedef struct _projectFile
 	GRMPrintType printOption = GRMPrintType::None;
 	int writeLog = 0;// true : 1, false : -1
 
-	map <int, swsParameters> swps;
-	vector <channelSettingInfo> css;
+	map <int, swsParameters> swps; // <wsid, paras>
+	map <int, channelSettingInfo> css; //<wsid. paras>
 	vector <flowControlinfo> fcs;
-	vector <watchPointInfo> wps;
+	vector <wpLocationRC> wps; // 
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;
 	vector <landCoverInfo> lcs;
 
 	int isDateTimeFormat = 0;// true : 1, false : -1
+	int isinletApplied = 0;// true : 1, false : -1
 
 	CPUsInfo cpusi;
 	int deleteAllFilesExceptDischargeOut = -1;
-
+	
 } projectFile;
 
 typedef struct _projectFileFieldName
@@ -597,13 +633,15 @@ projectfilePathInfo getProjectFileInfo(string fpn_prj);
 flowDirection8 getFlowDirection(int fdirV, flowDirectionType fdType);
 void grmHelp();
 
-int InitControlVolumeAttribute();
+int setupWithFaAndNetwork();
 int initOutputFiles();
 int initWatershedNetwork();
+int initWPinfos();
+int initFCCellinfoAndData();
 int isNormalChannelSettingInfo(channelSettingInfo aci);
 int isNormalFlowControlinfo(flowControlinfo afc);
 int isNormalSwsParameter(swsParameters assp);
-int isNormalWatchPointInfo(watchPointInfo awp);
+int isNormalWatchPointInfo(wpLocationRC awp);
 int isNormalSoilTextureInfo(soilTextureInfo ast);
 int isNormalSoilDepthInfo(soilDepthInfo asd);
 int isNormalLandCoverInfo(landCoverInfo alc);
@@ -611,7 +649,7 @@ int isNormalLandCoverInfo(landCoverInfo alc);
 channelSettingInfo nullChannelSettingInfo();
 flowControlinfo nullFlowControlinfo();
 swsParameters nullSwsParameters();
-watchPointInfo nullWatchPointInfo();
+wpLocationRC nullWatchPointInfo();
 soilTextureInfo nullSoilTextureInfo();
 soilDepthInfo nullSoilDepthInfo();
 landCoverInfo nullLandCoverInfo();

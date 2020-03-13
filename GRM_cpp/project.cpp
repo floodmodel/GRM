@@ -43,7 +43,7 @@ int openProjectFile(int forceRealTime)
 	swsParameters assp;
 	channelSettingInfo acs;
 	flowControlinfo afc;
-	watchPointInfo awp;
+	wpLocationRC awp;
 	soilTextureInfo ast;
 	soilDepthInfo asd;
 	landCoverInfo alc;
@@ -430,9 +430,16 @@ int openProjectFile(int forceRealTime)
 			vString = getValueStringFromXmlLine(aline, fn.SimulStartingTime);
 			if (vString != "") {
 				prj.simulStartingTime = vString;
+				if (isNumeric(vString) == true) {
+					prj.isDateTimeFormat = -1;
+				}
+				else {
+					prj.isDateTimeFormat = 1;
+				}
+
 			}
 			else {
-				prj.isDateTimeFormat = 1;
+				prj.isDateTimeFormat = -1;
 				prj.simulStartingTime = "0";
 			}
 			continue;
@@ -962,7 +969,7 @@ int openProjectFile(int forceRealTime)
 			}
 		}
 		if ( acs.mdWsid>0 && isNormalChannelSettingInfo(acs) == 1) {
-			prj.css.push_back(acs);
+			prj.css[acs.mdWsid]=acs;
 			acs = nullChannelSettingInfo();
 			continue;
 		}
@@ -1041,7 +1048,7 @@ int openProjectFile(int forceRealTime)
 		if (aline.find(fn.FlowDataFile) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.FlowDataFile);
 			if (vString != "" && _access(vString.c_str(), 0) == 0) {
-				afc.fcDataFile = vString;
+				afc.fpnFCData = vString;
 			}
 			else {
 				writeLog(fpnLog, "Flow control data file of [" 
@@ -1580,9 +1587,9 @@ swsParameters nullSwsParameters()
 	return assp;
 }
 
-watchPointInfo nullWatchPointInfo()
+wpLocationRC nullWatchPointInfo()
 {
-	watchPointInfo awp;
+	wpLocationRC awp;
 	return awp;
 }
 
@@ -1645,7 +1652,7 @@ int isNormalFlowControlinfo(flowControlinfo afc)
 		if (afc.roType == afc_ini.roType) { return -1; }
 		if (afc.roConstQ == afc_ini.roConstQ) { return -1; }
 		if (afc.roConstQDuration == afc_ini.roConstQDuration) { return -1; }
-	} else 	if (afc.fcDataFile == afc_ini.fcDataFile){ return -1; }
+	} else 	if (afc.fpnFCData == afc_ini.fpnFCData){ return -1; }
 	return 1;
 }
 
@@ -1671,9 +1678,9 @@ int isNormalSwsParameter(swsParameters assp)
 	return 1;
 }
 
-int isNormalWatchPointInfo(watchPointInfo awp)
+int isNormalWatchPointInfo(wpLocationRC awp)
 {
-	watchPointInfo wpi_ini;//여기서 생성된 초기값과 서로 비교
+	wpLocationRC wpi_ini;//여기서 생성된 초기값과 서로 비교
 	if (awp.wpName == wpi_ini.wpName){ return -1; };
 	if (awp.wpColX == wpi_ini.wpColX) { return -1; };
 	if (awp.wpRowY == wpi_ini.wpRowY) { return -1; };

@@ -17,7 +17,7 @@ extern fs::path fpnLog;
 extern projectFile prj;
 
 extern domaininfo di;
-extern int** cvans;
+extern int** cvais;
 extern cvAtt* cvs;
 
 
@@ -39,9 +39,9 @@ int readDomainFileAndSetupCV()
     di.cvidsInEachRegion.clear();
     di.dmids.clear();
     //====================================
-    cvans = new int* [di.nCols];
+    cvais = new int* [di.nCols];
     for (int i = 0; i < di.nCols; ++i) {
-        cvans[i] = new int[di.nRows];
+        cvais[i] = new int[di.nRows];
     }
     vector<cvAtt> cvsv;
     int cvid = 0;
@@ -58,22 +58,15 @@ int readDomainFileAndSetupCV()
                 if (getVectorIndex(di.dmids, wsid) == -1) {//wsid가 vector에 없으면, 추가한다.
                     di.dmids.push_back(wsid);
                 }
-                //if (di.cvidsInEachRegion.count(wsid) == 0) {
-                //    vector<int> v;
-                //    v.push_back(cvid);
-                //    di.cvidsInEachRegion[wsid] = v;
-                //}
-                //else {
                 di.cvidsInEachRegion[wsid].push_back(cvid);
-                //}
                 cv.toBeSimulated = 1;
                 //cv.x = cx; // cellidx 검증용
                 //cv.y = ry; // cellidx 검증용
                 cvsv.push_back(cv); // 여기는 유효셀만
-                cvans[cx][ry] = cvid - 1;// 모든셀. cvid가 아니고, 1차원 배열의 인덱스를 저장. 
+                cvais[cx][ry] = cvid - 1;// 모든셀. cvid가 아니고, 1차원 배열의 인덱스를 저장. 
             }
             else {
-                cvans[cx][ry] = -1;// 모든셀. cvid가 아니고, 1차원 배열의 인덱스를 저장. 모의영역 외부는 -1.
+                cvais[cx][ry] = -1;// 모든셀. cvid가 아니고, 1차원 배열의 인덱스를 저장. 모의영역 외부는 -1.
             }
         }
     }
@@ -170,7 +163,7 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
 #pragma omp parallel for schedule(guided)
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvans[cx][ry];
+            int idx = cvais[cx][ry];
             if (idx >= 0) {
                 cvs[idx].slope = slopeFile.valuesFromTL[cx][ry];
                 if (cvs[idx].slope <= 0.0) {
@@ -266,7 +259,7 @@ int readLandCoverFileAndSetCVbyVAT()
     //오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvans[cx][ry];
+            int idx = cvais[cx][ry];
             if (idx >= 0) {
                 int v = lcFile.valuesFromTL[cx][ry];
                 if (v > 0) {
@@ -318,7 +311,7 @@ int setCVbyLCConstant()
 #pragma omp parallel for schedule(guided)
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvans[cx][ry];
+            int idx = cvais[cx][ry];
             if (idx >= 0) {
                     cvs[idx].lcCellValue = 0; // 이 값은 상수를 의미하게 한다.
                     cvs[idx].roughnessCoeffOFori = prj.cnstRoughnessC;
@@ -392,7 +385,7 @@ int readSoilTextureFileAndSetCVbyVAT()
     //오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvans[cx][ry];
+            int idx = cvais[cx][ry];
             if (idx >= 0) {
                 int v = stFile.valuesFromTL[cx][ry];
                 if (v > 0) {
@@ -458,7 +451,7 @@ int setCVbySTConstant()
 #pragma omp parallel for schedule(guided)
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvans[cx][ry];
+            int idx = cvais[cx][ry];
             if (idx >= 0) {
                 cvs[idx].stCellValue = 0;// 이 값은 상수를 의미하게 한다.
                 cvs[idx].porosity_EtaOri = prj.cnstSoilPorosity;
@@ -534,7 +527,7 @@ int readSoilDepthFileAndSetCVbyVAT()
     //오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvans[cx][ry];
+            int idx = cvais[cx][ry];
             if (idx >= 0) {
                 int v = sdFile.valuesFromTL[cx][ry];
                 if (v > 0) {
@@ -579,7 +572,7 @@ int setCVbySDConstant()
 #pragma omp parallel for schedule(guided)
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvans[cx][ry];
+            int idx = cvais[cx][ry];
             if (idx >= 0) {
                 cvs[idx].sdCellValue = 0;// 이 값은 상수를 의미하게 한다.
                 cvs[idx].sdOri_m = prj.cnstSoilDepth / 100.0;   // cm ->  m
@@ -632,7 +625,7 @@ int setFlowNetwork()
     //여기서 셀별 네트워크 정보 초기화
     for (int ry = 0; ry < di.nRows; ry++) {
         for (int cx = 0; cx < di.nCols; cx++) {
-            int idx = cvans[cx][ry];// current cell index
+            int idx = cvais[cx][ry];// current cell index
             if (idx >= 0) {
                 cvs[idx].neighborCVIDsFlowIntoMe.clear();
                 cvs[idx].downStreamWPCVIDs.clear();
@@ -646,7 +639,7 @@ int setFlowNetwork()
     halfDXperp_m = di.cellSize / 2.0;
     for (int ry = 0; ry < di.nRows; ry++) {
         for (int cx = 0; cx < di.nCols; cx++) {
-            int cidx = cvans[cx][ry];// current cell index
+            int cidx = cvais[cx][ry];// current cell index
             if (cidx >= 0) {
                 double dxe = -1.0;
                 int tCx; // 하류방향 대상 셀의 x array index
@@ -711,7 +704,7 @@ int setFlowNetwork()
 
                 if (tCx >= 0 && tCx < di.nCols && tRy >= 0 && tRy < di.nRows) {
                     //하류 셀이 전체 raster 영역 내부이면,
-                    if (cvans[tCx][tRy] == -1) {// 하류 셀이 effect 셀 영역 외부에 있으면,
+                    if (cvais[tCx][tRy] == -1) {// 하류 셀이 effect 셀 영역 외부에 있으면,
                         int wsidKey = cvs[cidx].wsid; // 이건 현재셀이 포함된 ws의 id
                         //di.wsn.wsOutletCVids 는 readDomainFileAndSetupCV() 에서 초기화 되어 있다.
                         if (di.wsn.wsOutletCVID.find(wsidKey) == di.wsn.wsOutletCVID.end() ||
@@ -719,17 +712,20 @@ int setFlowNetwork()
                             // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
                             //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
                             di.wsn.wsOutletCVID[wsidKey] = cvs[cidx].cvid;
+                            di.wsn.wsidNearbyDown[cvs[cidx].wsid] = -1;// 하류 셀이 eff 영역 외부이면, tidx가 cvs의 영역을 벗어난다..
                         }
                     }
                     else {
-                        int tidx = cvans[tCx][tRy]; // target cell index
+                        int tidx = cvais[tCx][tRy]; // target cell index
                         cvs[tidx].neighborCVIDsFlowIntoMe.push_back(cvs[cidx].cvid);
                         cvs[tidx].dxWSum = cvs[tidx].dxWSum + dxe;
                         cvs[cidx].downCellidToFlow = cvs[tidx].cvid;// 흘러갈 방향의 cellid를 현재 셀의 정보에 기록
                         if (cvs[cidx].wsid != cvs[tidx].wsid) {
                             if (di.wsn.wsidNearbyDown[cvs[cidx].wsid] != cvs[tidx].wsid) {
-                                di.wsn.wsidNearbyDown[cvs[cidx].wsid] = cvs[tidx].wsid;
+                                di.wsn.wsidNearbyDown[cvs[cidx].wsid] = cvs[tidx].wsid; 
                                 di.wsn.wsOutletCVID[cvs[cidx].wsid] = cvs[cidx].cvid;
+                                int oid = di.wsn.wsOutletCVID[cvs[cidx].wsid];
+                                int a = 1;
                             }
                             vector<int> v = di.wsn.wsidsNearbyUp[cvs[tidx].wsid];
                             if (std::find(v.begin(), v.end(), cvs[cidx].wsid) == v.end()) {
@@ -748,13 +744,14 @@ int setFlowNetwork()
                         // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
                         //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
                         di.wsn.wsOutletCVID[wsidKey] = cvs[cidx].cvid;
+                        di.wsn.wsidNearbyDown[cvs[cidx].wsid] = -1;
                     }
                 }
             }
         }
-        if (updateWatershedNetwork() == -1) {
-            return -1;
-        }
+    }
+    if (updateWatershedNetwork() == -1) {
+        return -1;
     }
     return 1;
 }
@@ -795,8 +792,14 @@ int updateWatershedNetwork()
     }
 
     for (int wsid_cur : di.dmids) {// 상하류 wsid를 추가한다.
-        vector<int> upIDs = di.wsn.wsidsAllUp[wsid_cur];
+        vector<int> upIDs = di.wsn.wsidsAllUp[wsid_cur];//여기서 wsid_cur로 없는 key가 들어가면, key가 추가되고, size 0 이 설정된다.
+        if (upIDs.size() == 0) {
+            di.wsn.wsidsAllUp[wsid_cur].push_back(-1); // 그래서 -1을 강제로 추가한다.
+        }
         vector<int> downIDs = di.wsn.wsidsAllDown[wsid_cur];
+        if (downIDs.size() == 0) {
+            di.wsn.wsidsAllDown[wsid_cur].push_back(-1);
+        }
         for (int uid : upIDs) {
             for (int did : downIDs) {
                 if (getVectorIndex(di.wsn.wsidsAllUp[did], uid) == -1) {
@@ -823,7 +826,6 @@ int updateWatershedNetwork()
             }
         }
     }
-
     return 1;
 }
 

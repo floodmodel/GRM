@@ -26,10 +26,12 @@ projectFile prj;
 grmOutFiles ofs;
 
 domaininfo di;
-int** cvans;
+int** cvais; // 각셀의 cv array idex 
 cvAtt* cvs;
 vector<rainfallData> rfs;
-map<int, int*> cvansTofa; //fa별 cvan 목록
+map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
+wpinfo wpis;
+flowControlCellAndData fccds;
 
 
 string msgToScreen="";
@@ -168,16 +170,16 @@ int main(int argc, char** args)
 
 void disposeDynamicVars()
 {
-	if (cvans != NULL)
+	if (cvais != NULL)
 	{
 		for (int i = 0; i < di.nCols; ++i)
 		{
-			if (cvans[i] != NULL) { delete[] cvans[i]; }
+			if (cvais[i] != NULL) { delete[] cvais[i]; }
 		}
 	}
 	if (cvs != NULL) { delete[] cvs; }
 
-	if (cvansTofa.size() > 0) {
+	if (cvaisToFA.size() > 0) {
 		map<int, int*>::iterator iter;
 		map<int, int*> cvansTofa; //fa별 cvan 목록
 		for (iter = cvansTofa.begin(); iter != cvansTofa.end(); ++iter) {
