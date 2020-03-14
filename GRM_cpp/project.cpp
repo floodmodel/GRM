@@ -130,9 +130,11 @@ int openProjectFile(int forceRealTime)
 			prj.fpnStream = "";
 			if (vString != "" && _access(vString.c_str(), 0) == 0) {
 				prj.fpnStream = vString;
+				prj.streamFileApplied = 1;
 			}
 			else {
 				writeLog(fpnLog, "Stream file [" + vString + "] was not set.\n", 1, -1);
+				prj.streamFileApplied = -1;
 			}
 			continue;
 		}
@@ -142,9 +144,11 @@ int openProjectFile(int forceRealTime)
 			prj.fpnChannelWidth = "";
 			if (vString != "" && _access(vString.c_str(), 0) == 0) {
 				prj.fpnChannelWidth = vString;
+				prj.cwFileApplied = 1;
 			}
 			else {
 				writeLog(fpnLog, "Channel width file [" + vString + "] was not set.\n", 1, -1);
+				prj.cwFileApplied = -1;
 			}
 			continue;
 		}
@@ -154,9 +158,11 @@ int openProjectFile(int forceRealTime)
 			prj.fpniniSSR = "";
 			if (vString != "" && _access(vString.c_str(), 0) == 0) {
 				prj.fpniniSSR = vString;
+				prj.issrFileApplied = 1;
 			}
 			else {
 				writeLog(fpnLog, "Soil saturation ratio file [" + vString + "] was not set.\n", 1, -1);
+				prj.issrFileApplied = -1;
 			}
 			continue;
 		}
@@ -166,9 +172,11 @@ int openProjectFile(int forceRealTime)
 			prj.fpniniChannelFlow = "";
 			if (vString != "" && _access(vString.c_str(), 0) == 0) {
 				prj.fpniniChannelFlow = vString;
+				prj.icfFileApplied = 1;
 			}
 			else {
 				writeLog(fpnLog, "Soil saturation ratio file [" + vString + "] was not set.\n", 1, -1);
+				prj.icfFileApplied = -1;
 			}
 			continue;
 		}
@@ -905,7 +913,7 @@ int openProjectFile(int forceRealTime)
 		if (aline.find(fn.LowerRegionHeight) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.LowerRegionHeight);
 			if (vString != "" && stod(vString) > 0) {
-				acs.lowRegionHeight = stod(vString);
+				acs.lowRHeight = stod(vString);
 			}
 			else if (acs.csType == crossSectionType::CSCompound) {
 				writeLog(fpnLog, "Lower region height parameter in the watershed ["
@@ -916,7 +924,7 @@ int openProjectFile(int forceRealTime)
 		if (aline.find(fn.LowerRegionBaseWidth) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.LowerRegionBaseWidth);
 			if (vString != "" && stod(vString) > 0) {
-				acs.lowRegionBaseWidth = stod(vString);
+				acs.lowRBaseWidth = stod(vString);
 			}
 			else if (acs.csType == crossSectionType::CSCompound) {
 				writeLog(fpnLog, "Lower region base width parameter in the watershed ["
@@ -927,7 +935,7 @@ int openProjectFile(int forceRealTime)
 		if (aline.find(fn.UpperRegionBaseWidth) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.UpperRegionBaseWidth);
 			if (vString != "" && stod(vString) > 0) {
-				acs.upRegionBaseWidth = stod(vString);
+				acs.highRBaseWidth = stod(vString);
 			}
 			else if (acs.csType == crossSectionType::CSCompound) {
 				writeLog(fpnLog, "Upper region base width parameter in the watershed ["
@@ -1626,9 +1634,9 @@ int isNormalChannelSettingInfo(channelSettingInfo aci)
 		if (aci.cwMostDownStream == aci_ini.cwMostDownStream) { return -1; }
 	}
 	if (aci.csType == crossSectionType::CSCompound) {
-		if (aci.lowRegionHeight == aci_ini.lowRegionHeight) { return -1; }
-		if (aci.lowRegionBaseWidth == aci_ini.lowRegionBaseWidth) { return -1; }
-		if (aci.upRegionBaseWidth == aci_ini.upRegionBaseWidth) { return -1; }
+		if (aci.lowRHeight == aci_ini.lowRHeight) { return -1; }
+		if (aci.lowRBaseWidth == aci_ini.lowRBaseWidth) { return -1; }
+		if (aci.highRBaseWidth == aci_ini.highRBaseWidth) { return -1; }
 		if (aci.compoundCSChannelWidthLimit == aci_ini.compoundCSChannelWidthLimit) { return -1; }
 	}
 	if (aci.bankSlopeRight == aci_ini.bankSlopeRight) { return -1; }

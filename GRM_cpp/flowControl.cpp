@@ -43,8 +43,8 @@ int initFCCellinfoAndData()
         }
     }
     if (fccds.cvidsinlet.size() > 0) {
-        prj.isinletApplied = 1;
+        prj.isinletExisted = 1;
     }
-    else { prj.isinletApplied = -1; }
+    else { prj.isinletExisted = -1; }
     return 1;
 }

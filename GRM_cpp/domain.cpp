@@ -93,37 +93,37 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
-    int streamFileApplied = -1;
-    int cwFileApplied = -1;
-    int cfFileApplied = -1;
-    int ssrFileApplied = -1;
     if (prj.fpnStream == "" || _access(prj.fpnStream.c_str(), 0) != 0) {
         string outstr = "Stream file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
+        prj.streamFileApplied = -1;
     }
     else {
-        streamFileApplied = 1;
+        prj.streamFileApplied = 1;
     }
     if (prj.fpnChannelWidth == "" || _access(prj.fpnChannelWidth.c_str(), 0) != 0) {
         string outstr = "Channel width file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
+        prj.cwFileApplied = -1;
     }
     else {
-        cwFileApplied = 1;
+        prj.cwFileApplied = 1;
     }
     if (prj.fpniniChannelFlow == "" || _access(prj.fpniniChannelFlow.c_str(), 0) != 0) {
         string outstr = "Initial stream flow file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
+        prj.icfFileApplied = -1;
     }
     else {
-        cfFileApplied = 1;
+        prj.icfFileApplied = 1;
     }
     if (prj.fpniniSSR == "" || _access(prj.fpniniSSR.c_str(), 0) != 0) {
         string outstr = "Initial soil saturation ratio file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
+        prj.issrFileApplied = -1;
     }
     else {
-        ssrFileApplied = 1;
+        prj.issrFileApplied = 1;
     }
     ascRasterFile slopeFile = ascRasterFile(prj.fpnSlope);
     ascRasterFile fdirFile = ascRasterFile(prj.fpnFD);
@@ -132,25 +132,25 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
     ascRasterFile* cwFile;
     ascRasterFile* cfFile;
     ascRasterFile* ssrFile;
-    if (streamFileApplied == 1) {
+    if (prj.streamFileApplied == 1) {
         streamFile = new ascRasterFile(prj.fpnStream);
     }
     else{
         streamFile = NULL;
     }
-    if (cwFileApplied == 1) {
+    if (prj.cwFileApplied == 1) {
         cwFile = new ascRasterFile(prj.fpnChannelWidth);
     }
     else {
         cwFile = NULL;
     }
-    if (cfFileApplied == 1) {
+    if (prj.icfFileApplied == 1) {
         cfFile = new ascRasterFile(prj.fpniniChannelFlow);
     }
     else {
         cfFile = NULL;
     }
-    if (ssrFileApplied == 1) {
+    if (prj.issrFileApplied == 1) {
         ssrFile = new ascRasterFile(prj.fpniniSSR);
     }
     else {
@@ -171,7 +171,7 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
                 }
                 cvs[idx].fdir = getFlowDirection((int)fdirFile.valuesFromTL[cx][ry], prj.fdType);
                 cvs[idx].fac = facFile.valuesFromTL[cx][ry];
-                if (streamFileApplied == 1) {
+                if (prj.streamFileApplied == 1) {
                     cvs[idx].stream.chStrOrder = streamFile->valuesFromTL[cx][ry];
                     if (cvs[idx].stream.chStrOrder > 0) {
                         cvs[idx].isStream = 1;
@@ -182,7 +182,7 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
                         cvs[idx].flowType = cellFlowType::ChannelFlow;
                     }
                 }
-                if (cwFileApplied == 1) {
+                if (prj.cwFileApplied == 1) {
                     double v = cwFile->valuesFromTL[cx][ry];
                     if (v < 0) {
                         cvs[idx].stream.chBaseWidthByLayer = 0;
@@ -194,7 +194,7 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
                 else {
                     cvs[idx].stream.chBaseWidthByLayer = -1;
                 }
-                if (cfFileApplied == 1) {
+                if (prj.icfFileApplied == 1) {
                     double v = cfFile->valuesFromTL[cx][ry];
                     if (v < 0) {
                         cvs[idx].stream.iniQCH_m3Ps = 0;
@@ -203,7 +203,7 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
                         cvs[idx].stream.iniQCH_m3Ps = v;
                     }
                 }
-                if (ssrFileApplied == 1) {
+                if (prj.issrFileApplied == 1) {
                     double v = ssrFile->valuesFromTL[cx][ry];
                     if (v < 0) {
                         cvs[idx].iniSR = 0;
@@ -216,16 +216,16 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
         }
     }
 
-    if (streamFileApplied == 1 && streamFile!=NULL) {
+    if (prj.streamFileApplied == 1 && streamFile!=NULL) {
         delete streamFile;
     }
-    if (cwFileApplied == 1&& cwFile!=NULL) {
+    if (prj.cwFileApplied == 1&& cwFile!=NULL) {
         delete cwFile;
     }
-    if (cfFileApplied == 1 && cfFile !=NULL) {
+    if (prj.icfFileApplied == 1 && cfFile !=NULL) {
         delete cfFile;
     }
-    if (ssrFileApplied == 1 && ssrFile != NULL) {
+    if (prj.issrFileApplied == 1 && ssrFile != NULL) {
         delete ssrFile;
     }
     return 1;
@@ -267,7 +267,7 @@ int readLandCoverFileAndSetCVbyVAT()
                         landCoverInfo lc = lcvat[v];
                         vBak = v; // 여기서 최신 셀의 값
                         cvs[idx].lcCellValue = v;
-                        cvs[idx].roughnessCoeffOFori = lc.RoughnessCoefficient;
+                        cvs[idx].rcOFori = lc.RoughnessCoefficient;
                         cvs[idx].imperviousR = lc.ImperviousRatio;
                         cvs[idx].lcCode = lc.lcCode;
                     }
@@ -283,7 +283,7 @@ int readLandCoverFileAndSetCVbyVAT()
                 else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
                     landCoverInfo lc = lcvat[vBak];
                     cvs[idx].lcCellValue = vBak;
-                    cvs[idx].roughnessCoeffOFori = lc.RoughnessCoefficient;
+                    cvs[idx].rcOFori = lc.RoughnessCoefficient;
                     cvs[idx].imperviousR = lc.ImperviousRatio;
                     cvs[idx].lcCode = lc.lcCode;
                 }
@@ -314,7 +314,7 @@ int setCVbyLCConstant()
             int idx = cvais[cx][ry];
             if (idx >= 0) {
                     cvs[idx].lcCellValue = 0; // 이 값은 상수를 의미하게 한다.
-                    cvs[idx].roughnessCoeffOFori = prj.cnstRoughnessC;
+                    cvs[idx].rcOFori = prj.cnstRoughnessC;
                     cvs[idx].imperviousR = prj.cnstImperviousR;
                     cvs[idx].lcCode = landCoverCode::CONSTV;
             }
@@ -628,7 +628,7 @@ int setFlowNetwork()
             int idx = cvais[cx][ry];// current cell index
             if (idx >= 0) {
                 cvs[idx].neighborCVIDsFlowIntoMe.clear();
-                cvs[idx].downStreamWPCVIDs.clear();
+                cvs[idx].downWPCVIDs.clear();
             }
         }
     }
