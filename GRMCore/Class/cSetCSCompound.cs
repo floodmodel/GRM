@@ -60,7 +60,7 @@ namespace GRMCore
 
         public override void SetValues(Dataset.GRMProject prjDB, int rowindex)
         {
-            Dataset.GRMProject.ChannelSettingsRow row = 
+            Dataset.GRMProject.ChannelSettingsRow row =
                 (Dataset.GRMProject.ChannelSettingsRow)prjDB.ChannelSettings.Rows[rowindex];
             row.CrossSectionType = CSTypeEnum.CSCompound.ToString();
             row.LowerRegionBaseWidth = System.Convert.ToString(mLowerRegionBaseWidth);

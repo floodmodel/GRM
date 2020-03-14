@@ -1,5 +1,4 @@
 ﻿
-using System.Collections.Generic;
 namespace GRMCore
 {
     public abstract class cSetCrossSection

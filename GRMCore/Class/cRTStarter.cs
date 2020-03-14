@@ -39,12 +39,18 @@ namespace GRMCore
         /// <param name="dtStart">런타임 확인을 위해 사용되는 모델링 시작 시간</param>
         /// <param name="RTStartDateTime">GUI 등으로 부터 모의기간 시작시간 설정된 것을 받을때 사용</param>
         /// <remarks></remarks>
-        public cRTStarter(string fpn_REF, string strGUID, DateTime dtStart, string RTStartDateTime = "")
+        public cRTStarter(string fpn_REF, string strGUID, DateTime dtStart, string RTStartDateTime = "" , string strModel ="")
         {
             mFPN_RTEnv = fpn_REF;
             UpdateRTVariablesUsingEnvFile(mFPN_RTEnv, RTStartDateTime); // 여기서 파일로 설정
             cRealTime_Common.g_performance_log_GUID = strGUID;
             cRealTime_Common.g_dtStart_from_MonitorEXE = dtStart;
+
+            //LENS 앙상블 고려...
+            cRealTime_Common.g_strModel = strModel;
+            cRealTime_Common.g_strTimeTagBase_KST = DateTime.ParseExact(RTStartDateTime, "yyyyMMddHHmm", null).AddHours(-4).ToString("yyyyMMddHH");
+            cRealTime_Common.g_strTimeTagBase_UCT =  DateTime.ParseExact(RTStartDateTime,"yyyyMMddHHmm",null).AddHours( -9-4).ToString("yyyyMMddHH");            
+
         }
 
         private bool UpdateRTVariablesUsingEnvFile(string rtEnvFPN, string RTStartDateTime = "")

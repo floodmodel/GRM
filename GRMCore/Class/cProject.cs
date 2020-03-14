@@ -178,7 +178,7 @@ namespace GRMCore
                 if (mProject.mSimulationType == cGRM.SimulationType.SingleEvent & !rainfall.IsSet)
                 { throw new InvalidOperationException(); }
                 Dataset.GRMProject.ProjectSettingsRow row = (Dataset.GRMProject.ProjectSettingsRow)PrjFile.ProjectSettings.Rows[0];
-                cReadGeoFileAndSetInfo.ReadLayerWSandSetBasicInfo(row.WatershedFile, watershed, ref WSCells, ref CVs, ref dmInfo, ref WSNetwork, ref subWSPar);
+                cReadGeoFileAndSetInfo.ReadLayerWSandSetBasicInfo(row.DomainFile, watershed, ref WSCells, ref CVs, ref dmInfo, ref WSNetwork, ref subWSPar);
                 cReadGeoFileAndSetInfo.ReadLayerSlope(row.SlopeFile, WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel);
                 cReadGeoFileAndSetInfo.ReadLayerFdir(row.FlowDirectionFile, WSCells, watershed.colCount, watershed.rowCount, watershed.mFDType, sThisSimulation.IsParallel);
                 cReadGeoFileAndSetInfo.ReadLayerFAcc(row.FlowAccumFile, WSCells, watershed.colCount, watershed.rowCount, sThisSimulation.IsParallel);
@@ -362,7 +362,7 @@ namespace GRMCore
                     {
                         cell.NeighborCVidFlowIntoMe = new List<int>();
                     }
-                    cCVAttribute targetCell = new cCVAttribute() ;
+                    cCVAttribute targetCell = new cCVAttribute();
                     double deltaXe;
                     int targetC;
                     int targetR;
@@ -370,7 +370,7 @@ namespace GRMCore
                         // 좌상단이 0,0 이다... 즉, 북쪽이면, row-1, 동쪽이면 col +1
                         switch (cell.FDir)
                         {
-                            case  cGRM.GRMFlowDirectionD8.NE:
+                            case cGRM.GRMFlowDirectionD8.NE:
                                 {
                                     targetC = col + 1;
                                     targetR = row - 1;
@@ -378,7 +378,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.E:
+                            case cGRM.GRMFlowDirectionD8.E:
                                 {
                                     targetC = col + 1;
                                     targetR = row;
@@ -386,7 +386,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.SE:
+                            case cGRM.GRMFlowDirectionD8.SE:
                                 {
                                     targetC = col + 1;
                                     targetR = row + 1;
@@ -394,7 +394,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.S:
+                            case cGRM.GRMFlowDirectionD8.S:
                                 {
                                     targetC = col;
                                     targetR = row + 1;
@@ -402,7 +402,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.SW:
+                            case cGRM.GRMFlowDirectionD8.SW:
                                 {
                                     targetC = col - 1;
                                     targetR = row + 1;
@@ -410,7 +410,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.W:
+                            case cGRM.GRMFlowDirectionD8.W:
                                 {
                                     targetC = col - 1;
                                     targetR = row;
@@ -418,7 +418,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.NW:
+                            case cGRM.GRMFlowDirectionD8.NW:
                                 {
                                     targetC = col - 1;
                                     targetR = row - 1;
@@ -426,7 +426,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.N:
+                            case cGRM.GRMFlowDirectionD8.N:
                                 {
                                     targetC = col;
                                     targetR = row - 1;
@@ -434,7 +434,7 @@ namespace GRMCore
                                     break;
                                 }
 
-                            case  cGRM.GRMFlowDirectionD8.NONE:
+                            case cGRM.GRMFlowDirectionD8.NONE:
                                 {
                                     targetC = -1;
                                     targetR = -1;
@@ -454,7 +454,7 @@ namespace GRMCore
                             if (targetCell == null)
                             {
                                 //WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
-                                if (WSNetwork.WSoutletCVID(cell.WSID) < 0 || cell.FAc > CVs[WSNetwork.WSoutletCVID(cell.WSID)-1].FAc)
+                                if (WSNetwork.WSoutletCVID(cell.WSID) < 0 || cell.FAc > CVs[WSNetwork.WSoutletCVID(cell.WSID) - 1].FAc)
                                 {
                                     WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
                                 }
@@ -487,10 +487,10 @@ namespace GRMCore
                             cell.DownCellidToFlow = -1;
                             cell.DeltaXDownHalf_m = deltaXe;
                             //WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
-                            if (WSNetwork.WSoutletCVID(cell.WSID) < 0 || cell.FAc > CVs[WSNetwork.WSoutletCVID(cell.WSID)-1].FAc)
+                            if (WSNetwork.WSoutletCVID(cell.WSID) < 0 || cell.FAc > CVs[WSNetwork.WSoutletCVID(cell.WSID) - 1].FAc)
                             {
                                 WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
-                            }                            
+                            }
                         }
                     }
                 }
@@ -546,13 +546,13 @@ namespace GRMCore
         private bool IsInBound(int colIdx, int rowIdy)
         {
             return colIdx >= 0 && colIdx < watershed.colCount && rowIdy >= 0 && rowIdy < watershed.rowCount;
-        }        
+        }
 
         public void UpdateCVbyUserSettings()
         {
-            for (int intR = 0; intR < watershed.rowCount ; intR++)
+            for (int intR = 0; intR < watershed.rowCount; intR++)
             {
-                for (int intC = 0; intC < watershed.colCount ; intC++)
+                for (int intC = 0; intC < watershed.colCount; intC++)
                 {
                     if (WSCells[intC, intR] == null) { continue; }
                     cCVAttribute cell = WSCells[intC, intR];
@@ -582,7 +582,7 @@ namespace GRMCore
                         cell.mStreamAttr.RoughnessCoeffCH = ups.chRoughness;
                         cell.mStreamAttr.chSideSlopeLeft = channel.CrossSections[mdWSid].LeftBankSlope;
                         cell.mStreamAttr.chSideSlopeRight = channel.CrossSections[mdWSid].RightBankSlope;
-                        cell.mStreamAttr.mChBankCoeff = 1 / channel.CrossSections[mdWSid].LeftBankSlope 
+                        cell.mStreamAttr.mChBankCoeff = 1 / channel.CrossSections[mdWSid].LeftBankSlope
                                                                     + 1 / channel.CrossSections[mdWSid].RightBankSlope;
                         //cell.mStreamAttr.chSideSlopeLeft = channel.mCrossSection.LeftBankSlope;
                         //cell.mStreamAttr.chSideSlopeRight = channel.mCrossSection.RightBankSlope;
@@ -668,8 +668,8 @@ namespace GRMCore
                     else
                     {
                     }
-                    if (cell.FlowType == cGRM.CellFlowType.ChannelFlow 
-                        || cell.LandCoverCode == cSetLandcover.LandCoverCode.WATR 
+                    if (cell.FlowType == cGRM.CellFlowType.ChannelFlow
+                        || cell.LandCoverCode == cSetLandcover.LandCoverCode.WATR
                         || cell.LandCoverCode == cSetLandcover.LandCoverCode.WTLD)
                     {
                         cell.soilSaturationRatio = 1;
@@ -716,7 +716,7 @@ namespace GRMCore
                     row = (Dataset.GRMProject.FlowControlGridRow)rows[0];
                     switch (row.ControlType)
                     {
-                        case  nameof(cFlowControl.FlowControlType.Inlet):
+                        case nameof(cFlowControl.FlowControlType.Inlet):
                             {
                                 CVs[cvid - 1].FCType = cFlowControl.FlowControlType.Inlet;
                                 break;
@@ -1163,7 +1163,7 @@ namespace GRMCore
         {
             if (cProject.Current.SetBasicCVInfo() == false) { return false; }
             if (cProject.Current.watchPoint.UpdatesWatchPointCVIDs(cProject.Current) == false) { return false; }
-            if (channel .CrossSections.Count >0)
+            if (channel.CrossSections.Count > 0)
             {
                 foreach (int wsid in channel.CrossSections.Keys)
                 {
@@ -1196,17 +1196,17 @@ namespace GRMCore
                 return false;
             }
 
-            if (!r.IsWatershedFileNull() && r.WatershedFile != "")
+            if (!r.IsDomainFileNull() && r.DomainFile != "")
             {
-                if (File.Exists(r.WatershedFile) == false)
+                if (File.Exists(r.DomainFile) == false)
                 {
-                    Console.WriteLine(string.Format("Watershed file is not exist!! {0} {1}", "\r\n", r.WatershedFile));
+                    Console.WriteLine(string.Format("Watershed file is not exist!! {0} {1}", "\r\n", r.DomainFile));
                     return false;
                 }
             }
             else
             {
-                Console.WriteLine(string.Format("Watershed file is not exist!! {0} {1}", "\r\n", r.WatershedFile));
+                Console.WriteLine(string.Format("Watershed file is not exist!! {0} {1}", "\r\n", r.DomainFile));
                 return false;
             }
 
@@ -1300,7 +1300,7 @@ namespace GRMCore
 
             if (!r.IsConstantRoughnessCoeffNull() && r.ConstantRoughnessCoeff != "")
             {
-                double v=0;
+                double v = 0;
                 if (double.TryParse(r.ConstantRoughnessCoeff, out v) == false)
                 {
                     Console.WriteLine(string.Format("ConstantRoughnessCoeff is invalid!! {0} {1}", "\r\n", r.ConstantRoughnessCoeff));
@@ -1348,7 +1348,7 @@ namespace GRMCore
 
             if (!r.IsConstantSoilPorosityNull() && r.ConstantSoilPorosity != "")
             {
-                double v=0;
+                double v = 0;
                 if (double.TryParse(r.ConstantSoilPorosity, out v) == false)
                 {
                     Console.WriteLine(string.Format("ConstantSoilPorosity is invalid!! {0} {1}", "\r\n", r.ConstantSoilPorosity));
@@ -1450,7 +1450,7 @@ namespace GRMCore
 
             if (!r.IsRainfallIntervalNull() && r.RainfallInterval != "")
             {
-                int v=0;
+                int v = 0;
                 if (int.TryParse(r.RainfallInterval, out v) == false)
                 {
                     Console.WriteLine(string.Format("Rainfall data interval is invalid!! {0} {1}", "\r\n", r.RainfallInterval));
@@ -1497,7 +1497,7 @@ namespace GRMCore
 
             if (!r.IsMaxDegreeOfParallelismNull() && r.MaxDegreeOfParallelism != "")
             {
-                int v=0;
+                int v = 0;
                 if (int.TryParse(r.MaxDegreeOfParallelism, out v) == false)
                 {
                     Console.WriteLine(string.Format("Grid cell size is invalid!! {0} {1}", "\r\n", r.MaxDegreeOfParallelism));
@@ -1557,126 +1557,7 @@ namespace GRMCore
             {
                 return false;
             }
-
-            if (!r.IsCrossSectionTypeNull() && r.CrossSectionType == "")
-            {
-                Console.WriteLine(string.Format("CrossSectionType is invalid!!"));
-                return false;
-            }
-
-            if (!r.IsSingleCSChannelWidthTypeNull() && r.SingleCSChannelWidthType == "")
-            {
-                Console.WriteLine(string.Format("SingleCSChannelWidthType is invalid!!"));
-                return false;
-            }
-
-            if (!r.IsChannelWidthEQcNull() && r.ChannelWidthEQc != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.ChannelWidthEQc, out v) == false)
-                {
-                    Console.WriteLine(string.Format("ChannelWidthEQc is invalid!! {0} {1}", "\r\n", r.ChannelWidthEQc));
-                    return false;
-                }
-            }
-
-            if (!r.IsChannelWidthEQdNull() && r.ChannelWidthEQd != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.ChannelWidthEQd, out v) == false)
-                {
-                    Console.WriteLine(string.Format("ChannelWidthEQd is invalid!! {0} {1}", "\r\n", r.ChannelWidthEQd));
-                    return false;
-                }
-            }
-
-            if (!r.IsChannelWidthEQeNull() && r.ChannelWidthEQe != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.ChannelWidthEQe, out v) == false)
-                {
-                    Console.WriteLine(string.Format("ChannelWidthEQe is invalid!! {0} {1}", "\r\n", r.ChannelWidthEQe));
-                    return false;
-                }
-            }
-
-            if (!r.IsChannelWidthMostDownStreamNull() && r.ChannelWidthMostDownStream != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.ChannelWidthMostDownStream, out v) == false)
-                {
-                    Console.WriteLine(string.Format("ChannelWidthMostDownStream is invalid!! {0} {1}", "\r\n", r.ChannelWidthMostDownStream));
-                    return false;
-                }
-            }
-
-            if (!r.IsLowerRegionHeightNull() && r.LowerRegionHeight != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.LowerRegionHeight, out v) == false)
-                {
-                    Console.WriteLine(string.Format("LowerRegionHeight is invalid!! {0} {1}", "\r\n", r.LowerRegionHeight));
-                    return false;
-                }
-            }
-
-            if (!r.IsLowerRegionBaseWidthNull() && r.LowerRegionBaseWidth != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.LowerRegionBaseWidth, out v) == false)
-                {
-                    Console.WriteLine(string.Format("LowerRegionBaseWidth is invalid!! {0} {1}", "\r\n", r.LowerRegionBaseWidth));
-                    return false;
-                }
-            }
-
-            if (!r.IsUpperRegionBaseWidthNull() && r.UpperRegionBaseWidth != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.UpperRegionBaseWidth, out v) == false)
-                {
-                    Console.WriteLine(string.Format("UpperRegionBaseWidth is invalid!! {0} {1}", "\r\n", r.UpperRegionBaseWidth));
-                    return false;
-                }
-            }
-
-            // If Not r.IsCompoundCSIniFlowDepthNull() AndAlso r.CompoundCSIniFlowDepth <> "" Then
-            // Dim v As Single
-            // If Single.TryParse(r.CompoundCSIniFlowDepth, v) = False Then
-            // Console.WriteLine(String.Format("CompoundCSIniFlowDepth is invalid!! {0} {1}", vbCrLf, r.CompoundCSIniFlowDepth))
-            // Return False
-            // End If
-            // End If
-
-            if (!r.IsCompoundCSChannelWidthLimitNull() && r.CompoundCSChannelWidthLimit != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.CompoundCSChannelWidthLimit, out v) == false)
-                {
-                    Console.WriteLine(string.Format("CompoundCSChannelWidthLimit is invalid!! {0} {1}", "\r\n", r.CompoundCSChannelWidthLimit));
-                    return false;
-                }
-            }
-
-            if (!r.IsBankSideSlopeRightNull() && r.BankSideSlopeRight != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.BankSideSlopeRight, out v) == false)
-                {
-                    Console.WriteLine(string.Format("BankSideSlopeRight is invalid!! {0} {1}", "\r\n", r.BankSideSlopeRight));
-                    return false;
-                }
-            }
-
-            if (!r.IsBankSideSlopeLeftNull() && r.BankSideSlopeLeft != "")
-            {
-                double v = 0;
-                if (double.TryParse(r.BankSideSlopeLeft, out v) == false)
-                {
-                    Console.WriteLine(string.Format("BankSideSlopeLeft is invalid!! {0} {1}", "\r\n", r.BankSideSlopeLeft));
-                    return false;
-                }
-            }
+                     
 
             if (r.IsSimulateInfiltrationNull() || r.SimulateInfiltration == "")
             {

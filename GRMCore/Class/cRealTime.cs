@@ -39,6 +39,7 @@ namespace GRMCore
         // Public mFPNFcData As String
         public float mPicWidth;
         public float mPicHeight;
+        public bool mbCreateDistributionFiles=false;
         private cRasterOutput mRasterFileOutput;
 
         public bool mbIsDWSS;
@@ -100,6 +101,7 @@ namespace GRMCore
                 mRTProject.mImgFPN_dist_RF = new List<string>();
                 mRTProject.mImgFPN_dist_RFAcc = new List<string>();
                 mRTProject.mImgFPN_dist_SSR = new List<string>();
+                mbCreateDistributionFiles = true;
                 mRasterFileOutput = new cRasterOutput(mRTProject);
             }
             int dateY = 0;
@@ -135,10 +137,27 @@ namespace GRMCore
                 cRealTime_DBMS.Add_Log_toDBMS(mRTProject.ProjectNameOnly, "RealTime Rainall Runoff Start..");
 
             mSimul = new cSimulator();
+            mSimul.MakeRasterOutput += new cSimulator.MakeRasterOutputEventHandler(makeRasterOutput);
             if (CreateNewOutputFilesRT() == false)
                 return;
 
-            string ascFPN = mRfFilePathRT + @"\" + GetYearAndMonthFromyyyyMMddHHmm(mRFStartDateTimeRT) + @"\" + mRFStartDateTimeRT + ".asc";
+            string ascFPN;
+            
+            if (cRealTime_Common.g_strModel == "")
+            {
+                ascFPN = mRfFilePathRT + @"\" + GetYearAndMonthFromyyyyMMddHHmm(mRFStartDateTimeRT) + @"\" + mRFStartDateTimeRT + ".asc";
+            }
+            else
+            {
+                //mRFStartDateTimeRT  시작 시점
+                string strDIFF = (DateTime.ParseExact(mRFStartDateTimeRT, "yyyyMMddHHmm", null)-DateTime.ParseExact(cRealTime_Common.g_strTimeTagBase_KST, "yyyyMMddHH",null)  ).TotalHours.ToString("000");
+                // 가정.. ref의 시작 시간을.. l030_v070_m00_h004.2016100400.gb2_1_clip.asc,,  에 맞추고... h000만 조정...
+                // 즉 KST로 시작 시간 지정은. 201610040900 + 4  즉 2016100413이 됨
+                
+                string strFileLEns = string.Format("l030_v070_{0}_h{1}.{2}.gb2_1_clip.asc",   cRealTime_Common.g_strModel , strDIFF, cRealTime_Common.g_strTimeTagBase_UCT);
+                ascFPN = mRfFilePathRT + @"\" + strFileLEns ;
+            }
+
             if (System.IO.File.Exists(ascFPN) == false)
             {
                 RTStatus("유출해석 시작 시간에서의 강우자료가 없습니다.");
@@ -170,6 +189,13 @@ namespace GRMCore
                 }
             }
             mSimul.SimulateRT(mRTProject, this,mIsPrediction);
+        }
+
+        private void makeRasterOutput(int nowTtoPrint_MIN)
+        {
+            if (mbCreateDistributionFiles == true)
+                mRasterFileOutput.MakeDistributionFiles(nowTtoPrint_MIN,
+                    mRasterFileOutput.ImgWidth, mRasterFileOutput.ImgHeight, true);
         }
 
         // 2018.8.8 이제 부터는 과거  run 도 보존 . 그래서 이 함수는 미사용됨.
@@ -258,8 +284,27 @@ namespace GRMCore
                 case cRainfall.RainfallDataType.TextFileASCgrid:
                     {
                         // Dim strFilenameOnly As String = strDate   '2017년 방식
-                        string strFilenameOnly = "RDR_COMP_ADJ_" + strDate + ".RKDP.bin";    // 2018년 8.8 현재 산출 naming
-                        string ascFPN = mRfFilePathRT + @"\" + GetYearAndMonthFromyyyyMMddHHmm(strDate) + @"\" + strFilenameOnly + ".asc";        // 2018년 8.8 현재 산출 naming
+                        string strFilenameOnly;    // 2018년 8.8 현재 산출 naming
+                        string ascFPN;        // 2018년 8.8 현재 산출 naming
+
+                        if (cRealTime_Common.g_strModel == "")
+                        {
+                            strFilenameOnly = "RDR_COMP_ADJ_" + strDate + ".RKDP.bin";    
+                            ascFPN = mRfFilePathRT + @"\" + GetYearAndMonthFromyyyyMMddHHmm(strDate) + @"\" + strFilenameOnly + ".asc";       
+                        }
+                        else
+                        {
+                            string strDIFF = (DateTime.ParseExact(strDate, "yyyyMMddHHmm", null) - DateTime.ParseExact(cRealTime_Common.g_strTimeTagBase_KST, "yyyyMMddHH", null)).TotalHours.ToString("000");
+                            // 가정.. ref의 시작 시간을.. l030_v070_m00_h004.2016100400.gb2_1_clip.asc,,  에 맞추고... h000만 조정...
+                            // 즉 KST로 시작 시간 지정은. 201610040900 + 4  즉 2016100413이 됨
+
+                            if (strDIFF == "073") { Console.WriteLine("LENS : completed"); Environment.Exit(0); }
+
+                            string strFileLEns = string.Format("l030_v070_{0}_h{1}.{2}.gb2_1_clip", cRealTime_Common.g_strModel, strDIFF, cRealTime_Common.g_strTimeTagBase_UCT);
+                            strFilenameOnly = strFileLEns;
+                            ascFPN = mRfFilePathRT + @"\" +  strFilenameOnly + ".asc";
+                        }
+
                         if (System.IO.File.Exists(ascFPN) == true)
                         {
                             mRFLayerCountToApply_RT += 1;
@@ -268,7 +313,13 @@ namespace GRMCore
                             nr.Order = mRFLayerCountToApply_RT;
                             nr.DataTime = strDate;
                             nr.Rainfall = strFilenameOnly + ".asc"; // 
-                            nr.FilePath = mRfFilePathRT + @"\" + GetYearAndMonthFromyyyyMMddHHmm(strDate);
+
+                            //LENS 인 경우 yyyymm 폴더 구분 하지 않음
+                            if (cRealTime_Common.g_strModel == "")
+                                { nr.FilePath = mRfFilePathRT + @"\" + GetYearAndMonthFromyyyyMMddHHmm(strDate); }
+                            else
+                                { nr.FilePath = mRfFilePathRT ; }
+                                
                             nr.FileName = strFilenameOnly + ".asc";
                             mlstRFdataRT.Add(nr);
                             RTStatus(nr.FileName + " 입력완료(강우)");

@@ -106,8 +106,10 @@ namespace GRMCore
 
                     // 2018년 방식 by 원 2018.8.8 
                     // 2018.8.10 이전에 9999 였고. 이제 test 위해 g_performance_log_GUID 사용중
-                    string strSQL = string.Format("insert into [Q_CAL] (runid,WPName, [Time],[value], RFMean_mm) values({0},'{1}','{2}',{3},{4})", 
-                        cRealTime_DBMS.g_RunID, strWPName, cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut), vToPrint, project.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID]);
+                    //string strSQL = string.Format("insert into [Q_CAL] (runid,WPName, [Time],[value], RFMean_mm) values({0},'{1}','{2}',{3},{4})",
+                    string strSQL = string.Format("insert into [Q_CAL] (runid,WPName, [Time],[value], RFMean_mm, model) values({0},'{1}','{2}',{3},{4},'{5}')",
+
+                        cRealTime_DBMS.g_RunID, strWPName, cComTools.GetTimeStringFromDateTimeFormat(strNowTimeToPrintOut), vToPrint, project.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID], cRealTime_Common.g_strModel);
 
                     SqlCommand oSQLCMD = new SqlCommand(strSQL, oSQLCon);
                     int intRetVal = oSQLCMD.ExecuteNonQuery();
