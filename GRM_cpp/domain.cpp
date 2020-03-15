@@ -206,10 +206,10 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
                 if (prj.issrFileApplied == 1) {
                     double v = ssrFile->valuesFromTL[cx][ry];
                     if (v < 0) {
-                        cvs[idx].iniSR = 0;
+                        cvs[idx].iniSSR = 0;
                     }
                     else {
-                        cvs[idx].iniSR = v;
+                        cvs[idx].iniSSR = v;
                     }
                 }
             }

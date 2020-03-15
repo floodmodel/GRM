@@ -27,6 +27,16 @@ const string CONST_OUTPUT_TABLE_MEAN_RAINFALL_FIELD_NAME = "Rainfall_Mean";
 
 const double CONST_MIN_SLOPE = 0.000001;
 const double CONST_CFL_NUMBER = 1.0;
+const double CONST_EXPONENTIAL_NUMBER_UNSATURATED_K = 6.4;
+const double CONST_WEDGE_FLOW_COEFF = 1; // 최상류 셀의 쐐기 흐름 계산시 p의 수심에 곱해지는 계수
+const double CONST_WET_AND_DRY_CRITERIA = 0.000001F;
+const double CONST_TOLERANCE = 0.001F;
+const double CONST_DEPTH_TO_BEDROCK = 20;// 암반까지의 깊이[m]
+const double CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN = 10;// 산악지역에서의 암반까지의 깊이[m]
+const double CONST_DEPTH_TO_UNCONFINED_GROUNDWATERTABEL = 10;// 비피압대수층까지의 깊이[m]
+const double CONST_UAQ_HEIGHT_FROM_BEDROCK = 5;//   암반에서 비피압대수층 상단까지의 높이[m]
+
+
 
 enum class channelWidthType
 {
@@ -418,7 +428,7 @@ typedef struct _cvAtt
 	double sd_m = -1.0;//현재 CV의 토양심 모델링 적용 값[m].
 	double sdOri_m = -1.0;//현재 CV의 토양심 GRM default 값[m].
 	double sdEffAsWaterDepth_m = -1.0;//현재 CV의 유효토양심 값[m]. 토양심에서 유효공극률을 곱한 값
-	double iniSR = -1.0;//현재 CV 토양의 초기포화도. 무차원. 0~1
+	double iniSSR = -1.0;//현재 CV 토양의 초기포화도. 무차원. 0~1
 	double effSR_Se = -1.0; // //현재 CV 토양의 유효포화도. 무차원. 0~1 무차원 %/100
 	double ssr = -1.0;//토양의 현재 포화도
 	unSaturatedKType ukType;
@@ -475,7 +485,7 @@ typedef struct _projectFile
 	double rfinterval_min = -1.0;
 	flowDirectionType fdType = flowDirectionType::None;
 	int maxDegreeOfParallelism = 0;
-	string simulStartingTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
+	string simStartTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
 	double simDuration_hr = -1.0;
 	double dtsec = -1.0;
 	int IsFixedTimeStep = 0;// true : 1, false : -1
@@ -496,14 +506,14 @@ typedef struct _projectFile
 
 	map <int, swsParameters> swps; // <wsid, paras>
 	map <int, channelSettingInfo> css; //<wsid. paras>
-	vector <flowControlinfo> fcs;
+	map <int, flowControlinfo> fcs; // <cvid, paras>
 	vector <wpLocationRC> wps; // 
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;
 	vector <landCoverInfo> lcs;
 
 	int isDateTimeFormat = 0;// true : 1, false : -1
-	int isinletExisted = 0;// true : 1, false : -1
+	int isinletExist = 0;// true : 1, false : -1
 	int streamFileApplied = 0;
 	int cwFileApplied = 0;
 	int icfFileApplied = 0;
@@ -586,9 +596,9 @@ typedef struct _projectFileFieldName
 	const string ChannelWidthEQd = "ChannelWidthEQd";
 	const string ChannelWidthEQe = "ChannelWidthEQe";
 	const string ChannelWidthMostDownStream = "ChannelWidthMostDownStream";
-	const string LowerRegionHeight = "LowerRegionHeight";
-	const string LowerRegionBaseWidth = "LowerRegionBaseWidth";
-	const string UpperRegionBaseWidth = "UpperRegionBaseWidth";
+	const string LowRegionHeight = "LowRegionHeight";
+	const string LowRegionBaseWidth = "LowRegionBaseWidth";
+	const string HighRegionBaseWidth = "HighRegionBaseWidth";
 	const string CompoundCSChannelWidthLimit = "CompoundCSChannelWidthLimit";
 	const string BankSideSlopeRight = "BankSideSlopeRight";
 	const string BankSideSlopeLeft = "BankSideSlopeLeft";
@@ -633,6 +643,10 @@ typedef struct _rainfallData
 
 void disposeDynamicVars();
 
+
+double getChCSAbyFlowDepth(double lowRBaseWidth, double chBankConst,
+	double crossSectionDepth, bool isCompoundCS, double lowRHeight,
+	double lowRArea, double highRBaseWidth);
 projectfilePathInfo getProjectFileInfo(string fpn_prj);
 flowDirection8 getFlowDirection(int fdirV, flowDirectionType fdType);
 void grmHelp();
@@ -640,7 +654,7 @@ void grmHelp();
 int initOutputFiles();
 int initWatershedNetwork();
 int initWPinfos();
-int initFCCellinfoAndData();
+int updateFCCellinfoAndData();
 int isNormalChannelSettingInfo(channelSettingInfo aci);
 int isNormalFlowControlinfo(flowControlinfo afc);
 int isNormalSwsParameter(swsParameters assp);

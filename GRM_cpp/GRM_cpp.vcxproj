@@ -30,6 +30,7 @@
     <ClCompile Include="project.cpp" />
     <ClCompile Include="rainfall.cpp" />
     <ClCompile Include="realTime.cpp" />
+    <ClCompile Include="solver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\gentle\cpp\bitmap_image.hpp" />

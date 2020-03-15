@@ -16,13 +16,14 @@ extern cvAtt* cvs;
 
 extern map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
 extern wpinfo wpis;
+extern flowControlCellAndData fccds;
 
 int setupModelAfterOpenProjectFile()
 {
 	if (setDomainAndCVBasicinfo() == -1) { return -1; }
 	if (initWPinfos() == -1) { return - 1; }
 	if (prj.simFlowControl == 1) {
-		if (initFCCellinfoAndData() == -1) { return -1; }
+		if (updateFCCellinfoAndData() == -1) { return -1; }
 	}
     if (setupByFAandNetwork() == -1) { return -1; }
     updateCVbyUserSettings();
@@ -250,8 +251,8 @@ int updateCVbyUserSettings()
                     cvs[i].stream.isCompoundCS = true;
                     cvs[i].stream.chHighRBaseWidth_m = cvs[i].fac * cs.highRBaseWidth / (double)facMax_inMDWS;
                     cvs[i].stream.chLowRHeight = cvs[i].fac * cs.lowRHeight / (double)facMax_inMDWS;
-                    cvs[i].stream.chLowRArea_m2 = mFVMSolver.GetChannelCrossSectionAreaUsingChannelFlowDepth
-                    (cvs[i].stream.chBaseWidth, cvs[i].stream.chBankCoeff, cvs[i].stream.chLowRHeight,
+                    cvs[i].stream.chLowRArea_m2 = getChCSAbyFlowDepth(cvs[i].stream.chBaseWidth,
+                        cvs[i].stream.chBankCoeff, cvs[i].stream.chLowRHeight,
                         false, cvs[i].stream.chLowRHeight, cvs[i].stream.chLowRArea_m2, 0);
                 }
             }
@@ -268,132 +269,98 @@ int updateCVbyUserSettings()
             }
         }
 
-        //// 토양
-        //if (watershed.mFPN_initialSoilSaturationRatio == "" || File.Exists(watershed.mFPN_initialSoilSaturationRatio) == false)
-        //{
-        //    cvs[i].InitialSaturation = ups.iniSaturation;
-        //}
-        //else
-        //{
-        //}
-        //if (cvs[i].FlowType == cGRM.CellFlowType.ChannelFlow
-        //    || cvs[i].LandCoverCode == cSetLandcover.LandCoverCode.WATR
-        //    || cvs[i].LandCoverCode == cSetLandcover.LandCoverCode.WTLD)
-        //{
-        //    cvs[i].soilSaturationRatio = 1;
-        //}
-        //else { cvs[i].soilSaturationRatio = cvs[i].InitialSaturation; }
+        // 토양
+        if (prj.issrFileApplied == -1) {
+            cvs[i].iniSSR = ups.iniSaturation;
+        }
+        if (cvs[i].flowType == cellFlowType::ChannelFlow
+            || cvs[i].lcCode == landCoverCode::WATR
+            || cvs[i].lcCode == landCoverCode::WTLD) {
+            cvs[i].ssr = 1.0;
+        }
+        else { cvs[i].ssr = cvs[i].iniSSR; }
 
-        //cvs[i].UKType = cGRM.UnSaturatedKType.Linear;
-        //if (ups.UKType.ToLower() == cGRM.UnSaturatedKType.Linear.ToString().ToLower())
-        //{
-        //    cvs[i].UKType = cGRM.UnSaturatedKType.Linear;
-        //}
-        //if (ups.UKType.ToLower() == cGRM.UnSaturatedKType.Exponential.ToString().ToLower())
-        //{
-        //    cvs[i].UKType = cGRM.UnSaturatedKType.Exponential;
-        //}
-        //if (ups.UKType.ToLower() == cGRM.UnSaturatedKType.Constant.ToString().ToLower())
-        //{
-        //    cvs[i].UKType = cGRM.UnSaturatedKType.Constant;
-        //}
+        cvs[i].ukType = unSaturatedKType::Linear;
+        if (ups.unSatKType == unSaturatedKType::Linear) {
+            cvs[i].ukType = unSaturatedKType::Linear;
+        }
+        if (ups.unSatKType == unSaturatedKType::Exponential) {
+            cvs[i].ukType = unSaturatedKType::Exponential;
+        }
+        if (ups.unSatKType == unSaturatedKType::Constant) {
+            cvs[i].ukType = unSaturatedKType::Constant;
+        }
 
-        //cvs[i].coefUK = ups.coefUK;
-        //cvs[i].porosityEta = cvs[i].PorosityEtaOri * ups.ccPorosity;
-        //if (cvs[i].porosityEta >= 1) { cvs[i].porosityEta = 0.99; }
-        //if (cvs[i].porosityEta <= 0) { cvs[i].porosityEta = 0.01; }
-        //cvs[i].effectivePorosityThetaE = cvs[i].EffectivePorosityThetaEori * ups.ccPorosity;   // 유효 공극율의 보정은 공극률 보정계수를 함께 사용한다.
-        //if (cvs[i].effectivePorosityThetaE >= 1) { cvs[i].effectivePorosityThetaE = 0.99; }
-        //if (cvs[i].effectivePorosityThetaE <= 0) { cvs[i].effectivePorosityThetaE = 0.01; }
-        //cvs[i].wettingFrontSuctionHeadPsi_m = cvs[i].WettingFrontSuctionHeadPsiOri_m * ups.ccWFSuctionHead;
-        //cvs[i].hydraulicConductK_mPsec = cvs[i].HydraulicConductKori_mPsec * ups.ccHydraulicK;
-        //cvs[i].soilDepth_m = cvs[i].SoilDepthOri_m * ups.ccSoilDepth;
-        //cvs[i].SoilDepthEffectiveAsWaterDepth_m = cvs[i].soilDepth_m * cvs[i].effectivePorosityThetaE;
-        //cvs[i].soilWaterContent_m = cvs[i].SoilDepthEffectiveAsWaterDepth_m * cvs[i].soilSaturationRatio;
-        //cvs[i].soilWaterContent_tM1_m = cvs[i].soilWaterContent_m;
-
-        //cvs[i].SoilDepthToBedrock_m = cGRM.CONST_DEPTH_TO_BEDROCK; // 암반까지의 깊이를 20m로 가정, 산악지역에서는 5m
-        //if (cvs[i].LandCoverCode == cSetLandcover.LandCoverCode.FRST)
-        //{
-        //    cvs[i].SoilDepthToBedrock_m = cGRM.CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN;
-        //}
-    //}
+        cvs[i].coefUK = ups.coefUnsaturatedK;
+        cvs[i].porosity_Eta = cvs[i].porosity_EtaOri * ups.ccPorosity;
+        if (cvs[i].porosity_Eta >= 1) { cvs[i].porosity_Eta = 0.99; }
+        if (cvs[i].porosity_Eta <= 0) { cvs[i].porosity_Eta = 0.01; }
+        cvs[i].effPorosity_ThetaE = cvs[i].effPorosity_ThetaEori * ups.ccPorosity;   // 유효 공극율의 보정은 공극률 보정계수를 함께 사용한다.
+        if (cvs[i].effPorosity_ThetaE >= 1) { cvs[i].effPorosity_ThetaE = 0.99; }
+        if (cvs[i].effPorosity_ThetaE <= 0) { cvs[i].effPorosity_ThetaE = 0.01; }
+        cvs[i].wfsh_Psi_m = cvs[i].wfsh_PsiOri_m * ups.ccWFSuctionHead;
+        cvs[i].hydraulicC_K_mPsec = cvs[i].HydraulicC_Kori_mPsec * ups.ccHydraulicK;
+        cvs[i].sd_m = cvs[i].sdOri_m * ups.ccSoilDepth;
+        cvs[i].sdEffAsWaterDepth_m = cvs[i].sd_m * cvs[i].effPorosity_ThetaE;
+        cvs[i].soilWaterContent_m = cvs[i].sdEffAsWaterDepth_m * cvs[i].ssr;
+        cvs[i].soilWaterContent_tm1_m = cvs[i].soilWaterContent_m;
+        cvs[i].sdToBedrock_m = CONST_DEPTH_TO_BEDROCK; // 암반까지의 깊이를 20m로 가정, 산악지역에서는 5m
+        if (cvs[i].lcCode == landCoverCode::FRST) {
+            cvs[i].sdToBedrock_m = CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN;
+        }
     }
 
     // Flow control
     if (prj.simFlowControl == 1 && prj.fcs.size() > 0) {
-        //foreach(int cvid in fcGrid.FCGridCVidList)
-        //{
-        //    DataRow[] rows = fcGrid.mdtFCGridInfo.Select("CVID = " + cvid);
-        //    Dataset.GRMProject.FlowControlGridRow row;
-        //    row = (Dataset.GRMProject.FlowControlGridRow)rows[0];
-        //    switch (row.ControlType)
-        //    {
-        //    case nameof(cFlowControl.FlowControlType.Inlet):
-        //    {
-        //        CVs[cvid - 1].FCType = cFlowControl.FlowControlType.Inlet;
-        //        break;
-        //    }
-
-        //    case nameof(cFlowControl.FlowControlType.ReservoirOperation):
-        //    {
-        //        CVs[cvid - 1].FCType = cFlowControl.FlowControlType.ReservoirOperation;
-        //        break;
-        //    }
-
-        //    case nameof(cFlowControl.FlowControlType.ReservoirOutflow):
-        //    {
-        //        CVs[cvid - 1].FCType = cFlowControl.FlowControlType.ReservoirOutflow;
-        //        break;
-        //    }
-
-        //    case nameof(cFlowControl.FlowControlType.SinkFlow):
-        //    {
-        //        CVs[cvid - 1].FCType = cFlowControl.FlowControlType.SinkFlow;
-        //        break;
-        //    }
-
-        //    case nameof(cFlowControl.FlowControlType.SourceFlow):
-        //    {
-        //        CVs[cvid - 1].FCType = cFlowControl.FlowControlType.SourceFlow;
-        //        break;
-        //    }
-
-        //    default:
-        //    {
-        //        throw new InvalidDataException();
-        //    }
-        //    }
-        //}
+        for (int cvid : fccds.cvidsFCcell) {
+            flowControlinfo afc = prj.fcs[cvid];
+            switch (afc.fcType) {
+            case flowControlType::Inlet: {
+                cvs[cvid - 1].fcType = flowControlType::Inlet;
+                break;
+            }
+            case flowControlType::ReservoirOperation: {
+                cvs[cvid - 1].fcType = flowControlType::ReservoirOperation;
+                break;
+            }
+            case flowControlType::ReservoirOutflow: {
+                cvs[cvid - 1].fcType = flowControlType::ReservoirOutflow;
+                break;
+            }
+            case flowControlType::SinkFlow: {
+                cvs[cvid - 1].fcType = flowControlType::SinkFlow;
+                break;
+            }
+            case flowControlType::SourceFlow: {
+                cvs[cvid - 1].fcType = flowControlType::SourceFlow;
+                break;
+            }
+            }
+        }
     }
 
-    // Inlet
-    if (prj.simFlowControl == 1 && prj.isinletExisted == 1) {
-        //bool bEnded = false;
-        //List<int> lBaseCVid;
-        //List<int> lNewCVid;
-        //lBaseCVid = new List<int>();
-        //lBaseCVid = fcGrid.InletCVidList;
-        //while (!bEnded == true)
-        //{
-        //    lNewCVid = new List<int>();
-        //    bEnded = true;
-        //    foreach(int cvidBase in lBaseCVid)
-        //    {
-        //        int cvan = cvidBase - 1;
-        //        if (CVs[cvan].NeighborCVidFlowIntoMe.Count > 0)
-        //        {
-        //            bEnded = false;
-        //            foreach(int cvidFlowIntoMe in CVs[cvan].NeighborCVidFlowIntoMe)
-        //            {
-        //                CVs[cvidFlowIntoMe - 1].toBeSimulated = -1;
-        //                lNewCVid.Add(cvidFlowIntoMe);
-        //            }
-        //        }
-        //    }
-        //    lBaseCVid = new List<int>();
-        //    lBaseCVid = lNewCVid;
-        //}
+    // Inlet 셀 상류는  toBeSimulated =-1 으로 설정
+    if (prj.simFlowControl == 1 && prj.isinletExist == 1) {
+        bool bEnded = false;
+        vector<int> baseCVids;
+        vector<int> newCVids;
+        baseCVids = fccds.cvidsinlet;
+        while (!bEnded == true) {
+            bEnded = true;
+            for (int cvidBase : baseCVids) {
+                int cvan = cvidBase - 1;
+                if (cvs[cvan].neighborCVIDsFlowIntoMe.size() > 0) {
+                    bEnded = false;
+                    for (int cvidFtoM : cvs[cvan].neighborCVIDsFlowIntoMe) {
+                        cvs[cvidFtoM - 1].toBeSimulated = -1;
+                        newCVids.push_back(cvidFtoM);
+                    }
+                }
+            }
+            baseCVids.clear();
+            baseCVids = newCVids;
+        }
     }
     return 1;
 }
+

@@ -437,7 +437,7 @@ int openProjectFile(int forceRealTime)
 		if (aline.find(fn.SimulStartingTime) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.SimulStartingTime);
 			if (vString != "") {
-				prj.simulStartingTime = vString;
+				prj.simStartTime = vString;
 				if (isNumeric(vString) == true) {
 					prj.isDateTimeFormat = -1;
 				}
@@ -448,7 +448,7 @@ int openProjectFile(int forceRealTime)
 			}
 			else {
 				prj.isDateTimeFormat = -1;
-				prj.simulStartingTime = "0";
+				prj.simStartTime = "0";
 			}
 			continue;
 		}
@@ -910,8 +910,8 @@ int openProjectFile(int forceRealTime)
 				return -1;
 			}
 		}
-		if (aline.find(fn.LowerRegionHeight) != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fn.LowerRegionHeight);
+		if (aline.find(fn.LowRegionHeight) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.LowRegionHeight);
 			if (vString != "" && stod(vString) > 0) {
 				acs.lowRHeight = stod(vString);
 			}
@@ -921,8 +921,8 @@ int openProjectFile(int forceRealTime)
 				return -1;
 			}
 		}
-		if (aline.find(fn.LowerRegionBaseWidth) != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fn.LowerRegionBaseWidth);
+		if (aline.find(fn.LowRegionBaseWidth) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.LowRegionBaseWidth);
 			if (vString != "" && stod(vString) > 0) {
 				acs.lowRBaseWidth = stod(vString);
 			}
@@ -932,8 +932,8 @@ int openProjectFile(int forceRealTime)
 				return -1;
 			}
 		}
-		if (aline.find(fn.UpperRegionBaseWidth) != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fn.UpperRegionBaseWidth);
+		if (aline.find(fn.HighRegionBaseWidth) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.HighRegionBaseWidth);
 			if (vString != "" && stod(vString) > 0) {
 				acs.highRBaseWidth = stod(vString);
 			}
@@ -1153,7 +1153,8 @@ int openProjectFile(int forceRealTime)
 			}
 		}
 		if (afc.fcName !="" && isNormalFlowControlinfo(afc) == 1) {
-			prj.fcs.push_back(afc);
+			int n = prj.fcs.size();
+			prj.fcs[n]=afc;// 우선 임의 숫자를 키로 사용. updateFCCellinfoAndData()에서 cvid를 키로 업데이트
 			afc = nullFlowControlinfo();
 			continue;
 		}
