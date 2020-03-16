@@ -27,6 +27,16 @@ const string CONST_OUTPUT_TABLE_MEAN_RAINFALL_FIELD_NAME = "Rainfall_Mean";
 
 const double CONST_MIN_SLOPE = 0.000001;
 const double CONST_CFL_NUMBER = 1.0;
+const double CONST_EXPONENTIAL_NUMBER_UNSATURATED_K = 6.4;
+const double CONST_WEDGE_FLOW_COEFF = 1; // 최상류 셀의 쐐기 흐름 계산시 p의 수심에 곱해지는 계수
+const double CONST_WET_AND_DRY_CRITERIA = 0.000001F;
+const double CONST_TOLERANCE = 0.001F;
+const double CONST_DEPTH_TO_BEDROCK = 20;// 암반까지의 깊이[m]
+const double CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN = 10;// 산악지역에서의 암반까지의 깊이[m]
+const double CONST_DEPTH_TO_UNCONFINED_GROUNDWATERTABEL = 10;// 비피압대수층까지의 깊이[m]
+const double CONST_UAQ_HEIGHT_FROM_BEDROCK = 5;//   암반에서 비피압대수층 상단까지의 높이[m]
+
+
 
 enum class channelWidthType
 {
@@ -243,9 +253,9 @@ typedef struct _channelSettingInfo
 	double cwEQd = -1.0;
 	double cwEQe = -1.0;
 	double cwMostDownStream = -1.0;
-	double lowRegionHeight = -1.0;
-	double lowRegionBaseWidth = -1.0;
-	double upRegionBaseWidth = -1.0;
+	double lowRHeight = -1.0;
+	double lowRBaseWidth = -1.0;
+	double highRBaseWidth = -1.0;
 	double compoundCSChannelWidthLimit = -1.0;
 	double bankSlopeRight = -1.0;
 	double bankSlopeLeft = -1.0;
@@ -326,7 +336,7 @@ typedef struct _domaininfo
 	int nodata_value = -9999;
 	string headerStringAll = "";
 
-	int cvanMaxFac;//fac가 가장 큰 셀(최하류셀 등)의 1차원 배열 번호
+	int cvidxMaxFac;//fac가 가장 큰 셀(최하류셀 등)의 1차원 배열 번호
 	int cellCountNotNull = 0;
 	int facMostUpChannelCell = -1;
 	int facMax = -1;
@@ -343,7 +353,7 @@ typedef struct _cvStreamAtt
 	int chStrOrder = -1;//하천차수
 	double chBaseWidth = -1.0;//하천의 바닥폭[m]
 	double chBaseWidthByLayer = -1.0;//하폭레이어에서 받은 하폭[m]
-	double roughnessCoeffCH = -1.0;//현재의 channel CV의 하도조도계수
+	double chRC = -1.0;//현재의 channel CV의 하도조도계수
 	double csaCh_ori = -1.0;//t 시간에서의 유출해석 전의 현재 channel CV의 초기 흐름단면적[m^2]
 	double csaCh = -1.0;//t 시간에서의 유출해석 결과 현재 channel CV의 흐름단면적[m^2]
 	double csaChAddedByOFinCHnOFcell = -1.0;//하도+지표면 흐름셀에서, 지표면 흐름에 의한 하도흐름 단면적 증가분
@@ -355,10 +365,10 @@ typedef struct _cvStreamAtt
 	double chSideSlopeLeft = -1.0;//현재의 channel CV의 좌측 제방 경사
 	double chSideSlopeRight = -1.0;//현재의 channel CV의 우측 제방 경사
 	double chBankCoeff = -1.0;// 현재의 channel CV의 제방 계수. 계산 편의를 위해서 channel CV 별로 미리계산한 값
-	double chUpperRBaseWidth_m = -1.0;//현재 channel CV의 복단면 고수부지 바닥 폭[m]
-	double chLowerRHeight = -1.0;// 현재 channel CV의 복단면 고수부지의 수심[m]
+	double chHighRBaseWidth_m = -1.0;//현재 channel CV의 복단면 고수부지 바닥 폭[m]
+	double chLowRHeight = -1.0;// 현재 channel CV의 복단면 고수부지의 수심[m]
 	int isCompoundCS = -1;//현재의 channel CV가 복단면인지(true), 단단면(false)인지를 나타내는 변수
-	double chLowerRArea_m2 = -1.0;// 복단면 channel 중 하층부의 면적[m^2]
+	double chLowRArea_m2 = -1.0;// 복단면 channel 중 하층부의 면적[m^2]
 } cvStreamAtt;
 
 typedef struct _cvAtt
@@ -378,7 +388,7 @@ typedef struct _cvAtt
 	int downCellidToFlow = -1; //흘러갈 직하류셀의 ID
 	int effCVCountFlowintoCViW = -1;//인접상류셀 중 실제 유출이 발생하는 셀들의 개수
 	double cvdx_m;//모델링에 적용할 검사체적의 X방향 길이
-	vector<int> downStreamWPCVIDs;//현재 CV 하류에 있는 watchpoint 들의 CVid 들
+	vector<int> downWPCVIDs;//현재 CV 하류에 있는 watchpoint 들의 CVid 들
 	int toBeSimulated = 0; // -1 : false, 1 : true //현재의 CV가 모의할 셀인지 아닌지 표시
 	cvStreamAtt stream;//현재 CV가 Stream 일경우 즉, eCellType이 Channel 혹은 OverlandAndChannel일 경우 부여되는 속성
 	int isStream = 0; // 현재 cv가 stream 인지 아닌지
@@ -418,7 +428,7 @@ typedef struct _cvAtt
 	double sd_m = -1.0;//현재 CV의 토양심 모델링 적용 값[m].
 	double sdOri_m = -1.0;//현재 CV의 토양심 GRM default 값[m].
 	double sdEffAsWaterDepth_m = -1.0;//현재 CV의 유효토양심 값[m]. 토양심에서 유효공극률을 곱한 값
-	double iniSR = -1.0;//현재 CV 토양의 초기포화도. 무차원. 0~1
+	double iniSSR = -1.0;//현재 CV 토양의 초기포화도. 무차원. 0~1
 	double effSR_Se = -1.0; // //현재 CV 토양의 유효포화도. 무차원. 0~1 무차원 %/100
 	double ssr = -1.0;//토양의 현재 포화도
 	unSaturatedKType ukType;
@@ -431,8 +441,8 @@ typedef struct _cvAtt
 	int lcCellValue = -1;//토지피복레이어의 값, VAT 참조 // 0 값은 상수를 의미하게 한다.
 	double imperviousR = -1.0;//현재 CV 토지피복의 불투수율. 무차원, 0~1.
 	double Interception_m = -1.0;//현재 CV 토지피복에서의 차단량 [m].
-	double roughnessCoeffOF = -1.0;//현재 CV 토지피복의 모델링 적용 지표면 조도계수
-	double roughnessCoeffOFori = -1.0;//현재 CV 토지피복의 grm default 지표면 조도계수
+	double rcOF = -1.0;//현재 CV 토지피복의 모델링 적용 지표면 조도계수
+	double rcOFori = -1.0;//현재 CV 토지피복의 grm default 지표면 조도계수
 	flowControlType fcType;//현재 CV에 부여된 Flow control 종류
 	double storageCumulative_m3 = -1.0;//현재 CV에서 flow control 모의시 누적 저류량[m^3]
 	double StorageAddedForDTfromRF_m3 = -1.0;//현재 CV에서 flow control 모의시 dt 시간동안의 강우에 의해서 추가되는 저류량[m^3/dt]
@@ -475,7 +485,7 @@ typedef struct _projectFile
 	double rfinterval_min = -1.0;
 	flowDirectionType fdType = flowDirectionType::None;
 	int maxDegreeOfParallelism = 0;
-	string simulStartingTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
+	string simStartTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
 	double simDuration_hr = -1.0;
 	double dtsec = -1.0;
 	int IsFixedTimeStep = 0;// true : 1, false : -1
@@ -496,14 +506,18 @@ typedef struct _projectFile
 
 	map <int, swsParameters> swps; // <wsid, paras>
 	map <int, channelSettingInfo> css; //<wsid. paras>
-	vector <flowControlinfo> fcs;
+	map <int, flowControlinfo> fcs; // <cvid, paras>
 	vector <wpLocationRC> wps; // 
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;
 	vector <landCoverInfo> lcs;
 
 	int isDateTimeFormat = 0;// true : 1, false : -1
-	int isinletApplied = 0;// true : 1, false : -1
+	int isinletExist = 0;// true : 1, false : -1
+	int streamFileApplied = 0;
+	int cwFileApplied = 0;
+	int icfFileApplied = 0;
+	int issrFileApplied = 0;
 
 	CPUsInfo cpusi;
 	int deleteAllFilesExceptDischargeOut = -1;
@@ -582,9 +596,9 @@ typedef struct _projectFileFieldName
 	const string ChannelWidthEQd = "ChannelWidthEQd";
 	const string ChannelWidthEQe = "ChannelWidthEQe";
 	const string ChannelWidthMostDownStream = "ChannelWidthMostDownStream";
-	const string LowerRegionHeight = "LowerRegionHeight";
-	const string LowerRegionBaseWidth = "LowerRegionBaseWidth";
-	const string UpperRegionBaseWidth = "UpperRegionBaseWidth";
+	const string LowRegionHeight = "LowRegionHeight";
+	const string LowRegionBaseWidth = "LowRegionBaseWidth";
+	const string HighRegionBaseWidth = "HighRegionBaseWidth";
 	const string CompoundCSChannelWidthLimit = "CompoundCSChannelWidthLimit";
 	const string BankSideSlopeRight = "BankSideSlopeRight";
 	const string BankSideSlopeLeft = "BankSideSlopeLeft";
@@ -629,15 +643,18 @@ typedef struct _rainfallData
 
 void disposeDynamicVars();
 
+
+double getChCSAbyFlowDepth(double lowRBaseWidth, double chBankConst,
+	double crossSectionDepth, bool isCompoundCS, double lowRHeight,
+	double lowRArea, double highRBaseWidth);
 projectfilePathInfo getProjectFileInfo(string fpn_prj);
 flowDirection8 getFlowDirection(int fdirV, flowDirectionType fdType);
 void grmHelp();
 
-int setupWithFaAndNetwork();
 int initOutputFiles();
 int initWatershedNetwork();
 int initWPinfos();
-int initFCCellinfoAndData();
+int updateFCCellinfoAndData();
 int isNormalChannelSettingInfo(channelSettingInfo aci);
 int isNormalFlowControlinfo(flowControlinfo afc);
 int isNormalSwsParameter(swsParameters assp);
@@ -671,10 +688,12 @@ int setCVbySTConstant();
 int setCVbySDConstant();
 int setFlowNetwork();
 int setRainfallData();
+int setupByFAandNetwork();
 int setupModelAfterOpenProjectFile();
 int startSingleEventRun();
 
 int updateWatershedNetwork();
+int updateCVbyUserSettings();
 
 
 // extern C

@@ -8,21 +8,29 @@ extern projectFile prj;
 extern int** cvais;
 extern flowControlCellAndData fccds;
 
-int initFCCellinfoAndData()
+int updateFCCellinfoAndData()
 {
     fccds.cvidsinlet.clear();
     fccds.cvidsFCcell.clear();
     fccds.fcDataAppliedNowT.clear();
     fccds.flowData.clear();
-    for (flowControlinfo afc : prj.fcs) {
+    map<int, flowControlinfo>::iterator iter;
+    map<int, flowControlinfo> fcs_tmp;
+    fcs_tmp = prj.fcs;
+    prj.fcs.clear();
+    for (iter = fcs_tmp.begin(); iter != fcs_tmp.end(); ++iter) {
+    //for (flowControlinfo afc : prj.fcs) {
+        flowControlinfo afc = iter->second;
         int aid = cvais[afc.fcColX][afc.fcRowY];
+        prj.fcs[aid + 1] = afc;
         fccds.cvidsFCcell.push_back(aid);
         if (afc.fcType == flowControlType::Inlet) {
             fccds.cvidsinlet.push_back(aid);
         }
         if (afc.fcType != flowControlType::ReservoirOperation) {
             if (afc.fpnFCData != "" && _access(afc.fpnFCData.c_str(), 0) != 0) {
-                string outstr = "Flow control data file (" + afc.fpnFCData + ") is invalid.\n";
+                string outstr = "Flow control data file (" + afc.fpnFCData 
+                    + ") is invalid.\n";
                 writeLog(fpnLog, outstr, 1, 1);
                 return -1;
             }
@@ -31,8 +39,9 @@ int initFCCellinfoAndData()
             for (int i = 0; i < vs.size(); ++i) {
                 timeSeries ts;
                 if (prj.isDateTimeFormat == 1) {
-                    ts.dataTime = timeElaspedToDateTimeFormat(prj.simulStartingTime, 
-                        afc.fcDT_min * 60 * i,-1,dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+                    ts.dataTime = timeElaspedToDateTimeFormat(prj.simStartTime,
+                        afc.fcDT_min * 60 * i, -1
+                        , dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
                 }
                 else {
                     ts.dataTime = afc.fcDT_min * i;
@@ -43,8 +52,13 @@ int initFCCellinfoAndData()
         }
     }
     if (fccds.cvidsinlet.size() > 0) {
-        prj.isinletApplied = 1;
+        prj.isinletExist = 1;
     }
-    else { prj.isinletApplied = -1; }
+    else { prj.isinletExist = -1; }
     return 1;
 }
+
+//flowControlinfo getFCinfoByCVID()
+//{
+//
+//}
