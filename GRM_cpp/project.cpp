@@ -1558,12 +1558,7 @@ int openProjectFile(int forceRealTime)
 	//map<int, domaininfo>::iterator iter;
 	//for (int n = 0; n < prj.swps.size(); n++) {
 	//	di.dmids.push_back(prj.swps[n].wsid);
-	//}
-	
-	if (initOutputFiles() == -1) {
-		writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
-		return -1;
-	}
+	//}	
 
 	if (prj.simType == simulationType::SingleEvent) {
 		if (setRainfallData() == -1) { return -1; }
@@ -1571,9 +1566,7 @@ int openProjectFile(int forceRealTime)
 
 	if (forceRealTime == 1) {
 		prj.simType = simulationType::RealTime;
-		changeOutputFileDisk(cRealTime::CONST_Output_File_Target_DISK);
 	}
-
 	return 1;
 }
 

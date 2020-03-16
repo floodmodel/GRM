@@ -33,6 +33,8 @@ map<int, vector<int>> cvaisToFA; //faº° cv array idex ¸ñ·Ï
 wpinfo wpis;
 flowControlCellAndData fccds;
 
+thisProcess tp;
+
 
 string msgToScreen="";
 
@@ -218,15 +220,14 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 	if (setupModelAfterOpenProjectFile() == -1) {
 		return -1;
 	}
-
-
-
-
 	string isparallel = "true";
 	if (prj.maxDegreeOfParallelism == 1) { isparallel = "false"; }
 	writeLog(fpnLog, "Parallel : "+ isparallel +". Max. degree of parallelism : "
 		+ to_string(prj.maxDegreeOfParallelism) +".\n", 1, 1);
-
+	if (initOutputFiles() == -1) {
+		writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
+		return -1;
+	}
 
 
 

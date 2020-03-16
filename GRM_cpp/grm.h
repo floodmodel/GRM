@@ -225,6 +225,7 @@ typedef struct _wpLocationRC
 
 typedef struct _wpinfo {
 	vector<int> wpCVIDs;
+	//<cvid, value>
 	map<int, double> rfReadIntensitySumUpWS_mPs;// 현재 wp 상류에 대해 원시자료에서 읽은 강우량.[m/s] 
 	map<int, double> rfUpWSAveForDt_mm; // 현재 wp 상류에 대해 dt(계산시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
 	map<int, double> rfUpWSAveForDtPrintout_mm;// 현재 wp 상류에 대해 출력시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
@@ -312,17 +313,18 @@ typedef struct _landCoverInfo
 
 typedef struct _grmOutFiles
 {
-	string ofnpDischarge;
+	string ofpnDischarge;
 	string ofpnDepth;
 	string ofpnRFGrid;
 	string ofpnRFMean;
 	//string OFNPFCData;
-	string OFNPFCStorage;
+	string ofpnFCStorage;
 	//string OFNPSwsPars;
-	string OFPSSRDistribution;
-	string OFPRFDistribution;
-	string OFPRFAccDistribution;
-	string OFPFlowDistribution;
+	string ofpSSRDistribution;
+	string ofpRFDistribution;
+	string ofpRFAccDistribution;
+	string ofpFlowDistribution;
+	map<int, string> ofpnWPs;
 } grmOutFiles;
 
 typedef struct _domaininfo
@@ -632,6 +634,15 @@ typedef struct _projectFileFieldName
 	const string ImperviousRatio = "LCImperviousR";
 } projectFileFieldName;
 
+
+typedef struct _thisProcess
+{
+	int setupGRMisNormal = 0;
+	int grmStarted = 0;
+	int rfDataCountInThisEvent = -1;
+
+} thisProcess;
+
 typedef struct _rainfallData
 {
 	int Order=-1;
@@ -642,7 +653,7 @@ typedef struct _rainfallData
 } rainfallData;
 
 void disposeDynamicVars();
-
+int deleteAllOutputFiles();
 
 double getChCSAbyFlowDepth(double lowRBaseWidth, double chBankConst,
 	double crossSectionDepth, bool isCompoundCS, double lowRHeight,
@@ -662,6 +673,8 @@ int isNormalWatchPointInfo(wpLocationRC awp);
 int isNormalSoilTextureInfo(soilTextureInfo ast);
 int isNormalSoilDepthInfo(soilDepthInfo asd);
 int isNormalLandCoverInfo(landCoverInfo alc);
+
+int makeNewOutputFiles();
 
 channelSettingInfo nullChannelSettingInfo();
 flowControlinfo nullFlowControlinfo();

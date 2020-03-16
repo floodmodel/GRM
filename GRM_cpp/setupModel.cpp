@@ -17,6 +17,9 @@ extern cvAtt* cvs;
 extern map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
 extern wpinfo wpis;
 extern flowControlCellAndData fccds;
+extern vector<rainfallData> rfs;
+
+extern thisProcess tp;
 
 int setupModelAfterOpenProjectFile()
 {
@@ -26,17 +29,15 @@ int setupModelAfterOpenProjectFile()
 		if (updateFCCellinfoAndData() == -1) { return -1; }
 	}
     if (setupByFAandNetwork() == -1) { return -1; }
-    updateCVbyUserSettings();
-
-
-
-	//cProject.Current.UpdateDownstreamWPforAllCVs(); //이건 setupByFAandNetwork으로 구현 이동
-	//cGRM.Start();
-	//sThisSimulation.mGRMSetupIsNormal = true;
-	//if (mProject.mSimulationType != cGRM.SimulationType.RealTime)
-	//{
-	//	sThisSimulation.mRFDataCountInThisEvent = mProject.rainfall.mlstRainfallData.Count;
-	//}
+    if (updateCVbyUserSettings() == -1) { return -1; }
+    if (prj.simType != simulationType::RealTime) {
+        tp.rfDataCountInThisEvent = rfs.size();
+    }
+    else {
+        tp.rfDataCountInThisEvent = -1;
+    }
+    tp.setupGRMisNormal = 1;
+    tp.grmStarted = 1;
 	return 1;
 }
 
