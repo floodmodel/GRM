@@ -182,11 +182,7 @@ int setupByFAandNetwork()
 
 int updateCVbyUserSettings()
 {
-    //for (int ir = 0; ir < di.nRows; ++ir)    {
-//    for (int ic = 0; ic < di.nCols; ++ic)        {
     for (int i = 0; i < di.cellCountNotNull; ++i) {
-        //if (WSCells[ic, ir] == null) { continue; }
-        //cCVAttribute cell = WSCells[ic, ir];
         int wid = cvs[i].wsid;
         swsParameters ups = prj.swps[wid];
         if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
