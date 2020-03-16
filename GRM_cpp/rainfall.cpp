@@ -54,7 +54,7 @@ int setRainfallData()
             break;
         }
         if (prj.isDateTimeFormat == 1) {
-            r.DataTime = timeElaspedToDateTimeFormat(prj.simulStartingTime, 
+            r.DataTime = timeElaspedToDateTimeFormat(prj.simStartTime, 
                 prj.rfinterval_min * 60 * n, false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
         }
         else {
