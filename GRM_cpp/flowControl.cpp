@@ -21,11 +21,12 @@ int updateFCCellinfoAndData()
     for (iter = fcs_tmp.begin(); iter != fcs_tmp.end(); ++iter) {
     //for (flowControlinfo afc : prj.fcs) {
         flowControlinfo afc = iter->second;
-        int aid = cvais[afc.fcColX][afc.fcRowY];
-        prj.fcs[aid + 1] = afc;
-        fccds.cvidsFCcell.push_back(aid);
+        int aidx = cvais[afc.fcColX][afc.fcRowY];
+        int acvid = aidx + 1;
+        prj.fcs[acvid] = afc;
+        fccds.cvidsFCcell.push_back(acvid);
         if (afc.fcType == flowControlType::Inlet) {
-            fccds.cvidsinlet.push_back(aid);
+            fccds.cvidsinlet.push_back(acvid);
         }
         if (afc.fcType != flowControlType::ReservoirOperation) {
             if (afc.fpnFCData != "" && _access(afc.fpnFCData.c_str(), 0) != 0) {
@@ -47,7 +48,7 @@ int updateFCCellinfoAndData()
                     ts.dataTime = afc.fcDT_min * i;
                 }
                 ts.value = vs[i];
-                fccds.flowData[aid].push_back(ts);
+                fccds.flowData[acvid].push_back(ts);
             }
         }
     }

@@ -60,8 +60,8 @@ int readDomainFileAndSetupCV()
                 }
                 di.cvidsInEachRegion[wsid].push_back(cvid);
                 cv.toBeSimulated = 1;
-                //cv.x = cx; // cellidx 검증용
-                //cv.y = ry; // cellidx 검증용
+                cv.idx_xr = cx; // cellidx 검증용
+                cv.idx_yc = ry; // cellidx 검증용
                 cvsv.push_back(cv); // 여기는 유효셀만
                 cvais[cx][ry] = cvid - 1;// 모든셀. cvid가 아니고, 1차원 배열의 인덱스를 저장. 
             }

@@ -30,6 +30,7 @@
     <ClCompile Include="project.cpp" />
     <ClCompile Include="rainfall.cpp" />
     <ClCompile Include="realTime.cpp" />
+    <ClCompile Include="simulator.cpp" />
     <ClCompile Include="solver.cpp" />
   </ItemGroup>
   <ItemGroup>

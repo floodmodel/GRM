@@ -1,6 +1,7 @@
 #include <filesystem>
 #include <string>
 #include <io.h>
+#include <omp.h>
 
 #include "gentle.h"
 #include "grm.h"
@@ -13,7 +14,12 @@ extern projectFile prj;
 extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
 
+extern cvAtt* cvs;
+extern domaininfo di;
+extern thisProcess tp;
+
 extern vector<rainfallData> rfs;
+extern wpinfo wpis;
 
 int setRainfallData()
 {
@@ -63,4 +69,77 @@ int setRainfallData()
         rfs.push_back(r);
     }
     return 1;
+}
+
+int setCVRF(int order)
+{
+    double dtrf_sec = prj.rfinterval_min * 60.0;
+    double dtrf_min = prj.rfinterval_min;
+    string fpnRF = rfs[order - 1].FilePath + "\\" + rfs[order - 1].FileName;
+    double cellSize = di.cellSize;
+    tp.rfintensitySumForAllCellsInCurrentRFData_mPs = 0;
+    for (int wpCVID : wpis.wpCVIDs) {
+        wpis.rfReadIntensitySumUpWS_mPs[wpCVID] = 0;
+    }
+    if (prj.rfDataType == rainfallDataType::TextFileASCgrid
+        || prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
+        ascRasterFile rfasc = ascRasterFile(fpnRF);
+        omp_set_num_threads(prj.maxDegreeOfParallelism);
+#pragma omp parallel for schedule(guided)
+        for (int i = 0; i < di.cellCountNotNull; ++i) {
+            if (cvs[i].toBeSimulated == -1) {
+                continue;
+            }
+            double inRF_mm = rfasc.valuesFromTL[cvs[i].idx_xr][cvs[i].idx_yc];
+            if (prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
+                inRF_mm = inRF_mm / (60.0 / dtrf_min);
+            }
+            cvs[i].rfintensityRead_mPsec = rfintensity_mPsec(inRF_mm, dtrf_sec);
+        }
+        for (int i = 0; i < di.cellCountNotNull; ++i) {
+            if (project.WSCells[cx, ry] != null && project.WSCells[cx, ry].toBeSimulated == 1)
+            {
+                sThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs =
+                    sThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs + project.WSCells[cx, ry].RFReadintensity_mPsec;
+                int cvan = project.WSCells[cx, ry].CVID - 1;
+                CalRFSumForWPUpWSWithRFGrid(cvan);
+            }
+        }
+    }
+    else if (eRainfallDataType == cRainfall.RainfallDataType.TextFileMAP)
+    {
+        double inRF_mm;
+        double v = 0;
+        if (double.TryParse(rfRow.Rainfall, out v) == true)
+        {
+            inRF_mm = v;
+        }
+        else
+        {
+            System.Console.WriteLine("Error: Can not read rainfall value!!" + "\r\n" + "Order = " + nowRFOrder.ToString());
+            return;
+        }
+        if (inRF_mm < 0) { inRF_mm = 0; }
+        for (int cvan = 0; cvan < project.CVCount; cvan++)
+        {
+            CalRFintensity_mPsec(project.CVs[cvan], inRF_mm, rfIntervalSEC);
+            sThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs = sThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs + project.CVs[cvan].RFReadintensity_mPsec;
+        }
+        CalRFSumForWPUpWSWithMAPValue(project.CVs[0].RFReadintensity_mPsec); // 모든 격자의 강우량 동일하므로.. 하나를 던저준다.
+    }
+    else
+    {
+        System.Console.WriteLine("Error: Rainfall data type is invalid.");
+    }
+}
+
+
+double rfintensity_mPsec(double rf_mm, double dtrf_sec)
+{
+    if (rf_mm <= 0) {
+       return 0;
+    }
+    else {
+        return rf_mm / 1000.0 / dtrf_sec;
+    }
 }

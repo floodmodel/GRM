@@ -25,7 +25,7 @@ int initOutputFiles()
 	ofs.ofpnRFGrid = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_RFGRID;
 	ofs.ofpnRFMean = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_RFMEAN;
 	//ofs.OFNPSwsPars = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_SWSPARSTEXTFILE;
-	//ofs.OFNPFCData = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FCAPP;
+	ofs.ofpnFCData = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FCDATA_APP;
 	ofs.ofpnFCStorage = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FCSTORAGE;
 	ofs.ofpSSRDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj+"_" + CONST_DIST_SSR_DIRECTORY_TAG;
 	ofs.ofpRFDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "_" + CONST_DIST_RF_DIRECTORY_TAG;
@@ -41,12 +41,12 @@ int initOutputFiles()
         changeOutputFileDisk(cRealTime::CONST_Output_File_Target_DISK);
     }
     if (deleteAllOutputFiles() == -1) {
-        string outstr = "An error was occured while deleting previous ouput files or folders. Try starting the Model again. \n";
+        string outstr = "An error was occured while deleting previous ouput files or folders. Try starting the model again. \n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (makeNewOutputFiles() == -1) {
-        string outstr = "An error was occured while making ouput files or folders. Try starting the Model again. \n";
+        string outstr = "An error was occured while making ouput files or folders. Try starting the model again. \n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
@@ -61,7 +61,7 @@ int changeOutputFileDisk(char targetDisk)
 	ofs.ofpnRFGrid = IO_Path_ChangeDrive(targetDisk, ofs.ofpnRFGrid);
 	ofs.ofpnRFMean = IO_Path_ChangeDrive(targetDisk, ofs.ofpnRFMean);
 	//ofs.OFNPSwsPars = IO_Path_ChangeDrive(targetDisk, ofs.OFNPSwsPars);
-	//ofs.OFNPFCData = IO_Path_ChangeDrive(targetDisk, ofs.OFNPFCData);
+	ofs.ofpnFCData = IO_Path_ChangeDrive(targetDisk, ofs.ofpnFCData);
 	ofs.ofpnFCStorage = IO_Path_ChangeDrive(targetDisk, ofs.ofpnFCStorage);
 	ofs.ofpSSRDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpSSRDistribution);
 	ofs.ofpRFDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpRFDistribution);
@@ -120,7 +120,6 @@ int deleteAllOutputFiles()
     if (beenRun == true) {
         cout << "Deleting previous output files... ";
         if (confirmDeleteFiles(fpns) == -1) {
-            tp.setupGRMisNormal = -1;
             cout << "failed. \n";
             return -1;
         }
@@ -131,7 +130,7 @@ int deleteAllOutputFiles()
         }
         cout << "completed. \n";
     }
-    return -1;
+    return 1;
 }
 
 
@@ -165,7 +164,7 @@ int makeNewOutputFiles()
         string ver = "GRM v."+to_string(grmVersion.major)+"."
             +to_string(grmVersion.minor)
             +"."+to_string(grmVersion.build)
-            +" Built in "+ grmVersion.LastWrittenTime+".\n";
+            +" Built in "+ grmVersion.LastWrittenTime;
         comHeader = "Project name : " + ppi.fn_prj + " " + nowT 
             + "  by " + ver+ "\n";
         string time_wpNames;
@@ -211,7 +210,6 @@ int makeNewOutputFiles()
             string fcTypeApp;
             string sourceDT;
             string resOperation;
-
             string roiniStorage;
             string romaxStorage;
             string romaxStorageRatio;
@@ -219,102 +217,153 @@ int makeNewOutputFiles()
             string roType;
             string roConstQ;
             string roConstQduration;
-
-            fcNameApp = "FCName:";
-            fcTypeApp = "FCType:";
-            sourceDT = "SourceDT[min]:";
-            resOperation = "ResOperation:";
-            roiniStorage = "StorageINI:";
-            romaxStorage = "StorageMax:";
-            romaxStorageRatio = "StorageMaxRatio:";
-            romaxStorageApp = "StorageMaxApp:";
-            roType = "ROType:";
-            roConstQ = "ConstQ:";
-            roConstQduration = "ConstQDuration:";
+            fcNameApp = "FC name :" ;
+            fcTypeApp = "FC type :";
+            sourceDT = "Source data interval[min] :";
+            resOperation = "Res. operation :";
+            roiniStorage = "Ini. storage :";
+            romaxStorage = "Max. storage :";
+            romaxStorageRatio = "Max. storage ratio :";
+            romaxStorageApp = "Max. storageMax applied :";
+            roType = "RO type :";
+            roConstQ = "Constant Q :";
+            roConstQduration = "Constant Q duration :";
             string fcDataField = CONST_OUTPUT_TABLE_TIME_FIELD_NAME;
-                for(int n :fccds.cvidsFCcell){
-                    flowControlinfo afc = prj.fcs[n];
-                    fcDataField = fcDataField + "\t" + afc.fcName;
-                    fcNameApp = fcNameApp + "\t" + afc.fcName;
-                    fcTypeApp = fcTypeApp + "\t" + ENUM_TO_STR(afc.fcType);
-                if (row.ControlType == cFlowControl.FlowControlType.ReservoirOutflow.ToString() | row.ControlType == cFlowControl.FlowControlType.Inlet.ToString())
-                {
-                    strSourceDT = strSourceDT + "\t" + System.Convert.ToString(row.DT);
-                    strResOperation = strResOperation + "\t" + "FALSE";
-                }
-                else
-                {
-                    strSourceDT = strSourceDT + "\t" + "NONE";
-                    if (!row.IsMaxStorageNull() && !row.IsMaxStorageRNull())
-                    {
-                        double v;
-                        if (double.TryParse(row.MaxStorage, out v) == false || double.TryParse(row.MaxStorageR, out v) == false ||
-                            System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR) <= 0)
+            for (int n : fccds.cvidsFCcell) {
+                flowControlinfo afc = prj.fcs[n];
+                fcDataField = fcDataField + "\t" + afc.fcName;
+                fcNameApp = fcNameApp + "\t" + afc.fcName;
+                fcTypeApp = fcTypeApp + "\t" + ENUM_TO_STR(afc.fcType);
 
-                        {
-                            strResOperation = strResOperation + "\t" + "FALSE";
-                        }
-                        else
-                        {
-                            strResOperation = strResOperation + "\t" + "TRUE";
-                        }
+                if (afc.fcType == flowControlType::ReservoirOutflow
+                    || afc.fcType == flowControlType::Inlet
+                    || afc.fcType== flowControlType::SinkFlow
+                    || afc.fcType== flowControlType::SourceFlow) {
+                    sourceDT = sourceDT + "\t" + to_string(afc.fcDT_min);
+                    resOperation = resOperation + "\t" + "False";
+                }
+                else {
+                    sourceDT = sourceDT + "\t" + "None";
+                    if (afc.maxStorage > 0 && afc.maxStorageR > 0) {
+                        resOperation = resOperation + "\t" + "True";
+                    }
+                    else {
+                        resOperation = resOperation + "\t" + "False";
                     }
                 }
-                if (!row.IsIniStorageNull() && row.IniStorage != "")
-                {
-                    strROiniStorage = strROiniStorage + "\t" + row.IniStorage;
-                }
-                if (!row.IsMaxStorageNull() && row.MaxStorage != "")
-                {
-                    strROmaxStorage = strROmaxStorage + "\t" + row.MaxStorage;
-                }
-                if (!row.IsMaxStorageRNull() && row.MaxStorageR != "")
-                {
-                    strROmaxStorageRatio = strROmaxStorageRatio + "\t" + row.MaxStorageR;
-                }
-                if (!row.IsMaxStorageRNull() && row.MaxStorageR != "")
-                {
-                    strROmaxStorageApp = strROmaxStorageApp + "\t" +
-                        System.Convert.ToString(System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR));
-                }
-                if (!row.IsROTypeNull() && row.ROType != "")
-                {
-                    strROType = strROType + "\t" + row.ROType;
-                }
-                if (!row.IsROConstQNull() && row.ROConstQ != "")
-                {
-                    strROConstQ = strROConstQ + "\t" + row.ROConstQ;
-                }
-                if (!row.IsROConstQDurationNull() && row.ROConstQDuration != "")
-                {
-                    strROConstQduration = strROConstQduration + "\t" + row.ROConstQDuration;
+                if (afc.fcType == flowControlType::ReservoirOperation) {
+                    if (afc.roType != reservoirOperationType::None) {
+                        roType = roType + "\t" + ENUM_TO_STR(afc.roType);
+                    }
+                    else {
+                        writeLog(fpnLog, "Reservoir operation type is invalid.\n", 1, 1);
+                        return -1;
+                    }
+
+                    if (afc.iniStorage >= 0) {
+                        roiniStorage = roiniStorage + "\t" + to_string(afc.iniStorage);
+                    }
+                    else {
+                        writeLog(fpnLog, "Initial reservoir storage is invalid.\n", 1, 1);
+                        return -1;
+                    }
+                    if (afc.maxStorage > 0 || afc.maxStorageR > 0) {
+                        romaxStorage = romaxStorage + "\t" + to_string(afc.maxStorage);
+                        if (afc.maxStorageR > 0) {
+                            romaxStorageRatio = romaxStorageRatio + "\t" + to_string(afc.maxStorageR);
+                            double storApp = afc.maxStorage * afc.maxStorageR;
+                            romaxStorageApp = romaxStorageApp + "\t" + to_string(storApp);
+                        }
+                    }
+                    else {
+                        writeLog(fpnLog, "Maximum reservoir storage or storage ratio is invalid.\n", 1, 1);
+                        return -1;
+                    }
+                    if (afc.roType == reservoirOperationType::ConstantQ && afc.roConstQ < 0) {
+                        roConstQ = roConstQ + "\t" + to_string(afc.roConstQ);
+                        if (afc.roConstQDuration > 0) {
+                            roConstQduration = roConstQduration + "\t" + to_string(afc.roConstQDuration);
+                        }
+                        else {
+                            writeLog(fpnLog, "Constant reservoir outflow duration is invalid.\n", 1, 1);
+                            return -1;
+                        }
+                    }
+
+                    else {
+                        writeLog(fpnLog, "Constant reservoir outflow is invalid.\n", 1, 1);
+                        return -1;
+                    }
                 }
             }
-
             // FCApp - flow control data
-            System.IO.File.AppendAllText(strFNPFCData, strOutputCommonHeader, Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCData, "Output data : Flow control data input[CMS]" + "\r\n" + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCData, strNameFCApp + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCData, strTypeFCApp + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCData, strSourceDT + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCData, strResOperation + "\r\n" + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCData, strFCDataField + "\r\n", Encoding.Default);
-
+            heads = comHeader
+                + "Output data : Flow control data input[CMS]\n\n"
+                + fcNameApp + "\n"
+                + fcTypeApp + "\n"
+                + sourceDT + "\n"
+                + resOperation + "\n"
+                + fcDataField + "\n";
+            appendTextToTextFile(ofs.ofpnFCData, heads);
             // reservoir operation
-            System.IO.File.AppendAllText(strFNPFCStorage, strOutputCommonHeader, Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCStorage, "Output data : Storage data[m^3]" + "\r\n" + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCStorage, strNameFCApp + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCStorage, strTypeFCApp + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCStorage, strROiniStorage + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCStorage, strROmaxStorage + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCStorage, strROmaxStorageRatio + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCStorage, strROmaxStorageApp + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCStorage, strROType + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCStorage, strROConstQ + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCStorage, strROConstQduration + "\r\n" + "\r\n", Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCStorage, strFCDataField + "\r\n", Encoding.Default);
+            heads = comHeader
+                +  "Output data : Storage data[m^3]\n\n"
+                + fcNameApp + "\n"
+                + fcTypeApp + "\n"
+                + roiniStorage + "\n"
+                + romaxStorage + "\n"
+                + romaxStorageRatio + "\n"
+                + romaxStorageApp + "\n"
+                + roType + "\n"
+                +roConstQ + "\n"
+                + roConstQduration + "\n"
+                + fcDataField + "\n";
+            appendTextToTextFile(ofs.ofpnFCStorage, heads);
         }
+    }
+    return 1;
+}
 
+int deleteAllFilesExceptDischarge()
+{
+    if (fs::exists(ofs.ofpnDepth)) {
+        std::remove(ofs.ofpnDepth.c_str());
+    }
+    //if (fs::exists(ofs.ofpnDischarge)) {
+    //    std::remove(ofs.ofpnDischarge.c_str());
+    //}
+    if (fs::exists(ofs.ofpnFCData)) {
+        std::remove(ofs.ofpnFCData.c_str());
+    }
+    if (fs::exists(ofs.ofpnFCStorage)) {
+        std::remove(ofs.ofpnFCStorage.c_str());
+    }
+    if (fs::exists(ofs.ofpnRFGrid)) {
+        std::remove(ofs.ofpnRFGrid.c_str());
+    }
+    if (fs::exists(ofs.ofpnRFMean)) {
+        std::remove(ofs.ofpnRFMean.c_str());
+    }
+    if (fs::exists(ofs.ofpFlowDistribution)) {
+        fs::remove_all(ofs.ofpFlowDistribution);
+    }
+    if (fs::exists(ofs.ofpRFAccDistribution)) {
+        fs::remove_all(ofs.ofpRFAccDistribution);
+    }
+    if (fs::exists(ofs.ofpRFDistribution)) {
+        fs::remove_all(ofs.ofpRFDistribution);
+    }
+    if (fs::exists(ofs.ofpSSRDistribution)) {
+        fs::remove_all(ofs.ofpSSRDistribution);
+    }
+    for (int wpcvid : wpis.wpCVIDs) {
+        string fpn = ofs.ofpnWPs[wpcvid];
+        if (fs::exists(fpn)) {
+            std::remove(fpn.c_str());
+        }
+    }
+    if (fs::exists(ppi.fpn_prj)) {
+        std::remove(ppi.fpn_prj.c_str());
     }
     return 1;
 }

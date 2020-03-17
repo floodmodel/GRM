@@ -73,7 +73,7 @@ int main(int argc, char** args)
 		else if (nResult == 0) {
 			ppi = getProjectFileInfo(arg1);
 			writeNewLog(fpnLog, outString, 1, -1);
-			if (startSingleEventRun() == -1) { 
+			if (simulateSingleEvent() == -1) { 
 				waitEnterKey();
 				return -1; 
 			}
@@ -145,7 +145,7 @@ int main(int argc, char** args)
 			string progF = to_string(n + 1) + '/' + to_string(gmpFiles.size());
 			string progR = forString(((n + 1) / nFiles * 100), 2);
 			msgToScreen = "Total progress: " + progF + "(" + progR + "%%). ";
-			if (startSingleEventRun() == -1) {
+			if (simulateSingleEvent() == -1) {
 				waitEnterKey();
 				return -1;
 			}
@@ -181,28 +181,39 @@ void disposeDynamicVars()
 	}
 	if (cvs != NULL) { delete[] cvs; }
 
-	if (cvaisToFA.size() > 0) {
-		map<int, int*>::iterator iter;
-		map<int, int*> cvansTofa; //fa별 cvan 목록
-		for (iter = cvansTofa.begin(); iter != cvansTofa.end(); ++iter) {
-			if (cvansTofa[iter->first] != NULL) {
-				delete[] cvansTofa[iter->first];
-			}				
-		}
-	}
+	//if (cvaisToFA.size() > 0) {
+	//	map<int, int*>::iterator iter;
+	//	map<int, int*> cvansTofa; //fa별 cvan 목록
+	//	for (iter = cvansTofa.begin(); iter != cvansTofa.end(); ++iter) {
+	//		if (cvansTofa[iter->first] != NULL) {
+	//			delete[] cvansTofa[iter->first];
+	//		}				
+	//	}
+	//}
 	
 }
 
 
-int startSingleEventRun()
+int simulateSingleEvent()
 {
 	if (openPrjAndSetupModel(-1) == -1) {
 		writeNewLog(fpnLog, "Model setup failed !!!\n", 1, 1);
 		return -1;
 	}
-	if (runGRM() == -1) {
+	writeLog(fpnLog, "Calculation was started.\n", 1, 1);
+	if (startSimulationSingleEvent() == -1) {
 		writeNewLog(fpnLog, "An error was occurred while simulation...\n", 1, 1);
 		return -1;
+	}
+
+
+
+
+	if (prj.deleteAllFilesExceptDischargeOut == 1) {
+		if (deleteAllFilesExceptDischarge() == -1) {
+			writeNewLog(fpnLog, "An error was occurred while deleting all files except discharge.out.\n", 1, 1);
+			return -1;
+		}
 	}
 	return 1;
 }
@@ -228,49 +239,7 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 		writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
 		return -1;
 	}
-
-
-
-
-	//if (setGenEnv() < 0) {
-	//	writeLog(fpnLog, "Setting general environment variables was failed.\n", 1, 1);
-	//	return -1;
-	//}
-
-	//if (setupDomainAndCVinfo() < 0) {
-	//	writeLog(fpnLog, "Setting domain and control volume data were failed.\n", 1, 1);
-	//	return -1;
-	//}
-	//if (prj.isRainfallApplied == 1) {
-	//	if (setRainfallinfo() == -1) {
-	//		writeLog(fpnLog, "Setting rainfall data was failed.\n", 1, 1);
-	//		return -1;
-	//	}
-	//}
-	//if (prj.isbcApplied == 1) {
-	//	if (setBCinfo() == -1) {
-	//		writeLog(fpnLog, "Setting boundary condition data was failed.\n", 1, 1);
-	//		return -1;
-	//	}
-	//}
-	//if (deleteAlloutputFiles() == -1) {
-	//	writeLog(fpnLog, "Deleting previous output files was failed.\n", 1, 1);
-	//	return -1;
-	//}
-
-	//if (initializeOutputArray() == -1) {
-	//	writeLog(fpnLog, "Initialize output arrays was failed.\n", 1, 1);
-	//	return -1;
-	//}
-
 	writeLog(fpnLog, ppi.fpn_prj+"  -> Model setup was completed.\n", 1, 1);
-	return 1;
-}
-
-int runGRM()
-{
-	writeLog(fpnLog, "Calculation was started.\n", 1, 1);
-//	if (simulationControlUsingCPUnGPU() == -1) { return -1; }
 	return 1;
 }
 

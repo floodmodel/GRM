@@ -6,7 +6,7 @@
 
 using namespace std;
 
-extern projectfilePathInfo ppi;
+//extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
 extern projectFile prj;
 
@@ -17,9 +17,8 @@ extern cvAtt* cvs;
 extern map<int, vector<int>> cvaisToFA; //faº° cv array idex ¸ñ·Ï
 extern wpinfo wpis;
 extern flowControlCellAndData fccds;
-extern vector<rainfallData> rfs;
 
-extern thisProcess tp;
+
 
 int setupModelAfterOpenProjectFile()
 {
@@ -30,16 +29,10 @@ int setupModelAfterOpenProjectFile()
 	}
     if (setupByFAandNetwork() == -1) { return -1; }
     if (updateCVbyUserSettings() == -1) { return -1; }
-    if (prj.simType != simulationType::RealTime) {
-        tp.rfDataCountInThisEvent = rfs.size();
-    }
-    else {
-        tp.rfDataCountInThisEvent = -1;
-    }
-    tp.setupGRMisNormal = 1;
-    tp.grmStarted = 1;
+
 	return 1;
 }
+
 
 int setDomainAndCVBasicinfo()
 {
@@ -76,8 +69,8 @@ int initWPinfos()
 	wpis.rfUpWSAveTotal_mm.clear();
 	wpis.rfWPGridForDtPrintout_mm.clear();
 	wpis.rfWPGridTotal_mm.clear();
-	wpis.mTotalFlow_cms.clear();
-	wpis.mTotalDepth_m.clear();
+	wpis.totalFlow_cms.clear();
+	wpis.totalDepth_m.clear();
 	wpis.maxFlow_cms.clear();
 	wpis.maxDepth_m.clear();
 	wpis.maxFlowTime.clear();
@@ -163,6 +156,7 @@ int setupByFAandNetwork()
         cvs[aidx].downWPCVIDs.push_back(curCVid);
         bool ended = false;
         while (ended != true) {
+            cvidsNew.clear();
             ended = true;
             for (int cvidBase : cvidsBase) {
                 aidx = cvidBase - 1;
@@ -205,7 +199,7 @@ int updateCVbyUserSettings()
             cvs[i].stream.chRC = ups.chRoughness;
             cvs[i].stream.chSideSlopeLeft = prj.css[mdwsid].bankSlopeLeft;
             cvs[i].stream.chSideSlopeRight = prj.css[mdwsid].bankSlopeRight;
-            cvs[i].stream.chBankCoeff = 1 / prj.css[mdwsid].bankSlopeLeft
+            cvs[i].stream.bankCoeff = 1 / prj.css[mdwsid].bankSlopeLeft
                 + 1 / prj.css[mdwsid].bankSlopeRight;
             if (cvs[i].slope < ups.minSlopeChBed) {
                 cvs[i].stream.chBedSlope = ups.minSlopeChBed;
@@ -249,7 +243,7 @@ int updateCVbyUserSettings()
                     cvs[i].stream.chHighRBaseWidth_m = cvs[i].fac * cs.highRBaseWidth / (double)facMax_inMDWS;
                     cvs[i].stream.chLowRHeight = cvs[i].fac * cs.lowRHeight / (double)facMax_inMDWS;
                     cvs[i].stream.chLowRArea_m2 = getChCSAbyFlowDepth(cvs[i].stream.chBaseWidth,
-                        cvs[i].stream.chBankCoeff, cvs[i].stream.chLowRHeight,
+                        cvs[i].stream.bankCoeff, cvs[i].stream.chLowRHeight,
                         false, cvs[i].stream.chLowRHeight, cvs[i].stream.chLowRArea_m2, 0);
                 }
             }
@@ -343,6 +337,7 @@ int updateCVbyUserSettings()
         vector<int> newCVids;
         baseCVids = fccds.cvidsinlet;
         while (!bEnded == true) {
+            newCVids.clear();
             bEnded = true;
             for (int cvidBase : baseCVids) {
                 int cvan = cvidBase - 1;
@@ -360,4 +355,6 @@ int updateCVbyUserSettings()
     }
     return 1;
 }
+
+
 
