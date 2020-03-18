@@ -910,8 +910,8 @@ int openProjectFile(int forceRealTime)
 				return -1;
 			}
 		}
-		if (aline.find(fn.LowRegionHeight) != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fn.LowRegionHeight);
+		if (aline.find(fn.LowerRegionHeight) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.LowerRegionHeight);
 			if (vString != "" && stod(vString) > 0) {
 				acs.lowRHeight = stod(vString);
 			}
@@ -921,8 +921,8 @@ int openProjectFile(int forceRealTime)
 				return -1;
 			}
 		}
-		if (aline.find(fn.LowRegionBaseWidth) != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fn.LowRegionBaseWidth);
+		if (aline.find(fn.LowerRegionBaseWidth) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.LowerRegionBaseWidth);
 			if (vString != "" && stod(vString) > 0) {
 				acs.lowRBaseWidth = stod(vString);
 			}
@@ -932,8 +932,8 @@ int openProjectFile(int forceRealTime)
 				return -1;
 			}
 		}
-		if (aline.find(fn.HighRegionBaseWidth) != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fn.HighRegionBaseWidth);
+		if (aline.find(fn.UpperRegionBaseWidth) != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fn.UpperRegionBaseWidth);
 			if (vString != "" && stod(vString) > 0) {
 				acs.highRBaseWidth = stod(vString);
 			}

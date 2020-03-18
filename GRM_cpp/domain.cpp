@@ -70,7 +70,7 @@ int readDomainFileAndSetupCV()
             }
         }
     }
-    di.cellCountNotNull = cvid;
+    di.cellNnotNull = cvid;
     cvs = new cvAtt[cvsv.size()];
     copy(cvsv.begin(), cvsv.end(), cvs);
     return 1;

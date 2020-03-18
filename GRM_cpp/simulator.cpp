@@ -6,7 +6,7 @@ using namespace std;
 
 extern fs::path fpnLog;
 extern projectFile prj;
-extern thisProcess tp;
+extern thisSimulation ts;
 
 extern domaininfo di;
 extern cvAtt* cvs;
@@ -16,90 +16,90 @@ extern wpinfo wpis;
 
 int startSimulationSingleEvent()
 {
-    initThisProcess();
+    initThisSimulation();
     setCVStartingCondition(0);
-    int stop = -1;
     int dtPrint_min = prj.printTimeStep_min;
     int dtRF_sec = prj.rfinterval_min * 60;
     int dtRFinterval_min = prj.rfinterval_min;
     int isRFended = -1;
     int tsec_tm1 = 0;
-    cvAtt Project_tm1 ;
+    cvAtt Project_tm1;
     int targetTtoPrint_min = 0;
     int nowRFOrder = 0;
-    int nowTsec = tp.dtsec;
-    tp.dtsec_usedtoForwardToThisTime = tp.dtsec;
-    tp.zeroTimePrinted = -1;
+    int nowTsec = ts.dtsec;
+    double nowTmin;
+    ts.dtsec_usedtoForwardToThisTime = ts.dtsec;
+    ts.zeroTimePrinted = -1;
     int dtsec;
-    // CVid의 값은 1부터 시작함. 
-    while (nowTsec <= tp.time_simEnding_sec) {// simulationTimeLimitSEC
-        dtsec = tp.dtsec;
-        tp.vMaxInThisStep = DBL_MIN;
+    while (nowTsec <= ts.time_simEnding_sec) {// simulationTimeLimitSEC
+        dtsec = ts.dtsec;
+        ts.vMaxInThisStep = DBL_MIN;
         // dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
-        if (isRFended ==-1 && (nowRFOrder == 0 || (nowTsec > dtRF_sec* nowRFOrder))) {
-            if (nowRFOrder < tp.rfDataCountInThisEvent)            {
+        if (isRFended == -1 && (nowRFOrder == 0
+            || (nowTsec > dtRF_sec* nowRFOrder))) {
+            if (nowRFOrder < ts.rfDataCountInThisEvent) {
                 nowRFOrder = nowRFOrder + 1; // 이렇게 하면 마지막 레이어 적용
-                setCVRF(nowRFOrder);
-                //cRainfall.ReadRainfall(project, eRainfallDataType, dtRFinfo, dTRFintervalMIN, nowRFOrder, sThisSimulation.IsParallel);
+                if (setCVRF(nowRFOrder) == -1) { return -1; }
                 isRFended = -1;
             }
             else {
-                cRainfall.SetRainfallintensity_mPsec_And_Rainfall_dt_meter_Zero(mProject);
-                nowRFOrder = int.MaxValue;
-                sThisSimulation.mRFMeanForDT_m = 0;
-                mbRFisEnded = true;
+                setRFintensityAndDTrf_Zero();
+                isRFended = 1;
             }
         }
-        int nowT_MIN = nowTsec / 60;
-        SimulateRunoff(mProject, nowT_MIN);
-        cRainfall.CalCumulativeRFDuringDTPrintOut(mProject, dtsec);
+        nowTmin = nowTsec / 60.0;
+        if (simulateRunoff(nowTmin) == -1) { return -1; }
+        calCumulativeRFDuringDTPrintOut(dtsec);
         WriteCurrentResultAndInitializeNextStep(mProject, nowTsec, dtsec, dTRFintervalSEC, dTPrint_MIN, wpCount,
             ref targetCalTtoPrint_MIN, ref mSEC_tm1, ref Project_tm1, mProject.mSimulationType, nowRFOrder);
-        if (nowTsec < endingTimeSEC && nowTsec + dtsec > endingTimeSEC) {
-            sThisSimulation.dtsec = nowTsec + dtsec - endingTimeSEC;
-            nowTsec = endingTimeSEC;
-            sThisSimulation.dtsec_usedtoForwardToThisTime = sThisSimulation.dtsec;
+
+        if (nowTsec < ts.time_simEnding_sec && nowTsec + dtsec > ts.time_simEnding_sec) {
+            ts.dtsec = nowTsec + dtsec - ts.time_simEnding_sec;
+            nowTsec = ts.time_simEnding_sec;
+            ts.dtsec_usedtoForwardToThisTime = ts.dtsec;
         }
         else {
             nowTsec = nowTsec + dtsec; // dtsec 만큼 전진
-            sThisSimulation.dtsec_usedtoForwardToThisTime = sThisSimulation.dtsec;
-            if (sThisSimulation.IsFixedTimeStep == false)
+            ts.dtsec_usedtoForwardToThisTime = ts.dtsec;
+            if (prj.IsFixedTimeStep == -1)
             {
-                sThisSimulation.dtsec = cHydroCom.getDTsec(cGRM.CONST_CFL_NUMBER,
-                    project.watershed.mCellSize, sThisSimulation.vMaxInThisStep, dTPrint_MIN);
+                ts.dtsec = getDTsec(CONST_CFL_NUMBER,
+                    di.cellSize, ts.vMaxInThisStep, ts.dtMaxLimit_sec, ts.dtMinLimit_sec);
             }
         }
-        if (mStop == true) { break; }
+        if (ts.stopSim == 1) { break; }
     }
-    if (mStop == true) {
-        SimulationStop();
+    if (ts.stopSim == 1) {
+        writeLog(fpnLog, "Simulation was stopped.\n", 1, 1);
+        return 1;
     }
     else {
-        cGRM.writelogAndConsole("Simulation was completed.", cGRM.bwriteLog, false);
-        SimulationComplete();
+        writeLog(fpnLog, "Simulation was completed.\n", 1, 1);
+        return 1;
     }
     return 1;
 }
 
 
-int initThisProcess()
+void initThisSimulation()
 {
     if (prj.simType != simulationType::RealTime) {
-        tp.rfDataCountInThisEvent = rfs.size();
+        ts.rfDataCountInThisEvent = rfs.size();
     }
     else {
-        tp.rfDataCountInThisEvent = -1;
+        ts.rfDataCountInThisEvent = -1;
     }
-    tp.time_simEnding_sec = (prj.simDuration_hr + prj.printTimeStep_min) * 60;
-    tp.setupGRMisNormal = 1;
-    tp.grmStarted = 1;
-
-    tp.dtsec = prj.dtsec;
+    ts.time_simEnding_sec = (prj.simDuration_hr + prj.printTimeStep_min) * 60;
+    ts.setupGRMisNormal = 1;
+    ts.grmStarted = 1;
+    ts.stopSim = -1;
+    ts.dtsec = prj.dtsec;
+    ts.dtMaxLimit_sec = (int)prj.printTimeStep_min * 60/2;
+    ts.dtMinLimit_sec = 1;
 
     time_t now = time(0);
-    localtime_s(&tp.g_RT_tStart_from_MonitorEXE, &now);
-    tp.time_thisSimStarted = tp.g_RT_tStart_from_MonitorEXE;
-    return 1;
+    localtime_s(&ts.g_RT_tStart_from_MonitorEXE, &now);
+    ts.time_thisSimStarted = ts.g_RT_tStart_from_MonitorEXE;
 }
 
 int setCVStartingCondition(double iniflow)
@@ -108,7 +108,7 @@ int setCVStartingCondition(double iniflow)
     double chCSAini;
     double qChCVini;
     double uChCVini;
-    for (int i = 0; i < di.cellCountNotNull; ++i) {
+    for (int i = 0; i < di.cellNnotNull; ++i) {
         double iniQAtwsOutlet = 0;
         int faAtBaseCV = di.facMax;
         int wsid = cvs[i].wsid;
@@ -161,8 +161,9 @@ int setCVStartingCondition(double iniflow)
                     double sngCAS_ini = qChCVini / (double)cvs[i].cvdx_m; // 초기값 설정
                     chCSAini = getChCSAbyQusingIteration(cvs[i], sngCAS_ini, qChCVini);
                     hChCVini = getChannelDepthUsingArea(cvs[i].stream.chBaseWidth, chCSAini,
-                        cvs[i].stream.isCompoundCS, cvs[i].stream.chHighRBaseWidth_m,
-                        cvs[i].stream.chLowRArea_m2, cvs[i].stream.chLowRHeight, cvs[i].stream.bankCoeff);
+                        cvs[i].stream.isCompoundCS, cvs[i].stream.chURBaseWidth_m,
+                        cvs[i].stream.chLRArea_m2, cvs[i].stream.chLRHeight,
+                        cvs[i].stream.bankCoeff);
                 }
             }
             cvs[i].stream.hCH = hChCVini;
@@ -178,14 +179,13 @@ int setCVStartingCondition(double iniflow)
                 cvs[i].hUAQfromChannelBed_m = 0;
             }
         }
-
         //cv.Qprint_cms = 0;
-        cvs[i].rfintensityRead_tm1_mPsec = 0;
-        cvs[i].rfintensityRead_mPsec = 0;
+        cvs[i].rfiRead_tm1_mPsec = 0;
+        cvs[i].rfiRead_mPsec = 0;
         cvs[i].rfEff_dt_m = 0;
         cvs[i].rfApp_dt_m = 0;
-        cvs[i].rf_dtPrintOut_m = 0;
-        cvs[i].rfAcc_FromStartToNow_m = 0;
+        cvs[i].rf_dtPrint_m = 0;
+        cvs[i].rfAcc_fromStart_m = 0;
         cvs[i].soilMoistureChange_DTheta = 0;
         cvs[i].infiltrationF_mPdt = 0;
         cvs[i].infiltRatef_mPsec = 0;
@@ -209,7 +209,6 @@ int setCVStartingCondition(double iniflow)
                 else {
                     cvs[i].storageCumulative_m3 = 0;
                 }
-
             }
         }
     }
@@ -223,6 +222,5 @@ int setCVStartingCondition(double iniflow)
         wpis.totalDepth_m[wpcvid] = 0;
         wpis.totalFlow_cms[wpcvid] = 0;
     }
-
 }
 

@@ -63,11 +63,11 @@ int setDomainAndCVBasicinfo()
 int initWPinfos()
 {
 	int isnormal = -1;
-	wpis.rfReadIntensitySumUpWS_mPs.clear();
+	wpis.rfiReadSumUpWS_mPs.clear();
 	wpis.rfUpWSAveForDt_mm.clear();
-	wpis.rfUpWSAveForDtPrintout_mm.clear();
+	wpis.rfUpWSAveForDtPrint_mm.clear();
 	wpis.rfUpWSAveTotal_mm.clear();
-	wpis.rfWPGridForDtPrintout_mm.clear();
+	wpis.rfWPGridForDtPrint_mm.clear();
 	wpis.rfWPGridTotal_mm.clear();
 	wpis.totalFlow_cms.clear();
 	wpis.totalDepth_m.clear();
@@ -93,11 +93,11 @@ int initWPinfos()
 
 int setupByFAandNetwork()
 {
-    di.facMostUpChannelCell = di.cellCountNotNull;//우선 최대값으로 초기화
+    di.facMostUpChannelCell = di.cellNnotNull;//우선 최대값으로 초기화
     di.facMax = -1;
     di.facMin = INT_MAX;
     cvaisToFA.clear();
-    for (int i = 0; i < di.cellCountNotNull; i++) {
+    for (int i = 0; i < di.cellNnotNull; i++) {
         //cvs[i].fcType = flowControlType::None;
         double dxw;
         if (cvs[i].neighborCVIDsFlowIntoMe.size() > 0) {
@@ -177,7 +177,7 @@ int setupByFAandNetwork()
 
 int updateCVbyUserSettings()
 {
-    for (int i = 0; i < di.cellCountNotNull; ++i) {
+    for (int i = 0; i < di.cellNnotNull; ++i) {
         int wid = cvs[i].wsid;
         swsParameters ups = prj.swps[wid];
         if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
@@ -223,9 +223,9 @@ int updateCVbyUserSettings()
                 if (prj.cwFileApplied == 1 && cvs[i].stream.chBaseWidthByLayer > 0) {
                     cvs[i].stream.chBaseWidth = cvs[i].stream.chBaseWidthByLayer;
                 }
-                cvs[i].stream.chHighRBaseWidth_m = 0;
+                cvs[i].stream.chURBaseWidth_m = 0;
                 cvs[i].stream.isCompoundCS = -1;
-                cvs[i].stream.chLowRArea_m2 = 0;
+                cvs[i].stream.chLRArea_m2 = 0;
             }
             else if (prj.css[mdwsid].csType == crossSectionType::CSCompound) {// Compound CS에서는 사용자가 입력한 재원을 이용해서 하폭 계산
                 channelSettingInfo cs = prj.css[mdwsid];
@@ -234,17 +234,17 @@ int updateCVbyUserSettings()
                     * cs.lowRBaseWidth / (double)facMax_inMDWS;
                 if (cvs[i].stream.chBaseWidth < cs.compoundCSChannelWidthLimit) {
                     cvs[i].stream.isCompoundCS = false;
-                    cvs[i].stream.chHighRBaseWidth_m = 0;
-                    cvs[i].stream.chLowRHeight = 0;
-                    cvs[i].stream.chLowRArea_m2 = 0;
+                    cvs[i].stream.chURBaseWidth_m = 0;
+                    cvs[i].stream.chLRHeight = 0;
+                    cvs[i].stream.chLRArea_m2 = 0;
                 }
                 else {
                     cvs[i].stream.isCompoundCS = true;
-                    cvs[i].stream.chHighRBaseWidth_m = cvs[i].fac * cs.highRBaseWidth / (double)facMax_inMDWS;
-                    cvs[i].stream.chLowRHeight = cvs[i].fac * cs.lowRHeight / (double)facMax_inMDWS;
-                    cvs[i].stream.chLowRArea_m2 = getChCSAbyFlowDepth(cvs[i].stream.chBaseWidth,
-                        cvs[i].stream.bankCoeff, cvs[i].stream.chLowRHeight,
-                        false, cvs[i].stream.chLowRHeight, cvs[i].stream.chLowRArea_m2, 0);
+                    cvs[i].stream.chURBaseWidth_m = cvs[i].fac * cs.highRBaseWidth / (double)facMax_inMDWS;
+                    cvs[i].stream.chLRHeight = cvs[i].fac * cs.lowRHeight / (double)facMax_inMDWS;
+                    cvs[i].stream.chLRArea_m2 = getChCSAbyFlowDepth(cvs[i].stream.chBaseWidth,
+                        cvs[i].stream.bankCoeff, cvs[i].stream.chLRHeight,
+                        false, cvs[i].stream.chLRHeight, cvs[i].stream.chLRArea_m2, 0);
                 }
             }
             else {
@@ -351,6 +351,17 @@ int updateCVbyUserSettings()
             }
             baseCVids.clear();
             baseCVids = newCVids;
+        }
+    }
+
+    // wp 별로, 상류에 있는 cv 개수 설정
+    for (int i = 0; i < di.cellNnotNull; i++) {
+        int cvid = i + 1;
+        // 상류 cv 개수에 이 조건 추가하려면 주석 해제.
+        //if (cvs[i].toBeSimulated == -1) { continue; }
+        di.cellNtobeSimulated++;
+        for (int wpcvid : cvs[i].downWPCVIDs) {
+            wpis.cvCountAllup[wpcvid] ++;
         }
     }
     return 1;

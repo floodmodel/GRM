@@ -16,7 +16,7 @@ extern int** cvais;
 extern wpinfo wpis;
 extern flowControlCellAndData fccds;
 
-extern thisProcess tp;
+extern thisSimulation ts;
 
 int initOutputFiles()
 {

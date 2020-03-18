@@ -16,7 +16,7 @@ extern fs::path fpnLog;
 
 extern cvAtt* cvs;
 extern domaininfo di;
-extern thisProcess tp;
+extern thisSimulation ts;
 
 extern vector<rainfallData> rfs;
 extern wpinfo wpis;
@@ -54,7 +54,17 @@ int setRainfallData()
             break;
         }
         case rainfallDataType::TextFileMAP:
-            r.Rainfall = Lines[n];
+            string value = Lines[n];
+            if (isNumeric(value) == true) {
+                r.Rainfall = value;
+            }
+            else {
+                string err= "Error: Can not read rainfall value.\nOrder = "
+                    + to_string(n + 1) + "\n";
+                writeLog(fpnLog, err, 1, 1);
+                r.Rainfall = "0";
+                return -1;
+            }
             r.FileName = fn_rf_in;
             r.FilePath = fp_rf_in;
             break;
@@ -77,69 +87,100 @@ int setCVRF(int order)
     double dtrf_min = prj.rfinterval_min;
     string fpnRF = rfs[order - 1].FilePath + "\\" + rfs[order - 1].FileName;
     double cellSize = di.cellSize;
-    tp.rfintensitySumForAllCellsInCurrentRFData_mPs = 0;
+    ts.rfiSumForAllCellsInCurrentRFData_mPs = 0;
     for (int wpCVID : wpis.wpCVIDs) {
-        wpis.rfReadIntensitySumUpWS_mPs[wpCVID] = 0;
+        wpis.rfiReadSumUpWS_mPs[wpCVID] = 0;
     }
     if (prj.rfDataType == rainfallDataType::TextFileASCgrid
         || prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
         ascRasterFile rfasc = ascRasterFile(fpnRF);
-        omp_set_num_threads(prj.maxDegreeOfParallelism);
-#pragma omp parallel for schedule(guided)
-        for (int i = 0; i < di.cellCountNotNull; ++i) {
-            if (cvs[i].toBeSimulated == -1) {
-                continue;
-            }
+        //        omp_set_num_threads(prj.maxDegreeOfParallelism);
+        //#pragma omp parallel for schedule(guided)
+        for (int i = 0; i < di.cellNnotNull; ++i) {
+            // 유역의 전체 강우량은 inlet 등으로 toBeSimulated == -1 여도 계산에 포함한다.
+            // 상류 cv 개수에 이 조건 추가하려면 주석 해제.
+            //if (cvs[i].toBeSimulated == -1) {
+            //    continue;
+            //}
             double inRF_mm = rfasc.valuesFromTL[cvs[i].idx_xr][cvs[i].idx_yc];
             if (prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
                 inRF_mm = inRF_mm / (60.0 / dtrf_min);
             }
-            cvs[i].rfintensityRead_mPsec = rfintensity_mPsec(inRF_mm, dtrf_sec);
-        }
-        for (int i = 0; i < di.cellCountNotNull; ++i) {
-            if (project.WSCells[cx, ry] != null && project.WSCells[cx, ry].toBeSimulated == 1)
-            {
-                sThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs =
-                    sThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs + project.WSCells[cx, ry].RFReadintensity_mPsec;
-                int cvan = project.WSCells[cx, ry].CVID - 1;
-                CalRFSumForWPUpWSWithRFGrid(cvan);
+            cvs[i].rfiRead_mPsec = rfintensity_mPsec(inRF_mm, dtrf_sec);
+
+            for (int wpcvid : cvs[i].downWPCVIDs) {
+                wpis.rfiReadSumUpWS_mPs[wpcvid] = wpis.rfiReadSumUpWS_mPs[wpcvid]
+                    + cvs[i].rfiRead_mPsec;
             }
+            ts.rfiSumForAllCellsInCurrentRFData_mPs =
+                ts.rfiSumForAllCellsInCurrentRFData_mPs
+                + cvs[i].rfiRead_mPsec;
         }
     }
-    else if (eRainfallDataType == cRainfall.RainfallDataType.TextFileMAP)
-    {
-        double inRF_mm;
-        double v = 0;
-        if (double.TryParse(rfRow.Rainfall, out v) == true)
-        {
-            inRF_mm = v;
-        }
-        else
-        {
-            System.Console.WriteLine("Error: Can not read rainfall value!!" + "\r\n" + "Order = " + nowRFOrder.ToString());
-            return;
-        }
+    else if (prj.rfDataType == rainfallDataType::TextFileMAP) {
+        string value = rfs[order - 1].Rainfall;
+        double inRF_mm = stod(value);
         if (inRF_mm < 0) { inRF_mm = 0; }
-        for (int cvan = 0; cvan < project.CVCount; cvan++)
-        {
-            CalRFintensity_mPsec(project.CVs[cvan], inRF_mm, rfIntervalSEC);
-            sThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs = sThisSimulation.mRFIntensitySumForAllCellsInCurrentRFData_mPs + project.CVs[cvan].RFReadintensity_mPsec;
+        double inRF_mPs = rfintensity_mPsec(inRF_mm, dtrf_sec);
+        for (int i = 0; i < di.cellNnotNull; ++i) {
+            // 유역의 전체 강우량은 inlet 등으로 toBeSimulated == -1 여도 계산에 포함한다.
+            // 상류 cv 개수에 이 조건 추가하려면 주석 해제.
+            //if (cvs[i].toBeSimulated == -1) { continue; }
+            cvs[i].rfiRead_mPsec = inRF_mPs;
+        }        
+        ts.rfiSumForAllCellsInCurrentRFData_mPs = inRF_mPs * di.cellNtobeSimulated;
+        for (int wpcvid : wpis.wpCVIDs) {
+            wpis.rfiReadSumUpWS_mPs[wpcvid] = inRF_mm * wpis.cvCountAllup[wpcvid];
         }
-        CalRFSumForWPUpWSWithMAPValue(project.CVs[0].RFReadintensity_mPsec); // 모든 격자의 강우량 동일하므로.. 하나를 던저준다.
-    }
-    else
-    {
-        System.Console.WriteLine("Error: Rainfall data type is invalid.");
-    }
-}
-
-
-double rfintensity_mPsec(double rf_mm, double dtrf_sec)
-{
-    if (rf_mm <= 0) {
-       return 0;
     }
     else {
-        return rf_mm / 1000.0 / dtrf_sec;
+        writeLog(fpnLog, "Error: Rainfall data type is invalid.\n", 1, 1);
+        return -1;
+    }
+    return 1;
+}
+
+ void setRFintensityAndDTrf_Zero()
+{
+     ts.rfAveForDT_m = 0;
+     ts.rfiSumForAllCellsInCurrentRFData_mPs = 0;
+     for (int i = 0; i < di.cellNnotNull; ++i)    {
+        cvs[i].rfiRead_mPsec = 0;
+        cvs[i].rfApp_dt_m = 0;
+    }
+    for(int wpcvid : wpis.wpCVIDs)    {
+        wpis.rfWPGridForDtPrint_mm[wpcvid] = 0;
+        wpis.rfUpWSAveForDt_mm[wpcvid] = 0;
+        wpis.rfiReadSumUpWS_mPs[wpcvid] = 0;
+        wpis.rfUpWSAveForDtPrint_mm[wpcvid] = 0;
     }
 }
+
+ void calCumulativeRFDuringDTPrintOut(int dtsec)
+ {
+     ts.rfAveForDT_m = ts.rfiSumForAllCellsInCurrentRFData_mPs * dtsec
+         / di.cellNtobeSimulated;
+     ts.rfAveForAllCell_sumDTprint_m = ts.rfAveForAllCell_sumDTprint_m
+         + ts.rfAveForDT_m;
+     for (int wpcvid : wpis.wpCVIDs) {
+         wpis.rfUpWSAveForDt_mm[wpcvid] = wpis.rfiReadSumUpWS_mPs[wpcvid]
+             * dtsec * 1000 / (double)(cvs[wpcvid - 1].fac + 1);
+         wpis.rfUpWSAveForDtPrint_mm[wpcvid] = wpis.rfUpWSAveForDtPrint_mm[wpcvid]
+             + wpis.rfUpWSAveForDt_mm[wpcvid];
+         wpis.rfWPGridForDtPrint_mm[wpcvid] = wpis.rfWPGridForDtPrint_mm[wpcvid]
+             + cvs[wpcvid - 1].rfiRead_mPsec * 1000 * dtsec;
+     }
+     if (prj.makeASCFile == 1 || prj.makeIMGFile == 1) {
+         if (prj.makeRfDistFile == 1 || prj.makeRFaccDistFile == 1) {
+             for (int i = 0; i < di.cellNtobeSimulated; ++i) {
+                 cvs[i].rf_dtPrint_m = cvs[i].rf_dtPrint_m
+                     + cvs[i].rfiRead_mPsec * dtsec;
+                 cvs[i].rfAcc_fromStart_m = cvs[i].rfAcc_fromStart_m
+                     + cvs[i].rfiRead_mPsec * dtsec;
+             }
+         }
+     }
+ }
+     
+
+

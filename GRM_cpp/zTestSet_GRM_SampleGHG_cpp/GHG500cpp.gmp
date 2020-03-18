@@ -189,9 +189,9 @@
     <ChannelWidthEQd>0.318</ChannelWidthEQd>
     <ChannelWidthEQe>0.5</ChannelWidthEQe>
     <ChannelWidthMostDownStream>400</ChannelWidthMostDownStream>
-    <LowRegionHeight>0</LowRegionHeight>
-    <LowRegionBaseWidth>0</LowRegionBaseWidth>
-    <HighRegionBaseWidth>0</HighRegionBaseWidth>
+    <LowerRegionHeight>0</LowerRegionHeight>
+    <LowerRegionBaseWidth>0</LowerRegionBaseWidth>
+    <UpperRegionBaseWidth>0</UpperRegionBaseWidth>
     <CompoundCSChannelWidthLimit>0</CompoundCSChannelWidthLimit>
     <BankSideSlopeRight>1.5</BankSideSlopeRight>
     <BankSideSlopeLeft>1.5</BankSideSlopeLeft>

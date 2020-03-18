@@ -33,7 +33,7 @@ map<int, vector<int>> cvaisToFA; //faº° cv array idex ¸ñ·Ï
 wpinfo wpis;
 flowControlCellAndData fccds;
 
-thisProcess tp;
+thisSimulation ts;
 
 
 string msgToScreen="";

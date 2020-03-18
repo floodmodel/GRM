@@ -238,9 +238,9 @@ typedef struct _projectFileFieldName
 	const string ChannelWidthEQd = "ChannelWidthEQd";
 	const string ChannelWidthEQe = "ChannelWidthEQe";
 	const string ChannelWidthMostDownStream = "ChannelWidthMostDownStream";
-	const string LowRegionHeight = "LowRegionHeight";
-	const string LowRegionBaseWidth = "LowRegionBaseWidth";
-	const string HighRegionBaseWidth = "HighRegionBaseWidth";
+	const string LowerRegionHeight = "LowerRegionHeight";
+	const string LowerRegionBaseWidth = "LowerRegionBaseWidth";
+	const string UpperRegionBaseWidth = "UpperRegionBaseWidth";
 	const string CompoundCSChannelWidthLimit = "CompoundCSChannelWidthLimit";
 	const string BankSideSlopeRight = "BankSideSlopeRight";
 	const string BankSideSlopeLeft = "BankSideSlopeLeft";
@@ -333,11 +333,11 @@ typedef struct _wpLocationRC
 typedef struct _wpinfo {
 	vector<int> wpCVIDs;
 	//<cvid, value>
-	map<int, double> rfReadIntensitySumUpWS_mPs;// 현재 wp 상류에 대해 원시자료에서 읽은 강우량.[m/s] 
+	map<int, double> rfiReadSumUpWS_mPs;// 현재 wp 상류에 대해 원시자료에서 읽은 강우량(강우강도 rfi).[m/s] 
 	map<int, double> rfUpWSAveForDt_mm; // 현재 wp 상류에 대해 dt(계산시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
-	map<int, double> rfUpWSAveForDtPrintout_mm;// 현재 wp 상류에 대해 출력시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
+	map<int, double> rfUpWSAveForDtPrint_mm;// 현재 wp 상류에 대해 출력시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
 	map<int, double> rfUpWSAveTotal_mm;//현재 watch point 상류의 평균강우량의 누적값[mm]
-	map<int, double> rfWPGridForDtPrintout_mm; // Watchpoint 격자에 대한 출력시간 간격 동안의 누적강우량. 원시자료를 이용해서 계산된값.[mm]
+	map<int, double> rfWPGridForDtPrint_mm; // Watchpoint 격자에 대한 출력시간 간격 동안의 누적강우량. 원시자료를 이용해서 계산된값.[mm]
 	map<int, double> rfWPGridTotal_mm; // Watchpoint 격자에 대한 누적강우량[mm]
 	map<int, double> totalFlow_cms; // Watchpoint 격자에 대한 전체유량[cms]. 누적값.
 	//Todo : 사용되지 않으면, 삭제
@@ -349,6 +349,7 @@ typedef struct _wpinfo {
 	map<int, double> qFromFCData_cms; // 해당 wp에서 Flow control에 의해서 계산되는 유량
 	map<int, double> qprint_cms;
 	map<int, string> FpnWpOut; // Watch point 별 모의결과 출력을 위한 파일 이름 저장
+	map<int, int>cvCountAllup;
 } wpinfo;
 
 typedef struct _channelSettingInfo
@@ -454,7 +455,8 @@ typedef struct _domaininfo
 	string headerStringAll = "";
 
 	int cvidxMaxFac;//fac가 가장 큰 셀(최하류셀 등)의 1차원 배열 번호
-	int cellCountNotNull = 0;
+	int cellNnotNull = 0;
+	int cellNtobeSimulated = 0;
 	int facMostUpChannelCell = -1;
 	int facMax = -1;
 	int facMin = -1;
@@ -481,10 +483,10 @@ typedef struct _cvStreamAtt
 	double chSideSlopeLeft = -1.0;//현재의 channel CV의 좌측 제방 경사
 	double chSideSlopeRight = -1.0;//현재의 channel CV의 우측 제방 경사
 	double bankCoeff = -1.0;// 현재의 channel CV의 제방 계수. 계산 편의를 위해서 channel CV 별로 미리계산한 값
-	double chHighRBaseWidth_m = -1.0;//현재 channel CV의 복단면 고수부지 바닥 폭[m]
-	double chLowRHeight = -1.0;// 현재 channel CV의 복단면 고수부지의 수심[m]
+	double chURBaseWidth_m = -1.0;//현재 channel CV의 복단면 고수부지 바닥 폭[m]
+	double chLRHeight = -1.0;// 현재 channel CV의 복단면 고수부지의 수심[m]
 	int isCompoundCS = -1;//현재의 channel CV가 복단면인지(true), 단단면(false)인지를 나타내는 변수
-	double chLowRArea_m2 = -1.0;// 복단면 channel 중 하층부의 면적[m^2]
+	double chLRArea_m2 = -1.0;// 복단면 channel 중 하층부의 면적[m^2]
 } cvStreamAtt;
 
 typedef struct _cvAtt
@@ -517,11 +519,11 @@ typedef struct _cvAtt
 	double QSSF_m3Ps = -1.0;//t 시간에서의 현재 셀에서 다음셀로 지표하에서 유출되는 유량 [m^3/s]
 	double QsumCVw_dt_m3 = -1.0;//상류인접 CV에서 현재 CV로 유입되는 유량 단순합. 이건 CVi에서의 연속방정식, 고려하지 않은 단순 합.[m^3/dt]
 	double rfApp_dt_m = -1.0;//dt 시간 동안의 강우량
-	double rfintensityRead_mPsec = -1.0;//현재 강우입력자료에서 읽은 강우강도 m/s
-	double rfintensityRead_tm1_mPsec = -1.0;//이전 시간의 강우강도 m/s
+	double rfiRead_mPsec = -1.0;//현재 강우입력자료에서 읽은 강우강도 m/s rfi.
+	double rfiRead_tm1_mPsec = -1.0;//이전 시간의 강우강도 m/s rfi.
 	double rfEff_dt_m = -1.0;//dt시간 동안의 유효강우량
-	double rf_dtPrintOut_m = -1.0;//출력 시간간격 동안의 누적 강우량[m]
-	double rfAcc_FromStartToNow_m = -1.0;//전체 기간의 누적 강우량[m]
+	double rf_dtPrint_m = -1.0;//출력 시간간격 동안의 누적 강우량[m]
+	double rfAcc_fromStart_m = -1.0;//전체 기간의 누적 강우량[m]
 	double soilWaterContent_m = -1.0;//토양수분함량. t 시간까지의 누적 침투량[m], 토양깊이가 아니고, 수심이다.
 	double soilWaterContent_tm1_m = -1.0;//토양수분함량. t-1 시간까지의 누적 침투량[m]. 수심
 	double infiltRatef_mPsec = -1.0;//t 시간에서 계산된 침투률[m/s]
@@ -638,16 +640,19 @@ typedef struct _projectFile
 
 
 
-typedef struct _thisProcess
+typedef struct _thisSimulation
 {
 	int setupGRMisNormal = 0; // Todo : 필요여부 확인 필요.
 	int grmStarted = 0;
+	int stopSim = 0;
 	int rfDataCountInThisEvent = -1;
-	double rfMeanForDT_m = 0;
+	double rfAveForDT_m = 0;
 	double rfAveForAllCell_sumDTprint_m = 0;
-	double rfintensitySumForAllCellsInCurrentRFData_mPs;
-	double dtsec = 0.0;
-	double dtsec_usedtoForwardToThisTime = 0.0;
+	double rfiSumForAllCellsInCurrentRFData_mPs; //rfi : rf intensity
+	int dtsec = 0;
+	int dtsec_usedtoForwardToThisTime = 0;
+	int dtMaxLimit_sec = 0;
+	int dtMinLimit_sec = 0;
 	int zeroTimePrinted = 0;
 	int time_simEnding_sec = -1;
 	tm g_RT_tStart_from_MonitorEXE;
@@ -655,7 +660,7 @@ typedef struct _thisProcess
 
 	double vMaxInThisStep;
 	
-} thisProcess;
+} thisSimulation;
 
 
 typedef struct _globalVinner // 계산 루프로 전달하기 위한 최소한의 전역 변수. gpu 고려
@@ -664,33 +669,38 @@ typedef struct _globalVinner // 계산 루프로 전달하기 위한 최소한의 전역 변수. gp
 } globalVinner;
 
 
+void calCumulativeRFDuringDTPrintOut(int dtsec);
+
 void disposeDynamicVars();
 int deleteAllOutputFiles();
 int deleteAllFilesExceptDischarge();
 
-double getChCSAbyFlowDepth(double lowRBaseWidth, 
-	double chBankConst,	double crossSectionDepth, 
-	bool isCompoundCS, double lowRHeight,
-	double lowRArea, double highRBaseWidth);
+double getChCSAbyFlowDepth(double LRBaseWidth, 
+	double chBankConst,	double crossSectionDepth,
+	bool isCompoundCS, double LRHeight,
+	double LRArea, double URBaseWidth);
 double getChCSAbyQusingIteration(cvAtt cv, 
 	double CSAini, double Q_m3Ps);
-double getChannelCrossSectionPerimeter(double lowRegionBaseWidth,
+double getChannelCrossSectionPerimeter(double LRegionBaseWidth,
 	double sideSlopeRightBank, double sideSlopeLeftBank,
 	double crossSectionDepth, bool isCompoundCrossSection,
-	double lowRegionHeight, double lowRegionArea,
-	double highRegionBaseWidth);
-double getChannelDepthUsingArea(double baseWidthLowRegion,
+	double LRegionHeight, double LRegionArea,
+	double URegionBaseWidth);
+double getChannelDepthUsingArea(double baseWidthLRegion,
 	double chCSAinput, bool isCompoundCrossSection,
-	double baseWidthHighRegion, double lowRegionArea,
-	double lowRegionHeight, double chBankConst);
+	double baseWidthURegion, double LRegionArea,
+	double LRegionHeight, double chBankConst);
 
-
+int getDTsec(double cfln, double dx, 
+	double vMax, int dtMax_min, 
+	int dtMin_min);
 projectfilePathInfo getProjectFileInfo(string fpn_prj);
-flowDirection8 getFlowDirection(int fdirV, flowDirectionType fdType);
+flowDirection8 getFlowDirection(int fdirV, 
+	flowDirectionType fdType);
 void grmHelp();
 
 int initOutputFiles();
-int initThisProcess();
+void initThisSimulation();
 int initWatershedNetwork();
 int initWPinfos();
 int isNormalChannelSettingInfo(channelSettingInfo aci);
@@ -719,7 +729,6 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV();
 int readLandCoverFileAndSetCVbyVAT();
 int readSoilTextureFileAndSetCVbyVAT();
 int readSoilDepthFileAndSetCVbyVAT();
-double rfintensity_mPsec(double rf_mm, double dtrf_sec);
 
 int setDomainAndCVBasicinfo();
 int setCVbyLCConstant();
@@ -729,14 +738,39 @@ int setCVRF(int order);
 int setCVStartingCondition(double iniflow);
 int setFlowNetwork();
 int setRainfallData();
+void setRFintensityAndDTrf_Zero();
 int setupByFAandNetwork();
 int setupModelAfterOpenProjectFile();
 int simulateSingleEvent();
+int simulateRunoff(double nowTmin);
+void simulateRunoffCore(int i, double nowTmin);
 int startSimulationSingleEvent();
 
 int updateWatershedNetwork();
 int updateCVbyUserSettings();
 int updateFCCellinfoAndData();
+
+inline double rfintensity_mPsec(double rf_mm, 
+	double dtrf_sec);
+
+
+inline double rfintensity_mPsec(double rf_mm, double dtrf_sec)
+{
+	if (rf_mm <= 0) { return 0; }
+	else { return rf_mm / 1000.0 / dtrf_sec; }
+}
+
+inline double rfApp_dt_m(double rfi_mPs,
+	int dtsec, double cellSize, double cvDX_m)
+{
+	if (rfi_mPs == 0) {
+		return rfi_mPs;
+	}
+	else {
+		return rfi_mPs * dtsec * (cellSize / cvDX_m);
+	}
+	return rfi_mPs;
+}
 
 
 // extern C
