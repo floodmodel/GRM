@@ -182,5 +182,21 @@ int setCVRF(int order)
      }
  }
      
+ inline double rfintensity_mPsec(double rf_mm, double dtrf_sec)
+ {
+     if (rf_mm <= 0) { return 0; }
+     else { return rf_mm / 1000.0 / dtrf_sec; }
+ }
 
+ inline double rfApp_dt_m(double rfi_mPs,
+     int dtsec, double cellSize, double cvDX_m)
+ {
+     if (rfi_mPs == 0) {
+         return rfi_mPs;
+     }
+     else {
+         return rfi_mPs * dtsec * (cellSize / cvDX_m);
+     }
+     return rfi_mPs;
+ }
 

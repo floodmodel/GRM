@@ -1,4 +1,5 @@
 
+#include <omp.h>
 #include "gentle.h"
 #include "grm.h"
 
@@ -10,6 +11,7 @@ extern thisSimulation ts;
 
 extern domaininfo di;
 extern cvAtt* cvs;
+extern map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
 extern vector<rainfallData> rfs;
 extern flowControlCellAndData fccds;
 extern wpinfo wpis;
@@ -21,7 +23,7 @@ int startSimulationSingleEvent()
     int dtPrint_min = prj.printTimeStep_min;
     int dtRF_sec = prj.rfinterval_min * 60;
     int dtRFinterval_min = prj.rfinterval_min;
-    int isRFended = -1;
+    //int isRFended = -1;
     int tsec_tm1 = 0;
     cvAtt Project_tm1;
     int targetTtoPrint_min = 0;
@@ -35,16 +37,18 @@ int startSimulationSingleEvent()
         dtsec = ts.dtsec;
         ts.vMaxInThisStep = DBL_MIN;
         // dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
-        if (isRFended == -1 && (nowRFOrder == 0
-            || (nowTsec > dtRF_sec* nowRFOrder))) {
+        /*if (isRFended == -1 && (nowRFOrder == 0
+            || (nowTsec > dtRF_sec* nowRFOrder))) {*/
+        if (nowTsec > dtRF_sec* nowRFOrder ) {
             if (nowRFOrder < ts.rfDataCountInThisEvent) {
-                nowRFOrder = nowRFOrder + 1; // 이렇게 하면 마지막 레이어 적용
+                nowRFOrder++; // 이렇게 하면 마지막 레이어 적용
                 if (setCVRF(nowRFOrder) == -1) { return -1; }
-                isRFended = -1;
+                //isRFended = -1;
             }
             else {
                 setRFintensityAndDTrf_Zero();
-                isRFended = 1;
+                nowRFOrder = INT_MAX;
+                //isRFended = 1;
             }
         }
         nowTmin = nowTsec / 60.0;
@@ -167,9 +171,9 @@ int setCVStartingCondition(double iniflow)
                 }
             }
             cvs[i].stream.hCH = hChCVini;
-            cvs[i].stream.csaCh = chCSAini;
+            cvs[i].stream.csaCH = chCSAini;
             cvs[i].stream.hCH_ori = hChCVini;
-            cvs[i].stream.csaCh_ori = chCSAini;
+            cvs[i].stream.csaCH_ori = chCSAini;
             cvs[i].stream.QCH_m3Ps = qChCVini;
             cvs[i].stream.uCH = uChCVini;
             if (prj.simBaseFlow == 1) {
@@ -187,12 +191,12 @@ int setCVStartingCondition(double iniflow)
         cvs[i].rf_dtPrint_m = 0;
         cvs[i].rfAcc_fromStart_m = 0;
         cvs[i].soilMoistureChange_DTheta = 0;
-        cvs[i].infiltrationF_mPdt = 0;
-        cvs[i].infiltRatef_mPsec = 0;
-        cvs[i].infiltRatef_tM1_mPsec = 0;
+        cvs[i].ifF_mPdt = 0;
+        cvs[i].ifRatef_mPsec = 0;
+        cvs[i].ifRatef_tm1_mPsec = 0;
         cvs[i].effSR_Se = 0;
         cvs[i].isAfterSaturated = -1;
-        cvs[i].StorageAddedForDTfromRF_m3 = 0;
+        cvs[i].storageAddedForDTbyRF_m3 = 0;
         cvs[i].QsumCVw_dt_m3 = 0;
         cvs[i].effCVCountFlowintoCViw = 0;
         cvs[i].QSSF_m3Ps = 0;
@@ -224,3 +228,94 @@ int setCVStartingCondition(double iniflow)
     }
 }
 
+int simulateRunoff(double nowTmin)
+{
+    int maxLimit = di.facMax + 1;
+    for (int fac = 0; fac < maxLimit; ++fac) {
+        if (cvaisToFA[fac].size() > 0) {
+            double uMax = 0;
+#pragma omp parallel
+            {
+                int iterLimit = cvaisToFA[fac].size();
+                omp_set_num_threads(prj.maxDegreeOfParallelism);
+                // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
+                // VS2019는 openMP 2.0 지원, 그러므로 critical 사용한다.
+#pragma omp for schedule(guided)
+                for (int i = 0; i < iterLimit; ++i) {
+                    if (cvs[i].toBeSimulated == 1) {
+                        simulateRunoffCore(i, nowTmin);
+                        if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                            uMax = cvs[i].uOF;
+                        }
+                        else {
+                            uMax = cvs[i].stream.uCH;
+                        }
+                    }
+                }
+#pragma omp critical(getVmax)
+                {
+                    if (ts.vMaxInThisStep < uMax) {
+                        ts.vMaxInThisStep = uMax;
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+}
+
+void simulateRunoffCore(int i, double nowTmin)
+{
+    int fac = cvs[i].fac;
+    int dtsec = ts.dtsec;
+    double cellsize = di.cellSize;
+    if (prj.simFlowControl == 1 &&
+        (cvs[i].fcType == flowControlType::ReservoirOutflow ||
+            cvs[i].fcType == flowControlType::Inlet)) {
+        calFCReservoirOutFlow(nowTmin, i);
+    }
+    else {
+        updatetCVbyRFandSoil(i);
+        if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+            double hCVw_tp1 = 0;
+            if (fac > 0) {
+                hCVw_tp1 = mFVMSolver.CalculateOverlandWaterDepthCViW(project, i);
+            }
+            if (hCVw_tp1 > 0 || cvs[i].hOF > 0) {
+                calOverlandFlow(i, hCVw_tp1, cellsize);
+            }
+            else {
+                setNoFluxCVOF(i);
+            }
+        }
+        else if (cvs[i].flowType == cellFlowType::ChannelFlow
+            || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
+            double CSAchCVw_i_jP1 = 0;
+            if (fac > 0) {
+                CSAchCVw_i_jP1 = mFVMSolver.CalChCSA_CViW(cvs, i);
+            }
+            if (CSAchCVw_i_jP1 > 0 || cvs[i].mStreamAttr.hCH > 0) {
+                mFVMSolver.CalculateChannelFlow(cvs[i], CSAchCVw_i_jP1);
+            }
+            else {
+                setNoFluxCVCH(i);
+            }
+        }
+    }
+    if (prj.simFlowControl == 1
+        && (cvs[i].fcType == flowControlType::SinkFlow
+            || cvs[i].fcType == flowControlType::SourceFlow
+            || cvs[i].fcType == flowControlType::ReservoirOperation)) {
+        Dataset.GRMProject.FlowControlGridRow[] rows =
+            (Dataset.GRMProject.FlowControlGridRow[])project.fcGrid.mdtFCGridInfo.Select("CVID = " + (cvan + 1));
+        Dataset.GRMProject.FlowControlGridRow row = rows[0];
+        double v;
+        if (double.TryParse(row.MaxStorage, out v) == false || double.TryParse(row.MaxStorageR, out v) == false ||
+            System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR) == 0) {
+            cFlowControl.CalFCSinkOrSourceFlow(project, nowT_min, i);
+        }
+        else {
+            cFlowControl.CalFCReservoirOperation(project, i, nowT_min);
+        }
+    }
+}

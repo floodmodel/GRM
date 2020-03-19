@@ -391,6 +391,7 @@ typedef struct _flowControlCellAndData
 	vector<int> cvidsinlet;
 	vector<int> cvidsFCcell;
 	map<int, vector<timeSeries>> flowData; //<cvid, data>, 분단위
+	map<int, int> curDorder;// <cvid, order>현재 적용될 데이터의 순서
 } flowControlCellAndData;
 
 typedef struct _soilTextureInfo
@@ -472,8 +473,8 @@ typedef struct _cvStreamAtt
 	double chBaseWidth = -1.0;//하천의 바닥폭[m]
 	double chBaseWidthByLayer = -1.0;//하폭레이어에서 받은 하폭[m]
 	double chRC = -1.0;//현재의 channel CV의 하도조도계수
-	double csaCh_ori = -1.0;//t 시간에서의 유출해석 전의 현재 channel CV의 초기 흐름단면적[m^2]
-	double csaCh = -1.0;//t 시간에서의 유출해석 결과 현재 channel CV의 흐름단면적[m^2]
+	double csaCH_ori = -1.0;//t 시간에서의 유출해석 전의 현재 channel CV의 초기 흐름단면적[m^2]
+	double csaCH = -1.0;//t 시간에서의 유출해석 결과 현재 channel CV의 흐름단면적[m^2]
 	double csaChAddedByOFinCHnOFcell = -1.0;//하도+지표면 흐름셀에서, 지표면 흐름에 의한 하도흐름 단면적 증가분
 	double hCH_ori = -1.0;//t 시간에서의 유출해석 전의 현재 channel CV의 초기 수심[m]
 	double hCH = -1.0;//t 시간에서의 유출해석 결과 현재 channel CV의 수심[m]
@@ -524,16 +525,16 @@ typedef struct _cvAtt
 	double rfEff_dt_m = -1.0;//dt시간 동안의 유효강우량
 	double rf_dtPrint_m = -1.0;//출력 시간간격 동안의 누적 강우량[m]
 	double rfAcc_fromStart_m = -1.0;//전체 기간의 누적 강우량[m]
-	double soilWaterContent_m = -1.0;//토양수분함량. t 시간까지의 누적 침투량[m], 토양깊이가 아니고, 수심이다.
-	double soilWaterContent_tm1_m = -1.0;//토양수분함량. t-1 시간까지의 누적 침투량[m]. 수심
-	double infiltRatef_mPsec = -1.0;//t 시간에서 계산된 침투률[m/s]
-	double infiltRatef_tM1_mPsec = -1.0;//t-1 시간에서 적용된 침투률[m/s]
-	double infiltrationF_mPdt = -1.0;//t 시간에서 계산된 dt 시간동안의 침투량[m/dt]
+	double soilWaterC_m = -1.0;//토양수분함량. t 시간까지의 누적 침투량[m], 토양깊이가 아니고, 수심이다.
+	double soilWaterC_tm1_m = -1.0;//토양수분함량. t-1 시간까지의 누적 침투량[m]. 수심
+	double ifRatef_mPsec = -1.0;//t 시간에서 계산된 침투률[m/s]
+	double ifRatef_tm1_mPsec = -1.0;//t-1 시간에서 적용된 침투률[m/s]
+	double ifF_mPdt = -1.0;//t 시간에서 계산된 dt 시간동안의 침투량[m/dt]
 	int isAfterSaturated = 0;// -1 : false, 1: true
 	soilTextureCode stCode;
 	int stCellValue = -1;//토성레이어의 값, VAT참조 // 0 값은 상수를 의미하게 한다.
-	double hydraulicC_K_mPsec = -1.0;//현재 CV 토양의 수리전도도[m/s] 모델링 적용값
-	double HydraulicC_Kori_mPsec = -1.0;//현재 CV 토양의 수리전도도[m/s] GRM default
+	double hc_K_mPsec = -1.0;//현재 CV 토양의 수리전도도[m/s] 모델링 적용값
+	double hc_Kori_mPsec = -1.0;//현재 CV 토양의 수리전도도[m/s] GRM default
 	double effPorosity_ThetaE = -1.0;//현재 CV 토양의 유효공극률 모델링 적용값. 무차원. 0~1
 	double effPorosity_ThetaEori = -1.0;//현재 CV 토양의 유효공극률 grm default. 무차원. 0~1
 	double porosity_Eta = -1.0;//현재 CV 토양의 공극률 모델링 적용값. 무차원. 0~1
@@ -563,7 +564,7 @@ typedef struct _cvAtt
 	double rcOFori = -1.0;//현재 CV 토지피복의 grm default 지표면 조도계수
 	flowControlType fcType;//현재 CV에 부여된 Flow control 종류
 	double storageCumulative_m3 = -1.0;//현재 CV에서 flow control 모의시 누적 저류량[m^3]
-	double StorageAddedForDTfromRF_m3 = -1.0;//현재 CV에서 flow control 모의시 dt 시간동안의 강우에 의해서 추가되는 저류량[m^3/dt]
+	double storageAddedForDTbyRF_m3 = -1.0;//현재 CV에서 flow control 모의시 dt 시간동안의 강우에 의해서 추가되는 저류량[m^3/dt]
 } cvAtt;
 
 typedef struct _projectFile
@@ -669,7 +670,17 @@ typedef struct _globalVinner // 계산 루프로 전달하기 위한 최소한의 전역 변수. gp
 } globalVinner;
 
 
+double calBFlowAndGetCSAaddedByBFlow(int i, 
+	int dtsec, 	double cellSize_m);//i는 cv array index
+double calRFlowAndSSFlow(int i,
+	int dtsec, double dy_m); // 현재 cv의 Return flow는 상류에서 유입되는 ssflwo로 계산하고, 현재 cv에서의 ssf는 현재 셀의 수분함량으로 계산한다.
+void calBFLateralMovement(int i,
+	int facMin, double dY_m, double dtsec);
 void calCumulativeRFDuringDTPrintOut(int dtsec);
+void calFCReservoirOutFlow(double nowTmin, int i); //i는 cv array index
+void calEffectiveRainfall(int i, int dtrf_sec, int dtsec);
+void calOverlandFlow(int i, double hCVw_tp1,
+	double effDy_m);
 
 void disposeDynamicVars();
 int deleteAllOutputFiles();
@@ -681,6 +692,7 @@ double getChCSAbyFlowDepth(double LRBaseWidth,
 	double LRArea, double URBaseWidth);
 double getChCSAbyQusingIteration(cvAtt cv, 
 	double CSAini, double Q_m3Ps);
+double getChCSAaddedBySSFlow(int i);
 double getChannelCrossSectionPerimeter(double LRegionBaseWidth,
 	double sideSlopeRightBank, double sideSlopeLeftBank,
 	double crossSectionDepth, bool isCompoundCrossSection,
@@ -694,11 +706,14 @@ double getChannelDepthUsingArea(double baseWidthLRegion,
 int getDTsec(double cfln, double dx, 
 	double vMax, int dtMax_min, 
 	int dtMin_min);
+double getinfiltrationForDtAfterPonding(int i, int dtSEC,
+	double CONSTGreenAmpt, double Kapp);
 projectfilePathInfo getProjectFileInfo(string fpn_prj);
 flowDirection8 getFlowDirection(int fdirV, 
 	flowDirectionType fdType);
 void grmHelp();
 
+void updatetCVbyRFandSoil(int i); // i는 cv array index
 int initOutputFiles();
 void initThisSimulation();
 int initWatershedNetwork();
@@ -710,6 +725,8 @@ int isNormalWatchPointInfo(wpLocationRC awp);
 int isNormalSoilTextureInfo(soilTextureInfo ast);
 int isNormalSoilDepthInfo(soilDepthInfo asd);
 int isNormalLandCoverInfo(landCoverInfo alc);
+
+double Kunsaturated(cvAtt cv);
 
 int makeNewOutputFiles();
 
@@ -746,31 +763,30 @@ int simulateRunoff(double nowTmin);
 void simulateRunoffCore(int i, double nowTmin);
 int startSimulationSingleEvent();
 
+double totalSSFfromCVwOFcell_m3Ps(int i);
+
 int updateWatershedNetwork();
 int updateCVbyUserSettings();
 int updateFCCellinfoAndData();
 
+
+inline double confirmSoilSaturationRaito(double curssr,
+	double cumulinfiltration, double effSoilDepth,
+	cellFlowType flowType);
 inline double rfintensity_mPsec(double rf_mm, 
 	double dtrf_sec);
-
-
-inline double rfintensity_mPsec(double rf_mm, double dtrf_sec)
-{
-	if (rf_mm <= 0) { return 0; }
-	else { return rf_mm / 1000.0 / dtrf_sec; }
-}
-
 inline double rfApp_dt_m(double rfi_mPs,
-	int dtsec, double cellSize, double cvDX_m)
-{
-	if (rfi_mPs == 0) {
-		return rfi_mPs;
-	}
-	else {
-		return rfi_mPs * dtsec * (cellSize / cvDX_m);
-	}
-	return rfi_mPs;
-}
+	int dtsec, double cellSize, double cvDX_m);
+inline void setNoFluxCVCH(int i);
+inline void setNoFluxCVOF(int i);
+inline void setNoInfiltrationParameters(int i);
+inline void setWaterAreaInfiltrationPars(int i);
+inline double soilSaturationRaitoByCumulF(double cumulinfiltration,
+	double effSoilDepth, cellFlowType flowType);
+inline  double vByManningEq(double hydraulicRaidus,
+	double slope, double nCoeff);
+inline double waterDepthCanBeInfiltrated(double preDepth,
+	double maxDepth, double maxINFILbeCalculated);
 
 
 // extern C

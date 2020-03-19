@@ -396,7 +396,7 @@ int readSoilTextureFileAndSetCVbyVAT()
                         cvs[idx].porosity_EtaOri = st.porosity;
                         cvs[idx].effPorosity_ThetaEori = st.effectivePorosity;
                         cvs[idx].wfsh_PsiOri_m = st.WFSuctionHead / 100.0;  // cm -> m
-                        cvs[idx].HydraulicC_Kori_mPsec = st.hydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
+                        cvs[idx].hc_Kori_mPsec = st.hydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
                         cvs[idx].stCode = st.stCode;
                     }
                     else {
@@ -413,7 +413,7 @@ int readSoilTextureFileAndSetCVbyVAT()
                     cvs[idx].porosity_EtaOri = st.porosity;
                     cvs[idx].effPorosity_ThetaEori = st.effectivePorosity;
                     cvs[idx].wfsh_PsiOri_m = st.WFSuctionHead / 100.0;  // cm -> m
-                    cvs[idx].HydraulicC_Kori_mPsec = st.hydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
+                    cvs[idx].hc_Kori_mPsec = st.hydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
                     cvs[idx].stCode = st.stCode;
                 }
             }
@@ -457,7 +457,7 @@ int setCVbySTConstant()
                 cvs[idx].porosity_EtaOri = prj.cnstSoilPorosity;
                 cvs[idx].effPorosity_ThetaEori = prj.cnstSoilEffPorosity;
                 cvs[idx].wfsh_PsiOri_m = prj.cnstSoilWFSH / 100.0;  // cm -> m
-                cvs[idx].HydraulicC_Kori_mPsec = prj.cnstSoilHydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
+                cvs[idx].hc_Kori_mPsec = prj.cnstSoilHydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
                 cvs[idx].stCode =  soilTextureCode::CONSTV;
             }
         }

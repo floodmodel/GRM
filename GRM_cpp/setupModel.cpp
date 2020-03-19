@@ -290,11 +290,11 @@ int updateCVbyUserSettings()
         if (cvs[i].effPorosity_ThetaE >= 1) { cvs[i].effPorosity_ThetaE = 0.99; }
         if (cvs[i].effPorosity_ThetaE <= 0) { cvs[i].effPorosity_ThetaE = 0.01; }
         cvs[i].wfsh_Psi_m = cvs[i].wfsh_PsiOri_m * ups.ccWFSuctionHead;
-        cvs[i].hydraulicC_K_mPsec = cvs[i].HydraulicC_Kori_mPsec * ups.ccHydraulicK;
+        cvs[i].hc_K_mPsec = cvs[i].hc_Kori_mPsec * ups.ccHydraulicK;
         cvs[i].sd_m = cvs[i].sdOri_m * ups.ccSoilDepth;
         cvs[i].sdEffAsWaterDepth_m = cvs[i].sd_m * cvs[i].effPorosity_ThetaE;
-        cvs[i].soilWaterContent_m = cvs[i].sdEffAsWaterDepth_m * cvs[i].ssr;
-        cvs[i].soilWaterContent_tm1_m = cvs[i].soilWaterContent_m;
+        cvs[i].soilWaterC_m = cvs[i].sdEffAsWaterDepth_m * cvs[i].ssr;
+        cvs[i].soilWaterC_tm1_m = cvs[i].soilWaterC_m;
         cvs[i].sdToBedrock_m = CONST_DEPTH_TO_BEDROCK; // 암반까지의 깊이를 20m로 가정, 산악지역에서는 5m
         if (cvs[i].lcCode == landCoverCode::FRST) {
             cvs[i].sdToBedrock_m = CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN;

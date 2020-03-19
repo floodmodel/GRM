@@ -6,120 +6,155 @@
 extern projectFile prj;
 extern domaininfo di;
 extern cvAtt* cvs;
-extern map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
 
 extern thisSimulation ts;
 
-int simulateRunoff(double nowTmin)
-{
-    int maxLimit = di.facMax + 1;
-    for (int fac = 0; fac < maxLimit; ++fac) {
-        if (cvaisToFA[fac].size() > 0) {
-            double uMax = 0;
-#pragma omp parallel
-            {
-                int iterLimit = cvaisToFA[fac].size();
-                omp_set_num_threads(prj.maxDegreeOfParallelism);
-                // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
-                // VS2019는 openMP 2.0 지원, 그러므로 critical 사용한다.
-#pragma omp for schedule(guided)
-                for (int i = 0; i < iterLimit; ++i) {
-                    if (cvs[i].toBeSimulated == 1) {
-                        simulateRunoffCore( i, nowTmin);
-                        if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                            uMax = cvs[i].uOF;
-                        }
-                        else {
-                            uMax = cvs[i].stream.uCH;
-                        }
-                    }
-                }
-#pragma omp critical(getVmax)
-                {
-                    if (ts.vMaxInThisStep < uMax) {
-                        ts.vMaxInThisStep = uMax;
-                    }
-                }
-            }
 
+void updatetCVbyRFandSoil(int i)
+{
+    int dtrf_sec = prj.rfinterval_min * 60;
+    double dY_m = di.cellSize;
+    double effOFdYinCHnOFcell = 0;
+    int dt_sec = ts.dtsec;
+    double CVdx_m = cvs[i].cvdx_m;
+    double chCSAaddedByBFlow_m2 = 0;
+    double ofDepthAddedByRFlow_m2 = 0;
+    double chCSAaddedBySSFlow_m2 = 0;
+    cvs[i].rfApp_dt_m = rfApp_dt_m(cvs[i].rfiRead_mPsec, dt_sec, di.cellSize, cvs[i].cvdx_m);
+    if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
+        effOFdYinCHnOFcell = dY_m - cvs[i].stream.chBaseWidth;
+    }
+    if (prj.simBaseFlow == 1) {
+        chCSAaddedByBFlow_m2 = calBFlowAndGetCSAaddedByBFlow(i, dt_sec, dY_m);
+    }
+    if (prj.simSubsurfaceFlow == 1) {
+        switch (cvs[i].flowType) {
+        case cellFlowType::OverlandFlow: {
+            ofDepthAddedByRFlow_m2 = calRFlowAndSSFlow(i, dt_sec, dY_m);
+            break;
+        }
+        case cellFlowType::ChannelFlow: {
+            chCSAaddedBySSFlow_m2 = getChCSAaddedBySSFlow(i);
+            break;
+        }
+        case cellFlowType::ChannelNOverlandFlow: {
+            ofDepthAddedByRFlow_m2 = calRFlowAndSSFlow(i,
+                dt_sec, effOFdYinCHnOFcell);
+            chCSAaddedBySSFlow_m2 = getChCSAaddedBySSFlow(i);
+            break;
+        }
         }
     }
-    return 1;
+    calEffectiveRainfall(i, dtrf_sec, dt_sec);
+    switch (cvs[i].flowType) {
+    case cellFlowType::OverlandFlow: {
+        cvs[i].hOF_ori = cvs[i].hOF + cvs[i].rfEff_dt_m + ofDepthAddedByRFlow_m2;
+        cvs[i].hOF = cvs[i].hOF_ori;
+        cvs[i].csaOF = cvs[i].hOF_ori * dY_m;
+        cvs[i].storageAddedForDTbyRF_m3 = cvs[i].rfEff_dt_m * dY_m * CVdx_m;
+        break;
+    }
+    case cellFlowType::ChannelFlow: {
+        double ChWidth = cvs[i].stream.chBaseWidth;
+        cvs[i].stream.hCH_ori = cvs[i].stream.hCH + cvs[i].rfApp_dt_m
+            + chCSAaddedBySSFlow_m2 / ChWidth
+            + chCSAaddedByBFlow_m2 / ChWidth;
+        cvs[i].stream.csaCH_ori = getChCSAbyFlowDepth(ChWidth,
+            cvs[i].stream.bankCoeff, cvs[i].stream.hCH_ori,
+            cvs[i].stream.isCompoundCS, cvs[i].stream.chLRHeight,
+            cvs[i].stream.chLRArea_m2, cvs[i].stream.chURBaseWidth_m);
+        cvs[i].stream.hCH = cvs[i].stream.hCH_ori;
+        cvs[i].stream.csaCH = cvs[i].stream.csaCH_ori;
+        cvs[i].storageAddedForDTbyRF_m3 = cvs[i].rfApp_dt_m * dY_m * CVdx_m;
+        break;
+    }
+    case cellFlowType::ChannelNOverlandFlow: {
+        double chCSAAddedByOFInChCell_m2;
+        double ChWidth = cvs[i].stream.chBaseWidth;
+        cvs[i].hOF_ori = cvs[i].hOF + cvs[i].rfEff_dt_m + ofDepthAddedByRFlow_m2;
+        cvs[i].hOF = cvs[i].hOF_ori;
+        cvs[i].csaOF = cvs[i].hOF_ori * effOFdYinCHnOFcell;
+        if (cvs[i].hOF > 0) {
+            calOverlandFlow(i, 0, effOFdYinCHnOFcell);
+        }
+        else {
+            cvs[i].hOF = 0;
+            cvs[i].uOF = 0;
+            cvs[i].csaOF = 0;
+            cvs[i].QOF_m3Ps = 0;
+        }
+        if (cvs[i].QOF_m3Ps > 0) {
+            chCSAAddedByOFInChCell_m2 = cvs[i].csaOF;
+        }
+        else {
+            chCSAAddedByOFInChCell_m2 = 0;
+        }
+        cvs[i].stream.csaChAddedByOFinCHnOFcell = chCSAAddedByOFInChCell_m2;
+        cvs[i].stream.hCH_ori = cvs[i].stream.hCH + cvs[i].rfApp_dt_m
+            + chCSAaddedBySSFlow_m2 / ChWidth
+            + chCSAaddedByBFlow_m2 / ChWidth;
+        if (cvs[i].stream.hCH_ori < 0) { cvs[i].stream.hCH_ori = 0; }
+        cvs[i].stream.csaCH_ori = getChCSAbyFlowDepth(ChWidth,
+            cvs[i].stream.bankCoeff, cvs[i].stream.hCH_ori,
+            cvs[i].stream.isCompoundCS, cvs[i].stream.chLRHeight,
+            cvs[i].stream.chLRArea_m2, cvs[i].stream.chURBaseWidth_m);
+        cvs[i].stream.hCH = cvs[i].stream.hCH_ori;
+        cvs[i].stream.csaCH = cvs[i].stream.csaCH_ori;
+        cvs[i].storageAddedForDTbyRF_m3 = cvs[i].rfApp_dt_m * ChWidth * CVdx_m
+            + cvs[i].rfEff_dt_m * effOFdYinCHnOFcell * CVdx_m;
+        break;
+    }
+    }
+    cvs[i].QsumCVw_dt_m3 = 0;
 }
 
-void simulateRunoffCore(int i, double nowTmin)
+void calOverlandFlow(int i, double hCVw_tp1, double effDy_m)
 {
-    int fac = cvs[i].fac;
-    int dtsec = ts.dtsec;
-    double cellsize = di.cellSize;
-    //이거 InitializeCVForThisStep()여기로 옮길 수 있는지?
-    cvs[i].rfApp_dt_m = rfApp_dt_m(cvs[i].rfiRead_mPsec, dtsec, cellsize, cvs[i].cvdx_m);
-    if (project.generalSimulEnv.mbSimulateFlowControl == true &&
-        (project.CVs[cvan].FCType == cFlowControl.FlowControlType.ReservoirOutflow ||
-            project.CVs[cvan].FCType == cFlowControl.FlowControlType.Inlet))
-    {
-        cFlowControl.CalFCReservoirOutFlow(project, nowT_min, cvan);
+    double constHp_j = cvs[i].hOF;
+    double CONST_DtPDx = ts.dtsec / cvs[i].cvdx_m;
+    double Hp_n = constHp_j;
+    double hCVw_n = hCVw_tp1;
+    double uCVw_n = 0;
+    double cCVw_n = 0;
+    if (hCVw_n > 0) {
+        uCVw_n = vByManningEq(hCVw_n, cvs[i].slopeOF, cvs[i].rcOF);
+        cCVw_n = uCVw_n * CONST_DtPDx * hCVw_n;
     }
-    else
-    {
-        InitializeCVForThisStep(project, cvan);
-        if (project.CVs[cvan].FlowType == cGRM.CellFlowType.OverlandFlow)
-        {
-            double hCVw_i_jP1 = 0;
-            if (fac > 0)
-            {
-                hCVw_i_jP1 = mFVMSolver.CalculateOverlandWaterDepthCViW(project, cvan);
-            }
-            if (hCVw_i_jP1 > 0 || project.CVs[cvan].hCVof_i_j > 0)
-            {
-                mFVMSolver.CalculateOverlandFlow(project.CVs[cvan], hCVw_i_jP1, project.watershed.mCellSize);
-            }
-            else
-            {
-                mFVMSolver.SetNoFluxOverlandFlowCV(project.CVs[cvan]);
-            }
+    for (int iter = 0; iter < 20000; iter++) {
+        double hCVe_n = Hp_n;
+        double uCVe_n = vByManningEq(hCVe_n, cvs[i].slopeOF, cvs[i].rcOF);
+        double cCVe_n = uCVe_n * CONST_DtPDx * hCVe_n;
+        // Newton-Raphson
+        double Fx = Hp_n - cCVw_n + cCVe_n - constHp_j;
+        double dFx;
+        dFx = 1 + (1.66667 * CONST_DtPDx
+            * pow((hCVe_n), (0.66667)) * (pow(cvs[i].slopeOF, 0.5)) 
+            / cvs[i].rcOF);
+        double Hp_nP1 = (Hp_n - Fx / dFx);
+        if (Hp_nP1 <= 0) {
+            setNoFluxCVOF(i);
+            break;
         }
-        else if (project.CVs[cvan].FlowType == cGRM.CellFlowType.ChannelFlow
-            || project.CVs[cvan].FlowType == cGRM.CellFlowType.ChannelNOverlandFlow)
-        {
-            double CSAchCVw_i_jP1 = 0;
-            if (fac > 0)
-            {
-                CSAchCVw_i_jP1 = mFVMSolver.CalChCSA_CViW(project.CVs, cvan);
-            }
-            if (CSAchCVw_i_jP1 > 0 || project.CVs[cvan].mStreamAttr.hCVch_i_j > 0)
-            {
-                mFVMSolver.CalculateChannelFlow(project.CVs[cvan], CSAchCVw_i_jP1);
-            }
-            else
-            {
-                mFVMSolver.SetNoFluxChannelFlowCV(project.CVs[cvan]);
-            }
+        double tolerance = Hp_n * CONST_TOLERANCE;
+        double err = abs(Hp_nP1 - Hp_n);
+        if (err < tolerance) {
+            cvs[i].hOF = Hp_nP1;
+            cvs[i].uOF = vByManningEq(Hp_nP1, cvs[i].slopeOF, cvs[i].rcOF);
+            cvs[i].csaOF = Hp_nP1 * effDy_m;
+            cvs[i].QOF_m3Ps = cvs[i].csaOF * cvs[i].uOF;
+            break;
         }
-    }
-    if (project.generalSimulEnv.mbSimulateFlowControl == true
-        && (project.CVs[cvan].FCType == cFlowControl.FlowControlType.SinkFlow
-            || project.CVs[cvan].FCType == cFlowControl.FlowControlType.SourceFlow
-            || project.CVs[cvan].FCType == cFlowControl.FlowControlType.ReservoirOperation))
-    {
-        Dataset.GRMProject.FlowControlGridRow[] rows =
-            (Dataset.GRMProject.FlowControlGridRow[])project.fcGrid.mdtFCGridInfo.Select("CVID = " + (cvan + 1));
-        Dataset.GRMProject.FlowControlGridRow row = rows[0];
-        double v;
-        if (double.TryParse(row.MaxStorage, out v) == false || double.TryParse(row.MaxStorageR, out v) == false ||
-            System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR) == 0)
-        {
-            cFlowControl.CalFCSinkOrSourceFlow(project, nowT_min, cvan);
-        }
-        else
-        {
-            cFlowControl.CalFCReservoirOperation(project, cvan, nowT_min);
-        }
+        Hp_n = Hp_nP1;
     }
 }
 
-double getChCSAbyFlowDepth(double LRBaseWidth, double chBankConst,
-    double crossSectionDepth, bool isCompoundCS, double LRHeight,
+
+
+
+
+double getChCSAbyFlowDepth(double LRBaseWidth,
+    double chBankConst, double crossSectionDepth,
+    bool isCompoundCS, double LRHeight,
     double LRArea, double URBaseWidth)
 {
     if ((isCompoundCS == true)
@@ -242,3 +277,25 @@ double getChannelCrossSectionPerimeter(double LRegionBaseWidth,
     }
     return dtsec;
 }
+
+ inline  double vByManningEq(double hydraulicRaidus,
+     double slope, double nCoeff)
+ {
+     return pow(hydraulicRaidus, 0.66667) * sqrt(slope) / nCoeff;
+ }
+
+inline void setNoFluxCVCH(int i)
+ {
+    cvs[i].stream.hCH = 0;
+    cvs[i].stream.uCH = 0;
+    cvs[i].stream.csaCH = 0;
+    cvs[i].stream.QCH_m3Ps = 0;
+ }
+
+ inline void setNoFluxCVOF(int i)
+ {
+     cvs[i].hOF = 0;
+     cvs[i].uOF = 0;
+     cvs[i].csaOF = 0;
+     cvs[i].QOF_m3Ps = 0;
+ }
