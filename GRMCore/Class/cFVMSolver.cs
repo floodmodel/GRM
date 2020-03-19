@@ -283,7 +283,9 @@ namespace GRMCore
         /// <param name="upperRegionBaseWidth"></param>
         /// <returns></returns>
         /// <remarks></remarks>
-        public double GetChannelCrossSectionAreaUsingChannelFlowDepth(double lowerRegionBaseWidth, double chBankConst, double crossSectionDepth, bool isCompoundCrossSection, double lowerRegionHeight, double lowerRegionArea, double upperRegionBaseWidth)
+        public double GetChannelCrossSectionAreaUsingChannelFlowDepth(double lowerRegionBaseWidth, 
+            double chBankConst, double crossSectionDepth, bool isCompoundCrossSection,
+            double lowerRegionHeight, double lowerRegionArea, double upperRegionBaseWidth)
         {
             if ((isCompoundCrossSection == true))
             {
