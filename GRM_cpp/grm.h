@@ -711,6 +711,7 @@ double getinfiltrationForDtAfterPonding(int i, int dtSEC,
 projectfilePathInfo getProjectFileInfo(string fpn_prj);
 flowDirection8 getFlowDirection(int fdirV, 
 	flowDirectionType fdType);
+double getOverlandFlowDepthCVw(int i);
 void grmHelp();
 
 void updatetCVbyRFandSoil(int i); // i´Â cv array index

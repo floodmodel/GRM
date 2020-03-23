@@ -279,7 +279,7 @@ void simulateRunoffCore(int i, double nowTmin)
         if (cvs[i].flowType == cellFlowType::OverlandFlow) {
             double hCVw_tp1 = 0;
             if (fac > 0) {
-                hCVw_tp1 = mFVMSolver.CalculateOverlandWaterDepthCViW(project, i);
+                hCVw_tp1 = getOverlandFlowDepthCVw(i);
             }
             if (hCVw_tp1 > 0 || cvs[i].hOF > 0) {
                 calOverlandFlow(i, hCVw_tp1, cellsize);

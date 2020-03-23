@@ -149,7 +149,32 @@ void calOverlandFlow(int i, double hCVw_tp1, double effDy_m)
 }
 
 
-
+double getOverlandFlowDepthCVw(int i)
+{
+    double qSumToCViM1 = 0;
+    double qCViM1;
+    double qWn_i;
+    int effCellCountFlowToCViW;
+    effCellCountFlowToCViW = cvs[i].neighborCVIDsFlowIntoMe.size();
+    for(int cvid : cvs[i].neighborCVIDsFlowIntoMe)    {
+        qCViM1 = project.CVs[cvid - 1].QCVof_i_j_m3Ps / project.watershed.mCellSize; // 단위폭당 유량
+        if (qCViM1 <= 0.0)
+        {
+            effCellCountFlowToCViW = effCellCountFlowToCViW - 1;
+            qCViM1 = 0;
+        }
+        qSumToCViM1 = qSumToCViM1 + qCViM1;
+        project.CVs[cvan].QsumCVw_dt_m3 = project.CVs[cvan].QsumCVw_dt_m3
+            + project.CVs[cvid - 1].QCVof_i_j_m3Ps * sThisSimulation.dtsec;
+    }
+    if (effCellCountFlowToCViW < 1)
+    {
+        effCellCountFlowToCViW = 1;
+    }
+    project.CVs[cvan].effCVCountFlowINTOCViW = effCellCountFlowToCViW;
+    qWn_i = Math.Pow(project.CVs[i].RoughnessCoeffOF * qSumToCViM1 / Math.Sqrt(project.CVs[i].SlopeOF), 0.6);
+    return qWn_i;
+}
 
 
 double getChCSAbyFlowDepth(double LRBaseWidth,
