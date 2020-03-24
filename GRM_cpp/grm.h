@@ -377,20 +377,20 @@ typedef struct _flowControlinfo
 	flowControlType fcType = flowControlType::None;
 	double fcDT_min = 0.0;
 	string fpnFCData = "";
-	double iniStorage = -1.0;
-	double maxStorage = -1.0;
+	double iniStorage_m3 = -1.0;
+	double maxStorage_m3 = -1.0;
 	double maxStorageR = -1.0;
 	reservoirOperationType roType= reservoirOperationType::None;
-	double roConstQ = -1.0;
-	double roConstQDuration = -1.0;
+	double roConstQ_cms = -1.0;
+	double roConstQDuration_hr = -1.0;
 } flowControlinfo;
 
 typedef struct _flowControlCellAndData
 {
-	map <int, double> fcDataAppliedNowT;// <cvid, value>현재의 모델링 시간(t)에 적용된 flow control data 값
+	map <int, double> fcDataAppliedNowT_m3Ps;// <cvid, value>현재의 모델링 시간(t)에 적용된 flow control data 값
 	vector<int> cvidsinlet;
 	vector<int> cvidsFCcell;
-	map<int, vector<timeSeries>> flowData; //<cvid, data>, 분단위
+	map<int, vector<timeSeries>> flowData_m3Ps; //<cvid, data>, 분단위
 	map<int, int> curDorder;// <cvid, order>현재 적용될 데이터의 순서
 } flowControlCellAndData;
 
@@ -503,9 +503,9 @@ typedef struct _cvAtt
 	int fac = -1;//흐름누적수, 자신의 셀을 제외하고, 상류에 있는 격자 개수
 	double dxDownHalf_m = -1.0;//격자 중심으로부터 하류방향 격자면까지의 거리
 	double dxWSum = -1.0;//격자 중심으로부터 상류방향 격자면까지의 거리합
-	vector<int> neighborCVIDsFlowIntoMe;//현재 셀로 흘러 들어오는 인접셀의 ID, 최대 7개
+	vector<int> neighborCVIDsFlowintoMe;//현재 셀로 흘러 들어오는 인접셀의 ID, 최대 7개
 	int downCellidToFlow = -1; //흘러갈 직하류셀의 ID
-	int effCVCountFlowintoCViw = -1;//인접상류셀 중 실제 유출이 발생하는 셀들의 개수
+	int effCVnFlowintoCVw = -1;//인접상류셀 중 실제 유출이 발생하는 셀들의 개수
 	double cvdx_m;//모델링에 적용할 검사체적의 X방향 길이
 	vector<int> downWPCVIDs;//현재 CV 하류에 있는 watchpoint 들의 CVid 들
 	int toBeSimulated = 0; // -1 : false, 1 : true //현재의 CV가 모의할 셀인지 아닌지 표시
@@ -676,29 +676,40 @@ double calRFlowAndSSFlow(int i,
 	int dtsec, double dy_m); // 현재 cv의 Return flow는 상류에서 유입되는 ssflwo로 계산하고, 현재 cv에서의 ssf는 현재 셀의 수분함량으로 계산한다.
 void calBFLateralMovement(int i,
 	int facMin, double dY_m, double dtsec);
+void calChannelFlow(int i, double chCSACVw_tp1);
 void calCumulativeRFDuringDTPrintOut(int dtsec);
-void calFCReservoirOutFlow(double nowTmin, int i); //i는 cv array index
+void calFCReservoirOutFlow(int i, double nowTmin); //i는 cv array index
 void calEffectiveRainfall(int i, int dtrf_sec, int dtsec);
 void calOverlandFlow(int i, double hCVw_tp1,
 	double effDy_m);
+void calReservoirAutoROM(int i, double maxStorageApp);
+void calReservoirConstantQ(int i, double roQ_CONST_CMS, 
+	double maxStorageApp, int bOutflowDuration);
+void calReservoirOperation(int i, int nowTmin);
+void calReservoirOutFlowInReservoirOperation(int i,
+	double Qout_cms, double dy_m);
+void calReservoirRigidROM(int i, double maxStorageApp,
+	double roQ_CONST_CMS);
+void calSinkOrSourceFlow(int i, int nowTmin);
 
 void disposeDynamicVars();
 int deleteAllOutputFiles();
 int deleteAllFilesExceptDischarge();
 
+double getChCSAatCVW(int i);
 double getChCSAbyFlowDepth(double LRBaseWidth, 
 	double chBankConst,	double crossSectionDepth,
 	bool isCompoundCS, double LRHeight,
 	double LRArea, double URBaseWidth);
-double getChCSAbyQusingIteration(cvAtt cv, 
+double getChCSAusingQbyiteration(cvAtt cv, 
 	double CSAini, double Q_m3Ps);
 double getChCSAaddedBySSFlow(int i);
-double getChannelCrossSectionPerimeter(double LRegionBaseWidth,
+double getChCrossSectionPerimeter(double LRegionBaseWidth,
 	double sideSlopeRightBank, double sideSlopeLeftBank,
 	double crossSectionDepth, bool isCompoundCrossSection,
 	double LRegionHeight, double LRegionArea,
 	double URegionBaseWidth);
-double getChannelDepthUsingArea(double baseWidthLRegion,
+double getChDepthUsingCSA(double baseWidthLRegion,
 	double chCSAinput, bool isCompoundCrossSection,
 	double baseWidthURegion, double LRegionArea,
 	double LRegionHeight, double chBankConst);

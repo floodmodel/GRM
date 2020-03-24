@@ -627,7 +627,7 @@ int setFlowNetwork()
         for (int cx = 0; cx < di.nCols; cx++) {
             int idx = cvais[cx][ry];// current cell index
             if (idx >= 0) {
-                cvs[idx].neighborCVIDsFlowIntoMe.clear();
+                cvs[idx].neighborCVIDsFlowintoMe.clear();
                 cvs[idx].downWPCVIDs.clear();
             }
         }
@@ -717,7 +717,7 @@ int setFlowNetwork()
                     }
                     else {
                         int tidx = cvais[tCx][tRy]; // target cell index
-                        cvs[tidx].neighborCVIDsFlowIntoMe.push_back(cvs[cidx].cvid);
+                        cvs[tidx].neighborCVIDsFlowintoMe.push_back(cvs[cidx].cvid);
                         cvs[tidx].dxWSum = cvs[tidx].dxWSum + dxe;
                         cvs[cidx].downCellidToFlow = cvs[tidx].cvid;// 흘러갈 방향의 cellid를 현재 셀의 정보에 기록
                         if (cvs[cidx].wsid != cvs[tidx].wsid) {

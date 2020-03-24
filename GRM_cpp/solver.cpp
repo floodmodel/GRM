@@ -148,34 +148,165 @@ void calOverlandFlow(int i, double hCVw_tp1, double effDy_m)
     }
 }
 
+void calChannelFlow(int i, double chCSACVw_tp1)
+{
+    double dtPdx = ts.dtsec / cvs[i].cvdx_m;
+    double HRch = 0.0;
+    double CSPer = 0.0;
+    double hChCVw_tp1 = 0.0;
+    double uCVw_n = 0.0;
+    double cChCVw_n = 0.0;
+    if (chCSACVw_tp1 > 0) {
+        hChCVw_tp1 = getChDepthUsingCSA(cvs[i].stream.chBaseWidth,
+            chCSACVw_tp1, cvs[i].stream.isCompoundCS,
+            cvs[i].stream.chURBaseWidth_m, cvs[i].stream.chLRArea_m2,
+            cvs[i].stream.chLRHeight, cvs[i].stream.bankCoeff);
+        CSPer = getChCrossSectionPerimeter(cvs[i].stream.chBaseWidth,
+            cvs[i].stream.chSideSlopeRight, cvs[i].stream.chSideSlopeLeft,
+            hChCVw_tp1, cvs[i].stream.isCompoundCS,
+            cvs[i].stream.chLRHeight, cvs[i].stream.chLRArea_m2,
+            cvs[i].stream.chURBaseWidth_m);
+        HRch = chCSACVw_tp1 / CSPer;
+        uCVw_n = vByManningEq(HRch, cvs[i].stream.chBedSlope,
+            cvs[i].stream.chRC);
+        cChCVw_n = uCVw_n * dtPdx * chCSACVw_tp1;
+    }
+    double constCSAchCVp_j = cvs[i].stream.csaCH;
+    double CSAp_n = constCSAchCVp_j;
+    double hChp_n = cvs[i].stream.hCH;
+    for (int iter = 0; iter < 20000; iter++) {
+        double hChCVe_n = hChp_n;
+        double CSAChCVe_n = CSAp_n;
+        CSPer = getChCrossSectionPerimeter(cvs[i].stream.chBaseWidth,
+            cvs[i].stream.chSideSlopeRight, cvs[i].stream.chSideSlopeLeft,
+            hChCVe_n, cvs[i].stream.isCompoundCS, cvs[i].stream.chLRHeight,
+            cvs[i].stream.chLRArea_m2, cvs[i].stream.chURBaseWidth_m);
+        HRch = CSAChCVe_n / CSPer;
+        double u_n = vByManningEq(HRch, cvs[i].stream.chBedSlope,
+            cvs[i].stream.chRC);
+        double cChCVe_n = u_n * dtPdx * CSAChCVe_n;
+        // Newton-Raphson
+        double Fx = CSAp_n - cChCVw_n + cChCVe_n - constCSAchCVp_j;
+        double dFx;
+        dFx = 1 + (1.66667 * pow(CSAChCVe_n, 0.66667)
+            * sqrt(cvs[i].stream.chBedSlope) * dtPdx
+            / (cvs[i].stream.chRC * pow(CSPer, 0.66667)));
+        double CSAch_nP1 = CSAp_n - Fx / dFx;
+        if (CSAch_nP1 <= 0) {
+            setNoFluxCVCH(i);
+            break;
+        }
+        double Qn = u_n * CSAp_n;
+        HRch = CSAch_nP1 / CSPer;
+        double u_nP1 = vByManningEq(HRch, cvs[i].stream.chBedSlope,
+            cvs[i].stream.chRC);
+        double QnP1 = u_nP1 * CSAch_nP1;
+        double tolerance = Qn * CONST_TOLERANCE;
+        double err = abs(Qn - QnP1);
+        double hCh_nP1 = getChDepthUsingCSA(cvs[i].stream.chBaseWidth,
+            CSAch_nP1, cvs[i].stream.isCompoundCS,
+            cvs[i].stream.chURBaseWidth_m, cvs[i].stream.chLRArea_m2,
+            cvs[i].stream.chLRHeight, cvs[i].stream.bankCoeff);
+        if (err < tolerance) {
+            cvs[i].stream.hCH = hCh_nP1;
+            cvs[i].stream.uCH = u_nP1;
+            cvs[i].stream.csaCH = CSAch_nP1;
+            cvs[i].stream.QCH_m3Ps = QnP1;
+            break;
+        }
+        CSAp_n = CSAch_nP1;
+        hChp_n = hCh_nP1;
+    }
+}
 
 double getOverlandFlowDepthCVw(int i)
 {
     double qSumToCViM1 = 0;
     double qCViM1;
     double qWn_i;
-    int effCellCountFlowToCViW;
-    effCellCountFlowToCViW = cvs[i].neighborCVIDsFlowIntoMe.size();
-    for(int cvid : cvs[i].neighborCVIDsFlowIntoMe)    {
-        qCViM1 = project.CVs[cvid - 1].QCVof_i_j_m3Ps / project.watershed.mCellSize; // 단위폭당 유량
-        if (qCViM1 <= 0.0)
-        {
-            effCellCountFlowToCViW = effCellCountFlowToCViW - 1;
+    int nEffCVFlowintoCVw;
+    nEffCVFlowintoCVw = cvs[i].neighborCVIDsFlowintoMe.size();
+    for (int cvid : cvs[i].neighborCVIDsFlowintoMe) {
+        qCViM1 = cvs[cvid - 1].QOF_m3Ps / di.cellSize; // 단위폭당 유량
+        if (qCViM1 <= 0.0) {
+            nEffCVFlowintoCVw = nEffCVFlowintoCVw - 1;
             qCViM1 = 0;
         }
         qSumToCViM1 = qSumToCViM1 + qCViM1;
-        project.CVs[cvan].QsumCVw_dt_m3 = project.CVs[cvan].QsumCVw_dt_m3
-            + project.CVs[cvid - 1].QCVof_i_j_m3Ps * sThisSimulation.dtsec;
+        cvs[i].QsumCVw_dt_m3 = cvs[i].QsumCVw_dt_m3
+            + cvs[cvid - 1].QOF_m3Ps * ts.dtsec;
     }
-    if (effCellCountFlowToCViW < 1)
-    {
-        effCellCountFlowToCViW = 1;
+    if (nEffCVFlowintoCVw < 1) {
+        nEffCVFlowintoCVw = 1;
     }
-    project.CVs[cvan].effCVCountFlowINTOCViW = effCellCountFlowToCViW;
-    qWn_i = Math.Pow(project.CVs[i].RoughnessCoeffOF * qSumToCViM1 / Math.Sqrt(project.CVs[i].SlopeOF), 0.6);
+    cvs[i].effCVnFlowintoCVw = nEffCVFlowintoCVw;
+    qWn_i = pow(cvs[i].rcOF * qSumToCViM1 / sqrt(cvs[i].slopeOF), 0.6);
     return qWn_i;
 }
 
+double getChCSAatCVW(int i)
+{    // w의 단면적 계산
+    double CSAe_iM1 = 0;
+    double CSAeSum_iM1 = 0;
+    double qSumCViM1_m3Ps = 0;
+    int nEffCVFlowintoCVw = cvs[i].neighborCVIDsFlowintoMe.size();
+    for (int cvid : cvs[i].neighborCVIDsFlowintoMe) {
+        double qCViM1_m3Ps = 0;
+        if (cvs[cvid - 1].flowType == cellFlowType::OverlandFlow) {
+            CSAe_iM1 = cvs[cvid - 1].csaOF;
+            qCViM1_m3Ps = cvs[cvid - 1].QOF_m3Ps;
+
+        }
+        else if (cvs[cvid - 1].flowType == cellFlowType::ChannelFlow
+            || cvs[cvid - 1].flowType == cellFlowType::ChannelNOverlandFlow) {
+            CSAe_iM1 = cvs[cvid - 1].stream.csaCH;
+            qCViM1_m3Ps = cvs[cvid - 1].stream.QCH_m3Ps;
+            if (cvs[cvid - 1].flowType == cellFlowType::ChannelNOverlandFlow) {
+                CSAe_iM1 = CSAe_iM1
+                    + cvs[cvid - 1].stream.csaChAddedByOFinCHnOFcell;
+                qCViM1_m3Ps = qCViM1_m3Ps + cvs[cvid - 1].QOF_m3Ps;
+            }
+        }
+        qSumCViM1_m3Ps = qSumCViM1_m3Ps + qCViM1_m3Ps;
+        CSAeSum_iM1 = CSAeSum_iM1 + CSAe_iM1;
+        if (qCViM1_m3Ps <= 0.0) {
+            nEffCVFlowintoCVw = nEffCVFlowintoCVw - 1;
+        }
+    }
+    cvs[i].QsumCVw_dt_m3 = cvs[i].QsumCVw_dt_m3
+        + qSumCViM1_m3Ps * ts.dtsec;
+    if (nEffCVFlowintoCVw < 1) { nEffCVFlowintoCVw = 1; }
+    cvs[i].effCVnFlowintoCVw = nEffCVFlowintoCVw;
+    if (CSAeSum_iM1 < CONST_WET_AND_DRY_CRITERIA) {
+        return 0;
+    }
+    double CSAw_n = CSAeSum_iM1;
+    double CSAw_nP1 = 0;
+    for (int iter = 0; iter < 100; ++iter) {
+        double hWn_i = getChDepthUsingCSA(cvs[i].stream.chBaseWidth, CSAw_n,
+            cvs[i].stream.isCompoundCS, cvs[i].stream.chURBaseWidth_m,
+            cvs[i].stream.chLRArea_m2, cvs[i].stream.chLRHeight,
+            cvs[i].stream.bankCoeff);
+        double chCSPeri = getChCrossSectionPerimeter(cvs[i].stream.chBaseWidth,
+            cvs[i].stream.chSideSlopeRight, cvs[i].stream.chSideSlopeLeft,
+            hWn_i, cvs[i].stream.isCompoundCS, cvs[i].stream.chLRHeight,
+            cvs[i].stream.chLRArea_m2, cvs[i].stream.chURBaseWidth_m);
+        double Fx = pow(CSAw_n, 1.66667) 
+            * pow(cvs[i].stream.chBedSlope, 0.5)
+            / (cvs[i].stream.chRC * pow(chCSPeri, 0.66667)) 
+            - qSumCViM1_m3Ps;
+        double dFx = 1.66667 * pow(CSAw_n, 0.66667) 
+            * pow(cvs[i].stream.chBedSlope, 0.5)
+            / (cvs[i].stream.chRC * pow(chCSPeri, 0.66667));
+        CSAw_nP1 = CSAw_n - Fx / dFx;
+        double err = abs(CSAw_nP1 - CSAw_n) / CSAw_n;
+        if (err < CONST_TOLERANCE) {
+            return CSAw_nP1;
+        }
+        CSAw_n = CSAw_nP1;
+    }
+    return CSAw_nP1;
+}
 
 double getChCSAbyFlowDepth(double LRBaseWidth,
     double chBankConst, double crossSectionDepth,
@@ -200,7 +331,7 @@ double getChCSAbyFlowDepth(double LRBaseWidth,
 }
 
 
-double getChCSAbyQusingIteration(cvAtt cv, double CSAini, double Q_m3Ps)
+double getChCSAusingQbyiteration(cvAtt cv, double CSAini, double Q_m3Ps)
 {
     if (Q_m3Ps <= 0) { return 0; }
     double CSA_nP1 = 0;
@@ -221,9 +352,9 @@ double getChCSAbyQusingIteration(cvAtt cv, double CSAini, double Q_m3Ps)
     double dFx;
     double ChCrossSecPer;
     for (int iter = 0; iter < 100; ++iter) {
-        double Hw_n = getChannelDepthUsingArea(cbw, CSA_n, bCompound,
+        double Hw_n = getChDepthUsingCSA(cbw, CSA_n, bCompound,
             bwURegion, AreaLR, hLR, bc);
-        ChCrossSecPer = getChannelCrossSectionPerimeter(cbw, cv.stream.chSideSlopeRight, 
+        ChCrossSecPer = getChCrossSectionPerimeter(cbw, cv.stream.chSideSlopeRight, 
             cv.stream.chSideSlopeLeft, Hw_n, bCompound, hLR, AreaLR, bwURegion);
         Fx = pow(CSA_n, 1.66667) * sqrt(cv.stream.chBedSlope)
             / (cv.stream.chRC * pow(ChCrossSecPer, 0.66667)) - Q_m3Ps;
@@ -240,7 +371,7 @@ double getChCSAbyQusingIteration(cvAtt cv, double CSAini, double Q_m3Ps)
     return CSA_nP1;
 }
 
-double getChannelDepthUsingArea(double baseWidthLRegion,
+double getChDepthUsingCSA(double baseWidthLRegion,
     double chCSAinput, bool isCompoundCrossSection,
     double baseWidthURegion, double LRegionArea,
     double LRegionHeight, double chBankConst)
@@ -259,7 +390,7 @@ double getChannelDepthUsingArea(double baseWidthLRegion,
     return chCSDepth;
 }
 
-double getChannelCrossSectionPerimeter(double LRegionBaseWidth,
+double getChCrossSectionPerimeter(double LRegionBaseWidth,
     double sideSlopeRightBank, double sideSlopeLeftBank,
     double crossSectionDepth, bool isCompoundCrossSection,
     double LRegionHeight, double LRegionArea,
@@ -284,7 +415,6 @@ double getChannelCrossSectionPerimeter(double LRegionBaseWidth,
             + sqrt(pow(crossSectionDepth, 2) + pow(crossSectionDepth / sideSlopeLeftBank, 2));
     }
 }
-
 
  int getDTsec(double cfln, double dx, 
      double vMax, int dtMax_min, int dtMin_min)

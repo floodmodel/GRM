@@ -244,7 +244,7 @@ int makeNewOutputFiles()
                 }
                 else {
                     sourceDT = sourceDT + "\t" + "None";
-                    if (afc.maxStorage > 0 && afc.maxStorageR > 0) {
+                    if (afc.maxStorage_m3 > 0 && afc.maxStorageR > 0) {
                         resOperation = resOperation + "\t" + "True";
                     }
                     else {
@@ -260,18 +260,18 @@ int makeNewOutputFiles()
                         return -1;
                     }
 
-                    if (afc.iniStorage >= 0) {
-                        roiniStorage = roiniStorage + "\t" + to_string(afc.iniStorage);
+                    if (afc.iniStorage_m3 >= 0) {
+                        roiniStorage = roiniStorage + "\t" + to_string(afc.iniStorage_m3);
                     }
                     else {
                         writeLog(fpnLog, "Initial reservoir storage is invalid.\n", 1, 1);
                         return -1;
                     }
-                    if (afc.maxStorage > 0 || afc.maxStorageR > 0) {
-                        romaxStorage = romaxStorage + "\t" + to_string(afc.maxStorage);
+                    if (afc.maxStorage_m3 > 0 || afc.maxStorageR > 0) {
+                        romaxStorage = romaxStorage + "\t" + to_string(afc.maxStorage_m3);
                         if (afc.maxStorageR > 0) {
                             romaxStorageRatio = romaxStorageRatio + "\t" + to_string(afc.maxStorageR);
-                            double storApp = afc.maxStorage * afc.maxStorageR;
+                            double storApp = afc.maxStorage_m3 * afc.maxStorageR;
                             romaxStorageApp = romaxStorageApp + "\t" + to_string(storApp);
                         }
                     }
@@ -279,10 +279,10 @@ int makeNewOutputFiles()
                         writeLog(fpnLog, "Maximum reservoir storage or storage ratio is invalid.\n", 1, 1);
                         return -1;
                     }
-                    if (afc.roType == reservoirOperationType::ConstantQ && afc.roConstQ < 0) {
-                        roConstQ = roConstQ + "\t" + to_string(afc.roConstQ);
-                        if (afc.roConstQDuration > 0) {
-                            roConstQduration = roConstQduration + "\t" + to_string(afc.roConstQDuration);
+                    if (afc.roType == reservoirOperationType::ConstantQ && afc.roConstQ_cms < 0) {
+                        roConstQ = roConstQ + "\t" + to_string(afc.roConstQ_cms);
+                        if (afc.roConstQDuration_hr > 0) {
+                            roConstQduration = roConstQduration + "\t" + to_string(afc.roConstQDuration_hr);
                         }
                         else {
                             writeLog(fpnLog, "Constant reservoir outflow duration is invalid.\n", 1, 1);

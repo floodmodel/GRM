@@ -361,7 +361,7 @@ void calBFLateralMovement(int i,
     double cumulBFq_m3Ps = 0;
     double dhUAQ_m;
     double dX_m = cvs[i].cvdx_m;
-    for (int cvid : cvs[i].neighborCVIDsFlowIntoMe) {
+    for (int cvid : cvs[i].neighborCVIDsFlowintoMe) {
         if (cvs[cvid - 1].flowType == cellFlowType::OverlandFlow) {
             cumulBFq_m3Ps = cumulBFq_m3Ps 
                 + cvs[cvid - 1].bfQ_m3Ps;// 수두경사가 셀의 지표면 경사와 같은 것으로 가정
@@ -390,7 +390,7 @@ void calBFLateralMovement(int i,
 double totalSSFfromCVwOFcell_m3Ps(int i)
 {
     double SSF_m3Ps = 0;
-    for(int cvid: cvs[i].neighborCVIDsFlowIntoMe)    {
+    for(int cvid: cvs[i].neighborCVIDsFlowintoMe)    {
         if (cvs[cvid - 1].flowType == cellFlowType::OverlandFlow) {
             // 즉, GRM에서 Green-Ampt 모형을 이용해서 침투된 양을 계산할때, 
             // 포화된 깊이로 계산됨. 즉, 현재 침투률로 얼만큼 깊이 들어갔는지는 계산하지 않는다..

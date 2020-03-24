@@ -1064,11 +1064,13 @@ int openProjectFile(int forceRealTime)
 				return -1;
 			}
 		}
-		if (afc.fcType == flowControlType::ReservoirOperation) {
+		if (afc.fcType == flowControlType::ReservoirOperation
+			|| afc.fcType== flowControlType::SourceFlow
+			|| afc.fcType==flowControlType::SinkFlow) {
 			if (aline.find(fn.IniStorage) != string::npos) {
 				vString = getValueStringFromXmlLine(aline, fn.IniStorage);
 				if (vString != "" && stod(vString) >= 0) {
-					afc.iniStorage = stod(vString);
+					afc.iniStorage_m3 = stod(vString);
 				}
 				else {
 					writeLog(fpnLog, "Ini. storage of reservoir ["
@@ -1078,8 +1080,14 @@ int openProjectFile(int forceRealTime)
 			}
 			if (aline.find(fn.MaxStorage) != string::npos) {
 				vString = getValueStringFromXmlLine(aline, fn.MaxStorage);
-				if (vString != "" && stod(vString) >= 0) {
-					afc.maxStorage = stod(vString);
+				if (vString != "" && stod(vString) >= 0) {// max storage must be greater than zero.
+					if (afc.fcType == flowControlType::ReservoirOperation
+						&& stod(vString) == 0){
+						writeLog(fpnLog, "Max. storage of reservoir ["
+							+ afc.fcName + "] is invalid.\n", 1, 1);
+						return -1;
+					}
+					afc.maxStorage_m3 = stod(vString);
 				}
 				else {
 					writeLog(fpnLog, "Max. storage of reservoir ["
@@ -1089,7 +1097,13 @@ int openProjectFile(int forceRealTime)
 			}
 			if (aline.find(fn.MaxStorageR) != string::npos) {
 				vString = getValueStringFromXmlLine(aline, fn.MaxStorageR);
-				if (vString != "" && stod(vString) >= 0) {
+				if (vString != "" && stod(vString) >= 0) {// max storage must be greater than zero.
+					if (afc.fcType == flowControlType::ReservoirOperation
+						&& stod(vString) == 0) {
+						writeLog(fpnLog, "Max. storage ratio of reservoir ["
+							+ afc.fcName + "] is invalid.\n", 1, 1);
+						return -1;
+					}
 					afc.maxStorageR = stod(vString);
 				}
 				else {
@@ -1131,7 +1145,7 @@ int openProjectFile(int forceRealTime)
 				if (aline.find(fn.ROConstQ) != string::npos) {
 					vString = getValueStringFromXmlLine(aline, fn.ROConstQ);
 					if (vString != "" && stod(vString) >= 0) {
-						afc.roConstQ = stod(vString);
+						afc.roConstQ_cms = stod(vString);
 					}
 					else {
 						writeLog(fpnLog, "Constant outlfow of reservoir ["
@@ -1142,7 +1156,7 @@ int openProjectFile(int forceRealTime)
 				if (aline.find(fn.ROConstQDuration) != string::npos) {
 					vString = getValueStringFromXmlLine(aline, fn.ROConstQDuration);
 					if (vString != "" && stod(vString) >= 0) {
-						afc.roConstQDuration = stod(vString);
+						afc.roConstQDuration_hr = stod(vString);
 					}
 					else {
 						writeLog(fpnLog, "Constant outlfow duration of reservoir ["
@@ -1458,6 +1472,21 @@ int openProjectFile(int forceRealTime)
 		// land cover =================
 	}
 
+	if (prj.fcs.size() > 0) {
+		map<int, flowControlinfo>::iterator iter;
+		for (iter = prj.fcs.begin(); iter != prj.fcs.end(); ++iter) {
+			int cvid = iter->first;
+			flowControlinfo afci;
+			afci = prj.fcs[cvid];
+			if(afci.roType!=reservoirOperationType::None
+				&& (afci.maxStorage_m3 <= 0
+					|| afci.maxStorageR <= 0)) {
+				writeLog(fpnLog, " Max. storage and max. storage ratio must be greater than zero when reservoir operation type is applied.\n", 1, 1);
+				return -1;
+			}
+		}
+	}
+
 	if (prj.lcDataType == fileOrConstant::File) {
 		if (prj.fpnLC == "") {
 			writeLog(fpnLog, "Land cover file is invalid.\n", 1, 1);
@@ -1648,12 +1677,12 @@ int isNormalFlowControlinfo(flowControlinfo afc)
 	if (afc.fcType == afc_ini.fcType) { return -1; }
 	if (afc.fcDT_min == afc_ini.fcDT_min) { return -1; }
 	if (afc.fcType == flowControlType::ReservoirOperation) {
-		if (afc.iniStorage == afc_ini.iniStorage) { return -1; }
-		if (afc.maxStorage == afc_ini.maxStorage) { return -1; }
+		if (afc.iniStorage_m3 == afc_ini.iniStorage_m3) { return -1; }
+		if (afc.maxStorage_m3 == afc_ini.maxStorage_m3) { return -1; }
 		if (afc.maxStorageR == afc_ini.maxStorageR) { return -1; }
 		if (afc.roType == afc_ini.roType) { return -1; }
-		if (afc.roConstQ == afc_ini.roConstQ) { return -1; }
-		if (afc.roConstQDuration == afc_ini.roConstQDuration) { return -1; }
+		if (afc.roConstQ_cms == afc_ini.roConstQ_cms) { return -1; }
+		if (afc.roConstQDuration_hr == afc_ini.roConstQDuration_hr) { return -1; }
 	} else 	if (afc.fpnFCData == afc_ini.fpnFCData){ return -1; }
 	return 1;
 }

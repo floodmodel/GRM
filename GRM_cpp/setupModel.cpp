@@ -100,8 +100,8 @@ int setupByFAandNetwork()
     for (int i = 0; i < di.cellNnotNull; i++) {
         //cvs[i].fcType = flowControlType::None;
         double dxw;
-        if (cvs[i].neighborCVIDsFlowIntoMe.size() > 0) {
-            dxw = cvs[i].dxWSum / (double)cvs[i].neighborCVIDsFlowIntoMe.size();
+        if (cvs[i].neighborCVIDsFlowintoMe.size() > 0) {
+            dxw = cvs[i].dxWSum / (double)cvs[i].neighborCVIDsFlowintoMe.size();
         }
         else {
             dxw = cvs[i].dxDownHalf_m;
@@ -160,9 +160,9 @@ int setupByFAandNetwork()
             ended = true;
             for (int cvidBase : cvidsBase) {
                 aidx = cvidBase - 1;
-                if (cvs[aidx].neighborCVIDsFlowIntoMe.size() > 0) {
+                if (cvs[aidx].neighborCVIDsFlowintoMe.size() > 0) {
                     ended = false;
-                    for (int cvid : cvs[aidx].neighborCVIDsFlowIntoMe) {
+                    for (int cvid : cvs[aidx].neighborCVIDsFlowintoMe) {
                         cvs[cvid - 1].downWPCVIDs.push_back(curCVid);
                         cvidsNew.push_back(cvid);
                     }
@@ -341,9 +341,9 @@ int updateCVbyUserSettings()
             bEnded = true;
             for (int cvidBase : baseCVids) {
                 int cvan = cvidBase - 1;
-                if (cvs[cvan].neighborCVIDsFlowIntoMe.size() > 0) {
+                if (cvs[cvan].neighborCVIDsFlowintoMe.size() > 0) {
                     bEnded = false;
-                    for (int cvidFtoM : cvs[cvan].neighborCVIDsFlowIntoMe) {
+                    for (int cvidFtoM : cvs[cvan].neighborCVIDsFlowintoMe) {
                         cvs[cvidFtoM - 1].toBeSimulated = -1;
                         newCVids.push_back(cvidFtoM);
                     }

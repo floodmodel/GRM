@@ -163,8 +163,8 @@ int setCVStartingCondition(double iniflow)
                 }
                 if (qChCVini > 0) {
                     double sngCAS_ini = qChCVini / (double)cvs[i].cvdx_m; // 초기값 설정
-                    chCSAini = getChCSAbyQusingIteration(cvs[i], sngCAS_ini, qChCVini);
-                    hChCVini = getChannelDepthUsingArea(cvs[i].stream.chBaseWidth, chCSAini,
+                    chCSAini = getChCSAusingQbyiteration(cvs[i], sngCAS_ini, qChCVini);
+                    hChCVini = getChDepthUsingCSA(cvs[i].stream.chBaseWidth, chCSAini,
                         cvs[i].stream.isCompoundCS, cvs[i].stream.chURBaseWidth_m,
                         cvs[i].stream.chLRArea_m2, cvs[i].stream.chLRHeight,
                         cvs[i].stream.bankCoeff);
@@ -198,7 +198,7 @@ int setCVStartingCondition(double iniflow)
         cvs[i].isAfterSaturated = -1;
         cvs[i].storageAddedForDTbyRF_m3 = 0;
         cvs[i].QsumCVw_dt_m3 = 0;
-        cvs[i].effCVCountFlowintoCViw = 0;
+        cvs[i].effCVnFlowintoCVw = 0;
         cvs[i].QSSF_m3Ps = 0;
         cvs[i].bfQ_m3Ps = 0;
         cvs[i].hUAQfromBedrock_m = CONST_UAQ_HEIGHT_FROM_BEDROCK;
@@ -206,7 +206,7 @@ int setCVStartingCondition(double iniflow)
         if (prj.simFlowControl == 1) {
             int acvid = i + 1;
             if (prj.fcs.size() > 0 && getVectorIndex(fccds.cvidsFCcell, acvid) != -1) {
-                double iniS = prj.fcs[acvid].iniStorage;
+                double iniS = prj.fcs[acvid].iniStorage_m3;
                 if (iniS > 0) {
                     cvs[i].storageCumulative_m3 = iniS;
                 }
@@ -272,7 +272,9 @@ void simulateRunoffCore(int i, double nowTmin)
     if (prj.simFlowControl == 1 &&
         (cvs[i].fcType == flowControlType::ReservoirOutflow ||
             cvs[i].fcType == flowControlType::Inlet)) {
-        calFCReservoirOutFlow(nowTmin, i);
+        fccds.fcDataAppliedNowT_m3Ps[i + 1] = 0;
+        calFCReservoirOutFlow(i, nowTmin);
+
     }
     else {
         updatetCVbyRFandSoil(i);
@@ -288,34 +290,32 @@ void simulateRunoffCore(int i, double nowTmin)
                 setNoFluxCVOF(i);
             }
         }
-        else if (cvs[i].flowType == cellFlowType::ChannelFlow
-            || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
+        else { //cvs[i].flowType == cellFlowType::ChannelFlow  || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow
             double CSAchCVw_i_jP1 = 0;
             if (fac > 0) {
-                CSAchCVw_i_jP1 = mFVMSolver.CalChCSA_CViW(cvs, i);
+                CSAchCVw_i_jP1 = getChCSAatCVW(i);
             }
-            if (CSAchCVw_i_jP1 > 0 || cvs[i].mStreamAttr.hCH > 0) {
-                mFVMSolver.CalculateChannelFlow(cvs[i], CSAchCVw_i_jP1);
+            if (CSAchCVw_i_jP1 > 0 || cvs[i].stream.hCH > 0) {
+                calChannelFlow(i, CSAchCVw_i_jP1);
             }
             else {
                 setNoFluxCVCH(i);
             }
         }
     }
-    if (prj.simFlowControl == 1
-        && (cvs[i].fcType == flowControlType::SinkFlow
-            || cvs[i].fcType == flowControlType::SourceFlow
-            || cvs[i].fcType == flowControlType::ReservoirOperation)) {
-        Dataset.GRMProject.FlowControlGridRow[] rows =
-            (Dataset.GRMProject.FlowControlGridRow[])project.fcGrid.mdtFCGridInfo.Select("CVID = " + (cvan + 1));
-        Dataset.GRMProject.FlowControlGridRow row = rows[0];
-        double v;
-        if (double.TryParse(row.MaxStorage, out v) == false || double.TryParse(row.MaxStorageR, out v) == false ||
-            System.Convert.ToDouble(row.MaxStorage) * System.Convert.ToDouble(row.MaxStorageR) == 0) {
-            cFlowControl.CalFCSinkOrSourceFlow(project, nowT_min, i);
-        }
-        else {
-            cFlowControl.CalFCReservoirOperation(project, i, nowT_min);
-        }
+    if (prj.simFlowControl == 1) {
+      if (cvs[i].fcType== flowControlType::SinkFlow
+          || cvs[i].fcType == flowControlType::SourceFlow
+          || cvs[i].fcType == flowControlType::ReservoirOperation) {
+          fccds.fcDataAppliedNowT_m3Ps[i+1] = 0;
+          if (cvs[i].fcType == flowControlType::SinkFlow
+              || cvs[i].fcType == flowControlType::SourceFlow) {
+              calSinkOrSourceFlow(i, nowTmin);
+          }
+          if (prj.fcs[i + 1].roType != reservoirOperationType::None) {
+              // rotype이 있으면, ro로 넘어간다.
+              calReservoirOperation(i, nowTmin);
+          }
+      }
     }
 }
