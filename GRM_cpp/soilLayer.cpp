@@ -70,8 +70,18 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
                 dtsec, CONSTGreenAmpt, cvs[i].hc_K_mPsec);
             beingPonding = true;
         }
-        cvs[i].ifF_mPdt = waterDepthCanBeInfiltrated(cvs[i].soilWaterC_tm1_m, 
-            cvs[i].sdEffAsWaterDepth_m, infiltrationF_mPdt_max);
+        if (infiltrationF_mPdt_max <= 0) {
+            cvs[i].ifF_mPdt = 0; 
+        }
+        else {
+            double dF = cvs[i].sdEffAsWaterDepth_m - cvs[i].soilWaterC_tm1_m;
+            if (dF < 0) {
+                cvs[i].ifF_mPdt = 0;
+            }
+            else if (dF < infiltrationF_mPdt_max) {
+                cvs[i].ifF_mPdt = dF;
+            }
+        }
         // 누가 침투량으로 dt 동안에 추가된 침투량을 더한다.
         cvs[i].soilWaterC_m = cvs[i].soilWaterC_tm1_m + cvs[i].ifF_mPdt;
         // 현재까지의 누가 침투량을 이용해서 이에 대한 포텐셜 침투률을 계산한다.
@@ -326,8 +336,16 @@ double getChCSAaddedBySSFlow(int i)
 double Kunsaturated(cvAtt cv)
 {
     // double ca = 0.2 '0.24
-    double ssr = confirmSoilSaturationRaito(cv.ssr, cv.soilWaterC_tm1_m,
-        cv.sdEffAsWaterDepth_m, cv.flowType);
+    double ssr = cv.ssr;
+    if (cv.flowType == cellFlowType::ChannelFlow) {
+        ssr= 1;
+    }
+    if (cv.sdEffAsWaterDepth_m <= 0) {
+        ssr = 1;
+    }
+    if (cv.soilWaterC_tm1_m <= 0) {
+        ssr = 0;
+    }
     double Ks = cv.hc_K_mPsec;
     unSaturatedKType uKType = cv.ukType;
     double CoefUnsaturatedK = cv.coefUK;
@@ -401,22 +419,6 @@ double totalSSFfromCVwOFcell_m3Ps(int i)
     return SSF_m3Ps;
 }
 
-inline double confirmSoilSaturationRaito(double curssr,
-    double cumulinfiltration,
-    double effSoilDepth, cellFlowType flowType)
-{
-    if (flowType == cellFlowType::ChannelFlow) {
-        return 1;
-    }
-    if (effSoilDepth <= 0) {
-        return 1;
-    }
-    if (cumulinfiltration <= 0) {
-        return 0;
-    }
-    return curssr;
-}
-
 inline double soilSaturationRaitoByCumulF(double cumulinfiltration,
     double effSoilDepth, cellFlowType flowType)
 {
@@ -446,12 +448,3 @@ inline void setWaterAreaInfiltrationPars(int i)
     cvs[i].rfEff_dt_m = cvs[i].rfApp_dt_m;
 }
 
-inline double waterDepthCanBeInfiltrated(double preDepth,
-    double maxDepth, double maxINFILbeCalculated)
-{
-    if (maxINFILbeCalculated <= 0) { return 0; }
-    double dF = maxDepth - preDepth;
-    if (dF < 0) { dF = 0; }
-    if (dF < maxINFILbeCalculated) { maxINFILbeCalculated = dF; }
-    return maxINFILbeCalculated;
-}

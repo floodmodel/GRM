@@ -20,7 +20,7 @@ void updatetCVbyRFandSoil(int i)
     double chCSAaddedByBFlow_m2 = 0;
     double ofDepthAddedByRFlow_m2 = 0;
     double chCSAaddedBySSFlow_m2 = 0;
-    cvs[i].rfApp_dt_m = rfApp_dt_m(cvs[i].rfiRead_mPsec, dt_sec, di.cellSize, cvs[i].cvdx_m);
+    cvs[i].rfApp_dt_m = cvs[i].rfiRead_mPsec * dt_sec * (di.cellSize / cvs[i].cvdx_m);
     if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
         effOFdYinCHnOFcell = dY_m - cvs[i].stream.chBaseWidth;
     }

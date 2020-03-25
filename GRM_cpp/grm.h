@@ -656,6 +656,10 @@ typedef struct _thisSimulation
 	int dtMinLimit_sec = 0;
 	int zeroTimePrinted = 0;
 	int time_simEnding_sec = -1;
+
+	int tsec_tm1 = 0;
+	int targetTtoPrint_min = 0;
+
 	tm g_RT_tStart_from_MonitorEXE;
 	tm time_thisSimStarted;
 
@@ -682,14 +686,9 @@ void calFCReservoirOutFlow(int i, double nowTmin); //i´Â cv array index
 void calEffectiveRainfall(int i, int dtrf_sec, int dtsec);
 void calOverlandFlow(int i, double hCVw_tp1,
 	double effDy_m);
-void calReservoirAutoROM(int i, double maxStorageApp);
-void calReservoirConstantQ(int i, double roQ_CONST_CMS, 
-	double maxStorageApp, int bOutflowDuration);
 void calReservoirOperation(int i, int nowTmin);
 void calReservoirOutFlowInReservoirOperation(int i,
 	double Qout_cms, double dy_m);
-void calReservoirRigidROM(int i, double maxStorageApp,
-	double roQ_CONST_CMS);
 void calSinkOrSourceFlow(int i, int nowTmin);
 
 void disposeDynamicVars();
@@ -764,7 +763,7 @@ int setCVbyLCConstant();
 int setCVbySTConstant();
 int setCVbySDConstant();
 int setCVRF(int order);
-int setCVStartingCondition(double iniflow);
+void setCVStartingCondition(double iniflow);
 int setFlowNetwork();
 int setRainfallData();
 void setRFintensityAndDTrf_Zero();
@@ -782,13 +781,8 @@ int updateCVbyUserSettings();
 int updateFCCellinfoAndData();
 
 
-inline double confirmSoilSaturationRaito(double curssr,
-	double cumulinfiltration, double effSoilDepth,
-	cellFlowType flowType);
 inline double rfintensity_mPsec(double rf_mm, 
 	double dtrf_sec);
-inline double rfApp_dt_m(double rfi_mPs,
-	int dtsec, double cellSize, double cvDX_m);
 inline void setNoFluxCVCH(int i);
 inline void setNoFluxCVOF(int i);
 inline void setNoInfiltrationParameters(int i);
@@ -797,9 +791,6 @@ inline double soilSaturationRaitoByCumulF(double cumulinfiltration,
 	double effSoilDepth, cellFlowType flowType);
 inline  double vByManningEq(double hydraulicRaidus,
 	double slope, double nCoeff);
-inline double waterDepthCanBeInfiltrated(double preDepth,
-	double maxDepth, double maxINFILbeCalculated);
-
 
 // extern C
 int readLandCoverFile(string fpnLC, 

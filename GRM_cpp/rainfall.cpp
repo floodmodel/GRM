@@ -106,8 +106,12 @@ int setCVRF(int order)
             if (prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
                 inRF_mm = inRF_mm / (60.0 / dtrf_min);
             }
-            cvs[i].rfiRead_mPsec = rfintensity_mPsec(inRF_mm, dtrf_sec);
-
+            if (inRF_mm < 0) {
+                cvs[i].rfiRead_mPsec = 0;
+            }
+            else {
+                cvs[i].rfiRead_mPsec = rfintensity_mPsec(inRF_mm, dtrf_sec);
+            }           
             for (int wpcvid : cvs[i].downWPCVIDs) {
                 wpis.rfiReadSumUpWS_mPs[wpcvid] = wpis.rfiReadSumUpWS_mPs[wpcvid]
                     + cvs[i].rfiRead_mPsec;
@@ -120,8 +124,14 @@ int setCVRF(int order)
     else if (prj.rfDataType == rainfallDataType::TextFileMAP) {
         string value = rfs[order - 1].Rainfall;
         double inRF_mm = stod(value);
-        if (inRF_mm < 0) { inRF_mm = 0; }
-        double inRF_mPs = rfintensity_mPsec(inRF_mm, dtrf_sec);
+        double inRF_mPs;
+        if (inRF_mm < 0) { 
+            inRF_mm = 0; 
+            inRF_mPs = 0;
+        }
+        else {
+            inRF_mPs = rfintensity_mPsec(inRF_mm, dtrf_sec);
+        }       
         for (int i = 0; i < di.cellNnotNull; ++i) {
             // 유역의 전체 강우량은 inlet 등으로 toBeSimulated == -1 여도 계산에 포함한다.
             // 상류 cv 개수에 이 조건 추가하려면 주석 해제.
@@ -184,19 +194,8 @@ int setCVRF(int order)
      
  inline double rfintensity_mPsec(double rf_mm, double dtrf_sec)
  {
-     if (rf_mm <= 0) { return 0; }
-     else { return rf_mm / 1000.0 / dtrf_sec; }
+     return rf_mm / 1000.0 / dtrf_sec;
  }
 
- inline double rfApp_dt_m(double rfi_mPs,
-     int dtsec, double cellSize, double cvDX_m)
- {
-     if (rfi_mPs == 0) {
-         return rfi_mPs;
-     }
-     else {
-         return rfi_mPs * dtsec * (cellSize / cvDX_m);
-     }
-     return rfi_mPs;
- }
+
 

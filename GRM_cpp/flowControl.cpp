@@ -181,185 +181,88 @@ void calReservoirOperation(int i, int nowTmin)
     int id = i + 1;
     double QforDTbySinkOrSourceFlow = 0;
     double cellsize = di.cellSize;
-    switch (cvs[i].fcType) {//이전에 sinkflow or source flow 가 계산되었으면..
-    case flowControlType::SinkFlow: {
+    //여기서는 ro 하기 전의 storage 계산
+    if (cvs[i].fcType == flowControlType::SinkFlow) {//이전에 sinkflow 가 계산되었으면..
         cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
             + cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
             - fccds.fcDataAppliedNowT_m3Ps[id] * dtsec;
-        break;
     }
-    case flowControlType::SourceFlow: {
+    else if (cvs[i].fcType == flowControlType::SourceFlow) {//이전에 source flow 가 계산되었으면..
         cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
             + cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
             + fccds.fcDataAppliedNowT_m3Ps[id] * dtsec;
-        break;
     }
+    else {//이전에 sinkflow or source flow 가 아니었으면, 그냥 강우와 상류, 횡방향만 추가한다.
+        cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
+            + cvs[i].storageAddedForDTbyRF_m3
+            + cvs[i].QsumCVw_dt_m3;
     }
+    double Qout_cms = 0.0;
+    double dy_m = di.cellSize;
+    double maxStorageApp = prj.fcs[id].maxStorage_m3 * prj.fcs[id].maxStorageR;
     switch (prj.fcs[id].roType) {
     case reservoirOperationType::AutoROM: {
-        calReservoirAutoROM(i, prj.fcs[id].maxStorage_m3 * prj.fcs[id].maxStorageR);
+        if (cvs[i].storageCumulative_m3 >= maxStorageApp) {
+            Qout_cms = (cvs[i].storageCumulative_m3
+                - maxStorageApp) / ts.dtsec; // 차이만큼 모두 유출
+            cvs[i].storageCumulative_m3 = maxStorageApp; // 최대저류량 유지
+        }
+        if (Qout_cms < 0) { Qout_cms = 0; }
+        calReservoirOutFlowInReservoirOperation(i, Qout_cms, dy_m);
         break;
     }
     case reservoirOperationType::RigidROM: {
-        calReservoirRigidROM(i, prj.fcs[id].maxStorage_m3 * prj.fcs[id].maxStorageR, 
-            prj.fcs[id].roConstQ_cms);
+        //calReservoirRigidROM(i, prj.fcs[id].maxStorage_m3 * prj.fcs[id].maxStorageR, 
+        //    prj.fcs[id].roConstQ_cms);
+        if (cvs[i].storageCumulative_m3 >= maxStorageApp) {
+            Qout_cms = (cvs[i].storageCumulative_m3
+                - maxStorageApp) / ts.dtsec; // 차이만큼 모두 유출
+            cvs[i].storageCumulative_m3 = maxStorageApp;
+        }
+        else  if (cvs[i].storageCumulative_m3 < prj.fcs[id].roConstQ_cms * ts.dtsec) {
+            // 현재 저류량이 dtsec 유출량 보다 작은 경우, 저류된 모든 양이 유출
+            Qout_cms = cvs[i].storageCumulative_m3 / ts.dtsec;
+            cvs[i].storageCumulative_m3 = 0;
+        }
+        else {
+            Qout_cms = prj.fcs[id].roConstQ_cms;
+            cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
+                - prj.fcs[id].roConstQ_cms;
+            if (cvs[i].storageCumulative_m3 < 0) {
+                cvs[i].storageCumulative_m3 = 0;
+            }
+        }
+        if (Qout_cms < 0) { Qout_cms = 0; }
+        calReservoirOutFlowInReservoirOperation(i, Qout_cms, dy_m);
         break;
     }
     case reservoirOperationType::ConstantQ: {
-        int inOutflowDuration = false;
+        //calReservoirConstantQ(i, prj.fcs[id].roConstQ_cms,
+        //    prj.fcs[id].maxStorage_m3 * prj.fcs[id].maxStorageR,
+        //    inOutflowDuration);
         if (nowTmin <= prj.fcs[id].roConstQDuration_hr * 60) {
-            inOutflowDuration = true;
+            //여기서는 최대 저류 가능량에 상관 없이 일정량 방류            
+            if (cvs[i].storageCumulative_m3 <= prj.fcs[id].roConstQ_cms * ts.dtsec) {
+                // 이경우는 저류량이 모두 유출
+                Qout_cms = cvs[i].storageCumulative_m3 / ts.dtsec;
+                cvs[i].storageCumulative_m3 = 0;
+            }
+            else {
+                Qout_cms = prj.fcs[id].roConstQ_cms * ts.dtsec;
+                cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
+                    - prj.fcs[id].roConstQ_cms * ts.dtsec;
+                if (cvs[i].storageCumulative_m3 < 0) {
+                    cvs[i].storageCumulative_m3 = 0;
+                }
+            }
         }
-        calReservoirConstantQ(i, prj.fcs[id].roConstQ_cms,
-            prj.fcs[id].maxStorage_m3 * prj.fcs[id].maxStorageR,
-            inOutflowDuration);
+        calReservoirOutFlowInReservoirOperation(i, Qout_cms, dy_m);
         break;
     }
     case reservoirOperationType::SDEqation: {
         break;
     }
     }
-}
-
-void calReservoirConstantQ(int i, double roQ_CONST_CMS,
-    double maxStorageApp, int bOutflowDuration)
-{
-    double dy_m = di.cellSize;
-
-    int id = i + 1;
-    double Qout_cms;
-    double Qinput_m3 = cvs[i].storageAddedForDTbyRF_m3
-        + cvs[i].QsumCVw_dt_m3;
-    cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3 - prj.fcs[id].roConstQ_cms * ts.dtsec;
-    if (bOutflowDuration == true)    {
-        if (cvs[i].storageCumulative_m3 <= 0)        {
-            // 이경우는 현재 저류량이 없는 경우
-            // 주어진 유출량으로 유출하지 못하고, 그것보다 작은 양으로 유출된다는 의미
-            if (Qinput_m3 < roQ_CONST_CMS * ts.dtsec) {
-                // dt 시간동안 저류되는 모든 양이 유출되는 것으로 한다.
-                Qout_cms = Qinput_m3 / ts.dtsec;
-                cvs[i].storageCumulative_m3 = 0;
-            }
-            else {//이경우는 일정량 방류
-                Qout_cms = roQ_CONST_CMS * ts.dtsec;
-                if (cvs[i].fcType == flowControlType::SinkFlow
-                    && cvs[i].fcType == flowControlType::SourceFlow) {
-                    // Qinput_m3이 sink, source에서 더해졌는데도 storage가 0이므로, 여기서도 0
-                    cvs[i].storageCumulative_m3 = 0; 
-                }
-                else {
-                    cvs[i].storageCumulative_m3 = Qinput_m3
-                        - roQ_CONST_CMS * ts.dtsec;
-                }
-            }
-
-            //double Storage_tM1 = (roQ_CONST_CMS * ts.dtsec) + cvs[i].storageCumulative_m3;
-            //if (Storage_tM1 < 0)
-            //{
-            //    Qout_cms = 0;
-            //}
-            //else
-            //{
-            //    Qout_cms = Storage_tM1 / (double)sThisSimulation.dtsec;
-            //}
-            //cvs[i].StorageCumulative_m3 = 0;
-        }
-        else        {
-
-            Qout_cms = roQ_CONST_CMS;
-            cvs[i].StorageCumulative_m3 = cvs[i].StorageCumulative_m3 - roQ_CONST_CMS;
-            if (cvs[i].StorageCumulative_m3 >= maxStorageApp)
-                // Constant dischrage에서는 계속 누가 시킨다. 
-                // 누가저류량이 최대저류량 보다 같거나 크면, 더이상 누가되지 않고, 최대저류량을 유지한다.
-            {
-                cvs[i].StorageCumulative_m3 = maxStorageApp;
-            }
-        }
-    }
-    else {
-        Qout_cms = 0;
-        if (cvs[i].fcType != flowControlType::SinkFlow
-            && cvs[i].fcType != flowControlType::SourceFlow) {
-            cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3 + Qinput_m3;
-        }
-    }
-    calReservoirOutFlowInReservoirOperation(i, Qout_cms, dy_m);
-}
-
-
-void calReservoirAutoROM(int i, double maxStorageApp)
-{
-    double Qout_cms;
-    double dy_m = di.cellSize;
-    double Qinput_m3;
-    if (cvs[i].storageCumulative_m3 >= maxStorageApp) {
-        if (cvs[i].fcType == flowControlType::SinkFlow
-            || cvs[i].fcType == flowControlType::SourceFlow)        {
-            // 이경우에는 생성항과 상류 유입량이 storage에 더해져 있다.
-            Qout_cms = (cvs[i].storageCumulative_m3
-                - maxStorageApp) / ts.dtsec; // 차이만큼 모두 유출
-            if (Qout_cms < 0) { Qout_cms = 0; }
-        }
-        else {
-            Qinput_m3 = cvs[i].storageAddedForDTbyRF_m3
-                + cvs[i].QsumCVw_dt_m3; //생성항과 상류 유입량
-            Qout_cms = Qinput_m3 / ts.dtsec;  // 이때는 셀의 특성에 상관없이 상류 유입 모든 양이 유출됨.
-        }        
-        cvs[i].storageCumulative_m3 = maxStorageApp; // 누가저류량이 최대저류량 보다 같거나 크면, 더이상 누가되지 않고, 최대저류량을 유지한다.
-    }
-    else {
-        Qout_cms = 0;
-        cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3 
-            + Qinput_m3;
-    }
-    calReservoirOutFlowInReservoirOperation(i, Qout_cms, dy_m);
-}
-
-
-void calReservoirRigidROM(int i, double maxStorageApp,
-    double roQ_CONST_CMS) {
-    double dy_m = di.cellSize;
-    double Qout_cms;
-    double Qinput_m3;
-    double Qinput_m3 = cvs[i].storageAddedForDTbyRF_m3
-        + cvs[i].QsumCVw_dt_m3;
-    if (cvs[i].storageCumulative_m3 < roQ_CONST_CMS * ts.dtsec
-        || maxStorageApp < roQ_CONST_CMS * ts.dtsec) {
-        // 현재 저류량이 dtsec 유출량 보다 작은 경우
-        // 이경우는 주어진 유출량으로 유출하지 못하고, 그것보다 작은 양으로 유출된다는 의미
-        // 즉 dt 시간에서 저류된 모든 양이 유출되는 유량으로 현재 저수지에서의 유출량을 계산해야 한다.
-        Qout_cms = cvs[i].storageCumulative_m3 / ts.dtsec;
-        cvs[i].storageCumulative_m3 = 0;
-    }
-    else if (cvs[i].storageCumulative_m3 >= maxStorageApp) {
-        if (cvs[i].fcType == flowControlType::SinkFlow
-            || cvs[i].fcType == flowControlType::SourceFlow) {
-            // 이경우에는 생성항과 상류 유입량이 storage에 더해져 있다.
-            Qout_cms = (cvs[i].storageCumulative_m3
-                - maxStorageApp) / ts.dtsec; // 차이만큼 모두 유출
-            if (Qout_cms < 0) { Qout_cms = 0; }
-        }
-        else {
-            // 이경우는 유입되는 모든 양이 유출
-            Qout_cms = Qinput_m3 / ts.dtsec;
-        }
-        cvs[i].storageCumulative_m3 = maxStorageApp; // 누가저류량이 최대저류량 보다 같거나 크면, 더이상 누가되지 않고, 최대저류량을 유지한다.
-    }
-    else {
-        Qout_cms = roQ_CONST_CMS;
-        if (cvs[i].fcType == flowControlType::SinkFlow
-            || cvs[i].fcType == flowControlType::SourceFlow) {
-            // sink flow or source flow에서는 storageCumulative_m3 가 이미 더해져 있므로,
-            // rigid로 방류되는 양만 빼준다.
-            cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
-                - Qout_cms;
-        }
-        else { // 이경우는 유입량을 더한 후 rigid 유출량을 뺀다.
-            cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
-                + Qinput_m3 - Qout_cms;
-        }
-    }
-    calReservoirOutFlowInReservoirOperation(i, Qout_cms, dy_m);
 }
 
 void calReservoirOutFlowInReservoirOperation(int i,

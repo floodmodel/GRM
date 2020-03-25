@@ -85,6 +85,101 @@ int startSimulationSingleEvent()
 }
 
 
+int simulateRunoff(double nowTmin)
+{
+    int maxLimit = di.facMax + 1;
+    for (int fac = 0; fac < maxLimit; ++fac) {
+        if (cvaisToFA[fac].size() > 0) {
+            double uMax = 0;
+#pragma omp parallel
+            {
+                int iterLimit = cvaisToFA[fac].size();
+                omp_set_num_threads(prj.maxDegreeOfParallelism);
+                // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
+                // VS2019는 openMP 2.0 지원, 그러므로 critical 사용한다.
+#pragma omp for schedule(guided)
+                for (int i = 0; i < iterLimit; ++i) {
+                    if (cvs[i].toBeSimulated == 1) {
+                        simulateRunoffCore(i, nowTmin);
+                        if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                            uMax = cvs[i].uOF;
+                        }
+                        else {
+                            uMax = cvs[i].stream.uCH;
+                        }
+                    }
+                }
+#pragma omp critical(getVmax)
+                {
+                    if (ts.vMaxInThisStep < uMax) {
+                        ts.vMaxInThisStep = uMax;
+                    }
+                }
+            }
+        }
+    }
+    return 1;
+}
+
+void simulateRunoffCore(int i, double nowTmin)
+{
+    int fac = cvs[i].fac;
+    int dtsec = ts.dtsec;
+    double cellsize = di.cellSize;
+    if (prj.simFlowControl == 1 &&
+        (cvs[i].fcType == flowControlType::ReservoirOutflow ||
+            cvs[i].fcType == flowControlType::Inlet)) {
+        fccds.fcDataAppliedNowT_m3Ps[i + 1] = 0;
+        calFCReservoirOutFlow(i, nowTmin);
+
+    }
+    else {
+        updatetCVbyRFandSoil(i);
+        if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+            double hCVw_tp1 = 0;
+            if (fac > 0) {
+                hCVw_tp1 = getOverlandFlowDepthCVw(i);
+            }
+            if (hCVw_tp1 > 0 || cvs[i].hOF > 0) {
+                calOverlandFlow(i, hCVw_tp1, cellsize);
+            }
+            else {
+                setNoFluxCVOF(i);
+            }
+        }
+        else { //cvs[i].flowType == cellFlowType::ChannelFlow  || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow
+            double CSAchCVw_i_jP1 = 0;
+            if (fac > 0) {
+                CSAchCVw_i_jP1 = getChCSAatCVW(i);
+            }
+            if (CSAchCVw_i_jP1 > 0 || cvs[i].stream.hCH > 0) {
+                calChannelFlow(i, CSAchCVw_i_jP1);
+            }
+            else {
+                setNoFluxCVCH(i);
+            }
+        }
+    }
+    if (prj.simFlowControl == 1) {
+      if (cvs[i].fcType== flowControlType::SinkFlow
+          || cvs[i].fcType == flowControlType::SourceFlow
+          || cvs[i].fcType == flowControlType::ReservoirOperation) {
+          fccds.fcDataAppliedNowT_m3Ps[i+1] = 0;
+          if (cvs[i].fcType == flowControlType::SinkFlow
+              || cvs[i].fcType == flowControlType::SourceFlow) {
+              calSinkOrSourceFlow(i, nowTmin);
+          }
+          if (prj.fcs[i + 1].roType != reservoirOperationType::None) {
+              // rotype이 있으면, ro로 넘어간다.
+              calReservoirOperation(i, nowTmin);
+          }
+      }
+    }
+}
+
+
+
+
 void initThisSimulation()
 {
     if (prj.simType != simulationType::RealTime) {
@@ -98,7 +193,7 @@ void initThisSimulation()
     ts.grmStarted = 1;
     ts.stopSim = -1;
     ts.dtsec = prj.dtsec;
-    ts.dtMaxLimit_sec = (int)prj.printTimeStep_min * 60/2;
+    ts.dtMaxLimit_sec = (int)prj.printTimeStep_min * 60 / 2;
     ts.dtMinLimit_sec = 1;
 
     time_t now = time(0);
@@ -106,7 +201,7 @@ void initThisSimulation()
     ts.time_thisSimStarted = ts.g_RT_tStart_from_MonitorEXE;
 }
 
-int setCVStartingCondition(double iniflow)
+void setCVStartingCondition(double iniflow)
 {
     double hChCVini;
     double chCSAini;
@@ -225,97 +320,5 @@ int setCVStartingCondition(double iniflow)
         wpis.rfUpWSAveTotal_mm[wpcvid] = 0;
         wpis.totalDepth_m[wpcvid] = 0;
         wpis.totalFlow_cms[wpcvid] = 0;
-    }
-}
-
-int simulateRunoff(double nowTmin)
-{
-    int maxLimit = di.facMax + 1;
-    for (int fac = 0; fac < maxLimit; ++fac) {
-        if (cvaisToFA[fac].size() > 0) {
-            double uMax = 0;
-#pragma omp parallel
-            {
-                int iterLimit = cvaisToFA[fac].size();
-                omp_set_num_threads(prj.maxDegreeOfParallelism);
-                // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
-                // VS2019는 openMP 2.0 지원, 그러므로 critical 사용한다.
-#pragma omp for schedule(guided)
-                for (int i = 0; i < iterLimit; ++i) {
-                    if (cvs[i].toBeSimulated == 1) {
-                        simulateRunoffCore(i, nowTmin);
-                        if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                            uMax = cvs[i].uOF;
-                        }
-                        else {
-                            uMax = cvs[i].stream.uCH;
-                        }
-                    }
-                }
-#pragma omp critical(getVmax)
-                {
-                    if (ts.vMaxInThisStep < uMax) {
-                        ts.vMaxInThisStep = uMax;
-                    }
-                }
-            }
-        }
-    }
-    return 1;
-}
-
-void simulateRunoffCore(int i, double nowTmin)
-{
-    int fac = cvs[i].fac;
-    int dtsec = ts.dtsec;
-    double cellsize = di.cellSize;
-    if (prj.simFlowControl == 1 &&
-        (cvs[i].fcType == flowControlType::ReservoirOutflow ||
-            cvs[i].fcType == flowControlType::Inlet)) {
-        fccds.fcDataAppliedNowT_m3Ps[i + 1] = 0;
-        calFCReservoirOutFlow(i, nowTmin);
-
-    }
-    else {
-        updatetCVbyRFandSoil(i);
-        if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-            double hCVw_tp1 = 0;
-            if (fac > 0) {
-                hCVw_tp1 = getOverlandFlowDepthCVw(i);
-            }
-            if (hCVw_tp1 > 0 || cvs[i].hOF > 0) {
-                calOverlandFlow(i, hCVw_tp1, cellsize);
-            }
-            else {
-                setNoFluxCVOF(i);
-            }
-        }
-        else { //cvs[i].flowType == cellFlowType::ChannelFlow  || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow
-            double CSAchCVw_i_jP1 = 0;
-            if (fac > 0) {
-                CSAchCVw_i_jP1 = getChCSAatCVW(i);
-            }
-            if (CSAchCVw_i_jP1 > 0 || cvs[i].stream.hCH > 0) {
-                calChannelFlow(i, CSAchCVw_i_jP1);
-            }
-            else {
-                setNoFluxCVCH(i);
-            }
-        }
-    }
-    if (prj.simFlowControl == 1) {
-      if (cvs[i].fcType== flowControlType::SinkFlow
-          || cvs[i].fcType == flowControlType::SourceFlow
-          || cvs[i].fcType == flowControlType::ReservoirOperation) {
-          fccds.fcDataAppliedNowT_m3Ps[i+1] = 0;
-          if (cvs[i].fcType == flowControlType::SinkFlow
-              || cvs[i].fcType == flowControlType::SourceFlow) {
-              calSinkOrSourceFlow(i, nowTmin);
-          }
-          if (prj.fcs[i + 1].roType != reservoirOperationType::None) {
-              // rotype이 있으면, ro로 넘어간다.
-              calReservoirOperation(i, nowTmin);
-          }
-      }
     }
 }

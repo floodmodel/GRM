@@ -13,10 +13,72 @@ extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
 
 extern int** cvais;
+extern cvAtt* cvs;
+cvAtt* cvsb;
 extern wpinfo wpis;
 extern flowControlCellAndData fccds;
 
 extern thisSimulation ts;
+
+
+void WriteCurrentResultAndInitializeNextStep(int nowtsec, int nowRForder)
+{
+    int dTPrint_MIN;
+    int wpCount;
+    int dTRFintervalMIN = (int)(dTRFintervalSEC / 60);
+    int dTPrint_SEC = dTPrint_MIN * 60;
+    double dtmin = dtsec / (double)60;
+    int timeToPrint_MIN;
+    if (targetCalTtoPrint_MIN == 0)
+    {
+        targetCalTtoPrint_MIN = dTPrint_MIN;
+    }
+    if (nowRForder == 1 && dTPrint_MIN > dTRFintervalMIN && ((nowtsec + dtsec) > dTRFintervalSEC))
+    {
+        // 첫번째 출력전에 다음 스텝에서 강우레이어가 바뀌는 경우는 첫번째 강우레이어 모델링이 끝났다는 얘기이므로 한번 출력한다.
+        // 0 시간에서의 모델링 결과로 출력한다.
+        timeToPrint_MIN = 0;
+        double RFmeanForFirstLayer = sThisSimulation.mRFMeanForDT_m / dtmin * dTRFintervalMIN;
+        OutputProcessManagerBySimType(timeToPrint_MIN, wpCount, RFmeanForFirstLayer, 1, null, SimType);
+        sThisSimulation.ZeroTimePrinted = 1;
+    }
+    else if (nowtsec > 0 && (nowtsec % dTPrint_SEC) == 0)
+    {
+        if (sThisSimulation.ZeroTimePrinted == -1)
+        {
+            timeToPrint_MIN = targetCalTtoPrint_MIN - dTPrint_MIN;
+        }
+        else
+        {
+            timeToPrint_MIN = targetCalTtoPrint_MIN;
+        }
+
+        OutputProcessManagerBySimType(timeToPrint_MIN, wpCount, sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m, 1, null, SimType);
+        targetCalTtoPrint_MIN = targetCalTtoPrint_MIN + dTPrint_MIN;
+    }
+    else
+    {
+        if (nowtsec < targetCalTtoPrint_MIN * 60 && (nowtsec + dtsec) >(targetCalTtoPrint_MIN) * 60)
+        {
+            if (Project_tm1.isSet == false)
+            {
+                mSEC_tm1 = nowtsec;
+                Project_tm1 = new cProjectBAK();
+                Project_tm1.SetCloneUsingCurrentProject(project);
+            }
+        }
+        if (nowtsec > (targetCalTtoPrint_MIN * 60) && (nowtsec - sThisSimulation.dtsec_usedtoForwardToThisTime) <= (targetCalTtoPrint_MIN * 60))
+        {
+            double coeffInterpolation;
+            coeffInterpolation = (targetCalTtoPrint_MIN * 60 - mSEC_tm1) / (double)(nowtsec - mSEC_tm1);
+            timeToPrint_MIN = targetCalTtoPrint_MIN - dTPrint_MIN;
+            OutputProcessManagerBySimType(timeToPrint_MIN, wpCount, sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m, coeffInterpolation, Project_tm1, SimType);
+            targetCalTtoPrint_MIN = targetCalTtoPrint_MIN + dTPrint_MIN;
+            Project_tm1.CVs = null;
+            Project_tm1.isSet = false;
+        }
+    }
+}
 
 int initOutputFiles()
 {
