@@ -11,6 +11,7 @@ extern thisSimulation ts;
 
 extern domaininfo di;
 extern cvAtt* cvs;
+extern cvAtt* cvsb;
 extern map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
 extern vector<rainfallData> rfs;
 extern flowControlCellAndData fccds;
@@ -20,55 +21,52 @@ int startSimulationSingleEvent()
 {
     initThisSimulation();
     setCVStartingCondition(0);
-    int dtPrint_min = prj.printTimeStep_min;
+    //int dtPrint_min = prj.printTimeStep_min;
     int dtRF_sec = prj.rfinterval_min * 60;
-    int dtRFinterval_min = prj.rfinterval_min;
+    //int dtrf_min = prj.rfinterval_min;
     //int isRFended = -1;
-    int tsec_tm1 = 0;
-    cvAtt Project_tm1;
-    int targetTtoPrint_min = 0;
-    int nowRFOrder = 0;
+    //int tsec_tm1 = 0;
+    //cvAtt Project_tm1;
+    //int targetTtoPrint_min = 0;
+    int rfOrder = 0;
     int nowTsec = ts.dtsec;
     double nowTmin;
-    ts.dtsec_usedtoForwardToThisTime = ts.dtsec;
+    ts.dtsecUsed_tm1 = ts.dtsec;
     ts.zeroTimePrinted = -1;
-    int dtsec;
-    while (nowTsec <= ts.time_simEnding_sec) {// simulationTimeLimitSEC
-        dtsec = ts.dtsec;
+    ts.targetTtoP_sec = prj.printTimeStep_min;
+    //int dtsec;
+    int endingT_sec = ts.time_simEnding_sec + ts.dtsec;
+    while (nowTsec <= endingT_sec) {// simulationTimeLimitSEC
+        //dtsec = ts.dtsec;
         ts.vMaxInThisStep = DBL_MIN;
         // dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
-        /*if (isRFended == -1 && (nowRFOrder == 0
-            || (nowTsec > dtRF_sec* nowRFOrder))) {*/
-        if (nowTsec > dtRF_sec* nowRFOrder ) {
-            if (nowRFOrder < ts.rfDataCountInThisEvent) {
-                nowRFOrder++; // 이렇게 하면 마지막 레이어 적용
-                if (setCVRF(nowRFOrder) == -1) { return -1; }
-                //isRFended = -1;
+        /*if (isRFended == -1 && (nowRFOrder == 0 || (nowTsec > dtRF_sec* nowRFOrder))) {*/
+        if (nowTsec > dtRF_sec* rfOrder) {
+            if (rfOrder < ts.rfDataCountTotal) {
+                rfOrder++; // 이렇게 하면 마지막 레이어 적용
+                if (setCVRF(rfOrder) == -1) { return -1; }    //isRFended = -1;
             }
             else {
                 setRFintensityAndDTrf_Zero();
-                nowRFOrder = INT_MAX;
-                //isRFended = 1;
+                rfOrder = INT_MAX;   //isRFended = 1;
             }
         }
         nowTmin = nowTsec / 60.0;
         if (simulateRunoff(nowTmin) == -1) { return -1; }
-        calCumulativeRFDuringDTPrintOut(dtsec);
-        WriteCurrentResultAndInitializeNextStep(mProject, nowTsec, dtsec, dTRFintervalSEC, dTPrint_MIN, wpCount,
-            ref targetCalTtoPrint_MIN, ref mSEC_tm1, ref Project_tm1, mProject.mSimulationType, nowRFOrder);
-
-        if (nowTsec < ts.time_simEnding_sec && nowTsec + dtsec > ts.time_simEnding_sec) {
-            ts.dtsec = nowTsec + dtsec - ts.time_simEnding_sec;
-            nowTsec = ts.time_simEnding_sec;
-            ts.dtsec_usedtoForwardToThisTime = ts.dtsec;
+        calCumulativeRFDuringDTPrintOut(ts.dtsec);
+        outputManager(nowTsec, rfOrder);
+        if (nowTsec + ts.dtsec > endingT_sec) {
+            ts.dtsec = nowTsec + ts.dtsec - endingT_sec;
+            nowTsec = endingT_sec;
+            ts.dtsecUsed_tm1 = ts.dtsec;
         }
         else {
-            nowTsec = nowTsec + dtsec; // dtsec 만큼 전진
-            ts.dtsec_usedtoForwardToThisTime = ts.dtsec;
-            if (prj.IsFixedTimeStep == -1)
-            {
+            nowTsec = nowTsec + ts.dtsec; // dtsec 만큼 전진
+            ts.dtsecUsed_tm1 = ts.dtsec;
+            if (prj.IsFixedTimeStep == -1) {
                 ts.dtsec = getDTsec(CONST_CFL_NUMBER,
-                    di.cellSize, ts.vMaxInThisStep, ts.dtMaxLimit_sec, ts.dtMinLimit_sec);
+                    di.cellSize, ts.vMaxInThisStep, ts.dtMaxLimit_sec, 
+                    ts.dtMinLimit_sec);
             }
         }
         if (ts.stopSim == 1) { break; }
@@ -178,23 +176,74 @@ void simulateRunoffCore(int i, double nowTmin)
 }
 
 
+void outputManager(int nowTsec, int rfOrder)
+{
+    int dtP_min = prj.printTimeStep_min;
+    int dtrf_min = (int)prj.rfinterval_min;
+    int dtrf_sec = dtrf_min * 60;
+    int dtP_SEC = dtP_min * 60;
+    double dtmin = ts.dtsec / 60.0;
+    int timeToP_min;
+    if (rfOrder == 1
+        && dtP_min > dtrf_min
+        && ((nowTsec + ts.dtsec) > dtrf_sec)) {
+        // 첫번째 출력전에 다음 스텝에서 강우레이어가 바뀌는 경우는 첫번째 강우레이어 모델링이 끝났다는 얘기이므로 한번 출력한다.
+        // 0 시간에서의 모델링 결과로 출력한다.
+        double RFmeanForFirstLayer = ts.rfAveForDT_m / dtmin * dtrf_min;
+        writeBySimType(0, 1);
+        ts.zeroTimePrinted = 1;
+        return; // 이경우는 모의시작 전에 설정된  ts.targetTtoP_min = dtP_min 을 유지
+    }
+    else if (nowTsec % dtP_SEC == 0) {
+        if (ts.zeroTimePrinted == -1) {
+            timeToP_min = ts.targetTtoP_sec * 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
+        }
+        else {
+            timeToP_min = ts.targetTtoP_sec * 60;
+        }
+        writeBySimType(timeToP_min, 1);
+        ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
+        return;
+    }
+    else {
+        if (nowTsec <  ts.targetTtoP_sec
+            && (nowTsec + ts.dtsec) >ts.targetTtoP_sec) {
+            // 만일 현재의 dtsec으로 한번더 전진해서 이 조건을 만족하면
+            ts.cvsbT_sec = nowTsec;
+            std::copy(cvs, cvs + di.cellNnotNull, cvsb);
+            return; //벡업만 받고 나간다.
+        }
+        if (nowTsec > ts.targetTtoP_sec
+            && (nowTsec - ts.dtsecUsed_tm1) <= ts.targetTtoP_sec) {
+            double citerp;
+            citerp = (ts.targetTtoP_sec - ts.cvsbT_sec) / (double)(nowTsec - ts.cvsbT_sec);
+            timeToP_min = ts.targetTtoP_sec * 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
+            writeBySimType(timeToP_min, citerp);
+            ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
+        }
+    }
+}
 
 
 void initThisSimulation()
 {
     if (prj.simType != simulationType::RealTime) {
-        ts.rfDataCountInThisEvent = rfs.size();
+        ts.rfDataCountTotal = rfs.size();
     }
     else {
-        ts.rfDataCountInThisEvent = -1;
+        ts.rfDataCountTotal = -1;
     }
-    ts.time_simEnding_sec = (prj.simDuration_hr + prj.printTimeStep_min) * 60;
+    // 이렇게 해야 모의기간에 맞게 실행된다. 
+    //왜냐하면, 첫번째 실행 결과가 0 시간으로 출력되기 때문에
+    ts.time_simEnding_sec = (prj.simDuration_hr*60 + prj.printTimeStep_min) * 60;     
     ts.setupGRMisNormal = 1;
     ts.grmStarted = 1;
     ts.stopSim = -1;
     ts.dtsec = prj.dtsec;
     ts.dtMaxLimit_sec = (int)prj.printTimeStep_min * 60 / 2;
     ts.dtMinLimit_sec = 1;
+    //ts.iscvsb = -1;
+    ts.cvsbT_sec = 0;
 
     time_t now = time(0);
     localtime_s(&ts.g_RT_tStart_from_MonitorEXE, &now);

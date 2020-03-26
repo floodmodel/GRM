@@ -83,11 +83,11 @@ int setRainfallData()
 
 int setCVRF(int order)
 {
-    double dtrf_sec = prj.rfinterval_min * 60.0;
-    double dtrf_min = prj.rfinterval_min;
+    int dtrf_sec = prj.rfinterval_min * 60;
+    int dtrf_min = prj.rfinterval_min;
     string fpnRF = rfs[order - 1].FilePath + "\\" + rfs[order - 1].FileName;
     double cellSize = di.cellSize;
-    ts.rfiSumForAllCellsInCurrentRFData_mPs = 0;
+    ts.rfiSumAllCellsInCurRFData_mPs = 0;
     for (int wpCVID : wpis.wpCVIDs) {
         wpis.rfiReadSumUpWS_mPs[wpCVID] = 0;
     }
@@ -116,8 +116,8 @@ int setCVRF(int order)
                 wpis.rfiReadSumUpWS_mPs[wpcvid] = wpis.rfiReadSumUpWS_mPs[wpcvid]
                     + cvs[i].rfiRead_mPsec;
             }
-            ts.rfiSumForAllCellsInCurrentRFData_mPs =
-                ts.rfiSumForAllCellsInCurrentRFData_mPs
+            ts.rfiSumAllCellsInCurRFData_mPs =
+                ts.rfiSumAllCellsInCurRFData_mPs
                 + cvs[i].rfiRead_mPsec;
         }
     }
@@ -138,7 +138,7 @@ int setCVRF(int order)
             //if (cvs[i].toBeSimulated == -1) { continue; }
             cvs[i].rfiRead_mPsec = inRF_mPs;
         }        
-        ts.rfiSumForAllCellsInCurrentRFData_mPs = inRF_mPs * di.cellNtobeSimulated;
+        ts.rfiSumAllCellsInCurRFData_mPs = inRF_mPs * di.cellNtobeSimulated;
         for (int wpcvid : wpis.wpCVIDs) {
             wpis.rfiReadSumUpWS_mPs[wpcvid] = inRF_mm * wpis.cvCountAllup[wpcvid];
         }
@@ -153,7 +153,7 @@ int setCVRF(int order)
  void setRFintensityAndDTrf_Zero()
 {
      ts.rfAveForDT_m = 0;
-     ts.rfiSumForAllCellsInCurrentRFData_mPs = 0;
+     ts.rfiSumAllCellsInCurRFData_mPs = 0;
      for (int i = 0; i < di.cellNnotNull; ++i)    {
         cvs[i].rfiRead_mPsec = 0;
         cvs[i].rfApp_dt_m = 0;
@@ -168,9 +168,9 @@ int setCVRF(int order)
 
  void calCumulativeRFDuringDTPrintOut(int dtsec)
  {
-     ts.rfAveForDT_m = ts.rfiSumForAllCellsInCurrentRFData_mPs * dtsec
+     ts.rfAveForDT_m = ts.rfiSumAllCellsInCurRFData_mPs * dtsec
          / di.cellNtobeSimulated;
-     ts.rfAveForAllCell_sumDTprint_m = ts.rfAveForAllCell_sumDTprint_m
+     ts.rfAveSumAllCells_dtP_m = ts.rfAveSumAllCells_dtP_m
          + ts.rfAveForDT_m;
      for (int wpcvid : wpis.wpCVIDs) {
          wpis.rfUpWSAveForDt_mm[wpcvid] = wpis.rfiReadSumUpWS_mPs[wpcvid]

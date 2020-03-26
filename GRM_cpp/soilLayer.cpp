@@ -30,7 +30,7 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
     }
     double CONSTGreenAmpt;
     double residuMC_ThetaR;
-    cvs[i].ssr = soilSaturationRaitoByCumulF(cvs[i].soilWaterC_tm1_m,
+    cvs[i].ssr = soilSSRbyCumulF(cvs[i].soilWaterC_tm1_m,
         cvs[i].sdEffAsWaterDepth_m, cvs[i].flowType);
     if (cvs[i].ssr > 0.99 
         || (prj.simType == simulationType::SingleEventPE_SSR 
@@ -118,7 +118,7 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
         }
     }
     // 유효강우량의 계산이 끝났으므로, 현재까지 계산된 침투, 강우강도 등을 tM1 변수로 저장한다.    
-    cvs[i].ssr = soilSaturationRaitoByCumulF(cvs[i].soilWaterC_m, 
+    cvs[i].ssr = soilSSRbyCumulF(cvs[i].soilWaterC_m, 
         cvs[i].sdEffAsWaterDepth_m, cvs[i].flowType);
     if (cvs[i].ssr == 1) {
         cvs[i].isAfterSaturated = true;
@@ -178,7 +178,7 @@ double calRFlowAndSSFlow(int i,
     double RflowBySSFfromCVw_m2; // 이건 return flow
     SSFfromCVw = totalSSFfromCVwOFcell_m3Ps(i) * dtsec / (dy_m * dx_m);
     // 상류의 지표하 유출에 의한 현재 셀의 Rflow 기여분 계산
-    double ssr = soilSaturationRaitoByCumulF(cvs[i].soilWaterC_tm1_m,
+    double ssr = soilSSRbyCumulF(cvs[i].soilWaterC_tm1_m,
         cvs[i].sdEffAsWaterDepth_m, cvs[i].flowType);
     if (ssr >= 0.99) {
         RflowBySSFfromCVw_m2 = SSFfromCVw * dy_m;
@@ -419,7 +419,7 @@ double totalSSFfromCVwOFcell_m3Ps(int i)
     return SSF_m3Ps;
 }
 
-inline double soilSaturationRaitoByCumulF(double cumulinfiltration,
+inline double soilSSRbyCumulF(double cumulinfiltration,
     double effSoilDepth, cellFlowType flowType)
 {
     if (flowType == cellFlowType::ChannelFlow) { return 1; }

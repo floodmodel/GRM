@@ -14,71 +14,74 @@ extern fs::path fpnLog;
 
 extern int** cvais;
 extern cvAtt* cvs;
-cvAtt* cvsb;
+extern cvAtt* cvsb;
+extern domaininfo di;
 extern wpinfo wpis;
 extern flowControlCellAndData fccds;
 
 extern thisSimulation ts;
 
-
-void WriteCurrentResultAndInitializeNextStep(int nowtsec, int nowRForder)
+void writeBySimType(int nowTP_min, 
+    double cinterp)
 {
-    int dTPrint_MIN;
-    int wpCount;
-    int dTRFintervalMIN = (int)(dTRFintervalSEC / 60);
-    int dTPrint_SEC = dTPrint_MIN * 60;
-    double dtmin = dtsec / (double)60;
-    int timeToPrint_MIN;
-    if (targetCalTtoPrint_MIN == 0)
+    double sumRFMeanForDTprint_m = ts.rfAveSumAllCells_dtP_m;
+    int wpCount = wpis.wpCVIDs.size();
+    simulationType simType = prj.simType;
+    switch (simType)
     {
-        targetCalTtoPrint_MIN = dTPrint_MIN;
-    }
-    if (nowRForder == 1 && dTPrint_MIN > dTRFintervalMIN && ((nowtsec + dtsec) > dTRFintervalSEC))
+    case cGRM.SimulationType.SingleEvent:
     {
-        // 첫번째 출력전에 다음 스텝에서 강우레이어가 바뀌는 경우는 첫번째 강우레이어 모델링이 끝났다는 얘기이므로 한번 출력한다.
-        // 0 시간에서의 모델링 결과로 출력한다.
-        timeToPrint_MIN = 0;
-        double RFmeanForFirstLayer = sThisSimulation.mRFMeanForDT_m / dtmin * dTRFintervalMIN;
-        OutputProcessManagerBySimType(timeToPrint_MIN, wpCount, RFmeanForFirstLayer, 1, null, SimType);
-        sThisSimulation.ZeroTimePrinted = 1;
-    }
-    else if (nowtsec > 0 && (nowtsec % dTPrint_SEC) == 0)
-    {
-        if (sThisSimulation.ZeroTimePrinted == -1)
+        if (SimulationStep != null) { SimulationStep(nowTP_min); }
+        if (mProject.generalSimulEnv.mPrintOption == cGRM.GRMPrintType.All)
         {
-            timeToPrint_MIN = targetCalTtoPrint_MIN - dTPrint_MIN;
+            mOutputControl.WriteSimResultsToTextFileForSingleEvent(mProject, wpCount, nowTP_min, sumRFMeanForDTprint_m, cinterp, Project_tm1);
         }
-        else
+        if (mProject.generalSimulEnv.mPrintOption == cGRM.GRMPrintType.DischargeFileQ)
         {
-            timeToPrint_MIN = targetCalTtoPrint_MIN;
+            mOutputControl.WriteDischargeOnlyToDischargeFile(mProject, cinterp, Project_tm1);
         }
+        if (mProject.generalSimulEnv.mPrintOption == cGRM.GRMPrintType.AllQ)
+        {
+            mOutputControl.WriteDischargeOnlyToDischargeFile(mProject, cinterp, Project_tm1);
+            mOutputControl.WriteDischargeOnlyToWPFile(mProject, cinterp, Project_tm1);
+        }
+        cGRM.writelogAndConsole(string.Format("Time(min) dt(sec), {0}{1}{2}", nowTP_min, "\t", sThisSimulation.dtsec), cGRM.bwriteLog, false);
+        break;
+    }
 
-        OutputProcessManagerBySimType(timeToPrint_MIN, wpCount, sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m, 1, null, SimType);
-        targetCalTtoPrint_MIN = targetCalTtoPrint_MIN + dTPrint_MIN;
-    }
-    else
+    case cGRM.SimulationType.RealTime:
     {
-        if (nowtsec < targetCalTtoPrint_MIN * 60 && (nowtsec + dtsec) >(targetCalTtoPrint_MIN) * 60)
+        mOutputControlRT.WriteSimResultsToTextFileAndDBForRealTime(mProject, nowTP_min, cinterp, Project_tm1, mRealTime);
+        break;
+    }
+    }
+
+    if (mProject.generalSimulEnv.mbRunAanlyzer == true)
+        // RaiseEvent SendQToAnalyzer(Me, mProject, Project_tm1, nowTtoPrint_MIN, coeffInterpolation)
+    {
+        SendQToAnalyzer(nowTP_min, cinterp);
+    }
+    if (mProject.generalSimulEnv.mbMakeRasterOutput == true)
+    {
+        MakeRasterOutput(nowTP_min);
+    }
+
+    sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0;
+    foreach(Dataset.GRMProject.WatchPointsRow row in mProject.watchPoint.mdtWatchPointInfo)
+    {
+        mProject.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID] = 0;
+        mProject.watchPoint.RFWPGridForDtPrintout_mm[row.CVID] = 0;
+    }
+    if ((mProject.generalSimulEnv.mbCreateImageFile == true || mProject.generalSimulEnv.mbCreateASCFile == true) &&
+        mProject.generalSimulEnv.mbShowRFdistribution == true)
+    {
+        for (int cvan = 0; cvan < cProject.Current.CVCount; cvan++)
         {
-            if (Project_tm1.isSet == false)
-            {
-                mSEC_tm1 = nowtsec;
-                Project_tm1 = new cProjectBAK();
-                Project_tm1.SetCloneUsingCurrentProject(project);
-            }
-        }
-        if (nowtsec > (targetCalTtoPrint_MIN * 60) && (nowtsec - sThisSimulation.dtsec_usedtoForwardToThisTime) <= (targetCalTtoPrint_MIN * 60))
-        {
-            double coeffInterpolation;
-            coeffInterpolation = (targetCalTtoPrint_MIN * 60 - mSEC_tm1) / (double)(nowtsec - mSEC_tm1);
-            timeToPrint_MIN = targetCalTtoPrint_MIN - dTPrint_MIN;
-            OutputProcessManagerBySimType(timeToPrint_MIN, wpCount, sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m, coeffInterpolation, Project_tm1, SimType);
-            targetCalTtoPrint_MIN = targetCalTtoPrint_MIN + dTPrint_MIN;
-            Project_tm1.CVs = null;
-            Project_tm1.isSet = false;
+            cProject.Current.CVs[cvan].RF_dtPrintOut_meter = 0;
         }
     }
 }
+
 
 int initOutputFiles()
 {

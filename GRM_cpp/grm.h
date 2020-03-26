@@ -596,7 +596,7 @@ typedef struct _projectFile
 	double cnstSoilDepth = -1.0;
 	rainfallDataType rfDataType = rainfallDataType::NoneRF;
 	string fpnRainfallData = "";
-	double rfinterval_min = -1.0;
+	int rfinterval_min = -1;
 	flowDirectionType fdType = flowDirectionType::None;
 	int maxDegreeOfParallelism = 0;
 	string simStartTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
@@ -646,19 +646,21 @@ typedef struct _thisSimulation
 	int setupGRMisNormal = 0; // Todo : 필요여부 확인 필요.
 	int grmStarted = 0;
 	int stopSim = 0;
-	int rfDataCountInThisEvent = -1;
+	int rfDataCountTotal = -1;
 	double rfAveForDT_m = 0;
-	double rfAveForAllCell_sumDTprint_m = 0;
-	double rfiSumForAllCellsInCurrentRFData_mPs; //rfi : rf intensity
+	double rfAveSumAllCells_dtP_m = 0;
+	double rfiSumAllCellsInCurRFData_mPs; //rfi : rf intensity
 	int dtsec = 0;
-	int dtsec_usedtoForwardToThisTime = 0;
+	int dtsecUsed_tm1 = 0;
 	int dtMaxLimit_sec = 0;
 	int dtMinLimit_sec = 0;
 	int zeroTimePrinted = 0;
 	int time_simEnding_sec = -1;
 
 	int tsec_tm1 = 0;
-	int targetTtoPrint_min = 0;
+	int targetTtoP_sec = 0;
+	//int iscvsb = -1; // 이전시간에서의 cvs가 백업되어 있는지 여부
+	int cvsbT_sec = 0;
 
 	tm g_RT_tStart_from_MonitorEXE;
 	tm time_thisSimStarted;
@@ -751,6 +753,8 @@ landCoverInfo nullLandCoverInfo();
 
 int openProjectFile(int forceRealTime);
 int openPrjAndSetupModel(int forceRealTime);//1:true, -1:false
+void outputManager(int nowTsec,
+	int nowRForder);
 
 int readDomainFileAndSetupCV();
 int readSlopeFdirFacStreamCwCfSsrFileAndSetCV();
@@ -780,6 +784,9 @@ int updateWatershedNetwork();
 int updateCVbyUserSettings();
 int updateFCCellinfoAndData();
 
+void writeBySimType(int nowTP_min,
+	double cinterp);
+
 
 inline double rfintensity_mPsec(double rf_mm, 
 	double dtrf_sec);
@@ -787,7 +794,7 @@ inline void setNoFluxCVCH(int i);
 inline void setNoFluxCVOF(int i);
 inline void setNoInfiltrationParameters(int i);
 inline void setWaterAreaInfiltrationPars(int i);
-inline double soilSaturationRaitoByCumulF(double cumulinfiltration,
+inline double soilSSRbyCumulF(double cumulinfiltration,
 	double effSoilDepth, cellFlowType flowType);
 inline  double vByManningEq(double hydraulicRaidus,
 	double slope, double nCoeff);

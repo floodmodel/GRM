@@ -386,7 +386,7 @@ int openProjectFile(int forceRealTime)
 		if (aline.find(fn.RainfallInterval_min) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.RainfallInterval_min);
 			if (vString != "") {
-				prj.rfinterval_min = stod(vString);
+				prj.rfinterval_min = stoi(vString);
 			}
 			else if (prj.simType == simulationType::SingleEvent) {
 				writeLog(fpnLog, "Rainfall data time interval was not set.\n", 1, 1);

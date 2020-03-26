@@ -28,6 +28,7 @@ grmOutFiles ofs;
 domaininfo di;
 int** cvais; // 각셀의 cv array idex 
 cvAtt* cvs;
+cvAtt* cvsb;
 vector<rainfallData> rfs;
 map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
 wpinfo wpis;
@@ -172,14 +173,13 @@ int main(int argc, char** args)
 
 void disposeDynamicVars()
 {
-	if (cvais != NULL)
-	{
-		for (int i = 0; i < di.nCols; ++i)
-		{
+	if (cvais != NULL) {
+		for (int i = 0; i < di.nCols; ++i) {
 			if (cvais[i] != NULL) { delete[] cvais[i]; }
 		}
 	}
 	if (cvs != NULL) { delete[] cvs; }
+	if (cvsb != NULL) { delete[] cvsb; }
 
 	//if (cvaisToFA.size() > 0) {
 	//	map<int, int*>::iterator iter;
@@ -190,7 +190,7 @@ void disposeDynamicVars()
 	//		}				
 	//	}
 	//}
-	
+
 }
 
 
