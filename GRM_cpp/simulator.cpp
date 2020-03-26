@@ -220,6 +220,7 @@ void outputManager(int nowTsec, int rfOrder)
             timeToP_min = ts.targetTtoP_sec * 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
             writeBySimType(timeToP_min, citerp);
             ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
+            return;
         }
     }
 }
