@@ -21,27 +21,22 @@ extern flowControlCellAndData fccds;
 
 extern thisSimulation ts;
 
-void writeBySimType(int nowTP_min, 
+void writeBySimType(int nowTP_min,
     double cinterp)
 {
     double sumRFMeanForDTprint_m = ts.rfAveSumAllCells_dtP_m;
     int wpCount = wpis.wpCVIDs.size();
     simulationType simType = prj.simType;
-    switch (simType)
-    {
-    case cGRM.SimulationType.SingleEvent:
-    {
+    switch (simType) {
+    case simulationType::SingleEvent: {
         if (SimulationStep != null) { SimulationStep(nowTP_min); }
-        if (mProject.generalSimulEnv.mPrintOption == cGRM.GRMPrintType.All)
-        {
+        if (prj.printOption == GRMPrintType::All) {
             mOutputControl.WriteSimResultsToTextFileForSingleEvent(mProject, wpCount, nowTP_min, sumRFMeanForDTprint_m, cinterp, Project_tm1);
         }
-        if (mProject.generalSimulEnv.mPrintOption == cGRM.GRMPrintType.DischargeFileQ)
-        {
+        if (prj.printOption == GRMPrintType::DischargeFileQ) {
             mOutputControl.WriteDischargeOnlyToDischargeFile(mProject, cinterp, Project_tm1);
         }
-        if (mProject.generalSimulEnv.mPrintOption == cGRM.GRMPrintType.AllQ)
-        {
+        if (prj.printOption == GRMPrintType::AllQ) {
             mOutputControl.WriteDischargeOnlyToDischargeFile(mProject, cinterp, Project_tm1);
             mOutputControl.WriteDischargeOnlyToWPFile(mProject, cinterp, Project_tm1);
         }
@@ -49,14 +44,13 @@ void writeBySimType(int nowTP_min,
         break;
     }
 
-    case cGRM.SimulationType.RealTime:
-    {
+    case simulationType::RealTime: {
         mOutputControlRT.WriteSimResultsToTextFileAndDBForRealTime(mProject, nowTP_min, cinterp, Project_tm1, mRealTime);
         break;
     }
     }
 
-    if (mProject.generalSimulEnv.mbRunAanlyzer == true)
+    if (ts.runByAnalyzer == 1)
         // RaiseEvent SendQToAnalyzer(Me, mProject, Project_tm1, nowTtoPrint_MIN, coeffInterpolation)
     {
         SendQToAnalyzer(nowTP_min, cinterp);
@@ -67,14 +61,13 @@ void writeBySimType(int nowTP_min,
     }
 
     sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0;
-    foreach(Dataset.GRMProject.WatchPointsRow row in mProject.watchPoint.mdtWatchPointInfo)
+    for (Dataset.GRMProject.WatchPointsRow row in mProject.watchPoint.mdtWatchPointInfo)
     {
         mProject.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID] = 0;
         mProject.watchPoint.RFWPGridForDtPrintout_mm[row.CVID] = 0;
     }
-    if ((mProject.generalSimulEnv.mbCreateImageFile == true || mProject.generalSimulEnv.mbCreateASCFile == true) &&
-        mProject.generalSimulEnv.mbShowRFdistribution == true)
-    {
+    if (prj.makeRfDistFile == 1 && (prj.makeIMGFile == 1
+        || prj.makeASCFile == 1)) {
         for (int cvan = 0; cvan < cProject.Current.CVCount; cvan++)
         {
             cProject.Current.CVs[cvan].RF_dtPrintOut_meter = 0;

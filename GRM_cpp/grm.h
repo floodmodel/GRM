@@ -662,6 +662,8 @@ typedef struct _thisSimulation
 	//int iscvsb = -1; // 이전시간에서의 cvs가 백업되어 있는지 여부
 	int cvsbT_sec = 0;
 
+	int runByAnalyzer = 0;
+
 	tm g_RT_tStart_from_MonitorEXE;
 	tm time_thisSimStarted;
 
