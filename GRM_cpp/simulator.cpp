@@ -33,12 +33,11 @@ int startSimulationSingleEvent()
     double nowTmin;
     ts.dtsecUsed_tm1 = ts.dtsec;
     ts.zeroTimePrinted = -1;
-    ts.targetTtoP_sec = prj.printTimeStep_min;
+    ts.targetTtoP_sec = prj.dtPrint_min;
     //int dtsec;
     int endingT_sec = ts.time_simEnding_sec + ts.dtsec;
     while (nowTsec <= endingT_sec) {// simulationTimeLimitSEC
-        //dtsec = ts.dtsec;
-        ts.vMaxInThisStep = DBL_MIN;
+        //dtsec = ts.dtsec;        
         // dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
         /*if (isRFended == -1 && (nowRFOrder == 0 || (nowTsec > dtRF_sec* nowRFOrder))) {*/
         if (nowTsec > dtRF_sec* rfOrder) {
@@ -53,8 +52,10 @@ int startSimulationSingleEvent()
         }
         nowTmin = nowTsec / 60.0;
         if (simulateRunoff(nowTmin) == -1) { return -1; }
-        calCumulativeRFDuringDTPrintOut(ts.dtsec);
+        calCumulRFduringDTP(ts.dtsec);
+
         outputManager(nowTsec, rfOrder);
+
         if (nowTsec + ts.dtsec > endingT_sec) {
             ts.dtsec = nowTsec + ts.dtsec - endingT_sec;
             nowTsec = endingT_sec;
@@ -86,31 +87,43 @@ int startSimulationSingleEvent()
 int simulateRunoff(double nowTmin)
 {
     int maxLimit = di.facMax + 1;
+    ts.vMaxInThisStep = DBL_MIN;
+    int numth = omp_get_thread_num();
+    double* uMax = new double[numth];
     for (int fac = 0; fac < maxLimit; ++fac) {
         if (cvaisToFA[fac].size() > 0) {
-            double uMax = 0;
+            int iterLimit = cvaisToFA[fac].size();
 #pragma omp parallel
-            {
-                int iterLimit = cvaisToFA[fac].size();
-                omp_set_num_threads(prj.maxDegreeOfParallelism);
-                // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
+            {    // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
                 // VS2019는 openMP 2.0 지원, 그러므로 critical 사용한다.
-#pragma omp for schedule(guided)
+                // critical은 속도 손실이 있으므로, 배열로 할당해서 직접 계산한다.
+                int id = omp_get_thread_num();
+                uMax[id] = 0;
+#pragma omp for schedule(guided) private (id)
                 for (int i = 0; i < iterLimit; ++i) {
                     if (cvs[i].toBeSimulated == 1) {
+                        id = omp_get_thread_num();
                         simulateRunoffCore(i, nowTmin);
-                        if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                            uMax = cvs[i].uOF;
-                        }
-                        else {
-                            uMax = cvs[i].stream.uCH;
+                        if (prj.IsFixedTimeStep == -1) {
+                            if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                                if (uMax[id] < cvs[i].uOF) {
+                                    uMax[id] = cvs[i].uOF;
+                                }
+                            }
+                            else {
+                                if (uMax[id] < cvs[i].stream.uCH) {
+                                    uMax[id] = cvs[i].stream.uCH;
+                                }
+                            }
                         }
                     }
                 }
-#pragma omp critical(getVmax)
-                {
-                    if (ts.vMaxInThisStep < uMax) {
-                        ts.vMaxInThisStep = uMax;
+            }
+            //#pragma omp critical(getVmax)
+            if (prj.IsFixedTimeStep == -1) {
+                for (int i = 0; i < numth; ++i) {
+                    if (ts.vMaxInThisStep < uMax[i]) {
+                        ts.vMaxInThisStep = uMax[i];
                     }
                 }
             }
@@ -178,7 +191,7 @@ void simulateRunoffCore(int i, double nowTmin)
 
 void outputManager(int nowTsec, int rfOrder)
 {
-    int dtP_min = prj.printTimeStep_min;
+    int dtP_min = prj.dtPrint_min;
     int dtrf_min = (int)prj.rfinterval_min;
     int dtrf_sec = dtrf_min * 60;
     int dtP_SEC = dtP_min * 60;
@@ -236,19 +249,20 @@ void initThisSimulation()
     }
     // 이렇게 해야 모의기간에 맞게 실행된다. 
     //왜냐하면, 첫번째 실행 결과가 0 시간으로 출력되기 때문에
-    ts.time_simEnding_sec = (prj.simDuration_hr*60 + prj.printTimeStep_min) * 60;     
+    ts.time_simEnding_sec = (prj.simDuration_hr*60 + prj.dtPrint_min) * 60;     
     ts.setupGRMisNormal = 1;
     ts.grmStarted = 1;
     ts.stopSim = -1;
     ts.dtsec = prj.dtsec;
-    ts.dtMaxLimit_sec = (int)prj.printTimeStep_min * 60 / 2;
+    ts.dtMaxLimit_sec = (int)prj.dtPrint_min * 60 / 2;
     ts.dtMinLimit_sec = 1;
+    ts.vMaxInThisStep = DBL_MIN;
     //ts.iscvsb = -1;
     ts.cvsbT_sec = 0;
 
     time_t now = time(0);
     localtime_s(&ts.g_RT_tStart_from_MonitorEXE, &now);
-    ts.time_thisSimStarted = ts.g_RT_tStart_from_MonitorEXE;
+    ts.time_thisSimStarted = COleDateTime::GetCurrentTime();;
 }
 
 void setCVStartingCondition(double iniflow)

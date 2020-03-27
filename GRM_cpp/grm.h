@@ -598,12 +598,12 @@ typedef struct _projectFile
 	string fpnRainfallData = "";
 	int rfinterval_min = -1;
 	flowDirectionType fdType = flowDirectionType::None;
-	int maxDegreeOfParallelism = 0;
+	int mdp = 0;
 	string simStartTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
 	double simDuration_hr = -1.0;
 	double dtsec = -1.0;
 	int IsFixedTimeStep = 0;// true : 1, false : -1
-	double printTimeStep_min = -1;
+	double dtPrint_min = -1;
 	int simInfiltration = 0;// true : 1, false : -1
 	int simSubsurfaceFlow = 0;// true : 1, false : -1
 	int simBaseFlow = 0;// true : 1, false : -1
@@ -632,6 +632,7 @@ typedef struct _projectFile
 	int cwFileApplied = 0;
 	int icfFileApplied = 0;
 	int issrFileApplied = 0;
+	int makeASCorIMGfile = 0;
 
 	CPUsInfo cpusi;
 	int deleteAllFilesExceptDischargeOut = -1;
@@ -665,7 +666,7 @@ typedef struct _thisSimulation
 	int runByAnalyzer = 0;
 
 	tm g_RT_tStart_from_MonitorEXE;
-	tm time_thisSimStarted;
+	COleDateTime time_thisSimStarted;
 
 	double vMaxInThisStep;
 	
@@ -685,7 +686,7 @@ double calRFlowAndSSFlow(int i,
 void calBFLateralMovement(int i,
 	int facMin, double dY_m, double dtsec);
 void calChannelFlow(int i, double chCSACVw_tp1);
-void calCumulativeRFDuringDTPrintOut(int dtsec);
+void calCumulRFduringDTP(int dtsec);
 void calFCReservoirOutFlow(int i, double nowTmin); //i는 cv array index
 void calEffectiveRainfall(int i, int dtrf_sec, int dtsec);
 void calOverlandFlow(int i, double hCVw_tp1,
@@ -788,6 +789,8 @@ int updateFCCellinfoAndData();
 
 void writeBySimType(int nowTP_min,
 	double cinterp);
+void writeSimStep(int elapsedT_min);
+void writeSingleEvent(int nowTmin, double interCoef);
 
 
 inline double rfintensity_mPsec(double rf_mm, 

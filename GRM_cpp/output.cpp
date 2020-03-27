@@ -1,5 +1,6 @@
 #include <io.h>
 #include <string>
+#include<ATLComTime.h>
 
 #include "grm.h"
 #include "realTime.h"
@@ -20,18 +21,18 @@ extern wpinfo wpis;
 extern flowControlCellAndData fccds;
 
 extern thisSimulation ts;
+extern string msgFileProcess;
 
 void writeBySimType(int nowTP_min,
     double cinterp)
 {
-    double sumRFMeanForDTprint_m = ts.rfAveSumAllCells_dtP_m;
+    writeSimStep(nowTP_min);
     int wpCount = wpis.wpCVIDs.size();
     simulationType simType = prj.simType;
     switch (simType) {
-    case simulationType::SingleEvent: {
-        if (SimulationStep != null) { SimulationStep(nowTP_min); }
+    case simulationType::SingleEvent: {       
         if (prj.printOption == GRMPrintType::All) {
-            mOutputControl.WriteSimResultsToTextFileForSingleEvent(mProject, wpCount, nowTP_min, sumRFMeanForDTprint_m, cinterp, Project_tm1);
+            writeSingleEvent( nowTP_min, cinterp);
         }
         if (prj.printOption == GRMPrintType::DischargeFileQ) {
             mOutputControl.WriteDischargeOnlyToDischargeFile(mProject, cinterp, Project_tm1);
@@ -66,14 +67,154 @@ void writeBySimType(int nowTP_min,
         mProject.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID] = 0;
         mProject.watchPoint.RFWPGridForDtPrintout_mm[row.CVID] = 0;
     }
-    if (prj.makeRfDistFile == 1 && (prj.makeIMGFile == 1
-        || prj.makeASCFile == 1)) {
-        for (int cvan = 0; cvan < cProject.Current.CVCount; cvan++)
+    if (prj.makeRfDistFile == 1
+        && prj.makeASCorIMGfile == 1) {
+        for (int cvan = 0; cvan < di.cellNnotNull; ++cvan)
         {
             cProject.Current.CVs[cvan].RF_dtPrintOut_meter = 0;
         }
     }
 }
+
+void writeSimStep(int elapsedT_min)
+{
+    double nowStep;
+    string curProgressRatio = "";
+    double simDur_min = prj.simDuration_hr * 60.0;
+    nowStep = elapsedT_min / simDur_min * 100.0;
+    curProgressRatio = forString(nowStep, 0);
+    cout<<"\rCurrent progress: " + curProgressRatio + "%. " + msgFileProcess;
+}
+
+
+void writeSingleEvent(int nowTmin, double cinterp)
+{
+    COleDateTime time_curPrint;
+    string tsFromStarting_sec;
+    string tStringToPrint;
+    double aveRFSumForDTP_mm;
+    //string strFNPDischarge;
+    //string strFNPDepth;
+    //string strFNPRFGrid;
+    //string strFNPRFMean;
+    //string strFNPFCData;
+    //string strFNPFCStorage;
+   /* strFNPDischarge = project.OFNPDischarge;
+    strFNPDepth = project.OFNPDepth;
+    strFNPRFGrid = project.OFNPRFGrid;
+    strFNPRFMean = project.OFNPRFMean;
+    strFNPFCData = project.OFNPFCData;
+    strFNPFCStorage = project.OFNPFCStorage;*/
+    string vToPrint = "";
+
+    aveRFSumForDTP_mm = ts.rfAveSumAllCells_dtP_m * 1000.0;
+    time_curPrint = COleDateTime::GetCurrentTime();    
+    COleDateTimeSpan tsTotalSim = time_curPrint - ts.time_thisSimStarted;
+    tsFromStarting_sec = forString(tsTotalSim.GetTotalSeconds(), 0);
+    if (prj.isDateTimeFormat == 1) {
+        tStringToPrint = timeElaspedToDateTimeFormat(prj.simStartTime,
+            false, nowTmin*60, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+    }
+    else {
+        tStringToPrint = forString(nowTmin / 60.0, 2);
+    }
+
+
+    // ===================================================================================================
+    // À¯·®
+    string txtToP ;
+    // lineToPrint = strNowTimeToPrintOut
+    txtToP = tStringToPrint;
+    for (int id : wpis.wpCVIDs) {
+        int i = id - 1;
+        if (cinterp == 1) {
+            if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                vToPrint = forString(cvs[i].QOF_m3Ps, 2);
+            }
+            else {
+                vToPrint = forString(cvs[i].stream.QCH_m3Ps, 2);
+            }
+        }
+        else if (project_tm1.CVs[i] != null) {
+            switch (cvs[i].FlowType)
+            {
+            case cGRM.CellFlowType.OverlandFlow:
+            {
+                vToPrint = cHydroCom.GetInterpolatedValueLinear(project_tm1.CVs[i].QCVof_i_j_m3Ps, cvs[i].QCVof_i_j_m3Ps, interCoef).ToString("F2");
+                break;
+            }
+
+            default:
+            {
+                vToPrint = cHydroCom.GetInterpolatedValueLinear(project_tm1.CVs[i].stream.QCVch_i_j_m3Ps, cvs[i].stream.QCVch_i_j_m3Ps, interCoef).ToString("F2");
+                break;
+            }
+            }
+        }
+        else        {
+            vToPrint = "0";
+        }
+
+        // lineToPrint = lineToPrint + vbTab + vToPrint.Trim
+        txtToP = txtToP + "\t" + vToPrint;
+        double sv = System.Convert.ToDouble(vToPrint);
+        project.watchPoint.mTotalFlow_cms[id] = project.watchPoint.mTotalFlow_cms[id] + sv;
+        project.watchPoint.Qprint_cms[id] = System.Convert.ToDouble(vToPrint);
+        if (project.watchPoint.MaxFlow_cms[id] < sv)
+        {
+            project.watchPoint.MaxFlow_cms[id] = sv;
+            project.watchPoint.MaxFlowTime[id] = strNowTimeToPrintOut;
+        }
+        WriteWPouputs(strNowTimeToPrintOut, i, interCoef, project, project_tm1);
+    }
+        sbQ.Append("\t" + meanRFSumForPrintoutTime_mm.ToString("F2") + "\t" + lngTimeDiffFromStarting_SEC.ToString() + "\r\n");
+        File.AppendAllText(strFNPDischarge, sbQ.ToString(), Encoding.Default);
+
+        // ===================================================================
+        // FCAppFlow, FCStorage
+        if (project.generalSimulEnv.mbSimulateFlowControl == true && project.fcGrid.FCCellCount > 0)
+        {
+            StringBuilder sbFCFlow = new StringBuilder();
+            StringBuilder sbFCStorage = new StringBuilder();
+            sbFCFlow.Append(strNowTimeToPrintOut);
+            sbFCStorage.Append(strNowTimeToPrintOut);
+            if (interCoef == 1)
+            {
+                foreach(int fcCvid in project.fcGrid.FCGridCVidList)
+                {
+                    sbFCFlow.Append("\t" + project.fcGrid.mFCdataToApplyNowT[fcCvid].ToString("F2"));
+                    sbFCStorage.Append("\t" + project.CVs[fcCvid - 1].StorageCumulative_m3.ToString("F2"));
+                }
+            }
+            else
+            {
+                foreach(int fcCvid in project.fcGrid.FCGridCVidList)
+                {
+                    if (project_tm1.CVs[fcCvid - 1] != null)
+                    {
+                        sbFCFlow.Append("\t" + cHydroCom.GetInterpolatedValueLinear(project_tm1.fcGrid.mFCdataToApplyNowT[fcCvid],
+                            project.fcGrid.mFCdataToApplyNowT[fcCvid], interCoef).ToString("F2"));
+                        sbFCStorage.Append("\t" + cHydroCom.GetInterpolatedValueLinear(project_tm1.CV(fcCvid - 1).StorageCumulative_m3,
+                            project.CVs[fcCvid - 1].StorageCumulative_m3, interCoef).ToString("F2"));
+                    }
+                }
+            }
+            sbFCFlow.Append("\r\n");
+            sbFCStorage.Append("\r\n");
+            System.IO.File.AppendAllText(strFNPFCData, sbFCFlow.ToString(), Encoding.Default);
+            System.IO.File.AppendAllText(strFNPFCStorage, sbFCStorage.ToString(), Encoding.Default);
+        }
+        // ===================================================================
+        if (nowT_MIN == System.Convert.ToInt32(project.generalSimulEnv.mSimDurationHOUR * 60))
+        {
+            project.generalSimulEnv.mEndingTimeToPrint = strNowTimeToPrintOut;
+        }
+    }
+
+
+
+
+
 
 
 int initOutputFiles()

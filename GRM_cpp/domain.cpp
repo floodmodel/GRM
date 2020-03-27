@@ -159,7 +159,6 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
 
     int nRy = di.nRows;
     int nCx = di.nCols;
-    omp_set_num_threads(prj.maxDegreeOfParallelism);
 #pragma omp parallel for schedule(guided)
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
@@ -307,7 +306,6 @@ int setCVbyLCConstant()
     }
     int nRy = di.nRows;
     int nCx = di.nCols;
-    omp_set_num_threads(prj.maxDegreeOfParallelism);
 #pragma omp parallel for schedule(guided)
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
@@ -335,7 +333,6 @@ int readLandCoverFile(string fpnLC, int** cvAryidx, cvAtt* cvs1D, int nColX, int
         return -1;
     }
     ascRasterFile lcFile = ascRasterFile(fpnLC);
-    omp_set_num_threads(prj.maxDegreeOfParallelism);
     int isnormal = 1;
 #pragma omp parallel for schedule(guided)
     for (int ry = 0; ry < nRowY; ry++) {
@@ -447,7 +444,6 @@ int setCVbySTConstant()
 
     int nRy = di.nRows;
     int nCx = di.nCols;
-    omp_set_num_threads(prj.maxDegreeOfParallelism);
 #pragma omp parallel for schedule(guided)
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
@@ -477,7 +473,6 @@ int readSoilTextureFile(string fpnST, int** cvAryidx, cvAtt* cvs1D, int nColX, i
         return -1;
     }
     ascRasterFile stFile = ascRasterFile(fpnST);
-    omp_set_num_threads(prj.maxDegreeOfParallelism);
     int isnormal = 1;
 #pragma omp parallel for schedule(guided)
     for (int ry = 0; ry < nRowY; ry++) {
@@ -568,7 +563,6 @@ int setCVbySDConstant()
     }
     int nRy = di.nRows;
     int nCx = di.nCols;
-    omp_set_num_threads(prj.maxDegreeOfParallelism);
 #pragma omp parallel for schedule(guided)
     for (int ry = 0; ry < nRy; ry++) {
         for (int cx = 0; cx < nCx; cx++) {
@@ -595,7 +589,6 @@ int readSoilDepthFile(string fpnSD, int** cvAryidx, cvAtt* cvs1D, int nColX, int
         return -1;
     }
     ascRasterFile sdFile = ascRasterFile(fpnSD);
-    omp_set_num_threads(prj.maxDegreeOfParallelism);
     int isnormal = 1;
 #pragma omp parallel for schedule(guided)
     for (int ry = 0; ry < nRowY; ry++) {
@@ -620,7 +613,6 @@ int readSoilDepthFile(string fpnSD, int** cvAryidx, cvAtt* cvs1D, int nColX, int
 int setFlowNetwork()
 {
     initWatershedNetwork(); // 여기서 유역 네트워크 정보 초기화
-    omp_set_num_threads(prj.maxDegreeOfParallelism);
 #pragma omp parallel for schedule(guided)
     //여기서 셀별 네트워크 정보 초기화
     for (int ry = 0; ry < di.nRows; ry++) {

@@ -166,7 +166,7 @@ int setCVRF(int order)
     }
 }
 
- void calCumulativeRFDuringDTPrintOut(int dtsec)
+ void calCumulRFduringDTP(int dtsec)
  {
      ts.rfAveForDT_m = ts.rfiSumAllCellsInCurRFData_mPs * dtsec
          / di.cellNtobeSimulated;
@@ -180,8 +180,9 @@ int setCVRF(int order)
          wpis.rfWPGridForDtPrint_mm[wpcvid] = wpis.rfWPGridForDtPrint_mm[wpcvid]
              + cvs[wpcvid - 1].rfiRead_mPsec * 1000 * dtsec;
      }
-     if (prj.makeASCFile == 1 || prj.makeIMGFile == 1) {
+     if (prj.makeASCorIMGfile == 1 ) {
          if (prj.makeRfDistFile == 1 || prj.makeRFaccDistFile == 1) {
+#pragma omp parallel for schedule(guided)
              for (int i = 0; i < di.cellNtobeSimulated; ++i) {
                  cvs[i].rf_dtPrint_m = cvs[i].rf_dtPrint_m
                      + cvs[i].rfiRead_mPsec * dtsec;
