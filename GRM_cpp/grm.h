@@ -332,6 +332,7 @@ typedef struct _wpLocationRC
 
 typedef struct _wpinfo {
 	vector<int> wpCVIDs;
+	map<int, string> wpNames; //<cvid, wpname>
 	//<cvid, value>
 	map<int, double> rfiReadSumUpWS_mPs;// 현재 wp 상류에 대해 원시자료에서 읽은 강우량(강우강도 rfi).[m/s] 
 	map<int, double> rfUpWSAveForDt_mm; // 현재 wp 상류에 대해 dt(계산시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
@@ -441,7 +442,7 @@ typedef struct _grmOutFiles
 	string ofpRFDistribution;
 	string ofpRFAccDistribution;
 	string ofpFlowDistribution;
-	map<int, string> ofpnWPs;
+	map<int, string> ofpnWPs; //<cvid, fpn>
 } grmOutFiles;
 
 typedef struct _domaininfo
@@ -744,6 +745,8 @@ int isNormalSoilDepthInfo(soilDepthInfo asd);
 int isNormalLandCoverInfo(landCoverInfo alc);
 
 double Kunsaturated(cvAtt cv);
+void Log_Performance_data(string strBasin, string strTag,
+	string strDataTime, double dblElapTime);
 
 int makeNewOutputFiles();
 
@@ -790,6 +793,8 @@ int updateFCCellinfoAndData();
 
 void writeBySimType(int nowTP_min,
 	double cinterp);
+void writeDischargeOnly(double cinterp, 
+	int writeWPfiles);
 void writeSimStep(int elapsedT_min);
 void writeSingleEvent(int nowTmin, 
 	double interCoef);
@@ -808,6 +813,9 @@ inline double soilSSRbyCumulF(double cumulinfiltration,
 	double effSoilDepth, cellFlowType flowType);
 inline  double vByManningEq(double hydraulicRaidus,
 	double slope, double nCoeff);
+
+
+
 
 // extern C
 int readLandCoverFile(string fpnLC, 

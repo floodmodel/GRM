@@ -85,6 +85,7 @@ int initWPinfos()
 		int ry = prj.wps[i].wpRowY;
 		int cvid = cvais[cx][ry] + 1;
 		wpis.wpCVIDs.push_back(cvid);
+        wpis.wpNames[cvid] = prj.wps[i].wpName;
 	}
 	isnormal = 1;
 	return isnormal;

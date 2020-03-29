@@ -2,6 +2,7 @@
 #include <omp.h>
 #include "gentle.h"
 #include "grm.h"
+#include "realTime.h"
 
 using namespace std;
 
@@ -191,63 +192,6 @@ void simulateRunoffCore(int i, double nowTmin)
     }
 }
 
-
-void outputManager(int nowTsec, int rfOrder)
-{
-    int dtP_min = prj.dtPrint_min;
-    int dtrf_min = (int)prj.rfinterval_min;
-    int dtrf_sec = dtrf_min * 60;
-    int dtP_SEC = dtP_min * 60;
-    double dtmin = ts.dtsec / 60.0;
-    int timeToP_min;
-    if (rfOrder == 1
-        && dtP_min > dtrf_min
-        && ((nowTsec + ts.dtsec) > dtrf_sec)) {
-        // 첫번째 출력전에 다음 스텝에서 강우레이어가 바뀌는 경우는 첫번째 강우레이어 모델링이 끝났다는 얘기이므로 한번 출력한다.
-        // 0 시간에서의 모델링 결과로 출력한다.
-        double RFmeanForFirstLayer = ts.rfAveForDT_m / dtmin * dtrf_min;
-        writeBySimType(0, 1);
-        ts.zeroTimePrinted = 1;
-        return; // 이경우는 모의시작 전에 설정된  ts.targetTtoP_min = dtP_min 을 유지
-    }
-    else if (nowTsec % dtP_SEC == 0) {
-        if (ts.zeroTimePrinted == -1) {
-            timeToP_min = ts.targetTtoP_sec * 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
-        }
-        else {
-            timeToP_min = ts.targetTtoP_sec * 60;
-        }
-        writeBySimType(timeToP_min, 1);
-        ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
-        return;
-    }
-    else {
-        if (nowTsec <  ts.targetTtoP_sec
-            && (nowTsec + ts.dtsec) >ts.targetTtoP_sec) {
-            // 만일 현재의 dtsec으로 한번더 전진해서 이 조건을 만족하면
-            std::copy(cvs, cvs + di.cellNnotNull, cvsb);
-            wpisb = wpis;
-            if (prj.simFlowControl == 1) {
-                fcdAb = fccds.fcDataAppliedNowT_m3Ps;
-            }
-            ts.cvsbT_sec = nowTsec;
-            ts.isbak = 1;
-            return; //벡업만 받고 나간다.
-        }
-        if (nowTsec > ts.targetTtoP_sec
-            && (nowTsec - ts.dtsecUsed_tm1) <= ts.targetTtoP_sec) {
-            double citerp;
-            citerp = (ts.targetTtoP_sec - ts.cvsbT_sec) / (double)(nowTsec - ts.cvsbT_sec);
-            timeToP_min = ts.targetTtoP_sec * 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
-            writeBySimType(timeToP_min, citerp);
-            ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
-            ts.isbak = -1;
-            return;
-        }
-    }
-}
-
-
 void initThisSimulation()
 {
     if (prj.simType != simulationType::RealTime) {
@@ -393,5 +337,111 @@ void setCVStartingCondition(double iniflow)
         wpis.rfUpWSAveTotal_mm[wpcvid] = 0;
         wpis.totalDepth_m[wpcvid] = 0;
         wpis.totalFlow_cms[wpcvid] = 0;
+    }
+}
+
+
+void outputManager(int nowTsec, int rfOrder)
+{
+    int dtP_min = prj.dtPrint_min;
+    int dtrf_min = (int)prj.rfinterval_min;
+    int dtrf_sec = dtrf_min * 60;
+    int dtP_SEC = dtP_min * 60;
+    double dtmin = ts.dtsec / 60.0;
+    int timeToP_min;
+    if (rfOrder == 1
+        && dtP_min > dtrf_min
+        && ((nowTsec + ts.dtsec) > dtrf_sec)) {
+        // 첫번째 출력전에 다음 스텝에서 강우레이어가 바뀌는 경우는 첫번째 강우레이어 모델링이 끝났다는 얘기이므로 한번 출력한다.
+        // 0 시간에서의 모델링 결과로 출력한다.
+        double RFmeanForFirstLayer = ts.rfAveForDT_m / dtmin * dtrf_min;
+        writeBySimType(0, 1);
+        ts.zeroTimePrinted = 1;
+        return; // 이경우는 모의시작 전에 설정된  ts.targetTtoP_min = dtP_min 을 유지
+    }
+    else if (nowTsec % dtP_SEC == 0) {
+        if (ts.zeroTimePrinted == -1) {
+            timeToP_min = ts.targetTtoP_sec * 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
+        }
+        else {
+            timeToP_min = ts.targetTtoP_sec * 60;
+        }
+        writeBySimType(timeToP_min, 1);
+        ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
+        return;
+    }
+    else {
+        if (nowTsec <  ts.targetTtoP_sec
+            && (nowTsec + ts.dtsec) >ts.targetTtoP_sec) {
+            // 만일 현재의 dtsec으로 한번더 전진해서 이 조건을 만족하면
+            std::copy(cvs, cvs + di.cellNnotNull, cvsb);
+            wpisb = wpis;
+            if (prj.simFlowControl == 1) {
+                fcdAb = fccds.fcDataAppliedNowT_m3Ps;
+            }
+            ts.cvsbT_sec = nowTsec;
+            ts.isbak = 1;
+            return; //벡업만 받고 나간다.
+        }
+        if (nowTsec > ts.targetTtoP_sec
+            && (nowTsec - ts.dtsecUsed_tm1) <= ts.targetTtoP_sec) {
+            double citerp;
+            citerp = (ts.targetTtoP_sec - ts.cvsbT_sec) / (double)(nowTsec - ts.cvsbT_sec);
+            timeToP_min = ts.targetTtoP_sec * 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
+            writeBySimType(timeToP_min, citerp);
+            ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
+            ts.isbak = -1;
+            return;
+        }
+    }
+}
+
+void writeBySimType(int nowTP_min,
+    double cinterp)
+{
+    writeSimStep(nowTP_min);
+    int wpCount = wpis.wpCVIDs.size();
+    simulationType simType = prj.simType;
+    switch (simType) {
+    case simulationType::SingleEvent: {
+        if (prj.printOption == GRMPrintType::All) {
+            writeSingleEvent(nowTP_min, cinterp);
+        }
+        if (prj.printOption == GRMPrintType::DischargeFileQ) {
+            writeDischargeOnly(cinterp, -1);
+        }
+        if (prj.printOption == GRMPrintType::AllQ) {
+            writeDischargeOnly(cinterp, 1);
+        }
+        break;
+    }
+    case simulationType::RealTime: {
+        writeDBRealTime(nowTP_min, cinterp);
+        break;
+    }
+    }
+
+    if (ts.runByAnalyzer == 1)
+        // RaiseEvent SendQToAnalyzer(Me, mProject, Project_tm1, nowTtoPrint_MIN, coeffInterpolation)
+    {
+        SendQToAnalyzer(nowTP_min, cinterp);
+    }
+    if (mProject.generalSimulEnv.mbMakeRasterOutput == true)
+    {
+        MakeRasterOutput(nowTP_min);
+    }
+
+    sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0;
+    for (Dataset.GRMProject.WatchPointsRow row in mProject.watchPoint.mdtWatchPointInfo)
+    {
+        mProject.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID] = 0;
+        mProject.watchPoint.RFWPGridForDtPrintout_mm[row.CVID] = 0;
+    }
+    if (prj.makeRfDistFile == 1
+        && prj.makeASCorIMGfile == 1) {
+        for (int cvan = 0; cvan < di.cellNnotNull; ++cvan)
+        {
+            cProject.Current.CVs[cvan].RF_dtPrintOut_meter = 0;
+        }
     }
 }

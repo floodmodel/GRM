@@ -25,58 +25,7 @@ extern map<int, double> fcdAb;
 extern wpinfo wpisb;;
 extern string msgFileProcess;
 
-void writeBySimType(int nowTP_min,
-    double cinterp)
-{
-    writeSimStep(nowTP_min);
-    int wpCount = wpis.wpCVIDs.size();
-    simulationType simType = prj.simType;
-    switch (simType) {
-    case simulationType::SingleEvent: {       
-        if (prj.printOption == GRMPrintType::All) {
-            writeSingleEvent( nowTP_min, cinterp);
-        }
-        if (prj.printOption == GRMPrintType::DischargeFileQ) {
-            mOutputControl.WriteDischargeOnlyToDischargeFile(mProject, cinterp, Project_tm1);
-        }
-        if (prj.printOption == GRMPrintType::AllQ) {
-            mOutputControl.WriteDischargeOnlyToDischargeFile(mProject, cinterp, Project_tm1);
-            mOutputControl.WriteDischargeOnlyToWPFile(mProject, cinterp, Project_tm1);
-        }
-        cGRM.writelogAndConsole(string.Format("Time(min) dt(sec), {0}{1}{2}", nowTP_min, "\t", sThisSimulation.dtsec), cGRM.bwriteLog, false);
-        break;
-    }
 
-    case simulationType::RealTime: {
-        mOutputControlRT.WriteSimResultsToTextFileAndDBForRealTime(mProject, nowTP_min, cinterp, Project_tm1, mRealTime);
-        break;
-    }
-    }
-
-    if (ts.runByAnalyzer == 1)
-        // RaiseEvent SendQToAnalyzer(Me, mProject, Project_tm1, nowTtoPrint_MIN, coeffInterpolation)
-    {
-        SendQToAnalyzer(nowTP_min, cinterp);
-    }
-    if (mProject.generalSimulEnv.mbMakeRasterOutput == true)
-    {
-        MakeRasterOutput(nowTP_min);
-    }
-
-    sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0;
-    for (Dataset.GRMProject.WatchPointsRow row in mProject.watchPoint.mdtWatchPointInfo)
-    {
-        mProject.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID] = 0;
-        mProject.watchPoint.RFWPGridForDtPrintout_mm[row.CVID] = 0;
-    }
-    if (prj.makeRfDistFile == 1
-        && prj.makeASCorIMGfile == 1) {
-        for (int cvan = 0; cvan < di.cellNnotNull; ++cvan)
-        {
-            cProject.Current.CVs[cvan].RF_dtPrintOut_meter = 0;
-        }
-    }
-}
 
 void writeSimStep(int elapsedT_min)
 {
@@ -102,7 +51,7 @@ void writeSingleEvent(int nowTmin, double cinterp)
     tsFromStarting_sec = forString(tsTotalSim.GetTotalSeconds(), 0);
     if (prj.isDateTimeFormat == 1) {
         tStrToPrint = timeElaspedToDateTimeFormat(prj.simStartTime,
-            false, nowTmin * 60, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+            nowTmin * 60, false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
     }
     else {
         tStrToPrint = forString(nowTmin / 60.0, 2);
@@ -212,6 +161,49 @@ void writeWPouput(string nowTP, int i, double cinterp)
             cvs[i].storageCumulative_m3, cinterp), 2) + "\n");
     }
     appendTextToTextFile(wpis.fpnWpOut[cvid], sbWP);
+}
+
+void writeDischargeOnly(double cinterp, int writeWPfiles)
+{
+    string strFNPDischarge;
+    string ptext;
+    string vToP = "";
+    for (int cvid : wpis.wpCVIDs) {
+        int i = cvid - 1;
+        if (cinterp == 1) {
+            if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                vToP = forString(cvs[i].QOF_m3Ps, 2);
+            }
+            else {
+                vToP = forString(cvs[i].stream.QCH_m3Ps, 2);
+            }
+        }
+        else if (ts.isbak == 1) {
+            if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                vToP = forString(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
+                    cvs[i].QOF_m3Ps, cinterp), 2);
+            }
+            else {
+                vToP = forString(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
+                    cvs[i].stream.QCH_m3Ps, cinterp), 2);
+            }
+        }
+        else {
+            vToP = "0";
+        }
+        wpis.qprint_cms[cvid] = stod(vToP);
+        if (writeWPfiles == 1) {
+            appendTextToTextFile(ofs.ofpnWPs[cvid], vToP);
+        }
+        if (trim(ptext) == "") {
+            ptext.append(vToP);
+        }
+        else {
+            ptext.append("\t" + vToP);
+        }
+    }
+    ptext.append("\n");
+    appendTextToTextFile(ofs.ofpnDischarge, ptext);
 }
 
 
