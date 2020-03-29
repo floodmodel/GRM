@@ -348,7 +348,7 @@ typedef struct _wpinfo {
 	map<int, string> maxDepthTime; // Watchpoint 격자에 대한 최고수심 시간. 첨두시간
 	map<int, double> qFromFCData_cms; // 해당 wp에서 Flow control에 의해서 계산되는 유량
 	map<int, double> qprint_cms;
-	map<int, string> FpnWpOut; // Watch point 별 모의결과 출력을 위한 파일 이름 저장
+	map<int, string> fpnWpOut; // Watch point 별 모의결과 출력을 위한 파일 이름 저장
 	map<int, int>cvCountAllup;
 } wpinfo;
 
@@ -662,6 +662,7 @@ typedef struct _thisSimulation
 	int targetTtoP_sec = 0;
 	//int iscvsb = -1; // 이전시간에서의 cvs가 백업되어 있는지 여부
 	int cvsbT_sec = 0;
+	int isbak = 0;
 
 	int runByAnalyzer = 0;
 
@@ -790,9 +791,13 @@ int updateFCCellinfoAndData();
 void writeBySimType(int nowTP_min,
 	double cinterp);
 void writeSimStep(int elapsedT_min);
-void writeSingleEvent(int nowTmin, double interCoef);
+void writeSingleEvent(int nowTmin, 
+	double interCoef);
+void writeWPouput(string nowTP, 
+	int i, double cinterp);
 
-
+inline double  getinterpolatedVLinear(double firstV,
+	double nextV, double cinterp);
 inline double rfintensity_mPsec(double rf_mm, 
 	double dtrf_sec);
 inline void setNoFluxCVCH(int i);

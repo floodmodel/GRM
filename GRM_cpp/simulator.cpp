@@ -11,11 +11,14 @@ extern thisSimulation ts;
 
 extern domaininfo di;
 extern cvAtt* cvs;
-extern cvAtt* cvsb;
 extern map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
 extern vector<rainfallData> rfs;
 extern flowControlCellAndData fccds;
 extern wpinfo wpis;
+
+extern cvAtt* cvsb; 
+map<int, double> fcdAb;// <cvid, value> t-dt 시간에 적용된 flow control data 값
+wpinfo wpisb;
 
 int startSimulationSingleEvent()
 {
@@ -88,7 +91,7 @@ int simulateRunoff(double nowTmin)
 {
     int maxLimit = di.facMax + 1;
     ts.vMaxInThisStep = DBL_MIN;
-    int numth = omp_get_thread_num();
+    int numth = prj.mdp;
     double* uMax = new double[numth];
     for (int fac = 0; fac < maxLimit; ++fac) {
         if (cvaisToFA[fac].size() > 0) {
@@ -99,10 +102,10 @@ int simulateRunoff(double nowTmin)
                 // critical은 속도 손실이 있으므로, 배열로 할당해서 직접 계산한다.
                 int id = omp_get_thread_num();
                 uMax[id] = 0;
-#pragma omp for schedule(guided) private (id)
+#pragma omp for schedule(guided) 
                 for (int i = 0; i < iterLimit; ++i) {
                     if (cvs[i].toBeSimulated == 1) {
-                        id = omp_get_thread_num();
+                        //id = omp_get_thread_num();
                         simulateRunoffCore(i, nowTmin);
                         if (prj.IsFixedTimeStep == -1) {
                             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
@@ -120,7 +123,7 @@ int simulateRunoff(double nowTmin)
                 }
             }
             //#pragma omp critical(getVmax)
-            if (prj.IsFixedTimeStep == -1) {
+            if (prj.IsFixedTimeStep == -1) {//이 조건 적용 여부?
                 for (int i = 0; i < numth; ++i) {
                     if (ts.vMaxInThisStep < uMax[i]) {
                         ts.vMaxInThisStep = uMax[i];
@@ -222,8 +225,13 @@ void outputManager(int nowTsec, int rfOrder)
         if (nowTsec <  ts.targetTtoP_sec
             && (nowTsec + ts.dtsec) >ts.targetTtoP_sec) {
             // 만일 현재의 dtsec으로 한번더 전진해서 이 조건을 만족하면
-            ts.cvsbT_sec = nowTsec;
             std::copy(cvs, cvs + di.cellNnotNull, cvsb);
+            wpisb = wpis;
+            if (prj.simFlowControl == 1) {
+                fcdAb = fccds.fcDataAppliedNowT_m3Ps;
+            }
+            ts.cvsbT_sec = nowTsec;
+            ts.isbak = 1;
             return; //벡업만 받고 나간다.
         }
         if (nowTsec > ts.targetTtoP_sec
@@ -233,6 +241,7 @@ void outputManager(int nowTsec, int rfOrder)
             timeToP_min = ts.targetTtoP_sec * 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
             writeBySimType(timeToP_min, citerp);
             ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
+            ts.isbak = -1;
             return;
         }
     }

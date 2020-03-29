@@ -15,12 +15,14 @@ extern fs::path fpnLog;
 
 extern int** cvais;
 extern cvAtt* cvs;
-extern cvAtt* cvsb;
 extern domaininfo di;
 extern wpinfo wpis;
 extern flowControlCellAndData fccds;
-
 extern thisSimulation ts;
+
+extern cvAtt* cvsb;
+extern map<int, double> fcdAb;
+extern wpinfo wpisb;;
 extern string msgFileProcess;
 
 void writeBySimType(int nowTP_min,
@@ -89,132 +91,128 @@ void writeSimStep(int elapsedT_min)
 
 void writeSingleEvent(int nowTmin, double cinterp)
 {
-    COleDateTime time_curPrint;
+    COleDateTime timeNow;
     string tsFromStarting_sec;
-    string tStringToPrint;
+    string tStrToPrint;
     double aveRFSumForDTP_mm;
-    //string strFNPDischarge;
-    //string strFNPDepth;
-    //string strFNPRFGrid;
-    //string strFNPRFMean;
-    //string strFNPFCData;
-    //string strFNPFCStorage;
-   /* strFNPDischarge = project.OFNPDischarge;
-    strFNPDepth = project.OFNPDepth;
-    strFNPRFGrid = project.OFNPRFGrid;
-    strFNPRFMean = project.OFNPRFMean;
-    strFNPFCData = project.OFNPFCData;
-    strFNPFCStorage = project.OFNPFCStorage;*/
-    string vToPrint = "";
-
+    string vToP = "";
     aveRFSumForDTP_mm = ts.rfAveSumAllCells_dtP_m * 1000.0;
-    time_curPrint = COleDateTime::GetCurrentTime();    
-    COleDateTimeSpan tsTotalSim = time_curPrint - ts.time_thisSimStarted;
+    timeNow = COleDateTime::GetCurrentTime();
+    COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
     tsFromStarting_sec = forString(tsTotalSim.GetTotalSeconds(), 0);
     if (prj.isDateTimeFormat == 1) {
-        tStringToPrint = timeElaspedToDateTimeFormat(prj.simStartTime,
-            false, nowTmin*60, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+        tStrToPrint = timeElaspedToDateTimeFormat(prj.simStartTime,
+            false, nowTmin * 60, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
     }
     else {
-        tStringToPrint = forString(nowTmin / 60.0, 2);
+        tStrToPrint = forString(nowTmin / 60.0, 2);
     }
-
-
-    // ===================================================================================================
-    // 유량
-    string txtToP ;
-    // lineToPrint = strNowTimeToPrintOut
-    txtToP = tStringToPrint;
+    // 유량 =================================================
+    string lineToP;
+    lineToP = tStrToPrint;
     for (int id : wpis.wpCVIDs) {
         int i = id - 1;
         if (cinterp == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                vToPrint = forString(cvs[i].QOF_m3Ps, 2);
+                vToP = forString(cvs[i].QOF_m3Ps, 2);
             }
             else {
-                vToPrint = forString(cvs[i].stream.QCH_m3Ps, 2);
+                vToP = forString(cvs[i].stream.QCH_m3Ps, 2);
             }
         }
-        else if (project_tm1.CVs[i] != null) {
-            switch (cvs[i].FlowType)
-            {
-            case cGRM.CellFlowType.OverlandFlow:
-            {
-                vToPrint = cHydroCom.GetInterpolatedValueLinear(project_tm1.CVs[i].QCVof_i_j_m3Ps, cvs[i].QCVof_i_j_m3Ps, interCoef).ToString("F2");
-                break;
+        else if (ts.isbak == 1) {
+            if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                vToP = forString(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
+                    cvs[i].QOF_m3Ps, cinterp), 2);
             }
-
-            default:
-            {
-                vToPrint = cHydroCom.GetInterpolatedValueLinear(project_tm1.CVs[i].stream.QCVch_i_j_m3Ps, cvs[i].stream.QCVch_i_j_m3Ps, interCoef).ToString("F2");
-                break;
-            }
+            else {
+                vToP = forString(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
+                    cvs[i].stream.QCH_m3Ps, cinterp), 2);
             }
         }
-        else        {
-            vToPrint = "0";
+        else {
+            vToP = "0";
         }
-
-        // lineToPrint = lineToPrint + vbTab + vToPrint.Trim
-        txtToP = txtToP + "\t" + vToPrint;
-        double sv = System.Convert.ToDouble(vToPrint);
-        project.watchPoint.mTotalFlow_cms[id] = project.watchPoint.mTotalFlow_cms[id] + sv;
-        project.watchPoint.Qprint_cms[id] = System.Convert.ToDouble(vToPrint);
-        if (project.watchPoint.MaxFlow_cms[id] < sv)
-        {
-            project.watchPoint.MaxFlow_cms[id] = sv;
-            project.watchPoint.MaxFlowTime[id] = strNowTimeToPrintOut;
+        lineToP = lineToP + "\t" + vToP;
+        double sv = stod(vToP);
+        wpis.totalFlow_cms[id] = wpis.totalFlow_cms[id] + sv;
+        wpis.qprint_cms[id] = sv;
+        if (wpis.maxFlow_cms[id] < sv) {
+            wpis.maxFlow_cms[id] = sv;
+            wpis.maxFlowTime[id] = tStrToPrint;
         }
-        WriteWPouputs(strNowTimeToPrintOut, i, interCoef, project, project_tm1);
+        writeWPouput(tStrToPrint, i, cinterp);
     }
-        sbQ.Append("\t" + meanRFSumForPrintoutTime_mm.ToString("F2") + "\t" + lngTimeDiffFromStarting_SEC.ToString() + "\r\n");
-        File.AppendAllText(strFNPDischarge, sbQ.ToString(), Encoding.Default);
+    lineToP = lineToP + "\t" + forString(aveRFSumForDTP_mm, 2)
+        + "\t" + tsFromStarting_sec + "\n";
+    appendTextToTextFile(ofs.ofpnDischarge, lineToP);
 
-        // ===================================================================
-        // FCAppFlow, FCStorage
-        if (project.generalSimulEnv.mbSimulateFlowControl == true && project.fcGrid.FCCellCount > 0)
-        {
-            StringBuilder sbFCFlow = new StringBuilder();
-            StringBuilder sbFCStorage = new StringBuilder();
-            sbFCFlow.Append(strNowTimeToPrintOut);
-            sbFCStorage.Append(strNowTimeToPrintOut);
-            if (interCoef == 1)
-            {
-                foreach(int fcCvid in project.fcGrid.FCGridCVidList)
-                {
-                    sbFCFlow.Append("\t" + project.fcGrid.mFCdataToApplyNowT[fcCvid].ToString("F2"));
-                    sbFCStorage.Append("\t" + project.CVs[fcCvid - 1].StorageCumulative_m3.ToString("F2"));
-                }
+    // FCAppFlow, FCStorage===================================
+    if (prj.simFlowControl == 1 && prj.fcs.size() > 0) {
+        string fcflow;
+        string fcStorage;
+        fcflow = tStrToPrint;
+        fcStorage = tStrToPrint;
+        if (cinterp == 1) {
+            for (int fcvid : fccds.cvidsFCcell) {
+                fcflow = fcflow + "\t" 
+                    + forString(fccds.fcDataAppliedNowT_m3Ps[fcvid], 2);
+                fcStorage = fcStorage + "\t" 
+                    + forString(cvs[fcvid - 1].storageCumulative_m3, 2);
             }
-            else
-            {
-                foreach(int fcCvid in project.fcGrid.FCGridCVidList)
-                {
-                    if (project_tm1.CVs[fcCvid - 1] != null)
-                    {
-                        sbFCFlow.Append("\t" + cHydroCom.GetInterpolatedValueLinear(project_tm1.fcGrid.mFCdataToApplyNowT[fcCvid],
-                            project.fcGrid.mFCdataToApplyNowT[fcCvid], interCoef).ToString("F2"));
-                        sbFCStorage.Append("\t" + cHydroCom.GetInterpolatedValueLinear(project_tm1.CV(fcCvid - 1).StorageCumulative_m3,
-                            project.CVs[fcCvid - 1].StorageCumulative_m3, interCoef).ToString("F2"));
-                    }
-                }
+        }
+        else if(ts.isbak==1){
+            for (int fcvid : fccds.cvidsFCcell) {
+                fcflow = fcflow + "\t"
+                    + forString(getinterpolatedVLinear( fcdAb[fcvid],
+                        fccds.fcDataAppliedNowT_m3Ps[fcvid], cinterp), 2);
+                fcStorage = fcStorage + "\t"
+                    + forString(getinterpolatedVLinear(cvsb[fcvid - 1].storageCumulative_m3,
+                        cvs[fcvid - 1].storageCumulative_m3, cinterp), 2);
             }
-            sbFCFlow.Append("\r\n");
-            sbFCStorage.Append("\r\n");
-            System.IO.File.AppendAllText(strFNPFCData, sbFCFlow.ToString(), Encoding.Default);
-            System.IO.File.AppendAllText(strFNPFCStorage, sbFCStorage.ToString(), Encoding.Default);
-        }
-        // ===================================================================
-        if (nowT_MIN == System.Convert.ToInt32(project.generalSimulEnv.mSimDurationHOUR * 60))
-        {
-            project.generalSimulEnv.mEndingTimeToPrint = strNowTimeToPrintOut;
-        }
+        }        
+        fcflow = fcflow + "\n";
+        fcStorage = fcStorage + "\n";
+        appendTextToTextFile(ofs.ofpnFCData, fcflow);
+        appendTextToTextFile(ofs.ofpnFCStorage, fcStorage);
     }
+    // ==================================
+}
 
 
-
-
-
+void writeWPouput(string nowTP, int i, double cinterp)
+{    // watchpoint별 모든 자료 출력
+    int cvid = i + 1;
+    string sbWP;
+    sbWP.append(nowTP + "\t");
+    sbWP.append(forString(wpis.qprint_cms[cvid], 2) + "\t");
+    if (cinterp == 1) {
+        sbWP.append(forString(cvs[i].hUAQfromChannelBed_m, 4) + "\t");
+        sbWP.append(forString(cvs[i].soilWaterC_m, 4) + "\t");
+        sbWP.append(forString(cvs[i].ssr, 4) + "\t");
+        sbWP.append(forString(wpis.rfWPGridForDtPrint_mm[cvid], 2) + "\t");
+        sbWP.append(forString(wpis.rfUpWSAveForDtPrint_mm[cvid], 2) + "\t");
+        sbWP.append(forString(wpis.qFromFCData_cms[cvid], 2) + "\t");
+        sbWP.append(forString(cvs[i].storageCumulative_m3, 2) + "\n");
+    }
+    else if (ts.isbak == 1) {
+        sbWP.append(forString(getinterpolatedVLinear(cvsb[i].hUAQfromChannelBed_m,
+            cvs[i].hUAQfromChannelBed_m, cinterp), 4) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(cvsb[i].soilWaterC_m,
+            cvs[i].soilWaterC_m, cinterp), 4) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(cvsb[i].ssr,
+            cvs[i].ssr, cinterp), 4) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(wpisb.rfWPGridForDtPrint_mm[cvid],
+            wpis.rfWPGridForDtPrint_mm[cvid], cinterp), 2) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(wpisb.rfUpWSAveForDtPrint_mm[cvid],
+            wpis.rfUpWSAveForDtPrint_mm[cvid], cinterp), 2) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(wpisb.qFromFCData_cms[cvid],
+            wpis.qFromFCData_cms[cvid], cinterp), 2) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(cvsb[i].storageCumulative_m3,
+            cvs[i].storageCumulative_m3, cinterp), 2) + "\n");
+    }
+    appendTextToTextFile(wpis.fpnWpOut[cvid], sbWP);
+}
 
 
 int initOutputFiles()
@@ -565,4 +563,11 @@ int deleteAllFilesExceptDischarge()
         std::remove(ppi.fpn_prj.c_str());
     }
     return 1;
+}
+
+inline double  getinterpolatedVLinear(double firstV, double nextV, double cinterp)
+{
+    double X;
+    X = (nextV - firstV) * cinterp + firstV;
+    return X;
 }

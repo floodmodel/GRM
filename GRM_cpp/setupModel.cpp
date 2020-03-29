@@ -77,7 +77,7 @@ int initWPinfos()
 	wpis.maxDepthTime.clear();
 	wpis.qFromFCData_cms.clear();
 	wpis.qprint_cms.clear();
-	wpis.FpnWpOut.clear();
+	wpis.fpnWpOut.clear();
 	wpis.wpCVIDs.clear();
 
 	for (int i = 0; i < prj.wps.size(); ++i) {
