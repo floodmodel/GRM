@@ -332,6 +332,7 @@ typedef struct _wpLocationRC
 
 typedef struct _wpinfo {
 	vector<int> wpCVIDs;
+	map<int, string> wpNames; //<cvid, wpname>
 	//<cvid, value>
 	map<int, double> rfiReadSumUpWS_mPs;// 현재 wp 상류에 대해 원시자료에서 읽은 강우량(강우강도 rfi).[m/s] 
 	map<int, double> rfUpWSAveForDt_mm; // 현재 wp 상류에 대해 dt(계산시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
@@ -348,7 +349,7 @@ typedef struct _wpinfo {
 	map<int, string> maxDepthTime; // Watchpoint 격자에 대한 최고수심 시간. 첨두시간
 	map<int, double> qFromFCData_cms; // 해당 wp에서 Flow control에 의해서 계산되는 유량
 	map<int, double> qprint_cms;
-	map<int, string> FpnWpOut; // Watch point 별 모의결과 출력을 위한 파일 이름 저장
+	map<int, string> fpnWpOut; // Watch point 별 모의결과 출력을 위한 파일 이름 저장
 	map<int, int>cvCountAllup;
 } wpinfo;
 
@@ -441,7 +442,7 @@ typedef struct _grmOutFiles
 	string ofpRFDistribution;
 	string ofpRFAccDistribution;
 	string ofpFlowDistribution;
-	map<int, string> ofpnWPs;
+	map<int, string> ofpnWPs; //<cvid, fpn>
 } grmOutFiles;
 
 typedef struct _domaininfo
@@ -598,12 +599,12 @@ typedef struct _projectFile
 	string fpnRainfallData = "";
 	int rfinterval_min = -1;
 	flowDirectionType fdType = flowDirectionType::None;
-	int maxDegreeOfParallelism = 0;
+	int mdp = 0;
 	string simStartTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
 	double simDuration_hr = -1.0;
 	double dtsec = -1.0;
 	int IsFixedTimeStep = 0;// true : 1, false : -1
-	double printTimeStep_min = -1;
+	double dtPrint_min = -1;
 	int simInfiltration = 0;// true : 1, false : -1
 	int simSubsurfaceFlow = 0;// true : 1, false : -1
 	int simBaseFlow = 0;// true : 1, false : -1
@@ -632,6 +633,7 @@ typedef struct _projectFile
 	int cwFileApplied = 0;
 	int icfFileApplied = 0;
 	int issrFileApplied = 0;
+	int makeASCorIMGfile = 0;
 
 	CPUsInfo cpusi;
 	int deleteAllFilesExceptDischargeOut = -1;
@@ -661,11 +663,12 @@ typedef struct _thisSimulation
 	int targetTtoP_sec = 0;
 	//int iscvsb = -1; // 이전시간에서의 cvs가 백업되어 있는지 여부
 	int cvsbT_sec = 0;
+	int isbak = 0;
 
 	int runByAnalyzer = 0;
 
 	tm g_RT_tStart_from_MonitorEXE;
-	tm time_thisSimStarted;
+	COleDateTime time_thisSimStarted;
 
 	double vMaxInThisStep;
 	
@@ -685,7 +688,7 @@ double calRFlowAndSSFlow(int i,
 void calBFLateralMovement(int i,
 	int facMin, double dY_m, double dtsec);
 void calChannelFlow(int i, double chCSACVw_tp1);
-void calCumulativeRFDuringDTPrintOut(int dtsec);
+void calCumulRFduringDTP(int dtsec);
 void calFCReservoirOutFlow(int i, double nowTmin); //i는 cv array index
 void calEffectiveRainfall(int i, int dtrf_sec, int dtsec);
 void calOverlandFlow(int i, double hCVw_tp1,
@@ -742,6 +745,8 @@ int isNormalSoilDepthInfo(soilDepthInfo asd);
 int isNormalLandCoverInfo(landCoverInfo alc);
 
 double Kunsaturated(cvAtt cv);
+void Log_Performance_data(string strBasin, string strTag,
+	string strDataTime, double dblElapTime);
 
 int makeNewOutputFiles();
 
@@ -788,8 +793,16 @@ int updateFCCellinfoAndData();
 
 void writeBySimType(int nowTP_min,
 	double cinterp);
+void writeDischargeOnly(double cinterp, 
+	int writeWPfiles);
+void writeSimStep(int elapsedT_min);
+void writeSingleEvent(int nowTmin, 
+	double interCoef);
+void writeWPouput(string nowTP, 
+	int i, double cinterp);
 
-
+inline double  getinterpolatedVLinear(double firstV,
+	double nextV, double cinterp);
 inline double rfintensity_mPsec(double rf_mm, 
 	double dtrf_sec);
 inline void setNoFluxCVCH(int i);
@@ -800,6 +813,9 @@ inline double soilSSRbyCumulF(double cumulinfiltration,
 	double effSoilDepth, cellFlowType flowType);
 inline  double vByManningEq(double hydraulicRaidus,
 	double slope, double nCoeff);
+
+
+
 
 // extern C
 int readLandCoverFile(string fpnLC, 

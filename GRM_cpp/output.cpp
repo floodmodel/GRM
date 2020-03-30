@@ -1,5 +1,6 @@
 #include <io.h>
 #include <string>
+#include<ATLComTime.h>
 
 #include "grm.h"
 #include "realTime.h"
@@ -14,65 +15,195 @@ extern fs::path fpnLog;
 
 extern int** cvais;
 extern cvAtt* cvs;
-extern cvAtt* cvsb;
 extern domaininfo di;
 extern wpinfo wpis;
 extern flowControlCellAndData fccds;
-
 extern thisSimulation ts;
 
-void writeBySimType(int nowTP_min,
-    double cinterp)
+extern cvAtt* cvsb;
+extern map<int, double> fcdAb;
+extern wpinfo wpisb;;
+extern string msgFileProcess;
+
+
+
+void writeSimStep(int elapsedT_min)
 {
-    double sumRFMeanForDTprint_m = ts.rfAveSumAllCells_dtP_m;
-    int wpCount = wpis.wpCVIDs.size();
-    simulationType simType = prj.simType;
-    switch (simType) {
-    case simulationType::SingleEvent: {
-        if (SimulationStep != null) { SimulationStep(nowTP_min); }
-        if (prj.printOption == GRMPrintType::All) {
-            mOutputControl.WriteSimResultsToTextFileForSingleEvent(mProject, wpCount, nowTP_min, sumRFMeanForDTprint_m, cinterp, Project_tm1);
-        }
-        if (prj.printOption == GRMPrintType::DischargeFileQ) {
-            mOutputControl.WriteDischargeOnlyToDischargeFile(mProject, cinterp, Project_tm1);
-        }
-        if (prj.printOption == GRMPrintType::AllQ) {
-            mOutputControl.WriteDischargeOnlyToDischargeFile(mProject, cinterp, Project_tm1);
-            mOutputControl.WriteDischargeOnlyToWPFile(mProject, cinterp, Project_tm1);
-        }
-        cGRM.writelogAndConsole(string.Format("Time(min) dt(sec), {0}{1}{2}", nowTP_min, "\t", sThisSimulation.dtsec), cGRM.bwriteLog, false);
-        break;
-    }
+    double nowStep;
+    string curProgressRatio = "";
+    double simDur_min = prj.simDuration_hr * 60.0;
+    nowStep = elapsedT_min / simDur_min * 100.0;
+    curProgressRatio = forString(nowStep, 0);
+    cout<<"\rCurrent progress: " + curProgressRatio + "%. " + msgFileProcess;
+}
 
-    case simulationType::RealTime: {
-        mOutputControlRT.WriteSimResultsToTextFileAndDBForRealTime(mProject, nowTP_min, cinterp, Project_tm1, mRealTime);
-        break;
-    }
-    }
 
-    if (ts.runByAnalyzer == 1)
-        // RaiseEvent SendQToAnalyzer(Me, mProject, Project_tm1, nowTtoPrint_MIN, coeffInterpolation)
-    {
-        SendQToAnalyzer(nowTP_min, cinterp);
+void writeSingleEvent(int nowTmin, double cinterp)
+{
+    COleDateTime timeNow;
+    string tsFromStarting_sec;
+    string tStrToPrint;
+    double aveRFSumForDTP_mm;
+    string vToP = "";
+    aveRFSumForDTP_mm = ts.rfAveSumAllCells_dtP_m * 1000.0;
+    timeNow = COleDateTime::GetCurrentTime();
+    COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
+    tsFromStarting_sec = forString(tsTotalSim.GetTotalSeconds(), 0);
+    if (prj.isDateTimeFormat == 1) {
+        tStrToPrint = timeElaspedToDateTimeFormat(prj.simStartTime,
+            nowTmin * 60, false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
     }
-    if (mProject.generalSimulEnv.mbMakeRasterOutput == true)
-    {
-        MakeRasterOutput(nowTP_min);
+    else {
+        tStrToPrint = forString(nowTmin / 60.0, 2);
     }
+    // 유량 =================================================
+    string lineToP;
+    lineToP = tStrToPrint;
+    for (int id : wpis.wpCVIDs) {
+        int i = id - 1;
+        if (cinterp == 1) {
+            if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                vToP = forString(cvs[i].QOF_m3Ps, 2);
+            }
+            else {
+                vToP = forString(cvs[i].stream.QCH_m3Ps, 2);
+            }
+        }
+        else if (ts.isbak == 1) {
+            if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                vToP = forString(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
+                    cvs[i].QOF_m3Ps, cinterp), 2);
+            }
+            else {
+                vToP = forString(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
+                    cvs[i].stream.QCH_m3Ps, cinterp), 2);
+            }
+        }
+        else {
+            vToP = "0";
+        }
+        lineToP = lineToP + "\t" + vToP;
+        double sv = stod(vToP);
+        wpis.totalFlow_cms[id] = wpis.totalFlow_cms[id] + sv;
+        wpis.qprint_cms[id] = sv;
+        if (wpis.maxFlow_cms[id] < sv) {
+            wpis.maxFlow_cms[id] = sv;
+            wpis.maxFlowTime[id] = tStrToPrint;
+        }
+        writeWPouput(tStrToPrint, i, cinterp);
+    }
+    lineToP = lineToP + "\t" + forString(aveRFSumForDTP_mm, 2)
+        + "\t" + tsFromStarting_sec + "\n";
+    appendTextToTextFile(ofs.ofpnDischarge, lineToP);
 
-    sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0;
-    for (Dataset.GRMProject.WatchPointsRow row in mProject.watchPoint.mdtWatchPointInfo)
-    {
-        mProject.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID] = 0;
-        mProject.watchPoint.RFWPGridForDtPrintout_mm[row.CVID] = 0;
+    // FCAppFlow, FCStorage===================================
+    if (prj.simFlowControl == 1 && prj.fcs.size() > 0) {
+        string fcflow;
+        string fcStorage;
+        fcflow = tStrToPrint;
+        fcStorage = tStrToPrint;
+        if (cinterp == 1) {
+            for (int fcvid : fccds.cvidsFCcell) {
+                fcflow = fcflow + "\t" 
+                    + forString(fccds.fcDataAppliedNowT_m3Ps[fcvid], 2);
+                fcStorage = fcStorage + "\t" 
+                    + forString(cvs[fcvid - 1].storageCumulative_m3, 2);
+            }
+        }
+        else if(ts.isbak==1){
+            for (int fcvid : fccds.cvidsFCcell) {
+                fcflow = fcflow + "\t"
+                    + forString(getinterpolatedVLinear( fcdAb[fcvid],
+                        fccds.fcDataAppliedNowT_m3Ps[fcvid], cinterp), 2);
+                fcStorage = fcStorage + "\t"
+                    + forString(getinterpolatedVLinear(cvsb[fcvid - 1].storageCumulative_m3,
+                        cvs[fcvid - 1].storageCumulative_m3, cinterp), 2);
+            }
+        }        
+        fcflow = fcflow + "\n";
+        fcStorage = fcStorage + "\n";
+        appendTextToTextFile(ofs.ofpnFCData, fcflow);
+        appendTextToTextFile(ofs.ofpnFCStorage, fcStorage);
     }
-    if (prj.makeRfDistFile == 1 && (prj.makeIMGFile == 1
-        || prj.makeASCFile == 1)) {
-        for (int cvan = 0; cvan < cProject.Current.CVCount; cvan++)
-        {
-            cProject.Current.CVs[cvan].RF_dtPrintOut_meter = 0;
+    // ==================================
+}
+
+
+void writeWPouput(string nowTP, int i, double cinterp)
+{    // watchpoint별 모든 자료 출력
+    int cvid = i + 1;
+    string sbWP;
+    sbWP.append(nowTP + "\t");
+    sbWP.append(forString(wpis.qprint_cms[cvid], 2) + "\t");
+    if (cinterp == 1) {
+        sbWP.append(forString(cvs[i].hUAQfromChannelBed_m, 4) + "\t");
+        sbWP.append(forString(cvs[i].soilWaterC_m, 4) + "\t");
+        sbWP.append(forString(cvs[i].ssr, 4) + "\t");
+        sbWP.append(forString(wpis.rfWPGridForDtPrint_mm[cvid], 2) + "\t");
+        sbWP.append(forString(wpis.rfUpWSAveForDtPrint_mm[cvid], 2) + "\t");
+        sbWP.append(forString(wpis.qFromFCData_cms[cvid], 2) + "\t");
+        sbWP.append(forString(cvs[i].storageCumulative_m3, 2) + "\n");
+    }
+    else if (ts.isbak == 1) {
+        sbWP.append(forString(getinterpolatedVLinear(cvsb[i].hUAQfromChannelBed_m,
+            cvs[i].hUAQfromChannelBed_m, cinterp), 4) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(cvsb[i].soilWaterC_m,
+            cvs[i].soilWaterC_m, cinterp), 4) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(cvsb[i].ssr,
+            cvs[i].ssr, cinterp), 4) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(wpisb.rfWPGridForDtPrint_mm[cvid],
+            wpis.rfWPGridForDtPrint_mm[cvid], cinterp), 2) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(wpisb.rfUpWSAveForDtPrint_mm[cvid],
+            wpis.rfUpWSAveForDtPrint_mm[cvid], cinterp), 2) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(wpisb.qFromFCData_cms[cvid],
+            wpis.qFromFCData_cms[cvid], cinterp), 2) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(cvsb[i].storageCumulative_m3,
+            cvs[i].storageCumulative_m3, cinterp), 2) + "\n");
+    }
+    appendTextToTextFile(wpis.fpnWpOut[cvid], sbWP);
+}
+
+void writeDischargeOnly(double cinterp, int writeWPfiles)
+{
+    string strFNPDischarge;
+    string ptext;
+    string vToP = "";
+    for (int cvid : wpis.wpCVIDs) {
+        int i = cvid - 1;
+        if (cinterp == 1) {
+            if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                vToP = forString(cvs[i].QOF_m3Ps, 2);
+            }
+            else {
+                vToP = forString(cvs[i].stream.QCH_m3Ps, 2);
+            }
+        }
+        else if (ts.isbak == 1) {
+            if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                vToP = forString(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
+                    cvs[i].QOF_m3Ps, cinterp), 2);
+            }
+            else {
+                vToP = forString(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
+                    cvs[i].stream.QCH_m3Ps, cinterp), 2);
+            }
+        }
+        else {
+            vToP = "0";
+        }
+        wpis.qprint_cms[cvid] = stod(vToP);
+        if (writeWPfiles == 1) {
+            appendTextToTextFile(ofs.ofpnWPs[cvid], vToP);
+        }
+        if (trim(ptext) == "") {
+            ptext.append(vToP);
+        }
+        else {
+            ptext.append("\t" + vToP);
         }
     }
+    ptext.append("\n");
+    appendTextToTextFile(ofs.ofpnDischarge, ptext);
 }
 
 
@@ -424,4 +555,11 @@ int deleteAllFilesExceptDischarge()
         std::remove(ppi.fpn_prj.c_str());
     }
     return 1;
+}
+
+inline double  getinterpolatedVLinear(double firstV, double nextV, double cinterp)
+{
+    double X;
+    X = (nextV - firstV) * cinterp + firstV;
+    return X;
 }

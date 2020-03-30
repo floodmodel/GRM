@@ -425,11 +425,11 @@ int openProjectFile(int forceRealTime)
 		if (aline.find(fn.MaxDegreeOfParallelism) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MaxDegreeOfParallelism);
 			if (vString != "" && stoi(vString)!=0 && stoi(vString) >= -1) {
-				prj.maxDegreeOfParallelism = stoi(vString);
+				prj.mdp = stoi(vString);
 			}
 			else {
 				writeLog(fpnLog, "Max. degree of parallelism was not set. Maximum value [-1] was assigned.\n", 1, 1);
-				prj.maxDegreeOfParallelism = -1;
+				prj.mdp = -1;
 			}
 			continue;
 		}
@@ -485,7 +485,7 @@ int openProjectFile(int forceRealTime)
 		if (aline.find(fn.OutputTimeStep_min) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.OutputTimeStep_min);
 			if (vString != "") {
-				prj.printTimeStep_min = stod(vString);
+				prj.dtPrint_min = stod(vString);
 			}
 			else {
 				writeLog(fpnLog, "Print out time step is invalid.\n", 1, 1);
@@ -1472,6 +1472,7 @@ int openProjectFile(int forceRealTime)
 		// land cover =================
 	}
 
+	// 여기서 부터 검증
 	if (prj.fcs.size() > 0) {
 		map<int, flowControlinfo>::iterator iter;
 		for (iter = prj.fcs.begin(); iter != prj.fcs.end(); ++iter) {
@@ -1576,12 +1577,12 @@ int openProjectFile(int forceRealTime)
 		}
 	}
 
-	if (prj.maxDegreeOfParallelism == -1) {
-		prj.maxDegreeOfParallelism = prj.cpusi.totalNumberOfLogicalProcessors;
+	if (prj.mdp == -1) {
+		prj.mdp = prj.cpusi.totalNumOfLP;
 	}
 
-	if (prj.printTimeStep_min * 30 < prj.dtsec) {
-		prj.dtsec = prj.printTimeStep_min * 30;
+	if (prj.dtPrint_min * 30 < prj.dtsec) {
+		prj.dtsec = prj.dtPrint_min * 30;
 	}
 	//di.dmids.clear();
 	//map<int, domaininfo>::iterator iter;
@@ -1596,6 +1597,14 @@ int openProjectFile(int forceRealTime)
 	if (forceRealTime == 1) {
 		prj.simType = simulationType::RealTime;
 	}
+
+	if (prj.makeASCFile == 1 || prj.makeIMGFile == 1) {
+		prj.makeASCorIMGfile == 1;
+	}
+	else {
+		prj.makeASCorIMGfile = -1;
+	}
+
 	return 1;
 }
 

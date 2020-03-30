@@ -5,6 +5,7 @@
 #include <conio.h>
 #include <time.h>
 #include <io.h>
+#include <omp.h>
 //#include <thread>
 #include <string>
 #include <filesystem>
@@ -37,7 +38,7 @@ flowControlCellAndData fccds;
 thisSimulation ts;
 
 
-string msgToScreen="";
+string msgFileProcess;
 
 int main(int argc, char** args)
 {
@@ -145,7 +146,7 @@ int main(int argc, char** args)
 			writeNewLog(fpnLog, outString, 1, -1);
 			string progF = to_string(n + 1) + '/' + to_string(gmpFiles.size());
 			string progR = forString(((n + 1) / nFiles * 100), 2);
-			msgToScreen = "Total progress: " + progF + "(" + progR + "%%). ";
+			msgFileProcess = "Total progress: " + progF + "(" + progR + "%%). ";
 			if (simulateSingleEvent() == -1) {
 				waitEnterKey();
 				return -1;
@@ -228,13 +229,14 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 		return -1;
 	}
 	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, 1);
+	omp_set_num_threads(prj.mdp);
 	if (setupModelAfterOpenProjectFile() == -1) {
 		return -1;
 	}
 	string isparallel = "true";
-	if (prj.maxDegreeOfParallelism == 1) { isparallel = "false"; }
+	if (prj.mdp == 1) { isparallel = "false"; }
 	writeLog(fpnLog, "Parallel : "+ isparallel +". Max. degree of parallelism : "
-		+ to_string(prj.maxDegreeOfParallelism) +".\n", 1, 1);
+		+ to_string(prj.mdp) +".\n", 1, 1);
 	if (initOutputFiles() == -1) {
 		writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
 		return -1;

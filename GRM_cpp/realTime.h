@@ -5,6 +5,8 @@
 
 using namespace std;
 
+const bool CONST_bUseDBMS_FOR_RealTimeSystem = true;
+
 typedef struct _realtimeCommon
 {
 	std::string g_performance_log_GUID;         // 성능 측정 기록 용 
@@ -23,7 +25,6 @@ private:
 	//private bool mIsPrediction = false;//2019.10.01. 최. prediction 관련
     static cRealTime mGRMRT;
 public:
-    const bool CONST_bUseDBMS_FOR_RealTimeSystem = true;    // Real time에서는 true로 설정
     static char CONST_Output_File_Target_DISK;// = '?'; // png 등의 모의 결과를 c ,.d  어디에 기입할지. 구분 
     //event RTStatusEventHandler RTStatus;
 
@@ -70,4 +71,6 @@ public:
 
 int changeOutputFileDisk(char targetDisk);
 string IO_Path_ChangeDrive(char strV, string strPath);
+
+void writeDBRealTime(int nowTmin, double cinterp);
 

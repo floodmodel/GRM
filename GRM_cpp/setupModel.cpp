@@ -77,7 +77,7 @@ int initWPinfos()
 	wpis.maxDepthTime.clear();
 	wpis.qFromFCData_cms.clear();
 	wpis.qprint_cms.clear();
-	wpis.FpnWpOut.clear();
+	wpis.fpnWpOut.clear();
 	wpis.wpCVIDs.clear();
 
 	for (int i = 0; i < prj.wps.size(); ++i) {
@@ -85,6 +85,7 @@ int initWPinfos()
 		int ry = prj.wps[i].wpRowY;
 		int cvid = cvais[cx][ry] + 1;
 		wpis.wpCVIDs.push_back(cvid);
+        wpis.wpNames[cvid] = prj.wps[i].wpName;
 	}
 	isnormal = 1;
 	return isnormal;
