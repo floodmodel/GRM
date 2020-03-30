@@ -271,7 +271,7 @@ typedef struct _projectFileFieldName
 	const string LCGridValue = "LCGridValue";
 	const string GRMCodeLC = "GRMCodeLC";
 	const string LCRoughnessCoeff = "LCRoughnessCoeff";
-	const string ImperviousRatio = "LCImperviousR";
+	const string LCImperviousR = "LCImperviousR";
 } projectFileFieldName;
 
 typedef struct _timeSeries

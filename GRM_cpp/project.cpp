@@ -1474,8 +1474,8 @@ int openProjectFile(int forceRealTime)
 					return -1;
 				}
 			}
-			if (aline.find(fn.ImperviousRatio) != string::npos) {
-				vString = getValueStringFromXmlLine(aline, fn.ImperviousRatio);
+			if (aline.find(fn.LCImperviousR) != string::npos) {
+				vString = getValueStringFromXmlLine(aline, fn.LCImperviousR);
 				if (vString != "") {
 					alc.ImperviousRatio = stod(vString);
 				}

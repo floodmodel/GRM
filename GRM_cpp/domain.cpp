@@ -100,9 +100,7 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
         writeLog(fpnLog, outstr, 1, -1);
         prj.streamFileApplied = -1;
     }
-    else {
-        prj.streamFileApplied = 1;
-    }
+
     if (prj.cwFileApplied == 1
         && (prj.fpnChannelWidth == ""
             || _access(prj.fpnChannelWidth.c_str(), 0) != 0)) {
@@ -110,9 +108,7 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
         writeLog(fpnLog, outstr, 1, -1);
         prj.cwFileApplied = -1;
     }
-    else {
-        prj.cwFileApplied = 1;
-    }
+
     if (prj.icfFileApplied == 1
         && (prj.fpniniChannelFlow == ""
             || _access(prj.fpniniChannelFlow.c_str(), 0) != 0)) {
@@ -120,18 +116,14 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
         writeLog(fpnLog, outstr, 1, -1);
         prj.icfFileApplied = -1;
     }
-    else {
-        prj.icfFileApplied = 1;
-    }
+
     if (prj.issrFileApplied==1
         &&(prj.fpniniSSR == "" || _access(prj.fpniniSSR.c_str(), 0) != 0)) {
         string outstr = "Initial soil saturation ratio file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
         prj.issrFileApplied = -1;
     }
-    else {
-        prj.issrFileApplied = 1;
-    }
+
     ascRasterFile slopeFile = ascRasterFile(prj.fpnSlope);
     ascRasterFile fdirFile = ascRasterFile(prj.fpnFD);
     ascRasterFile facFile = ascRasterFile(prj.fpnFA);

@@ -346,7 +346,7 @@ void outputManager(int nowTsec, int rfOrder)
     int dtrf_sec = dtrf_min * 60;
     int dtP_SEC = dtP_min * 60;
     double dtmin = ts.dtsec / 60.0;
-    int timeToP_min;
+    int timeToP_min = nowTsec/60;
     if (rfOrder == 1
         && dtP_min > dtrf_min
         && ((nowTsec + ts.dtsec) > dtrf_sec)) {
@@ -359,10 +359,10 @@ void outputManager(int nowTsec, int rfOrder)
     }
     else if (nowTsec % dtP_SEC == 0) {
         if (ts.zeroTimePrinted == -1) {
-            timeToP_min = ts.targetTtoP_sec * 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
+            timeToP_min = ts.targetTtoP_sec / 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
         }
         else {
-            timeToP_min = ts.targetTtoP_sec * 60;
+            timeToP_min = ts.targetTtoP_sec/ 60;
         }
         writeBySimType(timeToP_min, 1);
         ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
@@ -385,7 +385,7 @@ void outputManager(int nowTsec, int rfOrder)
             && (nowTsec - ts.dtsecUsed_tm1) <= ts.targetTtoP_sec) {
             double citerp;
             citerp = (ts.targetTtoP_sec - ts.cvsbT_sec) / (double)(nowTsec - ts.cvsbT_sec);
-            timeToP_min = ts.targetTtoP_sec * 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
+            timeToP_min = ts.targetTtoP_sec / 60. - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
             writeBySimType(timeToP_min, citerp);
             ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
             ts.isbak = -1;

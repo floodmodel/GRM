@@ -198,7 +198,7 @@ void disposeDynamicVars()
 int simulateSingleEvent()
 {
 	if (openPrjAndSetupModel(-1) == -1) {
-		writeNewLog(fpnLog, "Model setup failed !!!\n", 1, 1);
+		writeLog(fpnLog, "Model setup failed !!!\n", 1, 1);
 		return -1;
 	}
 	writeLog(fpnLog, "Calculation was started.\n", 1, 1);
