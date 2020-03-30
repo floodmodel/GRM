@@ -93,7 +93,9 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
-    if (prj.fpnStream == "" || _access(prj.fpnStream.c_str(), 0) != 0) {
+    if (prj.streamFileApplied == 1
+        && (prj.fpnStream == ""
+            || _access(prj.fpnStream.c_str(), 0) != 0)) {
         string outstr = "Stream file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
         prj.streamFileApplied = -1;
@@ -101,7 +103,9 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
     else {
         prj.streamFileApplied = 1;
     }
-    if (prj.fpnChannelWidth == "" || _access(prj.fpnChannelWidth.c_str(), 0) != 0) {
+    if (prj.cwFileApplied == 1
+        && (prj.fpnChannelWidth == ""
+            || _access(prj.fpnChannelWidth.c_str(), 0) != 0)) {
         string outstr = "Channel width file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
         prj.cwFileApplied = -1;
@@ -109,7 +113,9 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
     else {
         prj.cwFileApplied = 1;
     }
-    if (prj.fpniniChannelFlow == "" || _access(prj.fpniniChannelFlow.c_str(), 0) != 0) {
+    if (prj.icfFileApplied == 1
+        && (prj.fpniniChannelFlow == ""
+            || _access(prj.fpniniChannelFlow.c_str(), 0) != 0)) {
         string outstr = "Initial stream flow file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
         prj.icfFileApplied = -1;
@@ -117,7 +123,8 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
     else {
         prj.icfFileApplied = 1;
     }
-    if (prj.fpniniSSR == "" || _access(prj.fpniniSSR.c_str(), 0) != 0) {
+    if (prj.issrFileApplied==1
+        &&(prj.fpniniSSR == "" || _access(prj.fpniniSSR.c_str(), 0) != 0)) {
         string outstr = "Initial soil saturation ratio file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
         prj.issrFileApplied = -1;
@@ -135,7 +142,7 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
     if (prj.streamFileApplied == 1) {
         streamFile = new ascRasterFile(prj.fpnStream);
     }
-    else{
+    else {
         streamFile = NULL;
     }
     if (prj.cwFileApplied == 1) {
@@ -215,13 +222,13 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
         }
     }
 
-    if (prj.streamFileApplied == 1 && streamFile!=NULL) {
+    if (prj.streamFileApplied == 1 && streamFile != NULL) {
         delete streamFile;
     }
-    if (prj.cwFileApplied == 1&& cwFile!=NULL) {
+    if (prj.cwFileApplied == 1 && cwFile != NULL) {
         delete cwFile;
     }
-    if (prj.icfFileApplied == 1 && cfFile !=NULL) {
+    if (prj.icfFileApplied == 1 && cfFile != NULL) {
         delete cfFile;
     }
     if (prj.issrFileApplied == 1 && ssrFile != NULL) {

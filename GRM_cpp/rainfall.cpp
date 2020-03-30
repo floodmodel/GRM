@@ -159,10 +159,10 @@ int setCVRF(int order)
         cvs[i].rfApp_dt_m = 0;
     }
     for(int wpcvid : wpis.wpCVIDs)    {
-        wpis.rfWPGridForDtPrint_mm[wpcvid] = 0;
+        wpis.rfWPGridForDtP_mm[wpcvid] = 0;
         wpis.rfUpWSAveForDt_mm[wpcvid] = 0;
         wpis.rfiReadSumUpWS_mPs[wpcvid] = 0;
-        wpis.rfUpWSAveForDtPrint_mm[wpcvid] = 0;
+        wpis.rfUpWSAveForDtP_mm[wpcvid] = 0;
     }
 }
 
@@ -175,9 +175,9 @@ int setCVRF(int order)
      for (int wpcvid : wpis.wpCVIDs) {
          wpis.rfUpWSAveForDt_mm[wpcvid] = wpis.rfiReadSumUpWS_mPs[wpcvid]
              * dtsec * 1000 / (double)(cvs[wpcvid - 1].fac + 1);
-         wpis.rfUpWSAveForDtPrint_mm[wpcvid] = wpis.rfUpWSAveForDtPrint_mm[wpcvid]
+         wpis.rfUpWSAveForDtP_mm[wpcvid] = wpis.rfUpWSAveForDtP_mm[wpcvid]
              + wpis.rfUpWSAveForDt_mm[wpcvid];
-         wpis.rfWPGridForDtPrint_mm[wpcvid] = wpis.rfWPGridForDtPrint_mm[wpcvid]
+         wpis.rfWPGridForDtP_mm[wpcvid] = wpis.rfWPGridForDtP_mm[wpcvid]
              + cvs[wpcvid - 1].rfiRead_mPsec * 1000 * dtsec;
      }
      if (prj.makeASCorIMGfile == 1 ) {

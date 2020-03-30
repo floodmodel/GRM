@@ -23,6 +23,7 @@
     <ClCompile Include="..\..\gentle\cpp\systemcommand.cpp" />
     <ClCompile Include="..\..\gentle\cpp\systeminfo.cpp" />
     <ClCompile Include="flowControl.cpp" />
+    <ClCompile Include="outputRaster.cpp" />
     <ClCompile Include="outputRT.cpp" />
     <ClCompile Include="setupModel.cpp" />
     <ClCompile Include="domain.cpp" />

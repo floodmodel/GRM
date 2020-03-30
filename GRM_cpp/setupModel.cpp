@@ -65,9 +65,9 @@ int initWPinfos()
 	int isnormal = -1;
 	wpis.rfiReadSumUpWS_mPs.clear();
 	wpis.rfUpWSAveForDt_mm.clear();
-	wpis.rfUpWSAveForDtPrint_mm.clear();
+	wpis.rfUpWSAveForDtP_mm.clear();
 	wpis.rfUpWSAveTotal_mm.clear();
-	wpis.rfWPGridForDtPrint_mm.clear();
+	wpis.rfWPGridForDtP_mm.clear();
 	wpis.rfWPGridTotal_mm.clear();
 	wpis.totalFlow_cms.clear();
 	wpis.totalDepth_m.clear();

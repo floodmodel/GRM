@@ -53,7 +53,7 @@ int main(int argc, char** args)
 	long elapseTime_Total_sec;
 	clock_t  finish_Total, start_Total;
 	start_Total = clock();
-
+	ts.runByAnalyzer = -1;
 	if (argc == 1) {
 		printf("GRM project file was not entered or invalid arguments.\n");
 		grmHelp();

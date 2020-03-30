@@ -57,9 +57,7 @@ int startSimulationSingleEvent()
         nowTmin = nowTsec / 60.0;
         if (simulateRunoff(nowTmin) == -1) { return -1; }
         calCumulRFduringDTP(ts.dtsec);
-
         outputManager(nowTsec, rfOrder);
-
         if (nowTsec + ts.dtsec > endingT_sec) {
             ts.dtsec = nowTsec + ts.dtsec - endingT_sec;
             nowTsec = endingT_sec;
@@ -420,28 +418,17 @@ void writeBySimType(int nowTP_min,
         break;
     }
     }
-
-    if (ts.runByAnalyzer == 1)
-        // RaiseEvent SendQToAnalyzer(Me, mProject, Project_tm1, nowTtoPrint_MIN, coeffInterpolation)
-    {
-        SendQToAnalyzer(nowTP_min, cinterp);
+    if (ts.runByAnalyzer == 1)    {
+        // 클래스나 전역 변수에 저장해서, 외부로 노출하고, analyzer에서 사용하는 방법은?
+        //모의 종료시 혹은 1초마다 챠트 업데이트하는 방법?
+        //SendQToAnalyzer(nowTP_min, cinterp);
     }
-    if (mProject.generalSimulEnv.mbMakeRasterOutput == true)
-    {
-        MakeRasterOutput(nowTP_min);
+    if (prj.makeASCorIMGfile == 1)    {
+        makeRasterOutput(nowTP_min);
     }
-
-    sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0;
-    for (Dataset.GRMProject.WatchPointsRow row in mProject.watchPoint.mdtWatchPointInfo)
-    {
-        mProject.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID] = 0;
-        mProject.watchPoint.RFWPGridForDtPrintout_mm[row.CVID] = 0;
-    }
-    if (prj.makeRfDistFile == 1
-        && prj.makeASCorIMGfile == 1) {
-        for (int cvan = 0; cvan < di.cellNnotNull; ++cvan)
-        {
-            cProject.Current.CVs[cvan].RF_dtPrintOut_meter = 0;
-        }
+    ts.rfAveSumAllCells_dtP_m = 0;
+    for (int cvid : wpis.wpCVIDs) {
+        wpis.rfUpWSAveForDtP_mm[cvid] = 0;
+        wpis.rfWPGridForDtP_mm[cvid] = 0;
     }
 }

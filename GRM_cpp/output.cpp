@@ -139,8 +139,8 @@ void writeWPouput(string nowTP, int i, double cinterp)
         sbWP.append(forString(cvs[i].hUAQfromChannelBed_m, 4) + "\t");
         sbWP.append(forString(cvs[i].soilWaterC_m, 4) + "\t");
         sbWP.append(forString(cvs[i].ssr, 4) + "\t");
-        sbWP.append(forString(wpis.rfWPGridForDtPrint_mm[cvid], 2) + "\t");
-        sbWP.append(forString(wpis.rfUpWSAveForDtPrint_mm[cvid], 2) + "\t");
+        sbWP.append(forString(wpis.rfWPGridForDtP_mm[cvid], 2) + "\t");
+        sbWP.append(forString(wpis.rfUpWSAveForDtP_mm[cvid], 2) + "\t");
         sbWP.append(forString(wpis.qFromFCData_cms[cvid], 2) + "\t");
         sbWP.append(forString(cvs[i].storageCumulative_m3, 2) + "\n");
     }
@@ -151,10 +151,10 @@ void writeWPouput(string nowTP, int i, double cinterp)
             cvs[i].soilWaterC_m, cinterp), 4) + "\t");
         sbWP.append(forString(getinterpolatedVLinear(cvsb[i].ssr,
             cvs[i].ssr, cinterp), 4) + "\t");
-        sbWP.append(forString(getinterpolatedVLinear(wpisb.rfWPGridForDtPrint_mm[cvid],
-            wpis.rfWPGridForDtPrint_mm[cvid], cinterp), 2) + "\t");
-        sbWP.append(forString(getinterpolatedVLinear(wpisb.rfUpWSAveForDtPrint_mm[cvid],
-            wpis.rfUpWSAveForDtPrint_mm[cvid], cinterp), 2) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(wpisb.rfWPGridForDtP_mm[cvid],
+            wpis.rfWPGridForDtP_mm[cvid], cinterp), 2) + "\t");
+        sbWP.append(forString(getinterpolatedVLinear(wpisb.rfUpWSAveForDtP_mm[cvid],
+            wpis.rfUpWSAveForDtP_mm[cvid], cinterp), 2) + "\t");
         sbWP.append(forString(getinterpolatedVLinear(wpisb.qFromFCData_cms[cvid],
             wpis.qFromFCData_cms[cvid], cinterp), 2) + "\t");
         sbWP.append(forString(getinterpolatedVLinear(cvsb[i].storageCumulative_m3,
@@ -238,6 +238,9 @@ int initOutputFiles()
         string outstr = "An error was occured while making ouput files or folders. Try starting the model again. \n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
+    }
+    if (prj.makeASCorIMGfile == 1) {
+        initRasterOutput();
     }
 	return 1;
 }

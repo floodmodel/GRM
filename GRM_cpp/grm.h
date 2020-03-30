@@ -336,9 +336,9 @@ typedef struct _wpinfo {
 	//<cvid, value>
 	map<int, double> rfiReadSumUpWS_mPs;// 현재 wp 상류에 대해 원시자료에서 읽은 강우량(강우강도 rfi).[m/s] 
 	map<int, double> rfUpWSAveForDt_mm; // 현재 wp 상류에 대해 dt(계산시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
-	map<int, double> rfUpWSAveForDtPrint_mm;// 현재 wp 상류에 대해 출력시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
+	map<int, double> rfUpWSAveForDtP_mm;// 현재 wp 상류에 대해 출력시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
 	map<int, double> rfUpWSAveTotal_mm;//현재 watch point 상류의 평균강우량의 누적값[mm]
-	map<int, double> rfWPGridForDtPrint_mm; // Watchpoint 격자에 대한 출력시간 간격 동안의 누적강우량. 원시자료를 이용해서 계산된값.[mm]
+	map<int, double> rfWPGridForDtP_mm; // Watchpoint 격자에 대한 출력시간 간격 동안의 누적강우량. 원시자료를 이용해서 계산된값.[mm]
 	map<int, double> rfWPGridTotal_mm; // Watchpoint 격자에 대한 누적강우량[mm]
 	map<int, double> totalFlow_cms; // Watchpoint 격자에 대한 전체유량[cms]. 누적값.
 	//Todo : 사용되지 않으면, 삭제
@@ -733,6 +733,7 @@ void grmHelp();
 
 void updatetCVbyRFandSoil(int i); // i는 cv array index
 int initOutputFiles();
+void initRasterOutput();
 void initThisSimulation();
 int initWatershedNetwork();
 int initWPinfos();
@@ -744,11 +745,23 @@ int isNormalSoilTextureInfo(soilTextureInfo ast);
 int isNormalSoilDepthInfo(soilDepthInfo asd);
 int isNormalLandCoverInfo(landCoverInfo alc);
 
+void joinOutputThreads();
+
 double Kunsaturated(cvAtt cv);
 void Log_Performance_data(string strBasin, string strTag,
 	string strDataTime, double dblElapTime);
 
+void makeIMG_ssr();
+void makeIMG_rf();
+void makeIMG_rfacc();
+void makeIMG_flow();
+void makeASC_ssr();
+void makeASC_rf();
+void makeASC_rfacc();
+void makeASC_flow();
+
 int makeNewOutputFiles();
+void makeRasterOutput(int nowTmin);
 
 channelSettingInfo nullChannelSettingInfo();
 flowControlinfo nullFlowControlinfo();
@@ -778,6 +791,7 @@ void setCVStartingCondition(double iniflow);
 int setFlowNetwork();
 int setRainfallData();
 void setRFintensityAndDTrf_Zero();
+int setRasterOutputArray();
 int setupByFAandNetwork();
 int setupModelAfterOpenProjectFile();
 int simulateSingleEvent();
