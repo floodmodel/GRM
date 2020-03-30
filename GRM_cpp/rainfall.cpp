@@ -182,7 +182,8 @@ int setCVRF(int order)
      }
      if (prj.makeASCFile == 1 || prj.makeIMGFile == 1) {
          if (prj.makeRfDistFile == 1 || prj.makeRFaccDistFile == 1) {
-             for (int i = 0; i < di.cellNtobeSimulated; ++i) {
+             //여기 병렬로..
+             fo r (int i = 0; i < di.cellNtobeSimulated; ++i) {
                  cvs[i].rf_dtPrint_m = cvs[i].rf_dtPrint_m
                      + cvs[i].rfiRead_mPsec * dtsec;
                  cvs[i].rfAcc_fromStart_m = cvs[i].rfAcc_fromStart_m
