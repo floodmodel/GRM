@@ -490,7 +490,7 @@ int openProjectFile(int forceRealTime)
 		if (aline.find(fn.ComputationalTimeStep_min) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.ComputationalTimeStep_min);
 			if (vString != "" && stod(vString) > 0) {
-				prj.dtsec = stod(vString) * 60.0;
+				prj.dtsec =(int) (stod(vString) * 60);
 			}
 			continue;
 		}
@@ -1066,8 +1066,8 @@ int openProjectFile(int forceRealTime)
 		}
 		if (aline.find(fn.FCDT_min) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.FCDT_min);
-			if (vString != "" && stod(vString) >= 0) {
-				afc.fcDT_min = stod(vString);
+			if (vString != "" && stoi(vString) >= 0) {
+				afc.fcDT_min = stoi(vString);
 			}
 			else {
 				writeLog(fpnLog, "Flow control data time interval of [" 
@@ -1525,11 +1525,11 @@ int openProjectFile(int forceRealTime)
 		}
 	}
 	else if (prj.lcDataType == fileOrConstant::Constant) {
-		if (prj.cnstRoughnessC == -1.0) {
+		if (prj.cnstRoughnessC == 0.0) {
 			writeLog(fpnLog, "Land cover constant roughness is invalid.\n", 1, 1);
 			return -1;
 		}
-		if (prj.cnstImperviousR == -1.0) {
+		if (prj.cnstImperviousR < 0.0) {
 			writeLog(fpnLog, "Land cover constant impervious ratio is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1549,19 +1549,19 @@ int openProjectFile(int forceRealTime)
 		}
 	}
 	else if(prj.stDataType==fileOrConstant::Constant){
-		if (prj.cnstSoilEffPorosity == -1.0) {
+		if (prj.cnstSoilEffPorosity < 0) {
 			writeLog(fpnLog, "Soil texture constant effective porosity is invalid.\n", 1, 1);
 			return -1;
 		}
-		if (prj.cnstSoilHydraulicK == -1.0) {
+		if (prj.cnstSoilHydraulicK < 0) {
 			writeLog(fpnLog, "Soil texture constant hydraulic conductivity is invalid.\n", 1, 1);
 			return -1;
 		}
-		if (prj.cnstSoilPorosity == -1.0) {
+		if (prj.cnstSoilPorosity < 0) {
 			writeLog(fpnLog, "Soil texture constant porosity is invalid.\n", 1, 1);
 			return -1;
 		}
-		if (prj.cnstSoilWFSH == -1.0) {
+		if (prj.cnstSoilWFSH < 0) {
 			writeLog(fpnLog, "Soil texture constant wetting front suction head is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1581,7 +1581,7 @@ int openProjectFile(int forceRealTime)
 		}
 	}
 	else if (prj.sdDataType == fileOrConstant::Constant) {
-		if (prj.cnstSoilDepth == -1.0) {
+		if (prj.cnstSoilDepth < 0) {
 			writeLog(fpnLog, "Soil depth constant value is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1621,7 +1621,7 @@ int openProjectFile(int forceRealTime)
 	}
 
 	if (prj.makeASCFile == 1 || prj.makeIMGFile == 1) {
-		prj.makeASCorIMGfile == 1;
+		prj.makeASCorIMGfile = 1;
 	}
 	else {
 		prj.makeASCorIMGfile = -1;

@@ -50,8 +50,8 @@ public:
     clock_t mDateTimeStartRT=clock();
     bool mbSimulationRTisOngoing=false;
 
-    double mPicWidth=-1.0;
-    double mPicHeight = -1.0;
+    double mPicWidth= 0.0;
+    double mPicHeight = 0.0;
     bool mbCreateDistributionFiles = false;
     //cRasterOutput mRasterFileOutput;
 

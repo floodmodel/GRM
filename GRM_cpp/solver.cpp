@@ -153,26 +153,26 @@ void calChannelFlow(int i, double chCSACVw_tp1)
     double dtPdx = ts.dtsec / cvs[i].cvdx_m;
     double HRch = 0.0;
     double CSPer = 0.0;
-    double hChCVw_tp1 = 0.0;
-    double uCVw_n = 0.0;
-    double cChCVw_n = 0.0;
+    double hChw_tp1 = 0.0;
+    double uw_n = 0.0;
+    double cCHw_n = 0.0;
     if (chCSACVw_tp1 > 0) {
-        hChCVw_tp1 = getChDepthUsingCSA(cvs[i].stream.chBaseWidth,
+        hChw_tp1 = getChDepthUsingCSA(cvs[i].stream.chBaseWidth,
             chCSACVw_tp1, cvs[i].stream.isCompoundCS,
             cvs[i].stream.chURBaseWidth_m, cvs[i].stream.chLRArea_m2,
             cvs[i].stream.chLRHeight, cvs[i].stream.bankCoeff);
         CSPer = getChCrossSectionPerimeter(cvs[i].stream.chBaseWidth,
             cvs[i].stream.chSideSlopeRight, cvs[i].stream.chSideSlopeLeft,
-            hChCVw_tp1, cvs[i].stream.isCompoundCS,
+            hChw_tp1, cvs[i].stream.isCompoundCS,
             cvs[i].stream.chLRHeight, cvs[i].stream.chLRArea_m2,
             cvs[i].stream.chURBaseWidth_m);
         HRch = chCSACVw_tp1 / CSPer;
-        uCVw_n = vByManningEq(HRch, cvs[i].stream.chBedSlope,
+        uw_n = vByManningEq(HRch, cvs[i].stream.chBedSlope,
             cvs[i].stream.chRC);
-        cChCVw_n = uCVw_n * dtPdx * chCSACVw_tp1;
+        cCHw_n = uw_n * dtPdx * chCSACVw_tp1;
     }
-    double constCSAchCVp_j = cvs[i].stream.csaCH;
-    double CSAp_n = constCSAchCVp_j;
+    double CSAchCVp_j = cvs[i].stream.csaCH;
+    double CSAp_n = CSAchCVp_j;
     double hChp_n = cvs[i].stream.hCH;
     for (int iter = 0; iter < 20000; iter++) {
         double hChCVe_n = hChp_n;
@@ -186,7 +186,7 @@ void calChannelFlow(int i, double chCSACVw_tp1)
             cvs[i].stream.chRC);
         double cChCVe_n = u_n * dtPdx * CSAChCVe_n;
         // Newton-Raphson
-        double Fx = CSAp_n - cChCVw_n + cChCVe_n - constCSAchCVp_j;
+        double Fx = CSAp_n - cCHw_n + cChCVe_n - CSAchCVp_j;
         double dFx;
         dFx = 1 + (1.66667 * pow(CSAChCVe_n, 0.66667)
             * sqrt(cvs[i].stream.chBedSlope) * dtPdx
@@ -225,7 +225,7 @@ double getOverlandFlowDepthCVw(int i)
     double qCViM1;
     double qWn_i;
     int nEffCVFlowintoCVw;
-    nEffCVFlowintoCVw = cvs[i].neighborCVIDsFlowintoMe.size();
+    nEffCVFlowintoCVw = (int)cvs[i].neighborCVIDsFlowintoMe.size();
     for (int cvid : cvs[i].neighborCVIDsFlowintoMe) {
         qCViM1 = cvs[cvid - 1].QOF_m3Ps / di.cellSize; // 단위폭당 유량
         if (qCViM1 <= 0.0) {
@@ -249,7 +249,7 @@ double getChCSAatCVW(int i)
     double CSAe_iM1 = 0;
     double CSAeSum_iM1 = 0;
     double qSumCViM1_m3Ps = 0;
-    int nEffCVFlowintoCVw = cvs[i].neighborCVIDsFlowintoMe.size();
+    int nEffCVFlowintoCVw = (int)cvs[i].neighborCVIDsFlowintoMe.size();
     for (int cvid : cvs[i].neighborCVIDsFlowintoMe) {
         double qCViM1_m3Ps = 0;
         if (cvs[cvid - 1].flowType == cellFlowType::OverlandFlow) {
@@ -310,10 +310,10 @@ double getChCSAatCVW(int i)
 
 double getChCSAbyFlowDepth(double LRBaseWidth,
     double chBankConst, double crossSectionDepth,
-    bool isCompoundCS, double LRHeight,
+    int isCompoundCS, double LRHeight,
     double LRArea, double URBaseWidth)
 {
-    if ((isCompoundCS == true)
+    if ((isCompoundCS == 1)
         && (crossSectionDepth > LRHeight)) {
         double uFlowDepth = crossSectionDepth - LRHeight;
         if (uFlowDepth < 0) {
@@ -337,7 +337,7 @@ double getChCSAusingQbyiteration(cvAtt cv, double CSAini, double Q_m3Ps)
     double CSA_nP1 = 0;
     double cbw = cv.stream.chBaseWidth;
     double bc = cv.stream.bankCoeff;
-    bool bCompound = cv.stream.isCompoundCS;
+    int bCompound = cv.stream.isCompoundCS;
     double hLR = cv.stream.chLRHeight;
     double AreaLR = cv.stream.chLRArea_m2;
     double bwURegion = cv.stream.chURBaseWidth_m;
@@ -372,12 +372,12 @@ double getChCSAusingQbyiteration(cvAtt cv, double CSAini, double Q_m3Ps)
 }
 
 double getChDepthUsingCSA(double baseWidthLRegion,
-    double chCSAinput, bool isCompoundCrossSection,
+    double chCSAinput, int isCompoundCS,
     double baseWidthURegion, double LRegionArea,
     double LRegionHeight, double chBankConst)
 {
     double chCSDepth = 0;
-    if (isCompoundCrossSection == true && chCSAinput > LRegionArea) {
+    if (isCompoundCS == 1 && chCSAinput > LRegionArea) {
         double uRegionArea = chCSAinput - LRegionArea;
         chCSDepth = (sqrt(pow(baseWidthURegion, 2)
             + 2 * chBankConst * uRegionArea) - baseWidthURegion) / chBankConst;
@@ -392,11 +392,11 @@ double getChDepthUsingCSA(double baseWidthLRegion,
 
 double getChCrossSectionPerimeter(double LRegionBaseWidth,
     double sideSlopeRightBank, double sideSlopeLeftBank,
-    double crossSectionDepth, bool isCompoundCrossSection,
+    double crossSectionDepth, int isCompoundCS,
     double LRegionHeight, double LRegionArea,
     double URegionBaseWidth)
 {
-    if (isCompoundCrossSection == true)    {
+    if (isCompoundCS == 1)    {
         if (crossSectionDepth > LRegionHeight)        {
             double LFlowPerimeter = LRegionBaseWidth 
                 + sqrt(pow(LRegionHeight, 2) + pow(LRegionHeight / sideSlopeRightBank, 2))

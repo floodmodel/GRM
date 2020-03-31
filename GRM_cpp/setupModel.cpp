@@ -77,7 +77,7 @@ int initWPinfos()
 	wpis.maxDepthTime.clear();
 	wpis.qFromFCData_cms.clear();
 	wpis.qprint_cms.clear();
-	wpis.fpnWpOut.clear();
+	//wpis.fpnWpOut.clear();
 	wpis.wpCVIDs.clear();
 
 	for (int i = 0; i < prj.wps.size(); ++i) {
@@ -234,18 +234,18 @@ int updateCVbyUserSettings()
                 cvs[i].stream.chBaseWidth = cvs[i].fac
                     * cs.lowRBaseWidth / (double)facMax_inMDWS;
                 if (cvs[i].stream.chBaseWidth < cs.compoundCSChannelWidthLimit) {
-                    cvs[i].stream.isCompoundCS = false;
+                    cvs[i].stream.isCompoundCS = -1;
                     cvs[i].stream.chURBaseWidth_m = 0;
                     cvs[i].stream.chLRHeight = 0;
                     cvs[i].stream.chLRArea_m2 = 0;
                 }
                 else {
-                    cvs[i].stream.isCompoundCS = true;
+                    cvs[i].stream.isCompoundCS = 1;
                     cvs[i].stream.chURBaseWidth_m = cvs[i].fac * cs.highRBaseWidth / (double)facMax_inMDWS;
                     cvs[i].stream.chLRHeight = cvs[i].fac * cs.lowRHeight / (double)facMax_inMDWS;
                     cvs[i].stream.chLRArea_m2 = getChCSAbyFlowDepth(cvs[i].stream.chBaseWidth,
                         cvs[i].stream.bankCoeff, cvs[i].stream.chLRHeight,
-                        false, cvs[i].stream.chLRHeight, cvs[i].stream.chLRArea_m2, 0);
+                        -1, cvs[i].stream.chLRHeight, cvs[i].stream.chLRArea_m2, 0);//처음에는 단단면으로 출발
                 }
             }
             else {

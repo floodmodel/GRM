@@ -37,10 +37,10 @@ int startSimulationSingleEvent()
     double nowTmin;
     ts.dtsecUsed_tm1 = ts.dtsec;
     ts.zeroTimePrinted = -1;
-    ts.targetTtoP_sec = prj.dtPrint_min;
+    ts.targetTtoP_sec = (int)prj.dtPrint_min*60;
     //int dtsec;
     int endingT_sec = ts.time_simEnding_sec + ts.dtsec;
-    while (nowTsec <= endingT_sec) {// simulationTimeLimitSEC
+    while (nowTsec < endingT_sec) {// simulationTimeLimitSEC
         //dtsec = ts.dtsec;        
         // dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
         /*if (isRFended == -1 && (nowRFOrder == 0 || (nowTsec > dtRF_sec* nowRFOrder))) {*/
@@ -55,6 +55,10 @@ int startSimulationSingleEvent()
             }
         }
         nowTmin = nowTsec / 60.0;
+        if (nowTmin == 65)
+        {
+            int a = 1;
+        }
         if (simulateRunoff(nowTmin) == -1) { return -1; }
         calCumulRFduringDTP(ts.dtsec);
         outputManager(nowTsec, rfOrder);
@@ -91,44 +95,44 @@ int simulateRunoff(double nowTmin)
     int maxLimit = di.facMax + 1;
     ts.vMaxInThisStep = DBL_MIN;
     int numth = prj.mdp;
-    double* uMax = new double[numth];
+    //double* uMax = new double[numth];
     for (int fac = 0; fac < maxLimit; ++fac) {
         if (cvaisToFA[fac].size() > 0) {
             int iterLimit = cvaisToFA[fac].size();
-#pragma omp parallel
-            {    // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
-                // VS2019는 openMP 2.0 지원, 그러므로 critical 사용한다.
-                // critical은 속도 손실이 있으므로, 배열로 할당해서 직접 계산한다.
-                int id = omp_get_thread_num();
-                uMax[id] = 0;
-#pragma omp for schedule(guided) 
-                for (int i = 0; i < iterLimit; ++i) {
+//#pragma omp parallel
+//            {    // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
+//                // VS2019는 openMP 2.0 지원, 그러므로 critical 사용한다.
+//                // 배열 보다는 critical이 좀더 빠르다..
+                double uMax = 0;
+//#pragma omp for schedule(guided) 
+                for (int e = 0; e < iterLimit; ++e) {
+                    int i = cvaisToFA[fac][e];
                     if (cvs[i].toBeSimulated == 1) {
                         //id = omp_get_thread_num();
                         simulateRunoffCore(i, nowTmin);
                         if (prj.IsFixedTimeStep == -1) {
                             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                                if (uMax[id] < cvs[i].uOF) {
-                                    uMax[id] = cvs[i].uOF;
+                                if (uMax < cvs[i].uOF) {
+                                    uMax = cvs[i].uOF;
                                 }
                             }
                             else {
-                                if (uMax[id] < cvs[i].stream.uCH) {
-                                    uMax[id] = cvs[i].stream.uCH;
+                                if (uMax < cvs[i].stream.uCH) {
+                                    uMax = cvs[i].stream.uCH;
                                 }
                             }
                         }
                     }
                 }
-            }
-            //#pragma omp critical(getVmax)
-            if (prj.IsFixedTimeStep == -1) {//이 조건 적용 여부?
-                for (int i = 0; i < numth; ++i) {
-                    if (ts.vMaxInThisStep < uMax[i]) {
-                        ts.vMaxInThisStep = uMax[i];
-                    }
-                }
-            }
+//#pragma omp critical(getVmax)
+//                {
+//                    if (prj.IsFixedTimeStep == -1) {//이 조건 적용 여부?
+//                        if (ts.vMaxInThisStep < uMax) {
+//                            ts.vMaxInThisStep = uMax;
+//                        }
+//                    }
+//                }
+            //}
         }
     }
     return 1;
@@ -193,14 +197,14 @@ void simulateRunoffCore(int i, double nowTmin)
 void initThisSimulation()
 {
     if (prj.simType != simulationType::RealTime) {
-        ts.rfDataCountTotal = rfs.size();
+        ts.rfDataCountTotal = (int)rfs.size();
     }
     else {
         ts.rfDataCountTotal = -1;
     }
     // 이렇게 해야 모의기간에 맞게 실행된다. 
     //왜냐하면, 첫번째 실행 결과가 0 시간으로 출력되기 때문에
-    ts.time_simEnding_sec = (prj.simDuration_hr*60 + prj.dtPrint_min) * 60;     
+    ts.time_simEnding_sec =(int) (prj.simDuration_hr*60 + prj.dtPrint_min) * 60;     
     ts.setupGRMisNormal = 1;
     ts.grmStarted = 1;
     ts.stopSim = -1;
@@ -385,7 +389,7 @@ void outputManager(int nowTsec, int rfOrder)
             && (nowTsec - ts.dtsecUsed_tm1) <= ts.targetTtoP_sec) {
             double citerp;
             citerp = (ts.targetTtoP_sec - ts.cvsbT_sec) / (double)(nowTsec - ts.cvsbT_sec);
-            timeToP_min = ts.targetTtoP_sec / 60. - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
+            timeToP_min = (int)ts.targetTtoP_sec / 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
             writeBySimType(timeToP_min, citerp);
             ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
             ts.isbak = -1;
@@ -397,11 +401,10 @@ void outputManager(int nowTsec, int rfOrder)
 void writeBySimType(int nowTP_min,
     double cinterp)
 {
-    writeSimStep(nowTP_min);
-    int wpCount = wpis.wpCVIDs.size();
     simulationType simType = prj.simType;
     switch (simType) {
     case simulationType::SingleEvent: {
+        writeSimStep(nowTP_min);
         if (prj.printOption == GRMPrintType::All) {
             writeSingleEvent(nowTP_min, cinterp);
         }

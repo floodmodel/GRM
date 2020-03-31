@@ -201,7 +201,7 @@ int simulateSingleEvent()
 		writeLog(fpnLog, "Model setup failed !!!\n", 1, 1);
 		return -1;
 	}
-	writeLog(fpnLog, "Calculation was started.\n", 1, 1);
+	writeLog(fpnLog, "Simulation was started.\n", 1, 1);
 	if (startSimulationSingleEvent() == -1) {
 		writeNewLog(fpnLog, "An error was occurred while simulation...\n", 1, 1);
 		return -1;
@@ -220,14 +220,14 @@ int simulateSingleEvent()
 }
 
 int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
-{
-	writeLog(fpnLog, "GRM was started.\n", 1, 1);
+{	
 	prj.cpusi = getCPUinfo();
 	writeLog(fpnLog, prj.cpusi.infoString, 1, 1);
 	if (openProjectFile(forceRealTime) < 0)	{
 		writeLog(fpnLog, "Open "+ ppi.fpn_prj+" was failed.\n", 1, 1);
 		return -1;
 	}
+	//writeLog(fpnLog, "GRM was started.\n", 1, 1);
 	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, 1);
 	omp_set_num_threads(prj.mdp);
 	if (setupModelAfterOpenProjectFile() == -1) {

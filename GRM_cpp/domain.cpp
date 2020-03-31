@@ -48,7 +48,7 @@ int readDomainFileAndSetupCV()
     // cvid를 순차적으로 부여하기 위해서, 이 과정은 병렬로 하지 않는다..
     for (int ry = 0; ry < di.nRows; ry++) {
         for (int cx = 0; cx < di.nCols; cx++) {
-            int wsid = dmFile.valuesFromTL[cx][ry];
+            int wsid = (int)dmFile.valuesFromTL[cx][ry];
             if (wsid > 0) {
                 cvAtt cv;
                 cv.wsid = wsid;
@@ -168,29 +168,29 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
                     cvs[idx].slope = CONST_MIN_SLOPE;
                 }
                 cvs[idx].fdir = getFlowDirection((int)fdirFile.valuesFromTL[cx][ry], prj.fdType);
-                cvs[idx].fac = facFile.valuesFromTL[cx][ry];
+                cvs[idx].fac = (int)facFile.valuesFromTL[cx][ry];
                 if (prj.streamFileApplied == 1) {
-                    cvs[idx].stream.chStrOrder = streamFile->valuesFromTL[cx][ry];
+                    cvs[idx].stream.chStrOrder = (int)streamFile->valuesFromTL[cx][ry];
                     if (cvs[idx].stream.chStrOrder > 0) {
                         cvs[idx].isStream = 1;
                         cvs[idx].flowType = cellFlowType::ChannelFlow;
                     }
                     else {
                         cvs[idx].isStream = -1;
-                        cvs[idx].flowType = cellFlowType::ChannelFlow;
+                        cvs[idx].flowType = cellFlowType::OverlandFlow;
                     }
                 }
                 if (prj.cwFileApplied == 1) {
                     double v = cwFile->valuesFromTL[cx][ry];
                     if (v < 0) {
-                        cvs[idx].stream.chBaseWidthByLayer = 0;
+                        cvs[idx].stream.chBaseWidthByLayer = 0.0;
                     }
                     else {
                         cvs[idx].stream.chBaseWidthByLayer = v;
                     }
                 }
                 else {
-                    cvs[idx].stream.chBaseWidthByLayer = -1;
+                    cvs[idx].stream.chBaseWidthByLayer =0.0;
                 }
                 if (prj.icfFileApplied == 1) {
                     double v = cfFile->valuesFromTL[cx][ry];
@@ -259,7 +259,7 @@ int readLandCoverFileAndSetCVbyVAT()
         for (int cx = 0; cx < nCx; cx++) {
             int idx = cvais[cx][ry];
             if (idx >= 0) {
-                int v = lcFile.valuesFromTL[cx][ry];
+                int v =(int) lcFile.valuesFromTL[cx][ry];
                 if (v > 0) {
                     if (lcvat.find(v) != lcvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
                         landCoverInfo lc = lcvat[v];
@@ -338,7 +338,7 @@ int readLandCoverFile(string fpnLC, int** cvAryidx, cvAtt* cvs1D, int nColX, int
         for (int cx = 0; cx < nColX; cx++) {
             int idx = cvAryidx[cx][ry];
             if (idx >= 0) {
-                int v = lcFile.valuesFromTL[cx][ry];
+                int v =(int) lcFile.valuesFromTL[cx][ry];
                 if (v > 0) {
                     cvs1D[idx].lcCellValue = v;
                 }
@@ -383,7 +383,7 @@ int readSoilTextureFileAndSetCVbyVAT()
         for (int cx = 0; cx < nCx; cx++) {
             int idx = cvais[cx][ry];
             if (idx >= 0) {
-                int v = stFile.valuesFromTL[cx][ry];
+                int v = (int)stFile.valuesFromTL[cx][ry];
                 if (v > 0) {
                     if (stvat.find(v) != stvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
                         soilTextureInfo st = stvat[v];
@@ -478,7 +478,7 @@ int readSoilTextureFile(string fpnST, int** cvAryidx, cvAtt* cvs1D, int nColX, i
         for (int cx = 0; cx < nColX; cx++) {
             int idx = cvAryidx[cx][ry];
             if (idx >= 0) {
-                int v = stFile.valuesFromTL[cx][ry];
+                int v = (int)stFile.valuesFromTL[cx][ry];
                 if (v > 0) {
                     cvs1D[idx].stCellValue = v;
                 }
@@ -523,7 +523,7 @@ int readSoilDepthFileAndSetCVbyVAT()
         for (int cx = 0; cx < nCx; cx++) {
             int idx = cvais[cx][ry];
             if (idx >= 0) {
-                int v = sdFile.valuesFromTL[cx][ry];
+                int v = (int)sdFile.valuesFromTL[cx][ry];
                 if (v > 0) {
                     if (sdvat.find(v) != sdvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
                         soilDepthInfo sd = sdvat[v];
@@ -594,7 +594,7 @@ int readSoilDepthFile(string fpnSD, int** cvAryidx, cvAtt* cvs1D, int nColX, int
         for (int cx = 0; cx < nColX; cx++) {
             int idx = cvAryidx[cx][ry];
             if (idx >= 0) {
-                int v = sdFile.valuesFromTL[cx][ry];
+                int v = (int)sdFile.valuesFromTL[cx][ry];
                 if (v > 0) {
                     cvs1D[idx].sdCellValue = v;
                 }
@@ -632,7 +632,7 @@ int setFlowNetwork()
         for (int cx = 0; cx < di.nCols; cx++) {
             int cidx = cvais[cx][ry];// current cell index
             if (cidx >= 0) {
-                double dxe = -1.0;
+                double dxe = 0.0;
                 int tCx; // 하류방향 대상 셀의 x array index
                 int tRy; // 하류방향 대상 셀의 y array index
                 // 좌상단이 0,0 이다... 즉, 북쪽이면, row-1, 동쪽이면 col +1

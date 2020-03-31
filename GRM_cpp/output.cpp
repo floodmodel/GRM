@@ -34,7 +34,7 @@ void writeSimStep(int elapsedT_min)
     double simDur_min = prj.simDuration_hr * 60.0;
     nowStep = elapsedT_min / simDur_min * 100.0;
     curProgressRatio = forString(nowStep, 0);
-    cout<<"\rCurrent progress: " + curProgressRatio + "%. " + msgFileProcess;
+    cout<<"\rCurrent progress: " + curProgressRatio + "%... " + msgFileProcess;
 }
 
 
@@ -132,35 +132,37 @@ void writeSingleEvent(int nowTmin, double cinterp)
 void writeWPouput(string nowTP, int i, double cinterp)
 {    // watchpoint별 모든 자료 출력
     int cvid = i + 1;
-    string sbWP;
-    sbWP.append(nowTP + "\t");
-    sbWP.append(forString(wpis.qprint_cms[cvid], 2) + "\t");
+    string oStr;
+    oStr.append(nowTP + "\t");
+    oStr.append(forString(wpis.qprint_cms[cvid], 2) + "\t");
     if (cinterp == 1) {
-        sbWP.append(forString(cvs[i].hUAQfromChannelBed_m, 4) + "\t");
-        sbWP.append(forString(cvs[i].soilWaterC_m, 4) + "\t");
-        sbWP.append(forString(cvs[i].ssr, 4) + "\t");
-        sbWP.append(forString(wpis.rfWPGridForDtP_mm[cvid], 2) + "\t");
-        sbWP.append(forString(wpis.rfUpWSAveForDtP_mm[cvid], 2) + "\t");
-        sbWP.append(forString(wpis.qFromFCData_cms[cvid], 2) + "\t");
-        sbWP.append(forString(cvs[i].storageCumulative_m3, 2) + "\n");
+        oStr.append(forString(cvs[i].hUAQfromChannelBed_m, 4) + "\t");
+        oStr.append(forString(cvs[i].soilWaterC_m, 4) + "\t");
+        oStr.append(forString(cvs[i].ssr, 4) + "\t");
+        oStr.append(forString(wpis.rfWPGridForDtP_mm[cvid], 2) + "\t");
+        oStr.append(forString(wpis.rfUpWSAveForDtP_mm[cvid], 2) + "\t");
+        oStr.append(forString(wpis.qFromFCData_cms[cvid], 2) + "\t");
+        oStr.append(forString(cvs[i].storageCumulative_m3, 2) + "\n");
     }
     else if (ts.isbak == 1) {
-        sbWP.append(forString(getinterpolatedVLinear(cvsb[i].hUAQfromChannelBed_m,
+        oStr.append(forString(getinterpolatedVLinear(cvsb[i].hUAQfromChannelBed_m,
             cvs[i].hUAQfromChannelBed_m, cinterp), 4) + "\t");
-        sbWP.append(forString(getinterpolatedVLinear(cvsb[i].soilWaterC_m,
+        oStr.append(forString(getinterpolatedVLinear(cvsb[i].soilWaterC_m,
             cvs[i].soilWaterC_m, cinterp), 4) + "\t");
-        sbWP.append(forString(getinterpolatedVLinear(cvsb[i].ssr,
+        oStr.append(forString(getinterpolatedVLinear(cvsb[i].ssr,
             cvs[i].ssr, cinterp), 4) + "\t");
-        sbWP.append(forString(getinterpolatedVLinear(wpisb.rfWPGridForDtP_mm[cvid],
+        oStr.append(forString(getinterpolatedVLinear(wpisb.rfWPGridForDtP_mm[cvid],
             wpis.rfWPGridForDtP_mm[cvid], cinterp), 2) + "\t");
-        sbWP.append(forString(getinterpolatedVLinear(wpisb.rfUpWSAveForDtP_mm[cvid],
+        oStr.append(forString(getinterpolatedVLinear(wpisb.rfUpWSAveForDtP_mm[cvid],
             wpis.rfUpWSAveForDtP_mm[cvid], cinterp), 2) + "\t");
-        sbWP.append(forString(getinterpolatedVLinear(wpisb.qFromFCData_cms[cvid],
+        oStr.append(forString(getinterpolatedVLinear(wpisb.qFromFCData_cms[cvid],
             wpis.qFromFCData_cms[cvid], cinterp), 2) + "\t");
-        sbWP.append(forString(getinterpolatedVLinear(cvsb[i].storageCumulative_m3,
+        oStr.append(forString(getinterpolatedVLinear(cvsb[i].storageCumulative_m3,
             cvs[i].storageCumulative_m3, cinterp), 2) + "\n");
     }
-    appendTextToTextFile(wpis.fpnWpOut[cvid], sbWP);
+    //string ofpn = wpis.fpnWpOut[cvid];
+    //string ofpn = ofs.ofpnWPs[cvid];
+    appendTextToTextFile(ofs.ofpnWPs[cvid], oStr);
 }
 
 void writeDischargeOnly(double cinterp, int writeWPfiles)
@@ -193,7 +195,8 @@ void writeDischargeOnly(double cinterp, int writeWPfiles)
         }
         wpis.qprint_cms[cvid] = stod(vToP);
         if (writeWPfiles == 1) {
-            appendTextToTextFile(ofs.ofpnWPs[cvid], vToP);
+            string ofpn = ofs.ofpnWPs[cvid];
+            appendTextToTextFile(ofpn, vToP);
         }
         if (trim(ptext) == "") {
             ptext.append(vToP);
@@ -357,7 +360,7 @@ int makeNewOutputFiles()
             +to_string(grmVersion.minor)
             +"."+to_string(grmVersion.build)
             +" Built in "+ grmVersion.LastWrittenTime;
-        comHeader = "Project name : " + ppi.fn_prj + " " + nowT 
+        comHeader = "Project name : " + ppi.fn_prj + "      " + nowT 
             + "  by " + ver+ "\n";
         string time_wpNames;
         time_wpNames = CONST_OUTPUT_TABLE_TIME_FIELD_NAME;

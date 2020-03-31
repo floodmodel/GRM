@@ -47,7 +47,7 @@ int updateFCCellinfoAndData()
                 timeSeries ts;
                 if (prj.isDateTimeFormat == 1) {
                     ts.dataTime = timeElaspedToDateTimeFormat(prj.simStartTime,
-                        afc.fcDT_min * 60 * i, -1
+                        afc.fcDT_min * 60 * i, false
                         , dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
                 }
                 else {
@@ -106,7 +106,7 @@ void calFCReservoirOutFlow(int i, double nowTmin)
 }
 
 
-void calSinkOrSourceFlow(int i, int nowTmin)
+void calSinkOrSourceFlow(int i, double nowTmin)
 {// nowTmin의 최소값은 dtsec/60이다.
     int id = i + 1;//cvid=arrayindex+1;
     int dtfc = prj.fcs[id].fcDT_min;
@@ -175,7 +175,7 @@ void calSinkOrSourceFlow(int i, int nowTmin)
     fccds.fcDataAppliedNowT_m3Ps[id] = QtoApp;
 }
 
-void calReservoirOperation(int i, int nowTmin)
+void calReservoirOperation(int i, double nowTmin)
 {
     int dtsec = ts.dtsec;
     int id = i + 1;

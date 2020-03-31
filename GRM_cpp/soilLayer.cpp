@@ -70,8 +70,11 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
                 dtsec, CONSTGreenAmpt, cvs[i].hc_K_mPsec);
             beingPonding = true;
         }
+
+
+
         if (infiltrationF_mPdt_max <= 0) {
-            cvs[i].ifF_mPdt = 0; 
+            cvs[i].ifF_  mPdt = 0; // 이거 확인 필요
         }
         else {
             double dF = cvs[i].sdEffAsWaterDepth_m - cvs[i].soilWaterC_tm1_m;
@@ -82,6 +85,7 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
                 cvs[i].ifF_mPdt = dF;
             }
         }
+
         // 누가 침투량으로 dt 동안에 추가된 침투량을 더한다.
         cvs[i].soilWaterC_m = cvs[i].soilWaterC_tm1_m + cvs[i].ifF_mPdt;
         // 현재까지의 누가 침투량을 이용해서 이에 대한 포텐셜 침투률을 계산한다.
@@ -121,7 +125,7 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
     cvs[i].ssr = soilSSRbyCumulF(cvs[i].soilWaterC_m, 
         cvs[i].sdEffAsWaterDepth_m, cvs[i].flowType);
     if (cvs[i].ssr == 1) {
-        cvs[i].isAfterSaturated = true;
+        cvs[i].isAfterSaturated = 1;
     }
     cvs[i].soilWaterC_tm1_m = cvs[i].soilWaterC_m;
     cvs[i].ifRatef_tm1_mPsec = cvs[i].ifRatef_mPsec;
