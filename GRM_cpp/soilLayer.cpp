@@ -62,29 +62,28 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
         bool beingPonding = false;
         if (cvs[i].ifRatef_tm1_mPsec >= cvs[i].rfiRead_tm1_mPsec) {
             // 이전 시간에서의 침투률이 이전 시간에서의 강우강도보다 컸다면, 모든 강우는 침투됨
-            infiltrationF_mPdt_max = cvs[i].rfApp_dt_m;
+            infiltrationF_mPdt_max = cvs[i].rfApp_dt_m;// 0 이상이 보장됨
         }
         else {
             // 이전 시간에서의 침투률이 이전 시간에서의 강우강도보다 같거나 작았다면 ponding이 발생한 경우
             infiltrationF_mPdt_max = getinfiltrationForDtAfterPonding(i, 
-                dtsec, CONSTGreenAmpt, cvs[i].hc_K_mPsec);
+                dtsec, CONSTGreenAmpt, cvs[i].hc_K_mPsec);// 0 이상이 보장됨
             beingPonding = true;
-        }
-
-
-
-        if (infiltrationF_mPdt_max <= 0) {
-            cvs[i].ifF_  mPdt = 0; // 이거 확인 필요
+        }                       
+        if (infiltrationF_mPdt_max < 0) {
+            infiltrationF_mPdt_max = 0; // 이거 확인 필요
         }
         else {
             double dF = cvs[i].sdEffAsWaterDepth_m - cvs[i].soilWaterC_tm1_m;
             if (dF < 0) {
-                cvs[i].ifF_mPdt = 0;
+                infiltrationF_mPdt_max = 0;
             }
             else if (dF < infiltrationF_mPdt_max) {
-                cvs[i].ifF_mPdt = dF;
+                infiltrationF_mPdt_max = dF;
             }
         }
+            cvs[i].ifF_mPdt = infiltrationF_mPdt_max;
+
 
         // 누가 침투량으로 dt 동안에 추가된 침투량을 더한다.
         cvs[i].soilWaterC_m = cvs[i].soilWaterC_tm1_m + cvs[i].ifF_mPdt;

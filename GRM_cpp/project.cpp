@@ -490,7 +490,7 @@ int openProjectFile(int forceRealTime)
 		if (aline.find(fn.ComputationalTimeStep_min) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.ComputationalTimeStep_min);
 			if (vString != "" && stod(vString) > 0) {
-				prj.dtsec =(int) (stod(vString) * 60);
+				prj.dtsec =stoi(vString) * 60;
 			}
 			continue;
 		}
@@ -507,7 +507,7 @@ int openProjectFile(int forceRealTime)
 		if (aline.find(fn.OutputTimeStep_min) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.OutputTimeStep_min);
 			if (vString != "") {
-				prj.dtPrint_min = stod(vString);
+				prj.dtPrint_min = stoi(vString);
 			}
 			else {
 				writeLog(fpnLog, "Print out time step is invalid.\n", 1, 1);

@@ -165,7 +165,7 @@ int main(int argc, char** args)
 	sprintf_s(outString, "Simulation was completed. Run time : %dhrs %dmin %dsec.\n",
 		ts_total.tm_hour, ts_total.tm_min, ts_total.tm_sec);
 	writeLog(fpnLog, outString, 1, 1);
-	waitEnterKey();
+	//waitEnterKey();
 	disposeDynamicVars();
 	return 1;
 }
