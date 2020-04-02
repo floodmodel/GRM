@@ -229,11 +229,16 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 	}
 	//writeLog(fpnLog, "GRM was started.\n", 1, 1);
 	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, 1);
-	omp_set_num_threads(prj.mdp);
 	if (setupModelAfterOpenProjectFile() == -1) {
 		return -1;
 	}
 	string isparallel = "true";
+	omp_set_num_threads(prj.mdp);
+
+	//todo : 여기에 셀 개수 조건으로 mdp 설정 추가 필요
+	//위천의 경우, 11734인데, 병렬계산이 쪼매 더 느리다..
+	// 금호강의 경우, 8418인데, 병렬계산이 쪼매 더 느리다..
+
 	if (prj.mdp == 1) { isparallel = "false"; }
 	writeLog(fpnLog, "Parallel : "+ isparallel +". Max. degree of parallelism : "
 		+ to_string(prj.mdp) +".\n", 1, 1);

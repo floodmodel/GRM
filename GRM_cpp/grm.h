@@ -301,7 +301,7 @@ typedef struct _swsParameters
 	double minChBaseWidth = 0.0;
 	double chRoughness = 0.0;
 	int dryStreamOrder = -1;
-	double iniFlow = 0.0;
+	double iniFlow = -1.0;
 	double ccLCRoughness = 0.0;
 	double ccPorosity = 0.0;
 	double ccWFSuctionHead = 0.0;
@@ -319,7 +319,7 @@ typedef struct _wsNetwork
 	map <int, vector<int>> wsidsAllUp;
 	map <int, vector<int>> wsidsAllDown;
 	vector <int> mdWSIDs;
-	map <int, int> wsOutletCVID;
+	map <int, int> wsOutletidxs;
 	map <int, int> mdWSIDofCurrentWS;
 } wsNetwork;
 
@@ -331,9 +331,9 @@ typedef struct _wpLocationRC
 } wpLocationRC;
 
 typedef struct _wpinfo {
-	vector<int> wpCVIDs;
-	map<int, string> wpNames; //<cvid, wpname>
-	//<cvid, value>
+	vector<int> wpCVidxes;
+	map<int, string> wpNames; //<idx, wpname>
+	//<idx, value>
 	map<int, double> rfiReadSumUpWS_mPs;// 현재 wp 상류에 대해 원시자료에서 읽은 강우량(강우강도 rfi).[m/s] 
 	map<int, double> rfUpWSAveForDt_mm; // 현재 wp 상류에 대해 dt(계산시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
 	map<int, double> rfUpWSAveForDtP_mm;// 현재 wp 상류에 대해 출력시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
@@ -388,11 +388,11 @@ typedef struct _flowControlinfo
 
 typedef struct _flowControlCellAndData
 {
-	map <int, double> fcDataAppliedNowT_m3Ps;// <cvid, value>현재의 모델링 시간(t)에 적용된 flow control data 값
-	vector<int> cvidsinlet;
-	vector<int> cvidsFCcell;
-	map<int, vector<timeSeries>> flowData_m3Ps; //<cvid, data>, 분단위
-	map<int, int> curDorder;// <cvid, order>현재 적용될 데이터의 순서
+	map <int, double> fcDataAppliedNowT_m3Ps;// <idx, value>현재의 모델링 시간(t)에 적용된 flow control data 값
+	vector<int> cvidxsinlet;
+	vector<int> cvidxsFCcell;
+	map<int, vector<timeSeries>> flowData_m3Ps; //<idx, data>, 분단위
+	map<int, int> curDorder;// <idx, order>현재 적용될 데이터의 순서
 } flowControlCellAndData;
 
 typedef struct _soilTextureInfo
@@ -442,7 +442,7 @@ typedef struct _grmOutFiles
 	string ofpRFDistribution;
 	string ofpRFAccDistribution;
 	string ofpFlowDistribution;
-	map<int, string> ofpnWPs; //<cvid, fpn>
+	map<int, string> ofpnWPs; //<idx, fpn>
 } grmOutFiles;
 
 typedef struct _domaininfo
@@ -463,7 +463,7 @@ typedef struct _domaininfo
 	int facMax = -1;
 	int facMin = 0;
 	vector <int> dmids;
-	map <int, vector<int>> cvidsInEachRegion;
+	map <int, vector<int>> cvidxInEachRegion;
 	wsNetwork wsn;
 } domaininfo;
 
@@ -493,9 +493,8 @@ typedef struct _cvStreamAtt
 
 typedef struct _cvAtt
 {
-	int idx_xr;// cellidx 검증용
-	int idx_yc;// cellidx 검증용
-	int cvid = -1;//유역에 해당하는 셀에만 부여되는 일련번호    
+	int idx_xr;
+	int idx_yc;
 	int wsid = -1; //유역 ID, 해당 raster cell의 값
 	cellFlowType flowType;//셀의 종류, 지표면흐름, 하도흐름, 지표면+하도
 	double slopeOF = 0.0; //지표면 해석에 적용되는 overland flow 셀의 경사(m/m)
@@ -504,11 +503,11 @@ typedef struct _cvAtt
 	int fac = -1;//흐름누적수, 자신의 셀을 제외하고, 상류에 있는 격자 개수
 	double dxDownHalf_m = 0.0;//격자 중심으로부터 하류방향 격자면까지의 거리
 	double dxWSum = 0.0;//격자 중심으로부터 상류방향 격자면까지의 거리합
-	vector<int> neighborCVIDsFlowintoMe;//현재 셀로 흘러 들어오는 인접셀의 ID, 최대 7개
-	int downCellidToFlow = -1; //흘러갈 직하류셀의 ID
+	vector<int> neighborCVidxFlowintoMe;//현재 셀로 흘러 들어오는 인접셀의 ID, 최대 7개
+	int downCellidxToFlow = -1; //흘러갈 직하류셀의 ID
 	int effCVnFlowintoCVw = -1;//인접상류셀 중 실제 유출이 발생하는 셀들의 개수
 	double cvdx_m;//모델링에 적용할 검사체적의 X방향 길이
-	vector<int> downWPCVIDs;//현재 CV 하류에 있는 watchpoint 들의 CVid 들
+	vector<int> downWPCVidx;//현재 CV 하류에 있는 watchpoint 들의 idxes 들
 	int toBeSimulated = 0; // -1 : false, 1 : true //현재의 CV가 모의할 셀인지 아닌지 표시
 	cvStreamAtt stream;//현재 CV가 Stream 일경우 즉, eCellType이 Channel 혹은 OverlandAndChannel일 경우 부여되는 속성
 	int isStream = 0; // 현재 cv가 stream 인지 아닌지
@@ -563,7 +562,7 @@ typedef struct _cvAtt
 	double Interception_m = 0.0;//현재 CV 토지피복에서의 차단량 [m].
 	double rcOF = 0.0;//현재 CV 토지피복의 모델링 적용 지표면 조도계수
 	double rcOFori = 0.0;//현재 CV 토지피복의 grm default 지표면 조도계수
-	flowControlType fcType;//현재 CV에 부여된 Flow control 종류
+	flowControlType fcType=flowControlType::None;//현재 CV에 부여된 Flow control 종류
 	double storageCumulative_m3 = 0.0;//현재 CV에서 flow control 모의시 누적 저류량[m^3]
 	double storageAddedForDTbyRF_m3 = 0.0;//현재 CV에서 flow control 모의시 dt 시간동안의 강우에 의해서 추가되는 저류량[m^3/dt]
 } cvAtt;
@@ -572,6 +571,7 @@ typedef struct _projectFile
 {
 	simulationType simType = simulationType::None;
 	string	fpnDomain = "";
+	string fpnProjection = "";
 	string fpnSlope = "";
 	string fpnFD = "";
 	string fpnFA = "";
@@ -621,7 +621,7 @@ typedef struct _projectFile
 
 	map <int, swsParameters> swps; // <wsid, paras>
 	map <int, channelSettingInfo> css; //<wsid. paras>
-	map <int, flowControlinfo> fcs; // <cvid, paras>
+	map <int, flowControlinfo> fcs; // <idx, paras>
 	vector <wpLocationRC> wps; // 
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;

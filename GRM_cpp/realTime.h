@@ -37,10 +37,10 @@ public:
     string mRFStartDateTimeRT="";
     bool mbNewRFAddedRT=false;
     bool mIsPrediction = false;//2019.10.01. 최. prediction 관련
-    //public Dictionary<int, bool> mdicBNewFCdataAddedRT;   // CVID 로 구분
+    //public Dictionary<int, bool> mdicBNewFCdataAddedRT;   // idx 로 구분
     vector<rainfallData> mlstRFdataRT;
     /// <summary>
-    /// Get data count by Cvid
+    /// Get data count by cv idx
     /// </summary>
     /// <remarks></remarks>
     //public Dictionary<int, int> mdicFCDataCountForEachCV;

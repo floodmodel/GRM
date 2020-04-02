@@ -59,8 +59,8 @@ void writeSingleEvent(int nowTmin, double cinterp)
     // 유량 =================================================
     string lineToP;
     lineToP = tStrToPrint;
-    for (int id : wpis.wpCVIDs) {
-        int i = id - 1;
+    for (int i : wpis.wpCVidxes) {
+        //int i = id - 1;
         if (cinterp == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
                 vToP = forString(cvs[i].QOF_m3Ps, 2);
@@ -84,11 +84,11 @@ void writeSingleEvent(int nowTmin, double cinterp)
         }
         lineToP = lineToP + "\t" + vToP;
         double sv = stod(vToP);
-        wpis.totalFlow_cms[id] = wpis.totalFlow_cms[id] + sv;
-        wpis.qprint_cms[id] = sv;
-        if (wpis.maxFlow_cms[id] < sv) {
-            wpis.maxFlow_cms[id] = sv;
-            wpis.maxFlowTime[id] = tStrToPrint;
+        wpis.totalFlow_cms[i] = wpis.totalFlow_cms[i] + sv;
+        wpis.qprint_cms[i] = sv;
+        if (wpis.maxFlow_cms[i] < sv) {
+            wpis.maxFlow_cms[i] = sv;
+            wpis.maxFlowTime[i] = tStrToPrint;
         }
         writeWPouput(tStrToPrint, i, cinterp);
     }
@@ -103,21 +103,21 @@ void writeSingleEvent(int nowTmin, double cinterp)
         fcflow = tStrToPrint;
         fcStorage = tStrToPrint;
         if (cinterp == 1) {
-            for (int fcvid : fccds.cvidsFCcell) {
+            for (int idx : fccds.cvidxsFCcell) {
                 fcflow = fcflow + "\t" 
-                    + forString(fccds.fcDataAppliedNowT_m3Ps[fcvid], 2);
+                    + forString(fccds.fcDataAppliedNowT_m3Ps[idx], 2);
                 fcStorage = fcStorage + "\t" 
-                    + forString(cvs[fcvid - 1].storageCumulative_m3, 2);
+                    + forString(cvs[idx].storageCumulative_m3, 2);
             }
         }
         else if(ts.isbak==1){
-            for (int fcvid : fccds.cvidsFCcell) {
+            for (int idx : fccds.cvidxsFCcell) {
                 fcflow = fcflow + "\t"
-                    + forString(getinterpolatedVLinear( fcdAb[fcvid],
-                        fccds.fcDataAppliedNowT_m3Ps[fcvid], cinterp), 2);
+                    + forString(getinterpolatedVLinear( fcdAb[idx],
+                        fccds.fcDataAppliedNowT_m3Ps[idx], cinterp), 2);
                 fcStorage = fcStorage + "\t"
-                    + forString(getinterpolatedVLinear(cvsb[fcvid - 1].storageCumulative_m3,
-                        cvs[fcvid - 1].storageCumulative_m3, cinterp), 2);
+                    + forString(getinterpolatedVLinear(cvsb[idx].storageCumulative_m3,
+                        cvs[idx].storageCumulative_m3, cinterp), 2);
             }
         }        
         fcflow = fcflow + "\n";
@@ -131,17 +131,17 @@ void writeSingleEvent(int nowTmin, double cinterp)
 
 void writeWPouput(string nowTP, int i, double cinterp)
 {    // watchpoint별 모든 자료 출력
-    int cvid = i + 1;
+    //int i = i + 1;
     string oStr;
     oStr.append(nowTP + "\t");
-    oStr.append(forString(wpis.qprint_cms[cvid], 2) + "\t");
+    oStr.append(forString(wpis.qprint_cms[i], 2) + "\t");
     if (cinterp == 1) {
         oStr.append(forString(cvs[i].hUAQfromChannelBed_m, 4) + "\t");
         oStr.append(forString(cvs[i].soilWaterC_m, 4) + "\t");
         oStr.append(forString(cvs[i].ssr, 4) + "\t");
-        oStr.append(forString(wpis.rfWPGridForDtP_mm[cvid], 2) + "\t");
-        oStr.append(forString(wpis.rfUpWSAveForDtP_mm[cvid], 2) + "\t");
-        oStr.append(forString(wpis.qFromFCData_cms[cvid], 2) + "\t");
+        oStr.append(forString(wpis.rfWPGridForDtP_mm[i], 2) + "\t");
+        oStr.append(forString(wpis.rfUpWSAveForDtP_mm[i], 2) + "\t");
+        oStr.append(forString(wpis.qFromFCData_cms[i], 2) + "\t");
         oStr.append(forString(cvs[i].storageCumulative_m3, 2) + "\n");
     }
     else if (ts.isbak == 1) {
@@ -151,18 +151,16 @@ void writeWPouput(string nowTP, int i, double cinterp)
             cvs[i].soilWaterC_m, cinterp), 4) + "\t");
         oStr.append(forString(getinterpolatedVLinear(cvsb[i].ssr,
             cvs[i].ssr, cinterp), 4) + "\t");
-        oStr.append(forString(getinterpolatedVLinear(wpisb.rfWPGridForDtP_mm[cvid],
-            wpis.rfWPGridForDtP_mm[cvid], cinterp), 2) + "\t");
-        oStr.append(forString(getinterpolatedVLinear(wpisb.rfUpWSAveForDtP_mm[cvid],
-            wpis.rfUpWSAveForDtP_mm[cvid], cinterp), 2) + "\t");
-        oStr.append(forString(getinterpolatedVLinear(wpisb.qFromFCData_cms[cvid],
-            wpis.qFromFCData_cms[cvid], cinterp), 2) + "\t");
+        oStr.append(forString(getinterpolatedVLinear(wpisb.rfWPGridForDtP_mm[i],
+            wpis.rfWPGridForDtP_mm[i], cinterp), 2) + "\t");
+        oStr.append(forString(getinterpolatedVLinear(wpisb.rfUpWSAveForDtP_mm[i],
+            wpis.rfUpWSAveForDtP_mm[i], cinterp), 2) + "\t");
+        oStr.append(forString(getinterpolatedVLinear(wpisb.qFromFCData_cms[i],
+            wpis.qFromFCData_cms[i], cinterp), 2) + "\t");
         oStr.append(forString(getinterpolatedVLinear(cvsb[i].storageCumulative_m3,
             cvs[i].storageCumulative_m3, cinterp), 2) + "\n");
     }
-    //string ofpn = wpis.fpnWpOut[cvid];
-    //string ofpn = ofs.ofpnWPs[cvid];
-    appendTextToTextFile(ofs.ofpnWPs[cvid], oStr);
+    appendTextToTextFile(ofs.ofpnWPs[i], oStr);
 }
 
 void writeDischargeOnly(double cinterp, int writeWPfiles)
@@ -170,32 +168,31 @@ void writeDischargeOnly(double cinterp, int writeWPfiles)
     string strFNPDischarge;
     string ptext;
     string vToP = "";
-    for (int cvid : wpis.wpCVIDs) {
-        int i = cvid - 1;
+    for (int idx : wpis.wpCVidxes) {
         if (cinterp == 1) {
-            if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                vToP = forString(cvs[i].QOF_m3Ps, 2);
+            if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
+                vToP = forString(cvs[idx].QOF_m3Ps, 2);
             }
             else {
-                vToP = forString(cvs[i].stream.QCH_m3Ps, 2);
+                vToP = forString(cvs[idx].stream.QCH_m3Ps, 2);
             }
         }
         else if (ts.isbak == 1) {
-            if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                vToP = forString(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
-                    cvs[i].QOF_m3Ps, cinterp), 2);
+            if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
+                vToP = forString(getinterpolatedVLinear(cvsb[idx].QOF_m3Ps,
+                    cvs[idx].QOF_m3Ps, cinterp), 2);
             }
             else {
-                vToP = forString(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
-                    cvs[i].stream.QCH_m3Ps, cinterp), 2);
+                vToP = forString(getinterpolatedVLinear(cvsb[idx].stream.QCH_m3Ps,
+                    cvs[idx].stream.QCH_m3Ps, cinterp), 2);
             }
         }
         else {
             vToP = "0";
         }
-        wpis.qprint_cms[cvid] = stod(vToP);
+        wpis.qprint_cms[idx] = stod(vToP);
         if (writeWPfiles == 1) {
-            string ofpn = ofs.ofpnWPs[cvid];
+            string ofpn = ofs.ofpnWPs[idx];
             appendTextToTextFile(ofpn, vToP);
         }
         if (trim(ptext) == "") {
@@ -226,8 +223,8 @@ int initOutputFiles()
     for (wpLocationRC awp : prj.wps) {
         string wpName = replaceText(awp.wpName, ",", "_");
         string wpfpn = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "WP_" + wpName + ".out";
-        int acvid = cvais[awp.wpColX][awp.wpRowY] + 1;
-        ofs.ofpnWPs[acvid] = wpfpn;
+        int adix = cvais[awp.wpColX][awp.wpRowY];
+        ofs.ofpnWPs[adix] = wpfpn;
     }	
     if (prj.simType == simulationType::RealTime){
         changeOutputFileDisk(cRealTime::CONST_Output_File_Target_DISK);
@@ -279,7 +276,7 @@ int deleteAllOutputFiles()
     fpns.push_back(ofs.ofpRFDistribution);
     fpns.push_back(ofs.ofpRFAccDistribution);
     fpns.push_back(ofs.ofpFlowDistribution);
-    for (int id : wpis.wpCVIDs) {
+    for (int id : wpis.wpCVidxes) {
         fpns.push_back(ofs.ofpnWPs[id]);
     }
     vector<string> fps;
@@ -378,8 +375,8 @@ int makeNewOutputFiles()
                 + "SoilSatR" + "\t" + "RFGrid" + "\t"
                 + "RFUpMean" + "\t" + "FCData" + "\t"
                 + "FCResStor" + "\n";
-            int acvid = cvais[awp.wpColX][awp.wpRowY] + 1;
-            string nFPN = ofs.ofpnWPs[acvid];
+            int aidx = cvais[awp.wpColX][awp.wpRowY] ;
+            string nFPN = ofs.ofpnWPs[aidx];
             appendTextToTextFile(nFPN, heads);
         }
 
@@ -424,7 +421,7 @@ int makeNewOutputFiles()
             roConstQ = "Constant Q :";
             roConstQduration = "Constant Q duration :";
             string fcDataField = CONST_OUTPUT_TABLE_TIME_FIELD_NAME;
-            for (int n : fccds.cvidsFCcell) {
+            for (int n : fccds.cvidxsFCcell) {
                 flowControlinfo afc = prj.fcs[n];
                 fcDataField = fcDataField + "\t" + afc.fcName;
                 fcNameApp = fcNameApp + "\t" + afc.fcName;
@@ -551,7 +548,7 @@ int deleteAllFilesExceptDischarge()
     if (fs::exists(ofs.ofpSSRDistribution)) {
         fs::remove_all(ofs.ofpSSRDistribution);
     }
-    for (int wpcvid : wpis.wpCVIDs) {
+    for (int wpcvid : wpis.wpCVidxes) {
         string fpn = ofs.ofpnWPs[wpcvid];
         if (fs::exists(fpn)) {
             std::remove(fpn.c_str());

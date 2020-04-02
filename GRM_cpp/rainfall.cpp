@@ -88,7 +88,7 @@ int setCVRF(int order)
     string fpnRF = rfs[order - 1].FilePath + "\\" + rfs[order - 1].FileName;
     double cellSize = di.cellSize;
     ts.rfiSumAllCellsInCurRFData_mPs = 0;
-    for (int wpCVID : wpis.wpCVIDs) {
+    for (int wpCVID : wpis.wpCVidxes) {
         wpis.rfiReadSumUpWS_mPs[wpCVID] = 0;
     }
     if (prj.rfDataType == rainfallDataType::TextFileASCgrid
@@ -112,7 +112,7 @@ int setCVRF(int order)
             else {
                 cvs[i].rfiRead_mPsec = rfintensity_mPsec(inRF_mm, dtrf_sec);
             }           
-            for (int wpcvid : cvs[i].downWPCVIDs) {
+            for (int wpcvid : cvs[i].downWPCVidx) {
                 wpis.rfiReadSumUpWS_mPs[wpcvid] = wpis.rfiReadSumUpWS_mPs[wpcvid]
                     + cvs[i].rfiRead_mPsec;
             }
@@ -139,7 +139,7 @@ int setCVRF(int order)
             cvs[i].rfiRead_mPsec = inRF_mPs;
         }        
         ts.rfiSumAllCellsInCurRFData_mPs = inRF_mPs * di.cellNtobeSimulated;
-        for (int wpcvid : wpis.wpCVIDs) {
+        for (int wpcvid : wpis.wpCVidxes) {
             wpis.rfiReadSumUpWS_mPs[wpcvid] = inRF_mm * wpis.cvCountAllup[wpcvid];
         }
     }
@@ -158,7 +158,7 @@ int setCVRF(int order)
         cvs[i].rfiRead_mPsec = 0;
         cvs[i].rfApp_dt_m = 0;
     }
-    for(int wpcvid : wpis.wpCVIDs)    {
+    for(int wpcvid : wpis.wpCVidxes)    {
         wpis.rfWPGridForDtP_mm[wpcvid] = 0;
         wpis.rfUpWSAveForDt_mm[wpcvid] = 0;
         wpis.rfiReadSumUpWS_mPs[wpcvid] = 0;
@@ -172,13 +172,13 @@ int setCVRF(int order)
          / di.cellNtobeSimulated;
      ts.rfAveSumAllCells_dtP_m = ts.rfAveSumAllCells_dtP_m
          + ts.rfAveForDT_m;
-     for (int wpcvid : wpis.wpCVIDs) {
-         wpis.rfUpWSAveForDt_mm[wpcvid] = wpis.rfiReadSumUpWS_mPs[wpcvid]
-             * dtsec * 1000 / (double)(cvs[wpcvid - 1].fac + 1);
-         wpis.rfUpWSAveForDtP_mm[wpcvid] = wpis.rfUpWSAveForDtP_mm[wpcvid]
-             + wpis.rfUpWSAveForDt_mm[wpcvid];
-         wpis.rfWPGridForDtP_mm[wpcvid] = wpis.rfWPGridForDtP_mm[wpcvid]
-             + cvs[wpcvid - 1].rfiRead_mPsec * 1000 * dtsec;
+     for (int idx : wpis.wpCVidxes) {
+         wpis.rfUpWSAveForDt_mm[idx] = wpis.rfiReadSumUpWS_mPs[idx]
+             * dtsec * 1000 / (double)(cvs[idx].fac + 1);
+         wpis.rfUpWSAveForDtP_mm[idx] = wpis.rfUpWSAveForDtP_mm[idx]
+             + wpis.rfUpWSAveForDt_mm[idx];
+         wpis.rfWPGridForDtP_mm[idx] = wpis.rfWPGridForDtP_mm[idx]
+             + cvs[idx].rfiRead_mPsec * 1000 * dtsec;
      }
      if (prj.makeASCorIMGfile == 1 ) {
          if (prj.makeRfDistFile == 1 || prj.makeRFaccDistFile == 1) {

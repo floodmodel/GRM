@@ -225,16 +225,16 @@ double getOverlandFlowDepthCVw(int i)
     double qCViM1;
     double qWn_i;
     int nEffCVFlowintoCVw;
-    nEffCVFlowintoCVw = (int)cvs[i].neighborCVIDsFlowintoMe.size();
-    for (int cvid : cvs[i].neighborCVIDsFlowintoMe) {
-        qCViM1 = cvs[cvid - 1].QOF_m3Ps / di.cellSize; // 단위폭당 유량
+    nEffCVFlowintoCVw = (int)cvs[i].neighborCVidxFlowintoMe.size();
+    for (int i : cvs[i].neighborCVidxFlowintoMe) {
+        qCViM1 = cvs[i].QOF_m3Ps / di.cellSize; // 단위폭당 유량
         if (qCViM1 <= 0.0) {
             nEffCVFlowintoCVw = nEffCVFlowintoCVw - 1;
             qCViM1 = 0;
         }
         qSumToCViM1 = qSumToCViM1 + qCViM1;
         cvs[i].QsumCVw_dt_m3 = cvs[i].QsumCVw_dt_m3
-            + cvs[cvid - 1].QOF_m3Ps * ts.dtsec;
+            + cvs[i].QOF_m3Ps * ts.dtsec;
     }
     if (nEffCVFlowintoCVw < 1) {
         nEffCVFlowintoCVw = 1;
@@ -249,22 +249,22 @@ double getChCSAatCVW(int i)
     double CSAe_iM1 = 0;
     double CSAeSum_iM1 = 0;
     double qSumCViM1_m3Ps = 0;
-    int nEffCVFlowintoCVw = (int)cvs[i].neighborCVIDsFlowintoMe.size();
-    for (int cvid : cvs[i].neighborCVIDsFlowintoMe) {
+    int nEffCVFlowintoCVw = (int)cvs[i].neighborCVidxFlowintoMe.size();
+    for (int i : cvs[i].neighborCVidxFlowintoMe) {
         double qCViM1_m3Ps = 0;
-        if (cvs[cvid - 1].flowType == cellFlowType::OverlandFlow) {
-            CSAe_iM1 = cvs[cvid - 1].csaOF;
-            qCViM1_m3Ps = cvs[cvid - 1].QOF_m3Ps;
+        if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+            CSAe_iM1 = cvs[i].csaOF;
+            qCViM1_m3Ps = cvs[i].QOF_m3Ps;
 
         }
-        else if (cvs[cvid - 1].flowType == cellFlowType::ChannelFlow
-            || cvs[cvid - 1].flowType == cellFlowType::ChannelNOverlandFlow) {
-            CSAe_iM1 = cvs[cvid - 1].stream.csaCH;
-            qCViM1_m3Ps = cvs[cvid - 1].stream.QCH_m3Ps;
-            if (cvs[cvid - 1].flowType == cellFlowType::ChannelNOverlandFlow) {
+        else if (cvs[i].flowType == cellFlowType::ChannelFlow
+            || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
+            CSAe_iM1 = cvs[i].stream.csaCH;
+            qCViM1_m3Ps = cvs[i].stream.QCH_m3Ps;
+            if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
                 CSAe_iM1 = CSAe_iM1
-                    + cvs[cvid - 1].stream.csaChAddedByOFinCHnOFcell;
-                qCViM1_m3Ps = qCViM1_m3Ps + cvs[cvid - 1].QOF_m3Ps;
+                    + cvs[i].stream.csaChAddedByOFinCHnOFcell;
+                qCViM1_m3Ps = qCViM1_m3Ps + cvs[i].QOF_m3Ps;
             }
         }
         qSumCViM1_m3Ps = qSumCViM1_m3Ps + qCViM1_m3Ps;
@@ -414,6 +414,7 @@ double getChCrossSectionPerimeter(double LRegionBaseWidth,
             + sqrt(pow(crossSectionDepth, 2) + pow(crossSectionDepth / sideSlopeRightBank, 2))
             + sqrt(pow(crossSectionDepth, 2) + pow(crossSectionDepth / sideSlopeLeftBank, 2));
     }
+    return 0;
 }
 
  int getDTsec(double cfln, double dx, 

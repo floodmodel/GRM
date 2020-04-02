@@ -78,6 +78,15 @@ int openProjectFile(int forceRealTime)
 			prj.fpnDomain = "";
 			if (vString != "" && _access(vString.c_str(), 0) == 0) {
 				prj.fpnDomain = vString;
+
+				fs::path fpnProjection;
+				fpnProjection =  fs::path(prj.fpnDomain.c_str()).replace_extension(".prj");
+				if (fs::exists(fpnProjection) == true) {
+					prj.fpnProjection = fpnProjection.string();
+				}
+				else {
+					prj.fpnProjection = "";
+				}
 			}
 			else {
 				writeLog(fpnLog, "DEM file [" + vString + "] is invalid.\n", 1, 1);
@@ -823,10 +832,10 @@ int openProjectFile(int forceRealTime)
 
 		if (assp.wsid >0 && isNormalSwsParameter(assp) == 1) {
 			//prj.swps.push_back(assp);
-			if (prj.swps.count(assp.wsid) == 0) {
+			//if (prj.swps.count(assp.wsid) == 0) {
 				prj.swps[assp.wsid] = assp;
 				assp = nullSwsParameters();
-			}			
+			//}			
 			continue;
 		}
 		//subwatershed parameters ===========
@@ -1498,9 +1507,9 @@ int openProjectFile(int forceRealTime)
 	if (prj.fcs.size() > 0) {
 		map<int, flowControlinfo>::iterator iter;
 		for (iter = prj.fcs.begin(); iter != prj.fcs.end(); ++iter) {
-			int cvid = iter->first;
+			int idx = iter->first;
 			flowControlinfo afci;
-			afci = prj.fcs[cvid];
+			afci = prj.fcs[idx];
 			if(afci.roType!=reservoirOperationType::None
 				&& (afci.maxStorage_m3 <= 0
 					|| afci.maxStorageR <= 0)) {

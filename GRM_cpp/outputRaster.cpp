@@ -103,6 +103,10 @@ void makeRasterOutput(int nowTmin)
             fpnssr_asc = ofs.ofpSSRDistribution + "\\"
                 + CONST_DIST_SSR_FILE_HEAD + tToP + ".asc";
             th_makeASC_ssr = new thread(makeASC_ssr);
+            if (prj.fpnProjection != "") {
+                string ofpn = replaceText(fpnssr_asc, ".asc", ".prj");
+                fs::copy(prj.fpnProjection, ofpn);
+            }            
         }
     }
 
@@ -120,6 +124,10 @@ void makeRasterOutput(int nowTmin)
             fpnrf_asc = ofs.ofpRFDistribution + "\\"
                 + CONST_DIST_RF_FILE_HEAD + tToP + ".asc";
             th_makeASC_rf = new thread(makeASC_rf);
+            if (prj.fpnProjection != "") {
+                string ofpn = replaceText(fpnrf_asc, ".asc", ".prj");
+                fs::copy(prj.fpnProjection, ofpn);
+            }
         }
     }
 
@@ -137,6 +145,10 @@ void makeRasterOutput(int nowTmin)
             fpnrfacc_asc = ofs.ofpRFAccDistribution + "\\"
                 + CONST_DIST_RFACC_FILE_HEAD + tToP + ".asc";
             th_makeASC_rfacc = new thread(makeASC_rfacc);
+            if (prj.fpnProjection != "") {
+                string ofpn = replaceText(fpnrfacc_asc, ".asc", ".prj");
+                fs::copy(prj.fpnProjection, ofpn);
+            }
         }
     }
     if (bQ == 1) {
@@ -153,6 +165,10 @@ void makeRasterOutput(int nowTmin)
             fpnQ_asc = ofs.ofpFlowDistribution + "\\"
                 + CONST_DIST_FLOW_FILE_HEAD + tToP + ".asc";
             th_makeASC_flow = new thread(makeASC_flow);
+            if (prj.fpnProjection != "") {
+                string ofpn = replaceText(fpnQ_asc, ".asc", ".prj");
+                fs::copy(prj.fpnProjection, ofpn);
+            }
         }
     }
     joinOutputThreads();
@@ -214,25 +230,27 @@ void makeIMG_ssr()
 void makeIMG_rf()
 {
     makeBMPFileUsingArrayGTzero_InParallel(fpnrf_img, rfAry,
-        di.nCols, di.nRows, rendererType::Depth, 200, di.nodata_value);
+        di.nCols, di.nRows, rendererType::Depth, 100, di.nodata_value);
 }
 
 void makeIMG_rfacc()
 {
     makeBMPFileUsingArrayGTzero_InParallel(fpnrfacc_img, rfaccAry,
-        di.nCols, di.nRows, rendererType::Depth, 1000, di.nodata_value);
+        di.nCols, di.nRows, rendererType::Depth, 500, di.nodata_value);
 }
 
 void makeIMG_flow()
 {
     makeBMPFileUsingArrayGTzero_InParallel(fpnQ_img, QAry,
-        di.nCols, di.nRows, rendererType::Depth, 10000, di.nodata_value);
+        di.nCols, di.nRows, rendererType::Depth, 1000, di.nodata_value);
 }
 
 void makeASC_ssr()
 {
     makeASCTextFile( fpnssr_asc, di.headerStringAll,
        ssrAry, di.nCols, di.nRows, 2, di.nodata_value);
+    
+
 }
 
 void makeASC_rf()

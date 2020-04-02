@@ -19,6 +19,7 @@ extern projectFile prj;
 extern domaininfo di;
 extern int** cvais;
 extern cvAtt* cvs;
+extern cvAtt* cvsb;
 
 
 int readDomainFileAndSetupCV()
@@ -36,7 +37,7 @@ int readDomainFileAndSetupCV()
     di.xll = dmFile.header.xllcorner;
     di.yll = dmFile.header.yllcorner;
     di.headerStringAll = dmFile.headerStringAll;
-    di.cvidsInEachRegion.clear();
+    di.cvidxInEachRegion.clear();
     di.dmids.clear();
     //====================================
     cvais = new int* [di.nCols];
@@ -44,34 +45,36 @@ int readDomainFileAndSetupCV()
         cvais[i] = new int[di.nRows];
     }
     vector<cvAtt> cvsv;
-    int cvid = 0;
-    // cvid를 순차적으로 부여하기 위해서, 이 과정은 병렬로 하지 않는다..
+    int cvidx = 0;
+    // cvidx를 순차적으로 부여하기 위해서, 이 과정은 병렬로 하지 않는다..
     for (int ry = 0; ry < di.nRows; ry++) {
         for (int cx = 0; cx < di.nCols; cx++) {
             int wsid = (int)dmFile.valuesFromTL[cx][ry];
             if (wsid > 0) {
                 cvAtt cv;
                 cv.wsid = wsid;
-                cvid += 1;
-                cv.cvid = cvid; // CVid를 CV 리스트의 인덱스 번호 +1 의 값으로 입력. 즉. 1 부터 시작
+                //cv.idx = cvidx; // CVid를 CV 리스트의 인덱스 번호 값으로 입력. 즉. 1 부터 시작
                 cv.flowType = cellFlowType::OverlandFlow; // 우선 overland flow로 설정
                 if (getVectorIndex(di.dmids, wsid) == -1) {//wsid가 vector에 없으면, 추가한다.
                     di.dmids.push_back(wsid);
                 }
-                di.cvidsInEachRegion[wsid].push_back(cvid);
+                di.cvidxInEachRegion[wsid].push_back(cvidx);
                 cv.toBeSimulated = 1;
-                cv.idx_xr = cx; // cellidx 검증용
-                cv.idx_yc = ry; // cellidx 검증용
+                cv.idx_xr = cx; 
+                cv.idx_yc = ry; 
                 cvsv.push_back(cv); // 여기는 유효셀만
-                cvais[cx][ry] = cvid - 1;// 모든셀. cvid가 아니고, 1차원 배열의 인덱스를 저장. 
+                cvais[cx][ry] = cvidx ;// 모든셀. 1차원 배열의 인덱스를 저장. 
+                cvidx += 1;
             }
             else {
-                cvais[cx][ry] = -1;// 모든셀. cvid가 아니고, 1차원 배열의 인덱스를 저장. 모의영역 외부는 -1.
+                cvais[cx][ry] = -1;// 모든셀. 1차원 배열의 인덱스를 저장. 모의영역 외부는 -1.
             }
+
         }
     }
-    di.cellNnotNull = cvid;
+    di.cellNnotNull = cvidx;
     cvs = new cvAtt[cvsv.size()];
+    cvsb = new cvAtt[cvsv.size()];
     copy(cvsv.begin(), cvsv.end(), cvs);
     return 1;
 }
@@ -618,8 +621,8 @@ int setFlowNetwork()
         for (int cx = 0; cx < di.nCols; cx++) {
             int idx = cvais[cx][ry];// current cell index
             if (idx >= 0) {
-                cvs[idx].neighborCVIDsFlowintoMe.clear();
-                cvs[idx].downWPCVIDs.clear();
+                cvs[idx].neighborCVidxFlowintoMe.clear();
+                cvs[idx].downWPCVidx.clear();
             }
         }
     }
@@ -698,25 +701,23 @@ int setFlowNetwork()
                     if (cvais[tCx][tRy] == -1) {// 하류 셀이 effect 셀 영역 외부에 있으면,
                         int wsidKey = cvs[cidx].wsid; // 이건 현재셀이 포함된 ws의 id
                         //di.wsn.wsOutletCVids 는 readDomainFileAndSetupCV() 에서 초기화 되어 있다.
-                        if (di.wsn.wsOutletCVID.find(wsidKey) == di.wsn.wsOutletCVID.end() ||
-                            cvs[cidx].fac > cvs[di.wsn.wsOutletCVID[wsidKey] - 1].fac) {
+                        if (di.wsn.wsOutletidxs.find(wsidKey) == di.wsn.wsOutletidxs.end() ||
+                            cvs[cidx].fac > cvs[di.wsn.wsOutletidxs[wsidKey]].fac) {
                             // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
                             //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
-                            di.wsn.wsOutletCVID[wsidKey] = cvs[cidx].cvid;
+                            di.wsn.wsOutletidxs[wsidKey] = cidx;
                             di.wsn.wsidNearbyDown[cvs[cidx].wsid] = -1;// 하류 셀이 eff 영역 외부이면, tidx가 cvs의 영역을 벗어난다..
                         }
                     }
                     else {
                         int tidx = cvais[tCx][tRy]; // target cell index
-                        cvs[tidx].neighborCVIDsFlowintoMe.push_back(cvs[cidx].cvid);
+                        cvs[tidx].neighborCVidxFlowintoMe.push_back(cidx);
                         cvs[tidx].dxWSum = cvs[tidx].dxWSum + dxe;
-                        cvs[cidx].downCellidToFlow = cvs[tidx].cvid;// 흘러갈 방향의 cellid를 현재 셀의 정보에 기록
+                        cvs[cidx].downCellidxToFlow = tidx;// 흘러갈 방향의 cellid를 현재 셀의 정보에 기록
                         if (cvs[cidx].wsid != cvs[tidx].wsid) {
                             if (di.wsn.wsidNearbyDown[cvs[cidx].wsid] != cvs[tidx].wsid) {
                                 di.wsn.wsidNearbyDown[cvs[cidx].wsid] = cvs[tidx].wsid; 
-                                di.wsn.wsOutletCVID[cvs[cidx].wsid] = cvs[cidx].cvid;
-                                int oid = di.wsn.wsOutletCVID[cvs[cidx].wsid];
-                                int a = 1;
+                                di.wsn.wsOutletidxs[cvs[cidx].wsid] = cidx;
                             }
                             vector<int> v = di.wsn.wsidsNearbyUp[cvs[tidx].wsid];
                             if (std::find(v.begin(), v.end(), cvs[cidx].wsid) == v.end()) {
@@ -727,14 +728,14 @@ int setFlowNetwork()
                     cvs[cidx].dxDownHalf_m = dxe;
                 }
                 else {// 하류셀이 전체 raster 파일 영역 외부이면,
-                    cvs[cidx].downCellidToFlow = -1;
+                    cvs[cidx].downCellidxToFlow = -1;
                     cvs[cidx].dxDownHalf_m = dxe;
                     int wsidKey = cvs[cidx].wsid; // 이건 현재셀이 포함된 ws의 id
-                    if (di.wsn.wsOutletCVID.find(wsidKey) == di.wsn.wsOutletCVID.end() ||
-                        cvs[cidx].fac > cvs[di.wsn.wsOutletCVID[wsidKey] - 1].fac) {
+                    if (di.wsn.wsOutletidxs.find(wsidKey) == di.wsn.wsOutletidxs.end() ||
+                        cvs[cidx].fac > cvs[di.wsn.wsOutletidxs[wsidKey]].fac) {
                         // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
                         //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
-                        di.wsn.wsOutletCVID[wsidKey] = cvs[cidx].cvid;
+                        di.wsn.wsOutletidxs[wsidKey] = cidx;
                         di.wsn.wsidNearbyDown[cvs[cidx].wsid] = -1;
                     }
                 }
@@ -755,7 +756,7 @@ int initWatershedNetwork()
     di.wsn.wsidsAllUp.clear();
     di.wsn.wsidsAllDown.clear();
     di.wsn.mdWSIDs.clear();
-    di.wsn.wsOutletCVID.clear();
+    di.wsn.wsOutletidxs.clear();
     di.wsn.mdWSIDofCurrentWS.clear();
     //for (int n = 0; n < di.dmids.size(); n++) {
     //    vector<int> v;

@@ -14,8 +14,8 @@ extern thisSimulation ts;
 
 int updateFCCellinfoAndData()
 {
-    fccds.cvidsinlet.clear();
-    fccds.cvidsFCcell.clear();
+    fccds.cvidxsinlet.clear();
+    fccds.cvidxsFCcell.clear();
     fccds.fcDataAppliedNowT_m3Ps.clear();
     fccds.flowData_m3Ps.clear();
     fccds.curDorder.clear();
@@ -27,12 +27,12 @@ int updateFCCellinfoAndData()
     //for (flowControlinfo afc : prj.fcs) {
         flowControlinfo afc = iter->second;
         int aidx = cvais[afc.fcColX][afc.fcRowY];
-        int acvid = aidx + 1;
-        prj.fcs[acvid] = afc;
-        fccds.cvidsFCcell.push_back(acvid);
-        fccds.curDorder[acvid] = 0;
+        //int aidx = aidx + 1;
+        prj.fcs[aidx] = afc;
+        fccds.cvidxsFCcell.push_back(aidx);
+        fccds.curDorder[aidx] = 0;
         if (afc.fcType == flowControlType::Inlet) {
-            fccds.cvidsinlet.push_back(acvid);
+            fccds.cvidxsinlet.push_back(aidx);
         }
         if (afc.fcType != flowControlType::ReservoirOperation) {
             if (afc.fpnFCData != "" && _access(afc.fpnFCData.c_str(), 0) != 0) {
@@ -54,11 +54,11 @@ int updateFCCellinfoAndData()
                     ts.dataTime = afc.fcDT_min * i;
                 }
                 ts.value = vs[i];
-                fccds.flowData_m3Ps[acvid].push_back(ts);
+                fccds.flowData_m3Ps[aidx].push_back(ts);
             }
         }
     }
-    if (fccds.cvidsinlet.size() > 0) {
+    if (fccds.cvidxsinlet.size() > 0) {
         prj.isinletExist = 1;
     }
     else { prj.isinletExist = -1; }
@@ -67,29 +67,32 @@ int updateFCCellinfoAndData()
 
 void calFCReservoirOutFlow(int i, double nowTmin)
 {// nowTmin의 최소값은 dtsec/60이다.
-    int id = i + 1;//cvid=arrayindex+1;
-    int dtfc = prj.fcs[id].fcDT_min;
-    if (nowTmin > dtfc* fccds.curDorder[id]) {
-        if (fccds.curDorder[id] < fccds.flowData_m3Ps[id].size()) {
-            fccds.curDorder[id]++;
+    int dtfc = prj.fcs[i].fcDT_min;
+    //cout << i << endl;
+    int nowOrder = fccds.curDorder[i];
+    // nowTmin= dtfc* fccds.curDorder[i]인 경우에는 
+    if (nowTmin > dtfc* fccds.curDorder[i]) {
+        if (fccds.curDorder[i] < fccds.flowData_m3Ps[i].size()) {
+            fccds.curDorder[i]++;
         }
         else {
-            fccds.curDorder[id] = INT_MAX;
+            //fccds.curDorder[i] = INT_MAX;
+            // 아래 조건 주석처리하면, 마지막 자료가 끝까지 사용된다..
             setNoFluxCVCH(i);
-            fccds.fcDataAppliedNowT_m3Ps[id] = 0;
+            fccds.fcDataAppliedNowT_m3Ps[i] = 0;
             return;
         }
     }
-    else {
-        // //이 조건으로 사용하면, 마지막 자료가 끝까지 사용된다..
-        // fccds.curDorder[id]= fccds.flowData[id].size() - 1; }
-        // 아래 조건으로 사용하면, 입력된 자료 만큼만 반영되고, 그 이후는 0
-        setNoFluxCVCH(i);
-        fccds.fcDataAppliedNowT_m3Ps[id] = 0;
-        return;
-    }
-    int idx = fccds.curDorder[id] - 1;//vector index, 이 지점에서 order의 최소값은 1
-    double v = fccds.flowData_m3Ps[id][idx].value;
+    //else {
+    //    // //이 조건으로 사용하면, 마지막 자료가 끝까지 사용된다..
+    //    // fccds.curDorder[id]= fccds.flowData[id].size() - 1; }
+    //    // 아래 조건으로 사용하면, 입력된 자료 만큼만 반영되고, 그 이후는 0
+    //    setNoFluxCVCH(i);
+    //    fccds.fcDataAppliedNowT_m3Ps[i] = 0;
+    //    return;
+    //}
+    int orderidx = fccds.curDorder[i] -1 ;//vector index, 이 지점에서  fccds.curDorder[i]의 최소값은 1
+    double v = fccds.flowData_m3Ps[i][orderidx].value;
     if (v < 0) { v = 0; }
     cvs[i].stream.QCH_m3Ps = v;
     cvs[i].stream.csaCH = getChCSAusingQbyiteration(cvs[i], cvs[i].stream.csaCH, cvs[i].stream.QCH_m3Ps);
@@ -97,40 +100,44 @@ void calFCReservoirOutFlow(int i, double nowTmin)
         cvs[i].stream.csaCH, cvs[i].stream.isCompoundCS, cvs[i].stream.chURBaseWidth_m,
         cvs[i].stream.chLRArea_m2, cvs[i].stream.chLRHeight, cvs[i].stream.bankCoeff);
     cvs[i].stream.uCH = cvs[i].stream.QCH_m3Ps / cvs[i].stream.csaCH;
-    fccds.fcDataAppliedNowT_m3Ps[id] = cvs[i].stream.QCH_m3Ps;
+    fccds.fcDataAppliedNowT_m3Ps[i] = cvs[i].stream.QCH_m3Ps;
     //아래에서  cvs[i].QsumCVw_dt_m3는 t-dt 에서의 값이 저장되어 있다.
     // 그리고, fcDataAppliedNowT_m3Ps 는 현재 셀에서 하류로 방류되는 값이므로, 빼준다.
     cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
         + cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
-        - fccds.fcDataAppliedNowT_m3Ps[id] * ts.dtsec;
+        - fccds.fcDataAppliedNowT_m3Ps[i] * ts.dtsec;
+    if (cvs[i].storageCumulative_m3, 0) {
+        cvs[i].storageCumulative_m3 = 0;
+    }
 }
 
 
 void calSinkOrSourceFlow(int i, double nowTmin)
 {// nowTmin의 최소값은 dtsec/60이다.
-    int id = i + 1;//cvid=arrayindex+1;
-    int dtfc = prj.fcs[id].fcDT_min;
+    int dtfc = prj.fcs[i].fcDT_min;
     double cellsize = di.cellSize;
-    if (nowTmin > dtfc* fccds.curDorder[id]) {
-        if (fccds.curDorder[id] < fccds.flowData_m3Ps[id].size()) {
-            fccds.curDorder[id]++;
+    if (nowTmin > dtfc* fccds.curDorder[i]) {
+        if (fccds.curDorder[i] < fccds.flowData_m3Ps[i].size()) {
+            fccds.curDorder[i]++;
         }
         else {
-            fccds.curDorder[id] = INT_MAX;
-            fccds.fcDataAppliedNowT_m3Ps[id] = 0.0;
+            //fccds.curDorder[i] = INT_MAX;
+            // 아래 조건 주석처리하면, 마지막 자료가 끝까지 사용된다..
+            setNoFluxCVCH(i);
+            fccds.fcDataAppliedNowT_m3Ps[i] = 0.0;
             return; //sink, source flow 모의하지 않는다
         }
     }
-    else {
-        // //이 조건으로 사용하면, 마지막 자료가 끝까지 사용된다..
-        // fccds.curDorder[id]= fccds.flowData[id].size() - 1; }
-        // 아래 조건으로 사용하면, 입력된 자료 만큼만 반영되고, 그 이후는 sin, source 는 0
-        fccds.fcDataAppliedNowT_m3Ps[id] = 0.0;
-        return; //sink, source flow 모의하지 않는다
-    }
-    int idx = fccds.curDorder[id] - 1;//vector index, 이 지점에서 order의 최소값은 1
-    double v = fccds.flowData_m3Ps[id][idx].value;
-    double QtoApp = fccds.flowData_m3Ps[id][idx].value;
+    //else {
+    //    // //이 조건으로 사용하면, 마지막 자료가 끝까지 사용된다..
+    //    // fccds.curDorder[id]= fccds.flowData[id].size() - 1; }
+    //    // 아래 조건으로 사용하면, 입력된 자료 만큼만 반영되고, 그 이후는 sin, source 는 0
+    //    fccds.fcDataAppliedNowT_m3Ps[i] = 0.0;
+    //    return; //sink, source flow 모의하지 않는다
+    //}
+    int orderidx = fccds.curDorder[i]-1 ;//vector index, 이 지점에서 fccds.curDorder[i] 의 최소값은 1
+    double v = fccds.flowData_m3Ps[i][orderidx].value;
+    double QtoApp = fccds.flowData_m3Ps[i][orderidx].value;
     if (cvs[i].flowType == cellFlowType::OverlandFlow) {
         switch (cvs[i].fcType) {
         case flowControlType::SinkFlow: {
@@ -172,25 +179,25 @@ void calSinkOrSourceFlow(int i, double nowTmin)
             cvs[i].stream.chLRHeight, cvs[i].stream.bankCoeff);
         cvs[i].stream.uCH = cvs[i].stream.QCH_m3Ps / cvs[i].stream.csaCH;
     }
-    fccds.fcDataAppliedNowT_m3Ps[id] = QtoApp;
+    fccds.fcDataAppliedNowT_m3Ps[i] = QtoApp;
 }
 
 void calReservoirOperation(int i, double nowTmin)
 {
     int dtsec = ts.dtsec;
-    int id = i + 1;
+    //int i = i + 1;
     double QforDTbySinkOrSourceFlow = 0;
     double cellsize = di.cellSize;
     //여기서는 ro 하기 전의 storage 계산
     if (cvs[i].fcType == flowControlType::SinkFlow) {//이전에 sinkflow 가 계산되었으면..
         cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
             + cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
-            - fccds.fcDataAppliedNowT_m3Ps[id] * dtsec;
+            - fccds.fcDataAppliedNowT_m3Ps[i] * dtsec;
     }
     else if (cvs[i].fcType == flowControlType::SourceFlow) {//이전에 source flow 가 계산되었으면..
         cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
             + cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
-            + fccds.fcDataAppliedNowT_m3Ps[id] * dtsec;
+            + fccds.fcDataAppliedNowT_m3Ps[i] * dtsec;
     }
     else {//이전에 sinkflow or source flow 가 아니었으면, 그냥 강우와 상류, 횡방향만 추가한다.
         cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
@@ -199,8 +206,8 @@ void calReservoirOperation(int i, double nowTmin)
     }
     double Qout_cms = 0.0;
     double dy_m = di.cellSize;
-    double maxStorageApp = prj.fcs[id].maxStorage_m3 * prj.fcs[id].maxStorageR;
-    switch (prj.fcs[id].roType) {
+    double maxStorageApp = prj.fcs[i].maxStorage_m3 * prj.fcs[i].maxStorageR;
+    switch (prj.fcs[i].roType) {
     case reservoirOperationType::AutoROM: {
         if (cvs[i].storageCumulative_m3 >= maxStorageApp) {
             Qout_cms = (cvs[i].storageCumulative_m3
@@ -219,15 +226,15 @@ void calReservoirOperation(int i, double nowTmin)
                 - maxStorageApp) / ts.dtsec; // 차이만큼 모두 유출
             cvs[i].storageCumulative_m3 = maxStorageApp;
         }
-        else  if (cvs[i].storageCumulative_m3 < prj.fcs[id].roConstQ_cms * ts.dtsec) {
+        else  if (cvs[i].storageCumulative_m3 < prj.fcs[i].roConstQ_cms * ts.dtsec) {
             // 현재 저류량이 dtsec 유출량 보다 작은 경우, 저류된 모든 양이 유출
             Qout_cms = cvs[i].storageCumulative_m3 / ts.dtsec;
             cvs[i].storageCumulative_m3 = 0;
         }
         else {
-            Qout_cms = prj.fcs[id].roConstQ_cms;
+            Qout_cms = prj.fcs[i].roConstQ_cms;
             cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
-                - prj.fcs[id].roConstQ_cms;
+                - prj.fcs[i].roConstQ_cms;
             if (cvs[i].storageCumulative_m3 < 0) {
                 cvs[i].storageCumulative_m3 = 0;
             }
@@ -240,17 +247,17 @@ void calReservoirOperation(int i, double nowTmin)
         //calReservoirConstantQ(i, prj.fcs[id].roConstQ_cms,
         //    prj.fcs[id].maxStorage_m3 * prj.fcs[id].maxStorageR,
         //    inOutflowDuration);
-        if (nowTmin <= prj.fcs[id].roConstQDuration_hr * 60) {
+        if (nowTmin <= prj.fcs[i].roConstQDuration_hr * 60) {
             //여기서는 최대 저류 가능량에 상관 없이 일정량 방류            
-            if (cvs[i].storageCumulative_m3 <= prj.fcs[id].roConstQ_cms * ts.dtsec) {
+            if (cvs[i].storageCumulative_m3 <= prj.fcs[i].roConstQ_cms * ts.dtsec) {
                 // 이경우는 저류량이 모두 유출
                 Qout_cms = cvs[i].storageCumulative_m3 / ts.dtsec;
                 cvs[i].storageCumulative_m3 = 0;
             }
             else {
-                Qout_cms = prj.fcs[id].roConstQ_cms * ts.dtsec;
+                Qout_cms = prj.fcs[i].roConstQ_cms * ts.dtsec;
                 cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
-                    - prj.fcs[id].roConstQ_cms * ts.dtsec;
+                    - prj.fcs[i].roConstQ_cms * ts.dtsec;
                 if (cvs[i].storageCumulative_m3 < 0) {
                     cvs[i].storageCumulative_m3 = 0;
                 }

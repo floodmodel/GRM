@@ -312,11 +312,11 @@ double getChCSAaddedBySSFlow(int i)
     if (cvs[i].flowType == cellFlowType::ChannelFlow) {
         SSFlow_cms = totalSSFfromCVwOFcell_m3Ps(i);
     }
-    else if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) { 
+    else if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
         SSFlow_cms = cvs[i].QSSF_m3Ps;
-    }    
+    }
     if (SSFlow_cms > 0) {
-        if (cvs[i].stream.uCH > 0) {     
+        if (cvs[i].stream.uCH > 0) {
             double chCSA;
             chCSA = SSFlow_cms / cvs[i].stream.uCH; // 이전 시간에 계산된 유속
             // 유속이 작을 경우.. 발산 가능성 있으므로.. 기존 단면적 보다 큰 단면적으로 유입될 경우.. 
@@ -327,12 +327,11 @@ double getChCSAaddedBySSFlow(int i)
             return chCSA;
         }
     }
-    else {
-        // 이경우에는 하도에 기여되지 않는 것으로 가정
-        // 즉 강우에 의한 하도의 유량 발생이 시작되지 않았는데(하도가 말라있을 경우).. 
-        // 지표하 유출에 의해 기여가 있을 수 없음.
-        return 0;
-    }
+
+    // 이경우에는 하도에 기여되지 않는 것으로 가정
+    // 즉 강우에 의한 하도의 유량 발생이 시작되지 않았는데(하도가 말라있을 경우).. 
+    // 지표하 유출에 의해 기여가 있을 수 없음.
+    return 0;
 }
 
 
@@ -374,6 +373,7 @@ double Kunsaturated(cvAtt cv)
         }
         }
     }
+    return Ks;
 }
 
 void calBFLateralMovement(int i,
@@ -382,10 +382,10 @@ void calBFLateralMovement(int i,
     double cumulBFq_m3Ps = 0;
     double dhUAQ_m;
     double dX_m = cvs[i].cvdx_m;
-    for (int cvid : cvs[i].neighborCVIDsFlowintoMe) {
-        if (cvs[cvid - 1].flowType == cellFlowType::OverlandFlow) {
+    for (int idx : cvs[i].neighborCVidxFlowintoMe) {
+        if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
             cumulBFq_m3Ps = cumulBFq_m3Ps 
-                + cvs[cvid - 1].bfQ_m3Ps;// 수두경사가 셀의 지표면 경사와 같은 것으로 가정
+                + cvs[idx].bfQ_m3Ps;// 수두경사가 셀의 지표면 경사와 같은 것으로 가정
         }
     }
     if (cvs[i].fac == facMin) {
@@ -411,12 +411,12 @@ void calBFLateralMovement(int i,
 double totalSSFfromCVwOFcell_m3Ps(int i)
 {
     double SSF_m3Ps = 0;
-    for(int cvid: cvs[i].neighborCVIDsFlowintoMe)    {
-        if (cvs[cvid - 1].flowType == cellFlowType::OverlandFlow) {
+    for(int idx: cvs[i].neighborCVidxFlowintoMe)    {
+        if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
             // 즉, GRM에서 Green-Ampt 모형을 이용해서 침투된 양을 계산할때, 
             // 포화된 깊이로 계산됨. 즉, 현재 침투률로 얼만큼 깊이 들어갔는지는 계산하지 않는다..
             // 따라서, 하도로 기여하는 지표하 유출량 계산할때는 누가침투깊이가 .saturatedSoildepth_m 이 된다.
-            SSF_m3Ps = SSF_m3Ps + cvs[cvid - 1].QSSF_m3Ps;
+            SSF_m3Ps = SSF_m3Ps + cvs[idx].QSSF_m3Ps;
         }
     }
     return SSF_m3Ps;
