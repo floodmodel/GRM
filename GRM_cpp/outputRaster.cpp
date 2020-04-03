@@ -96,7 +96,7 @@ void makeRasterOutput(int nowTmin)
         }
         if (bimg == 1) {
             fpnssr_img = ofs.ofpSSRDistribution + "\\"
-                + CONST_DIST_SSR_FILE_HEAD + tToP + ".png";
+                + CONST_DIST_SSR_FILE_HEAD + tToP + ".bmp";
             th_makeIMG_ssr = new thread(makeIMG_ssr);
         }
         if (basc == 1) {
@@ -117,7 +117,7 @@ void makeRasterOutput(int nowTmin)
         }
         if (bimg == 1) {
             fpnrf_img = ofs.ofpRFDistribution + "\\"
-                + CONST_DIST_RF_FILE_HEAD + tToP + ".png";
+                + CONST_DIST_RF_FILE_HEAD + tToP + ".bmp";
             th_makeIMG_rf = new thread(makeIMG_rf);
         }
         if (basc == 1) {
@@ -138,7 +138,7 @@ void makeRasterOutput(int nowTmin)
         }
         if (bimg == 1) {
             fpnrfacc_img = ofs.ofpRFAccDistribution + "\\"
-                + CONST_DIST_RFACC_FILE_HEAD + tToP + ".png";
+                + CONST_DIST_RFACC_FILE_HEAD + tToP + ".bmp";
             th_makeIMG_rfacc = new thread(makeIMG_rfacc);
         }
         if (basc == 1) {
@@ -158,7 +158,7 @@ void makeRasterOutput(int nowTmin)
         }
         if (bimg == 1) {
             fpnQ_img = ofs.ofpFlowDistribution + "\\"
-                + CONST_DIST_FLOW_FILE_HEAD + tToP + ".png";
+                + CONST_DIST_FLOW_FILE_HEAD + tToP + ".bmp";
             th_makeIMG_flow = new thread(makeIMG_flow);
         }
         if (basc == 1) {
@@ -249,8 +249,6 @@ void makeASC_ssr()
 {
     makeASCTextFile( fpnssr_asc, di.headerStringAll,
        ssrAry, di.nCols, di.nRows, 2, di.nodata_value);
-    
-
 }
 
 void makeASC_rf()

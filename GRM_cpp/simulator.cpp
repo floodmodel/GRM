@@ -36,10 +36,9 @@ int startSimulationSingleEvent()
     int nowTsec = ts.dtsec;
     double nowTmin;
     ts.dtsecUsed_tm1 = ts.dtsec;
-    ts.zeroTimePrinted = -1;
     ts.targetTtoP_sec = (int)prj.dtPrint_min*60;
     //int dtsec;
-    int endingT_sec = ts.time_simEnding_sec + ts.dtsec;
+    int endingT_sec = ts.simEnding_sec + 1;
     while (nowTsec < endingT_sec) {// simulationTimeLimitSEC
         //dtsec = ts.dtsec;        
         // dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
@@ -99,13 +98,13 @@ int simulateRunoff(double nowTmin)
     for (int fac = 0; fac < maxLimit; ++fac) {
         if (cvaisToFA[fac].size() > 0) {
             int iterLimit = cvaisToFA[fac].size();
-//#pragma omp parallel
-//            {    // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
-//            // VS2019는 openMP 2.0 지원, 그러므로 critical 사용한다.
-//            // 배열 보다는 critical이 좀더 빠르다..
+#pragma omp parallel
+            {    // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
+            // VS2019는 openMP 2.0 지원, 그러므로 critical 사용한다.
+            // 배열 보다는 critical이 좀더 빠르다..
                 double uMax = 0;
                 int i=-1;
-//#pragma omp for schedule(guided) private(i)
+#pragma omp for schedule(guided) private(i)
                 for (int e = 0; e < iterLimit; ++e) {
                   i = cvaisToFA[fac][e];
                   //cout << i << endl;
@@ -121,21 +120,20 @@ int simulateRunoff(double nowTmin)
                                 uMax = cvs[i].stream.uCH;
                             }
                         }
+                        //if (ts.vMaxInThisStep < uMax) {
+                        //    ts.vMaxInThisStep = uMax;
+                        //}
+                    }
+                }
+#pragma omp critical(getVmax)
+                {
+                    if (prj.IsFixedTimeStep == -1) {
                         if (ts.vMaxInThisStep < uMax) {
                             ts.vMaxInThisStep = uMax;
                         }
-
                     }
                 }
-//#pragma omp critical(getVmax)
-//                {
-//                    if (prj.IsFixedTimeStep == -1) {
-//                        if (ts.vMaxInThisStep < uMax) {
-//                            ts.vMaxInThisStep = uMax;
-//                        }
-//                    }
-//                }
-            //}
+            }
         }
     }
     return 1;
@@ -206,16 +204,36 @@ void initThisSimulation()
     }
     // 이렇게 해야 모의기간에 맞게 실행된다. 
     //왜냐하면, 첫번째 실행 결과가 0 시간으로 출력되기 때문에
-    ts.time_simEnding_sec =(int) (prj.simDuration_hr*60 + prj.dtPrint_min) * 60;     
+    ts.simDuration_min = (int)prj.simDuration_hr * 60
+        + prj.dtPrint_min;
+    ts.simEnding_sec = ts.simDuration_min * 60;
     ts.setupGRMisNormal = 1;
     ts.grmStarted = 1;
     ts.stopSim = -1;
     ts.dtsec = prj.dtsec;
-    ts.dtMaxLimit_sec = (int)prj.dtPrint_min * 60 / 2;
-    ts.dtMinLimit_sec = 1;
     ts.vMaxInThisStep = DBL_MIN;
     //ts.iscvsb = -1;
     ts.cvsbT_sec = 0;
+    ts.dtMinLimit_sec = 1;
+    ts.zeroTimePrinted = -1;
+    //dtMaxLimit은 출력시간간격, 강우, fc의 시간간격을 모두 고려해서 그 반으로 한다.
+    int dtFromP = (int)(prj.dtPrint_min * 60 / 2);
+    int dtFromR = (int)(prj.rfinterval_min * 60 / 2);
+    ts.dtMaxLimit_sec = min(dtFromP, dtFromR);
+    if (prj.simFlowControl == 1) {
+        int mindtFC = INT_MAX;
+        for (int i :fccds.cvidxsFCcell) {
+            if (mindtFC > prj.fcs[i].fcDT_min) {
+                mindtFC = int(prj.fcs[i].fcDT_min *60 / 2);
+            }
+        }
+        if (ts.dtMaxLimit_sec > mindtFC) {
+            ts.dtMaxLimit_sec = mindtFC;
+        }
+    }
+    if (ts.dtMaxLimit_sec < ts.dtMinLimit_sec) {
+        ts.dtMaxLimit_sec = ts.dtMinLimit_sec;
+    }
 
     time_t now = time(0);
     localtime_s(&ts.g_RT_tStart_from_MonitorEXE, &now);
@@ -361,6 +379,7 @@ void outputManager(int nowTsec, int rfOrder)
         double RFmeanForFirstLayer = ts.rfAveForDT_m / dtmin * dtrf_min;
         writeBySimType(0, 1);
         ts.zeroTimePrinted = 1;
+        ts.isbak = -1;
         return; // 이경우는 모의시작 전에 설정된  ts.targetTtoP_min = dtP_min 을 유지
     }
     else if (nowTsec % dtP_SEC == 0) {
@@ -369,9 +388,11 @@ void outputManager(int nowTsec, int rfOrder)
         }
         else {
             timeToP_min = ts.targetTtoP_sec/ 60;
+            ts.zeroTimePrinted = 1;
         }
         writeBySimType(timeToP_min, 1);
         ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
+        ts.isbak = -1;
         return;
     }
     else {
@@ -391,8 +412,13 @@ void outputManager(int nowTsec, int rfOrder)
             && (nowTsec - ts.dtsecUsed_tm1) <= ts.targetTtoP_sec) {
             double citerp;
             citerp = (ts.targetTtoP_sec - ts.cvsbT_sec) / (double)(nowTsec - ts.cvsbT_sec);
-            timeToP_min = (int)ts.targetTtoP_sec / 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
-            여기서.. 시간이.. 60분일때.. 검토 필요
+            if (ts.zeroTimePrinted == -1) {
+                timeToP_min = (int)(ts.targetTtoP_sec / 60) - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
+                ts.zeroTimePrinted = 1;
+            }
+            else {
+                timeToP_min = (int)(ts.targetTtoP_sec / 60);
+            }            
             writeBySimType(timeToP_min, citerp);
             ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
             ts.isbak = -1;

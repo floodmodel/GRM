@@ -1615,6 +1615,7 @@ int openProjectFile(int forceRealTime)
 	if (prj.dtPrint_min * 30 < prj.dtsec) {
 		prj.dtsec = prj.dtPrint_min * 30;
 	}
+
 	//di.dmids.clear();
 	//map<int, domaininfo>::iterator iter;
 	//for (int n = 0; n < prj.swps.size(); n++) {

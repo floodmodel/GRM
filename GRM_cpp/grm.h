@@ -293,7 +293,7 @@ typedef struct _projectFileInfo
 typedef struct _swsParameters
 {
 	int wsid = -1;
-	double iniSaturation =0.0;
+	double iniSaturation =-1.0;
 	double minSlopeOF = 0.0;
 	unSaturatedKType unSatKType= unSaturatedKType::None;
 	double coefUnsaturatedK = 0.0;
@@ -657,7 +657,8 @@ typedef struct _thisSimulation
 	int dtMaxLimit_sec = 0;
 	int dtMinLimit_sec = 0;
 	int zeroTimePrinted = 0;
-	int time_simEnding_sec = -1;
+	int simEnding_sec = -1;
+	int simDuration_min = 0;
 
 	int tsec_tm1 = 0;
 	int targetTtoP_sec = 0;

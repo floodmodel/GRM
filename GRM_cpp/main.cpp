@@ -206,10 +206,6 @@ int simulateSingleEvent()
 		writeNewLog(fpnLog, "An error was occurred while simulation...\n", 1, 1);
 		return -1;
 	}
-
-
-
-
 	if (prj.deleteAllFilesExceptDischargeOut == 1) {
 		if (deleteAllFilesExceptDischarge() == -1) {
 			writeNewLog(fpnLog, "An error was occurred while deleting all files except discharge.out.\n", 1, 1);
@@ -238,6 +234,13 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 	//todo : 여기에 셀 개수 조건으로 mdp 설정 추가 필요
 	//위천의 경우, 11734인데, 병렬계산이 쪼매 더 느리다..
 	// 금호강의 경우, 8418인데, 병렬계산이 쪼매 더 느리다..
+	//if (di.cellNnotNull < 12000) {
+	//	writeLog(fpnLog, "The number of effective cell [ "
+	//		+ to_string(di.cellNnotNull) + "] is smaller than 12,000.\n"
+	//		+ "It was converted to serial calculation. \n", 1, 1);
+	//	prj.mdp = 1;
+	//	isparallel = "false";
+	//}
 
 	if (prj.mdp == 1) { isparallel = "false"; }
 	writeLog(fpnLog, "Parallel : "+ isparallel +". Max. degree of parallelism : "
