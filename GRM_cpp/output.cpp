@@ -60,7 +60,6 @@ void writeSingleEvent(int nowTmin, double cinterp)
     string lineToP;
     lineToP = tStrToPrint;
     for (int i : wpis.wpCVidxes) {
-        //int i = id - 1;
         if (cinterp == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
                 vToP = forString(cvs[i].QOF_m3Ps, 2);
