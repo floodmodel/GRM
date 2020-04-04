@@ -143,7 +143,7 @@ enum class soilTextureCode
 enum class soilDepthCode
 {
 	D,
-	M,
+	MDMS,
 	S,
 	VD,
 	VS,
@@ -165,6 +165,28 @@ enum class landCoverCode
 	CONSTV,
 	None
 };
+
+typedef struct _projectFileTable
+{
+	const string nProjectSettings = "ProjectSettings";
+	const string nSubWatershedSettings = "SubWatershedSettings";
+	const string nChannelSettings = "ChannelSettings";
+	const string nWatchPoints = "WatchPoints";
+	const string nGreenAmptParameter = "GreenAmptParameter";
+	const string nSoilDepth = "SoilDepth";
+	const string nLandCover = "LandCover";
+	const string nFlowControlGrid = "FlowControlGrid";
+	const string nRTenv = "RTenv";
+	int sProjectSettings = 0; //0::비활성, 1: 활성
+	int sSubWatershedSettings = 0; //0:비활성, 1: 활성
+	int sChannelSettings = 0; //0:비활성, 1: 활성
+	int sWatchPoints = 0; //0:비활성, 1: 활성
+	int sGreenAmptParameter = 0; //0:비활성, 1: 활성
+	int sSoilDepth = 0; //0:비활성, 1: 활성
+	int sLandCover = 0; //0:비활성, 1: 활성
+	int sFlowControlGrid = 0; //0:비활성, 1: 활성
+	int sRTenv = 0; //0:비활성, 1: 활성
+} projectFileTable;
 
 typedef struct _projectFileFieldName
 {
@@ -195,14 +217,14 @@ typedef struct _projectFileFieldName
 	const string ConstantSoilDepth = "ConstantSoilDepth";
 	const string RainfallDataType = "RainfallDataType";
 	const string RainfallDataFile = "RainfallDataFile";
-	const string RainfallInterval_min = "RainfallInterval_min";
+	const string RainfallInterval_min = "RainfallInterval";
 	const string FlowDirectionType = "FlowDirectionType";
 	const string MaxDegreeOfParallelism = "MaxDegreeOfParallelism";
 	const string SimulStartingTime = "SimulStartingTime"; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
-	const string SimulationDuration_hr = "SimulationDuration_hr";
-	const string ComputationalTimeStep_min = "ComputationalTimeStep_min";
+	const string SimulationDuration_hr = "SimulationDuration";
+	const string ComputationalTimeStep_min = "ComputationalTimeStep";
 	const string IsFixedTimeStep = "IsFixedTimeStep";
-	const string OutputTimeStep_min = "OutputTimeStep_min";
+	const string OutputTimeStep_min = "OutputTimeStep";
 	const string SimulateInfiltration = "SimulateInfiltration";
 	const string SimulateSubsurfaceFlow = "SimulateSubsurfaceFlow";
 	const string SimulateBaseFlow = "SimulateBaseFlow";
@@ -215,7 +237,7 @@ typedef struct _projectFileFieldName
 	const string MakeFlowDistFile = "MakeFlowDistFile";
 	const string PrintOption = "PrintOption";
 	const string WriteLog = "WriteLog";
-	const string SWSID = "SWSID";
+	const string ID_SWP = "ID";
 	const string IniSaturation = "IniSaturation";
 	const string MinSlopeOF = "MinSlopeOF";
 	const string UnsaturatedKType = "UnsaturatedKType";
@@ -231,7 +253,7 @@ typedef struct _projectFileFieldName
 	const string CalCoefHydraulicK = "CalCoefHydraulicK";
 	const string CalCoefSoilDepth = "CalCoefSoilDepth";
 	const string UserSet = "UserSet";
-	const string MDWSID = "MDWSID";
+	const string WSID_CH = "WSID";
 	const string CrossSectionType = "CrossSectionType";
 	const string SingleCSChannelWidthType = "SingleCSChannelWidthType";
 	const string ChannelWidthEQc = "ChannelWidthEQc";
@@ -244,11 +266,11 @@ typedef struct _projectFileFieldName
 	const string CompoundCSChannelWidthLimit = "CompoundCSChannelWidthLimit";
 	const string BankSideSlopeRight = "BankSideSlopeRight";
 	const string BankSideSlopeLeft = "BankSideSlopeLeft";
-	const string FCName = "FCName";
-	const string FCColX = "FCColX";
-	const string FCRowY = "FCRowY";
+	const string Name_FCG = "Name";
+	const string ColX_FCG = "ColX";
+	const string RowY_FCG = "RowY";
 	const string ControlType = "ControlType";
-	const string FCDT_min = "FCDT_min";
+	const string FCDT_min = "DT";
 	const string FlowDataFile = "FlowDataFile";
 	const string IniStorage = "IniStorage";
 	const string MaxStorage = "MaxStorage";
@@ -256,22 +278,22 @@ typedef struct _projectFileFieldName
 	const string ROType = "ROType";
 	const string ROConstQ = "ROConstQ";
 	const string ROConstQDuration = "ROConstQDuration";
-	const string WPName = "WPName";
-	const string WPColX = "WPColX";
-	const string WPRowY = "WPRowY";
-	const string STGridValue = "STGridValue";
-	const string GRMCodeST = "GRMCodeST";
-	const string STPorosity = "STPorosity";
-	const string STEffectivePorosity = "STEffectivePorosity";
-	const string STWFSuctionHead = "STWFSuctionHead";
-	const string STHydraulicConductivity = "STHydraulicConductivity";
-	const string SDGridValue = "SDGridValue";
-	const string GRMCodeSD = "GRMCodeSD";
-	const string SDSoilDepth = "SDSoilDepth";
-	const string LCGridValue = "LCGridValue";
-	const string GRMCodeLC = "GRMCodeLC";
-	const string LCRoughnessCoeff = "LCRoughnessCoeff";
-	const string LCImperviousR = "LCImperviousR";
+	const string Name_WP = "Name";
+	const string ColX_WP = "ColX";
+	const string RowY_WP = "RowY";
+	const string GridValue_ST = "GridValue";
+	const string GRMCode_ST = "GRMCode";
+	const string Porosity = "Porosity";
+	const string EffectivePorosity = "EffectivePorosity";
+	const string WFSuctionHead = "WFSoilSuctionHead";
+	const string HydraulicConductivity = "HydraulicConductivity";
+	const string GridValue_SD = "GridValue";
+	const string GRMCode_SD = "GRMCode";
+	const string SoilDepthValue = "SoilDepth";
+	const string GridValue_LC = "GridValue";
+	const string GRMCode_LC = "GRMCode";
+	const string RoughnessCoeff = "RoughnessCoefficient";
+	const string ImperviousR = "ImperviousRatio";
 } projectFileFieldName;
 
 typedef struct _timeSeries
@@ -738,13 +760,13 @@ void initRasterOutput();
 void initThisSimulation();
 int initWatershedNetwork();
 int initWPinfos();
-int isNormalChannelSettingInfo(channelSettingInfo aci);
-int isNormalFlowControlinfo(flowControlinfo afc);
-int isNormalSwsParameter(swsParameters assp);
-int isNormalWatchPointInfo(wpLocationRC awp);
-int isNormalSoilTextureInfo(soilTextureInfo ast);
-int isNormalSoilDepthInfo(soilDepthInfo asd);
-int isNormalLandCoverInfo(landCoverInfo alc);
+int isNormalChannelSettingInfo(channelSettingInfo *csi);
+int isNormalFlowControlinfo(flowControlinfo *fci);
+int isNormalSwsParameter(swsParameters *swp);
+int isNormalWatchPointInfo(wpLocationRC *wpL);
+int isNormalSoilTextureInfo(soilTextureInfo *st);
+int isNormalSoilDepthInfo(soilDepthInfo *sd);
+int isNormalLandCoverInfo(landCoverInfo *lc);
 
 void joinOutputThreads();
 
@@ -764,15 +786,16 @@ void makeASC_flow();
 int makeNewOutputFiles();
 void makeRasterOutput(int nowTmin);
 
-channelSettingInfo nullChannelSettingInfo();
-flowControlinfo nullFlowControlinfo();
-swsParameters nullSwsParameters();
-wpLocationRC nullWatchPointInfo();
-soilTextureInfo nullSoilTextureInfo();
-soilDepthInfo nullSoilDepthInfo();
-landCoverInfo nullLandCoverInfo();
+//channelSettingInfo nullChannelSettingInfo();
+//flowControlinfo nullFlowControlinfo();
+//swsParameters nullSwsParameters();
+//wpLocationRC nullWatchPointInfo();
+//soilTextureInfo nullSoilTextureInfo();
+//soilDepthInfo nullSoilDepthInfo();
+//landCoverInfo nullLandCoverInfo();
 
 int openProjectFile(int forceRealTime);
+//int openProjectFile_old(int forceRealTime);
 int openPrjAndSetupModel(int forceRealTime);//1:true, -1:false
 void outputManager(int nowTsec,
 	int nowRForder);
@@ -782,6 +805,23 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV();
 int readLandCoverFileAndSetCVbyVAT();
 int readSoilTextureFileAndSetCVbyVAT();
 int readSoilDepthFileAndSetCVbyVAT();
+
+int readXmlRowChannelSettings(string aline, 
+	channelSettingInfo* csi);
+int readXmlRowProjectSettings(string aline);
+int readXmlRowSubWatershedSettings(string aline,
+	swsParameters *swp);
+int readXmlRowFlowControlGrid(string aline, 
+	flowControlinfo *fci);
+int readXmlRowWatchPoint(string aline, 
+	wpLocationRC *wpl);
+int readXmlRowSoilTextureInfo(string aline,
+	soilTextureInfo* st);
+int readXmlRowSoilDepth(string aline,
+	soilDepthInfo* sd);
+int readXmlRowLandCover(string aline,
+	landCoverInfo* lc);
+
 
 int setDomainAndCVBasicinfo();
 int setCVbyLCConstant();

@@ -25,21 +25,14 @@ int startSimulationSingleEvent()
 {
     initThisSimulation();
     setCVStartingCondition(0);
-    //int dtPrint_min = prj.printTimeStep_min;
     int dtRF_sec = prj.rfinterval_min * 60;
-    //int dtrf_min = prj.rfinterval_min;
-    //int isRFended = -1;
-    //int tsec_tm1 = 0;
-    //cvAtt Project_tm1;
-    //int targetTtoPrint_min = 0;
     int rfOrder = 0;
     int nowTsec = ts.dtsec;
     double nowTmin;
     ts.dtsecUsed_tm1 = ts.dtsec;
-    ts.targetTtoP_sec = (int)prj.dtPrint_min*60;
-    //int dtsec;
-    int endingT_sec = ts.simEnding_sec + 1;
-    while (nowTsec < endingT_sec) {// simulationTimeLimitSEC
+    ts.targetTtoP_sec = (int)prj.dtPrint_min * 60;
+    int endingT_sec = ts.simEnding_sec + ts.dtsec+1;
+    while (nowTsec < endingT_sec) {
         //dtsec = ts.dtsec;        
         // dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
         /*if (isRFended == -1 && (nowRFOrder == 0 || (nowTsec > dtRF_sec* nowRFOrder))) {*/
@@ -370,7 +363,7 @@ void outputManager(int nowTsec, int rfOrder)
     int dtrf_sec = dtrf_min * 60;
     int dtP_SEC = dtP_min * 60;
     double dtmin = ts.dtsec / 60.0;
-    int timeToP_min = nowTsec/60;
+    int timeToP_min = 0;// = nowTsec / 60;
     if (rfOrder == 1
         && dtP_min > dtrf_min
         && ((nowTsec + ts.dtsec) > dtrf_sec)) {
@@ -387,8 +380,7 @@ void outputManager(int nowTsec, int rfOrder)
             timeToP_min = ts.targetTtoP_sec / 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
         }
         else {
-            timeToP_min = ts.targetTtoP_sec/ 60;
-            ts.zeroTimePrinted = 1;
+            timeToP_min = ts.targetTtoP_sec / 60;
         }
         writeBySimType(timeToP_min, 1);
         ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
@@ -412,13 +404,7 @@ void outputManager(int nowTsec, int rfOrder)
             && (nowTsec - ts.dtsecUsed_tm1) <= ts.targetTtoP_sec) {
             double citerp;
             citerp = (ts.targetTtoP_sec - ts.cvsbT_sec) / (double)(nowTsec - ts.cvsbT_sec);
-            if (ts.zeroTimePrinted == -1) {
-                timeToP_min = (int)(ts.targetTtoP_sec / 60) - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
-                ts.zeroTimePrinted = 1;
-            }
-            else {
-                timeToP_min = (int)(ts.targetTtoP_sec / 60);
-            }            
+            timeToP_min = (int)(ts.targetTtoP_sec / 60) - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
             writeBySimType(timeToP_min, citerp);
             ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
             ts.isbak = -1;

@@ -250,6 +250,7 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 		return -1;
 	}
 	writeLog(fpnLog, ppi.fpn_prj+"  -> Model setup was completed.\n", 1, 1);
+	writeLog(fpnLog, "The number of effecitve cells : "+to_string(di.cellNnotNull)+"\n", 1, 1); 
 	return 1;
 }
 
