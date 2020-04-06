@@ -1,5 +1,5 @@
 #include <string>
-
+#include <algorithm>
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"
@@ -14,7 +14,9 @@ extern domaininfo di;
 extern int** cvais;
 extern cvAtt* cvs;
 
-extern map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
+extern map<int, int*> cvaisToFA; //fa별 cv array idex 목록
+extern vector<int> fas;
+extern map<int, int> faCount;
 extern wpinfo wpis;
 extern flowControlCellAndData fccds;
 
@@ -36,8 +38,8 @@ int setupModelAfterOpenProjectFile()
 
 int setDomainAndCVBasicinfo()
 {
-	if (readDomainFileAndSetupCV() == -1) { return -1; }
-	if (readSlopeFdirFacStreamCwCfSsrFileAndSetCV() == -1) { return -1; }
+	if (readDomainFaFileAndSetupCV() == -1) { return -1; }
+	if (readSlopeFdirStreamCwCfSsrFileAndSetCV() == -1) { return -1; }
 	if (prj.lcDataType == fileOrConstant::File) {
 		if (readLandCoverFileAndSetCVbyVAT() == -1) { return -1; }
 	}
@@ -95,12 +97,14 @@ int initWPinfos()
 int setupByFAandNetwork()
 {
     di.facMostUpChannelCell = di.cellNnotNull;//우선 최대값으로 초기화
-    di.facMax = -1;
-    di.facMin = INT_MAX;
     cvaisToFA.clear();
+    fas.clear();
+    faCount.clear();
+    map<int, vector<int>> aisFA;
     for (int i = 0; i < di.cellNnotNull; i++) {
         //cvs[i].fcType = flowControlType::None;
         double dxw;
+        int curfa = cvs[i].fac;
         if (cvs[i].neighborCVidxFlowintoMe.size() > 0) {
             dxw = cvs[i].dxWSum / (double)cvs[i].neighborCVidxFlowintoMe.size();
         }
@@ -109,24 +113,28 @@ int setupByFAandNetwork()
         }
         //cvs[i].cvdx_m = cvs[i].dxDownHalf_m + dxw; 이것 적용하지 않는 것으로 수정. 상류 유입량이 w 끝으로 들어오는 것으로 계산..2015.03.12
         cvs[i].cvdx_m = cvs[i].dxDownHalf_m * 2.0;
-        if (cvs[i].fac > di.facMax) {
-            di.facMax = cvs[i].fac;
-            di.cvidxMaxFac = i;
-        }
-        if (cvs[i].fac < di.facMin) {
-            di.facMin = cvs[i].fac;
-        }
         // 하도 매개변수 받고
         if (cvs[i].flowType == cellFlowType::ChannelFlow &&
-            cvs[i].fac < di.facMostUpChannelCell) {
-            di.facMostUpChannelCell = cvs[i].fac;
+            curfa < di.facMostUpChannelCell) {
+            di.facMostUpChannelCell = curfa;
         }
         // FA별 idx 저장
-        cvaisToFA[cvs[i].fac].push_back(i);
-
+        aisFA[curfa].push_back(i);
+        if (getVectorIndex(fas, curfa) == -1) {
+            fas.push_back(curfa);
+        }
         //셀별 하류 wp 정보 초기화
         cvs[i].downWPCVidx.clear();
     }
+    sort(fas.begin(), fas.end());
+    for (int i = 0; i<fas.size(); ++i) {
+        int curFA = fas[i];
+        vector<int> av = aisFA[curFA];
+        cvaisToFA[curFA] = new int[av.size()];
+        copy(av.begin(), av.end(), cvaisToFA[curFA]);
+        faCount[curFA] = av.size();
+    }
+
 
     // cross section 정보 wsid 오류 확인
     if (prj.css.size() > 0) {

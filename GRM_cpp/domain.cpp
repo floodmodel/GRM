@@ -22,15 +22,22 @@ extern cvAtt* cvs;
 extern cvAtt* cvsb;
 
 
-int readDomainFileAndSetupCV()
+int readDomainFaFileAndSetupCV()
 {
     if (prj.fpnDomain == "" || _access(prj.fpnDomain.c_str(), 0) != 0) {
         string outstr = "Domain file (" + prj.fpnDomain + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
+    if (prj.fpnFA == "" || _access(prj.fpnFA.c_str(), 0) != 0) {
+        string outstr = "Flow accumulation file (" + prj.fpnFA + ") is invalid.\n";
+        writeLog(fpnLog, outstr, 1, 1);
+        return -1;
+    }
+
     //여기서 di 일반사항 초기화, 설정===============
     ascRasterFile dmFile = ascRasterFile(prj.fpnDomain);
+    ascRasterFile facFile = ascRasterFile(prj.fpnFA);
     di.nRows = dmFile.header.nRows;
     di.nCols = dmFile.header.nCols;
     di.cellSize = dmFile.header.cellsize;
@@ -39,6 +46,8 @@ int readDomainFileAndSetupCV()
     di.headerStringAll = dmFile.headerStringAll;
     di.cvidxInEachRegion.clear();
     di.dmids.clear();
+    di.facMax = -1;
+    di.facMin = INT_MAX;
     //====================================
     cvais = new int* [di.nCols];
     for (int i = 0; i < di.nCols; ++i) {
@@ -60,8 +69,16 @@ int readDomainFileAndSetupCV()
                 }
                 di.cvidxInEachRegion[wsid].push_back(cvidx);
                 cv.toBeSimulated = 1;
-                cv.idx_xr = cx; 
-                cv.idx_yc = ry; 
+                cv.idx_xc = cx; 
+                cv.idx_yr = ry; 
+                cv.fac = (int)facFile.valuesFromTL[cx][ry];
+                if (cv.fac > di.facMax) {
+                    di.facMax = cv.fac;
+                    di.cvidxMaxFac = cvidx;
+                }
+                if (cv.fac < di.facMin) {
+                    di.facMin = cv.fac;
+                }
                 cvsv.push_back(cv); // 여기는 유효셀만
                 cvais[cx][ry] = cvidx ;// 모든셀. 1차원 배열의 인덱스를 저장. 
                 cvidx += 1;
@@ -79,7 +96,7 @@ int readDomainFileAndSetupCV()
     return 1;
 }
 
-int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
+int readSlopeFdirStreamCwCfSsrFileAndSetCV()
 {
     if (prj.fpnSlope == "" || _access(prj.fpnSlope.c_str(), 0) != 0) {
         string outstr = "Slope file (" + prj.fpnSlope + ") is invalid.\n";
@@ -91,11 +108,7 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
-    if (prj.fpnFA == "" || _access(prj.fpnFA.c_str(), 0) != 0) {
-        string outstr = "Flow accumulation file (" + prj.fpnFA + ") is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
-        return -1;
-    }
+
     if (prj.streamFileApplied == 1
         && (prj.fpnStream == ""
             || _access(prj.fpnStream.c_str(), 0) != 0)) {
@@ -129,7 +142,6 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
 
     ascRasterFile slopeFile = ascRasterFile(prj.fpnSlope);
     ascRasterFile fdirFile = ascRasterFile(prj.fpnFD);
-    ascRasterFile facFile = ascRasterFile(prj.fpnFA);
     ascRasterFile* streamFile;
     ascRasterFile* cwFile;
     ascRasterFile* cfFile;
@@ -161,60 +173,59 @@ int readSlopeFdirFacStreamCwCfSsrFileAndSetCV()
 
     int nRy = di.nRows;
     int nCx = di.nCols;
-#pragma omp parallel for schedule(guided)
-    for (int ry = 0; ry < nRy; ry++) {
-        for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvais[cx][ry];
-            if (idx >= 0) {
-                cvs[idx].slope = slopeFile.valuesFromTL[cx][ry];
-                if (cvs[idx].slope <= 0.0) {
-                    cvs[idx].slope = CONST_MIN_SLOPE;
-                }
-                cvs[idx].fdir = getFlowDirection((int)fdirFile.valuesFromTL[cx][ry], prj.fdType);
-                cvs[idx].fac = (int)facFile.valuesFromTL[cx][ry];
-                if (prj.streamFileApplied == 1) {
-                    cvs[idx].stream.chStrOrder = (int)streamFile->valuesFromTL[cx][ry];
-                    if (cvs[idx].stream.chStrOrder > 0) {
-                        cvs[idx].isStream = 1;
-                        cvs[idx].flowType = cellFlowType::ChannelFlow;
-                    }
-                    else {
-                        cvs[idx].isStream = -1;
-                        cvs[idx].flowType = cellFlowType::OverlandFlow;
-                    }
-                }
-                if (prj.cwFileApplied == 1) {
-                    double v = cwFile->valuesFromTL[cx][ry];
-                    if (v < 0) {
-                        cvs[idx].stream.chBaseWidthByLayer = 0.0;
-                    }
-                    else {
-                        cvs[idx].stream.chBaseWidthByLayer = v;
-                    }
-                }
-                else {
-                    cvs[idx].stream.chBaseWidthByLayer =0.0;
-                }
-                if (prj.icfFileApplied == 1) {
-                    double v = cfFile->valuesFromTL[cx][ry];
-                    if (v < 0) {
-                        cvs[idx].stream.iniQCH_m3Ps = 0;
-                    }
-                    else {
-                        cvs[idx].stream.iniQCH_m3Ps = v;
-                    }
-                }
-                if (prj.issrFileApplied == 1) {
-                    double v = ssrFile->valuesFromTL[cx][ry];
-                    if (v < 0) {
-                        cvs[idx].iniSSR = 0;
-                    }
-                    else {
-                        cvs[idx].iniSSR = v;
-                    }
-                }
+    int cvCount = di.cellNnotNull;
+#pragma omp parallel for //schedule(guided)
+    for (int idx = 0; idx < cvCount; ++idx) {
+        int cx = cvs[idx].idx_xc;
+        int ry = cvs[idx].idx_yr;
+        cvs[idx].slope = slopeFile.valuesFromTL[cx][ry];
+        if (cvs[idx].slope <= 0.0) {
+            cvs[idx].slope = CONST_MIN_SLOPE;
+        }
+        cvs[idx].fdir = getFlowDirection((int)fdirFile.valuesFromTL[cx][ry], prj.fdType);
+        if (prj.streamFileApplied == 1) {
+            cvs[idx].stream.chStrOrder = (int)streamFile->valuesFromTL[cx][ry];
+            if (cvs[idx].stream.chStrOrder > 0) {
+                cvs[idx].isStream = 1;
+                cvs[idx].flowType = cellFlowType::ChannelFlow;
+            }
+            else {
+                cvs[idx].isStream = -1;
+                cvs[idx].flowType = cellFlowType::OverlandFlow;
             }
         }
+        if (prj.cwFileApplied == 1) {
+            double v = cwFile->valuesFromTL[cx][ry];
+            if (v < 0) {
+                cvs[idx].stream.chBaseWidthByLayer = 0.0;
+            }
+            else {
+                cvs[idx].stream.chBaseWidthByLayer = v;
+            }
+        }
+        else {
+            cvs[idx].stream.chBaseWidthByLayer = 0.0;
+        }
+        if (prj.icfFileApplied == 1) {
+            double v = cfFile->valuesFromTL[cx][ry];
+            if (v < 0) {
+                cvs[idx].stream.iniQCH_m3Ps = 0;
+            }
+            else {
+                cvs[idx].stream.iniQCH_m3Ps = v;
+            }
+        }
+        if (prj.issrFileApplied == 1) {
+            double v = ssrFile->valuesFromTL[cx][ry];
+            if (v < 0) {
+                cvs[idx].iniSSR = 0;
+            }
+            else {
+                cvs[idx].iniSSR = v;
+            }
+        }
+        //    }
+        //}
     }
 
     if (prj.streamFileApplied == 1 && streamFile != NULL) {
@@ -258,37 +269,32 @@ int readLandCoverFileAndSetCVbyVAT()
     iter = lcvat.begin();
     int vBak = iter->first;
     //오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
-    for (int ry = 0; ry < nRy; ry++) {
-        for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvais[cx][ry];
-            if (idx >= 0) {
-                int v =(int) lcFile.valuesFromTL[cx][ry];
-                if (v > 0) {
-                    if (lcvat.find(v) != lcvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
-                        landCoverInfo lc = lcvat[v];
-                        vBak = v; // 여기서 최신 셀의 값
-                        cvs[idx].lcCellValue = v;
-                        cvs[idx].rcOFori = lc.RoughnessCoefficient;
-                        cvs[idx].imperviousR = lc.ImperviousRatio;
-                        cvs[idx].lcCode = lc.lcCode;
-                    }
-                    else {
-                        string outstr = "Landcover VAT file [" + prj.fpnLCVat
-                            + "] or current project file do not have the land cover value (" 
-                            + to_string(v) + ").\n"
-                            + "Check the land cover file or land cover VAT file. \n";
-                        writeLog(fpnLog, outstr, -1, 1);
-                        return -1;
-                    }
-                }
-                else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
-                    landCoverInfo lc = lcvat[vBak];
-                    cvs[idx].lcCellValue = vBak;
-                    cvs[idx].rcOFori = lc.RoughnessCoefficient;
-                    cvs[idx].imperviousR = lc.ImperviousRatio;
-                    cvs[idx].lcCode = lc.lcCode;
-                }
+    for (int i = 0; i < di.cellNnotNull; ++i) {
+        int v = (int)lcFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
+        if (v > 0) {
+            if (lcvat.find(v) != lcvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
+                landCoverInfo lc = lcvat[v];
+                vBak = v; // 여기서 최신 셀의 값
+                cvs[i].lcCellValue = v;
+                cvs[i].rcOFori = lc.RoughnessCoefficient;
+                cvs[i].imperviousR = lc.ImperviousRatio;
+                cvs[i].lcCode = lc.lcCode;
             }
+            else {
+                string outstr = "Landcover VAT file [" + prj.fpnLCVat
+                    + "] or current project file do not have the land cover value ("
+                    + to_string(v) + ").\n"
+                    + "Check the land cover file or land cover VAT file. \n";
+                writeLog(fpnLog, outstr, -1, 1);
+                return -1;
+            }
+        }
+        else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
+            landCoverInfo lc = lcvat[vBak];
+            cvs[i].lcCellValue = vBak;
+            cvs[i].rcOFori = lc.RoughnessCoefficient;
+            cvs[i].imperviousR = lc.ImperviousRatio;
+            cvs[i].lcCode = lc.lcCode;
         }
     }
     return 1;
@@ -309,49 +315,34 @@ int setCVbyLCConstant()
     int nRy = di.nRows;
     int nCx = di.nCols;
 #pragma omp parallel for schedule(guided)
-    for (int ry = 0; ry < nRy; ry++) {
-        for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvais[cx][ry];
-            if (idx >= 0) {
-                    cvs[idx].lcCellValue = 0; // 이 값은 상수를 의미하게 한다.
-                    cvs[idx].rcOFori = prj.cnstRoughnessC;
-                    cvs[idx].imperviousR = prj.cnstImperviousR;
-                    cvs[idx].lcCode = landCoverCode::CONSTV;
-            }
-        }
+    for (int i = 0; i < di.cellNnotNull; ++i) {
+        cvs[i].lcCellValue = 0; // 이 값은 상수를 의미하게 한다.
+        cvs[i].rcOFori = prj.cnstRoughnessC;
+        cvs[i].imperviousR = prj.cnstImperviousR;
+        cvs[i].lcCode = landCoverCode::CONSTV;
     }
     return 1;
 }
 
-int readLandCoverFile(string fpnLC, int** cvAryidx, cvAtt* cvs1D, int nColX, int nRowY)
+int readLandCoverFile(string fpnLC, int** cvAryidx, cvAtt* cvs1D, int effCellCount)
 {
     if (fpnLC == "" || _access(fpnLC.c_str(), 0) != 0) {
         string outstr = "Land cover file (" + fpnLC + ") is invalid.\n";
         writeLog(fpnLog, outstr, -1, 1);
         return -1;
     }
-    if (nColX < 1 || nRowY < 1)    {
-        writeLog(fpnLog, "The number of columns or rows have to be greater than 0.\n", -1, 1);
-        return -1;
-    }
     ascRasterFile lcFile = ascRasterFile(fpnLC);
     int isnormal = 1;
 #pragma omp parallel for schedule(guided)
-    for (int ry = 0; ry < nRowY; ry++) {
-        for (int cx = 0; cx < nColX; cx++) {
-            int idx = cvAryidx[cx][ry];
-            if (idx >= 0) {
-                int v =(int) lcFile.valuesFromTL[cx][ry];
-                if (v > 0) {
-                    cvs1D[idx].lcCellValue = v;
-                }
-                else {
-                    string outstr = "Land cover file (" + fpnLC + ") has invalid value.\n";
-                    writeLog(fpnLog, outstr, -1, 1);
-                    isnormal = -1;
-                }
-            }
-
+    for (int i = 0; i < effCellCount; ++i) {
+        int v = (int)lcFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];;
+        if (v > 0) {
+            cvs1D[i].lcCellValue = v;
+        }
+        else {
+            string outstr = "Land cover file (" + fpnLC + ") has invalid value.\n";
+            writeLog(fpnLog, outstr, -1, 1);
+            isnormal = -1;
         }
     }
     return isnormal;
@@ -382,40 +373,35 @@ int readSoilTextureFileAndSetCVbyVAT()
     iter = stvat.begin();
     int vBak = iter->first;
     //오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
-    for (int ry = 0; ry < nRy; ry++) {
-        for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvais[cx][ry];
-            if (idx >= 0) {
-                int v = (int)stFile.valuesFromTL[cx][ry];
-                if (v > 0) {
-                    if (stvat.find(v) != stvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
-                        soilTextureInfo st = stvat[v];
-                        vBak = v; // 여기서 최신 셀의 값
-                        cvs[idx].stCellValue = v;
-                        cvs[idx].porosity_EtaOri = st.porosity;
-                        cvs[idx].effPorosity_ThetaEori = st.effectivePorosity;
-                        cvs[idx].wfsh_PsiOri_m = st.WFSuctionHead / 100.0;  // cm -> m
-                        cvs[idx].hc_Kori_mPsec = st.hydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
-                        cvs[idx].stCode = st.stCode;
-                    }
-                    else {
-                        string outstr = "Soil texture VAT file [" + prj.fpnSTVat
-                            + "] or current project file do not have the soil texture value (" + to_string(v) + ").\n"
-                            + "Check the soil texture file or soil texture VAT file. \n";
-                        writeLog(fpnLog, outstr, -1, 1);
-                        return -1;
-                    }
-                }
-                else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
-                    soilTextureInfo st = stvat[vBak];
-                    cvs[idx].stCellValue = vBak;
-                    cvs[idx].porosity_EtaOri = st.porosity;
-                    cvs[idx].effPorosity_ThetaEori = st.effectivePorosity;
-                    cvs[idx].wfsh_PsiOri_m = st.WFSuctionHead / 100.0;  // cm -> m
-                    cvs[idx].hc_Kori_mPsec = st.hydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
-                    cvs[idx].stCode = st.stCode;
-                }
+    for (int i = 0; i < di.cellNnotNull; ++i) {
+        int v = (int)stFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
+        if (v > 0) {
+            if (stvat.find(v) != stvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
+                soilTextureInfo st = stvat[v];
+                vBak = v; // 여기서 최신 셀의 값
+                cvs[i].stCellValue = v;
+                cvs[i].porosity_EtaOri = st.porosity;
+                cvs[i].effPorosity_ThetaEori = st.effectivePorosity;
+                cvs[i].wfsh_PsiOri_m = st.WFSuctionHead / 100.0;  // cm -> m
+                cvs[i].hc_Kori_mPsec = st.hydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
+                cvs[i].stCode = st.stCode;
             }
+            else {
+                string outstr = "Soil texture VAT file [" + prj.fpnSTVat
+                    + "] or current project file do not have the soil texture value (" + to_string(v) + ").\n"
+                    + "Check the soil texture file or soil texture VAT file. \n";
+                writeLog(fpnLog, outstr, -1, 1);
+                return -1;
+            }
+        }
+        else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
+            soilTextureInfo st = stvat[vBak];
+            cvs[i].stCellValue = vBak;
+            cvs[i].porosity_EtaOri = st.porosity;
+            cvs[i].effPorosity_ThetaEori = st.effectivePorosity;
+            cvs[i].wfsh_PsiOri_m = st.WFSuctionHead / 100.0;  // cm -> m
+            cvs[i].hc_Kori_mPsec = st.hydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
+            cvs[i].stCode = st.stCode;
         }
     }
     return 1;
@@ -447,50 +433,36 @@ int setCVbySTConstant()
     int nRy = di.nRows;
     int nCx = di.nCols;
 #pragma omp parallel for schedule(guided)
-    for (int ry = 0; ry < nRy; ry++) {
-        for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvais[cx][ry];
-            if (idx >= 0) {
-                cvs[idx].stCellValue = 0;// 이 값은 상수를 의미하게 한다.
-                cvs[idx].porosity_EtaOri = prj.cnstSoilPorosity;
-                cvs[idx].effPorosity_ThetaEori = prj.cnstSoilEffPorosity;
-                cvs[idx].wfsh_PsiOri_m = prj.cnstSoilWFSH / 100.0;  // cm -> m
-                cvs[idx].hc_Kori_mPsec = prj.cnstSoilHydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
-                cvs[idx].stCode =  soilTextureCode::CONSTV;
+    for (int i = 0; i < di.cellNnotNull; ++i) {
+                cvs[i].stCellValue = 0;// 이 값은 상수를 의미하게 한다.
+                cvs[i].porosity_EtaOri = prj.cnstSoilPorosity;
+                cvs[i].effPorosity_ThetaEori = prj.cnstSoilEffPorosity;
+                cvs[i].wfsh_PsiOri_m = prj.cnstSoilWFSH / 100.0;  // cm -> m
+                cvs[i].hc_Kori_mPsec = prj.cnstSoilHydraulicK / 100.0 / 3600.0;    // cm/hr -> m/s;
+                cvs[i].stCode =  soilTextureCode::CONSTV;
             }
-        }
-    }
     return 1;
 }
 
-int readSoilTextureFile(string fpnST, int** cvAryidx, cvAtt* cvs1D, int nColX, int nRowY)
+int readSoilTextureFile(string fpnST, int** cvAryidx, cvAtt* cvs1D, int effCellCount)
 {
     if (fpnST == "" || _access(fpnST.c_str(), 0) != 0) {
         string outstr = "Soil texture file (" + fpnST + ") is invalid.\n";
         writeLog(fpnLog, outstr, -1, 1);
         return -1;
     }
-    if (nColX < 1 || nRowY < 1) {
-        writeLog(fpnLog, "The number of columns or rows have to be greater than 0.\n", -1, 1);
-        return -1;
-    }
     ascRasterFile stFile = ascRasterFile(fpnST);
     int isnormal = 1;
 #pragma omp parallel for schedule(guided)
-    for (int ry = 0; ry < nRowY; ry++) {
-        for (int cx = 0; cx < nColX; cx++) {
-            int idx = cvAryidx[cx][ry];
-            if (idx >= 0) {
-                int v = (int)stFile.valuesFromTL[cx][ry];
-                if (v > 0) {
-                    cvs1D[idx].stCellValue = v;
-                }
-                else {
-                    string outstr = "Soil texture file (" + fpnST + ") has invalid value.\n";
-                    writeLog(fpnLog, outstr, -1, 1);
-                    isnormal = -1;
-                }
-            }
+    for (int i = 0; i < effCellCount; ++i) {
+        int v = (int)stFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
+        if (v > 0) {
+            cvs1D[i].stCellValue = v;
+        }
+        else {
+            string outstr = "Soil texture file (" + fpnST + ") has invalid value.\n";
+            writeLog(fpnLog, outstr, -1, 1);
+            isnormal = -1;
         }
     }
     return isnormal;
@@ -522,35 +494,30 @@ int readSoilDepthFileAndSetCVbyVAT()
     iter = sdvat.begin();
     int vBak = iter->first;
     //오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
-    for (int ry = 0; ry < nRy; ry++) {
-        for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvais[cx][ry];
-            if (idx >= 0) {
-                int v = (int)sdFile.valuesFromTL[cx][ry];
-                if (v > 0) {
-                    if (sdvat.find(v) != sdvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
-                        soilDepthInfo sd = sdvat[v];
-                        vBak = v; // 여기서 최신 셀의 값
-                        cvs[idx].sdCellValue = v;
-                        cvs[idx].sdOri_m = sd.soilDepth / 100.0;   // cm ->  m
-                        cvs[idx].sdCode = sd.sdCode; 
-                    }
-                    else {
-                        string outstr = "Soil depth VAT file [" + prj.fpnSDVat
-                            + "] or current project file do not have the soil depth value ("
-                            + to_string(v) + ").\n"
-                            + "Check the soil depth file or soil depth VAT file. \n";
-                        writeLog(fpnLog, outstr, -1, 1);
-                        return -1;
-                    }
-                }
-                else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
-                    soilDepthInfo sd = sdvat[vBak];
-                    cvs[idx].sdCellValue = vBak;
-                    cvs[idx].sdOri_m = sd.soilDepth / 100.0;   // cm ->  m
-                    cvs[idx].sdCode = sd.sdCode;
-                }
+    for (int i = 0; i < di.cellNnotNull; ++i) {
+        int v = (int)sdFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
+        if (v > 0) {
+            if (sdvat.find(v) != sdvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
+                soilDepthInfo sd = sdvat[v];
+                vBak = v; // 여기서 최신 셀의 값
+                cvs[i].sdCellValue = v;
+                cvs[i].sdOri_m = sd.soilDepth / 100.0;   // cm ->  m
+                cvs[i].sdCode = sd.sdCode;
             }
+            else {
+                string outstr = "Soil depth VAT file [" + prj.fpnSDVat
+                    + "] or current project file do not have the soil depth value ("
+                    + to_string(v) + ").\n"
+                    + "Check the soil depth file or soil depth VAT file. \n";
+                writeLog(fpnLog, outstr, -1, 1);
+                return -1;
+            }
+        }
+        else { // 셀값으로 정상적인 값(>0)이 입력되어 있지 않으면.. 가장 인접한(최신의) 값으로 설정한다.
+            soilDepthInfo sd = sdvat[vBak];
+            cvs[i].sdCellValue = vBak;
+            cvs[i].sdOri_m = sd.soilDepth / 100.0;   // cm ->  m
+            cvs[i].sdCode = sd.sdCode;
         }
     }
     return 1;
@@ -566,47 +533,33 @@ int setCVbySDConstant()
     int nRy = di.nRows;
     int nCx = di.nCols;
 #pragma omp parallel for schedule(guided)
-    for (int ry = 0; ry < nRy; ry++) {
-        for (int cx = 0; cx < nCx; cx++) {
-            int idx = cvais[cx][ry];
-            if (idx >= 0) {
-                cvs[idx].sdCellValue = 0;// 이 값은 상수를 의미하게 한다.
-                cvs[idx].sdOri_m = prj.cnstSoilDepth / 100.0;   // cm ->  m
-                cvs[idx].sdCode = soilDepthCode::CONSTV;
-            }
-        }
+    for (int i = 0; i < di.cellNnotNull; ++i) {
+        cvs[i].sdCellValue = 0;// 이 값은 상수를 의미하게 한다.
+        cvs[i].sdOri_m = prj.cnstSoilDepth / 100.0;   // cm ->  m
+        cvs[i].sdCode = soilDepthCode::CONSTV;
     }
     return 1;
 }
 
-int readSoilDepthFile(string fpnSD, int** cvAryidx, cvAtt* cvs1D, int nColX, int nRowY)
+int readSoilDepthFile(string fpnSD, int** cvAryidx, cvAtt* cvs1D, int effCellCount)
 {
     if (fpnSD == "" || _access(fpnSD.c_str(), 0) != 0) {
         string outstr = "Soil depth file (" + fpnSD + ") is invalid.\n";
         writeLog(fpnLog, outstr, -1, 1);
         return -1;
     }
-    if (nColX < 1 || nRowY < 1) {
-        writeLog(fpnLog, "The number of columns or rows have to be greater than 0.\n", -1, 1);
-        return -1;
-    }
     ascRasterFile sdFile = ascRasterFile(fpnSD);
     int isnormal = 1;
 #pragma omp parallel for schedule(guided)
-    for (int ry = 0; ry < nRowY; ry++) {
-        for (int cx = 0; cx < nColX; cx++) {
-            int idx = cvAryidx[cx][ry];
-            if (idx >= 0) {
-                int v = (int)sdFile.valuesFromTL[cx][ry];
-                if (v > 0) {
-                    cvs1D[idx].sdCellValue = v;
-                }
-                else {
-                    string outstr = "Soil depth file (" + fpnSD + ") has invalid value.\n";
-                    writeLog(fpnLog, outstr, -1, 1);
-                    isnormal = -1;
-                }
-            }
+    for (int i = 0; i < effCellCount; ++i) {
+        int v = (int)sdFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
+        if (v > 0) {
+            cvs1D[i].sdCellValue = v;
+        }
+        else {
+            string outstr = "Soil depth file (" + fpnSD + ") has invalid value.\n";
+            writeLog(fpnLog, outstr, -1, 1);
+            isnormal = -1;
         }
     }
     return isnormal;
@@ -617,128 +570,126 @@ int setFlowNetwork()
     initWatershedNetwork(); // 여기서 유역 네트워크 정보 초기화
 #pragma omp parallel for schedule(guided)
     //여기서 셀별 네트워크 정보 초기화
-    for (int ry = 0; ry < di.nRows; ry++) {
-        for (int cx = 0; cx < di.nCols; cx++) {
-            int idx = cvais[cx][ry];// current cell index
-            if (idx >= 0) {
-                cvs[idx].neighborCVidxFlowintoMe.clear();
-                cvs[idx].downWPCVidx.clear();
-            }
+    for (int i = 0; i < di.cellNnotNull; ++i) {
+        cvs[i].neighborCVidxFlowintoMe.clear();
+        cvs[i].downWPCVidx.clear();
+        if (di.facMax == di.cellNnotNull) {
+            cvs[i].fac = cvs[i].fac - 1;
         }
     }
-
+    if (di.facMax == di.cellNnotNull) {// 이경우는 최상류 셀 fac=1인 경우, 이것을 fac=0으로 만든다.
+        di.facMax = di.facMax - 1;
+        di.facMin = di.facMin - 1;
+    }
+    
     double halfDX_Diag_m;
     double halfDXperp_m;
     halfDX_Diag_m = di.cellSize * sqrt(2) / 2.0;
     halfDXperp_m = di.cellSize / 2.0;
-    for (int ry = 0; ry < di.nRows; ry++) {
-        for (int cx = 0; cx < di.nCols; cx++) {
-            int cidx = cvais[cx][ry];// current cell index
-            if (cidx >= 0) {
-                double dxe = 0.0;
-                int tCx; // 하류방향 대상 셀의 x array index
-                int tRy; // 하류방향 대상 셀의 y array index
-                // 좌상단이 0,0 이다... 즉, 북쪽이면, row-1, 동쪽이면 col +1
-                switch (cvs[cidx].fdir) {
-                case flowDirection8::NE8: {
-                    tCx = cx + 1;
-                    tRy = ry - 1;
-                    dxe = halfDX_Diag_m;
-                    break;
+    for (int i = 0; i < di.cellNnotNull; ++i) {
+        double dxe = 0.0;
+        int tCx; // 하류방향 대상 셀의 x array index
+        int tRy; // 하류방향 대상 셀의 y array index
+        // 좌상단이 0,0 이다... 즉, 북쪽이면, row-1, 동쪽이면 col +1
+        int cx = cvs[i].idx_xc;
+        int ry = cvs[i].idx_yr;
+        switch (cvs[i].fdir) {
+        case flowDirection8::NE8: {
+            tCx = cx + 1;
+            tRy = ry - 1;
+            dxe = halfDX_Diag_m;
+            break;
+        }
+        case flowDirection8::E8: {
+            tCx = cx + 1;
+            tRy = ry;
+            dxe = halfDXperp_m;
+            break;
+        }
+        case flowDirection8::SE8: {
+            tCx = cx + 1;
+            tRy = ry + 1;
+            dxe = halfDX_Diag_m;
+            break;
+        }
+        case flowDirection8::S8: {
+            tCx = cx;
+            tRy = ry + 1;
+            dxe = halfDXperp_m;
+            break;
+        }
+        case flowDirection8::SW8: {
+            tCx = cx - 1;
+            tRy = ry + 1;
+            dxe = halfDX_Diag_m;
+            break;
+        }
+        case flowDirection8::W8: {
+            tCx = cx - 1;
+            tRy = ry;
+            dxe = halfDXperp_m;
+            break;
+        }
+        case flowDirection8::NW8: {
+            tCx = cx - 1;
+            tRy = ry - 1;
+            dxe = halfDX_Diag_m;
+            break;
+        }
+        case flowDirection8::N8: {
+            tCx = cx;
+            tRy = ry - 1;
+            dxe = halfDXperp_m;
+            break;
+        }
+        case flowDirection8::None8: {
+            tCx = -1;
+            tRy = -1;
+            dxe = halfDXperp_m;
+            break;
+        }
+        }
+        if (tCx >= 0 && tCx < di.nCols && tRy >= 0 && tRy < di.nRows) {
+            //하류 셀이 전체 raster 영역 내부이면,
+            if (cvais[tCx][tRy] == -1) {// 하류 셀이 effect 셀 영역 외부에 있으면,
+                int wsidKey = cvs[i].wsid; // 이건 현재셀이 포함된 ws의 id
+                //di.wsn.wsOutletCVids 는 readDomainFileAndSetupCV() 에서 초기화 되어 있다.
+                if (di.wsn.wsOutletidxs.find(wsidKey) == di.wsn.wsOutletidxs.end() ||
+                    cvs[i].fac > cvs[di.wsn.wsOutletidxs[wsidKey]].fac) {
+                    // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
+                    //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
+                    di.wsn.wsOutletidxs[wsidKey] = i;
+                    di.wsn.wsidNearbyDown[cvs[i].wsid] = -1;// 하류 셀이 eff 영역 외부이면, tidx가 cvs의 영역을 벗어난다..
                 }
-                case flowDirection8::E8: {
-                    tCx = cx + 1;
-                    tRy = ry;
-                    dxe = halfDXperp_m;
-                    break;
-                }
-                case flowDirection8::SE8: {
-                    tCx = cx + 1;
-                    tRy = ry + 1;
-                    dxe = halfDX_Diag_m;
-                    break;
-                }
-                case flowDirection8::S8: {
-                    tCx = cx;
-                    tRy = ry + 1;
-                    dxe = halfDXperp_m;
-                    break;
-                }
-                case flowDirection8::SW8: {
-                    tCx = cx - 1;
-                    tRy = ry + 1;
-                    dxe = halfDX_Diag_m;
-                    break;
-                }
-                case flowDirection8::W8: {
-                    tCx = cx - 1;
-                    tRy = ry;
-                    dxe = halfDXperp_m;
-                    break;
-                }
-                case flowDirection8::NW8: {
-                    tCx = cx - 1;
-                    tRy = ry - 1;
-                    dxe = halfDX_Diag_m;
-                    break;
-                }
-                case flowDirection8::N8: {
-                    tCx = cx;
-                    tRy = ry - 1;
-                    dxe = halfDXperp_m;
-                    break;
-                }
-                case flowDirection8::None8: {
-                    tCx = -1;
-                    tRy = -1;
-                    dxe = halfDXperp_m;
-                    break;
-                }
-                }
-
-                if (tCx >= 0 && tCx < di.nCols && tRy >= 0 && tRy < di.nRows) {
-                    //하류 셀이 전체 raster 영역 내부이면,
-                    if (cvais[tCx][tRy] == -1) {// 하류 셀이 effect 셀 영역 외부에 있으면,
-                        int wsidKey = cvs[cidx].wsid; // 이건 현재셀이 포함된 ws의 id
-                        //di.wsn.wsOutletCVids 는 readDomainFileAndSetupCV() 에서 초기화 되어 있다.
-                        if (di.wsn.wsOutletidxs.find(wsidKey) == di.wsn.wsOutletidxs.end() ||
-                            cvs[cidx].fac > cvs[di.wsn.wsOutletidxs[wsidKey]].fac) {
-                            // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
-                            //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
-                            di.wsn.wsOutletidxs[wsidKey] = cidx;
-                            di.wsn.wsidNearbyDown[cvs[cidx].wsid] = -1;// 하류 셀이 eff 영역 외부이면, tidx가 cvs의 영역을 벗어난다..
-                        }
+            }
+            else {
+                int tidx = cvais[tCx][tRy]; // target cell index
+                cvs[tidx].neighborCVidxFlowintoMe.push_back(i);
+                cvs[tidx].dxWSum = cvs[tidx].dxWSum + dxe;
+                cvs[i].downCellidxToFlow = tidx;// 흘러갈 방향의 cellid를 현재 셀의 정보에 기록
+                if (cvs[i].wsid != cvs[tidx].wsid) {
+                    if (di.wsn.wsidNearbyDown[cvs[i].wsid] != cvs[tidx].wsid) {
+                        di.wsn.wsidNearbyDown[cvs[i].wsid] = cvs[tidx].wsid;
+                        di.wsn.wsOutletidxs[cvs[i].wsid] = i;
                     }
-                    else {
-                        int tidx = cvais[tCx][tRy]; // target cell index
-                        cvs[tidx].neighborCVidxFlowintoMe.push_back(cidx);
-                        cvs[tidx].dxWSum = cvs[tidx].dxWSum + dxe;
-                        cvs[cidx].downCellidxToFlow = tidx;// 흘러갈 방향의 cellid를 현재 셀의 정보에 기록
-                        if (cvs[cidx].wsid != cvs[tidx].wsid) {
-                            if (di.wsn.wsidNearbyDown[cvs[cidx].wsid] != cvs[tidx].wsid) {
-                                di.wsn.wsidNearbyDown[cvs[cidx].wsid] = cvs[tidx].wsid; 
-                                di.wsn.wsOutletidxs[cvs[cidx].wsid] = cidx;
-                            }
-                            vector<int> v = di.wsn.wsidsNearbyUp[cvs[tidx].wsid];
-                            if (std::find(v.begin(), v.end(), cvs[cidx].wsid) == v.end()) {
-                                di.wsn.wsidsNearbyUp[cvs[tidx].wsid].push_back(cvs[cidx].wsid);
-                            }
-                        }
-                    }
-                    cvs[cidx].dxDownHalf_m = dxe;
-                }
-                else {// 하류셀이 전체 raster 파일 영역 외부이면,
-                    cvs[cidx].downCellidxToFlow = -1;
-                    cvs[cidx].dxDownHalf_m = dxe;
-                    int wsidKey = cvs[cidx].wsid; // 이건 현재셀이 포함된 ws의 id
-                    if (di.wsn.wsOutletidxs.find(wsidKey) == di.wsn.wsOutletidxs.end() ||
-                        cvs[cidx].fac > cvs[di.wsn.wsOutletidxs[wsidKey]].fac) {
-                        // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
-                        //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
-                        di.wsn.wsOutletidxs[wsidKey] = cidx;
-                        di.wsn.wsidNearbyDown[cvs[cidx].wsid] = -1;
+                    vector<int> v = di.wsn.wsidsNearbyUp[cvs[tidx].wsid];
+                    if (std::find(v.begin(), v.end(), cvs[i].wsid) == v.end()) {
+                        di.wsn.wsidsNearbyUp[cvs[tidx].wsid].push_back(cvs[i].wsid);
                     }
                 }
+            }
+            cvs[i].dxDownHalf_m = dxe;
+        }
+        else {// 하류셀이 전체 raster 파일 영역 외부이면,
+            cvs[i].downCellidxToFlow = -1;
+            cvs[i].dxDownHalf_m = dxe;
+            int wsidKey = cvs[i].wsid; // 이건 현재셀이 포함된 ws의 id
+            if (di.wsn.wsOutletidxs.find(wsidKey) == di.wsn.wsOutletidxs.end() ||
+                cvs[i].fac > cvs[di.wsn.wsOutletidxs[wsidKey]].fac) {
+                // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
+                //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
+                di.wsn.wsOutletidxs[wsidKey] = i;
+                di.wsn.wsidNearbyDown[cvs[i].wsid] = -1;
             }
         }
     }
@@ -758,16 +709,6 @@ int initWatershedNetwork()
     di.wsn.mdWSIDs.clear();
     di.wsn.wsOutletidxs.clear();
     di.wsn.mdWSIDofCurrentWS.clear();
-    //for (int n = 0; n < di.dmids.size(); n++) {
-    //    vector<int> v;
-    //    int wsid = di.dmids[n];
-    //    di.wsn.wsidsNearbyUp[wsid] = v;
-    //    di.wsn.wsidNearbyDown[wsid] = -1;
-    //    di.wsn.wsidsAllUp[wsid] = v;
-    //    di.wsn.wsidsAllDown[wsid] = v;
-    //    di.wsn.wsOutletCVID[wsid] = -1;
-    //    di.wsn.mdWSIDofCurrentWS[wsid] = -1;
-    //}
     return 1;
 }
 

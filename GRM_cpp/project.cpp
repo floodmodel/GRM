@@ -346,7 +346,7 @@ int openProjectFile(int forceRealTime)
 		}
 	}
 
-	if (prj.dtsec == -1) {
+	if (prj.dtsec == 0) {
 		if (prj.IsFixedTimeStep == 1) {
 			writeLog(fpnLog, "In fixed dt, the calculation time step ["
 				+ to_string(prj.dtsec) + "] is invalid.\n", 1, 1);
@@ -362,9 +362,6 @@ int openProjectFile(int forceRealTime)
 		prj.mdp = prj.cpusi.totalNumOfLP;
 	}
 
-	if (prj.dtPrint_min * 30 < prj.dtsec) {
-		prj.dtsec = prj.dtPrint_min * 30;
-	}
 
 	//di.dmids.clear();
 	//map<int, domaininfo>::iterator iter;
@@ -417,8 +414,12 @@ int readXmlRowProjectSettings(string aline)
 		return 1;
 	}
 
-	if (aline.find(fn.DomainFile) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fn.DomainFile);
+	if (aline.find(fn.DomainFile_01) != string::npos
+		|| aline.find(fn.DomainFile_02) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fn.DomainFile_01);
+		if (vString == "") {
+			vString = getValueStringFromXmlLine(aline, fn.DomainFile_02);
+		}
 		prj.fpnDomain = "";
 		if (vString != "" && _access(vString.c_str(), 0) == 0) {
 			prj.fpnDomain = vString;
@@ -758,8 +759,12 @@ int readXmlRowProjectSettings(string aline)
 		}
 		return 1;
 	}
-	if (aline.find(fn.RainfallInterval_min) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fn.RainfallInterval_min);
+	if (aline.find(fn.RainfallInterval_min_01) != string::npos
+		|| aline.find(fn.RainfallInterval_min_02) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fn.RainfallInterval_min_01);
+		if (vString == "") {
+			vString = getValueStringFromXmlLine(aline, fn.RainfallInterval_min_02);
+		}
 		if (vString != "") {
 			prj.rfinterval_min = stoi(vString);
 		}
@@ -828,8 +833,12 @@ int readXmlRowProjectSettings(string aline)
 		return 1;
 	}
 
-	if (aline.find(fn.SimulationDuration_hr) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fn.SimulationDuration_hr);
+	if (aline.find(fn.SimulationDuration_hr_01) != string::npos
+		|| aline.find(fn.SimulationDuration_hr_02) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fn.SimulationDuration_hr_01);
+		if (vString == "") {
+			vString = getValueStringFromXmlLine(aline, fn.SimulationDuration_hr_02);
+		}
 		if (vString != "" && stod(vString) >= 0) {
 			prj.simDuration_hr = stod(vString);
 		}
@@ -840,8 +849,12 @@ int readXmlRowProjectSettings(string aline)
 		return 1;
 	}
 
-	if (aline.find(fn.ComputationalTimeStep_min) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fn.ComputationalTimeStep_min);
+	if (aline.find(fn.ComputationalTimeStep_min_01) != string::npos
+		|| aline.find(fn.ComputationalTimeStep_min_02) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fn.ComputationalTimeStep_min_01);
+		if (vString == "") {
+			vString = getValueStringFromXmlLine(aline, fn.ComputationalTimeStep_min_02);
+		}
 		if (vString != "" && stod(vString) > 0) {
 			prj.dtsec = stoi(vString) * 60;
 		}
@@ -857,8 +870,12 @@ int readXmlRowProjectSettings(string aline)
 		return 1;
 	}
 
-	if (aline.find(fn.OutputTimeStep_min) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fn.OutputTimeStep_min);
+	if (aline.find(fn.OutputTimeStep_min_01) != string::npos
+		|| aline.find(fn.OutputTimeStep_min_02) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fn.OutputTimeStep_min_01);
+		if (vString == "") {
+			vString = getValueStringFromXmlLine(aline, fn.OutputTimeStep_min_02);
+		}
 		if (vString != "") {
 			prj.dtPrint_min = stoi(vString);
 		}
@@ -1088,7 +1105,10 @@ int  readXmlRowSoilDepth(string aline,	soilDepthInfo* sd)
 				sd->sdCode = soilDepthCode::D;
 			}
 			else if (lower(vString) == lower(ENUM_TO_STR(MDMS))) {
-				sd->sdCode = soilDepthCode::MDMS;
+				sd->sdCode = soilDepthCode::M;
+			}
+			else if (lower(vString) == lower(ENUM_TO_STR(M))) {
+				sd->sdCode = soilDepthCode::M;
 			}
 			else if (lower(vString) == lower(ENUM_TO_STR(S))) {
 				sd->sdCode = soilDepthCode::S;
@@ -1209,7 +1229,7 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 			return -1;
 		}
 	}
-	if (aline.find(fn.EffectivePorosity) != string::npos) {
+	if (aline.find("<"+fn.EffectivePorosity+">") != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.EffectivePorosity);
 		if (vString != "") {
 			st->effectivePorosity = stod(vString);
@@ -1348,11 +1368,11 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		if (vString != "" && _access(vString.c_str(), 0) == 0) {
 			fci->fpnFCData = vString;
 		}
-		else {
-			writeLog(fpnLog, "Flow control data file of ["
-				+ fci->fcName + "] is invalid.\n", 1, 1);
-			return -1;
-		}
+		//else if(){
+		//	writeLog(fpnLog, "Flow control data file of ["
+		//		+ fci->fcName + "] is invalid.\n", 1, 1);
+		//	return -1;
+		//}
 	}
 	if (fci->fcType == flowControlType::ReservoirOperation
 		|| fci->fcType == flowControlType::SourceFlow
@@ -1368,7 +1388,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 				return -1;
 			}
 		}
-		if (aline.find(fn.MaxStorage) != string::npos) {
+		if (aline.find("<"+fn.MaxStorage+">") != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MaxStorage);
 			if (vString != "" && stod(vString) >= 0) {// max storage must be greater than zero.
 				if (fci->fcType == flowControlType::ReservoirOperation
@@ -1385,7 +1405,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 				return -1;
 			}
 		}
-		if (aline.find(fn.MaxStorageR) != string::npos) {
+		if (aline.find("<"+fn.MaxStorageR+">") != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MaxStorageR);
 			if (vString != "" && stod(vString) >= 0) {// max storage must be greater than zero.
 				if (fci->fcType == flowControlType::ReservoirOperation
@@ -1463,7 +1483,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 {
 	string vString = "";
 	projectFileFieldName fn;
-	if (aline.find(fn.WSID_CH) != string::npos) {
+	if (aline.find("<"+fn.WSID_CH+">") != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.WSID_CH);
 		if (vString != "" && stoi(vString) > 0) {
 			csi->mdWsid = stoi(vString);
@@ -1637,7 +1657,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 {
 	string vString = "";
 	projectFileFieldName fn;
-	if (aline.find(fn.ID_SWP) != string::npos) {
+	if (aline.find("<"+fn.ID_SWP+">") != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.ID_SWP);
 		if (vString != "" && stoi(vString) > 0) {
 			ssp->wsid = stoi(vString);

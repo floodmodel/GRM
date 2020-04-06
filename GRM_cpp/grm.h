@@ -143,7 +143,8 @@ enum class soilTextureCode
 enum class soilDepthCode
 {
 	D,
-	MDMS,
+	MDMS, //MDMS
+	M, //MDMS
 	S,
 	VD,
 	VS,
@@ -191,7 +192,8 @@ typedef struct _projectFileTable
 typedef struct _projectFileFieldName
 {
 	const string GRMSimulationType = "GRMSimulationType";
-	const string DomainFile = "DomainFile";
+	const string DomainFile_01 = "DomainFile";
+	const string DomainFile_02 = "WatershedFile";
 	const string SlopeFile = "SlopeFile";
 	const string FlowDirectionFile = "FlowDirectionFile";
 	const string FlowAccumFile = "FlowAccumFile";
@@ -217,14 +219,18 @@ typedef struct _projectFileFieldName
 	const string ConstantSoilDepth = "ConstantSoilDepth";
 	const string RainfallDataType = "RainfallDataType";
 	const string RainfallDataFile = "RainfallDataFile";
-	const string RainfallInterval_min = "RainfallInterval";
+	const string RainfallInterval_min_01 = "RainfallInterval";
+	const string RainfallInterval_min_02 = "RainfallInterval_min";
 	const string FlowDirectionType = "FlowDirectionType";
 	const string MaxDegreeOfParallelism = "MaxDegreeOfParallelism";
 	const string SimulStartingTime = "SimulStartingTime"; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
-	const string SimulationDuration_hr = "SimulationDuration";
-	const string ComputationalTimeStep_min = "ComputationalTimeStep";
+	const string SimulationDuration_hr_01 = "SimulationDuration";
+	const string SimulationDuration_hr_02 = "SimulationDuration_hr";
+	const string ComputationalTimeStep_min_01 = "ComputationalTimeStep";
+	const string ComputationalTimeStep_min_02 = "ComputationalTimeStep_min";
 	const string IsFixedTimeStep = "IsFixedTimeStep";
-	const string OutputTimeStep_min = "OutputTimeStep";
+	const string OutputTimeStep_min_01 = "OutputTimeStep";
+	const string OutputTimeStep_min_02 = "OutputTimeStep_min";
 	const string SimulateInfiltration = "SimulateInfiltration";
 	const string SimulateSubsurfaceFlow = "SimulateSubsurfaceFlow";
 	const string SimulateBaseFlow = "SimulateBaseFlow";
@@ -483,7 +489,7 @@ typedef struct _domaininfo
 	int cellNtobeSimulated = 0;
 	int facMostUpChannelCell = -1;
 	int facMax = -1;
-	int facMin = 0;
+	int facMin = INT_MAX;
 	vector <int> dmids;
 	map <int, vector<int>> cvidxInEachRegion;
 	wsNetwork wsn;
@@ -515,14 +521,14 @@ typedef struct _cvStreamAtt
 
 typedef struct _cvAtt
 {
-	int idx_xr;
-	int idx_yc;
+	int idx_xc;
+	int idx_yr;
 	int wsid = -1; //유역 ID, 해당 raster cell의 값
 	cellFlowType flowType;//셀의 종류, 지표면흐름, 하도흐름, 지표면+하도
 	double slopeOF = 0.0; //지표면 해석에 적용되는 overland flow 셀의 경사(m/m)
 	double slope = 0.0; //셀의 경사(m/m)
 	flowDirection8 fdir;//흐름방향
-	int fac = -1;//흐름누적수, 자신의 셀을 제외하고, 상류에 있는 격자 개수
+	int fac = -1;//흐름누적수, 자신의 셀을 제외하고, 상류에 있는 격자 개수. 최소값은 0 최대값은 유효셀 개수 -1
 	double dxDownHalf_m = 0.0;//격자 중심으로부터 하류방향 격자면까지의 거리
 	double dxWSum = 0.0;//격자 중심으로부터 상류방향 격자면까지의 거리합
 	vector<int> neighborCVidxFlowintoMe;//현재 셀로 흘러 들어오는 인접셀의 ID, 최대 7개
@@ -800,8 +806,8 @@ int openPrjAndSetupModel(int forceRealTime);//1:true, -1:false
 void outputManager(int nowTsec,
 	int nowRForder);
 
-int readDomainFileAndSetupCV();
-int readSlopeFdirFacStreamCwCfSsrFileAndSetCV();
+int readDomainFaFileAndSetupCV();
+int readSlopeFdirStreamCwCfSsrFileAndSetCV();
 int readLandCoverFileAndSetCVbyVAT();
 int readSoilTextureFileAndSetCVbyVAT();
 int readSoilDepthFileAndSetCVbyVAT();
@@ -874,10 +880,10 @@ inline  double vByManningEq(double hydraulicRaidus,
 
 // extern C
 int readLandCoverFile(string fpnLC, 
-	int** cvAryidx, cvAtt* cvs1D, int nColX, int nRowY);
+	int** cvAryidx, cvAtt* cvs1D, int effCellCount);
 int readSoilTextureFile(string fpnST, 
-	int** cvAryidx, cvAtt* cvs1D, int nColX, int nRowY);
+	int** cvAryidx, cvAtt* cvs1D, int effCellCount);
 int readSoilDepthFile(string fpnSD, 
-	int** cvAryidx, cvAtt* cvs1D, int nColX, int nRowY);
+	int** cvAryidx, cvAtt* cvs1D, int effCellCount);
 
 

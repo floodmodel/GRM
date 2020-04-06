@@ -94,7 +94,6 @@ int setCVRF(int order)
     if (prj.rfDataType == rainfallDataType::TextFileASCgrid
         || prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
         ascRasterFile rfasc = ascRasterFile(fpnRF);
-        //        omp_set_num_threads(prj.maxDegreeOfParallelism);
         //#pragma omp parallel for schedule(guided)
         for (int i = 0; i < di.cellNnotNull; ++i) {
             // 유역의 전체 강우량은 inlet 등으로 toBeSimulated == -1 여도 계산에 포함한다.
@@ -102,7 +101,7 @@ int setCVRF(int order)
             //if (cvs[i].toBeSimulated == -1) {
             //    continue;
             //}
-            double inRF_mm = rfasc.valuesFromTL[cvs[i].idx_xr][cvs[i].idx_yc];
+            double inRF_mm = rfasc.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
             if (prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
                 inRF_mm = inRF_mm / (60.0 / dtrf_min);
             }

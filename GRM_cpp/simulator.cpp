@@ -12,7 +12,9 @@ extern thisSimulation ts;
 
 extern domaininfo di;
 extern cvAtt* cvs;
-extern map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
+extern map<int, int*> cvaisToFA; //fa별 cv array idex 목록
+extern vector<int> fas;
+extern map<int, int> faCount;
 extern vector<rainfallData> rfs;
 extern flowControlCellAndData fccds;
 extern wpinfo wpis;
@@ -35,7 +37,6 @@ int startSimulationSingleEvent()
     while (nowTsec < endingT_sec) {
         //dtsec = ts.dtsec;        
         // dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
-        /*if (isRFended == -1 && (nowRFOrder == 0 || (nowTsec > dtRF_sec* nowRFOrder))) {*/
         if (nowTsec > dtRF_sec* rfOrder) {
             if (rfOrder < ts.rfDataCountTotal) {
                 rfOrder++; // 이렇게 하면 마지막 레이어 적용
@@ -47,10 +48,6 @@ int startSimulationSingleEvent()
             }
         }
         nowTmin = nowTsec / 60.0;
-        if (nowTmin == 65)
-        {
-            int a = 1;
-        }
         if (simulateRunoff(nowTmin) == -1) { return -1; }
         calCumulRFduringDTP(ts.dtsec);
         outputManager(nowTsec, rfOrder);
@@ -87,50 +84,42 @@ int simulateRunoff(double nowTmin)
     int maxLimit = di.facMax + 1;
     ts.vMaxInThisStep = DBL_MIN;
     int numth = prj.mdp;
-    //double* uMax = new double[numth];
-    for (int fac = 0; fac < maxLimit; ++fac) {
-        if (cvaisToFA[fac].size() > 0) {
-            int iterLimit = cvaisToFA[fac].size();
-#pragma omp parallel
-            {    // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
-            // VS2019는 openMP 2.0 지원, 그러므로 critical 사용한다.
-            // 배열 보다는 critical이 좀더 빠르다..
-                double uMax = 0;
-                int i=-1;
-#pragma omp for schedule(guided) private(i)
-                for (int e = 0; e < iterLimit; ++e) {
-                  i = cvaisToFA[fac][e];
-                  //cout << i << endl;
-                    if (cvs[i].toBeSimulated == 1) {
-                        simulateRunoffCore(i, nowTmin);
-                        if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                            if (uMax < cvs[i].uOF) {
-                                uMax = cvs[i].uOF;
-                            }
-                        }
-                        else {
-                            if (uMax < cvs[i].stream.uCH) {
-                                uMax = cvs[i].stream.uCH;
-                            }
-                        }
-                        //if (ts.vMaxInThisStep < uMax) {
-                        //    ts.vMaxInThisStep = uMax;
-                        //}
+    double* uMax = new double[numth];
+    for (int fac : fas) {
+        int iterLimit = faCount[fac];
+//        // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
+//        // VS2019는 openMP 2.0 지원, 
+//        // 배열 사용하는 것이 critical 보다 좀더 빠르다..
+        int i = -1;
+        int nth = 0;
+#pragma omp parallel for private(i, nth) //schedule(guided)  //  guided 안쓰는더 더 빠르다..
+        for (int e = 0; e < iterLimit; ++e) {
+            i = cvaisToFA[fac][e];
+            nth = omp_get_thread_num();
+            if (cvs[i].toBeSimulated == 1) {
+                simulateRunoffCore(i, nowTmin);
+                if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                    if (uMax[nth] < cvs[i].uOF) {
+                        uMax[nth] = cvs[i].uOF;
                     }
                 }
-#pragma omp critical(getVmax)
-                {
-                    if (prj.IsFixedTimeStep == -1) {
-                        if (ts.vMaxInThisStep < uMax) {
-                            ts.vMaxInThisStep = uMax;
-                        }
+                else {
+                    if (uMax[nth] < cvs[i].stream.uCH) {
+                        uMax[nth] = cvs[i].stream.uCH;
                     }
                 }
             }
         }
     }
+    for (int i = 0; i < prj.mdp; ++i) {
+        if (ts.vMaxInThisStep < uMax[i]) {
+            ts.vMaxInThisStep = uMax[i];
+        }
+    }
+    delete[] uMax;
     return 1;
 }
+
 
 void simulateRunoffCore(int i, double nowTmin)
 {
@@ -157,7 +146,7 @@ void simulateRunoffCore(int i, double nowTmin)
                 setNoFluxCVOF(i);
             }
         }
-        else { //cvs[i].flowType == cellFlowType::ChannelFlow  || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow
+        else { 
             double CSAchCVw_i_jP1 = 0;
             if (fac > 0) {
                 CSAchCVw_i_jP1 = getChCSAatCVW(i);
@@ -203,7 +192,6 @@ void initThisSimulation()
     ts.setupGRMisNormal = 1;
     ts.grmStarted = 1;
     ts.stopSim = -1;
-    ts.dtsec = prj.dtsec;
     ts.vMaxInThisStep = DBL_MIN;
     //ts.iscvsb = -1;
     ts.cvsbT_sec = 0;
@@ -227,6 +215,10 @@ void initThisSimulation()
     if (ts.dtMaxLimit_sec < ts.dtMinLimit_sec) {
         ts.dtMaxLimit_sec = ts.dtMinLimit_sec;
     }
+    if (ts.dtMaxLimit_sec < prj.dtsec) {
+        prj.dtsec = ts.dtMaxLimit_sec;
+    }
+    ts.dtsec = prj.dtsec;
 
     time_t now = time(0);
     localtime_s(&ts.g_RT_tStart_from_MonitorEXE, &now);
@@ -235,11 +227,12 @@ void initThisSimulation()
 
 void setCVStartingCondition(double iniflow)
 {
-    double hChCVini;
-    double chCSAini;
-    double qChCVini;
-    double uChCVini;
+    #pragma omp parallel for schedule(guided)
     for (int i = 0; i < di.cellNnotNull; ++i) {
+        double hChCVini;
+        double chCSAini;
+        double qChCVini;
+        double uChCVini;
         double iniQAtwsOutlet = 0;
         int faAtBaseCV = di.facMax;
         int wsid = cvs[i].wsid;
@@ -343,6 +336,7 @@ void setCVStartingCondition(double iniflow)
             }
         }
     }
+
     for (int wpcvid : wpis.wpCVidxes) {
         wpis.maxDepth_m[wpcvid] = 0;
         wpis.maxDepthTime[wpcvid] = "";

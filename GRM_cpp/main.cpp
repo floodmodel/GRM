@@ -31,7 +31,9 @@ int** cvais; // 각셀의 cv array idex
 cvAtt* cvs;
 cvAtt* cvsb;
 vector<rainfallData> rfs;
-map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
+map<int, int*> cvaisToFA; //fa별 cv array idex 목록
+vector<int> fas;
+map<int, int> faCount;
 wpinfo wpis;
 flowControlCellAndData fccds;
 
@@ -182,15 +184,15 @@ void disposeDynamicVars()
 	if (cvs != NULL) { delete[] cvs; }
 	if (cvsb != NULL) { delete[] cvsb; }
 
-	//if (cvaisToFA.size() > 0) {
-	//	map<int, int*>::iterator iter;
-	//	map<int, int*> cvansTofa; //fa별 cvan 목록
-	//	for (iter = cvansTofa.begin(); iter != cvansTofa.end(); ++iter) {
-	//		if (cvansTofa[iter->first] != NULL) {
-	//			delete[] cvansTofa[iter->first];
-	//		}				
-	//	}
-	//}
+	if (cvaisToFA.size() > 0) {
+		map<int, int*>::iterator iter;
+		//map<int, int*> cvansTofa; //fa별 cvan 목록
+		for (iter = cvaisToFA.begin(); iter != cvaisToFA.end(); ++iter) {
+			if (cvaisToFA[iter->first] != NULL) {
+				delete[] cvaisToFA[iter->first];
+			}				
+		}
+	}
 
 }
 
