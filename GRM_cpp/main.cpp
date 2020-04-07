@@ -233,9 +233,7 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 	string isparallel = "true";
 	omp_set_num_threads(prj.mdp);
 
-	//todo : 여기에 셀 개수 조건으로 mdp 설정 추가 필요
-	//위천의 경우, 11734인데, 병렬계산이 쪼매 더 느리다..
-	// 금호강의 경우, 8418인데, 병렬계산이 쪼매 더 느리다..
+	//todo : 여기에 셀 개수 조건으로 mdp 설정 추가 가능
 	//if (di.cellNnotNull < 12000) {
 	//	writeLog(fpnLog, "The number of effective cell [ "
 	//		+ to_string(di.cellNnotNull) + "] is smaller than 12,000.\n"

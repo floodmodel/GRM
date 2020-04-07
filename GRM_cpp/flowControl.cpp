@@ -69,7 +69,7 @@ void calFCReservoirOutFlow(int i, double nowTmin)
 {// nowTmin의 최소값은 dtsec/60이다.
     int dtfc = prj.fcs[i].fcDT_min;
     //cout << i << endl;
-    int nowOrder = fccds.curDorder[i];
+    //int nowOrder = fccds.curDorder[i];
     // nowTmin= dtfc* fccds.curDorder[i]인 경우에는 
     if (nowTmin > dtfc* fccds.curDorder[i]) {
         if (fccds.curDorder[i] < fccds.flowData_m3Ps[i].size()) {

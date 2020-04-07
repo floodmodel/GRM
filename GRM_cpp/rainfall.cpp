@@ -88,13 +88,13 @@ int setCVRF(int order)
     string fpnRF = rfs[order - 1].FilePath + "\\" + rfs[order - 1].FileName;
     double cellSize = di.cellSize;
     ts.rfiSumAllCellsInCurRFData_mPs = 0;
-    for (int wpCVID : wpis.wpCVidxes) {
-        wpis.rfiReadSumUpWS_mPs[wpCVID] = 0;
+    for (int idx : wpis.wpCVidxes) {
+        wpis.rfiReadSumUpWS_mPs[idx] = 0;
     }
     if (prj.rfDataType == rainfallDataType::TextFileASCgrid
         || prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
         ascRasterFile rfasc = ascRasterFile(fpnRF);
-        //#pragma omp parallel for schedule(guided)
+        //#pragma omp parallel for// schedule(guided)
         for (int i = 0; i < di.cellNnotNull; ++i) {
             // 유역의 전체 강우량은 inlet 등으로 toBeSimulated == -1 여도 계산에 포함한다.
             // 상류 cv 개수에 이 조건 추가하려면 주석 해제.
@@ -105,14 +105,15 @@ int setCVRF(int order)
             if (prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
                 inRF_mm = inRF_mm / (60.0 / dtrf_min);
             }
-            if (inRF_mm < 0) {
+            if (inRF_mm <= 0) {
                 cvs[i].rfiRead_mPsec = 0;
             }
             else {
                 cvs[i].rfiRead_mPsec = rfintensity_mPsec(inRF_mm, dtrf_sec);
-            }           
-            for (int wpcvid : cvs[i].downWPCVidx) {
-                wpis.rfiReadSumUpWS_mPs[wpcvid] = wpis.rfiReadSumUpWS_mPs[wpcvid]
+            }
+
+            for (int idx : cvs[i].downWPCVidx) {
+                wpis.rfiReadSumUpWS_mPs[idx] = wpis.rfiReadSumUpWS_mPs[idx]
                     + cvs[i].rfiRead_mPsec;
             }
             ts.rfiSumAllCellsInCurRFData_mPs =
@@ -124,22 +125,23 @@ int setCVRF(int order)
         string value = rfs[order - 1].Rainfall;
         double inRF_mm = stod(value);
         double inRF_mPs;
-        if (inRF_mm < 0) { 
-            inRF_mm = 0; 
+        if (inRF_mm < 0) {
+            inRF_mm = 0;
             inRF_mPs = 0;
         }
         else {
             inRF_mPs = rfintensity_mPsec(inRF_mm, dtrf_sec);
-        }       
+        }
+#pragma omp parallel for schedule(guided)
         for (int i = 0; i < di.cellNnotNull; ++i) {
             // 유역의 전체 강우량은 inlet 등으로 toBeSimulated == -1 여도 계산에 포함한다.
             // 상류 cv 개수에 이 조건 추가하려면 주석 해제.
             //if (cvs[i].toBeSimulated == -1) { continue; }
             cvs[i].rfiRead_mPsec = inRF_mPs;
-        }        
+        }
         ts.rfiSumAllCellsInCurRFData_mPs = inRF_mPs * di.cellNtobeSimulated;
-        for (int wpcvid : wpis.wpCVidxes) {
-            wpis.rfiReadSumUpWS_mPs[wpcvid] = inRF_mm * wpis.cvCountAllup[wpcvid];
+        for (int idx : wpis.wpCVidxes) {
+            wpis.rfiReadSumUpWS_mPs[idx] = inRF_mm * wpis.cvCountAllup[idx];
         }
     }
     else {

@@ -30,8 +30,11 @@ projectfilePathInfo getProjectFileInfo(string fpn_prj)
 
 int openProjectFile(int forceRealTime)
 {
-	ifstream prjfile(ppi.fpn_prj);
-	if (prjfile.is_open() == false) { return -1; }
+	/*ifstream prjfile(ppi.fpn_prj);
+	if (prjfile.is_open() == false) { return -1; }*/
+	if (_access(ppi.fpn_prj.c_str(), 0) != 0) {
+		 return -1; 
+	}
 	projectFileFieldName fn;
 	swsParameters* aswp;
 	aswp = new swsParameters;
@@ -133,7 +136,6 @@ int openProjectFile(int forceRealTime)
 			}
 			continue;
 		}
-
 		if (sbSubWatershedSettings == 1 && pt.sSubWatershedSettings == 0) {
 			sbSubWatershedSettings = 0;
 			if (aswp->wsid > 0 && isNormalSwsParameter(aswp) == 1) {
@@ -1016,6 +1018,7 @@ int readXmlRowLandCover(string aline, landCoverInfo* lc)
 			writeLog(fpnLog, "Land cover raster value in gmp file is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.GRMCode_LC) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.GRMCode_LC);
@@ -1052,6 +1055,7 @@ int readXmlRowLandCover(string aline, landCoverInfo* lc)
 					+ to_string(lc->lcGridValue) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
+			return 1;
 		}
 		else {
 			writeLog(fpnLog, "Land cover code name of the raster value ["
@@ -1069,6 +1073,7 @@ int readXmlRowLandCover(string aline, landCoverInfo* lc)
 				+ to_string(lc->lcGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.ImperviousR) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.ImperviousR);
@@ -1080,6 +1085,7 @@ int readXmlRowLandCover(string aline, landCoverInfo* lc)
 				+ to_string(lc->lcGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	return 1;
 }
@@ -1097,6 +1103,7 @@ int  readXmlRowSoilDepth(string aline,	soilDepthInfo* sd)
 			writeLog(fpnLog, "Soil depth raster value in gmp file is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.GRMCode_SD) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.GRMCode_SD);
@@ -1130,6 +1137,7 @@ int  readXmlRowSoilDepth(string aline,	soilDepthInfo* sd)
 					+ to_string(sd->sdGridValue) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
+			return 1;
 		}
 		else {
 			writeLog(fpnLog, "Soil depth code name of the raster value ["
@@ -1147,6 +1155,7 @@ int  readXmlRowSoilDepth(string aline,	soilDepthInfo* sd)
 				+ to_string(sd->sdGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	return 1;
 }
@@ -1163,6 +1172,7 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 			writeLog(fpnLog, "Soil texture raster value in gmp file is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.GRMCode_ST) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.GRMCode_ST);
@@ -1211,6 +1221,7 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 					+ to_string(st->stGridValue) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
+			return 1;
 		}
 		else {
 			writeLog(fpnLog, "Soil texture code name of the raster value ["
@@ -1228,6 +1239,7 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 				+ to_string(st->stGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find("<"+fn.EffectivePorosity+">") != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.EffectivePorosity);
@@ -1239,6 +1251,7 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 				+ to_string(st->stGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.WFSuctionHead) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.WFSuctionHead);
@@ -1250,6 +1263,7 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 				+ to_string(st->stGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.HydraulicConductivity) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.HydraulicConductivity);
@@ -1261,6 +1275,7 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 				+ to_string(st->stGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	return 1;
 }
@@ -1274,18 +1289,21 @@ int readXmlRowWatchPoint(string aline, wpLocationRC* wpl)
 		if (vString != "") {
 			wpl->wpName = vString;
 		}
+		return 1;
 	}
 	if (aline.find(fn.ColX_WP) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.ColX_WP);
 		if (vString != "") {
 			wpl->wpColX = stoi(vString);
 		}
+		return 1;
 	}
 	if (aline.find(fn.RowY_WP) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.RowY_WP);
 		if (vString != "") {
 			wpl->wpRowY = stoi(vString);
 		}
+		return 1;
 	}
 	return 1;
 }
@@ -1294,11 +1312,12 @@ int readXmlRowWatchPoint(string aline, wpLocationRC* wpl)
 int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 	string vString = "";
 	projectFileFieldName fn;
-	if (aline.find(fn.Name_FCG) != string::npos) {
+	if (aline.find("<"+fn.Name_FCG+">") != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.Name_FCG);
 		if (vString != "") {
 			fci->fcName = vString;
 		}
+		return 1;
 	}
 	if (aline.find(fn.ColX_FCG) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.ColX_FCG);
@@ -1306,9 +1325,10 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			fci->fcColX = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "ColX  value of [" + fci->fcName + "] is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ColX value of [" + fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.RowY_FCG) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.RowY_FCG);
@@ -1319,6 +1339,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			writeLog(fpnLog, "RowY  value of [" + fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.ControlType) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.ControlType);
@@ -1351,6 +1372,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			return -1;
 		}
 		fci->fcType = afct;
+		return 1;
 	}
 	if (aline.find(fn.FCDT_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.FCDT_min);
@@ -1362,6 +1384,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 				+ fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.FlowDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.FlowDataFile);
@@ -1387,6 +1410,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
 			}
+			return 1;
 		}
 		if (aline.find("<"+fn.MaxStorage+">") != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MaxStorage);
@@ -1404,6 +1428,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
 			}
+			return 1;
 		}
 		if (aline.find("<"+fn.MaxStorageR+">") != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MaxStorageR);
@@ -1421,6 +1446,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
 			}
+			return 1;
 		}
 		if (aline.find(fn.ROType) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.ROType);
@@ -1450,6 +1476,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 				return -1;
 			}
 			fci->roType = arot;
+			return 1;
 		}
 		if (fci->roType == reservoirOperationType::ConstantQ) {
 			if (aline.find(fn.ROConstQ) != string::npos) {
@@ -1462,6 +1489,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 						+ fci->fcName + "] is invalid.\n", 1, 1);
 					return -1;
 				}
+				return 1;
 			}
 			if (aline.find(fn.ROConstQDuration) != string::npos) {
 				vString = getValueStringFromXmlLine(aline, fn.ROConstQDuration);
@@ -1473,6 +1501,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 						+ fci->fcName + "] is invalid.\n", 1, 1);
 					return -1;
 				}
+				return 1;
 			}
 		}
 	}
@@ -1492,6 +1521,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			writeLog(fpnLog, "Most downstream watershed ID for channel setting is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.CrossSectionType) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.CrossSectionType);
@@ -1515,6 +1545,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			return -1;
 		}
 		csi->csType = acst;
+		return 1;
 	}
 	if (aline.find(fn.SingleCSChannelWidthType) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.SingleCSChannelWidthType);
@@ -1538,6 +1569,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			return -1;
 		}
 		csi->csWidthType = acwt;
+		return 1;
 	}
 	if (aline.find(fn.ChannelWidthEQc) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.ChannelWidthEQc);
@@ -1549,6 +1581,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.ChannelWidthEQd) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.ChannelWidthEQd);
@@ -1560,6 +1593,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.ChannelWidthEQe) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.ChannelWidthEQe);
@@ -1571,6 +1605,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.ChannelWidthMostDownStream) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.ChannelWidthMostDownStream);
@@ -1582,6 +1617,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.LowerRegionHeight) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.LowerRegionHeight);
@@ -1593,6 +1629,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.LowerRegionBaseWidth) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.LowerRegionBaseWidth);
@@ -1604,6 +1641,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.UpperRegionBaseWidth) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.UpperRegionBaseWidth);
@@ -1615,6 +1653,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.CompoundCSChannelWidthLimit) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.CompoundCSChannelWidthLimit);
@@ -1626,6 +1665,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.BankSideSlopeRight) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.BankSideSlopeRight);
@@ -1637,6 +1677,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.BankSideSlopeLeft) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.BankSideSlopeLeft);
@@ -1648,6 +1689,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	return 1;
 
@@ -1666,6 +1708,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			writeLog(fpnLog, "Watershed ID is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.IniSaturation) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.IniSaturation);
@@ -1677,6 +1720,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.MinSlopeOF) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.MinSlopeOF);
@@ -1688,6 +1732,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.UnsaturatedKType) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.UnsaturatedKType);
@@ -1714,6 +1759,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			return -1;
 		}
 		ssp->unSatKType = uskt;
+		return 1;
 	}
 	if (aline.find(fn.CoefUnsaturatedK) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.CoefUnsaturatedK);
@@ -1725,6 +1771,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.MinSlopeChBed) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.MinSlopeChBed);
@@ -1736,6 +1783,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.MinChBaseWidth) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.MinChBaseWidth);
@@ -1747,6 +1795,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.ChRoughness) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.ChRoughness);
@@ -1758,6 +1807,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.DryStreamOrder) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.DryStreamOrder);
@@ -1769,6 +1819,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.IniFlow) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.IniFlow);
@@ -1780,6 +1831,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.CalCoefLCRoughness) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.CalCoefLCRoughness);
@@ -1791,6 +1843,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.CalCoefPorosity) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.CalCoefPorosity);
@@ -1802,6 +1855,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.CalCoefWFSuctionHead) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.CalCoefWFSuctionHead);
@@ -1813,6 +1867,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.CalCoefHydraulicK) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.CalCoefHydraulicK);
@@ -1824,6 +1879,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.CalCoefSoilDepth) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.CalCoefSoilDepth);
@@ -1835,6 +1891,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
+		return 1;
 	}
 	if (aline.find(fn.UserSet) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.UserSet);
@@ -1844,6 +1901,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		else if (lower(vString) == "false") {
 			ssp->userSet = -1;
 		}
+		return 1;
 	}
 	return 1;
 }

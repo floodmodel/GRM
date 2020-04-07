@@ -84,28 +84,29 @@ int simulateRunoff(double nowTmin)
     int maxLimit = di.facMax + 1;
     ts.vMaxInThisStep = DBL_MIN;
     int numth = prj.mdp;
-    double* uMax = new double[numth];
+    double* uMax = new double[numth];// 이렇게 하면 아주 작은 값으로 초기화 된다.
     for (int fac : fas) {
         int iterLimit = faCount[fac];
-//        // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
-//        // VS2019는 openMP 2.0 지원, 
-//        // 배열 사용하는 것이 critical 보다 좀더 빠르다..
-        int i = -1;
-        int nth = 0;
-#pragma omp parallel for private(i, nth) //schedule(guided)  //  guided 안쓰는더 더 빠르다..
-        for (int e = 0; e < iterLimit; ++e) {
-            i = cvaisToFA[fac][e];
-            nth = omp_get_thread_num();
-            if (cvs[i].toBeSimulated == 1) {
-                simulateRunoffCore(i, nowTmin);
-                if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                    if (uMax[nth] < cvs[i].uOF) {
-                        uMax[nth] = cvs[i].uOF;
+#pragma omp parallel
+        {
+            // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
+            // 배열 사용하는 것이 critical 보다 빠르다..
+            int nth = omp_get_thread_num();
+            uMax[nth] = DBL_MIN;
+#pragma omp for//  guided 안쓰는더 더 빠르다..
+            for (int e = 0; e < iterLimit; ++e) {
+                int i = cvaisToFA[fac][e];
+                if (cvs[i].toBeSimulated == 1) {
+                    simulateRunoffCore(i, nowTmin);
+                    if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                        if (uMax[nth] < cvs[i].uOF) {
+                            uMax[nth] = cvs[i].uOF;
+                        }
                     }
-                }
-                else {
-                    if (uMax[nth] < cvs[i].stream.uCH) {
-                        uMax[nth] = cvs[i].stream.uCH;
+                    else {
+                        if (uMax[nth] < cvs[i].stream.uCH) {
+                            uMax[nth] = cvs[i].stream.uCH;
+                        }
                     }
                 }
             }
@@ -227,7 +228,7 @@ void initThisSimulation()
 
 void setCVStartingCondition(double iniflow)
 {
-    #pragma omp parallel for schedule(guided)
+    #pragma omp parallel for //schedule(guided)
     for (int i = 0; i < di.cellNnotNull; ++i) {
         double hChCVini;
         double chCSAini;

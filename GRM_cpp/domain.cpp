@@ -314,7 +314,7 @@ int setCVbyLCConstant()
     }
     int nRy = di.nRows;
     int nCx = di.nCols;
-#pragma omp parallel for schedule(guided)
+#pragma omp parallel for //schedule(guided)
     for (int i = 0; i < di.cellNnotNull; ++i) {
         cvs[i].lcCellValue = 0; // 이 값은 상수를 의미하게 한다.
         cvs[i].rcOFori = prj.cnstRoughnessC;
@@ -333,7 +333,7 @@ int readLandCoverFile(string fpnLC, int** cvAryidx, cvAtt* cvs1D, int effCellCou
     }
     ascRasterFile lcFile = ascRasterFile(fpnLC);
     int isnormal = 1;
-#pragma omp parallel for schedule(guided)
+#pragma omp parallel for //schedule(guided)
     for (int i = 0; i < effCellCount; ++i) {
         int v = (int)lcFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];;
         if (v > 0) {
@@ -432,7 +432,7 @@ int setCVbySTConstant()
 
     int nRy = di.nRows;
     int nCx = di.nCols;
-#pragma omp parallel for schedule(guided)
+#pragma omp parallel for //schedule(guided)
     for (int i = 0; i < di.cellNnotNull; ++i) {
                 cvs[i].stCellValue = 0;// 이 값은 상수를 의미하게 한다.
                 cvs[i].porosity_EtaOri = prj.cnstSoilPorosity;
@@ -453,7 +453,7 @@ int readSoilTextureFile(string fpnST, int** cvAryidx, cvAtt* cvs1D, int effCellC
     }
     ascRasterFile stFile = ascRasterFile(fpnST);
     int isnormal = 1;
-#pragma omp parallel for schedule(guided)
+#pragma omp parallel for// schedule(guided)
     for (int i = 0; i < effCellCount; ++i) {
         int v = (int)stFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
         if (v > 0) {
@@ -532,7 +532,7 @@ int setCVbySDConstant()
     }
     int nRy = di.nRows;
     int nCx = di.nCols;
-#pragma omp parallel for schedule(guided)
+#pragma omp parallel for //schedule(guided)
     for (int i = 0; i < di.cellNnotNull; ++i) {
         cvs[i].sdCellValue = 0;// 이 값은 상수를 의미하게 한다.
         cvs[i].sdOri_m = prj.cnstSoilDepth / 100.0;   // cm ->  m
@@ -550,7 +550,7 @@ int readSoilDepthFile(string fpnSD, int** cvAryidx, cvAtt* cvs1D, int effCellCou
     }
     ascRasterFile sdFile = ascRasterFile(fpnSD);
     int isnormal = 1;
-#pragma omp parallel for schedule(guided)
+#pragma omp parallel for //schedule(guided)
     for (int i = 0; i < effCellCount; ++i) {
         int v = (int)sdFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
         if (v > 0) {
@@ -568,7 +568,7 @@ int readSoilDepthFile(string fpnSD, int** cvAryidx, cvAtt* cvs1D, int effCellCou
 int setFlowNetwork()
 {
     initWatershedNetwork(); // 여기서 유역 네트워크 정보 초기화
-#pragma omp parallel for schedule(guided)
+#pragma omp parallel for// schedule(guided)
     //여기서 셀별 네트워크 정보 초기화
     for (int i = 0; i < di.cellNnotNull; ++i) {
         cvs[i].neighborCVidxFlowintoMe.clear();
