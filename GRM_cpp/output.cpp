@@ -34,7 +34,7 @@ void writeSimStep(int elapsedT_min)
     double simDur_min = prj.simDuration_hr * 60.0;
     nowStep = elapsedT_min / simDur_min * 100.0;
     curProgressRatio = forString(nowStep, 0);
-    cout<<"\rCurrent progress: " + curProgressRatio + "%... " + msgFileProcess;
+    cout<<"\rCurrent progress: " + curProgressRatio + "%..." + msgFileProcess;
 }
 
 

@@ -1,5 +1,6 @@
 
 #include <omp.h>
+#include <string>
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"
@@ -72,7 +73,12 @@ int startSimulationSingleEvent()
         return 1;
     }
     else {
-        writeLog(fpnLog, "Simulation was completed.\n", 1, 1);
+        COleDateTime  timeNow = COleDateTime::GetCurrentTime();
+        COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
+            writeLog(fpnLog, "Simulation was completed. Run time: "
+                +to_string(tsTotalSim.GetHours())+"hrs "
+                +to_string(tsTotalSim.GetMinutes())+"min "
+                +to_string(tsTotalSim.GetSeconds())+"sec.\n", 1, 1);
         return 1;
     }
     return 1;
