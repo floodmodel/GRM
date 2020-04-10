@@ -503,8 +503,8 @@ typedef struct _domaininfo
 
 typedef struct _cvStreamAtt
 {
-	double chBedSlope = 0.0;//하도셀과 하도+지표면 흐름 속성을 가지는 격자에 부여되는 하천경사(m/m)
-	int chStrOrder = -1;//하천차수
+	double slopeCH = 0.0;//하도셀과 하도+지표면 흐름 속성을 가지는 격자에 부여되는 하천경사(m/m)
+	int cellValue = -1;//하천차수
 	double chBaseWidth = 0.0;//하천의 바닥폭[m]
 	double chBaseWidthByLayer = 0.0;//하폭레이어에서 받은 하폭[m]
 	double chRC = 0.0;//현재의 channel CV의 하도조도계수
@@ -527,8 +527,8 @@ typedef struct _cvStreamAtt
 
 typedef struct _cvAtt
 {
-	int idx_xc;
-	int idx_yr;
+	int xCol;
+	int yRow;
 	int wsid = -1; //유역 ID, 해당 raster cell의 값
 	cellFlowType flowType;//셀의 종류, 지표면흐름, 하도흐름, 지표면+하도
 	double slopeOF = 0.0; //지표면 해석에 적용되는 overland flow 셀의 경사(m/m)
@@ -891,14 +891,15 @@ namespace GRM
 {
 	class grmWS {
 	private:
-	 //   flowDirection8 fdType;
-		//string fpnStream;
-		//string fpnLandCover;
-		//string fpnSoilTexture;
-		//string fpnSoilDepth;
-		//string fpnissr;
-		//string fpniChannelFlow;
+		int setPublicVariables();
+		bool byGMPfile = false;
 	public:
+		cellPosition mostDownStreamCell;
+		vector<int> WSIDsAll;
+		int WScount = 0;
+		vector<int> mostDownStreamWSIDs;
+		int cellCountInWatershed=0;
+
 		grmWS(string fdirType, string fpnDomain,
 			string slopeFPN, string fpnFdir, string fpnFac,
 			string fpnStream = "", string fpnLandCover = "",
@@ -908,10 +909,25 @@ namespace GRM
 			string fpnChannelWidth="");
 		grmWS(string gmpFPN);
 		
-		GRMDLL_API bool IsInWatershedArea(int colXArrayIdx, int rowYArrayIdx);
-		
+		GRMDLL_API bool IsInWatershedArea(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
 		GRMDLL_API int grmPlus(int a, int b);
 		GRMDLL_API int grmMultiple(int a, int b);
+		GRMDLL_API vector<int> upStreamWSIDs(int currentWSID);
+		GRMDLL_API int upStreamWSCount(int currentWSID);
+		GRMDLL_API vector<int> downStreamWSIDs(int currentWSID);
+		GRMDLL_API int downStreamWSCount(int currentWSID);
+		GRMDLL_API int watershedID(int colXAryidx, int rowYAryidx); // 배열 인덱스 사용
+		GRMDLL_API string flowDirection(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API int flowAccumulation(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API double slope(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API int streamValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API string cellFlowType(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API int landCoverValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API int soilTextureValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API int soilDepthValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API vector<string> allCellsInUpstreamArea(int colXAryidx, int rowYAryidx); //    Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
+	
+	
 	};
 }
 

@@ -101,7 +101,7 @@ int setCVRF(int order)
             //if (cvs[i].toBeSimulated == -1) {
             //    continue;
             //}
-            double inRF_mm = rfasc.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
+            double inRF_mm = rfasc.valuesFromTL[cvs[i].xCol][cvs[i].yRow];
             if (prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
                 inRF_mm = inRF_mm / (60.0 / dtrf_min);
             }

@@ -210,10 +210,10 @@ int updateCVbyUserSettings()
             cvs[i].stream.bankCoeff = 1 / prj.css[mdwsid].bankSlopeLeft
                 + 1 / prj.css[mdwsid].bankSlopeRight;
             if (cvs[i].slope < ups.minSlopeChBed) {
-                cvs[i].stream.chBedSlope = ups.minSlopeChBed;
+                cvs[i].stream.slopeCH = ups.minSlopeChBed;
             }
             else {
-                cvs[i].stream.chBedSlope = cvs[i].slope;
+                cvs[i].stream.slopeCH = cvs[i].slope;
             }
             if (prj.css[mdwsid].csType == crossSectionType::CSSingle) {//Single CS에서는 두 가지 방법을 이용해서 하폭을 계산
                 channelSettingInfo cs = prj.css[mdwsid];
@@ -221,7 +221,7 @@ int updateCVbyUserSettings()
                     double cellarea = di.cellSize * di.cellSize / 1000000.0;
                     double area = (cvs[i].fac + 1.0) * cellarea;
                     cvs[i].stream.chBaseWidth = cs.cwEQc * pow(area, cs.cwEQd)
-                        / pow(cvs[i].stream.chBedSlope, cs.cwEQe);
+                        / pow(cvs[i].stream.slopeCH, cs.cwEQe);
                 }
                 else {
                     int facMax_inMDWS = cvs[di.wsn.wsOutletidxs[mdwsid]].fac;

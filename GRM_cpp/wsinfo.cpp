@@ -132,6 +132,8 @@ GRM::grmWS::grmWS(string fdirType, string fpnDomain,
         writeLog(fpnLog, "Network setup failed !!!\n", 1, 1);
         return;
     }
+    byGMPfile = false;
+    GRM::grmWS::setPublicVariables();
 }
 
 GRM::grmWS::grmWS(string gmpFPN)
@@ -141,6 +143,8 @@ GRM::grmWS::grmWS(string gmpFPN)
         writeLog(fpnLog, "Model setup failed !!!\n", 1, 1);
         return;
     }
+    byGMPfile = true;
+    GRM::grmWS::setPublicVariables();
 }
 
 GRM::grmWS::~grmWS()
@@ -160,12 +164,31 @@ GRM::grmWS::~grmWS()
             }
         }
     }
+    //delete[] WSIDsAll;
 }
 
-bool GRM::grmWS::IsInWatershedArea(int colXArrayIdx, int rowYArrayIdx)
+
+int GRM::grmWS::setPublicVariables()
 {
-    int id = cvais[colXArrayIdx][rowYArrayIdx];
-    if (id >= 0) {
+    mostDownStreamCell.xCol = cvs[di.cvidxMaxFac].xCol;
+    mostDownStreamCell.yRow = cvs[di.cvidxMaxFac].yRow;    
+    WSIDsAll = di.dmids;
+    //WSIDsAll = new int[di.dmids.size()];
+    //copy(di.dmids.begin(), di.dmids.end(), WSIDsAll);
+    WScount = (int)di.dmids.size();
+    mostDownStreamWSIDs = di.wsn.mdWSIDs;
+    //mostDownStreamWSIDs = new int[di.wsn.mdWSIDs.size()];
+    //copy(di.wsn.mdWSIDs.begin(), di.wsn.mdWSIDs.end(), mostDownStreamWSIDs);
+    cellCountInWatershed = di.cellNnotNull;
+
+
+}
+
+
+bool GRM::grmWS::IsInWatershedArea(int colXAryidx, int rowYAryidx)
+{
+    int idx = cvais[colXAryidx][rowYAryidx];
+    if (idx >= 0) {
         return true;
     }
     else {
@@ -173,210 +196,165 @@ bool GRM::grmWS::IsInWatershedArea(int colXArrayIdx, int rowYArrayIdx)
     }
 }
 
-GRM::grmWS:
+vector<int> GRM::grmWS::upStreamWSIDs(int currentWSID)
+{
+    return di.wsn.wsidsAllUp[currentWSID];
+}
 
-//public int mostDownStreamCellArrayXColPosition()
-//{
-//    return grmPrj.dmInfo[grmPrj.mMostDownCellArrayNumber].XCol;
-//}
+int GRM::grmWS::upStreamWSCount(int currentWSID)
+{
+    return  di.wsn.wsidsAllUp[currentWSID].size();
+}
 
-//public int mostDownStreamCellArrayYRowPosition()
-//{
-//    return grmPrj.dmInfo[grmPrj.mMostDownCellArrayNumber].YRow;
-//}
+vector<int> GRM::grmWS::downStreamWSIDs(int currentWSID)
+{
+    return di.wsn.wsidsAllDown[currentWSID];
+}
 
-///// <summary>
-/////   Watershed ID list.
-/////   </summary>
-/////   <returns></returns>
-//public int[] WSIDsAll()
-//{
-//    return grmPrj.WSNetwork.WSIDsAll.ToArray();
-//}
+int GRM::grmWS::downStreamWSCount(int currentWSID)
+{
+    return di.wsn.wsidsAllDown[currentWSID].size();
+}
 
-///// <summary>
-/////   Watershed count.
-/////   </summary>
-/////   <returns></returns>
-//public int WScount()
-//{
-//    return grmPrj.WSNetwork.WSIDsAll.Count;
-//}
+int GRM::grmWS::watershedID(int colXAryidx, int rowYAryidx)
+{
+    int idx = cvais[colXAryidx][rowYAryidx];
+    if (idx >= 0) {
+        return cvs[idx].wsid;
+    }
+    else {
+        return 0;
+    }
+}
 
-//// 2018.06.26. 최
-//// 이것을 리스트로 바꾼다. 
-//// 연결되지 않는 여러개 유역 영역을 가지는 정보에서 모든 최하류 유역 id를 받는다.
-//public List<int> mostDownStreamWSIDs()
-//{
-//    return grmPrj.WSNetwork.MostDownstreamWSIDs;
-//}
+string GRM::grmWS::flowDirection(int colXAryidx, int rowYAryidx)
+{
+    int idx = cvais[colXAryidx][rowYAryidx];
+    if (idx >= 0) {
+        return ENUM_TO_STR(cvs[idx].fdir);
+    }
+    else {
+        return "NULL";
+    }
+}
 
-//public List<int> upStreamWSIDs(int currentWSID)
-//{
-//    return grmPrj.WSNetwork.WSIDsAllUps(currentWSID);
-//}
+int GRM::grmWS::flowAccumulation(int colXAryidx, int rowYAryidx)
+{
+    int idx = cvais[colXAryidx][rowYAryidx];
+    if (idx >= 0) {
+        return cvs[idx].fac;
+    }
+    else {
+        return -1;
+    }
+}
 
-//public int upStreamWSCount(int currentWSID)
-//{
-//    return grmPrj.WSNetwork.WSIDsAllUps(currentWSID).Count;
-//}
+double GRM::grmWS::slope(int colXAryidx, int rowYAryidx)
+{
+    int idx = cvais[colXAryidx][rowYAryidx];
+    if (idx >= 0) {
+        if (byGMPfile == true) {
+            if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
+                return cvs[idx].slopeOF;
+            }
+            else {
+                return cvs[idx].stream.slopeCH;
+            }
+        }
+        else {
+            return cvs[idx].slope;
+        }
+    }
+    else {
+        return -1.0;
+    }
+}
 
-//public List<int> downStreamWSIDs(int currentWSID)
-//{
-//    return grmPrj.WSNetwork.WSIDsAllDowns(currentWSID);
-//}
+int GRM::grmWS::streamValue(int colXAryidx, int rowYAryidx)
+{
+    int idx = cvais[colXAryidx][rowYAryidx];
+    if (idx >= 0 && prj.streamFileApplied == 1) {
+        if (cvs[idx].isStream == 1) {
+            return cvs[idx].stream.cellValue;
+        }
+        else {
+            return 0;
+        }
+    }
+    return -1;
+}
 
-//public int downStreamWSCount(int currentWSID)
-//{
-//    return grmPrj.WSNetwork.WSIDsAllDowns(currentWSID).Count;
-//}
+string GRM::grmWS::cellFlowType(int colXAryidx, int rowYAryidx)
+{
+    int idx = cvais[colXAryidx][rowYAryidx];
+    if (idx >= 0) {
+        return ENUM_TO_STR(cvs[idx].flowType);
+    }
+    else {
+        return "NULL";
+    }
+}
 
-//public int watershedID(int colXArrayIdx, int rowYArrayIdx)
-//{
-//    if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-//    {
-//        return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].WSID;
-//    }
-//    else
-//    {
-//        return 0;
-//    }
-//}
+int GRM::grmWS::landCoverValue(int colXAryidx, int rowYAryidx)
+{
+    int idx = cvais[colXAryidx][rowYAryidx];
+    if (idx >= 0) {
+        return cvs[idx].lcCellValue;
+    }
+    else    {
+        return -1;
+    }
+}
 
-//public int cellCountInWatershed()
-//{
-//    return grmPrj.CVCount;
-//}
+int GRM::grmWS::soilTextureValue(int colXAryidx, int rowYAryidx)
+{
+    int idx = cvais[colXAryidx][rowYAryidx];
+    if (idx >= 0) {
+        return cvs[idx].stCellValue;
+    }
+    else {
+        return -1;
+    }
+}
 
-//public string flowDirection(int colXArrayIdx, int rowYArrayIdx)
-//{
-//    if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-//    {
-//        return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].FDir.ToString();
-//    }
-//    else
-//    {
-//        return null;
-//    }
-//}
+int GRM::grmWS::soilDepthValue(int colXAryidx, int rowYAryidx)
+{
+    int idx = cvais[colXAryidx][rowYAryidx];
+    if (idx >= 0) {
+        return  cvs[idx].sdCellValue;
+    }
+    else {
+        return -1;
+    }
+}
 
-//public int flowAccumulation(int colXArrayIdx, int rowYArrayIdx)
-//{
-//    if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-//    {
-//        return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].FAc;
-//    }
-//    else
-//    {
-//        return -1;
-//    }
-//}
-
-//public double slope(int colXArrayIdx, int rowYArrayIdx)
-//{
-//    if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-//    {
-//        return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].Slope;
-//    }
-//    else
-//    {
-//        return default(Double);
-//    }
-//}
-
-//public int streamValue(int colXArrayIdx, int rowYArrayIdx)
-//{
-//    if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true && mstreamFPN != "")
-//    {
-//        if (grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].IsStream)
-//        {
-//            return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].mStreamAttr.ChStrOrder;
-//        }
-//    }
-//    return -1;
-//}
-
-//public string cellFlowType(int colXArrayIdx, int rowYArrayIdx)
-//{
-//    if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-//    {
-//        return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].FlowType.ToString();
-//    }
-//    else
-//    {
-//        return null;
-//    }
-//}
-
-//public int landCoverValue(int colXArrayIdx, int rowYArrayIdx)
-//{
-//    if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-//    {
-//        return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].LandCoverValue;
-//    }
-//    else
-//    {
-//        return -1;
-//    }
-//}
-
-//public int soilTextureValue(int colXArrayIdx, int rowYArrayIdx)
-//{
-//    if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-//    {
-//        return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].SoilTextureValue;
-//    }
-//    else
-//    {
-//        return -1;
-//    }
-//}
-
-//public int soilDepthValue(int colXArrayIdx, int rowYArrayIdx)
-//{
-//    if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-//    {
-//        return grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].SoilDepthTypeValue;
-//    }
-//    else
-//    {
-//        return -1;
-//    }
-//}
-
-///// <summary>
-/////    Select all cells in upstream area of a input cell position. Return string array of cell positions - "column, row".
-/////   </summary>
-/////   <param name="colXArrayIdx"></param>
-/////   <param name="rowYArrayIdx"></param>
-/////   <returns></returns>
-//public string[] allCellsInUpstreamArea(int colXArrayIdx, int rowYArrayIdx)
-//{
-//    if (IsInWatershedArea(colXArrayIdx, rowYArrayIdx) == true)
-//    {
-//        List<int> cvids = new List<int>();
-//        int startingBaseCVID = grmPrj.WSCells[colXArrayIdx, rowYArrayIdx].CVID;
-//        cvids = grmPrj.getAllUpstreamCells(startingBaseCVID);
-//        if (cvids != null)
-//        {
-//            string[] cellsArray = new string[cvids.Count - 1 + 1];
-//            int idx = 0;
-//            foreach(int cvid in cvids)
-//            {
-//                int colx = grmPrj.dmInfo[cvid - 1].XCol;
-//                int rowy = grmPrj.dmInfo[cvid - 1].YRow;
-//                string cellpos = colx.ToString() + ", " + rowy.ToString();
-//                cellsArray[idx] = cellpos;
-//                idx += 1;
-//            }
-//            return cellsArray;
-//        }
-//        else
-//            return null;
-//    }
-//    else
-//        return null;
-//}
+vector<string> GRM::grmWS::allCellsInUpstreamArea(int colXAryidx, int rowYAryidx)
+{
+    int idx = cvais[colXAryidx][rowYAryidx];
+    if (idx >= 0) {
+        vector<int> cvidxs;
+        int startingBaseCVidx = idx;
+        cvidxs  = grmPrj.getAllUpstreamCells(startingBaseCVidx);
+        if (cvidxs != null)
+        {
+            string[] cellsArray = new string[cvids.Count - 1 + 1];
+            int idx = 0;
+            foreach(int cvid in cvids)
+            {
+                int colx = grmPrj.dmInfo[cvid - 1].XCol;
+                int rowy = grmPrj.dmInfo[cvid - 1].YRow;
+                string cellpos = colx.ToString() + ", " + rowy.ToString();
+                cellsArray[idx] = cellpos;
+                idx += 1;
+            }
+            return cellsArray;
+        }
+        else
+            return null;
+    }
+    else
+        return null;
+}
 
 //public bool SetOneSWSParametersAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
 //    double minSlopeLandSurface, string UnsKType, double coefUnsK,

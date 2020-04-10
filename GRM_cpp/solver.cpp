@@ -167,7 +167,7 @@ void calChannelFlow(int i, double chCSACVw_tp1)
             cvs[i].stream.chLRHeight, cvs[i].stream.chLRArea_m2,
             cvs[i].stream.chURBaseWidth_m);
         HRch = chCSACVw_tp1 / CSPer;
-        uw_n = vByManningEq(HRch, cvs[i].stream.chBedSlope,
+        uw_n = vByManningEq(HRch, cvs[i].stream.slopeCH,
             cvs[i].stream.chRC);
         cCHw_n = uw_n * dtPdx * chCSACVw_tp1;
     }
@@ -182,14 +182,14 @@ void calChannelFlow(int i, double chCSACVw_tp1)
             hChCVe_n, cvs[i].stream.isCompoundCS, cvs[i].stream.chLRHeight,
             cvs[i].stream.chLRArea_m2, cvs[i].stream.chURBaseWidth_m);
         HRch = CSAChCVe_n / CSPer;
-        double u_n = vByManningEq(HRch, cvs[i].stream.chBedSlope,
+        double u_n = vByManningEq(HRch, cvs[i].stream.slopeCH,
             cvs[i].stream.chRC);
         double cChCVe_n = u_n * dtPdx * CSAChCVe_n;
         // Newton-Raphson
         double Fx = CSAp_n - cCHw_n + cChCVe_n - CSAchCVp_j;
         double dFx;
         dFx = 1 + (1.66667 * pow(CSAChCVe_n, 0.66667)
-            * sqrt(cvs[i].stream.chBedSlope) * dtPdx
+            * sqrt(cvs[i].stream.slopeCH) * dtPdx
             / (cvs[i].stream.chRC * pow(CSPer, 0.66667)));
         double CSAch_nP1 = CSAp_n - Fx / dFx;
         if (CSAch_nP1 <= 0) {
@@ -198,7 +198,7 @@ void calChannelFlow(int i, double chCSACVw_tp1)
         }
         double Qn = u_n * CSAp_n;
         HRch = CSAch_nP1 / CSPer;
-        double u_nP1 = vByManningEq(HRch, cvs[i].stream.chBedSlope,
+        double u_nP1 = vByManningEq(HRch, cvs[i].stream.slopeCH,
             cvs[i].stream.chRC);
         double QnP1 = u_nP1 * CSAch_nP1;
         double tolerance = Qn * CONST_TOLERANCE;
@@ -292,11 +292,11 @@ double getChCSAatCVW(int i)
             hWn_i, cvs[i].stream.isCompoundCS, cvs[i].stream.chLRHeight,
             cvs[i].stream.chLRArea_m2, cvs[i].stream.chURBaseWidth_m);
         double Fx = pow(CSAw_n, 1.66667) 
-            * pow(cvs[i].stream.chBedSlope, 0.5)
+            * pow(cvs[i].stream.slopeCH, 0.5)
             / (cvs[i].stream.chRC * pow(chCSPeri, 0.66667)) 
             - qSumCViM1_m3Ps;
         double dFx = 1.66667 * pow(CSAw_n, 0.66667) 
-            * pow(cvs[i].stream.chBedSlope, 0.5)
+            * pow(cvs[i].stream.slopeCH, 0.5)
             / (cvs[i].stream.chRC * pow(chCSPeri, 0.66667));
         CSAw_nP1 = CSAw_n - Fx / dFx;
         double err = abs(CSAw_nP1 - CSAw_n) / CSAw_n;
@@ -356,9 +356,9 @@ double getChCSAusingQbyiteration(cvAtt cv, double CSAini, double Q_m3Ps)
             bwURegion, AreaLR, hLR, bc);
         ChCrossSecPer = getChCrossSectionPerimeter(cbw, cv.stream.chSideSlopeRight, 
             cv.stream.chSideSlopeLeft, Hw_n, bCompound, hLR, AreaLR, bwURegion);
-        Fx = pow(CSA_n, 1.66667) * sqrt(cv.stream.chBedSlope)
+        Fx = pow(CSA_n, 1.66667) * sqrt(cv.stream.slopeCH)
             / (cv.stream.chRC * pow(ChCrossSecPer, 0.66667)) - Q_m3Ps;
-        dFx = 1.66667 * pow(CSA_n, 0.66667) * sqrt(cv.stream.chBedSlope)
+        dFx = 1.66667 * pow(CSA_n, 0.66667) * sqrt(cv.stream.slopeCH)
             / (cv.stream.chRC * pow(ChCrossSecPer, 0.66667));
         CSA_nP1 = CSA_n - Fx / dFx;
         double toler = CSA_n * CONST_TOLERANCE;

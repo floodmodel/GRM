@@ -15,7 +15,7 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
         return;
     }
     if (cvs[i].flowType == cellFlowType::ChannelFlow
-        && cvs[i].stream.chStrOrder > prj.swps[cvs[i].wsid].dryStreamOrder) {
+        && cvs[i].stream.cellValue > prj.swps[cvs[i].wsid].dryStreamOrder) {
         setWaterAreaInfiltrationPars(i);
         return;
     }
@@ -235,7 +235,7 @@ double calBFlowAndGetCSAaddedByBFlow(int i, int dtsec, double cellSize_m)
         soilDepthPercolated_m = cvs[i].sd_m;
     }
     if ((cvs[i].flowType == cellFlowType::ChannelFlow
-        && cvs[i].stream.chStrOrder > prj.swps[wsid].dryStreamOrder)
+        && cvs[i].stream.cellValue > prj.swps[wsid].dryStreamOrder)
         || cvs[i].lcCode == landCoverCode::WATR
         || cvs[i].lcCode == landCoverCode::WTLD) {
         // 이조건에서는 항상 포화상태, 침누있음, 강우에 의한 침투량 없음. 대신 지표면 저류량에 의한 침투는 항상 있음

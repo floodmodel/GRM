@@ -69,8 +69,8 @@ int readDomainFaFileAndSetupCV()
                 }
                 di.cvidxInEachRegion[wsid].push_back(cvidx);
                 cv.toBeSimulated = 1;
-                cv.idx_xc = cx; 
-                cv.idx_yr = ry; 
+                cv.xCol = cx; 
+                cv.yRow = ry; 
                 cv.fac = (int)facFile.valuesFromTL[cx][ry];
                 if (cv.fac > di.facMax) {
                     di.facMax = cv.fac;
@@ -176,16 +176,16 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
     int cvCount = di.cellNnotNull;
 #pragma omp parallel for //schedule(guided)
     for (int idx = 0; idx < cvCount; ++idx) {
-        int cx = cvs[idx].idx_xc;
-        int ry = cvs[idx].idx_yr;
+        int cx = cvs[idx].xCol;
+        int ry = cvs[idx].yRow;
         cvs[idx].slope = slopeFile.valuesFromTL[cx][ry];
         if (cvs[idx].slope <= 0.0) {
             cvs[idx].slope = CONST_MIN_SLOPE;
         }
         cvs[idx].fdir = getFlowDirection((int)fdirFile.valuesFromTL[cx][ry], prj.fdType);
         if (prj.streamFileApplied == 1) {
-            cvs[idx].stream.chStrOrder = (int)streamFile->valuesFromTL[cx][ry];
-            if (cvs[idx].stream.chStrOrder > 0) {
+            cvs[idx].stream.cellValue = (int)streamFile->valuesFromTL[cx][ry];
+            if (cvs[idx].stream.cellValue > 0) {
                 cvs[idx].isStream = 1;
                 cvs[idx].flowType = cellFlowType::ChannelFlow;
             }
@@ -270,7 +270,7 @@ int readLandCoverFileAndSetCVbyVAT()
     int vBak = iter->first;
     //오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
     for (int i = 0; i < di.cellNnotNull; ++i) {
-        int v = (int)lcFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
+        int v = (int)lcFile.valuesFromTL[cvs[i].xCol][cvs[i].yRow];
         if (v > 0) {
             if (lcvat.find(v) != lcvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
                 landCoverInfo lc = lcvat[v];
@@ -335,7 +335,7 @@ int readLandCoverFile()
     int isnormal = 1;
 #pragma omp parallel for //schedule(guided)
     for (int i = 0; i < di.cellNnotNull; ++i) {
-        int v = (int)lcFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];;
+        int v = (int)lcFile.valuesFromTL[cvs[i].xCol][cvs[i].yRow];;
         if (v > 0) {
             cvs[i].lcCellValue = v;
         }
@@ -374,7 +374,7 @@ int readSoilTextureFileAndSetCVbyVAT()
     int vBak = iter->first;
     //오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
     for (int i = 0; i < di.cellNnotNull; ++i) {
-        int v = (int)stFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
+        int v = (int)stFile.valuesFromTL[cvs[i].xCol][cvs[i].yRow];
         if (v > 0) {
             if (stvat.find(v) != stvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
                 soilTextureInfo st = stvat[v];
@@ -455,7 +455,7 @@ int readSoilTextureFile(string fpnST, int** cvAryidx, cvAtt* cvs1D, int effCellC
     int isnormal = 1;
 #pragma omp parallel for// schedule(guided)
     for (int i = 0; i < effCellCount; ++i) {
-        int v = (int)stFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
+        int v = (int)stFile.valuesFromTL[cvs[i].xCol][cvs[i].yRow];
         if (v > 0) {
             cvs1D[i].stCellValue = v;
         }
@@ -495,7 +495,7 @@ int readSoilDepthFileAndSetCVbyVAT()
     int vBak = iter->first;
     //오류 값에 인접 셀값을 설정하기 위해, 병렬로 하지 않는다.
     for (int i = 0; i < di.cellNnotNull; ++i) {
-        int v = (int)sdFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
+        int v = (int)sdFile.valuesFromTL[cvs[i].xCol][cvs[i].yRow];
         if (v > 0) {
             if (sdvat.find(v) != sdvat.end()) {// 현재 셀값이 키로 등록되어 있는지 확인
                 soilDepthInfo sd = sdvat[v];
@@ -552,7 +552,7 @@ int readSoilDepthFile(string fpnSD, int** cvAryidx, cvAtt* cvs1D, int effCellCou
     int isnormal = 1;
 #pragma omp parallel for //schedule(guided)
     for (int i = 0; i < effCellCount; ++i) {
-        int v = (int)sdFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];
+        int v = (int)sdFile.valuesFromTL[cvs[i].xCol][cvs[i].yRow];
         if (v > 0) {
             cvs1D[i].sdCellValue = v;
         }
@@ -591,8 +591,8 @@ int setFlowNetwork()
         int tCx; // 하류방향 대상 셀의 x array index
         int tRy; // 하류방향 대상 셀의 y array index
         // 좌상단이 0,0 이다... 즉, 북쪽이면, row-1, 동쪽이면 col +1
-        int cx = cvs[i].idx_xc;
-        int ry = cvs[i].idx_yr;
+        int cx = cvs[i].xCol;
+        int ry = cvs[i].yRow;
         switch (cvs[i].fdir) {
         case flowDirection8::NE8: {
             tCx = cx + 1;
