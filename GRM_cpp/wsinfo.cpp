@@ -339,7 +339,7 @@ vector<string> GRM::grmWS::allCellsInUpstreamArea(int colXAryidx, int rowYAryidx
         {
             string[] cellsArray = new string[cvids.Count - 1 + 1];
             int idx = 0;
-            foreach(int cvid in cvids)
+            foreach(int cvid : cvids)
             {
                 int colx = grmPrj.dmInfo[cvid - 1].XCol;
                 int rowy = grmPrj.dmInfo[cvid - 1].YRow;
