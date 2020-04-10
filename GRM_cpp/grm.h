@@ -2,6 +2,12 @@
 
 #include "gentle.h"
 
+#ifdef GRMDLL_EXPORTS
+#define GRMLL_API __declspec(dllexport)
+#else
+#define GRMDLL_API __declspec(dllimport)
+#endif
+
 using namespace std;
 namespace fs = std::filesystem;
 
@@ -606,7 +612,7 @@ typedef struct _projectFile
 	string fpnStream = "";
 	string fpnChannelWidth = "";
 	string fpniniSSR = "";
-	string fpniniChannelFlow = "";
+	string fpniniChFlow = "";
 	fileOrConstant lcDataType = fileOrConstant::None;
 	string fpnLC = "";
 	string fpnLCVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
@@ -878,12 +884,44 @@ inline  double vByManningEq(double hydraulicRaidus,
 
 
 
-// extern C
-int readLandCoverFile(string fpnLC, 
-	int** cvAryidx, cvAtt* cvs1D, int effCellCount);
-int readSoilTextureFile(string fpnST, 
-	int** cvAryidx, cvAtt* cvs1D, int effCellCount);
-int readSoilDepthFile(string fpnSD, 
-	int** cvAryidx, cvAtt* cvs1D, int effCellCount);
 
+
+
+namespace GRM
+{
+	class grmWS {
+	private:
+	 //   flowDirection8 fdType;
+		//string fpnStream;
+		//string fpnLandCover;
+		//string fpnSoilTexture;
+		//string fpnSoilDepth;
+		//string fpnissr;
+		//string fpniChannelFlow;
+	public:
+		grmWS(string fdirType, string fpnDomain,
+			string slopeFPN, string fpnFdir, string fpnFac,
+			string fpnStream = "", string fpnLandCover = "",
+			string fpnSoilTexture = "", string fpnSoilDepth = "",
+			string fpnIniSoilSaturationRatio = "", 
+			string pfnIniChannelFlow = "",
+			string fpnChannelWidth="");
+		grmWS(string gmpFPN);
+		
+		GRMDLL_API bool IsInWatershedArea(int colXArrayIdx, int rowYArrayIdx);
+		
+		GRMDLL_API int grmPlus(int a, int b);
+		GRMDLL_API int grmMultiple(int a, int b);
+	};
+}
+
+// extern C
+
+extern "C" 
+extern "C" GRMDLL_API int readLandCoverFile(string fpnLC,
+	int** cvAryidx, cvAtt * cvs1D, int effCellCount);
+extern "C" GRMDLL_API int readSoilTextureFile(string fpnST,
+	int** cvAryidx, cvAtt * cvs1D, int effCellCount);
+extern "C" GRMDLL_API int readSoilDepthFile(string fpnSD,
+	int** cvAryidx, cvAtt * cvs1D, int effCellCount);
 

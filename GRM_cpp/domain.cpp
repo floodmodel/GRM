@@ -126,8 +126,8 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
     }
 
     if (prj.icfFileApplied == 1
-        && (prj.fpniniChannelFlow == ""
-            || _access(prj.fpniniChannelFlow.c_str(), 0) != 0)) {
+        && (prj.fpniniChFlow == ""
+            || _access(prj.fpniniChFlow.c_str(), 0) != 0)) {
         string outstr = "Initial stream flow file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
         prj.icfFileApplied = -1;
@@ -159,7 +159,7 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
         cwFile = NULL;
     }
     if (prj.icfFileApplied == 1) {
-        cfFile = new ascRasterFile(prj.fpniniChannelFlow);
+        cfFile = new ascRasterFile(prj.fpniniChFlow);
     }
     else {
         cfFile = NULL;
@@ -324,23 +324,23 @@ int setCVbyLCConstant()
     return 1;
 }
 
-int readLandCoverFile(string fpnLC, int** cvAryidx, cvAtt* cvs1D, int effCellCount)
+int readLandCoverFile()
 {
-    if (fpnLC == "" || _access(fpnLC.c_str(), 0) != 0) {
-        string outstr = "Land cover file (" + fpnLC + ") is invalid.\n";
+    if (prj.fpnLC == "" || _access(prj.fpnLC.c_str(), 0) != 0) {
+        string outstr = "Land cover file (" + prj.fpnLC + ") is invalid.\n";
         writeLog(fpnLog, outstr, -1, 1);
         return -1;
     }
-    ascRasterFile lcFile = ascRasterFile(fpnLC);
+    ascRasterFile lcFile = ascRasterFile(prj.fpnLC);
     int isnormal = 1;
 #pragma omp parallel for //schedule(guided)
-    for (int i = 0; i < effCellCount; ++i) {
+    for (int i = 0; i < di.cellNnotNull; ++i) {
         int v = (int)lcFile.valuesFromTL[cvs[i].idx_xc][cvs[i].idx_yr];;
         if (v > 0) {
-            cvs1D[i].lcCellValue = v;
+            cvs[i].lcCellValue = v;
         }
         else {
-            string outstr = "Land cover file (" + fpnLC + ") has invalid value.\n";
+            string outstr = "Land cover file (" + prj.fpnLC + ") has invalid value.\n";
             writeLog(fpnLog, outstr, -1, 1);
             isnormal = -1;
         }

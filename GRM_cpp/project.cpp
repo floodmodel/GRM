@@ -542,9 +542,9 @@ int readXmlRowProjectSettings(string aline)
 
 	if (aline.find(fn.InitialChannelFlowFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.InitialChannelFlowFile);
-		prj.fpniniChannelFlow = "";
+		prj.fpniniChFlow = "";
 		if (vString != "" && _access(vString.c_str(), 0) == 0) {
-			prj.fpniniChannelFlow = vString;
+			prj.fpniniChFlow = vString;
 			prj.icfFileApplied = 1;
 		}
 		else {

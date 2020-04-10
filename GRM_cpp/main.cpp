@@ -47,13 +47,15 @@ int main(int argc, char** args)
 {
 	string exeName = "GRM";
 	version grmVersion = getCurrentFileVersion();
-	char outString[200];
-	sprintf_s(outString, "GRM v.%d.%d.%d. Built in %s.\n", 
-		grmVersion.major, grmVersion.minor,
-		grmVersion.build, grmVersion.LastWrittenTime);
-	printf(outString);
+	string outString;
+	outString = "GRM v." + to_string(grmVersion.major) + "."
+		+ to_string(grmVersion.minor)		+ "." 
+		+ to_string(grmVersion.build) + ". Built in " 
+		+ grmVersion.LastWrittenTime + ".\n";
 	prj.cpusi = getCPUinfo();
-	writeLog(fpnLog, prj.cpusi.infoString, 1, 1);
+	cout << outString;
+	cout << prj.cpusi.infoString << endl;
+	outString = outString + prj.cpusi.infoString;
 	long elapseTime_Total_sec;
 	clock_t  finish_Total, start_Total;
 	start_Total = clock();
@@ -163,9 +165,10 @@ int main(int argc, char** args)
 		finish_Total = clock();
 		elapseTime_Total_sec = (long)(finish_Total - start_Total) / CLOCKS_PER_SEC;
 		tm ts_total = secToHHMMSS(elapseTime_Total_sec);
-		sprintf_s(outString, "Total simulation was completed. Run time : %dhrs %dmin %dsec.\n",
+		char endingStr[200];
+		sprintf_s(endingStr, "Total simulation was completed. Run time : %dhrs %dmin %dsec.\n",
 			ts_total.tm_hour, ts_total.tm_min, ts_total.tm_sec);
-		writeLog(fpnLog, outString, 1, 1);
+		writeLog(fpnLog, endingStr, 1, 1);
 		return 1;
 	}
 	//waitEnterKey();
@@ -194,7 +197,6 @@ void disposeDynamicVars()
 			}				
 		}
 	}
-
 }
 
 
@@ -220,13 +222,10 @@ int simulateSingleEvent()
 
 int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 {	
-	//prj.cpusi = getCPUinfo();
-	//writeLog(fpnLog, prj.cpusi.infoString, 1, 1);
 	if (openProjectFile(forceRealTime) < 0)	{
 		writeLog(fpnLog, "Open "+ ppi.fpn_prj+" was failed.\n", 1, 1);
 		return -1;
 	}
-	//writeLog(fpnLog, "GRM was started.\n", 1, 1);
 	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, 1);
 	if (setupModelAfterOpenProjectFile() == -1) {
 		return -1;
@@ -243,15 +242,15 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 	//	isparallel = "false";
 	//}
 
-	if (prj.mdp == 1) { isparallel = "false"; }
-	writeLog(fpnLog, "Parallel : "+ isparallel +". Max. degree of parallelism : "
-		+ to_string(prj.mdp) +".\n", 1, 1);
 	if (initOutputFiles() == -1) {
 		writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
 		return -1;
 	}
-	writeLog(fpnLog, ppi.fpn_prj+"  -> Model setup was completed.\n", 1, 1);
-	writeLog(fpnLog, "The number of effecitve cells : "+to_string(di.cellNnotNull)+"\n", 1, 1); 
+	writeLog(fpnLog, ppi.fpn_prj+" -> Model setup was completed.\n", 1, 1);
+	writeLog(fpnLog, "The number of effecitve cells : " + to_string(di.cellNnotNull) + "\n", 1, 1);
+	if (prj.mdp == 1) { isparallel = "false"; }
+	writeLog(fpnLog, "Parallel : " + isparallel + ". Max. degree of parallelism : "
+		+ to_string(prj.mdp) + ".\n", 1, 1);	
 	return 1;
 }
 

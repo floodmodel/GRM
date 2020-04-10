@@ -102,7 +102,6 @@ int setupByFAandNetwork()
     faCount.clear();
     map<int, vector<int>> aisFA;
     for (int i = 0; i < di.cellNnotNull; i++) {
-        //cvs[i].fcType = flowControlType::None;
         double dxw;
         int curfa = cvs[i].fac;
         if (cvs[i].neighborCVidxFlowintoMe.size() > 0) {
