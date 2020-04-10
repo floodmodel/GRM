@@ -11,6 +11,7 @@
 #include <filesystem>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <locale>
 
 #include "gentle.h"
 #include "grm.h"
@@ -31,7 +32,9 @@ int** cvais; // 각셀의 cv array idex
 cvAtt* cvs;
 cvAtt* cvsb;
 vector<rainfallData> rfs;
-map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
+map<int, int*> cvaisToFA; //fa별 cv array idex 목록
+vector<int> fas;
+map<int, int> faCount;
 wpinfo wpis;
 flowControlCellAndData fccds;
 
@@ -44,30 +47,36 @@ int main(int argc, char** args)
 {
 	string exeName = "GRM";
 	version grmVersion = getCurrentFileVersion();
-	char outString[200];
-	sprintf_s(outString, "GRM v.%d.%d.%d. Built in %s.\n", 
-		grmVersion.major, grmVersion.minor,
-		grmVersion.build, grmVersion.LastWrittenTime);
-	printf(outString);
-
+	string outString;
+	outString = "GRM v." + to_string(grmVersion.major) + "."
+		+ to_string(grmVersion.minor)		+ "." 
+		+ to_string(grmVersion.build) + ". Built in " 
+		+ grmVersion.LastWrittenTime + ".\n";
+	prj.cpusi = getCPUinfo();
+	cout << outString;
+	cout << prj.cpusi.infoString << endl;
+	outString = outString + prj.cpusi.infoString;
 	long elapseTime_Total_sec;
 	clock_t  finish_Total, start_Total;
 	start_Total = clock();
-
+	ts.runByAnalyzer = -1;
 	if (argc == 1) {
 		printf("GRM project file was not entered or invalid arguments.\n");
 		grmHelp();
 		return -1;
 	}
 	prj.deleteAllFilesExceptDischargeOut = -1;
+	setlocale(LC_ALL, "korean");
 	if (argc == 2) {
 		string arg1(args[1]);
 		if (trim(arg1) == "/?" || lower(trim(arg1)) == "/help") {
 			grmHelp();
 			return -1;
 		}
+		fs::path in_arg = fs::path(arg1.c_str());
 		int nResult = _access(args[1], 0);
-		if (nResult == -1) {
+		if (nResult == -1
+			|| lower(in_arg.extension().string()) != ".gmp") {
 			printf("GRM project file(%s) is invalid.\n", args[1]);
 			waitEnterKey();
 			return -1;
@@ -81,19 +90,16 @@ int main(int argc, char** args)
 			}
 		}
 	}
-
 	if (argc == 3 || argc == 4) {
 		vector<string> gmpFiles;
 		if (argc == 3) {
 			string arg1(args[1]);
 			string arg2(args[2]);
-			arg1 = lower(trim(arg1));
-			arg2 = lower(trim(arg2));
-			if (arg1 == "/" && (arg2 == "?" || arg2 == "help")) {
+			if (arg1 == "/" && (arg2 == "?" || lower(trim(arg2)) == "help")) {
 				grmHelp();
 				return -1;
 			}
-			if (arg1 == "/f" || arg1 == "/fd") {
+			if (lower(trim(arg1)) == "/f" || lower(trim(arg2)) == "/fd") {
 				struct stat finfo;
 				if (stat(arg2.c_str(), &finfo) == 0) { //폴더가 있으면
 					gmpFiles = getFileListInNaturalOrder(arg2, ".gmp");
@@ -102,7 +108,7 @@ int main(int argc, char** args)
 						waitEnterKey();
 						return -1;
 					}
-					if (arg1 == "/fd") {
+					if (lower(trim(arg1)) == "/fd") {
 						prj.deleteAllFilesExceptDischargeOut = 1;
 					}
 				}
@@ -146,7 +152,7 @@ int main(int argc, char** args)
 			writeNewLog(fpnLog, outString, 1, -1);
 			string progF = to_string(n + 1) + '/' + to_string(gmpFiles.size());
 			string progR = forString(((n + 1) / nFiles * 100), 2);
-			msgFileProcess = "Total progress: " + progF + "(" + progR + "%%). ";
+			msgFileProcess = "Total progress: " + progF + "(" + progR + "%). ";
 			if (simulateSingleEvent() == -1) {
 				waitEnterKey();
 				return -1;
@@ -156,16 +162,16 @@ int main(int argc, char** args)
 				//system("clear");// On linux
 			}
 		}
+		finish_Total = clock();
+		elapseTime_Total_sec = (long)(finish_Total - start_Total) / CLOCKS_PER_SEC;
+		tm ts_total = secToHHMMSS(elapseTime_Total_sec);
+		char endingStr[200];
+		sprintf_s(endingStr, "Total simulation was completed. Run time : %dhrs %dmin %dsec.\n",
+			ts_total.tm_hour, ts_total.tm_min, ts_total.tm_sec);
+		writeLog(fpnLog, endingStr, 1, 1);
 		return 1;
 	}
-
-	finish_Total = clock();
-	elapseTime_Total_sec = (long)(finish_Total - start_Total) / CLOCKS_PER_SEC;
-	tm ts_total = secToHHMMSS(elapseTime_Total_sec);
-	sprintf_s(outString, "Simulation was completed. Run time : %dhrs %dmin %dsec.\n",
-		ts_total.tm_hour, ts_total.tm_min, ts_total.tm_sec);
-	writeLog(fpnLog, outString, 1, 1);
-	waitEnterKey();
+	//waitEnterKey();
 	disposeDynamicVars();
 	return 1;
 }
@@ -182,34 +188,29 @@ void disposeDynamicVars()
 	if (cvs != NULL) { delete[] cvs; }
 	if (cvsb != NULL) { delete[] cvsb; }
 
-	//if (cvaisToFA.size() > 0) {
-	//	map<int, int*>::iterator iter;
-	//	map<int, int*> cvansTofa; //fa별 cvan 목록
-	//	for (iter = cvansTofa.begin(); iter != cvansTofa.end(); ++iter) {
-	//		if (cvansTofa[iter->first] != NULL) {
-	//			delete[] cvansTofa[iter->first];
-	//		}				
-	//	}
-	//}
-
+	if (cvaisToFA.size() > 0) {
+		map<int, int*>::iterator iter;
+		//map<int, int*> cvansTofa; //fa별 cvan 목록
+		for (iter = cvaisToFA.begin(); iter != cvaisToFA.end(); ++iter) {
+			if (cvaisToFA[iter->first] != NULL) {
+				delete[] cvaisToFA[iter->first];
+			}				
+		}
+	}
 }
 
 
 int simulateSingleEvent()
 {
 	if (openPrjAndSetupModel(-1) == -1) {
-		writeNewLog(fpnLog, "Model setup failed !!!\n", 1, 1);
+		writeLog(fpnLog, "Model setup failed !!!\n", 1, 1);
 		return -1;
 	}
-	writeLog(fpnLog, "Calculation was started.\n", 1, 1);
+	writeLog(fpnLog, "Simulation was started.\n", 1, 1);
 	if (startSimulationSingleEvent() == -1) {
 		writeNewLog(fpnLog, "An error was occurred while simulation...\n", 1, 1);
 		return -1;
 	}
-
-
-
-
 	if (prj.deleteAllFilesExceptDischargeOut == 1) {
 		if (deleteAllFilesExceptDischarge() == -1) {
 			writeNewLog(fpnLog, "An error was occurred while deleting all files except discharge.out.\n", 1, 1);
@@ -220,28 +221,36 @@ int simulateSingleEvent()
 }
 
 int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
-{
-	writeLog(fpnLog, "GRM was started.\n", 1, 1);
-	prj.cpusi = getCPUinfo();
-	writeLog(fpnLog, prj.cpusi.infoString, 1, 1);
+{	
 	if (openProjectFile(forceRealTime) < 0)	{
 		writeLog(fpnLog, "Open "+ ppi.fpn_prj+" was failed.\n", 1, 1);
 		return -1;
 	}
 	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, 1);
-	omp_set_num_threads(prj.mdp);
 	if (setupModelAfterOpenProjectFile() == -1) {
 		return -1;
 	}
 	string isparallel = "true";
-	if (prj.mdp == 1) { isparallel = "false"; }
-	writeLog(fpnLog, "Parallel : "+ isparallel +". Max. degree of parallelism : "
-		+ to_string(prj.mdp) +".\n", 1, 1);
+	omp_set_num_threads(prj.mdp);
+
+	//todo : 여기에 셀 개수 조건으로 mdp 설정 추가 가능
+	//if (di.cellNnotNull < 12000) {
+	//	writeLog(fpnLog, "The number of effective cell [ "
+	//		+ to_string(di.cellNnotNull) + "] is smaller than 12,000.\n"
+	//		+ "It was converted to serial calculation. \n", 1, 1);
+	//	prj.mdp = 1;
+	//	isparallel = "false";
+	//}
+
 	if (initOutputFiles() == -1) {
 		writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
 		return -1;
 	}
-	writeLog(fpnLog, ppi.fpn_prj+"  -> Model setup was completed.\n", 1, 1);
+	writeLog(fpnLog, ppi.fpn_prj+" -> Model setup was completed.\n", 1, 1);
+	writeLog(fpnLog, "The number of effecitve cells : " + to_string(di.cellNnotNull) + "\n", 1, 1);
+	if (prj.mdp == 1) { isparallel = "false"; }
+	writeLog(fpnLog, "Parallel : " + isparallel + ". Max. degree of parallelism : "
+		+ to_string(prj.mdp) + ".\n", 1, 1);	
 	return 1;
 }
 

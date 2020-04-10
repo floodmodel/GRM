@@ -15,7 +15,7 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
         return;
     }
     if (cvs[i].flowType == cellFlowType::ChannelFlow
-        && cvs[i].stream.chStrOrder > prj.swps[cvs[i].wsid].dryStreamOrder) {
+        && cvs[i].stream.cellValue > prj.swps[cvs[i].wsid].dryStreamOrder) {
         setWaterAreaInfiltrationPars(i);
         return;
     }
@@ -62,26 +62,29 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
         bool beingPonding = false;
         if (cvs[i].ifRatef_tm1_mPsec >= cvs[i].rfiRead_tm1_mPsec) {
             // 이전 시간에서의 침투률이 이전 시간에서의 강우강도보다 컸다면, 모든 강우는 침투됨
-            infiltrationF_mPdt_max = cvs[i].rfApp_dt_m;
+            infiltrationF_mPdt_max = cvs[i].rfApp_dt_m;// 0 이상이 보장됨
         }
         else {
             // 이전 시간에서의 침투률이 이전 시간에서의 강우강도보다 같거나 작았다면 ponding이 발생한 경우
             infiltrationF_mPdt_max = getinfiltrationForDtAfterPonding(i, 
-                dtsec, CONSTGreenAmpt, cvs[i].hc_K_mPsec);
+                dtsec, CONSTGreenAmpt, cvs[i].hc_K_mPsec);// 0 이상이 보장됨
             beingPonding = true;
-        }
-        if (infiltrationF_mPdt_max <= 0) {
-            cvs[i].ifF_mPdt = 0; 
+        }                       
+        if (infiltrationF_mPdt_max < 0) {
+            infiltrationF_mPdt_max = 0; // 이거 확인 필요
         }
         else {
             double dF = cvs[i].sdEffAsWaterDepth_m - cvs[i].soilWaterC_tm1_m;
             if (dF < 0) {
-                cvs[i].ifF_mPdt = 0;
+                infiltrationF_mPdt_max = 0;
             }
             else if (dF < infiltrationF_mPdt_max) {
-                cvs[i].ifF_mPdt = dF;
+                infiltrationF_mPdt_max = dF;
             }
         }
+            cvs[i].ifF_mPdt = infiltrationF_mPdt_max;
+
+
         // 누가 침투량으로 dt 동안에 추가된 침투량을 더한다.
         cvs[i].soilWaterC_m = cvs[i].soilWaterC_tm1_m + cvs[i].ifF_mPdt;
         // 현재까지의 누가 침투량을 이용해서 이에 대한 포텐셜 침투률을 계산한다.
@@ -121,7 +124,7 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
     cvs[i].ssr = soilSSRbyCumulF(cvs[i].soilWaterC_m, 
         cvs[i].sdEffAsWaterDepth_m, cvs[i].flowType);
     if (cvs[i].ssr == 1) {
-        cvs[i].isAfterSaturated = true;
+        cvs[i].isAfterSaturated = 1;
     }
     cvs[i].soilWaterC_tm1_m = cvs[i].soilWaterC_m;
     cvs[i].ifRatef_tm1_mPsec = cvs[i].ifRatef_mPsec;
@@ -232,7 +235,7 @@ double calBFlowAndGetCSAaddedByBFlow(int i, int dtsec, double cellSize_m)
         soilDepthPercolated_m = cvs[i].sd_m;
     }
     if ((cvs[i].flowType == cellFlowType::ChannelFlow
-        && cvs[i].stream.chStrOrder > prj.swps[wsid].dryStreamOrder)
+        && cvs[i].stream.cellValue > prj.swps[wsid].dryStreamOrder)
         || cvs[i].lcCode == landCoverCode::WATR
         || cvs[i].lcCode == landCoverCode::WTLD) {
         // 이조건에서는 항상 포화상태, 침누있음, 강우에 의한 침투량 없음. 대신 지표면 저류량에 의한 침투는 항상 있음
@@ -309,11 +312,11 @@ double getChCSAaddedBySSFlow(int i)
     if (cvs[i].flowType == cellFlowType::ChannelFlow) {
         SSFlow_cms = totalSSFfromCVwOFcell_m3Ps(i);
     }
-    else if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) { 
+    else if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
         SSFlow_cms = cvs[i].QSSF_m3Ps;
-    }    
+    }
     if (SSFlow_cms > 0) {
-        if (cvs[i].stream.uCH > 0) {     
+        if (cvs[i].stream.uCH > 0) {
             double chCSA;
             chCSA = SSFlow_cms / cvs[i].stream.uCH; // 이전 시간에 계산된 유속
             // 유속이 작을 경우.. 발산 가능성 있으므로.. 기존 단면적 보다 큰 단면적으로 유입될 경우.. 
@@ -324,12 +327,11 @@ double getChCSAaddedBySSFlow(int i)
             return chCSA;
         }
     }
-    else {
-        // 이경우에는 하도에 기여되지 않는 것으로 가정
-        // 즉 강우에 의한 하도의 유량 발생이 시작되지 않았는데(하도가 말라있을 경우).. 
-        // 지표하 유출에 의해 기여가 있을 수 없음.
-        return 0;
-    }
+
+    // 이경우에는 하도에 기여되지 않는 것으로 가정
+    // 즉 강우에 의한 하도의 유량 발생이 시작되지 않았는데(하도가 말라있을 경우).. 
+    // 지표하 유출에 의해 기여가 있을 수 없음.
+    return 0;
 }
 
 
@@ -371,6 +373,7 @@ double Kunsaturated(cvAtt cv)
         }
         }
     }
+    return Ks;
 }
 
 void calBFLateralMovement(int i,
@@ -379,10 +382,10 @@ void calBFLateralMovement(int i,
     double cumulBFq_m3Ps = 0;
     double dhUAQ_m;
     double dX_m = cvs[i].cvdx_m;
-    for (int cvid : cvs[i].neighborCVIDsFlowintoMe) {
-        if (cvs[cvid - 1].flowType == cellFlowType::OverlandFlow) {
+    for (int idx : cvs[i].neighborCVidxFlowintoMe) {
+        if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
             cumulBFq_m3Ps = cumulBFq_m3Ps 
-                + cvs[cvid - 1].bfQ_m3Ps;// 수두경사가 셀의 지표면 경사와 같은 것으로 가정
+                + cvs[idx].bfQ_m3Ps;// 수두경사가 셀의 지표면 경사와 같은 것으로 가정
         }
     }
     if (cvs[i].fac == facMin) {
@@ -408,12 +411,12 @@ void calBFLateralMovement(int i,
 double totalSSFfromCVwOFcell_m3Ps(int i)
 {
     double SSF_m3Ps = 0;
-    for(int cvid: cvs[i].neighborCVIDsFlowintoMe)    {
-        if (cvs[cvid - 1].flowType == cellFlowType::OverlandFlow) {
+    for(int idx: cvs[i].neighborCVidxFlowintoMe)    {
+        if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
             // 즉, GRM에서 Green-Ampt 모형을 이용해서 침투된 양을 계산할때, 
             // 포화된 깊이로 계산됨. 즉, 현재 침투률로 얼만큼 깊이 들어갔는지는 계산하지 않는다..
             // 따라서, 하도로 기여하는 지표하 유출량 계산할때는 누가침투깊이가 .saturatedSoildepth_m 이 된다.
-            SSF_m3Ps = SSF_m3Ps + cvs[cvid - 1].QSSF_m3Ps;
+            SSF_m3Ps = SSF_m3Ps + cvs[idx].QSSF_m3Ps;
         }
     }
     return SSF_m3Ps;

@@ -37,10 +37,10 @@ public:
     string mRFStartDateTimeRT="";
     bool mbNewRFAddedRT=false;
     bool mIsPrediction = false;//2019.10.01. 최. prediction 관련
-    //public Dictionary<int, bool> mdicBNewFCdataAddedRT;   // CVID 로 구분
+    //public Dictionary<int, bool> mdicBNewFCdataAddedRT;   // idx 로 구분
     vector<rainfallData> mlstRFdataRT;
     /// <summary>
-    /// Get data count by Cvid
+    /// Get data count by cv idx
     /// </summary>
     /// <remarks></remarks>
     //public Dictionary<int, int> mdicFCDataCountForEachCV;
@@ -50,8 +50,8 @@ public:
     clock_t mDateTimeStartRT=clock();
     bool mbSimulationRTisOngoing=false;
 
-    double mPicWidth=-1.0;
-    double mPicHeight = -1.0;
+    double mPicWidth= 0.0;
+    double mPicHeight = 0.0;
     bool mbCreateDistributionFiles = false;
     //cRasterOutput mRasterFileOutput;
 

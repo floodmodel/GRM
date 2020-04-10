@@ -15,7 +15,9 @@ namespace GRMCore
         public string miniSoilSaturationFPN;
         public string miniChannelFlowFPN;
 
-        public cGetWatershedInfo(string fdirType, string watershedFPN, string slopeFPN, string fdirFPN, string facFPN, string streamFPN = "", string landCoverFPN = "", string soilTextureFPN = "", string soilDepthFPN = "", string iniSoilSaturationFPN = "", string iniChannelFlowFPN = "")
+        public cGetWatershedInfo(string fdirType, string watershedFPN, string slopeFPN, string fdirFPN, 
+            string facFPN, string streamFPN = "", string landCoverFPN = "", string soilTextureFPN = "", 
+            string soilDepthFPN = "", string iniSoilSaturationFPN = "", string iniChannelFlowFPN = "")
         {
             // Console.WriteLine(watershedFPN + " watershedFPN instancing argument file")
             // Console.WriteLine(File.Exists(watershedFPN).ToString)
@@ -89,8 +91,8 @@ namespace GRMCore
             }
             if (landCoverFPN != "" && File.Exists(landCoverFPN))
             {
-                cReadGeoFileAndSetInfo.ReadLandCoverFile(landCoverFPN, 
-                    grmPrj.WSCells, grmPrj.watershed.colCount, grmPrj.watershed.rowCount,                    true);
+                cReadGeoFileAndSetInfo.ReadLandCoverFile(landCoverFPN,
+                    grmPrj.WSCells, grmPrj.watershed.colCount, grmPrj.watershed.rowCount, true);
                 mlandCoverFPN = landCoverFPN;
             }
             if (soilTextureFPN != "" && File.Exists(soilTextureFPN))

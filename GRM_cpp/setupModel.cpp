@@ -1,5 +1,5 @@
 #include <string>
-
+#include <algorithm>
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"
@@ -14,7 +14,9 @@ extern domaininfo di;
 extern int** cvais;
 extern cvAtt* cvs;
 
-extern map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
+extern map<int, int*> cvaisToFA; //fa별 cv array idex 목록
+extern vector<int> fas;
+extern map<int, int> faCount;
 extern wpinfo wpis;
 extern flowControlCellAndData fccds;
 
@@ -36,8 +38,8 @@ int setupModelAfterOpenProjectFile()
 
 int setDomainAndCVBasicinfo()
 {
-	if (readDomainFileAndSetupCV() == -1) { return -1; }
-	if (readSlopeFdirFacStreamCwCfSsrFileAndSetCV() == -1) { return -1; }
+	if (readDomainFaFileAndSetupCV() == -1) { return -1; }
+	if (readSlopeFdirStreamCwCfSsrFileAndSetCV() == -1) { return -1; }
 	if (prj.lcDataType == fileOrConstant::File) {
 		if (readLandCoverFileAndSetCVbyVAT() == -1) { return -1; }
 	}
@@ -65,9 +67,9 @@ int initWPinfos()
 	int isnormal = -1;
 	wpis.rfiReadSumUpWS_mPs.clear();
 	wpis.rfUpWSAveForDt_mm.clear();
-	wpis.rfUpWSAveForDtPrint_mm.clear();
+	wpis.rfUpWSAveForDtP_mm.clear();
 	wpis.rfUpWSAveTotal_mm.clear();
-	wpis.rfWPGridForDtPrint_mm.clear();
+	wpis.rfWPGridForDtP_mm.clear();
 	wpis.rfWPGridTotal_mm.clear();
 	wpis.totalFlow_cms.clear();
 	wpis.totalDepth_m.clear();
@@ -77,15 +79,15 @@ int initWPinfos()
 	wpis.maxDepthTime.clear();
 	wpis.qFromFCData_cms.clear();
 	wpis.qprint_cms.clear();
-	wpis.fpnWpOut.clear();
-	wpis.wpCVIDs.clear();
+	//wpis.fpnWpOut.clear();
+	wpis.wpCVidxes.clear();
 
 	for (int i = 0; i < prj.wps.size(); ++i) {
 		int cx = prj.wps[i].wpColX;
 		int ry = prj.wps[i].wpRowY;
-		int cvid = cvais[cx][ry] + 1;
-		wpis.wpCVIDs.push_back(cvid);
-        wpis.wpNames[cvid] = prj.wps[i].wpName;
+		int idx = cvais[cx][ry];
+		wpis.wpCVidxes.push_back(idx);
+        wpis.wpNames[idx] = prj.wps[i].wpName;
 	}
 	isnormal = 1;
 	return isnormal;
@@ -95,38 +97,43 @@ int initWPinfos()
 int setupByFAandNetwork()
 {
     di.facMostUpChannelCell = di.cellNnotNull;//우선 최대값으로 초기화
-    di.facMax = -1;
-    di.facMin = INT_MAX;
     cvaisToFA.clear();
+    fas.clear();
+    faCount.clear();
+    map<int, vector<int>> aisFA;
     for (int i = 0; i < di.cellNnotNull; i++) {
-        //cvs[i].fcType = flowControlType::None;
         double dxw;
-        if (cvs[i].neighborCVIDsFlowintoMe.size() > 0) {
-            dxw = cvs[i].dxWSum / (double)cvs[i].neighborCVIDsFlowintoMe.size();
+        int curfa = cvs[i].fac;
+        if (cvs[i].neighborCVidxFlowintoMe.size() > 0) {
+            dxw = cvs[i].dxWSum / (double)cvs[i].neighborCVidxFlowintoMe.size();
         }
         else {
             dxw = cvs[i].dxDownHalf_m;
         }
         //cvs[i].cvdx_m = cvs[i].dxDownHalf_m + dxw; 이것 적용하지 않는 것으로 수정. 상류 유입량이 w 끝으로 들어오는 것으로 계산..2015.03.12
         cvs[i].cvdx_m = cvs[i].dxDownHalf_m * 2.0;
-        if (cvs[i].fac > di.facMax) {
-            di.facMax = cvs[i].fac;
-            di.cvidxMaxFac = i;
-        }
-        if (cvs[i].fac < di.facMin) {
-            di.facMin = cvs[i].fac;
-        }
         // 하도 매개변수 받고
         if (cvs[i].flowType == cellFlowType::ChannelFlow &&
-            cvs[i].fac < di.facMostUpChannelCell) {
-            di.facMostUpChannelCell = cvs[i].fac;
+            curfa < di.facMostUpChannelCell) {
+            di.facMostUpChannelCell = curfa;
         }
-        // FA별 cvid 저장
-        cvaisToFA[cvs[i].fac].push_back(i);
-
+        // FA별 idx 저장
+        aisFA[curfa].push_back(i);
+        if (getVectorIndex(fas, curfa) == -1) {
+            fas.push_back(curfa);
+        }
         //셀별 하류 wp 정보 초기화
-        cvs[i].downWPCVIDs.clear();
+        cvs[i].downWPCVidx.clear();
     }
+    sort(fas.begin(), fas.end());
+    for (int i = 0; i<fas.size(); ++i) {
+        int curFA = fas[i];
+        vector<int> av = aisFA[curFA];
+        cvaisToFA[curFA] = new int[av.size()];
+        copy(av.begin(), av.end(), cvaisToFA[curFA]);
+        faCount[curFA] = av.size();
+    }
+
 
     // cross section 정보 wsid 오류 확인
     if (prj.css.size() > 0) {
@@ -147,29 +154,29 @@ int setupByFAandNetwork()
         }
     }
 
-    // 셀별 하류 wp cvid 정보 업데이트
-    vector<int> cvidsBase;
-    vector<int> cvidsNew;
-    for (int curCVid : wpis.wpCVIDs) {
-        cvidsBase.push_back(curCVid);
+    // 셀별 하류 wp idx 정보 업데이트
+    vector<int> idxesBase;
+    vector<int> idxesNew;
+    for (int curidx : wpis.wpCVidxes) {
+        idxesBase.push_back(curidx);
         //현재 셀을 출발점으로 한다.
-        int aidx = curCVid - 1;// array index는 cvid-1
-        cvs[aidx].downWPCVIDs.push_back(curCVid);
+        int aidx = curidx ;
+        cvs[aidx].downWPCVidx.push_back(curidx);
         bool ended = false;
         while (ended != true) {
-            cvidsNew.clear();
+            idxesNew.clear();
             ended = true;
-            for (int cvidBase : cvidsBase) {
-                aidx = cvidBase - 1;
-                if (cvs[aidx].neighborCVIDsFlowintoMe.size() > 0) {
+            for (int cvidBase : idxesBase) {
+                aidx = cvidBase ;
+                if (cvs[aidx].neighborCVidxFlowintoMe.size() > 0) {
                     ended = false;
-                    for (int cvid : cvs[aidx].neighborCVIDsFlowintoMe) {
-                        cvs[cvid - 1].downWPCVIDs.push_back(curCVid);
-                        cvidsNew.push_back(cvid);
+                    for (int idx : cvs[aidx].neighborCVidxFlowintoMe) {
+                        cvs[idx].downWPCVidx.push_back(curidx);
+                        idxesNew.push_back(idx);
                     }
                 }
             }
-            cvidsBase = cvidsNew;
+            idxesBase = idxesNew;
         }
     }
     return 1;
@@ -203,10 +210,10 @@ int updateCVbyUserSettings()
             cvs[i].stream.bankCoeff = 1 / prj.css[mdwsid].bankSlopeLeft
                 + 1 / prj.css[mdwsid].bankSlopeRight;
             if (cvs[i].slope < ups.minSlopeChBed) {
-                cvs[i].stream.chBedSlope = ups.minSlopeChBed;
+                cvs[i].stream.slopeCH = ups.minSlopeChBed;
             }
             else {
-                cvs[i].stream.chBedSlope = cvs[i].slope;
+                cvs[i].stream.slopeCH = cvs[i].slope;
             }
             if (prj.css[mdwsid].csType == crossSectionType::CSSingle) {//Single CS에서는 두 가지 방법을 이용해서 하폭을 계산
                 channelSettingInfo cs = prj.css[mdwsid];
@@ -214,10 +221,10 @@ int updateCVbyUserSettings()
                     double cellarea = di.cellSize * di.cellSize / 1000000.0;
                     double area = (cvs[i].fac + 1.0) * cellarea;
                     cvs[i].stream.chBaseWidth = cs.cwEQc * pow(area, cs.cwEQd)
-                        / pow(cvs[i].stream.chBedSlope, cs.cwEQe);
+                        / pow(cvs[i].stream.slopeCH, cs.cwEQe);
                 }
                 else {
-                    int facMax_inMDWS = cvs[di.wsn.wsOutletCVID[mdwsid] - 1].fac;
+                    int facMax_inMDWS = cvs[di.wsn.wsOutletidxs[mdwsid]].fac;
                     cvs[i].stream.chBaseWidth = cvs[i].fac
                         * cs.cwMostDownStream / (double)facMax_inMDWS;
                 }
@@ -230,22 +237,22 @@ int updateCVbyUserSettings()
             }
             else if (prj.css[mdwsid].csType == crossSectionType::CSCompound) {// Compound CS에서는 사용자가 입력한 재원을 이용해서 하폭 계산
                 channelSettingInfo cs = prj.css[mdwsid];
-                int facMax_inMDWS = cvs[di.wsn.wsOutletCVID[mdwsid] - 1].fac;
+                int facMax_inMDWS = cvs[di.wsn.wsOutletidxs[mdwsid]].fac;
                 cvs[i].stream.chBaseWidth = cvs[i].fac
                     * cs.lowRBaseWidth / (double)facMax_inMDWS;
                 if (cvs[i].stream.chBaseWidth < cs.compoundCSChannelWidthLimit) {
-                    cvs[i].stream.isCompoundCS = false;
+                    cvs[i].stream.isCompoundCS = -1;
                     cvs[i].stream.chURBaseWidth_m = 0;
                     cvs[i].stream.chLRHeight = 0;
                     cvs[i].stream.chLRArea_m2 = 0;
                 }
                 else {
-                    cvs[i].stream.isCompoundCS = true;
+                    cvs[i].stream.isCompoundCS = 1;
                     cvs[i].stream.chURBaseWidth_m = cvs[i].fac * cs.highRBaseWidth / (double)facMax_inMDWS;
                     cvs[i].stream.chLRHeight = cvs[i].fac * cs.lowRHeight / (double)facMax_inMDWS;
                     cvs[i].stream.chLRArea_m2 = getChCSAbyFlowDepth(cvs[i].stream.chBaseWidth,
                         cvs[i].stream.bankCoeff, cvs[i].stream.chLRHeight,
-                        false, cvs[i].stream.chLRHeight, cvs[i].stream.chLRArea_m2, 0);
+                        -1, cvs[i].stream.chLRHeight, cvs[i].stream.chLRArea_m2, 0);//처음에는 단단면으로 출발
                 }
             }
             else {
@@ -304,27 +311,27 @@ int updateCVbyUserSettings()
 
     // Flow control
     if (prj.simFlowControl == 1 && prj.fcs.size() > 0) {
-        for (int cvid : fccds.cvidsFCcell) {
-            flowControlinfo afc = prj.fcs[cvid];
+        for (int idx : fccds.cvidxsFCcell) {
+            flowControlinfo afc = prj.fcs[idx];
             switch (afc.fcType) {
             case flowControlType::Inlet: {
-                cvs[cvid - 1].fcType = flowControlType::Inlet;
+                cvs[idx].fcType = flowControlType::Inlet;
                 break;
             }
             case flowControlType::ReservoirOperation: {
-                cvs[cvid - 1].fcType = flowControlType::ReservoirOperation;
+                cvs[idx].fcType = flowControlType::ReservoirOperation;
                 break;
             }
             case flowControlType::ReservoirOutflow: {
-                cvs[cvid - 1].fcType = flowControlType::ReservoirOutflow;
+                cvs[idx].fcType = flowControlType::ReservoirOutflow;
                 break;
             }
             case flowControlType::SinkFlow: {
-                cvs[cvid - 1].fcType = flowControlType::SinkFlow;
+                cvs[idx].fcType = flowControlType::SinkFlow;
                 break;
             }
             case flowControlType::SourceFlow: {
-                cvs[cvid - 1].fcType = flowControlType::SourceFlow;
+                cvs[idx].fcType = flowControlType::SourceFlow;
                 break;
             }
             }
@@ -334,39 +341,37 @@ int updateCVbyUserSettings()
     // Inlet 셀 상류는  toBeSimulated =-1 으로 설정
     if (prj.simFlowControl == 1 && prj.isinletExist == 1) {
         bool bEnded = false;
-        vector<int> baseCVids;
+        vector<int> baseCVidxs;
         vector<int> newCVids;
-        baseCVids = fccds.cvidsinlet;
+        baseCVidxs = fccds.cvidxsinlet;
         while (!bEnded == true) {
             newCVids.clear();
             bEnded = true;
-            for (int cvidBase : baseCVids) {
-                int cvan = cvidBase - 1;
-                if (cvs[cvan].neighborCVIDsFlowintoMe.size() > 0) {
+            for (int cvan : baseCVidxs) {
+                //int cvan = cvidBase - 1;
+                if (cvs[cvan].neighborCVidxFlowintoMe.size() > 0) {
                     bEnded = false;
-                    for (int cvidFtoM : cvs[cvan].neighborCVIDsFlowintoMe) {
-                        cvs[cvidFtoM - 1].toBeSimulated = -1;
-                        newCVids.push_back(cvidFtoM);
+                    for (int idFtoM : cvs[cvan].neighborCVidxFlowintoMe) {
+                        cvs[idFtoM].toBeSimulated = -1;
+                        newCVids.push_back(idFtoM);
                     }
                 }
             }
-            baseCVids.clear();
-            baseCVids = newCVids;
+            baseCVidxs.clear();
+            baseCVidxs = newCVids;
         }
     }
 
     // wp 별로, 상류에 있는 cv 개수 설정
     for (int i = 0; i < di.cellNnotNull; i++) {
-        int cvid = i + 1;
         // 상류 cv 개수에 이 조건 추가하려면 주석 해제.
         //if (cvs[i].toBeSimulated == -1) { continue; }
         di.cellNtobeSimulated++;
-        for (int wpcvid : cvs[i].downWPCVIDs) {
-            wpis.cvCountAllup[wpcvid] ++;
+        for (int idx : cvs[i].downWPCVidx) {
+            wpis.cvCountAllup[idx] ++;
         }
     }
     return 1;
 }
-
 
 

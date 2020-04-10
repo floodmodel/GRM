@@ -1,5 +1,6 @@
 
 #include <omp.h>
+#include <string>
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"
@@ -12,38 +13,31 @@ extern thisSimulation ts;
 
 extern domaininfo di;
 extern cvAtt* cvs;
-extern map<int, vector<int>> cvaisToFA; //fa별 cv array idex 목록
+extern map<int, int*> cvaisToFA; //fa별 cv array idex 목록
+extern vector<int> fas;
+extern map<int, int> faCount;
 extern vector<rainfallData> rfs;
 extern flowControlCellAndData fccds;
 extern wpinfo wpis;
 
 extern cvAtt* cvsb; 
-map<int, double> fcdAb;// <cvid, value> t-dt 시간에 적용된 flow control data 값
+map<int, double> fcdAb;// <idx, value> t-dt 시간에 적용된 flow control data 값
 wpinfo wpisb;
 
 int startSimulationSingleEvent()
 {
     initThisSimulation();
     setCVStartingCondition(0);
-    //int dtPrint_min = prj.printTimeStep_min;
     int dtRF_sec = prj.rfinterval_min * 60;
-    //int dtrf_min = prj.rfinterval_min;
-    //int isRFended = -1;
-    //int tsec_tm1 = 0;
-    //cvAtt Project_tm1;
-    //int targetTtoPrint_min = 0;
     int rfOrder = 0;
     int nowTsec = ts.dtsec;
     double nowTmin;
     ts.dtsecUsed_tm1 = ts.dtsec;
-    ts.zeroTimePrinted = -1;
-    ts.targetTtoP_sec = prj.dtPrint_min;
-    //int dtsec;
-    int endingT_sec = ts.time_simEnding_sec + ts.dtsec;
-    while (nowTsec <= endingT_sec) {// simulationTimeLimitSEC
+    ts.targetTtoP_sec = (int)prj.dtPrint_min * 60;
+    int endingT_sec = ts.simEnding_sec + ts.dtsec+1;
+    while (nowTsec < endingT_sec) {
         //dtsec = ts.dtsec;        
         // dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
-        /*if (isRFended == -1 && (nowRFOrder == 0 || (nowTsec > dtRF_sec* nowRFOrder))) {*/
         if (nowTsec > dtRF_sec* rfOrder) {
             if (rfOrder < ts.rfDataCountTotal) {
                 rfOrder++; // 이렇게 하면 마지막 레이어 적용
@@ -57,9 +51,7 @@ int startSimulationSingleEvent()
         nowTmin = nowTsec / 60.0;
         if (simulateRunoff(nowTmin) == -1) { return -1; }
         calCumulRFduringDTP(ts.dtsec);
-
         outputManager(nowTsec, rfOrder);
-
         if (nowTsec + ts.dtsec > endingT_sec) {
             ts.dtsec = nowTsec + ts.dtsec - endingT_sec;
             nowTsec = endingT_sec;
@@ -81,7 +73,12 @@ int startSimulationSingleEvent()
         return 1;
     }
     else {
-        writeLog(fpnLog, "Simulation was completed.\n", 1, 1);
+        COleDateTime  timeNow = COleDateTime::GetCurrentTime();
+        COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
+            writeLog(fpnLog, "Simulation was completed. Run time: "
+                +to_string(tsTotalSim.GetHours())+"hrs "
+                +to_string(tsTotalSim.GetMinutes())+"min "
+                +to_string(tsTotalSim.GetSeconds())+"sec.\n", 1, 1);
         return 1;
     }
     return 1;
@@ -93,48 +90,43 @@ int simulateRunoff(double nowTmin)
     int maxLimit = di.facMax + 1;
     ts.vMaxInThisStep = DBL_MIN;
     int numth = prj.mdp;
-    double* uMax = new double[numth];
-    for (int fac = 0; fac < maxLimit; ++fac) {
-        if (cvaisToFA[fac].size() > 0) {
-            int iterLimit = cvaisToFA[fac].size();
+    double* uMax = new double[numth];// 이렇게 하면 아주 작은 값으로 초기화 된다.
+    for (int fac : fas) {
+        int iterLimit = faCount[fac];
 #pragma omp parallel
-            {    // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
-                // VS2019는 openMP 2.0 지원, 그러므로 critical 사용한다.
-                // critical은 속도 손실이 있으므로, 배열로 할당해서 직접 계산한다.
-                int id = omp_get_thread_num();
-                uMax[id] = 0;
-#pragma omp for schedule(guided) 
-                for (int i = 0; i < iterLimit; ++i) {
-                    if (cvs[i].toBeSimulated == 1) {
-                        //id = omp_get_thread_num();
-                        simulateRunoffCore(i, nowTmin);
-                        if (prj.IsFixedTimeStep == -1) {
-                            if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                                if (uMax[id] < cvs[i].uOF) {
-                                    uMax[id] = cvs[i].uOF;
-                                }
-                            }
-                            else {
-                                if (uMax[id] < cvs[i].stream.uCH) {
-                                    uMax[id] = cvs[i].stream.uCH;
-                                }
-                            }
+        {
+            // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
+            // 배열 사용하는 것이 critical 보다 빠르다..
+            int nth = omp_get_thread_num();
+            uMax[nth] = DBL_MIN;
+#pragma omp for//  guided 안쓰는더 더 빠르다..
+            for (int e = 0; e < iterLimit; ++e) {
+                int i = cvaisToFA[fac][e];
+                if (cvs[i].toBeSimulated == 1) {
+                    simulateRunoffCore(i, nowTmin);
+                    if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                        if (uMax[nth] < cvs[i].uOF) {
+                            uMax[nth] = cvs[i].uOF;
                         }
                     }
-                }
-            }
-            //#pragma omp critical(getVmax)
-            if (prj.IsFixedTimeStep == -1) {//이 조건 적용 여부?
-                for (int i = 0; i < numth; ++i) {
-                    if (ts.vMaxInThisStep < uMax[i]) {
-                        ts.vMaxInThisStep = uMax[i];
+                    else {
+                        if (uMax[nth] < cvs[i].stream.uCH) {
+                            uMax[nth] = cvs[i].stream.uCH;
+                        }
                     }
                 }
             }
         }
     }
+    for (int i = 0; i < prj.mdp; ++i) {
+        if (ts.vMaxInThisStep < uMax[i]) {
+            ts.vMaxInThisStep = uMax[i];
+        }
+    }
+    delete[] uMax;
     return 1;
 }
+
 
 void simulateRunoffCore(int i, double nowTmin)
 {
@@ -144,9 +136,8 @@ void simulateRunoffCore(int i, double nowTmin)
     if (prj.simFlowControl == 1 &&
         (cvs[i].fcType == flowControlType::ReservoirOutflow ||
             cvs[i].fcType == flowControlType::Inlet)) {
-        fccds.fcDataAppliedNowT_m3Ps[i + 1] = 0;
+        fccds.fcDataAppliedNowT_m3Ps[i ] = 0;
         calFCReservoirOutFlow(i, nowTmin);
-
     }
     else {
         updatetCVbyRFandSoil(i);
@@ -162,7 +153,7 @@ void simulateRunoffCore(int i, double nowTmin)
                 setNoFluxCVOF(i);
             }
         }
-        else { //cvs[i].flowType == cellFlowType::ChannelFlow  || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow
+        else { 
             double CSAchCVw_i_jP1 = 0;
             if (fac > 0) {
                 CSAchCVw_i_jP1 = getChCSAatCVW(i);
@@ -184,7 +175,7 @@ void simulateRunoffCore(int i, double nowTmin)
               || cvs[i].fcType == flowControlType::SourceFlow) {
               calSinkOrSourceFlow(i, nowTmin);
           }
-          if (prj.fcs[i + 1].roType != reservoirOperationType::None) {
+          if (prj.fcs[i].roType != reservoirOperationType::None) {
               // rotype이 있으면, ro로 넘어간다.
               calReservoirOperation(i, nowTmin);
           }
@@ -195,23 +186,46 @@ void simulateRunoffCore(int i, double nowTmin)
 void initThisSimulation()
 {
     if (prj.simType != simulationType::RealTime) {
-        ts.rfDataCountTotal = rfs.size();
+        ts.rfDataCountTotal = (int)rfs.size();
     }
     else {
         ts.rfDataCountTotal = -1;
     }
     // 이렇게 해야 모의기간에 맞게 실행된다. 
     //왜냐하면, 첫번째 실행 결과가 0 시간으로 출력되기 때문에
-    ts.time_simEnding_sec = (prj.simDuration_hr*60 + prj.dtPrint_min) * 60;     
+    ts.simDuration_min = (int)prj.simDuration_hr * 60
+        + prj.dtPrint_min;
+    ts.simEnding_sec = ts.simDuration_min * 60;
     ts.setupGRMisNormal = 1;
     ts.grmStarted = 1;
     ts.stopSim = -1;
-    ts.dtsec = prj.dtsec;
-    ts.dtMaxLimit_sec = (int)prj.dtPrint_min * 60 / 2;
-    ts.dtMinLimit_sec = 1;
     ts.vMaxInThisStep = DBL_MIN;
     //ts.iscvsb = -1;
     ts.cvsbT_sec = 0;
+    ts.dtMinLimit_sec = 1;
+    ts.zeroTimePrinted = -1;
+    //dtMaxLimit은 출력시간간격, 강우, fc의 시간간격을 모두 고려해서 그 반으로 한다.
+    int dtFromP = (int)(prj.dtPrint_min * 60 / 2);
+    int dtFromR = (int)(prj.rfinterval_min * 60 / 2);
+    ts.dtMaxLimit_sec = min(dtFromP, dtFromR);
+    if (prj.simFlowControl == 1) {
+        int mindtFC = INT_MAX;
+        for (int i :fccds.cvidxsFCcell) {
+            if (mindtFC > prj.fcs[i].fcDT_min) {
+                mindtFC = int(prj.fcs[i].fcDT_min *60 / 2);
+            }
+        }
+        if (ts.dtMaxLimit_sec > mindtFC) {
+            ts.dtMaxLimit_sec = mindtFC;
+        }
+    }
+    if (ts.dtMaxLimit_sec < ts.dtMinLimit_sec) {
+        ts.dtMaxLimit_sec = ts.dtMinLimit_sec;
+    }
+    if (ts.dtMaxLimit_sec < prj.dtsec) {
+        prj.dtsec = ts.dtMaxLimit_sec;
+    }
+    ts.dtsec = prj.dtsec;
 
     time_t now = time(0);
     localtime_s(&ts.g_RT_tStart_from_MonitorEXE, &now);
@@ -220,11 +234,12 @@ void initThisSimulation()
 
 void setCVStartingCondition(double iniflow)
 {
-    double hChCVini;
-    double chCSAini;
-    double qChCVini;
-    double uChCVini;
+    #pragma omp parallel for //schedule(guided)
     for (int i = 0; i < di.cellNnotNull; ++i) {
+        double hChCVini;
+        double chCSAini;
+        double qChCVini;
+        double uChCVini;
         double iniQAtwsOutlet = 0;
         int faAtBaseCV = di.facMax;
         int wsid = cvs[i].wsid;
@@ -239,7 +254,7 @@ void setCVStartingCondition(double iniflow)
             int iniStreamFlowIWasSet = -1;
             if (prj.swps[wsid].iniFlow > 0) {//Apply ini. flow of current sws
                 iniQAtwsOutlet = prj.swps[wsid].iniFlow;
-                faAtBaseCV = cvs[di.wsn.wsOutletCVID[wsid] - 1].fac;
+                faAtBaseCV = cvs[di.wsn.wsOutletidxs[wsid]].fac;
                 iniStreamFlowIWasSet = true;
             }
             else {
@@ -248,7 +263,7 @@ void setCVStartingCondition(double iniflow)
                     int downWSid = di.wsn.wsidNearbyDown[baseWSid];
                     if (prj.swps[downWSid].iniFlow > 0) {// If this condition is satisfied, apply ini. flow of downstream ws.
                         iniQAtwsOutlet = prj.swps[downWSid].iniFlow;
-                        faAtBaseCV = cvs[di.wsn.wsOutletCVID[downWSid] - 1].fac;
+                        faAtBaseCV = cvs[di.wsn.wsOutletidxs[downWSid]].fac;
                         iniStreamFlowIWasSet = 1;
                         break;
                     }
@@ -316,9 +331,9 @@ void setCVStartingCondition(double iniflow)
         cvs[i].hUAQfromBedrock_m = CONST_UAQ_HEIGHT_FROM_BEDROCK;
         cvs[i].storageCumulative_m3 = 0;
         if (prj.simFlowControl == 1) {
-            int acvid = i + 1;
-            if (prj.fcs.size() > 0 && getVectorIndex(fccds.cvidsFCcell, acvid) != -1) {
-                double iniS = prj.fcs[acvid].iniStorage_m3;
+            //int i = i + 1;
+            if (prj.fcs.size() > 0 && getVectorIndex(fccds.cvidxsFCcell, i) != -1) {
+                double iniS = prj.fcs[i].iniStorage_m3;
                 if (iniS > 0) {
                     cvs[i].storageCumulative_m3 = iniS;
                 }
@@ -328,7 +343,8 @@ void setCVStartingCondition(double iniflow)
             }
         }
     }
-    for (int wpcvid : wpis.wpCVIDs) {
+
+    for (int wpcvid : wpis.wpCVidxes) {
         wpis.maxDepth_m[wpcvid] = 0;
         wpis.maxDepthTime[wpcvid] = "";
         wpis.maxFlow_cms[wpcvid] = 0;
@@ -348,7 +364,7 @@ void outputManager(int nowTsec, int rfOrder)
     int dtrf_sec = dtrf_min * 60;
     int dtP_SEC = dtP_min * 60;
     double dtmin = ts.dtsec / 60.0;
-    int timeToP_min;
+    int timeToP_min = 0;// = nowTsec / 60;
     if (rfOrder == 1
         && dtP_min > dtrf_min
         && ((nowTsec + ts.dtsec) > dtrf_sec)) {
@@ -357,17 +373,19 @@ void outputManager(int nowTsec, int rfOrder)
         double RFmeanForFirstLayer = ts.rfAveForDT_m / dtmin * dtrf_min;
         writeBySimType(0, 1);
         ts.zeroTimePrinted = 1;
+        ts.isbak = -1;
         return; // 이경우는 모의시작 전에 설정된  ts.targetTtoP_min = dtP_min 을 유지
     }
     else if (nowTsec % dtP_SEC == 0) {
         if (ts.zeroTimePrinted == -1) {
-            timeToP_min = ts.targetTtoP_sec * 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
+            timeToP_min = ts.targetTtoP_sec / 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
         }
         else {
-            timeToP_min = ts.targetTtoP_sec * 60;
+            timeToP_min = ts.targetTtoP_sec / 60;
         }
         writeBySimType(timeToP_min, 1);
         ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
+        ts.isbak = -1;
         return;
     }
     else {
@@ -387,7 +405,7 @@ void outputManager(int nowTsec, int rfOrder)
             && (nowTsec - ts.dtsecUsed_tm1) <= ts.targetTtoP_sec) {
             double citerp;
             citerp = (ts.targetTtoP_sec - ts.cvsbT_sec) / (double)(nowTsec - ts.cvsbT_sec);
-            timeToP_min = ts.targetTtoP_sec * 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
+            timeToP_min = (int)(ts.targetTtoP_sec / 60) - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
             writeBySimType(timeToP_min, citerp);
             ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
             ts.isbak = -1;
@@ -399,11 +417,10 @@ void outputManager(int nowTsec, int rfOrder)
 void writeBySimType(int nowTP_min,
     double cinterp)
 {
-    writeSimStep(nowTP_min);
-    int wpCount = wpis.wpCVIDs.size();
     simulationType simType = prj.simType;
     switch (simType) {
     case simulationType::SingleEvent: {
+        writeSimStep(nowTP_min);
         if (prj.printOption == GRMPrintType::All) {
             writeSingleEvent(nowTP_min, cinterp);
         }
@@ -420,28 +437,17 @@ void writeBySimType(int nowTP_min,
         break;
     }
     }
-
-    if (ts.runByAnalyzer == 1)
-        // RaiseEvent SendQToAnalyzer(Me, mProject, Project_tm1, nowTtoPrint_MIN, coeffInterpolation)
-    {
-        SendQToAnalyzer(nowTP_min, cinterp);
+    if (ts.runByAnalyzer == 1)    {
+        // 클래스나 전역 변수에 저장해서, 외부로 노출하고, analyzer에서 사용하는 방법은?
+        //모의 종료시 혹은 1초마다 챠트 업데이트하는 방법?
+        //SendQToAnalyzer(nowTP_min, cinterp);
     }
-    if (mProject.generalSimulEnv.mbMakeRasterOutput == true)
-    {
-        MakeRasterOutput(nowTP_min);
+    if (prj.makeASCorIMGfile == 1)    {
+        makeRasterOutput(nowTP_min);
     }
-
-    sThisSimulation.mRFMeanForAllCell_sumForDTprintOut_m = 0;
-    for (Dataset.GRMProject.WatchPointsRow row in mProject.watchPoint.mdtWatchPointInfo)
-    {
-        mProject.watchPoint.RFUpWsMeanForDtPrintout_mm[row.CVID] = 0;
-        mProject.watchPoint.RFWPGridForDtPrintout_mm[row.CVID] = 0;
-    }
-    if (prj.makeRfDistFile == 1
-        && prj.makeASCorIMGfile == 1) {
-        for (int cvan = 0; cvan < di.cellNnotNull; ++cvan)
-        {
-            cProject.Current.CVs[cvan].RF_dtPrintOut_meter = 0;
-        }
+    ts.rfAveSumAllCells_dtP_m = 0;
+    for (int idx : wpis.wpCVidxes) {
+        wpis.rfUpWSAveForDtP_mm[idx] = 0;
+        wpis.rfWPGridForDtP_mm[idx] = 0;
     }
 }

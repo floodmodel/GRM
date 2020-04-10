@@ -14,8 +14,11 @@ namespace GRMCore
         ///   <remarks>
         ///   레이어가 없는 경우는 FileNotFoundException 던짐
         ///   </remarks>
-        public static bool ReadLayerWSandSetBasicInfo(string fpnWS, cSetWatershed watershed, ref cCVAttribute[,] wsCells,
-            ref cCVAttribute[] CVs, ref sDomain[] dmInfo, ref cWatershedNetwork WSNetwork, ref cSetSubWatershedParameter subWSPar)
+        public static bool ReadLayerWSandSetBasicInfo(string fpnWS, 
+            cSetWatershed watershed, ref cCVAttribute[,] wsCells,
+            ref cCVAttribute[] CVs, ref sDomain[] dmInfo, 
+            ref cWatershedNetwork WSNetwork, 
+            ref cSetSubWatershedParameter subWSPar)
         {
             if (File.Exists(fpnWS) == false)
             {
