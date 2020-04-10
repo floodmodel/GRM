@@ -66,6 +66,9 @@
     <ClCompile Include="wsinfo.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="network.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="grm.h">

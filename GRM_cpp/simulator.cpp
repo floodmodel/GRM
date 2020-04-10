@@ -13,6 +13,7 @@ extern thisSimulation ts;
 
 extern domaininfo di;
 extern cvAtt* cvs;
+extern cvpos* cvps;
 extern map<int, int*> cvaisToFA; //faº° cv array idex ¸ñ·Ï
 extern vector<int> fas;
 extern map<int, int> faCount;
@@ -242,7 +243,7 @@ void setCVStartingCondition(double iniflow)
         double uChCVini;
         double iniQAtwsOutlet = 0;
         int faAtBaseCV = di.facMax;
-        int wsid = cvs[i].wsid;
+        int wsid = cvps[i].wsid;
         cvs[i].uOF = 0;
         cvs[i].hOF = 0;
         cvs[i].hOF_ori = 0;

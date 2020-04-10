@@ -2015,6 +2015,53 @@ int isNormalLandCoverInfo(landCoverInfo *lc)
 	return 1;
 }
 
+void updateAllSWSParsUsingNetwork()
+{
+	for (int wsid : di.dmids) {
+		if (prj.swps[wsid].userSet == 1) {
+			vector<int> wsidToExclude;
+			for (int upsid : di.wsn.wsidsAllUp[wsid]) {
+				if (prj.swps[upsid].userSet == 1) {
+					if (getVectorIndex(wsidToExclude, upsid) == -1) {
+						wsidToExclude.push_back(upsid);
+					}
+					for (int upupID : di.wsn.wsidsAllUp[upsid]) {
+						if (getVectorIndex(wsidToExclude, upupID) == -1) {
+							wsidToExclude.push_back(upupID);
+						}
+					}
+				}
+			}
+			for (int upsid : di.wsn.wsidsAllUp[wsid]) {
+				if (getVectorIndex(wsidToExclude, upsid) == -1) {
+					updateOneSWSParsWithOtherSWSParsSet(upsid, wsid);
+				}
+			}
+		}
+	}
+}
+
+bool updateOneSWSParsWithOtherSWSParsSet(int targetWSid, int referenceWSid)
+{
+	swsParameters spars = prj.swps[referenceWSid];
+	prj.swps[targetWSid].iniSaturation = spars.iniSaturation;
+	prj.swps[targetWSid].minSlopeOF = spars.minSlopeOF;
+	prj.swps[targetWSid].unSatKType = spars.unSatKType;
+	prj.swps[targetWSid].coefUnsaturatedK = spars.coefUnsaturatedK;
+	prj.swps[targetWSid].minSlopeChBed = spars.minSlopeChBed;
+	prj.swps[targetWSid].minChBaseWidth = spars.minChBaseWidth;
+	prj.swps[targetWSid].chRoughness = spars.chRoughness;
+	prj.swps[targetWSid].dryStreamOrder = spars.dryStreamOrder;
+	prj.swps[targetWSid].ccLCRoughness = spars.ccLCRoughness;
+	prj.swps[targetWSid].ccPorosity = spars.ccPorosity;
+	prj.swps[targetWSid].ccWFSuctionHead = spars.ccWFSuctionHead;
+	prj.swps[targetWSid].ccHydraulicK = spars.ccHydraulicK;
+	prj.swps[targetWSid].ccSoilDepth = spars.ccSoilDepth;
+	if (prj.swps[targetWSid].userSet == -1) {
+		prj.swps[targetWSid].iniFlow = 0;
+	}
+	return true;
+}
 
 
 

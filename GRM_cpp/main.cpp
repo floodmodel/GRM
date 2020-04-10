@@ -28,7 +28,8 @@ projectFile prj;
 grmOutFiles ofs;
 
 domaininfo di;
-int** cvais; // 각셀의 cv array idex 
+int** cvais; // 각셀(x,y)의 cv array idex 
+cvpos* cvps;//각 cv의 x, y 위치, ws 위치
 cvAtt* cvs;
 cvAtt* cvsb;
 vector<rainfallData> rfs;

@@ -15,6 +15,7 @@ extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
 
 extern cvAtt* cvs;
+extern cvpos* cvps;
 extern domaininfo di;
 extern thisSimulation ts;
 
@@ -101,7 +102,7 @@ int setCVRF(int order)
             //if (cvs[i].toBeSimulated == -1) {
             //    continue;
             //}
-            double inRF_mm = rfasc.valuesFromTL[cvs[i].xCol][cvs[i].yRow];
+            double inRF_mm = rfasc.valuesFromTL[cvps[i].xCol][cvps[i].yRow];
             if (prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
                 inRF_mm = inRF_mm / (60.0 / dtrf_min);
             }

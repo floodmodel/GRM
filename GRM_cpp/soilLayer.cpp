@@ -4,6 +4,7 @@
 
 extern projectFile prj;
 extern cvAtt* cvs;
+extern cvpos* cvps;
 extern domaininfo di;
 
 
@@ -15,7 +16,7 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
         return;
     }
     if (cvs[i].flowType == cellFlowType::ChannelFlow
-        && cvs[i].stream.cellValue > prj.swps[cvs[i].wsid].dryStreamOrder) {
+        && cvs[i].stream.cellValue > prj.swps[cvps[i].wsid].dryStreamOrder) {
         setWaterAreaInfiltrationPars(i);
         return;
     }
@@ -222,7 +223,7 @@ double calBFlowAndGetCSAaddedByBFlow(int i, int dtsec, double cellSize_m)
     double soilDepthPercolated_m;
     double waterDepthPercolated_m;
     double csa = 0;
-    int wsid = cvs[i].wsid;
+    int wsid = cvps[i].wsid;
     deltaSoilDepthofUAQ_m = 0;
     // 토양의 포화 상태와 상관없이 침누가 발생한다. 토양포화도가 상승 및 하강한다. 포화도가 0 이면 침누 발생 안한다.
     if (cvs[i].ssr > 0) {

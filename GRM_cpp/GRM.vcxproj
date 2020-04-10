@@ -22,6 +22,7 @@
     <ClCompile Include="..\..\gentle\cpp\gentle.cpp" />
     <ClCompile Include="..\..\gentle\cpp\systemcommand.cpp" />
     <ClCompile Include="..\..\gentle\cpp\systeminfo.cpp" />
+    <ClCompile Include="network.cpp" />
     <ClCompile Include="wsinfo.cpp" />
     <ClCompile Include="flowControl.cpp" />
     <ClCompile Include="outputRaster.cpp" />

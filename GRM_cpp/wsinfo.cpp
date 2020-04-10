@@ -12,6 +12,7 @@ extern fs::path fpnLog;
 
 extern int** cvais;
 extern cvAtt* cvs;
+extern cvpos* cvps;
 extern domaininfo di;
 extern map<int, int*> cvaisToFA; //faº° cv array idex ¸ñ·Ï
 
@@ -170,8 +171,8 @@ GRM::grmWS::~grmWS()
 
 int GRM::grmWS::setPublicVariables()
 {
-    mostDownStreamCell.xCol = cvs[di.cvidxMaxFac].xCol;
-    mostDownStreamCell.yRow = cvs[di.cvidxMaxFac].yRow;    
+    mostDownStreamCell.xCol = cvps[di.cvidxMaxFac].xCol;
+    mostDownStreamCell.yRow = cvps[di.cvidxMaxFac].yRow;
     WSIDsAll = di.dmids;
     //WSIDsAll = new int[di.dmids.size()];
     //copy(di.dmids.begin(), di.dmids.end(), WSIDsAll);
@@ -180,12 +181,11 @@ int GRM::grmWS::setPublicVariables()
     //mostDownStreamWSIDs = new int[di.wsn.mdWSIDs.size()];
     //copy(di.wsn.mdWSIDs.begin(), di.wsn.mdWSIDs.end(), mostDownStreamWSIDs);
     cellCountInWatershed = di.cellNnotNull;
-
-
+    cellSize = di.cellSize;
 }
 
 
-bool GRM::grmWS::IsInWatershedArea(int colXAryidx, int rowYAryidx)
+bool GRM::grmWS::isInWatershedArea(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
@@ -220,7 +220,7 @@ int GRM::grmWS::watershedID(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
-        return cvs[idx].wsid;
+        return cvps[idx].wsid;
     }
     else {
         return 0;
@@ -330,109 +330,87 @@ int GRM::grmWS::soilDepthValue(int colXAryidx, int rowYAryidx)
 
 vector<string> GRM::grmWS::allCellsInUpstreamArea(int colXAryidx, int rowYAryidx)
 {
-    int idx = cvais[colXAryidx][rowYAryidx];
-    if (idx >= 0) {
+    vector<string> cellsPos;
+    int startingidx = cvais[colXAryidx][rowYAryidx];
+    if (startingidx >= 0) {
         vector<int> cvidxs;
-        int startingBaseCVidx = idx;
-        cvidxs  = grmPrj.getAllUpstreamCells(startingBaseCVidx);
-        if (cvidxs != null)
-        {
-            string[] cellsArray = new string[cvids.Count - 1 + 1];
-            int idx = 0;
-            foreach(int cvid : cvids)
-            {
-                int colx = grmPrj.dmInfo[cvid - 1].XCol;
-                int rowy = grmPrj.dmInfo[cvid - 1].YRow;
-                string cellpos = colx.ToString() + ", " + rowy.ToString();
-                cellsArray[idx] = cellpos;
+        cvidxs = getAllUpstreamCells(startingidx);
+        if (cvidxs.size() > 0) {
+            for (int idx : cvidxs) {
+                int colx = cvps[idx].xCol;
+                int rowy = cvps[idx].yRow;
+                string cp = to_string(colx) + ", " + to_string(rowy);
+                cellsPos.push_back(cp);
                 idx += 1;
             }
-            return cellsArray;
         }
-        else
-            return null;
     }
-    else
-        return null;
+    return cellsPos;
 }
 
-//public bool SetOneSWSParametersAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
-//    double minSlopeLandSurface, string UnsKType, double coefUnsK,
-//    double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
-//    int dryStreamOrder, double ccLCRoughness,
-//    double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
-//    double ccSoilHydraulicCond, double iniFlow = 0)
-//{
-//    try
-//    {
-//        {
-//            grmPrj.subWSPar.userPars[wsid].iniSaturation = iniSat;
-//            grmPrj.subWSPar.userPars[wsid].minSlopeOF = minSlopeLandSurface;
-//            grmPrj.subWSPar.userPars[wsid].UKType = cGRM.UnSaturatedKType.Linear.ToString();
-//            if (UnsKType.ToLower() == cGRM.UnSaturatedKType.Linear.ToString().ToLower()) { grmPrj.subWSPar.userPars[wsid].UKType = cGRM.UnSaturatedKType.Linear.ToString(); }
-//            if (UnsKType.ToLower() == cGRM.UnSaturatedKType.Exponential.ToString().ToLower()) { grmPrj.subWSPar.userPars[wsid].UKType = cGRM.UnSaturatedKType.Exponential.ToString(); }
-//            if (UnsKType.ToLower() == cGRM.UnSaturatedKType.Constant.ToString().ToLower()) { grmPrj.subWSPar.userPars[wsid].UKType = cGRM.UnSaturatedKType.Constant.ToString(); }
-//            if (UnsKType.ToLower() == cGRM.UnSaturatedKType.Constant.ToString().ToLower()) { grmPrj.subWSPar.userPars[wsid].UKType = cGRM.UnSaturatedKType.Constant.ToString(); }
-//            grmPrj.subWSPar.userPars[wsid].coefUK = coefUnsK;
-//            grmPrj.subWSPar.userPars[wsid].minSlopeChBed = minSlopeChannel;
-//            grmPrj.subWSPar.userPars[wsid].minChBaseWidth = minChannelBaseWidth;
-//            grmPrj.subWSPar.userPars[wsid].chRoughness = roughnessChannel;
-//            grmPrj.subWSPar.userPars[wsid].dryStreamOrder = dryStreamOrder;
-//            grmPrj.subWSPar.userPars[wsid].ccLCRoughness = ccLCRoughness;
-//            grmPrj.subWSPar.userPars[wsid].ccSoilDepth = ccSoilDepth;
-//            grmPrj.subWSPar.userPars[wsid].ccPorosity = ccPorosity;
-//            grmPrj.subWSPar.userPars[wsid].ccWFSuctionHead = ccWFSuctionHead;
-//            grmPrj.subWSPar.userPars[wsid].ccHydraulicK = ccSoilHydraulicCond;
-//            grmPrj.subWSPar.userPars[wsid].iniFlow = iniFlow;
-//            grmPrj.subWSPar.userPars[wsid].isUserSet = true;
-//        }
-//        cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(grmPrj);
-//        return true;
-//    }
-//    catch (Exception ex)
-//    {
-//        Console.WriteLine(ex.ToString());
-//        return false;
-//    }
-//}
+// If this class was instanced by using gmp file --"grmWS(string gmpFPN)".		
+bool GRM::grmWS::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
+    double minSlopeLandSurface, string unSKType, double coefUnsK,
+    double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
+    int dryStreamOrder, double ccLCRoughness,
+    double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
+    double ccSoilHydraulicCond, double iniFlow)
+{
+    prj.swps[wsid].iniSaturation = iniSat;
+    prj.swps[wsid].minSlopeOF = minSlopeLandSurface;
+    prj.swps[wsid].unSatKType = unSaturatedKType::Linear;
+        unSaturatedKType uskt = unSaturatedKType::None;
+        if (unSKType != "") {
+            if (lower(unSKType) == lower(ENUM_TO_STR(Constant))) {
+                prj.swps[wsid].unSatKType = unSaturatedKType::Constant;
+            }
+            else if (lower(unSKType) == lower(ENUM_TO_STR(Linear))) {
+                prj.swps[wsid].unSatKType = unSaturatedKType::Linear;
+            }
+            else if (lower(unSKType) == lower(ENUM_TO_STR(Exponential))) {
+                prj.swps[wsid].unSatKType = unSaturatedKType::Exponential;
+            }
+            else {
+                writeLog(fpnLog, "Unsaturated K type in the watershed ["
+                    + to_string(wsid) + "] is invalid.\n", 1, 1);
+                return false;
+            }
+        }
+    prj.swps[wsid].coefUnsaturatedK = coefUnsK;
+    prj.swps[wsid].minSlopeChBed = minSlopeChannel;
+    prj.swps[wsid].minChBaseWidth = minChannelBaseWidth;
+    prj.swps[wsid].chRoughness = roughnessChannel;
+    prj.swps[wsid].dryStreamOrder = dryStreamOrder;
+    prj.swps[wsid].ccLCRoughness = ccLCRoughness;
+    prj.swps[wsid].ccSoilDepth = ccSoilDepth;
+    prj.swps[wsid].ccPorosity = ccPorosity;
+    prj.swps[wsid].ccWFSuctionHead = ccWFSuctionHead;
+    prj.swps[wsid].ccHydraulicK = ccSoilHydraulicCond;
+    prj.swps[wsid].iniFlow = iniFlow;
+    prj.swps[wsid].userSet = 1;
+    updateAllSWSParsUsingNetwork();
+    return true;
+}
 
-///// <summary>
-/////    This method is applied to update all the subwatersheds parameters when there are more than 1 subwatershed.
-/////    Before this method is called, user set parameters must have been updated for each user set watershed
-/////    by using [ grmPrj.SubWSPar.userPars[wsid] property]
-/////    And after this method is called, all the paramters in all the watersheds would be updated by using user set parameters.
-/////   </summary>
-//public void UpdateAllSubWatershedParametersUsingNetwork()
-//{
-//    if (WScount() > 1)
-//    {
-//        cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(grmPrj);
-//    }
-//}
+// If this class was instanced by using gmp file --"grmWS(string gmpFPN)".		
+// This method is applied to update all the subwatersheds parameters 
+// when there are more than 1 subwatershed.
+// Before this method is called, user set parameters must have been updated for each user set watershed
+// by using [ grmPrj.SubWSPar.userPars[wsid] property]
+// And after this method is called, all the paramters in all the watersheds would be updated by using user set parameters.
+void GRM::grmWS::updateAllSubWatershedParametersUsingNetwork()
+{
+    updateAllSWSParsUsingNetwork();
+}
 
-//public cUserParameters subwatershedPars(int wsid)
-//{
-//    return grmPrj.subWSPar.userPars[wsid];
-//}
+swsParameters GRM::grmWS::subwatershedPars(int wsid)
+{
+    return prj.swps[wsid];
+}
 
-//public bool RemoveUserParametersSetting(int wsid)
-//{
-//    try
-//    {
-//        grmPrj.subWSPar.userPars[wsid].isUserSet = false;
-//        cSetSubWatershedParameter.UpdateSubWSParametersForWSNetwork(grmPrj);
-//        return true;
-//    }
-//    catch (Exception ex)
-//    {
-//        Console.WriteLine(ex.ToString());
-//        return false;
-//    }
-//}
-
-
-//public double cellSize()
-//{
-//    return grmPrj.watershed.mCellSize;
-//}
-
+bool GRM::grmWS::removeUserParametersSetting(int wsid)
+{
+    prj.swps[wsid].userSet = -1;
+    updateAllSWSParsUsingNetwork();
+    return true;
+}

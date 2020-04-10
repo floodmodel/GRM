@@ -525,11 +525,18 @@ typedef struct _cvStreamAtt
 	double chLRArea_m2 = 0.0;// 복단면 channel 중 하층부의 면적[m^2]
 } cvStreamAtt;
 
-typedef struct _cvAtt
+typedef struct _cvpos
 {
 	int xCol;
 	int yRow;
 	int wsid = -1; //유역 ID, 해당 raster cell의 값
+} cvpos;
+
+typedef struct _cvAtt
+{
+	//int xCol;
+	//int yRow;
+	//int wsid = -1; //유역 ID, 해당 raster cell의 값
 	cellFlowType flowType;//셀의 종류, 지표면흐름, 하도흐름, 지표면+하도
 	double slopeOF = 0.0; //지표면 해석에 적용되는 overland flow 셀의 경사(m/m)
 	double slope = 0.0; //셀의 경사(m/m)
@@ -737,6 +744,7 @@ void disposeDynamicVars();
 int deleteAllOutputFiles();
 int deleteAllFilesExceptDischarge();
 
+vector<int> getAllUpstreamCells(int startingidx);
 double getChCSAatCVW(int i);
 double getChCSAbyFlowDepth(double LRBaseWidth, 
 	double chBankConst,	double crossSectionDepth,
@@ -857,6 +865,9 @@ double totalSSFfromCVwOFcell_m3Ps(int i);
 int updateWatershedNetwork();
 int updateCVbyUserSettings();
 int updateFCCellinfoAndData();
+void updateAllSWSParsUsingNetwork();
+bool updateOneSWSParsWithOtherSWSParsSet(int TargetWSid,
+	int ReferenceWSid);
 
 void writeBySimType(int nowTP_min,
 	double cinterp);
@@ -883,13 +894,9 @@ inline  double vByManningEq(double hydraulicRaidus,
 
 
 
-
-
-
-
 namespace GRM
 {
-	class grmWS {
+	GRMDLL_API class grmWS {
 	private:
 		int setPublicVariables();
 		bool byGMPfile = false;
@@ -899,6 +906,7 @@ namespace GRM
 		int WScount = 0;
 		vector<int> mostDownStreamWSIDs;
 		int cellCountInWatershed=0;
+		double cellSize = 0;
 
 		grmWS(string fdirType, string fpnDomain,
 			string slopeFPN, string fpnFdir, string fpnFac,
@@ -909,35 +917,39 @@ namespace GRM
 			string fpnChannelWidth="");
 		grmWS(string gmpFPN);
 		
-		GRMDLL_API bool IsInWatershedArea(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
-		GRMDLL_API int grmPlus(int a, int b);
-		GRMDLL_API int grmMultiple(int a, int b);
-		GRMDLL_API vector<int> upStreamWSIDs(int currentWSID);
-		GRMDLL_API int upStreamWSCount(int currentWSID);
-		GRMDLL_API vector<int> downStreamWSIDs(int currentWSID);
-		GRMDLL_API int downStreamWSCount(int currentWSID);
-		GRMDLL_API int watershedID(int colXAryidx, int rowYAryidx); // 배열 인덱스 사용
-		GRMDLL_API string flowDirection(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
-		GRMDLL_API int flowAccumulation(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
-		GRMDLL_API double slope(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
-		GRMDLL_API int streamValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
-		GRMDLL_API string cellFlowType(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
-		GRMDLL_API int landCoverValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
-		GRMDLL_API int soilTextureValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
-		GRMDLL_API int soilDepthValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
-		GRMDLL_API vector<string> allCellsInUpstreamArea(int colXAryidx, int rowYAryidx); //    Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
-	
-	
+		bool isInWatershedArea(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		int grmPlus(int a, int b);
+		int grmMultiple(int a, int b);
+		vector<int> upStreamWSIDs(int currentWSID);
+		int upStreamWSCount(int currentWSID);
+		vector<int> downStreamWSIDs(int currentWSID);
+		int downStreamWSCount(int currentWSID);
+		int watershedID(int colXAryidx, int rowYAryidx); // 배열 인덱스 사용
+		string flowDirection(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		int flowAccumulation(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		double slope(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		int streamValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		string cellFlowType(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		int landCoverValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		int soilTextureValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		int soilDepthValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		vector<string> allCellsInUpstreamArea(int colXAryidx, //    Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
+			int rowYAryidx); 		
+
+		// If this class was instanced by using gmp file --"grmWS(string gmpFPN)".		
+		bool setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
+			double minSlopeLandSurface, string unSKType, double coefUnsK,
+			double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
+			int dryStreamOrder, double ccLCRoughness,
+			double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
+			double ccSoilHydraulicCond, double iniFlow = 0);		
+		void updateAllSubWatershedParametersUsingNetwork();
+		swsParameters subwatershedPars(int wsid);
+		bool removeUserParametersSetting(int wsid);
 	};
 }
 
 // extern C
+extern "C" GRMDLL_API class  grmWS;
 
-extern "C" 
-extern "C" GRMDLL_API int readLandCoverFile(string fpnLC,
-	int** cvAryidx, cvAtt * cvs1D, int effCellCount);
-extern "C" GRMDLL_API int readSoilTextureFile(string fpnST,
-	int** cvAryidx, cvAtt * cvs1D, int effCellCount);
-extern "C" GRMDLL_API int readSoilDepthFile(string fpnSD,
-	int** cvAryidx, cvAtt * cvs1D, int effCellCount);
 

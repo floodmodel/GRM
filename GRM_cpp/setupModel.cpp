@@ -13,6 +13,7 @@ extern projectFile prj;
 extern domaininfo di;
 extern int** cvais;
 extern cvAtt* cvs;
+extern cvpos* cvps;
 
 extern map<int, int*> cvaisToFA; //fa별 cv array idex 목록
 extern vector<int> fas;
@@ -92,7 +93,6 @@ int initWPinfos()
 	isnormal = 1;
 	return isnormal;
 }
-
 
 int setupByFAandNetwork()
 {
@@ -186,7 +186,7 @@ int setupByFAandNetwork()
 int updateCVbyUserSettings()
 {
     for (int i = 0; i < di.cellNnotNull; ++i) {
-        int wid = cvs[i].wsid;
+        int wid = cvps[i].wsid;
         swsParameters ups = prj.swps[wid];
         if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
             cvs[i].flowType = cellFlowType::ChannelFlow; //우선 channel flow로 초기화
