@@ -32,8 +32,7 @@ void writeDBRealTime(int nowTmin, double cinterp)
     double Qobs_cms;
     string strOutPutLine;
     string strSQL_Server = "";       // SQL DB 에도 추가적으로 기입
-    for (int cvid : wpis.wpCVIDs) {
-        int i = cvid - 1;
+    for (int i : wpis.wpCVidxes) {
         if (cinterp == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
                 vToP = forString(cvs[i].QOF_m3Ps, 2);
@@ -54,7 +53,7 @@ void writeDBRealTime(int nowTmin, double cinterp)
         }
         // 여기서 관측자료 받는다.. 직접 받을 수 있는 경우를 대비해서, 자리만 만들어줌..
         Qobs_cms = 0;
-        strWPName = wpis.wpNames[cvid];
+        strWPName = wpis.wpNames[i];
 
         //// 실시간 모델링 텍스트 파일 쓰지 않는다. 2020.03.29. 최
         //strFNP = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "RealTime_" + strWPName + ".out";

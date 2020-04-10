@@ -2,6 +2,12 @@
 
 #include "gentle.h"
 
+#ifdef GRMDLL_EXPORTS
+#define GRMLL_API __declspec(dllexport)
+#else
+#define GRMDLL_API __declspec(dllimport)
+#endif
+
 using namespace std;
 namespace fs = std::filesystem;
 
@@ -29,8 +35,8 @@ const double CONST_MIN_SLOPE = 0.000001;
 const double CONST_CFL_NUMBER = 1.0;
 const double CONST_EXPONENTIAL_NUMBER_UNSATURATED_K = 6.4;
 const double CONST_WEDGE_FLOW_COEFF = 1; // 최상류 셀의 쐐기 흐름 계산시 p의 수심에 곱해지는 계수
-const double CONST_WET_AND_DRY_CRITERIA = 0.000001F;
-const double CONST_TOLERANCE = 0.001F;
+const double CONST_WET_AND_DRY_CRITERIA = 0.000001;
+const double CONST_TOLERANCE = 0.001;
 const double CONST_DEPTH_TO_BEDROCK = 20;// 암반까지의 깊이[m]
 const double CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN = 10;// 산악지역에서의 암반까지의 깊이[m]
 const double CONST_DEPTH_TO_UNCONFINED_GROUNDWATERTABEL = 10;// 비피압대수층까지의 깊이[m]
@@ -143,7 +149,8 @@ enum class soilTextureCode
 enum class soilDepthCode
 {
 	D,
-	M,
+	MDMS, //MDMS
+	M, //MDMS
 	S,
 	VD,
 	VS,
@@ -166,10 +173,33 @@ enum class landCoverCode
 	None
 };
 
+typedef struct _projectFileTable
+{
+	const string nProjectSettings = "ProjectSettings";
+	const string nSubWatershedSettings = "SubWatershedSettings";
+	const string nChannelSettings = "ChannelSettings";
+	const string nWatchPoints = "WatchPoints";
+	const string nGreenAmptParameter = "GreenAmptParameter";
+	const string nSoilDepth = "SoilDepth";
+	const string nLandCover = "LandCover";
+	const string nFlowControlGrid = "FlowControlGrid";
+	const string nRTenv = "RTenv";
+	int sProjectSettings = 0; //0::비활성, 1: 활성
+	int sSubWatershedSettings = 0; //0:비활성, 1: 활성
+	int sChannelSettings = 0; //0:비활성, 1: 활성
+	int sWatchPoints = 0; //0:비활성, 1: 활성
+	int sGreenAmptParameter = 0; //0:비활성, 1: 활성
+	int sSoilDepth = 0; //0:비활성, 1: 활성
+	int sLandCover = 0; //0:비활성, 1: 활성
+	int sFlowControlGrid = 0; //0:비활성, 1: 활성
+	int sRTenv = 0; //0:비활성, 1: 활성
+} projectFileTable;
+
 typedef struct _projectFileFieldName
 {
 	const string GRMSimulationType = "GRMSimulationType";
-	const string DomainFile = "DomainFile";
+	const string DomainFile_01 = "DomainFile";
+	const string DomainFile_02 = "WatershedFile";
 	const string SlopeFile = "SlopeFile";
 	const string FlowDirectionFile = "FlowDirectionFile";
 	const string FlowAccumFile = "FlowAccumFile";
@@ -195,14 +225,18 @@ typedef struct _projectFileFieldName
 	const string ConstantSoilDepth = "ConstantSoilDepth";
 	const string RainfallDataType = "RainfallDataType";
 	const string RainfallDataFile = "RainfallDataFile";
-	const string RainfallInterval_min = "RainfallInterval_min";
+	const string RainfallInterval_min_01 = "RainfallInterval";
+	const string RainfallInterval_min_02 = "RainfallInterval_min";
 	const string FlowDirectionType = "FlowDirectionType";
 	const string MaxDegreeOfParallelism = "MaxDegreeOfParallelism";
 	const string SimulStartingTime = "SimulStartingTime"; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
-	const string SimulationDuration_hr = "SimulationDuration_hr";
-	const string ComputationalTimeStep_min = "ComputationalTimeStep_min";
+	const string SimulationDuration_hr_01 = "SimulationDuration";
+	const string SimulationDuration_hr_02 = "SimulationDuration_hr";
+	const string ComputationalTimeStep_min_01 = "ComputationalTimeStep";
+	const string ComputationalTimeStep_min_02 = "ComputationalTimeStep_min";
 	const string IsFixedTimeStep = "IsFixedTimeStep";
-	const string OutputTimeStep_min = "OutputTimeStep_min";
+	const string OutputTimeStep_min_01 = "OutputTimeStep";
+	const string OutputTimeStep_min_02 = "OutputTimeStep_min";
 	const string SimulateInfiltration = "SimulateInfiltration";
 	const string SimulateSubsurfaceFlow = "SimulateSubsurfaceFlow";
 	const string SimulateBaseFlow = "SimulateBaseFlow";
@@ -215,7 +249,7 @@ typedef struct _projectFileFieldName
 	const string MakeFlowDistFile = "MakeFlowDistFile";
 	const string PrintOption = "PrintOption";
 	const string WriteLog = "WriteLog";
-	const string SWSID = "SWSID";
+	const string ID_SWP = "ID";
 	const string IniSaturation = "IniSaturation";
 	const string MinSlopeOF = "MinSlopeOF";
 	const string UnsaturatedKType = "UnsaturatedKType";
@@ -231,7 +265,7 @@ typedef struct _projectFileFieldName
 	const string CalCoefHydraulicK = "CalCoefHydraulicK";
 	const string CalCoefSoilDepth = "CalCoefSoilDepth";
 	const string UserSet = "UserSet";
-	const string MDWSID = "MDWSID";
+	const string WSID_CH = "WSID";
 	const string CrossSectionType = "CrossSectionType";
 	const string SingleCSChannelWidthType = "SingleCSChannelWidthType";
 	const string ChannelWidthEQc = "ChannelWidthEQc";
@@ -244,11 +278,11 @@ typedef struct _projectFileFieldName
 	const string CompoundCSChannelWidthLimit = "CompoundCSChannelWidthLimit";
 	const string BankSideSlopeRight = "BankSideSlopeRight";
 	const string BankSideSlopeLeft = "BankSideSlopeLeft";
-	const string FCName = "FCName";
-	const string FCColX = "FCColX";
-	const string FCRowY = "FCRowY";
+	const string Name_FCG = "Name";
+	const string ColX_FCG = "ColX";
+	const string RowY_FCG = "RowY";
 	const string ControlType = "ControlType";
-	const string FCDT_min = "FCDT_min";
+	const string FCDT_min = "DT";
 	const string FlowDataFile = "FlowDataFile";
 	const string IniStorage = "IniStorage";
 	const string MaxStorage = "MaxStorage";
@@ -256,22 +290,22 @@ typedef struct _projectFileFieldName
 	const string ROType = "ROType";
 	const string ROConstQ = "ROConstQ";
 	const string ROConstQDuration = "ROConstQDuration";
-	const string WPName = "WPName";
-	const string WPColX = "WPColX";
-	const string WPRowY = "WPRowY";
-	const string STGridValue = "STGridValue";
-	const string GRMCodeST = "GRMCodeST";
-	const string STPorosity = "STPorosity";
-	const string STEffectivePorosity = "STEffectivePorosity";
-	const string STWFSuctionHead = "STWFSuctionHead";
-	const string STHydraulicConductivity = "STHydraulicConductivity";
-	const string SDGridValue = "SDGridValue";
-	const string GRMCodeSD = "GRMCodeSD";
-	const string SDSoilDepth = "SDSoilDepth";
-	const string LCGridValue = "LCGridValue";
-	const string GRMCodeLC = "GRMCodeLC";
-	const string LCRoughnessCoeff = "LCRoughnessCoeff";
-	const string ImperviousRatio = "LCImperviousR";
+	const string Name_WP = "Name";
+	const string ColX_WP = "ColX";
+	const string RowY_WP = "RowY";
+	const string GridValue_ST = "GridValue";
+	const string GRMCode_ST = "GRMCode";
+	const string Porosity = "Porosity";
+	const string EffectivePorosity = "EffectivePorosity";
+	const string WFSuctionHead = "WFSoilSuctionHead";
+	const string HydraulicConductivity = "HydraulicConductivity";
+	const string GridValue_SD = "GridValue";
+	const string GRMCode_SD = "GRMCode";
+	const string SoilDepthValue = "SoilDepth";
+	const string GridValue_LC = "GridValue";
+	const string GRMCode_LC = "GRMCode";
+	const string RoughnessCoeff = "RoughnessCoefficient";
+	const string ImperviousR = "ImperviousRatio";
 } projectFileFieldName;
 
 typedef struct _timeSeries
@@ -294,19 +328,19 @@ typedef struct _swsParameters
 {
 	int wsid = -1;
 	double iniSaturation =-1.0;
-	double minSlopeOF = -1.0;
+	double minSlopeOF = 0.0;
 	unSaturatedKType unSatKType= unSaturatedKType::None;
-	double coefUnsaturatedK = -1.0;
-	double minSlopeChBed = -1.0;
-	double minChBaseWidth = -1.0;
-	double chRoughness = -1.0;
+	double coefUnsaturatedK = 0.0;
+	double minSlopeChBed = 0.0;
+	double minChBaseWidth = 0.0;
+	double chRoughness = 0.0;
 	int dryStreamOrder = -1;
 	double iniFlow = -1.0;
-	double ccLCRoughness = -1.0;
-	double ccPorosity = -1.0;
-	double ccWFSuctionHead = -1.0;
-	double ccHydraulicK = -1.0;
-	double ccSoilDepth = -1.0;
+	double ccLCRoughness = 0.0;
+	double ccPorosity = 0.0;
+	double ccWFSuctionHead = 0.0;
+	double ccHydraulicK = 0.0;
+	double ccSoilDepth = 0.0;
 	int userSet = 0;
 } swsParameters;
 
@@ -319,7 +353,7 @@ typedef struct _wsNetwork
 	map <int, vector<int>> wsidsAllUp;
 	map <int, vector<int>> wsidsAllDown;
 	vector <int> mdWSIDs;
-	map <int, int> wsOutletCVID;
+	map <int, int> wsOutletidxs;
 	map <int, int> mdWSIDofCurrentWS;
 } wsNetwork;
 
@@ -331,14 +365,14 @@ typedef struct _wpLocationRC
 } wpLocationRC;
 
 typedef struct _wpinfo {
-	vector<int> wpCVIDs;
-	map<int, string> wpNames; //<cvid, wpname>
-	//<cvid, value>
+	vector<int> wpCVidxes;
+	map<int, string> wpNames; //<idx, wpname>
+	//<idx, value>
 	map<int, double> rfiReadSumUpWS_mPs;// 현재 wp 상류에 대해 원시자료에서 읽은 강우량(강우강도 rfi).[m/s] 
 	map<int, double> rfUpWSAveForDt_mm; // 현재 wp 상류에 대해 dt(계산시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
-	map<int, double> rfUpWSAveForDtPrint_mm;// 현재 wp 상류에 대해 출력시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
+	map<int, double> rfUpWSAveForDtP_mm;// 현재 wp 상류에 대해 출력시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
 	map<int, double> rfUpWSAveTotal_mm;//현재 watch point 상류의 평균강우량의 누적값[mm]
-	map<int, double> rfWPGridForDtPrint_mm; // Watchpoint 격자에 대한 출력시간 간격 동안의 누적강우량. 원시자료를 이용해서 계산된값.[mm]
+	map<int, double> rfWPGridForDtP_mm; // Watchpoint 격자에 대한 출력시간 간격 동안의 누적강우량. 원시자료를 이용해서 계산된값.[mm]
 	map<int, double> rfWPGridTotal_mm; // Watchpoint 격자에 대한 누적강우량[mm]
 	map<int, double> totalFlow_cms; // Watchpoint 격자에 대한 전체유량[cms]. 누적값.
 	//Todo : 사용되지 않으면, 삭제
@@ -349,7 +383,7 @@ typedef struct _wpinfo {
 	map<int, string> maxDepthTime; // Watchpoint 격자에 대한 최고수심 시간. 첨두시간
 	map<int, double> qFromFCData_cms; // 해당 wp에서 Flow control에 의해서 계산되는 유량
 	map<int, double> qprint_cms;
-	map<int, string> fpnWpOut; // Watch point 별 모의결과 출력을 위한 파일 이름 저장
+	//map<int, string> fpnWpOut; // Watch point 별 모의결과 출력을 위한 파일 이름 저장
 	map<int, int>cvCountAllup;
 } wpinfo;
 
@@ -358,16 +392,16 @@ typedef struct _channelSettingInfo
 	int mdWsid = -1;
 	crossSectionType csType = crossSectionType::None;
 	channelWidthType csWidthType= channelWidthType::None;
-	double cwEQc = -1.0;
-	double cwEQd = -1.0;
-	double cwEQe = -1.0;
-	double cwMostDownStream = -1.0;
-	double lowRHeight = -1.0;
-	double lowRBaseWidth = -1.0;
-	double highRBaseWidth = -1.0;
-	double compoundCSChannelWidthLimit = -1.0;
-	double bankSlopeRight = -1.0;
-	double bankSlopeLeft = -1.0;
+	double cwEQc = 0.0;
+	double cwEQd = 0.0;
+	double cwEQe = 0.0;
+	double cwMostDownStream = 0.0;
+	double lowRHeight = 0.0;
+	double lowRBaseWidth = 0.0;
+	double highRBaseWidth = 0.0;
+	double compoundCSChannelWidthLimit = 0.0;
+	double bankSlopeRight = 0.0;
+	double bankSlopeLeft = 0.0;
 } channelSettingInfo;
 
 typedef struct _flowControlinfo
@@ -376,48 +410,48 @@ typedef struct _flowControlinfo
 	int fcColX = -1;
 	int fcRowY = -1;
 	flowControlType fcType = flowControlType::None;
-	double fcDT_min = 0.0;
+	int fcDT_min = 0;
 	string fpnFCData = "";
-	double iniStorage_m3 = -1.0;
-	double maxStorage_m3 = -1.0;
-	double maxStorageR = -1.0;
+	double iniStorage_m3 = 0.0;
+	double maxStorage_m3 = 0.0;
+	double maxStorageR = 0.0;
 	reservoirOperationType roType= reservoirOperationType::None;
-	double roConstQ_cms = -1.0;
-	double roConstQDuration_hr = -1.0;
+	double roConstQ_cms = 0.0;
+	double roConstQDuration_hr = 0.0;
 } flowControlinfo;
 
 typedef struct _flowControlCellAndData
 {
-	map <int, double> fcDataAppliedNowT_m3Ps;// <cvid, value>현재의 모델링 시간(t)에 적용된 flow control data 값
-	vector<int> cvidsinlet;
-	vector<int> cvidsFCcell;
-	map<int, vector<timeSeries>> flowData_m3Ps; //<cvid, data>, 분단위
-	map<int, int> curDorder;// <cvid, order>현재 적용될 데이터의 순서
+	map <int, double> fcDataAppliedNowT_m3Ps;// <idx, value>현재의 모델링 시간(t)에 적용된 flow control data 값
+	vector<int> cvidxsinlet;
+	vector<int> cvidxsFCcell;
+	map<int, vector<timeSeries>> flowData_m3Ps; //<idx, data>, 분단위
+	map<int, int> curDorder;// <idx, order>현재 적용될 데이터의 순서
 } flowControlCellAndData;
 
 typedef struct _soilTextureInfo
 {
 	int stGridValue=-1;
 	soilTextureCode stCode = soilTextureCode::None;
-	double porosity = -1.0;
-	double effectivePorosity = -1.0;
-	double WFSuctionHead = -1.0;
-	double hydraulicK = -1.0;
+	double porosity = 0.0;
+	double effectivePorosity = 0.0;
+	double WFSuctionHead = 0.0;
+	double hydraulicK = 0.0;
 } soilTextureInfo;
 
 typedef struct _soilDepthInfo
 {
 	int sdGridValue = -1;
 	soilDepthCode sdCode = soilDepthCode::None;
-	double soilDepth = -1.0;
+	double soilDepth = 0.0;
 } soilDepthInfo;
 
 typedef struct _landCoverInfo
 {
 	int lcGridValue = -1;
 	landCoverCode lcCode = landCoverCode::None;
-	double RoughnessCoefficient = -1;
-	double ImperviousRatio = -1;
+	double RoughnessCoefficient = 0.0;
+	double ImperviousRatio = 0.0;
 } landCoverInfo;
 
 typedef struct _rainfallData
@@ -442,7 +476,7 @@ typedef struct _grmOutFiles
 	string ofpRFDistribution;
 	string ofpRFAccDistribution;
 	string ofpFlowDistribution;
-	map<int, string> ofpnWPs; //<cvid, fpn>
+	map<int, string> ofpnWPs; //<idx, fpn>
 } grmOutFiles;
 
 typedef struct _domaininfo
@@ -461,150 +495,150 @@ typedef struct _domaininfo
 	int cellNtobeSimulated = 0;
 	int facMostUpChannelCell = -1;
 	int facMax = -1;
-	int facMin = -1;
+	int facMin = INT_MAX;
 	vector <int> dmids;
-	map <int, vector<int>> cvidsInEachRegion;
+	map <int, vector<int>> cvidxInEachRegion;
 	wsNetwork wsn;
 } domaininfo;
 
 typedef struct _cvStreamAtt
 {
-	double chBedSlope = -1.0;//하도셀과 하도+지표면 흐름 속성을 가지는 격자에 부여되는 하천경사(m/m)
-	int chStrOrder = -1;//하천차수
-	double chBaseWidth = -1.0;//하천의 바닥폭[m]
-	double chBaseWidthByLayer = -1.0;//하폭레이어에서 받은 하폭[m]
-	double chRC = -1.0;//현재의 channel CV의 하도조도계수
-	double csaCH_ori = -1.0;//t 시간에서의 유출해석 전의 현재 channel CV의 초기 흐름단면적[m^2]
-	double csaCH = -1.0;//t 시간에서의 유출해석 결과 현재 channel CV의 흐름단면적[m^2]
-	double csaChAddedByOFinCHnOFcell = -1.0;//하도+지표면 흐름셀에서, 지표면 흐름에 의한 하도흐름 단면적 증가분
-	double hCH_ori = -1.0;//t 시간에서의 유출해석 전의 현재 channel CV의 초기 수심[m]
-	double hCH = -1.0;//t 시간에서의 유출해석 결과 현재 channel CV의 수심[m]
-	double uCH = -1.0; //t 시간에서의 유출해석 결과 현재 channel CV의 유속[m/s]
-	double QCH_m3Ps = -1.0;//t 시간에서의 유출해석 결과 현재 channel CV의 유량[m^3/s]
-	double iniQCH_m3Ps = -1.0;//하천셀에서의 초기 유량을 파일로 받을때 설정되는 값[m^3/s]
-	double chSideSlopeLeft = -1.0;//현재의 channel CV의 좌측 제방 경사
-	double chSideSlopeRight = -1.0;//현재의 channel CV의 우측 제방 경사
-	double bankCoeff = -1.0;// 현재의 channel CV의 제방 계수. 계산 편의를 위해서 channel CV 별로 미리계산한 값
-	double chURBaseWidth_m = -1.0;//현재 channel CV의 복단면 고수부지 바닥 폭[m]
-	double chLRHeight = -1.0;// 현재 channel CV의 복단면 고수부지의 수심[m]
+	double slopeCH = 0.0;//하도셀과 하도+지표면 흐름 속성을 가지는 격자에 부여되는 하천경사(m/m)
+	int cellValue = -1;//하천차수
+	double chBaseWidth = 0.0;//하천의 바닥폭[m]
+	double chBaseWidthByLayer = 0.0;//하폭레이어에서 받은 하폭[m]
+	double chRC = 0.0;//현재의 channel CV의 하도조도계수
+	double csaCH_ori = 0.0;//t 시간에서의 유출해석 전의 현재 channel CV의 초기 흐름단면적[m^2]
+	double csaCH = 0.0;//t 시간에서의 유출해석 결과 현재 channel CV의 흐름단면적[m^2]
+	double csaChAddedByOFinCHnOFcell = 0.0;//하도+지표면 흐름셀에서, 지표면 흐름에 의한 하도흐름 단면적 증가분
+	double hCH_ori = 0.0;//t 시간에서의 유출해석 전의 현재 channel CV의 초기 수심[m]
+	double hCH = 0.0;//t 시간에서의 유출해석 결과 현재 channel CV의 수심[m]
+	double uCH = 0.0; //t 시간에서의 유출해석 결과 현재 channel CV의 유속[m/s]
+	double QCH_m3Ps = 0.0;//t 시간에서의 유출해석 결과 현재 channel CV의 유량[m^3/s]
+	double iniQCH_m3Ps = 0.0;//하천셀에서의 초기 유량을 파일로 받을때 설정되는 값[m^3/s]
+	double chSideSlopeLeft = 0.0;//현재의 channel CV의 좌측 제방 경사
+	double chSideSlopeRight = 0.0;//현재의 channel CV의 우측 제방 경사
+	double bankCoeff = 0.0;// 현재의 channel CV의 제방 계수. 계산 편의를 위해서 channel CV 별로 미리계산한 값
+	double chURBaseWidth_m = 0.0;//현재 channel CV의 복단면 고수부지 바닥 폭[m]
+	double chLRHeight = 0.0;// 현재 channel CV의 복단면 고수부지의 수심[m]
 	int isCompoundCS = -1;//현재의 channel CV가 복단면인지(true), 단단면(false)인지를 나타내는 변수
-	double chLRArea_m2 = -1.0;// 복단면 channel 중 하층부의 면적[m^2]
+	double chLRArea_m2 = 0.0;// 복단면 channel 중 하층부의 면적[m^2]
 } cvStreamAtt;
 
 typedef struct _cvAtt
 {
-	int idx_xr;// cellidx 검증용
-	int idx_yc;// cellidx 검증용
-	int cvid = -1;//유역에 해당하는 셀에만 부여되는 일련번호    
+	int xCol;
+	int yRow;
 	int wsid = -1; //유역 ID, 해당 raster cell의 값
 	cellFlowType flowType;//셀의 종류, 지표면흐름, 하도흐름, 지표면+하도
-	double slopeOF = -1.0; //지표면 해석에 적용되는 overland flow 셀의 경사(m/m)
-	double slope = -1.0; //셀의 경사(m/m)
+	double slopeOF = 0.0; //지표면 해석에 적용되는 overland flow 셀의 경사(m/m)
+	double slope = 0.0; //셀의 경사(m/m)
 	flowDirection8 fdir;//흐름방향
-	int fac = -1;//흐름누적수, 자신의 셀을 제외하고, 상류에 있는 격자 개수
-	double dxDownHalf_m = -1.0;//격자 중심으로부터 하류방향 격자면까지의 거리
-	double dxWSum = -1.0;//격자 중심으로부터 상류방향 격자면까지의 거리합
-	vector<int> neighborCVIDsFlowintoMe;//현재 셀로 흘러 들어오는 인접셀의 ID, 최대 7개
-	int downCellidToFlow = -1; //흘러갈 직하류셀의 ID
+	int fac = -1;//흐름누적수, 자신의 셀을 제외하고, 상류에 있는 격자 개수. 최소값은 0 최대값은 유효셀 개수 -1
+	double dxDownHalf_m = 0.0;//격자 중심으로부터 하류방향 격자면까지의 거리
+	double dxWSum = 0.0;//격자 중심으로부터 상류방향 격자면까지의 거리합
+	vector<int> neighborCVidxFlowintoMe;//현재 셀로 흘러 들어오는 인접셀의 ID, 최대 7개
+	int downCellidxToFlow = -1; //흘러갈 직하류셀의 ID
 	int effCVnFlowintoCVw = -1;//인접상류셀 중 실제 유출이 발생하는 셀들의 개수
 	double cvdx_m;//모델링에 적용할 검사체적의 X방향 길이
-	vector<int> downWPCVIDs;//현재 CV 하류에 있는 watchpoint 들의 CVid 들
+	vector<int> downWPCVidx;//현재 CV 하류에 있는 watchpoint 들의 idxes 들
 	int toBeSimulated = 0; // -1 : false, 1 : true //현재의 CV가 모의할 셀인지 아닌지 표시
 	cvStreamAtt stream;//현재 CV가 Stream 일경우 즉, eCellType이 Channel 혹은 OverlandAndChannel일 경우 부여되는 속성
 	int isStream = 0; // 현재 cv가 stream 인지 아닌지
-	double hOF_ori = -1.0;//t 시간에서 유출해석 시작 전 overland flow 검사체적의 수심
-	double uOF = -1.0;//t 시간에서 유출해석 결과 overland flow 검사체적의 유속
-	double hOF = -1.0;  //t 시간에서 유출해석 결과 overland flow 검사체적의 수심
-	double csaOF = -1.0;//t 시간에서 유출해석 결과 overland flow의 흐름 단면적
-	double qOF_m2Ps = -1.0; //단위폭당 overland flow 유량
-	double QOF_m3Ps = -1.0;//t 시간에서의 유출해석 결과 overland flow의 유량 [m^3/s]
-	double QSSF_m3Ps = -1.0;//t 시간에서의 현재 셀에서 다음셀로 지표하에서 유출되는 유량 [m^3/s]
-	double QsumCVw_dt_m3 = -1.0;//상류인접 CV에서 현재 CV로 유입되는 유량 단순합. 이건 CVi에서의 연속방정식, 고려하지 않은 단순 합.[m^3/dt]
-	double rfApp_dt_m = -1.0;//dt 시간 동안의 강우량
-	double rfiRead_mPsec = -1.0;//현재 강우입력자료에서 읽은 강우강도 m/s rfi.
-	double rfiRead_tm1_mPsec = -1.0;//이전 시간의 강우강도 m/s rfi.
-	double rfEff_dt_m = -1.0;//dt시간 동안의 유효강우량
-	double rf_dtPrint_m = -1.0;//출력 시간간격 동안의 누적 강우량[m]
-	double rfAcc_fromStart_m = -1.0;//전체 기간의 누적 강우량[m]
-	double soilWaterC_m = -1.0;//토양수분함량. t 시간까지의 누적 침투량[m], 토양깊이가 아니고, 수심이다.
-	double soilWaterC_tm1_m = -1.0;//토양수분함량. t-1 시간까지의 누적 침투량[m]. 수심
-	double ifRatef_mPsec = -1.0;//t 시간에서 계산된 침투률[m/s]
-	double ifRatef_tm1_mPsec = -1.0;//t-1 시간에서 적용된 침투률[m/s]
-	double ifF_mPdt = -1.0;//t 시간에서 계산된 dt 시간동안의 침투량[m/dt]
+	double hOF_ori = 0.0;//t 시간에서 유출해석 시작 전 overland flow 검사체적의 수심
+	double uOF = 0.0;//t 시간에서 유출해석 결과 overland flow 검사체적의 유속
+	double hOF = 0.0;  //t 시간에서 유출해석 결과 overland flow 검사체적의 수심
+	double csaOF = 0.0;//t 시간에서 유출해석 결과 overland flow의 흐름 단면적
+	double qOF_m2Ps = 0.0; //단위폭당 overland flow 유량
+	double QOF_m3Ps = 0.0;//t 시간에서의 유출해석 결과 overland flow의 유량 [m^3/s]
+	double QSSF_m3Ps = 0.0;//t 시간에서의 현재 셀에서 다음셀로 지표하에서 유출되는 유량 [m^3/s]
+	double QsumCVw_dt_m3 = 0.0;//상류인접 CV에서 현재 CV로 유입되는 유량 단순합. 이건 CVi에서의 연속방정식, 고려하지 않은 단순 합.[m^3/dt]
+	double rfApp_dt_m = 0.0;//dt 시간 동안의 강우량
+	double rfiRead_mPsec = 0.0;//현재 강우입력자료에서 읽은 강우강도 m/s rfi.
+	double rfiRead_tm1_mPsec = 0.0;//이전 시간의 강우강도 m/s rfi.
+	double rfEff_dt_m = 0.0;//dt시간 동안의 유효강우량
+	double rf_dtPrint_m = 0.0;//출력 시간간격 동안의 누적 강우량[m]
+	double rfAcc_fromStart_m = 0.0;//전체 기간의 누적 강우량[m]
+	double soilWaterC_m = 0.0;//토양수분함량. t 시간까지의 누적 침투량[m], 토양깊이가 아니고, 수심이다.
+	double soilWaterC_tm1_m = 0.0;//토양수분함량. t-1 시간까지의 누적 침투량[m]. 수심
+	double ifRatef_mPsec = 0.0;//t 시간에서 계산된 침투률[m/s]
+	double ifRatef_tm1_mPsec = 0.0;//t-1 시간에서 적용된 침투률[m/s]
+	double ifF_mPdt = 0.0;//t 시간에서 계산된 dt 시간동안의 침투량[m/dt]
 	int isAfterSaturated = 0;// -1 : false, 1: true
 	soilTextureCode stCode;
 	int stCellValue = -1;//토성레이어의 값, VAT참조 // 0 값은 상수를 의미하게 한다.
-	double hc_K_mPsec = -1.0;//현재 CV 토양의 수리전도도[m/s] 모델링 적용값
-	double hc_Kori_mPsec = -1.0;//현재 CV 토양의 수리전도도[m/s] GRM default
-	double effPorosity_ThetaE = -1.0;//현재 CV 토양의 유효공극률 모델링 적용값. 무차원. 0~1
-	double effPorosity_ThetaEori = -1.0;//현재 CV 토양의 유효공극률 grm default. 무차원. 0~1
-	double porosity_Eta = -1.0;//현재 CV 토양의 공극률 모델링 적용값. 무차원. 0~1
-	double porosity_EtaOri = -1.0;//현재 CV 토양의 공극률 GRM default. 무차원. 0~1
-	double wfsh_Psi_m = -1.0;//현재 CV 토양의 습윤전선흡인수두[m] 모델링 적용값
-	double wfsh_PsiOri_m = -1.0;//현재 CV 토양의 습윤전선흡인수두[m] grm default
-	double soilMoistureChange_DTheta = -1.0;//토양습윤변화량
+	double hc_K_mPsec = 0.0;//현재 CV 토양의 수리전도도[m/s] 모델링 적용값
+	double hc_Kori_mPsec = 0.0;//현재 CV 토양의 수리전도도[m/s] GRM default
+	double effPorosity_ThetaE = 0.0;//현재 CV 토양의 유효공극률 모델링 적용값. 무차원. 0~1
+	double effPorosity_ThetaEori = 0.0;//현재 CV 토양의 유효공극률 grm default. 무차원. 0~1
+	double porosity_Eta = 0.0;//현재 CV 토양의 공극률 모델링 적용값. 무차원. 0~1
+	double porosity_EtaOri = 0.0;//현재 CV 토양의 공극률 GRM default. 무차원. 0~1
+	double wfsh_Psi_m = 0.0;//현재 CV 토양의 습윤전선흡인수두[m] 모델링 적용값
+	double wfsh_PsiOri_m = 0.0;//현재 CV 토양의 습윤전선흡인수두[m] grm default
+	double soilMoistureChange_DTheta = 0.0;//토양습윤변화량
 	soilDepthCode sdCode;
 	int sdCellValue = -1;//토심레이어의 값, VAT 참조 // 0 값은 상수를 의미하게 한다.
-	double sd_m = -1.0;//현재 CV의 토양심 모델링 적용 값[m].
-	double sdOri_m = -1.0;//현재 CV의 토양심 GRM default 값[m].
-	double sdEffAsWaterDepth_m = -1.0;//현재 CV의 유효토양심 값[m]. 토양심에서 유효공극률을 곱한 값
-	double iniSSR = -1.0;//현재 CV 토양의 초기포화도. 무차원. 0~1
-	double effSR_Se = -1.0; // //현재 CV 토양의 유효포화도. 무차원. 0~1 무차원 %/100
-	double ssr = -1.0;//토양의 현재 포화도
+	double sd_m = 0.0;//현재 CV의 토양심 모델링 적용 값[m].
+	double sdOri_m = 0.0;//현재 CV의 토양심 GRM default 값[m].
+	double sdEffAsWaterDepth_m = 0.0;//현재 CV의 유효토양심 값[m]. 토양심에서 유효공극률을 곱한 값
+	double iniSSR = 0.0;//현재 CV 토양의 초기포화도. 무차원. 0~1
+	double effSR_Se = 0.0; // //현재 CV 토양의 유효포화도. 무차원. 0~1 무차원 %/100
+	double ssr = 0.0;//토양의 현재 포화도
 	unSaturatedKType ukType;
-	double coefUK = -1.0;
-	double hUAQfromChannelBed_m = -1.0; //하도셀에서 비피압대수층의 수심(하도바닥에서의 높이)[m].
-	double hUAQfromBedrock_m = -1.0;///암반으로부터 비피압대수층의 상단부까지의 깊이[m]. 토양깊이.
-	double sdToBedrock_m = -1.0;//현재 CV 토양의 암반까지의 깊이[m]. 지표면에서 암반까지의 깊이임.
-	double bfQ_m3Ps = -1.0;//현재 CV의 기저유출량 [m^3/s]
+	double coefUK = 0.0;
+	double hUAQfromChannelBed_m = 0.0; //하도셀에서 비피압대수층의 수심(하도바닥에서의 높이)[m].
+	double hUAQfromBedrock_m = 0.0;///암반으로부터 비피압대수층의 상단부까지의 깊이[m]. 토양깊이.
+	double sdToBedrock_m = 0.0;//현재 CV 토양의 암반까지의 깊이[m]. 지표면에서 암반까지의 깊이임.
+	double bfQ_m3Ps = 0.0;//현재 CV의 기저유출량 [m^3/s]
 	landCoverCode lcCode;
 	int lcCellValue = -1;//토지피복레이어의 값, VAT 참조 // 0 값은 상수를 의미하게 한다.
-	double imperviousR = -1.0;//현재 CV 토지피복의 불투수율. 무차원, 0~1.
-	double Interception_m = -1.0;//현재 CV 토지피복에서의 차단량 [m].
-	double rcOF = -1.0;//현재 CV 토지피복의 모델링 적용 지표면 조도계수
-	double rcOFori = -1.0;//현재 CV 토지피복의 grm default 지표면 조도계수
-	flowControlType fcType;//현재 CV에 부여된 Flow control 종류
-	double storageCumulative_m3 = -1.0;//현재 CV에서 flow control 모의시 누적 저류량[m^3]
-	double storageAddedForDTbyRF_m3 = -1.0;//현재 CV에서 flow control 모의시 dt 시간동안의 강우에 의해서 추가되는 저류량[m^3/dt]
+	double imperviousR = 0.0;//현재 CV 토지피복의 불투수율. 무차원, 0~1.
+	double Interception_m = 0.0;//현재 CV 토지피복에서의 차단량 [m].
+	double rcOF = 0.0;//현재 CV 토지피복의 모델링 적용 지표면 조도계수
+	double rcOFori = 0.0;//현재 CV 토지피복의 grm default 지표면 조도계수
+	flowControlType fcType=flowControlType::None;//현재 CV에 부여된 Flow control 종류
+	double storageCumulative_m3 = 0.0;//현재 CV에서 flow control 모의시 누적 저류량[m^3]
+	double storageAddedForDTbyRF_m3 = 0.0;//현재 CV에서 flow control 모의시 dt 시간동안의 강우에 의해서 추가되는 저류량[m^3/dt]
 } cvAtt;
 
 typedef struct _projectFile
 {
 	simulationType simType = simulationType::None;
 	string	fpnDomain = "";
+	string fpnProjection = "";
 	string fpnSlope = "";
 	string fpnFD = "";
 	string fpnFA = "";
 	string fpnStream = "";
 	string fpnChannelWidth = "";
 	string fpniniSSR = "";
-	string fpniniChannelFlow = "";
+	string fpniniChFlow = "";
 	fileOrConstant lcDataType = fileOrConstant::None;
 	string fpnLC = "";
 	string fpnLCVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
-	double cnstRoughnessC = -1.0;
-	double cnstImperviousR = -1.0;
+	double cnstRoughnessC = 0.0;
+	double cnstImperviousR = 0.0;
 	fileOrConstant stDataType = fileOrConstant::None;
 	string fpnST = "";
 	string fpnSTVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
-	double cnstSoilPorosity = -1.0;
-	double cnstSoilEffPorosity = -1.0;
-	double cnstSoilWFSH = -1.0;
-	double cnstSoilHydraulicK = -1;
+	double cnstSoilPorosity = 0.0;
+	double cnstSoilEffPorosity = 0.0;
+	double cnstSoilWFSH = 0.0;
+	double cnstSoilHydraulicK = 0.0;
 	fileOrConstant sdDataType = fileOrConstant::None;
 	string fpnSD = "";
 	string fpnSDVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
-	double cnstSoilDepth = -1.0;
+	double cnstSoilDepth = 0.0;
 	rainfallDataType rfDataType = rainfallDataType::NoneRF;
 	string fpnRainfallData = "";
 	int rfinterval_min = -1;
 	flowDirectionType fdType = flowDirectionType::None;
 	int mdp = 0;
 	string simStartTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
-	double simDuration_hr = -1.0;
-	double dtsec = -1.0;
+	double simDuration_hr = 0.0;
+	int dtsec = 0;
 	int IsFixedTimeStep = 0;// true : 1, false : -1
-	double dtPrint_min = -1;
+	int dtPrint_min = 0;
 	int simInfiltration = 0;// true : 1, false : -1
 	int simSubsurfaceFlow = 0;// true : 1, false : -1
 	int simBaseFlow = 0;// true : 1, false : -1
@@ -621,7 +655,7 @@ typedef struct _projectFile
 
 	map <int, swsParameters> swps; // <wsid, paras>
 	map <int, channelSettingInfo> css; //<wsid. paras>
-	map <int, flowControlinfo> fcs; // <cvid, paras>
+	map <int, flowControlinfo> fcs; // <idx, paras>
 	vector <wpLocationRC> wps; // 
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;
@@ -657,7 +691,8 @@ typedef struct _thisSimulation
 	int dtMaxLimit_sec = 0;
 	int dtMinLimit_sec = 0;
 	int zeroTimePrinted = 0;
-	int time_simEnding_sec = -1;
+	int simEnding_sec = -1;
+	int simDuration_min = 0;
 
 	int tsec_tm1 = 0;
 	int targetTtoP_sec = 0;
@@ -693,10 +728,10 @@ void calFCReservoirOutFlow(int i, double nowTmin); //i는 cv array index
 void calEffectiveRainfall(int i, int dtrf_sec, int dtsec);
 void calOverlandFlow(int i, double hCVw_tp1,
 	double effDy_m);
-void calReservoirOperation(int i, int nowTmin);
+void calReservoirOperation(int i, double nowTmin);
 void calReservoirOutFlowInReservoirOperation(int i,
 	double Qout_cms, double dy_m);
-void calSinkOrSourceFlow(int i, int nowTmin);
+void calSinkOrSourceFlow(int i, double nowTmin);
 
 void disposeDynamicVars();
 int deleteAllOutputFiles();
@@ -705,18 +740,18 @@ int deleteAllFilesExceptDischarge();
 double getChCSAatCVW(int i);
 double getChCSAbyFlowDepth(double LRBaseWidth, 
 	double chBankConst,	double crossSectionDepth,
-	bool isCompoundCS, double LRHeight,
+	int isCompoundCS, double LRHeight,
 	double LRArea, double URBaseWidth);
 double getChCSAusingQbyiteration(cvAtt cv, 
 	double CSAini, double Q_m3Ps);
 double getChCSAaddedBySSFlow(int i);
 double getChCrossSectionPerimeter(double LRegionBaseWidth,
 	double sideSlopeRightBank, double sideSlopeLeftBank,
-	double crossSectionDepth, bool isCompoundCrossSection,
+	double crossSectionDepth, int isCompoundCS,
 	double LRegionHeight, double LRegionArea,
 	double URegionBaseWidth);
 double getChDepthUsingCSA(double baseWidthLRegion,
-	double chCSAinput, bool isCompoundCrossSection,
+	double chCSAinput, int isCompoundCS,
 	double baseWidthURegion, double LRegionArea,
 	double LRegionHeight, double chBankConst);
 
@@ -733,41 +768,72 @@ void grmHelp();
 
 void updatetCVbyRFandSoil(int i); // i는 cv array index
 int initOutputFiles();
+void initRasterOutput();
 void initThisSimulation();
 int initWatershedNetwork();
 int initWPinfos();
-int isNormalChannelSettingInfo(channelSettingInfo aci);
-int isNormalFlowControlinfo(flowControlinfo afc);
-int isNormalSwsParameter(swsParameters assp);
-int isNormalWatchPointInfo(wpLocationRC awp);
-int isNormalSoilTextureInfo(soilTextureInfo ast);
-int isNormalSoilDepthInfo(soilDepthInfo asd);
-int isNormalLandCoverInfo(landCoverInfo alc);
+int isNormalChannelSettingInfo(channelSettingInfo *csi);
+int isNormalFlowControlinfo(flowControlinfo *fci);
+int isNormalSwsParameter(swsParameters *swp);
+int isNormalWatchPointInfo(wpLocationRC *wpL);
+int isNormalSoilTextureInfo(soilTextureInfo *st);
+int isNormalSoilDepthInfo(soilDepthInfo *sd);
+int isNormalLandCoverInfo(landCoverInfo *lc);
+
+void joinOutputThreads();
 
 double Kunsaturated(cvAtt cv);
 void Log_Performance_data(string strBasin, string strTag,
 	string strDataTime, double dblElapTime);
 
-int makeNewOutputFiles();
+void makeIMG_ssr();
+void makeIMG_rf();
+void makeIMG_rfacc();
+void makeIMG_flow();
+void makeASC_ssr();
+void makeASC_rf();
+void makeASC_rfacc();
+void makeASC_flow();
 
-channelSettingInfo nullChannelSettingInfo();
-flowControlinfo nullFlowControlinfo();
-swsParameters nullSwsParameters();
-wpLocationRC nullWatchPointInfo();
-soilTextureInfo nullSoilTextureInfo();
-soilDepthInfo nullSoilDepthInfo();
-landCoverInfo nullLandCoverInfo();
+int makeNewOutputFiles();
+void makeRasterOutput(int nowTmin);
+
+//channelSettingInfo nullChannelSettingInfo();
+//flowControlinfo nullFlowControlinfo();
+//swsParameters nullSwsParameters();
+//wpLocationRC nullWatchPointInfo();
+//soilTextureInfo nullSoilTextureInfo();
+//soilDepthInfo nullSoilDepthInfo();
+//landCoverInfo nullLandCoverInfo();
 
 int openProjectFile(int forceRealTime);
+//int openProjectFile_old(int forceRealTime);
 int openPrjAndSetupModel(int forceRealTime);//1:true, -1:false
 void outputManager(int nowTsec,
 	int nowRForder);
 
-int readDomainFileAndSetupCV();
-int readSlopeFdirFacStreamCwCfSsrFileAndSetCV();
+int readDomainFaFileAndSetupCV();
+int readSlopeFdirStreamCwCfSsrFileAndSetCV();
 int readLandCoverFileAndSetCVbyVAT();
 int readSoilTextureFileAndSetCVbyVAT();
 int readSoilDepthFileAndSetCVbyVAT();
+
+int readXmlRowChannelSettings(string aline, 
+	channelSettingInfo* csi);
+int readXmlRowProjectSettings(string aline);
+int readXmlRowSubWatershedSettings(string aline,
+	swsParameters *swp);
+int readXmlRowFlowControlGrid(string aline, 
+	flowControlinfo *fci);
+int readXmlRowWatchPoint(string aline, 
+	wpLocationRC *wpl);
+int readXmlRowSoilTextureInfo(string aline,
+	soilTextureInfo* st);
+int readXmlRowSoilDepth(string aline,
+	soilDepthInfo* sd);
+int readXmlRowLandCover(string aline,
+	landCoverInfo* lc);
+
 
 int setDomainAndCVBasicinfo();
 int setCVbyLCConstant();
@@ -778,6 +844,7 @@ void setCVStartingCondition(double iniflow);
 int setFlowNetwork();
 int setRainfallData();
 void setRFintensityAndDTrf_Zero();
+int setRasterOutputArray();
 int setupByFAandNetwork();
 int setupModelAfterOpenProjectFile();
 int simulateSingleEvent();
@@ -817,12 +884,60 @@ inline  double vByManningEq(double hydraulicRaidus,
 
 
 
-// extern C
-int readLandCoverFile(string fpnLC, 
-	int** cvAryidx, cvAtt* cvs1D, int nColX, int nRowY);
-int readSoilTextureFile(string fpnST, 
-	int** cvAryidx, cvAtt* cvs1D, int nColX, int nRowY);
-int readSoilDepthFile(string fpnSD, 
-	int** cvAryidx, cvAtt* cvs1D, int nColX, int nRowY);
 
+
+
+namespace GRM
+{
+	class grmWS {
+	private:
+		int setPublicVariables();
+		bool byGMPfile = false;
+	public:
+		cellPosition mostDownStreamCell;
+		vector<int> WSIDsAll;
+		int WScount = 0;
+		vector<int> mostDownStreamWSIDs;
+		int cellCountInWatershed=0;
+
+		grmWS(string fdirType, string fpnDomain,
+			string slopeFPN, string fpnFdir, string fpnFac,
+			string fpnStream = "", string fpnLandCover = "",
+			string fpnSoilTexture = "", string fpnSoilDepth = "",
+			string fpnIniSoilSaturationRatio = "", 
+			string pfnIniChannelFlow = "",
+			string fpnChannelWidth="");
+		grmWS(string gmpFPN);
+		
+		GRMDLL_API bool IsInWatershedArea(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API int grmPlus(int a, int b);
+		GRMDLL_API int grmMultiple(int a, int b);
+		GRMDLL_API vector<int> upStreamWSIDs(int currentWSID);
+		GRMDLL_API int upStreamWSCount(int currentWSID);
+		GRMDLL_API vector<int> downStreamWSIDs(int currentWSID);
+		GRMDLL_API int downStreamWSCount(int currentWSID);
+		GRMDLL_API int watershedID(int colXAryidx, int rowYAryidx); // 배열 인덱스 사용
+		GRMDLL_API string flowDirection(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API int flowAccumulation(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API double slope(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API int streamValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API string cellFlowType(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API int landCoverValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API int soilTextureValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API int soilDepthValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+		GRMDLL_API vector<string> allCellsInUpstreamArea(int colXAryidx, int rowYAryidx); //    Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
+	
+	
+	};
+}
+
+// extern C
+
+extern "C" 
+extern "C" GRMDLL_API int readLandCoverFile(string fpnLC,
+	int** cvAryidx, cvAtt * cvs1D, int effCellCount);
+extern "C" GRMDLL_API int readSoilTextureFile(string fpnST,
+	int** cvAryidx, cvAtt * cvs1D, int effCellCount);
+extern "C" GRMDLL_API int readSoilDepthFile(string fpnSD,
+	int** cvAryidx, cvAtt * cvs1D, int effCellCount);
 
