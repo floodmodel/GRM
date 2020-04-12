@@ -1,6 +1,8 @@
 #include <io.h>
 #include <string>
+#include "gentle.h"
 #include "grm.h"
+#include "grmapi.h"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -16,17 +18,47 @@ extern cvpos* cvps;
 extern domaininfo di;
 extern map<int, int*> cvaisToFA; //faº° cv array idex ¸ñ·Ï
 
-int GRM::grmWS::grmPlus(int a, int b)
+int grmPlusFunction(int a, int b)
+{
+    return a + b;
+}
+testClass::testClass(int a, int b)
+{
+    ain = a;
+    bin = b;
+    cout << ain << "  " << bin << endl;
+}
+testClass::~testClass()
+{
+    cout << "end" << endl;
+}
+
+int __stdcall testClass::grmPlus()
+{
+    cout << "grmPlus" << endl;
+    return ain + bin;
+}
+
+INT32 __stdcall testClass::grmMultiple()
+{
+    cout << "grmMultiple" << endl;
+    return (INT32) (ain * bin);
+}
+
+
+
+int grmWS::grmPlus(int a, int b)
 {
 return a + b;
 }
-int GRM::grmWS::grmMultiple(int a, int b)
+
+int grmWS::grmMultiple(int a, int b)
 {
 return a * b; 
 }
 
 
-GRM::grmWS::grmWS(string fdirType, string fpnDomain,
+grmWS::grmWS(string fdirType, string fpnDomain,
     string fpnSlope, string fpnFdir, string fpnFac,
     string fpnStream, string fpnLandCover,
     string fpnSoilTexture, string fpnSoilDepth,
@@ -134,10 +166,10 @@ GRM::grmWS::grmWS(string fdirType, string fpnDomain,
         return;
     }
     byGMPfile = false;
-    GRM::grmWS::setPublicVariables();
+    grmWS::setPublicVariables();
 }
 
-GRM::grmWS::grmWS(string gmpFPN)
+grmWS::grmWS(string gmpFPN)
 {
     getProjectFileInfo(gmpFPN);
     if (openPrjAndSetupModel(-1) == -1) {
@@ -145,10 +177,10 @@ GRM::grmWS::grmWS(string gmpFPN)
         return;
     }
     byGMPfile = true;
-    GRM::grmWS::setPublicVariables();
+    grmWS::setPublicVariables();
 }
 
-GRM::grmWS::~grmWS()
+grmWS::~grmWS()
 {
     if (cvais != NULL) {
         for (int i = 0; i < di.nCols; ++i) {
@@ -169,7 +201,7 @@ GRM::grmWS::~grmWS()
 }
 
 
-int GRM::grmWS::setPublicVariables()
+void grmWS::setPublicVariables()
 {
     mostDownStreamCell.xCol = cvps[di.cvidxMaxFac].xCol;
     mostDownStreamCell.yRow = cvps[di.cvidxMaxFac].yRow;
@@ -182,10 +214,10 @@ int GRM::grmWS::setPublicVariables()
     //copy(di.wsn.mdWSIDs.begin(), di.wsn.mdWSIDs.end(), mostDownStreamWSIDs);
     cellCountInWatershed = di.cellNnotNull;
     cellSize = di.cellSize;
+    
 }
 
-
-bool GRM::grmWS::isInWatershedArea(int colXAryidx, int rowYAryidx)
+bool grmWS::isInWatershedArea(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
@@ -196,27 +228,27 @@ bool GRM::grmWS::isInWatershedArea(int colXAryidx, int rowYAryidx)
     }
 }
 
-vector<int> GRM::grmWS::upStreamWSIDs(int currentWSID)
+vector<int> grmWS::upStreamWSIDs(int currentWSID)
 {
     return di.wsn.wsidsAllUp[currentWSID];
 }
 
-int GRM::grmWS::upStreamWSCount(int currentWSID)
+int grmWS::upStreamWSCount(int currentWSID)
 {
     return  di.wsn.wsidsAllUp[currentWSID].size();
 }
 
-vector<int> GRM::grmWS::downStreamWSIDs(int currentWSID)
+vector<int> grmWS::downStreamWSIDs(int currentWSID)
 {
     return di.wsn.wsidsAllDown[currentWSID];
 }
 
-int GRM::grmWS::downStreamWSCount(int currentWSID)
+int grmWS::downStreamWSCount(int currentWSID)
 {
     return di.wsn.wsidsAllDown[currentWSID].size();
 }
 
-int GRM::grmWS::watershedID(int colXAryidx, int rowYAryidx)
+int grmWS::watershedID(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
@@ -227,7 +259,7 @@ int GRM::grmWS::watershedID(int colXAryidx, int rowYAryidx)
     }
 }
 
-string GRM::grmWS::flowDirection(int colXAryidx, int rowYAryidx)
+string grmWS::flowDirection(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
@@ -238,7 +270,7 @@ string GRM::grmWS::flowDirection(int colXAryidx, int rowYAryidx)
     }
 }
 
-int GRM::grmWS::flowAccumulation(int colXAryidx, int rowYAryidx)
+int grmWS::flowAccumulation(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
@@ -249,7 +281,7 @@ int GRM::grmWS::flowAccumulation(int colXAryidx, int rowYAryidx)
     }
 }
 
-double GRM::grmWS::slope(int colXAryidx, int rowYAryidx)
+double grmWS::slope(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
@@ -270,7 +302,7 @@ double GRM::grmWS::slope(int colXAryidx, int rowYAryidx)
     }
 }
 
-int GRM::grmWS::streamValue(int colXAryidx, int rowYAryidx)
+int grmWS::streamValue(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0 && prj.streamFileApplied == 1) {
@@ -284,7 +316,7 @@ int GRM::grmWS::streamValue(int colXAryidx, int rowYAryidx)
     return -1;
 }
 
-string GRM::grmWS::cellFlowType(int colXAryidx, int rowYAryidx)
+string grmWS::cellFlowType(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
@@ -295,7 +327,7 @@ string GRM::grmWS::cellFlowType(int colXAryidx, int rowYAryidx)
     }
 }
 
-int GRM::grmWS::landCoverValue(int colXAryidx, int rowYAryidx)
+int grmWS::landCoverValue(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
@@ -306,7 +338,7 @@ int GRM::grmWS::landCoverValue(int colXAryidx, int rowYAryidx)
     }
 }
 
-int GRM::grmWS::soilTextureValue(int colXAryidx, int rowYAryidx)
+int grmWS::soilTextureValue(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
@@ -317,7 +349,7 @@ int GRM::grmWS::soilTextureValue(int colXAryidx, int rowYAryidx)
     }
 }
 
-int GRM::grmWS::soilDepthValue(int colXAryidx, int rowYAryidx)
+int grmWS::soilDepthValue(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
@@ -328,7 +360,7 @@ int GRM::grmWS::soilDepthValue(int colXAryidx, int rowYAryidx)
     }
 }
 
-vector<string> GRM::grmWS::allCellsInUpstreamArea(int colXAryidx, int rowYAryidx)
+vector<string> grmWS::allCellsInUpstreamArea(int colXAryidx, int rowYAryidx)
 {
     vector<string> cellsPos;
     int startingidx = cvais[colXAryidx][rowYAryidx];
@@ -349,7 +381,7 @@ vector<string> GRM::grmWS::allCellsInUpstreamArea(int colXAryidx, int rowYAryidx
 }
 
 // If this class was instanced by using gmp file --"grmWS(string gmpFPN)".		
-bool GRM::grmWS::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
+bool grmWS::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
     double minSlopeLandSurface, string unSKType, double coefUnsK,
     double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
     int dryStreamOrder, double ccLCRoughness,
@@ -398,17 +430,17 @@ bool GRM::grmWS::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSa
 // Before this method is called, user set parameters must have been updated for each user set watershed
 // by using [ grmPrj.SubWSPar.userPars[wsid] property]
 // And after this method is called, all the paramters in all the watersheds would be updated by using user set parameters.
-void GRM::grmWS::updateAllSubWatershedParametersUsingNetwork()
+void grmWS::updateAllSubWatershedParametersUsingNetwork()
 {
     updateAllSWSParsUsingNetwork();
 }
 
-swsParameters GRM::grmWS::subwatershedPars(int wsid)
+swsParameters grmWS::subwatershedPars(int wsid)
 {
     return prj.swps[wsid];
 }
 
-bool GRM::grmWS::removeUserParametersSetting(int wsid)
+bool grmWS::removeUserParametersSetting(int wsid)
 {
     prj.swps[wsid].userSet = -1;
     updateAllSWSParsUsingNetwork();

@@ -101,6 +101,9 @@
     <ClInclude Include="realTime.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
+    <ClInclude Include="grmapi.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="grm.rc">
