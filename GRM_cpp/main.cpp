@@ -16,6 +16,7 @@
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"
+#include "grmapi.h"
 
 #pragma comment(lib,"version.lib")
 
@@ -203,6 +204,7 @@ void disposeDynamicVars()
 
 int simulateSingleEvent()
 {
+	grmWSinfo gws = grmWSinfo(ppi.fpn_prj);
 	if (openPrjAndSetupModel(-1) == -1) {
 		writeLog(fpnLog, "Model setup failed !!!\n", 1, 1);
 		return -1;
