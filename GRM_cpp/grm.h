@@ -106,12 +106,12 @@ enum class simulationType
 	None
 };
 
-enum class unSaturatedKType
+enum class unSaturatedKType //python 인터페이스와 맞춘다.
 {
-	Constant,
-	Linear,
-	Exponential,
-	None
+	Constant = 0,
+	Linear = 1,
+	Exponential = 2,
+	None = 3
 };
 
 enum class cellFlowType
@@ -242,7 +242,7 @@ typedef struct _projectFileFieldName
 	const string MakeRFaccDistFile = "MakeRFaccDistFile";
 	const string MakeFlowDistFile = "MakeFlowDistFile";
 	const string PrintOption = "PrintOption";
-	const string WriteLog = "WriteLog";
+	//const string WriteLog = "WriteLog";
 	const string ID_SWP = "ID";
 	const string IniSaturation = "IniSaturation";
 	const string MinSlopeOF = "MinSlopeOF";
@@ -652,7 +652,9 @@ typedef struct _projectFile
 	int makeRFaccDistFile = 0;// true : 1, false : -1
 	int makeFlowDistFile = 0;// true : 1, false : -1
 	GRMPrintType printOption = GRMPrintType::None;
-	int writeLog = 0;// true : 1, false : -1
+
+	int writeConsole = 0;// true : 1, false : -1
+	int forSimulation = 0;
 
 	map <int, swsParameters> swps; // <wsid, paras>
 	map <int, channelSettingInfo> css; //<wsid. paras>
@@ -891,14 +893,16 @@ inline  double vByManningEq(double hydraulicRaidus,
 class grmWSinfo {
 private:
 	void setPublicVariables();
+	vector<string> allCellsInUpstreamArea(int colXAryidx, int rowYAryidx);
 	bool byGMPfile = false;
 
 public:
 	int facMaxCellxCol;
 	int facMaxCellyRow;
-	int* WSIDsAll;
+	vector<int> WSIDsAll;
 	int WScount = 0;
-	int* mostDownStreamWSIDs;
+	vector<int> mostDownStreamWSIDs;
+	int mostDownStreamWSCount;
 	int cellCountInWatershed = 0;
 	double cellSize = 0;
 
@@ -913,9 +917,9 @@ public:
 	~grmWSinfo();
 
 	bool isInWatershedArea(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
-	int* upStreamWSIDs(int currentWSID);
+	vector<int> upStreamWSIDs(int currentWSID);
 	int upStreamWSCount(int currentWSID);
-	int* downStreamWSIDs(int currentWSID);
+	vector<int> downStreamWSIDs(int currentWSID);
 	int downStreamWSCount(int currentWSID);
 	int watershedID(int colXAryidx, int rowYAryidx); // 배열 인덱스 사용
 	string flowDirection(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
@@ -926,12 +930,14 @@ public:
 	int landCoverValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
 	int soilTextureValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
 	int soilDepthValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
-	string* allCellsInUpstreamArea(int colXAryidx, //    Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
+	vector<string> allCellsInUpstreamArea_Array(int colXAryidx, //    Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
+		int rowYAryidx);
+	int cellCountInUpstreamArea(int colXAryidx, //  Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
 		int rowYAryidx);
 
 	// If this class was instanced by using gmp file --"grmWS(string gmpFPN)".		
 	bool setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
-		double minSlopeLandSurface, string unSKType, double coefUnsK,
+		double minSlopeLandSurface, unSaturatedKType unSKType, double coefUnsK,
 		double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
 		int dryStreamOrder, double ccLCRoughness,
 		double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,

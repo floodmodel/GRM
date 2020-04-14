@@ -1,4 +1,7 @@
 #pragma once
+
+//#include "Python.h"
+#include "gentle.h"
 #include "grm.h"
 
 #ifdef GRM_EXPORTS // 전처리기 정의에서 이것 명시해 줘야함.
@@ -41,7 +44,10 @@ extern "C" // for python //grmWSinfo의 내용을  로 재정의 한다.
 	GRMDLL_API int* upStreamWSIDs(grmWSinfo* f,
 		int currentWSID)
 	{
-		return f->upStreamWSIDs(currentWSID);
+		vector <int> r = f->upStreamWSIDs(currentWSID);
+		int* rv = new int[r.size()];
+		copy(r.begin(), r.end(), rv);
+		return rv;
 	}
 
 	GRMDLL_API int upStreamWSCount(grmWSinfo* f,
@@ -53,7 +59,10 @@ extern "C" // for python //grmWSinfo의 내용을  로 재정의 한다.
 	GRMDLL_API int* downStreamWSIDs(grmWSinfo* f,
 		int currentWSID)
 	{
-		return f->downStreamWSIDs(currentWSID);
+		vector <int> r = f->downStreamWSIDs(currentWSID);
+		int* rv = new int[r.size()];
+		copy(r.begin(), r.end(), rv);
+		return rv;
 	}
 
 	GRMDLL_API int downStreamWSCount(grmWSinfo* f,
@@ -67,11 +76,14 @@ extern "C" // for python //grmWSinfo의 내용을  로 재정의 한다.
 	{
 		return f->watershedID(colXAryidx, rowYAryidx);
 	}
-	GRMDLL_API string flowDirection(grmWSinfo* f,
+
+	GRMDLL_API char * flowDirection(grmWSinfo* f,
 		int colXAryidx, int rowYAryidx)// 배열 인덱스 사용
 	{
-		return f->flowDirection(colXAryidx, rowYAryidx);
+		string r = f->flowDirection(colXAryidx, rowYAryidx);
+		return stringToCharP(r);
 	}
+
 	GRMDLL_API int flowAccumulation(grmWSinfo* f,
 		int colXAryidx, int rowYAryidx)// 배열 인덱스 사용
 	{
@@ -87,10 +99,12 @@ extern "C" // for python //grmWSinfo의 내용을  로 재정의 한다.
 	{
 		return f->streamValue(colXAryidx, rowYAryidx);
 	}
-	GRMDLL_API string cellFlowTypeOfaCell(grmWSinfo* f,
+	GRMDLL_API char * cellFlowTypeACell(grmWSinfo* f,
 		int colXAryidx, int rowYAryidx)// 배열 인덱스 사용
 	{
-		return f->cellFlowType(colXAryidx, rowYAryidx);
+		string r = f->cellFlowType(colXAryidx, rowYAryidx);
+		cout <<"grm"<< r << endl;
+		return stringToCharP(r);
 	}
 	GRMDLL_API int landCoverValue(grmWSinfo* f,
 		int colXAryidx, int rowYAryidx)// 배열 인덱스 사용
@@ -112,13 +126,22 @@ extern "C" // for python //grmWSinfo의 내용을  로 재정의 한다.
 	GRMDLL_API string* allCellsInUpstreamArea(grmWSinfo* f,
 		int colXAryidx, 	int rowYAryidx)//    Select all cells in upstream area of a input cell position. Return string list of cell positions - "xCol, yRow".
 	{
-		return f->allCellsInUpstreamArea(colXAryidx, rowYAryidx);
+		vector <string> r = f->allCellsInUpstreamArea_Array(colXAryidx, rowYAryidx);
+		string * rv = new string[r.size()];
+		copy(r.begin(), r.end(), rv);
+		return rv;
+	}
+
+	GRMDLL_API int cellCountInUpstreamArea(grmWSinfo* f,  //  The number of all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
+		int colXAryidx, int rowYAryidx)
+	{
+		return f->cellCountInUpstreamArea(colXAryidx, rowYAryidx);
 	}
 
 	// If this class was instanced by using gmp file --"grmWS(string gmpFPN)".		
 	GRMDLL_API bool setOneSWSParsAndUpdateAllSWSUsingNetwork(grmWSinfo* f,
 		int wsid, double iniSat,
-		double minSlopeLandSurface, string unSKType, double coefUnsK,
+		double minSlopeLandSurface, unSaturatedKType unSKType, double coefUnsK,
 		double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
 		int dryStreamOrder, double ccLCRoughness,
 		double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
@@ -161,7 +184,10 @@ extern "C" // for python //grmWSinfo의 내용을  로 재정의 한다.
 	}
 	GRMDLL_API int* WSIDsAll(grmWSinfo* f)
 	{
-		return f->WSIDsAll;
+		vector <int> r = f->WSIDsAll;
+		int * rv = new int[r.size()];
+		copy(r.begin(), r.end(), rv);
+		return rv;
 	}
 
 	GRMDLL_API int WScount(grmWSinfo* f)
@@ -171,12 +197,23 @@ extern "C" // for python //grmWSinfo의 내용을  로 재정의 한다.
 		
 	GRMDLL_API int* mostDownStreamWSIDs(grmWSinfo* f)
 	{
-		return f->mostDownStreamWSIDs;
+		vector <int> r = f->mostDownStreamWSIDs;
+		int* rv = new int[r.size()];
+		copy(r.begin(), r.end(), rv);
+		return rv;
 	}
+
+	GRMDLL_API int mostDownStreamWSCount(grmWSinfo* f)
+	{
+		return f->mostDownStreamWSCount;
+	}
+
+
 	GRMDLL_API int cellCountInWatershed(grmWSinfo* f)
 	{
 		return f->cellCountInWatershed;
 	}
+
 	GRMDLL_API double cellSize(grmWSinfo* f)
 	{
 		return f->cellSize;

@@ -994,14 +994,14 @@ int readXmlRowProjectSettings(string aline)
 		}
 		return 1;
 	}
-	if (aline.find(fn.WriteLog) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fn.WriteLog);
-		prj.writeLog = -1;
-		if (lower(vString) == "true") {
-			prj.writeLog = 1;
-		}
-		return 1;
-	}
+	//if (aline.find(fn.WriteLog) != string::npos) {
+	//	vString = getValueStringFromXmlLine(aline, fn.WriteLog);
+	//	prj.writeConsole = -1;
+	//	if (lower(vString) == "true") {
+	//		prj.writeConsole = 1;
+	//	}
+	//	return 1;
+	//}
 	return 1;
 }
 

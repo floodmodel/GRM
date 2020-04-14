@@ -56,7 +56,7 @@ int main(int argc, char** args)
 		+ grmVersion.LastWrittenTime + ".\n";
 	prj.cpusi = getCPUinfo();
 	cout << outString;
-	cout << prj.cpusi.infoString << endl;
+	cout << prj.cpusi.infoString;
 	outString = outString + prj.cpusi.infoString;
 	long elapseTime_Total_sec;
 	clock_t  finish_Total, start_Total;
@@ -69,6 +69,8 @@ int main(int argc, char** args)
 	}
 	prj.deleteAllFilesExceptDischargeOut = -1;
 	setlocale(LC_ALL, "korean");
+	prj.writeConsole = 1;
+	prj.forSimulation = 1;
 	if (argc == 2) {
 		string arg1(args[1]);
 		if (trim(arg1) == "/?" || lower(trim(arg1)) == "/help") {
@@ -204,7 +206,7 @@ void disposeDynamicVars()
 
 int simulateSingleEvent()
 {
-	grmWSinfo gws = grmWSinfo(ppi.fpn_prj);
+	//grmWSinfo gws = grmWSinfo(ppi.fpn_prj);  // ¿©±â¼­ grmWSinfo class  test
 	if (openPrjAndSetupModel(-1) == -1) {
 		writeLog(fpnLog, "Model setup failed !!!\n", 1, 1);
 		return -1;
@@ -229,7 +231,7 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 		writeLog(fpnLog, "Open "+ ppi.fpn_prj+" was failed.\n", 1, 1);
 		return -1;
 	}
-	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, 1);
+	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, prj.writeConsole);
 	if (setupModelAfterOpenProjectFile() == -1) {
 		return -1;
 	}
@@ -244,16 +246,17 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 	//	prj.mdp = 1;
 	//	isparallel = "false";
 	//}
-
-	if (initOutputFiles() == -1) {
-		writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
-		return -1;
+	if (prj.forSimulation == 1) {
+		if (initOutputFiles() == -1) {
+			writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
+			return -1;
+		}
 	}
-	writeLog(fpnLog, ppi.fpn_prj+" -> Model setup was completed.\n", 1, 1);
-	writeLog(fpnLog, "The number of effecitve cells : " + to_string(di.cellNnotNull) + "\n", 1, 1);
+	writeLog(fpnLog, ppi.fpn_prj+" -> Model setup was completed.\n", 1, prj.writeConsole);
+	writeLog(fpnLog, "The number of effecitve cells : " + to_string(di.cellNnotNull) + "\n", 1, prj.writeConsole);
 	if (prj.mdp == 1) { isparallel = "false"; }
 	writeLog(fpnLog, "Parallel : " + isparallel + ". Max. degree of parallelism : "
-		+ to_string(prj.mdp) + ".\n", 1, 1);	
+		+ to_string(prj.mdp) + ".\n", 1, prj.writeConsole);
 	return 1;
 }
 

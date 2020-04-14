@@ -2,6 +2,7 @@
 #include <string>
 #include "gentle.h"
 #include "grm.h"
+//#include "Python.h"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -24,6 +25,12 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     string fpnIniSoilSaturationRatio, string pfnIniChannelFlow,
     string fpnChannelWidth)
 {
+    prj.writeConsole = -1;
+    prj.forSimulation = -1;
+    fpnLog = "GRMdll.log";
+    //cout << fpnLog << endl;
+    writeNewLog(fpnLog, "GRM.dll : grmWSinfo with input files was started.\n", 1, -1);
+
     if (_access(fpnDomain.c_str(), 0) != 0) {
         cout << "[" + fpnDomain + "] file is invalid" << endl;
         return;
@@ -126,21 +133,24 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     }
     byGMPfile = false;
     grmWSinfo::setPublicVariables();
+    writeLog(fpnLog, "GRM.dll : grmWSinfo with input files was ended.\n", 1, -1);
 }
 
 grmWSinfo::grmWSinfo(string gmpFPN)
 {
-    cout << "1. " << gmpFPN << endl;
+    prj.writeConsole = -1;
+    prj.forSimulation = -1;
     ppi=getProjectFileInfo(gmpFPN);
-    cout << "2. " << ppi.fpn_prj << endl;
+    fpnLog = "GRMdll.log";
+    //cout << fpnLog << endl;
+    writeNewLog(fpnLog, "GRM.dll : grmWSinfo with gmp file was started.\n", 1, -1);
     if (openPrjAndSetupModel(-1) == -1) {
-        writeLog(fpnLog, "Model setup failed !!!\n", 1, 1);
+        writeLog(fpnLog, "GRM.dll : Model setup failed !!!\n", 1, 1);
         return;
     }
     byGMPfile = true;
-    cout <<"3. "<< gmpFPN << endl;
     grmWSinfo::setPublicVariables();
-    cout << "6. " << "setPublicVariables. ok" << endl;
+    writeLog(fpnLog, "GRM.dll : grmWSinfo with gmp file was ended.\n", 1, -1);
 }
 
 grmWSinfo::~grmWSinfo()
@@ -166,21 +176,17 @@ grmWSinfo::~grmWSinfo()
 
 void grmWSinfo::setPublicVariables()
 {
+    writeLog(fpnLog, "GRM.dll : setPublicVariables was started.\n", 1, -1);
     facMaxCellxCol = cvps[di.cvidxMaxFac].xCol;
     facMaxCellyRow = cvps[di.cvidxMaxFac].yRow;
-    WSIDsAll = new int[di.dmids.size()];
-    copy(di.dmids.begin(), di.dmids.end(), WSIDsAll);
-    //WSIDsAll = new int[di.dmids.size()];
-    //copy(di.dmids.begin(), di.dmids.end(), WSIDsAll);
+    WSIDsAll = di.dmids;
     WScount = (int)di.dmids.size();
-    mostDownStreamWSIDs = new int[di.wsn.mdWSIDs.size()];
-    copy(di.wsn.mdWSIDs.begin(), di.wsn.mdWSIDs.end(), 
-        mostDownStreamWSIDs);
-    //mostDownStreamWSIDs = new int[di.wsn.mdWSIDs.size()];
-    //copy(di.wsn.mdWSIDs.begin(), di.wsn.mdWSIDs.end(), mostDownStreamWSIDs);
+    mostDownStreamWSIDs = di.wsn.mdWSIDs;
+    mostDownStreamWSCount = di.wsn.mdWSIDs.size();
     cellCountInWatershed = di.cellNnotNull;
     cellSize = di.cellSize;    
-    cout << "5. " << "setPublicVariables. facMaxCellxCol : " << facMaxCellxCol << endl;
+    writeLog(fpnLog, "GRM.dll : setPublicVariables was ended.\n", 1, -1);
+    writeLog(fpnLog, "GRM.dll : facMaxCellxCol : "+to_string(facMaxCellxCol)+"\n", 1, -1);
 }
 
 bool grmWSinfo::isInWatershedArea(int colXAryidx, int rowYAryidx)
@@ -194,13 +200,9 @@ bool grmWSinfo::isInWatershedArea(int colXAryidx, int rowYAryidx)
     }
 }
 
-int* grmWSinfo::upStreamWSIDs(int currentWSID)
+vector<int> grmWSinfo::upStreamWSIDs(int currentWSID)
 {
-    vector<int>  idsv = di.wsn.wsidsAllUp[currentWSID];
-    int* ids = new int[idsv.size()];
-    copy(idsv.begin(), idsv.end(), ids);
-    return ids;
-    //return di.wsn.wsidsAllUp[currentWSID];
+    return di.wsn.wsidsAllUp[currentWSID];
 }
 
 int grmWSinfo::upStreamWSCount(int currentWSID)
@@ -208,13 +210,9 @@ int grmWSinfo::upStreamWSCount(int currentWSID)
     return  di.wsn.wsidsAllUp[currentWSID].size();
 }
 
-int * grmWSinfo::downStreamWSIDs(int currentWSID)
+vector<int> grmWSinfo::downStreamWSIDs(int currentWSID)
 {
-    vector<int>  idsv = di.wsn.wsidsAllDown[currentWSID];
-    int* ids = new int[idsv.size()];
-    copy(idsv.begin(), idsv.end(), ids);
-    return ids;
-    //return di.wsn.wsidsAllDown[currentWSID];
+    return di.wsn.wsidsAllDown[currentWSID];
 }
 
 int grmWSinfo::downStreamWSCount(int currentWSID)
@@ -240,7 +238,7 @@ string grmWSinfo::flowDirection(int colXAryidx, int rowYAryidx)
         return ENUM_TO_STR(cvs[idx].fdir);
     }
     else {
-        return "NULL";
+        return "OFWB";
     }
 }
 
@@ -297,7 +295,7 @@ string grmWSinfo::cellFlowType(int colXAryidx, int rowYAryidx)
         return ENUM_TO_STR(cvs[idx].flowType);
     }
     else {
-        return "NULL";
+        return "OFWB";
     }
 }
 
@@ -334,7 +332,7 @@ int grmWSinfo::soilDepthValue(int colXAryidx, int rowYAryidx)
     }
 }
 
-string* grmWSinfo::allCellsInUpstreamArea(int colXAryidx, int rowYAryidx)
+vector<string> grmWSinfo::allCellsInUpstreamArea(int colXAryidx, int rowYAryidx)
 {
     vector<string> cellsPos;
     int startingidx = cvais[colXAryidx][rowYAryidx];
@@ -351,16 +349,27 @@ string* grmWSinfo::allCellsInUpstreamArea(int colXAryidx, int rowYAryidx)
             }
         }
     }
-    string* cps;
-    cps = new string[cellsPos.size()];
-    copy(cellsPos.begin(), cellsPos.end(), cps);
-    return cps;
-    //return cellsPos;
+    return cellsPos;
+}
+
+
+vector<string> grmWSinfo::allCellsInUpstreamArea_Array(int colXAryidx, int rowYAryidx)
+{
+    //vector<string> cellsPos;
+    return grmWSinfo::allCellsInUpstreamArea(colXAryidx, rowYAryidx);
+}
+
+int grmWSinfo::cellCountInUpstreamArea(int colXAryidx,
+    int rowYAryidx)
+{
+    vector<string> cellsPos;
+    cellsPos = grmWSinfo::allCellsInUpstreamArea(colXAryidx, rowYAryidx);
+    return cellsPos.size();
 }
 
 // If this class was instanced by using gmp file --"grmWS(string gmpFPN)".		
 bool grmWSinfo::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
-    double minSlopeLandSurface, string unSKType, double coefUnsK,
+    double minSlopeLandSurface, unSaturatedKType unSKType, double coefUnsK,
     double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
     int dryStreamOrder, double ccLCRoughness,
     double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
@@ -368,24 +377,25 @@ bool grmWSinfo::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat
 {
     prj.swps[wsid].iniSaturation = iniSat;
     prj.swps[wsid].minSlopeOF = minSlopeLandSurface;
-    prj.swps[wsid].unSatKType = unSaturatedKType::Linear;
-        unSaturatedKType uskt = unSaturatedKType::None;
-        if (unSKType != "") {
-            if (lower(unSKType) == lower(ENUM_TO_STR(Constant))) {
-                prj.swps[wsid].unSatKType = unSaturatedKType::Constant;
-            }
-            else if (lower(unSKType) == lower(ENUM_TO_STR(Linear))) {
-                prj.swps[wsid].unSatKType = unSaturatedKType::Linear;
-            }
-            else if (lower(unSKType) == lower(ENUM_TO_STR(Exponential))) {
-                prj.swps[wsid].unSatKType = unSaturatedKType::Exponential;
-            }
-            else {
-                writeLog(fpnLog, "Unsaturated K type in the watershed ["
-                    + to_string(wsid) + "] is invalid.\n", 1, 1);
-                return false;
-            }
-        }
+    prj.swps[wsid].unSatKType = unSKType;
+    //prj.swps[wsid].unSatKType = unSaturatedKType::Linear;
+    //    unSaturatedKType uskt = unSaturatedKType::None;
+    //    if (unSKType != "") {
+    //        if (lower(unSKType) == lower(ENUM_TO_STR(Constant))) {
+    //            prj.swps[wsid].unSatKType = unSaturatedKType::Constant;
+    //        }
+    //        else if (lower(unSKType) == lower(ENUM_TO_STR(Linear))) {
+    //            prj.swps[wsid].unSatKType = unSaturatedKType::Linear;
+    //        }
+    //        else if (lower(unSKType) == lower(ENUM_TO_STR(Exponential))) {
+    //            prj.swps[wsid].unSatKType = unSaturatedKType::Exponential;
+    //        }
+    //        else {
+    //            writeLog(fpnLog, "Unsaturated K type in the watershed ["
+    //                + to_string(wsid) + "] is invalid.\n", 1, 1);
+    //            return false;
+    //        }
+    //    }
     prj.swps[wsid].coefUnsaturatedK = coefUnsK;
     prj.swps[wsid].minSlopeChBed = minSlopeChannel;
     prj.swps[wsid].minChBaseWidth = minChannelBaseWidth;
