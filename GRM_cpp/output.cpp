@@ -424,8 +424,22 @@ int makeNewOutputFiles()
                 flowControlinfo afc = prj.fcs[n];
                 fcDataField = fcDataField + "\t" + afc.fcName;
                 fcNameApp = fcNameApp + "\t" + afc.fcName;
-                fcTypeApp = fcTypeApp + "\t" + ENUM_TO_STR(afc.fcType);
-
+                string fct=ENUM_TO_STR(None);
+                switch (afc.fcType) {
+                case flowControlType::Inlet:
+                    fct= ENUM_TO_STR(Inlet);
+                case flowControlType::ReservoirOperation:
+                    fct = ENUM_TO_STR(ReservoirOperation);
+                case flowControlType::ReservoirOutflow:
+                    fct = ENUM_TO_STR(ReservoirOutflow);
+                case flowControlType::SinkFlow:
+                    fct = ENUM_TO_STR(SinkFlow);
+                case flowControlType::SourceFlow:
+                    fct = ENUM_TO_STR(SourceFlow);
+                case flowControlType::None:
+                    fct = ENUM_TO_STR(None);
+                }
+                fcTypeApp = fcTypeApp + "\t" + fct;
                 if (afc.fcType == flowControlType::ReservoirOutflow
                     || afc.fcType == flowControlType::Inlet
                     || afc.fcType== flowControlType::SinkFlow

@@ -103,7 +103,6 @@ extern "C" // for python //grmWSinfo의 내용을  로 재정의 한다.
 		int colXAryidx, int rowYAryidx)// 배열 인덱스 사용
 	{
 		string r = f->cellFlowType(colXAryidx, rowYAryidx);
-		cout <<"grm"<< r << endl;
 		return stringToCharP(r);
 	}
 	GRMDLL_API int landCoverValue(grmWSinfo* f,
@@ -123,13 +122,16 @@ extern "C" // for python //grmWSinfo의 내용을  로 재정의 한다.
 		return f->soilDepthValue(colXAryidx, rowYAryidx);
 	}
 
-	GRMDLL_API string* allCellsInUpstreamArea(grmWSinfo* f,
+	GRMDLL_API char ** allCellsInUpstreamArea(grmWSinfo* f,
 		int colXAryidx, 	int rowYAryidx)//    Select all cells in upstream area of a input cell position. Return string list of cell positions - "xCol, yRow".
 	{
-		vector <string> r = f->allCellsInUpstreamArea_Array(colXAryidx, rowYAryidx);
-		string * rv = new string[r.size()];
-		copy(r.begin(), r.end(), rv);
-		return rv;
+		vector <string> rv = f->allCellsInUpstreamArea_Array(colXAryidx, rowYAryidx);
+		char** r;
+		r = new char* [rv.size()];
+		for (int i = 0; i < rv.size(); ++i) {
+			r[i] = stringToCharP(rv[i]);
+		}
+		return r;
 	}
 
 	GRMDLL_API int cellCountInUpstreamArea(grmWSinfo* f,  //  The number of all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".

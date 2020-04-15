@@ -3,13 +3,14 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>9ca03951-d897-42f7-890e-5b9fde4db9d5</ProjectGuid>
-    <ProjectHome>.</ProjectHome>
-    <StartupFile>pyUsingGRMdll.py</StartupFile>
+    <ProjectHome>
+    </ProjectHome>
+    <StartupFile>pyGRMdll.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>pyCPdll</Name>
+    <Name>pyGRM</Name>
     <RootNamespace>pyCPdll</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -21,7 +22,7 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="pyUsingGRMdll.py">
+    <Compile Include="pyGRMdll.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

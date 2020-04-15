@@ -206,10 +206,14 @@ void disposeDynamicVars()
 
 int simulateSingleEvent()
 {
-	//grmWSinfo gws = grmWSinfo(ppi.fpn_prj);  // 여기서 grmWSinfo class  test
+	//grmWSinfo gws = grmWSinfo(ppi.fpn_prj);  // 여기서 grmWSinfo class  test	
+	//string cft = gws.cellFlowType(80, 120);
+	
 	if (openPrjAndSetupModel(-1) == -1) {
-		writeLog(fpnLog, "Model setup failed !!!\n", 1, 1);
-		return -1;
+		writeLog(fpnLog, "Model setup failed !!!\n", 1, prj.writeConsole);
+		if (prj.forSimulation == 1) {
+			return -1;
+		}
 	}
 	writeLog(fpnLog, "Simulation was started.\n", 1, 1);
 	if (startSimulationSingleEvent() == -1) {
@@ -228,12 +232,15 @@ int simulateSingleEvent()
 int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 {	
 	if (openProjectFile(forceRealTime) < 0)	{
-		writeLog(fpnLog, "Open "+ ppi.fpn_prj+" was failed.\n", 1, 1);
-		return -1;
+		writeLog(fpnLog, "Open "+ ppi.fpn_prj+" was failed.\n", 1, prj.writeConsole);
+		if (prj.forSimulation == 1) {
+			return -1;
+		}
 	}
 	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, prj.writeConsole);
 	if (setupModelAfterOpenProjectFile() == -1) {
-		return -1;
+		
+		if (prj.forSimulation == 1) { return -1; }
 	}
 	string isparallel = "true";
 	omp_set_num_threads(prj.mdp);

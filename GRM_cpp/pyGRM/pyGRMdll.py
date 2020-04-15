@@ -1,9 +1,12 @@
+# codes to implement the class in grm.dll
 import sys, platform
 import ctypes, ctypes.util
 import enum
 from ctypes import *
 
-gdl_path = ctypes.util.find_library("D:/Github/GRM/GRM_cpp/x64/Release/GRM.dll") # here, grm dll file full path and name
+# here, grm dll file full path and name
+gdl_path = ctypes.util.find_library("D:/Github/GRM/GRM_cpp/x64/Release/GRM.dll") 
+
 if not gdl_path:
     print("Unable to find the specified library.")
     sys.exit() 
@@ -13,12 +16,6 @@ except OSError:
     print("Unable to load the system C library")
     sys.exit()
 
-
-#fpn_gmp = "D:\\Github\\zTestSet_GRM_SampleWC_cpp\\SampleProject.gmp"
-fpn_gmp = "D:/Github/zTestSet_GRM_SampleWC_cpp/SampleProject.gmp"
-#fpn_gmp = "D:/Github/zTestSet_GRM_SampleGHG_cpp/GHG500_20200407_cpp.gmp"
-
-# codes to implement the class in grm.dll
 class unSaturatedKType(enum.Enum): #grm과 맞춘다.
 	Constant=0
 	Linear=1
@@ -43,9 +40,6 @@ class swsParameters(Structure):
         ("ccSoilDepth", ctypes.c_double),
         ("userSet", ctypes.c_int)]
 
-#def decode_ctype(x):
-#    return bytes(x, encoding='utf-8')
-    #return ctypes.c_char_p(x).value.decode('utf-8')
 
 #  class grmWSinfo(object) start =========== 
 class grmWSinfo(object): 
@@ -96,7 +90,12 @@ class grmWSinfo(object):
         gdl.soilDepthValue.restype = ctypes.c_int
 
         gdl.allCellsInUpstreamArea.argtypes =[ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
-        gdl.allCellsInUpstreamArea.restype =ctypes.POINTER(ctypes.c_char_p) #string *
+        gdl.allCellsInUpstreamArea.restype = ctypes.POINTER(ctypes.c_char_p)
+        #ctypes.c_char_p
+        #ctypes.POINTER(ctypes.c_char)
+        #ctypes.c_char_p 
+        #ctypes.POINTER(ctypes.c_char_p)
+        # #string *
 
         gdl.cellCountInUpstreamArea.argtypes =[ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
         gdl.cellCountInUpstreamArea.restype =ctypes.c_int
@@ -232,7 +231,10 @@ class grmWSinfo(object):
     def removeUserParametersSetting(self, wsid):
         return gdl.removeUserParametersSetting(self.obj, wsid)
 #  class grmWSinfo(object) end =========== 
+
 # sample code to use grmWSinfo class
+#fpn_gmp = "D:\Github\zTestSet_GRM_SampleWC_cpp\SampleProject.gmp" # 여기에 gmp 파일 세팅
+fpn_gmp = "C:\GRM\SampleGHG\GHG500.gmp"
 wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
 xCol = 80
 yRow = 120
@@ -284,9 +286,13 @@ print("soilDepthValue :", a)  # if -1, the cell is out of the simulation domain 
 a = wsi.cellCountInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
 print("cellCountInUpstreamArea :", a)  
 
-a = wsi.allCellsInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.POINTER(ctypes.c_char_p)
-for i in range(wsi.cellCountI  nUpstreamArea(xCol, yRow)):
-    print("  allCellsInUpstreamArea :", a[i]) # if -1, there is no downstream watershed.
+#a = ctypes.POINTER(ctypes.c_char_p)()
+
+#check_call(_LIB.NNSymbolListInputNames(
+#            self.handle, 0, ctypes.byref(size), ctypes.byref(a)))
+a= wsi.allCellsInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.POINTER(ctypes.c_char_p)
+for i in range(wsi.cellCountInUpstreamArea(xCol, yRow)):
+    print("  allCellsInUpstreamArea :", a[i].decode('utf-8')) # if -1, there is no downstream watershed.
 
 swp=swsParameters()
 swp = wsi.subwatershedPars(wsid) # current ws id / [ctypes.c_int] -> swsParameters

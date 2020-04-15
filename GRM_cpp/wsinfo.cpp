@@ -235,7 +235,27 @@ string grmWSinfo::flowDirection(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
-        return ENUM_TO_STR(cvs[idx].fdir);
+        switch (cvs[idx].fdir) {
+        case flowDirection8::E8:
+            return ENUM_TO_STR(E8);
+        case flowDirection8::N8:
+            return ENUM_TO_STR(N8);
+        case flowDirection8::NE8:
+            return ENUM_TO_STR(NE8);
+        case flowDirection8::NW8:
+            return ENUM_TO_STR(NW8);
+        case flowDirection8::S8:
+            return ENUM_TO_STR(S8);
+        case flowDirection8::SE8:
+            return ENUM_TO_STR(SE8);
+        case flowDirection8::SW8:
+            return ENUM_TO_STR(SW8);
+        case flowDirection8::W8:
+            return ENUM_TO_STR(W8);
+        case flowDirection8::None8:
+            return ENUM_TO_STR(None8);
+        }
+        return ENUM_TO_STR(None8);
     }
     else {
         return "OFWB";
@@ -292,7 +312,17 @@ string grmWSinfo::cellFlowType(int colXAryidx, int rowYAryidx)
 {
     int idx = cvais[colXAryidx][rowYAryidx];
     if (idx >= 0) {
-        return ENUM_TO_STR(cvs[idx].flowType);
+        switch (cvs[idx].flowType) {
+        case cellFlowType::OverlandFlow:
+            return ENUM_TO_STR(OverlandFlow);
+        case cellFlowType::ChannelNOverlandFlow:
+            return ENUM_TO_STR(ChannelNOverlandFlow);
+        case cellFlowType::ChannelFlow:
+            return ENUM_TO_STR(ChannelFlow);
+        case cellFlowType::None:
+            return ENUM_TO_STR(None);
+        }
+        return ENUM_TO_STR(None);
     }
     else {
         return "OFWB";
