@@ -16,17 +16,17 @@ except OSError:
     print("Unable to load the system C library")
     sys.exit()
 
-class unSaturatedKType(enum.Enum): #grm과 맞춘다.
+class unSaturatedKType(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
 	Constant=0
 	Linear=1
 	Exponential=2
 	usKNone=3
 
-class swsParameters(Structure):
+class swsParameters(Structure):  #grm 코드에 있는 내용과 맞춘다.
 	_fields_ = [("wsid", ctypes.c_int),
         ("iniSaturation", ctypes.c_double),
         ("minSlopeOF", ctypes.c_double),
-        ("unSatKType", ctypes.c_int),# unSaturatedKType,
+        ("unSatKType", ctypes.c_int),  # unSaturatedKType,
         ("coefUnsaturatedK", ctypes.c_double),
         ("minSlopeChBed", ctypes.c_double),
         ("minChBaseWidth", ctypes.c_double),
@@ -44,7 +44,7 @@ class swsParameters(Structure):
 #  class grmWSinfo(object) start =========== 
 class grmWSinfo(object): 
     def __init__(self, fpn_gmp): 
-        gdl.grmWSinfo_new_gmpFile.argtypes =[ctypes.c_char_p] #[ctypes.c_char_p] #  # string
+        gdl.grmWSinfo_new_gmpFile.argtypes =[ctypes.c_char_p] # string
         gdl.grmWSinfo_new_gmpFile.restype = ctypes.c_void_p
 
         gdl.isInWatershedArea.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
@@ -91,11 +91,6 @@ class grmWSinfo(object):
 
         gdl.allCellsInUpstreamArea.argtypes =[ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
         gdl.allCellsInUpstreamArea.restype = ctypes.POINTER(ctypes.c_char_p)
-        #ctypes.c_char_p
-        #ctypes.POINTER(ctypes.c_char)
-        #ctypes.c_char_p 
-        #ctypes.POINTER(ctypes.c_char_p)
-        # #string *
 
         gdl.cellCountInUpstreamArea.argtypes =[ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
         gdl.cellCountInUpstreamArea.restype =ctypes.c_int
@@ -233,12 +228,18 @@ class grmWSinfo(object):
 #  class grmWSinfo(object) end =========== 
 
 # sample code to use grmWSinfo class
-#fpn_gmp = "D:\Github\zTestSet_GRM_SampleWC_cpp\SampleProject.gmp" # 여기에 gmp 파일 세팅
+
+# 여기서 gmp 파일먼저 설정
+# gmp 파일에서 ProjectSetting 테이블까지만 채워져 있어도 사용할 수 있다. 
+#     즉, QGIS-GRM의 경우 Setup/Run GRM GUI가 뜨기 전에 gmp 파일 한번 저장하고, 사용하면 됨
 fpn_gmp = "C:\GRM\SampleGHG\GHG500.gmp"
-wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
-xCol = 80
-yRow = 120
-wsid = 1;
+
+# 여기서는 정보를 얻고자 하는 셀위치 혹은 유역 번호를 설정
+xCol = 80  # 정보를 얻고자 하는 셀 위치
+yRow = 120 # 정보를 얻고자 하는 셀 위치
+wsid = 1   # 정보를 얻고자 하는 유역 번호
+
+wsi=grmWSinfo(fpn_gmp) #여기서 클래스 인스턴싱, gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
 a = wsi.isInWatershedArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_bool
 print("isInWatershedArea :", a)
 
@@ -286,10 +287,6 @@ print("soilDepthValue :", a)  # if -1, the cell is out of the simulation domain 
 a = wsi.cellCountInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
 print("cellCountInUpstreamArea :", a)  
 
-#a = ctypes.POINTER(ctypes.c_char_p)()
-
-#check_call(_LIB.NNSymbolListInputNames(
-#            self.handle, 0, ctypes.byref(size), ctypes.byref(a)))
 a= wsi.allCellsInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.POINTER(ctypes.c_char_p)
 for i in range(wsi.cellCountInUpstreamArea(xCol, yRow)):
     print("  allCellsInUpstreamArea :", a[i].decode('utf-8')) # if -1, there is no downstream watershed.
@@ -311,9 +308,7 @@ print("subwatershedPars. ccPorosity :", swp.ccPorosity)
 print("subwatershedPars. ccWFSuctionHead :", swp.ccWFSuctionHead)
 print("subwatershedPars. ccHydraulicK :", swp.ccHydraulicK)
 print("subwatershedPars. ccSoilDepth :", swp.ccSoilDepth)
-print("subwatershedPars. userSet :", swp.userSet)
-
-    
+print("subwatershedPars. userSet :", swp.userSet)    
 
 a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(swp.wsid,  swp.iniSaturation#  watershed parameters -> ctypes.c_bool
                            , swp.minSlopeOF, swp.unSatKType, swp.coefUnsaturatedK
