@@ -1,6 +1,5 @@
 #pragma once
 
-//#include "Python.h"
 #include "gentle.h"
 #include "grm.h"
 
@@ -10,7 +9,7 @@
 #define GRMDLL_API __declspec(dllimport)
 #endif
 
-extern "C" // for python //grmWSinfo의 내용을  로 재정의 한다. 
+extern "C" // for python //grmWSinfo의 내용을  재정의 한다. 
 {
 	GRMDLL_API grmWSinfo* grmWSinfo_new_inputFiles(string fdirType, 
 		string fpnDomain,
@@ -174,7 +173,6 @@ extern "C" // for python //grmWSinfo의 내용을  로 재정의 한다.
 		return f->removeUserParametersSetting(wsid);
 	}
 
-
 	// Properties
 	GRMDLL_API int facMaxCellxCol(grmWSinfo* f)
 	{
@@ -222,63 +220,3 @@ extern "C" // for python //grmWSinfo의 내용을  로 재정의 한다.
 	}
 }
 	
-
-//// extern "C" sample code
-//	class testClass {
-//	private:
-//	public:
-//		int ain;
-//		int bin;
-//		testClass(int a, int b);
-//		~testClass();
-//		int grmPlus();
-//		int grmMultiple();
-//	};
-//
-//  extern "C" GRMDLL_API int grmPlusFunction(int a, int b);
-//	extern "C" // for python
-//	{
-//		// __stdcall을 꼭 써야 하는 것은 아니다..
-//		// __declspec(dllexport) 은 꼭 써야 한다.
-//		//__declspec(dllexport) testClass* __stdcall testClass_new(int a, int b) {
-//		//	return new testClass(a, b);
-//		//}
-//		GRMDLL_API testClass* testClass_new(int a, int b) {
-//			return new testClass(a, b);
-//		}
-//		GRMDLL_API int  testClass_plus(testClass* f) {
-//			return f->grmPlus();
-//		}
-//		GRMDLL_API   int testClass_multi(testClass* f) {
-//			return f->grmMultiple();
-//		}
-//		GRMDLL_API  int  ain(testClass* f) {
-//			return f->ain;
-//		}
-//		GRMDLL_API  int   bin(testClass* f) {
-//			return f->bin;
-//		}
-//	}
-//
-//int grmPlusFunction(int a, int b)	{
-//	return a + b;
-//}
-//testClass::testClass(int a, int b)	{
-//	ain = a;
-//	bin = b;
-//	cout << "a : " << ain << "  b : " << bin << endl;
-//}
-//testClass::~testClass()	{
-//	cout << "end" << endl;
-//}
-//int  testClass::grmPlus() {
-//	cout << "grmPlus" << endl;
-//	cout << "a : " << ain << "  b : " << bin << endl;
-//	return ain + bin;
-//}
-//
-//int  testClass::grmMultiple() {
-//	cout << "grmMultiple" << endl;
-//	return (int)(ain * bin);
-//}
-//// extern "C" sample code

@@ -2,7 +2,6 @@
 #include <string>
 #include "gentle.h"
 #include "grm.h"
-//#include "Python.h"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -408,24 +407,6 @@ bool grmWSinfo::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat
     prj.swps[wsid].iniSaturation = iniSat;
     prj.swps[wsid].minSlopeOF = minSlopeLandSurface;
     prj.swps[wsid].unSatKType = unSKType;
-    //prj.swps[wsid].unSatKType = unSaturatedKType::Linear;
-    //    unSaturatedKType uskt = unSaturatedKType::None;
-    //    if (unSKType != "") {
-    //        if (lower(unSKType) == lower(ENUM_TO_STR(Constant))) {
-    //            prj.swps[wsid].unSatKType = unSaturatedKType::Constant;
-    //        }
-    //        else if (lower(unSKType) == lower(ENUM_TO_STR(Linear))) {
-    //            prj.swps[wsid].unSatKType = unSaturatedKType::Linear;
-    //        }
-    //        else if (lower(unSKType) == lower(ENUM_TO_STR(Exponential))) {
-    //            prj.swps[wsid].unSatKType = unSaturatedKType::Exponential;
-    //        }
-    //        else {
-    //            writeLog(fpnLog, "Unsaturated K type in the watershed ["
-    //                + to_string(wsid) + "] is invalid.\n", 1, 1);
-    //            return false;
-    //        }
-    //    }
     prj.swps[wsid].coefUnsaturatedK = coefUnsK;
     prj.swps[wsid].minSlopeChBed = minSlopeChannel;
     prj.swps[wsid].minChBaseWidth = minChannelBaseWidth;
