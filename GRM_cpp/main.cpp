@@ -206,9 +206,9 @@ void disposeDynamicVars()
 
 int simulateSingleEvent()
 {
-	//// 여기서 grmWSinfo class  test
-	string fpn = "C://GRM//SampleGHG//GHG500.gmp";
-	grmWSinfo gws = grmWSinfo(fpn);
+	////// 여기서 grmWSinfo class  test
+	//string fpn = "C://GRM//SampleGHG//GHG500.gmp";
+	//grmWSinfo gws = grmWSinfo(fpn);
 	//string fdType = "StartsFromE_TauDEM";
 	//string fpn_domain = "D:\\GRM_ex\\SpeedTest\\GHG/watershed/GHG_Watershed.asc";
 	//string fpn_slope = "D:\\GRM_ex\\SpeedTest\\GHG/watershed/GHG_Slope_ST.asc";
@@ -221,10 +221,10 @@ int simulateSingleEvent()
 	//grmWSinfo	gws = grmWSinfo(fdType, fpn_domain,	fpn_slope, fpn_fd,
 	//	fpn_fa, fpn_stream, fpn_lc, fpn_st, fpn_sd);
 	//string cft = gws.cellFlowType(80, 120);
-	vector<string> sv = gws.allCellsInUpstreamArea(21, 49);
-	for (string s : sv) {
-		cout << s << endl;
-	}
+	//vector<string> sv = gws.allCellsInUpstreamArea(21, 49);
+	//for (string s : sv) {
+	//	cout << s << endl;
+	//}
 	
 	if (openPrjAndSetupModel(-1) == -1) {
 		writeLog(fpnLog, "Model setup failed !!!\n", 1, prj.writeConsole);

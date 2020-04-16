@@ -43,21 +43,20 @@ class swsParameters(Structure):  #grm 코드에 있는 내용과 맞춘다.
 
 #  class grmWSinfo(object) start =========== 
 class grmWSinfo(object): 
-    #def __init__(self, fpn_gmp): 
+    # fpnGMP_OR_fdirType 여기에 gmp 파일을 입력하든지, flowDirectionType을 입력하든지 선택
+    #      flowDirectionType 을 입력할 경우에는 다른 파일들도 argument로 입력해야 한다. 
     def __init__(self, fpnGMP_OR_fdirType, 
-                fpnDomain="", 
-                fpnSlope="", 
-                fpnFdir="",  
-                fpnFac="", 
-                fpnStream = "", 
-                fpnLandCover = "",   
-                fpnSoilTexture = "",  
-                fpnSoilDepth = "",	 
-                fpnIniSoilSaturationRatio = "", 
-                pfnIniChannelFlow = "", 
-                fpnChannelWidth = ""):
-        #fdirType 혹은 gmpfpn, fpnDomain, fpnSlope, fpnFdir,  fpnFac, 
-        #fpnStream = "", fpnLandCover = "",   fpnSoilTexture = "",  fpnSoilDepth = "",	 fpnIniSoilSaturationRatio = "", pfnIniChannelFlow = "", fpnChannelWidth = ""
+                fpnDomain="", # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
+                fpnSlope="", # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
+                fpnFdir="",  # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
+                fpnFac="", # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
+                fpnStream = "", # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
+                fpnLandCover = "",   # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
+                fpnSoilTexture = "",  # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
+                fpnSoilDepth = "",	 # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
+                fpnIniSoilSaturationRatio = "", # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
+                pfnIniChannelFlow = "", # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
+                fpnChannelWidth = ""): # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
         gdl.grmWSinfo_new_inputFiles.argtypes =[ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p,
                 ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, 
                 ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p,
@@ -118,7 +117,7 @@ class grmWSinfo(object):
 
         gdl.allCellsInUpstreamArea.argtypes =[ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
         gdl.allCellsInUpstreamArea.restype = ctypes.POINTER(ctypes.c_char_p)
-        ctypes.POINTER
+
         gdl.setOneSWSParsAndUpdateAllSWSUsingNetwork.argtypes = [ctypes.c_void_p, 
             ctypes.c_int, ctypes.c_double,
             ctypes.c_double,  ctypes.c_int, ctypes.c_double, # unSaturatedKType :  ctypes.c_int
@@ -245,7 +244,6 @@ class grmWSinfo(object):
     def cellCountInUpstreamArea(self, colXAryidx, rowYAryidx): #    Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".`
         return gdl.cellCountInUpstreamArea(self.obj, colXAryidx, rowYAryidx)
 
-	# If this class was instanced by using gmp file --"grmWS(self, string gmpFPN)".		
     def setOneSWSParsAndUpdateAllSWSUsingNetwork(self, wsid, iniSat,
 		minSlopeLandSurface, unSKType, coefUnsK,
 		minSlopeChannel, minChannelBaseWidth, roughnessChannel,
@@ -357,9 +355,7 @@ for i in range(wsi.cellCountInUpstreamArea(xCol, yRow)):
     print("  allCellsInUpstreamArea :", b[i].decode('utf-8')) # if -1, there is no downstream watershed.
 
 swp=swsParameters()
-
-#이건 gmp 파일에서 읽은 매개변수를 적용하는 경우 ================================
-
+#이건 gmp 파일에서 매개변수를 받는 경우 
 swp = wsi.subwatershedPars(wsid) # current ws id / [ctypes.c_int] -> swsParameters
 print("subwatershedPars. wsid :", swp.wsid)
 print("subwatershedPars. iniSaturation :", swp.iniSaturation)
@@ -378,10 +374,7 @@ print("subwatershedPars. ccHydraulicK :", swp.ccHydraulicK)
 print("subwatershedPars. ccSoilDepth :", swp.ccSoilDepth)
 print("subwatershedPars. userSet :", swp.userSet)    
 
-
-#이건 GUI에서 받은 매개변수를 적용하는 경우 ================================
-
-
+#GUI에서 받은 매개변수를 사용할 경우에는 swp의 항목을 직접 입력해 줘야 한다. 
 a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(swp.wsid,  swp.iniSaturation#  watershed parameters -> ctypes.c_bool
                            , swp.minSlopeOF, swp.unSatKType, swp.coefUnsaturatedK
                            , swp.minSlopeChBed, swp.minChBaseWidth, swp.chRoughness
