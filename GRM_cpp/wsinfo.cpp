@@ -52,7 +52,6 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     }
     fs::path fpn_dm = fs::path(fpnDomain.c_str());
     string fp_dm = fpn_dm.parent_path().string();
-    fpnLog = fp_dm + "\\grmdll.log";
     prj.fpnDomain = fpnDomain;
     prj.fpnFA = fpnFac;
     prj.fpnFD = fpnFdir;
@@ -122,14 +121,19 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
         prj.sdDataType = fileOrConstant::Constant;
     }
 
-    if (setDomainAndCVBasicinfo() == -1) {
-        writeLog(fpnLog, "Model setup failed !!!\n", 1, 1);
-        return;
+    readDomainFaFileAndSetupCV();
+    readSlopeFdirStreamCwCfSsrFileAndSetCV();    
+    if (prj.lcDataType == fileOrConstant::File) {
+        readLandCoverFile();
     }
-    if (setupByFAandNetwork() == -1) {
-        writeLog(fpnLog, "Network setup failed !!!\n", 1, 1);
-        return;
+    if (prj.stDataType == fileOrConstant::File) {
+        readSoilTextureFile();
     }
+    if (prj.sdDataType == fileOrConstant::File) {
+        readSoilDepthFile();
+    }
+    setFlowNetwork();
+    setupByFAandNetwork();
     byGMPfile = false;
     grmWSinfo::setPublicVariables();
     writeLog(fpnLog, "GRM.dll : grmWSinfo with input files was ended.\n", 1, -1);

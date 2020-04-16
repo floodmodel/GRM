@@ -11,22 +11,26 @@
 
 extern "C" // for python //grmWSinfo의 내용을  재정의 한다. 
 {
-	GRMDLL_API grmWSinfo* grmWSinfo_new_inputFiles(string fdirType, 
-		string fpnDomain,
-		string slopeFPN, string fpnFdir, string fpnFac,
-		string fpnStream = "", string fpnLandCover = "",
-		string fpnSoilTexture = "", string fpnSoilDepth = "",
-		string fpnIniSoilSaturationRatio = "",
-		string pfnIniChannelFlow = "",
-		string fpnChannelWidth = "")
+	GRMDLL_API grmWSinfo* grmWSinfo_new_inputFiles(char* fdirType,
+		char* fpnDomain,
+		char* slopeFPN, 
+		char* fpnFdir, 
+		char* fpnFac,
+		const char* fpnStream = "", 
+		const char* fpnLandCover = "",
+		const char* fpnSoilTexture = "", 
+		const char* fpnSoilDepth = "",
+		const char* fpnIniSoilSaturationRatio = "",
+		const char* pfnIniChannelFlow = "",
+		const char* fpnChannelWidth = "")
 	{
 		return new grmWSinfo(fdirType, fpnDomain,
 			slopeFPN, fpnFdir, fpnFac,
-			fpnStream = "", fpnLandCover = "",
-			fpnSoilTexture = "", fpnSoilDepth = "",
-			fpnIniSoilSaturationRatio = "",
-			pfnIniChannelFlow = "",
-			fpnChannelWidth = "");
+			fpnStream, fpnLandCover,
+			fpnSoilTexture, fpnSoilDepth,
+			fpnIniSoilSaturationRatio,
+			pfnIniChannelFlow,
+			fpnChannelWidth);
 	}
 
 	GRMDLL_API grmWSinfo* grmWSinfo_new_gmpFile(char * gmpFPN)

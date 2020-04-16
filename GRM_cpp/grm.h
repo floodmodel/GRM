@@ -295,7 +295,8 @@ typedef struct _projectFileFieldName
 	const string HydraulicConductivity = "HydraulicConductivity";
 	const string GridValue_SD = "GridValue";
 	const string GRMCode_SD = "GRMCode";
-	const string SoilDepthValue = "SoilDepth";
+	const string SoilDepthValue_01 = "SoilDepth";
+	const string SoilDepthValue_02 = "SoilDepth_cm";
 	const string GridValue_LC = "GridValue";
 	const string GRMCode_LC = "GRMCode";
 	const string RoughnessCoeff = "RoughnessCoefficient";
@@ -818,8 +819,11 @@ void outputManager(int nowTsec,
 
 int readDomainFaFileAndSetupCV();
 int readSlopeFdirStreamCwCfSsrFileAndSetCV();
+int readLandCoverFile();
 int readLandCoverFileAndSetCVbyVAT();
+int readSoilTextureFile();
 int readSoilTextureFileAndSetCVbyVAT();
+int readSoilDepthFile();
 int readSoilDepthFileAndSetCVbyVAT();
 
 int readXmlRowChannelSettings(string aline, 
@@ -893,7 +897,6 @@ inline  double vByManningEq(double hydraulicRaidus,
 class grmWSinfo {
 private:
 	void setPublicVariables();
-	vector<string> allCellsInUpstreamArea(int colXAryidx, int rowYAryidx);
 	bool byGMPfile = false;
 
 public:
@@ -930,6 +933,7 @@ public:
 	int landCoverValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
 	int soilTextureValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
 	int soilDepthValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
+	vector<string> allCellsInUpstreamArea(int colXAryidx, int rowYAryidx);
 	vector<string> allCellsInUpstreamArea_Array(int colXAryidx, //    Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
 		int rowYAryidx);
 	int cellCountInUpstreamArea(int colXAryidx, //  Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".

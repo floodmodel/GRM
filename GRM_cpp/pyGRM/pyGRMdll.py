@@ -43,7 +43,31 @@ class swsParameters(Structure):  #grm 코드에 있는 내용과 맞춘다.
 
 #  class grmWSinfo(object) start =========== 
 class grmWSinfo(object): 
-    def __init__(self, fpn_gmp): 
+    #def __init__(self, fpn_gmp): 
+    def __init__(self, fpnGMP_OR_fdirType, 
+                fpnDomain="", 
+                fpnSlope="", 
+                fpnFdir="",  
+                fpnFac="", 
+                fpnStream = "", 
+                fpnLandCover = "",   
+                fpnSoilTexture = "",  
+                fpnSoilDepth = "",	 
+                fpnIniSoilSaturationRatio = "", 
+                pfnIniChannelFlow = "", 
+                fpnChannelWidth = ""):
+        #fdirType 혹은 gmpfpn, fpnDomain, fpnSlope, fpnFdir,  fpnFac, 
+        #fpnStream = "", fpnLandCover = "",   fpnSoilTexture = "",  fpnSoilDepth = "",	 fpnIniSoilSaturationRatio = "", pfnIniChannelFlow = "", fpnChannelWidth = ""
+        gdl.grmWSinfo_new_inputFiles.argtypes =[ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p,
+                ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, 
+                ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p,
+                ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p] 
+        	# grmWSinfo* grmWSinfo_new_inputFiles(string fdirType, string fpnDomain, string fpnSlope, 
+               #     string fpnFdir, string fpnFac, string fpnStream = "", 
+               #     string fpnLandCover = "",  string fpnSoilTexture = "", string fpnSoilDepth = "",
+		       #     string fpnIniSoilSaturationRatio = "", string pfnIniChannelFlow = "", string fpnChannelWidth = "")
+        gdl.grmWSinfo_new_inputFiles.restype = ctypes.c_void_p
+
         gdl.grmWSinfo_new_gmpFile.argtypes =[ctypes.c_char_p] # string
         gdl.grmWSinfo_new_gmpFile.restype = ctypes.c_void_p
 
@@ -89,12 +113,12 @@ class grmWSinfo(object):
         gdl.soilDepthValue.argtypes =[ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
         gdl.soilDepthValue.restype = ctypes.c_int
 
-        gdl.allCellsInUpstreamArea.argtypes =[ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
-        gdl.allCellsInUpstreamArea.restype = ctypes.POINTER(ctypes.c_char_p)
-
         gdl.cellCountInUpstreamArea.argtypes =[ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
         gdl.cellCountInUpstreamArea.restype =ctypes.c_int
 
+        gdl.allCellsInUpstreamArea.argtypes =[ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
+        gdl.allCellsInUpstreamArea.restype = ctypes.POINTER(ctypes.c_char_p)
+        ctypes.POINTER
         gdl.setOneSWSParsAndUpdateAllSWSUsingNetwork.argtypes = [ctypes.c_void_p, 
             ctypes.c_int, ctypes.c_double,
             ctypes.c_double,  ctypes.c_int, ctypes.c_double, # unSaturatedKType :  ctypes.c_int
@@ -144,8 +168,26 @@ class grmWSinfo(object):
         gdl.cellSize.argtypes= [ctypes.c_void_p]
         gdl.cellSize.restype = ctypes.c_double
 
-        bfpn_gmp = fpn_gmp.encode('utf-8')
-        self.obj = gdl.grmWSinfo_new_gmpFile(bfpn_gmp)
+        bfpnGMPfdirTypeOR = fpnGMP_OR_fdirType.encode('utf-8')
+        if fpnDomain=="":
+            self.obj = gdl.grmWSinfo_new_gmpFile(bfpnGMPfdirTypeOR)
+        else :
+            bfpnDomain =fpnDomain.encode('utf-8')
+            bfpnSlope =fpnSlope.encode('utf-8')
+            bfpnFdir = fpnFdir.encode('utf-8')
+            bfpnFac = fpnFac.encode('utf-8')
+            bfpnStream=fpnStream.encode('utf-8')
+            bfpnLandCover = fpnLandCover.encode('utf-8')
+            bfpnSoilTexture = fpnSoilTexture.encode('utf-8')
+            bfpnSoilDepth = fpnSoilDepth.encode('utf-8')
+            bfpnIniSoilSaturationRatio = fpnIniSoilSaturationRatio.encode('utf-8')
+            bpfnIniChannelFlow = pfnIniChannelFlow.encode('utf-8')
+            bfpnChannelWidth = fpnChannelWidth.encode('utf-8')
+            self.obj = gdl.grmWSinfo_new_inputFiles(bfpnGMPfdirTypeOR, bfpnDomain, bfpnSlope, 
+                    bfpnFdir, bfpnFac, bfpnStream, 
+                    bfpnLandCover, bfpnSoilTexture, bfpnSoilDepth, 
+                    bfpnIniSoilSaturationRatio, bpfnIniChannelFlow, bfpnChannelWidth)
+
         self.facMaxCellxCol = gdl.facMaxCellxCol(self.obj)
         self.facMaxCellyRow = gdl.facMaxCellyRow(self.obj)
         self.WSIDsAll = gdl.WSIDsAll(self.obj)
@@ -229,17 +271,38 @@ class grmWSinfo(object):
 
 # sample code to use grmWSinfo class
 
-# 여기서 gmp 파일먼저 설정
-# gmp 파일에서 ProjectSetting 테이블까지만 채워져 있어도 사용할 수 있다. 
-#     즉, QGIS-GRM의 경우 Setup/Run GRM GUI가 뜨기 전에 gmp 파일 한번 저장하고, 사용하면 됨
-fpn_gmp = "C:\GRM\SampleGHG\GHG500.gmp"
+### gmp 파일로 grmWSinfo class 를 인스턴싱 할 경우 ==============================
+### gmp 파일에서 ProjectSetting 테이블까지만 채워져 있어도 사용할 수 있다. 
+#fpn_gmp = "C:\GRM\SampleGHG\GHG500.gmp"
+#wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
+##================================================================
 
-# 여기서는 정보를 얻고자 하는 셀위치 혹은 유역 번호를 설정
-xCol = 80  # 정보를 얻고자 하는 셀 위치
-yRow = 120 # 정보를 얻고자 하는 셀 위치
+# gmp 입력 파일로 grmWSinfo class 를 인스턴싱 할 경우 ============================
+fdType = "StartsFromE_TauDEM"
+fpn_domain = "C:\GRM\SampleGHG\watershed/GHG_Watershed.asc"
+fpn_slope = "C:\GRM\SampleGHG\watershed/GHG_Slope_ST.asc"
+fpn_fd = "C:\GRM\SampleGHG\watershed/GHG_FDir.asc"
+fpn_fa = "C:\GRM\SampleGHG\watershed/GHG_FAc.asc"
+fpn_stream = "C:\GRM\SampleGHG\watershed/GHG_Stream.asc"
+fpn_lc="C:\GRM\SampleGHG\watershed/GHG_lc.asc"
+fpn_st="C:\GRM\SampleGHG\watershed/GHG_SoilTexture.asc"
+fpn_sd="C:\GRM\SampleGHG\watershed/GHG_SoilDepth.asc"
+wsi=grmWSinfo(fdType,  
+    fpn_domain,
+    fpn_slope,
+    fpn_fd,
+    fpn_fa,
+    fpn_stream, 
+    fpn_lc,
+    fpn_st,
+    fpn_sd, "", "", "")
+#================================================================
+
+# 여기서는 정보를 얻고자 하는 셀위치 혹은 유역 번호를 지정 =========================
+xCol = 21 #9  # 정보를 얻고자 하는 셀 위치
+yRow = 49 #93 # 정보를 얻고자 하는 셀 위치
 wsid = 1   # 정보를 얻고자 하는 유역 번호
 
-wsi=grmWSinfo(fpn_gmp) #여기서 클래스 인스턴싱, gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
 a = wsi.isInWatershedArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_bool
 print("isInWatershedArea :", a)
 
@@ -262,6 +325,7 @@ print("watershedID :", a)   # if -1, the cell is out of the simulation domain bo
 
 a = wsi.flowDirection(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_char_p
 print("flowDirection :", a.decode('utf-8')) #if 'OFWB', the cell is out of the simulation domain bound
+#enum class flowDirection8 of GRM.dll : E8 = 1, SE8 = 2, S8 = 3, SW8 = 4, W8 = 5, NW8 = 6, N8 = 7, NE8 = 8, None8 = 0
 
 a = wsi.flowAccumulation(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
 print("flowAccumulation :", a)  # if -1, the cell is out of the simulation domain bound
@@ -287,11 +351,15 @@ print("soilDepthValue :", a)  # if -1, the cell is out of the simulation domain 
 a = wsi.cellCountInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
 print("cellCountInUpstreamArea :", a)  
 
-a= wsi.allCellsInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.POINTER(ctypes.c_char_p)
+# 여기서 상류셀 개수가 많아지면, 애러 발생할때 있다.. 해결 방법은? 박책임님 검토 필요함. 2020.04.16. 최
+b= wsi.allCellsInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.POINTER(ctypes.c_char_p)
 for i in range(wsi.cellCountInUpstreamArea(xCol, yRow)):
-    print("  allCellsInUpstreamArea :", a[i].decode('utf-8')) # if -1, there is no downstream watershed.
+    print("  allCellsInUpstreamArea :", b[i].decode('utf-8')) # if -1, there is no downstream watershed.
 
 swp=swsParameters()
+
+#이건 gmp 파일에서 읽은 매개변수를 적용하는 경우 ================================
+
 swp = wsi.subwatershedPars(wsid) # current ws id / [ctypes.c_int] -> swsParameters
 print("subwatershedPars. wsid :", swp.wsid)
 print("subwatershedPars. iniSaturation :", swp.iniSaturation)
@@ -309,6 +377,10 @@ print("subwatershedPars. ccWFSuctionHead :", swp.ccWFSuctionHead)
 print("subwatershedPars. ccHydraulicK :", swp.ccHydraulicK)
 print("subwatershedPars. ccSoilDepth :", swp.ccSoilDepth)
 print("subwatershedPars. userSet :", swp.userSet)    
+
+
+#이건 GUI에서 받은 매개변수를 적용하는 경우 ================================
+
 
 a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(swp.wsid,  swp.iniSaturation#  watershed parameters -> ctypes.c_bool
                            , swp.minSlopeOF, swp.unSatKType, swp.coefUnsaturatedK

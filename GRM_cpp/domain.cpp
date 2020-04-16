@@ -449,23 +449,23 @@ int setCVbySTConstant()
     return 1;
 }
 
-int readSoilTextureFile(string fpnST, int** cvAryidx, cvAtt* cvs1D, int effCellCount)
+int readSoilTextureFile()
 {
-    if (fpnST == "" || _access(fpnST.c_str(), 0) != 0) {
-        string outstr = "Soil texture file (" + fpnST + ") is invalid.\n";
+    if (prj.fpnST == "" || _access(prj.fpnST.c_str(), 0) != 0) {
+        string outstr = "Soil texture file (" + prj.fpnST + ") is invalid.\n";
         writeLog(fpnLog, outstr, -1, 1);
         return -1;
     }
-    ascRasterFile stFile = ascRasterFile(fpnST);
+    ascRasterFile stFile = ascRasterFile(prj.fpnST);
     int isnormal = 1;
 #pragma omp parallel for// schedule(guided)
-    for (int i = 0; i < effCellCount; ++i) {
+    for (int i = 0; i < di.cellNnotNull; ++i) {
         int v = (int)stFile.valuesFromTL[cvps[i].xCol][cvps[i].yRow];
         if (v > 0) {
-            cvs1D[i].stCellValue = v;
+            cvs[i].stCellValue = v;
         }
         else {
-            string outstr = "Soil texture file (" + fpnST + ") has invalid value.\n";
+            string outstr = "Soil texture file (" + prj.fpnST + ") has invalid value.\n";
             writeLog(fpnLog, outstr, -1, 1);
             isnormal = -1;
         }
@@ -546,23 +546,23 @@ int setCVbySDConstant()
     return 1;
 }
 
-int readSoilDepthFile(string fpnSD, int** cvAryidx, cvAtt* cvs1D, int effCellCount)
+int readSoilDepthFile()
 {
-    if (fpnSD == "" || _access(fpnSD.c_str(), 0) != 0) {
-        string outstr = "Soil depth file (" + fpnSD + ") is invalid.\n";
+    if (prj.fpnSD == "" || _access(prj.fpnSD.c_str(), 0) != 0) {
+        string outstr = "Soil depth file (" + prj.fpnSD + ") is invalid.\n";
         writeLog(fpnLog, outstr, -1, 1);
         return -1;
     }
-    ascRasterFile sdFile = ascRasterFile(fpnSD);
+    ascRasterFile sdFile = ascRasterFile(prj.fpnSD);
     int isnormal = 1;
 #pragma omp parallel for //schedule(guided)
-    for (int i = 0; i < effCellCount; ++i) {
+    for (int i = 0; i < di.cellNnotNull; ++i) {
         int v = (int)sdFile.valuesFromTL[cvps[i].xCol][cvps[i].yRow];
         if (v > 0) {
-            cvs1D[i].sdCellValue = v;
+            cvs[i].sdCellValue = v;
         }
         else {
-            string outstr = "Soil depth file (" + fpnSD + ") has invalid value.\n";
+            string outstr = "Soil depth file (" + prj.fpnSD + ") has invalid value.\n";
             writeLog(fpnLog, outstr, -1, 1);
             isnormal = -1;
         }

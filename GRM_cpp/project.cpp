@@ -1145,8 +1145,12 @@ int  readXmlRowSoilDepth(string aline,	soilDepthInfo* sd)
 			return -1;
 		}
 	}
-	if (aline.find(fn.SoilDepthValue) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fn.SoilDepthValue);
+	if (aline.find(fn.SoilDepthValue_01) != string::npos
+		|| aline.find(fn.SoilDepthValue_02) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fn.SoilDepthValue_01);
+		if (vString == "") {
+			vString = getValueStringFromXmlLine(aline, fn.SoilDepthValue_02);
+		}
 		if (vString != "") {
 			sd->soilDepth = stod(vString);
 		}
