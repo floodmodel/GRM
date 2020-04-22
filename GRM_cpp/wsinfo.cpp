@@ -386,11 +386,11 @@ vector<string> grmWSinfo::allCellsInUpstreamArea(int colXAryidx, int rowYAryidx)
 }
 
 
-vector<string> grmWSinfo::allCellsInUpstreamArea_Array(int colXAryidx, int rowYAryidx)
-{
-    //vector<string> cellsPos;
-    return grmWSinfo::allCellsInUpstreamArea(colXAryidx, rowYAryidx);
-}
+//vector<string> grmWSinfo::allCellsInUpstreamArea_Array(int colXAryidx, int rowYAryidx)
+//{
+//    //vector<string> cellsPos;
+//    return grmWSinfo::allCellsInUpstreamArea(colXAryidx, rowYAryidx);
+//}
 
 int grmWSinfo::cellCountInUpstreamArea(int colXAryidx,
     int rowYAryidx)

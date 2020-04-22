@@ -125,16 +125,13 @@ extern "C" // for python //grmWSinfo의 내용을  재정의 한다.
 		return f->soilDepthValue(colXAryidx, rowYAryidx);
 	}
 
-	GRMDLL_API char ** allCellsInUpstreamArea(grmWSinfo* f,
-		int colXAryidx, 	int rowYAryidx)//    Select all cells in upstream area of a input cell position. Return string list of cell positions - "xCol, yRow".
+	GRMDLL_API char** allCellsInUpstreamArea(grmWSinfo* f,
+		int colXAryidx, int rowYAryidx)//    Select all cells in upstream area of a input cell position. Return string list of cell positions - "xCol, yRow".
 	{
-		vector <string> rv = f->allCellsInUpstreamArea_Array(colXAryidx, rowYAryidx);
-		char** r;
-		r = new char* [rv.size()];
-		for (int i = 0; i < rv.size(); ++i) {
-			r[i] = stringToCharP(rv[i]);
-		}
-		return r;
+		vector <string> rv = f->allCellsInUpstreamArea(colXAryidx, rowYAryidx);
+		int vs = rv.size();
+		char** result = stringVectorToCharPP(rv);
+		return result;
 	}
 
 	GRMDLL_API int cellCountInUpstreamArea(grmWSinfo* f,  //  The number of all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".

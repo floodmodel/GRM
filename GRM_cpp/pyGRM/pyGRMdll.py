@@ -269,8 +269,8 @@ class grmWSinfo(object):
 
 # sample code to use grmWSinfo class
 
-### gmp 파일로 grmWSinfo class 를 인스턴싱 할 경우 ==============================
-### gmp 파일에서 ProjectSetting 테이블까지만 채워져 있어도 사용할 수 있다. 
+## gmp 파일로 grmWSinfo class 를 인스턴싱 할 경우 ==============================
+## gmp 파일에서 ProjectSetting 테이블까지만 채워져 있어도 사용할 수 있다. 
 #fpn_gmp = "C:\GRM\SampleGHG\GHG500.gmp"
 #wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
 ##================================================================
@@ -297,8 +297,8 @@ wsi=grmWSinfo(fdType,
 #================================================================
 
 # 여기서는 정보를 얻고자 하는 셀위치 혹은 유역 번호를 지정 =========================
-xCol = 21 #9  # 정보를 얻고자 하는 셀 위치
-yRow = 49 #93 # 정보를 얻고자 하는 셀 위치
+xCol =25# 21 #9  # 정보를 얻고자 하는 셀 위치
+yRow = 69#49 #93 # 정보를 얻고자 하는 셀 위치
 wsid = 1   # 정보를 얻고자 하는 유역 번호
 
 a = wsi.isInWatershedArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_bool
@@ -349,10 +349,9 @@ print("soilDepthValue :", a)  # if -1, the cell is out of the simulation domain 
 a = wsi.cellCountInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
 print("cellCountInUpstreamArea :", a)  
 
-# 여기서 상류셀 개수가 많아지면, 애러 발생할때 있다.. 해결 방법은? 박책임님 검토 필요함. 2020.04.16. 최
-b= wsi.allCellsInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.POINTER(ctypes.c_char_p)
+a= wsi.allCellsInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.POINTER(ctypes.c_char_p)
 for i in range(wsi.cellCountInUpstreamArea(xCol, yRow)):
-    print("  allCellsInUpstreamArea :", b[i].decode('utf-8')) # if -1, there is no downstream watershed.
+    print("  allCellsInUpstreamArea :", a[i].decode('utf-8')) # if -1, there is no upstream cell.
 
 swp=swsParameters()
 #이건 gmp 파일에서 매개변수를 받는 경우 
