@@ -349,12 +349,12 @@ int openProjectFile(int forceRealTime)
 	}
 
 	if (prj.dtsec == 0) {
-		if (prj.IsFixedTimeStep == 1) {
+		if (prj.isFixedTimeStep == 1) {
 			writeLog(fpnLog, "In fixed dt, the calculation time step ["
 				+ to_string(prj.dtsec) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
-		else if (prj.IsFixedTimeStep == -1) {
+		else if (prj.isFixedTimeStep == -1) {
 			writeLog(fpnLog, "In adaptive dt, the calculation time step ["
 				+ to_string(prj.dtsec) + "] is changed to 1 minute.\n", 1, -1);
 		}
@@ -865,9 +865,9 @@ int readXmlRowProjectSettings(string aline)
 
 	if (aline.find(fn.IsFixedTimeStep) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.IsFixedTimeStep);
-		prj.IsFixedTimeStep = -1;
+		prj.isFixedTimeStep = -1;
 		if (lower(vString) == "true") {
-			prj.IsFixedTimeStep = 1;
+			prj.isFixedTimeStep = 1;
 		}
 		return 1;
 	}

@@ -116,6 +116,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>GRMProject.xsd</DependentUpon>
     </Compile>
+    <Compile Include="Dataset\GRMProject1.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GRMProject.xsd</DependentUpon>
+    </Compile>
     <Compile Include="Dataset\GRMStaticDB.cs">
       <DependentUpon>GRMStaticDB.xsd</DependentUpon>
     </Compile>

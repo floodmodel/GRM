@@ -231,8 +231,7 @@ namespace GRMCore
                         if (nowRFLayerOrder < sThisSimulation.mRFDataCountInThisEvent) { break; }
                         Thread.Sleep(2000);
                     }
-                    while (true)  // 2초 지연 적절함
-    ;
+                    while (true);  // 2초 지연 적절함
                     nowRFLayerOrder = nowRFLayerOrder + 1; // 이렇게 하면 마지막 레이어 적용
                     cRainfall.ReadRainfall(mProject, mRealTime.mRainfallDataTypeRT, mRealTime.mlstRFdataRT, System.Convert.ToInt32(mProject.rainfall.mRainfallinterval), nowRFLayerOrder, sThisSimulation.IsParallel);
                     bRainfallisEnded = false;
@@ -243,8 +242,9 @@ namespace GRMCore
                     string ReadDBorCSVandMakeFCdataTableForRealTime_TargetDataTime_Previous = "";
                     for (int nfc = 0; nfc < mProject.fcGrid.FCCellCount; nfc++)
                     {
-                        Dataset.GRMProject.FlowControlGridRow r = (Dataset.GRMProject.FlowControlGridRow)mProject.fcGrid.mdtFCGridInfo.Rows[nfc];
-                        int cvid = r.CVID;
+                        Dataset.GRMProject.FlowControlGridRow r = 
+                            (Dataset.GRMProject.FlowControlGridRow)mProject.fcGrid.mdtFCGridInfo.Rows[nfc];
+                        int cvid =r.CVID;
                         if (r.ControlType.ToString() != cFlowControl.FlowControlType.ReservoirOperation.ToString())
                         {
                             int dt_MIN = System.Convert.ToInt32(r.DT);

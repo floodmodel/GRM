@@ -23,6 +23,10 @@
     <ClCompile Include="..\..\gentle\cpp\systemcommand.cpp" />
     <ClCompile Include="..\..\gentle\cpp\systeminfo.cpp" />
     <ClCompile Include="network.cpp" />
+    <ClCompile Include="realTimeLauncher.cpp" />
+    <ClCompile Include="realTime.cpp" />
+    <ClCompile Include="realTime_DBMS.cpp" />
+    <ClCompile Include="simulatorRT.cpp" />
     <ClCompile Include="wsinfo.cpp" />
     <ClCompile Include="flowControl.cpp" />
     <ClCompile Include="outputRaster.cpp" />
@@ -33,7 +37,6 @@
     <ClCompile Include="output.cpp" />
     <ClCompile Include="project.cpp" />
     <ClCompile Include="rainfall.cpp" />
-    <ClCompile Include="realTime.cpp" />
     <ClCompile Include="simulator.cpp" />
     <ClCompile Include="soilLayer.cpp" />
     <ClCompile Include="solver.cpp" />
@@ -82,7 +85,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
@@ -189,6 +192,8 @@
       <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <FloatingPointModel>Precise</FloatingPointModel>
+      <CompileAsManaged>false</CompileAsManaged>
+      <ExceptionHandling>Sync</ExceptionHandling>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>

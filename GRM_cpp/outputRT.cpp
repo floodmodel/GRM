@@ -24,8 +24,9 @@ void writeDBRealTime(int nowTmin, double cinterp)
     timeNow = COleDateTime::GetCurrentTime();
     COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
     tsFromStarting_sec = tsTotalSim.GetTotalSeconds();
-    tStrToPrint = timeElaspedToDateTimeFormat(prj.simStartTime,
-        nowTmin * 60, false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+    tStrToPrint = timeElaspedToDateTimeFormat2(prj.simStartTime,
+        nowTmin * 60, timeUnitToShow::toMinute, 
+        dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
     string strWPName;
     string strFNP;
     string vToP = "";
@@ -35,19 +36,19 @@ void writeDBRealTime(int nowTmin, double cinterp)
     for (int i : wpis.wpCVidxes) {
         if (cinterp == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                vToP = forString(cvs[i].QOF_m3Ps, 2);
+                vToP = toStrWithPrecision(cvs[i].QOF_m3Ps, 2);
             }
             else {
-                vToP = forString(cvs[i].stream.QCH_m3Ps, 2);
+                vToP = toStrWithPrecision(cvs[i].stream.QCH_m3Ps, 2);
             }
         }
         else if (ts.isbak == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                vToP = forString(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
+                vToP = toStrWithPrecision(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
                     cvs[i].QOF_m3Ps, cinterp), 2);
             }
             else {
-                vToP = forString(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
+                vToP = toStrWithPrecision(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
                     cvs[i].stream.QCH_m3Ps, cinterp), 2);
             }
         }

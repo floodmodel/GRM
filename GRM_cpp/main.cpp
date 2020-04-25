@@ -45,142 +45,193 @@ thisSimulation ts;
 
 string msgFileProcess;
 
-int main(int argc, char** args)
+void main(int argc, char** args)
 {
 	string exeName = "GRM";
 	version grmVersion = getCurrentFileVersion();
 	string outString;
 	outString = "GRM v." + to_string(grmVersion.major) + "."
-		+ to_string(grmVersion.minor)		+ "." 
-		+ to_string(grmVersion.build) + ". Built in " 
+		+ to_string(grmVersion.minor) + "."
+		+ to_string(grmVersion.build) + ". Built in "
 		+ grmVersion.LastWrittenTime + ".\n";
 	prj.cpusi = getCPUinfo();
 	cout << outString;
 	cout << prj.cpusi.infoString;
 	outString = outString + prj.cpusi.infoString;
-	long elapseTime_Total_sec;
-	clock_t  finish_Total, start_Total;
-	start_Total = clock();
 	ts.runByAnalyzer = -1;
 	if (argc == 1) {
 		printf("GRM project file was not entered or invalid arguments.\n");
 		grmHelp();
-		return -1;
+		return;
 	}
 	prj.deleteAllFilesExceptDischargeOut = -1;
 	setlocale(LC_ALL, "korean");
-	prj.writeConsole = 1;
-	prj.forSimulation = 1;
+	prj.writeConsole = 1; // exe로 진입하는 것은 1
+	prj.forSimulation = 1;// exe로 진입하는 것은 1
 	if (argc == 2) {
 		string arg1(args[1]);
-		if (trim(arg1) == "/?" || lower(trim(arg1)) == "/help") {
+		arg1 = lower(trim(arg1));
+		if (arg1 == "/?" || arg1 == "/help") {
 			grmHelp();
-			return -1;
+			return;
 		}
-		fs::path in_arg = fs::path(arg1.c_str());
-		int nResult = _access(args[1], 0);
+		// 이경우는 grm.exe  fpn_gmp 인 경우
+		startSingleEventRun(arg1, -1, outString);
+	}
+	string rtOption1(args[1]);
+	string rtOption2(args[2]);
+	rtOption1 = lower(trim(rtOption1));
+	rtOption2 = lower(trim(rtOption2));
+	int isRealTime = -1;
+	if (rtOption1 == "/rt" || rtOption2 == "/rt") {
+		// 실시간 수신자료 적용 옵션은 /rt, 예측은 /p 이다.
+		// args[0] : grm.exe,               args[1] : /rt 혹은 /p,   args[2] : /rt 혹은 /p,          
+		// args[3] : fpnRef,                 args[4] : strGUID,       args[5] : dtStartLine(모의시점 ? ? ), 
+		// args[6] : strRTStartDateTime, agrs[7] : strMODEL
+		isRealTime = 1;
+		string arg1(args[1]); // /rt 혹은 /p
+		string arg2(args[2]); // /rt 혹은 /p
+		string arg3(args[3]); // ref 파일 경로, 이름
+		arg1 = lower(trim(arg1));
+		arg2 = lower(trim(arg2));
+		arg3 = lower(trim(arg3));
+		fs::path fpn_ref = fs::path(arg3.c_str());
+		int nResult = _access(args[3], 0);
 		if (nResult == -1
-			|| lower(in_arg.extension().string()) != ".gmp") {
-			printf("GRM project file(%s) is invalid.\n", args[1]);
+			|| lower(fpn_ref.extension().string()) != ".ref") {
+			printf("GRM real time simulation environment file(%s) is invalid.\n", args[2]);
+			waitEnterKey();
+			return;
+		}
+		else {
+			int isPrediction = -1;
+			if (arg1 == "/p" || arg2 == "/p") {
+				isPrediction = 1;
+			}
+			grmRTLauncher(argc, args, isPrediction);
+		}
+	}
+
+	if (isRealTime == -1 && argc == 3) {
+		// 이경우는 /p, /f, /fd 중 하나의 옵션이 사용된 경우 
+		string arg1(args[1]); // 이건 옵션
+		string arg2(args[2]); // 이건 gmp 파일, 혹은 gmps 폴더
+		arg1 = lower(trim(arg1));
+		arg2 = lower(trim(arg2));
+		if (arg1 == "/p") {
+			startSingleEventRun(arg1, 1, outString);
+		}
+		if (arg1 == "/f" || arg1 == "/fd") {
+			struct stat finfo;
+			if (stat(arg2.c_str(), &finfo) == 0) { //폴더가 있으면
+				vector<string> gmpFiles;
+				gmpFiles = getFileListInNaturalOrder(arg2, ".gmp");
+				if (gmpFiles.size() == 0) {
+					printf("There is no GRM project file in this directory.\n");
+					waitEnterKey();
+					return;
+				}
+				if (arg1 == "/fd") {
+					prj.deleteAllFilesExceptDischargeOut = 1;
+				}
+				startGMPsRun(gmpFiles, -1, outString);
+			}
+			else {
+				printf("Project folder is invalid!!\n");
+				waitEnterKey();
+				return;
+			}
+		}
+	}
+
+	if (isRealTime == -1 && argc == 4) {
+		// 이경우는 /p, /f 혹은 /p, /fd 옵션이 사용된 경우 
+		string arg1(args[1]); // /p, /f , /fd 옵션
+		string arg2(args[2]);// /p, /f , /fd 옵션
+		string arg3(args[3]);// gmps 폴더
+		arg1 = lower(trim(arg1));
+		arg2 = lower(trim(arg2));
+		arg3 = lower(trim(arg3));
+		int isP = -1;
+		if (arg1 == "/p" || arg2 == "/p") {
+			isP = 1;
+		}
+		if (arg1 == "/fd" || arg1 == "/fd") {
+			prj.deleteAllFilesExceptDischargeOut = 1;
+		}
+		struct stat finfo;
+		if (stat(arg3.c_str(), &finfo) == 0) { //폴더가 있으면
+			vector<string> gmpFiles;
+			gmpFiles = getFileListInNaturalOrder(arg3, ".gmp");
+			if (gmpFiles.size() == 0) {
+				printf("There is no GRM project file in this directory.\n");
+				waitEnterKey();
+				return;
+			}
+			startGMPsRun(gmpFiles, isP, outString);
+		}
+		else {
+			printf("Project folder is invalid!!\n");
+			waitEnterKey();
+			return;
+		}
+	}
+
+	disposeDynamicVars();
+	return;
+}
+
+int startSingleEventRun(string fpnGMP, int isPrediction, string outString)
+{
+	fs::path in_arg = fs::path(fpnGMP.c_str());
+	int nResult = _access(fpnGMP.c_str(), 0);
+	if (nResult == -1
+		|| lower(in_arg.extension().string()) != ".gmp") {
+		cout<<"GRM project file["+
+			fpnGMP+"] is invalid.\n";
+		waitEnterKey();
+		return -1;
+	}
+	else if (nResult == 0) {
+		ppi = getProjectFileInfo(fpnGMP);
+		ts.isPrediction = isPrediction;
+		writeNewLog(fpnLog, outString, 1, -1);
+		if (simulateSingleEvent() == -1) {
 			waitEnterKey();
 			return -1;
 		}
-		else if (nResult == 0) {
-			ppi = getProjectFileInfo(arg1);
-			writeNewLog(fpnLog, outString, 1, -1);
-			if (simulateSingleEvent() == -1) { 
-				waitEnterKey();
-				return -1; 
-			}
-		}
 	}
-	if (argc == 3 || argc == 4) {
-		vector<string> gmpFiles;
-		if (argc == 3) {
-			string arg1(args[1]);
-			string arg2(args[2]);
-			if (arg1 == "/" && (arg2 == "?" || lower(trim(arg2)) == "help")) {
-				grmHelp();
-				return -1;
-			}
-			if (lower(trim(arg1)) == "/f" || lower(trim(arg2)) == "/fd") {
-				struct stat finfo;
-				if (stat(arg2.c_str(), &finfo) == 0) { //폴더가 있으면
-					gmpFiles = getFileListInNaturalOrder(arg2, ".gmp");
-					if (gmpFiles.size() == 0) {
-						printf("There is no GRM project file in this directory.\n");
-						waitEnterKey();
-						return -1;
-					}
-					if (lower(trim(arg1)) == "/fd") {
-						prj.deleteAllFilesExceptDischargeOut = 1;
-					}
-				}
-				else {
-					printf("Project folder is invalid!!\n");
-					waitEnterKey();
-					return -1;
-				}
-			}
-		}
-		else if (argc == 4) {
-			string arg1(args[1]);
-			string arg2(args[2]);
-			string arg3(args[3]);
-			arg1 = lower(trim(arg1));
-			arg2 = lower(trim(arg2));
-			arg3 = lower(trim(arg3));
-			if (arg1 == "/" && (arg2 == "f" || arg2 == "fd")) {
-				struct stat finfo;
-				if (stat(arg3.c_str(), &finfo) == 0) { //폴더가 있으면
-					gmpFiles = getFileListInNaturalOrder(arg3, ".gmp");
-					if (gmpFiles.size() == 0) {
-						printf("There is no GRM project file in this directory.\n");
-						waitEnterKey();
-						return -1;
-					}
-					if (arg2 == "fd") {
-						prj.deleteAllFilesExceptDischargeOut = 1;
-					}
-				}
-				else {
-					printf("Project folder is invalid!!\n");
-					waitEnterKey();
-					return -1;
-				}
-			}
-		}
-		int nFiles = gmpFiles.size();
-		for (int n = 0; n < nFiles; n++) {
-			ppi = getProjectFileInfo(gmpFiles[n]);
-			writeNewLog(fpnLog, outString, 1, -1);
-			string progF = to_string(n + 1) + '/' + to_string(gmpFiles.size());
-			string progR = forString(((n + 1) / nFiles * 100), 2);
-			msgFileProcess = "Total progress: " + progF + "(" + progR + "%). ";
-			if (simulateSingleEvent() == -1) {
-				waitEnterKey();
-				return -1;
-			}
-			if ((n + 1) % 100 == 0) {
-				system("cls"); // On windows
-				//system("clear");// On linux
-			}
-		}
-		finish_Total = clock();
-		elapseTime_Total_sec = (long)(finish_Total - start_Total) / CLOCKS_PER_SEC;
-		tm ts_total = secToHHMMSS(elapseTime_Total_sec);
-		char endingStr[200];
-		sprintf_s(endingStr, "Total simulation was completed. Run time : %dhrs %dmin %dsec.\n",
-			ts_total.tm_hour, ts_total.tm_min, ts_total.tm_sec);
-		writeLog(fpnLog, endingStr, 1, 1);
-		return 1;
-	}
-	//waitEnterKey();
-	disposeDynamicVars();
-	return 1;
 }
 
-
+int startGMPsRun(vector<string> gmpFiles, int isPrediction, string outString)
+{
+	clock_t  startT = clock();
+	int nFiles = gmpFiles.size();
+	ts.isPrediction = isPrediction;
+	for (int n = 0; n < nFiles; n++) {// /f 혹은 /fd 인 경우 여기서 실행
+		ppi = getProjectFileInfo(gmpFiles[n]);
+		writeNewLog(fpnLog, outString, 1, -1);
+		string progF = to_string(n + 1) + '/' + to_string(gmpFiles.size());
+		string progR = toStrWithPrecision(((n + 1) / nFiles * 100), 2);
+		msgFileProcess = "Total progress: " + progF + "(" + progR + "%). ";
+		if (simulateSingleEvent() == -1) {
+			waitEnterKey();
+			return -1;
+		}
+		if ((n + 1) % 100 == 0) {
+			system("cls");
+		}
+	}
+	clock_t finishT = clock();
+	long elapseT_sec = (long)(finishT - startT) / CLOCKS_PER_SEC;
+	tm ts_total = secToHHMMSS(elapseT_sec);
+	string endingStr = "Total simulation was completed. Run time : " 
+		+ to_string(ts_total.tm_hour) + "hrs " 
+		+ to_string(ts_total.tm_min) + "min " 
+		+ to_string(ts_total.tm_sec) + "sec.\n";
+	writeLog(fpnLog, endingStr, 1, 1);
+	return 1;
+}
 
 void disposeDynamicVars()
 {
@@ -202,7 +253,6 @@ void disposeDynamicVars()
 		}
 	}
 }
-
 
 int simulateSingleEvent()
 {

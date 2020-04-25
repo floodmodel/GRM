@@ -33,7 +33,7 @@ void writeSimStep(int elapsedT_min)
     string curProgressRatio = "";
     double simDur_min = prj.simDuration_hr * 60.0;
     nowStep = elapsedT_min / simDur_min * 100.0;
-    curProgressRatio = forString(nowStep, 0);
+    curProgressRatio = toStrWithPrecision(nowStep, 0);
     cout<<"\rCurrent progress: " + curProgressRatio + "%..." + msgFileProcess;
 }
 
@@ -48,13 +48,14 @@ void writeSingleEvent(int nowTmin, double cinterp)
     aveRFSumForDTP_mm = ts.rfAveSumAllCells_dtP_m * 1000.0;
     timeNow = COleDateTime::GetCurrentTime();
     COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
-    tsFromStarting_sec = forString(tsTotalSim.GetTotalSeconds(), 0);
+    tsFromStarting_sec = toStrWithPrecision(tsTotalSim.GetTotalSeconds(), 0);
     if (prj.isDateTimeFormat == 1) {
-        tStrToPrint = timeElaspedToDateTimeFormat(prj.simStartTime,
-            nowTmin * 60, false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+        tStrToPrint = timeElaspedToDateTimeFormat2(prj.simStartTime,
+            nowTmin * 60,  timeUnitToShow::toMinute, 
+            dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
     }
     else {
-        tStrToPrint = forString(nowTmin / 60.0, 2);
+        tStrToPrint = toStrWithPrecision(nowTmin / 60.0, 2);
     }
     // À¯·® =================================================
     string lineToP;
@@ -62,19 +63,19 @@ void writeSingleEvent(int nowTmin, double cinterp)
     for (int i : wpis.wpCVidxes) {
         if (cinterp == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                vToP = forString(cvs[i].QOF_m3Ps, 2);
+                vToP = toStrWithPrecision(cvs[i].QOF_m3Ps, 2);
             }
             else {
-                vToP = forString(cvs[i].stream.QCH_m3Ps, 2);
+                vToP = toStrWithPrecision(cvs[i].stream.QCH_m3Ps, 2);
             }
         }
         else if (ts.isbak == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                vToP = forString(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
+                vToP = toStrWithPrecision(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
                     cvs[i].QOF_m3Ps, cinterp), 2);
             }
             else {
-                vToP = forString(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
+                vToP = toStrWithPrecision(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
                     cvs[i].stream.QCH_m3Ps, cinterp), 2);
             }
         }
@@ -91,7 +92,7 @@ void writeSingleEvent(int nowTmin, double cinterp)
         }
         writeWPouput(tStrToPrint, i, cinterp);
     }
-    lineToP = lineToP + "\t" + forString(aveRFSumForDTP_mm, 2)
+    lineToP = lineToP + "\t" + toStrWithPrecision(aveRFSumForDTP_mm, 2)
         + "\t" + tsFromStarting_sec + "\n";
     appendTextToTextFile(ofs.ofpnDischarge, lineToP);
 
@@ -104,18 +105,18 @@ void writeSingleEvent(int nowTmin, double cinterp)
         if (cinterp == 1) {
             for (int idx : fccds.cvidxsFCcell) {
                 fcflow = fcflow + "\t" 
-                    + forString(fccds.fcDataAppliedNowT_m3Ps[idx], 2);
+                    + toStrWithPrecision(fccds.fcDataAppliedNowT_m3Ps[idx], 2);
                 fcStorage = fcStorage + "\t" 
-                    + forString(cvs[idx].storageCumulative_m3, 2);
+                    + toStrWithPrecision(cvs[idx].storageCumulative_m3, 2);
             }
         }
         else if(ts.isbak==1){
             for (int idx : fccds.cvidxsFCcell) {
                 fcflow = fcflow + "\t"
-                    + forString(getinterpolatedVLinear( fcdAb[idx],
+                    + toStrWithPrecision(getinterpolatedVLinear( fcdAb[idx],
                         fccds.fcDataAppliedNowT_m3Ps[idx], cinterp), 2);
                 fcStorage = fcStorage + "\t"
-                    + forString(getinterpolatedVLinear(cvsb[idx].storageCumulative_m3,
+                    + toStrWithPrecision(getinterpolatedVLinear(cvsb[idx].storageCumulative_m3,
                         cvs[idx].storageCumulative_m3, cinterp), 2);
             }
         }        
@@ -133,30 +134,30 @@ void writeWPouput(string nowTP, int i, double cinterp)
     //int i = i + 1;
     string oStr;
     oStr.append(nowTP + "\t");
-    oStr.append(forString(wpis.qprint_cms[i], 2) + "\t");
+    oStr.append(toStrWithPrecision(wpis.qprint_cms[i], 2) + "\t");
     if (cinterp == 1) {
-        oStr.append(forString(cvs[i].hUAQfromChannelBed_m, 4) + "\t");
-        oStr.append(forString(cvs[i].soilWaterC_m, 4) + "\t");
-        oStr.append(forString(cvs[i].ssr, 4) + "\t");
-        oStr.append(forString(wpis.rfWPGridForDtP_mm[i], 2) + "\t");
-        oStr.append(forString(wpis.rfUpWSAveForDtP_mm[i], 2) + "\t");
-        oStr.append(forString(wpis.qFromFCData_cms[i], 2) + "\t");
-        oStr.append(forString(cvs[i].storageCumulative_m3, 2) + "\n");
+        oStr.append(toStrWithPrecision(cvs[i].hUAQfromChannelBed_m, 4) + "\t");
+        oStr.append(toStrWithPrecision(cvs[i].soilWaterC_m, 4) + "\t");
+        oStr.append(toStrWithPrecision(cvs[i].ssr, 4) + "\t");
+        oStr.append(toStrWithPrecision(wpis.rfWPGridForDtP_mm[i], 2) + "\t");
+        oStr.append(toStrWithPrecision(wpis.rfUpWSAveForDtP_mm[i], 2) + "\t");
+        oStr.append(toStrWithPrecision(wpis.qFromFCData_cms[i], 2) + "\t");
+        oStr.append(toStrWithPrecision(cvs[i].storageCumulative_m3, 2) + "\n");
     }
     else if (ts.isbak == 1) {
-        oStr.append(forString(getinterpolatedVLinear(cvsb[i].hUAQfromChannelBed_m,
+        oStr.append(toStrWithPrecision(getinterpolatedVLinear(cvsb[i].hUAQfromChannelBed_m,
             cvs[i].hUAQfromChannelBed_m, cinterp), 4) + "\t");
-        oStr.append(forString(getinterpolatedVLinear(cvsb[i].soilWaterC_m,
+        oStr.append(toStrWithPrecision(getinterpolatedVLinear(cvsb[i].soilWaterC_m,
             cvs[i].soilWaterC_m, cinterp), 4) + "\t");
-        oStr.append(forString(getinterpolatedVLinear(cvsb[i].ssr,
+        oStr.append(toStrWithPrecision(getinterpolatedVLinear(cvsb[i].ssr,
             cvs[i].ssr, cinterp), 4) + "\t");
-        oStr.append(forString(getinterpolatedVLinear(wpisb.rfWPGridForDtP_mm[i],
+        oStr.append(toStrWithPrecision(getinterpolatedVLinear(wpisb.rfWPGridForDtP_mm[i],
             wpis.rfWPGridForDtP_mm[i], cinterp), 2) + "\t");
-        oStr.append(forString(getinterpolatedVLinear(wpisb.rfUpWSAveForDtP_mm[i],
+        oStr.append(toStrWithPrecision(getinterpolatedVLinear(wpisb.rfUpWSAveForDtP_mm[i],
             wpis.rfUpWSAveForDtP_mm[i], cinterp), 2) + "\t");
-        oStr.append(forString(getinterpolatedVLinear(wpisb.qFromFCData_cms[i],
+        oStr.append(toStrWithPrecision(getinterpolatedVLinear(wpisb.qFromFCData_cms[i],
             wpis.qFromFCData_cms[i], cinterp), 2) + "\t");
-        oStr.append(forString(getinterpolatedVLinear(cvsb[i].storageCumulative_m3,
+        oStr.append(toStrWithPrecision(getinterpolatedVLinear(cvsb[i].storageCumulative_m3,
             cvs[i].storageCumulative_m3, cinterp), 2) + "\n");
     }
     appendTextToTextFile(ofs.ofpnWPs[i], oStr);
@@ -170,19 +171,19 @@ void writeDischargeOnly(double cinterp, int writeWPfiles)
     for (int idx : wpis.wpCVidxes) {
         if (cinterp == 1) {
             if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
-                vToP = forString(cvs[idx].QOF_m3Ps, 2);
+                vToP = toStrWithPrecision(cvs[idx].QOF_m3Ps, 2);
             }
             else {
-                vToP = forString(cvs[idx].stream.QCH_m3Ps, 2);
+                vToP = toStrWithPrecision(cvs[idx].stream.QCH_m3Ps, 2);
             }
         }
         else if (ts.isbak == 1) {
             if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
-                vToP = forString(getinterpolatedVLinear(cvsb[idx].QOF_m3Ps,
+                vToP = toStrWithPrecision(getinterpolatedVLinear(cvsb[idx].QOF_m3Ps,
                     cvs[idx].QOF_m3Ps, cinterp), 2);
             }
             else {
-                vToP = forString(getinterpolatedVLinear(cvsb[idx].stream.QCH_m3Ps,
+                vToP = toStrWithPrecision(getinterpolatedVLinear(cvsb[idx].stream.QCH_m3Ps,
                     cvs[idx].stream.QCH_m3Ps, cinterp), 2);
             }
         }
@@ -226,7 +227,7 @@ int initOutputFiles()
         ofs.ofpnWPs[adix] = wpfpn;
     }	
     if (prj.simType == simulationType::RealTime){
-        changeOutputFileDisk(cRealTime::CONST_Output_File_Target_DISK);
+        changeOutputFileDisk(grmRealTime::CONST_Output_File_Target_DISK);
     }
     if (deleteAllOutputFiles() == -1) {
         string outstr = "An error was occured while deleting previous ouput files or folders. Try starting the model again. \n";
@@ -350,14 +351,22 @@ int makeNewOutputFiles()
         time_t now = time(0);
         localtime_s(&ltm, &now);
         string nowT = timeToString(ltm,
-            false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+            false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
         version grmVersion = getCurrentFileVersion();
         string ver = "GRM v."+to_string(grmVersion.major)+"."
             +to_string(grmVersion.minor)
             +"."+to_string(grmVersion.build)
             +" Built in "+ grmVersion.LastWrittenTime;
-        comHeader = "Project name : " + ppi.fn_prj + "      " + nowT 
-            + "  by " + ver+ "\n";
+
+        if (prj.simType == simulationType::RealTime) {
+            comHeader = "Project name : " + ppi.fn_prj + " [Real time simulation] " + nowT
+                + "  by " + ver + "\n";
+        }
+        else {
+            comHeader = "Project name : " + ppi.fn_prj + "    " + nowT
+                + "  by " + ver + "\n";
+        }
+
         string time_wpNames;
         time_wpNames = CONST_OUTPUT_TABLE_TIME_FIELD_NAME;
         string heads;

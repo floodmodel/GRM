@@ -61,7 +61,7 @@ int startSimulationSingleEvent()
         else {
             nowTsec = nowTsec + ts.dtsec; // dtsec 만큼 전진
             ts.dtsecUsed_tm1 = ts.dtsec;
-            if (prj.IsFixedTimeStep == -1) {
+            if (prj.isFixedTimeStep == -1) {
                 ts.dtsec = getDTsec(CONST_CFL_NUMBER,
                     di.cellSize, ts.vMaxInThisStep, ts.dtMaxLimit_sec, 
                     ts.dtMinLimit_sec);
@@ -229,8 +229,8 @@ void initThisSimulation()
     ts.dtsec = prj.dtsec;
 
     time_t now = time(0);
-    localtime_s(&ts.g_RT_tStart_from_MonitorEXE, &now);
-    ts.time_thisSimStarted = COleDateTime::GetCurrentTime();;
+    ts.time_thisSimStarted = COleDateTime::GetCurrentTime();
+    //tsrt.g_RT_tStart_from_MonitorEXE = COleDateTime::GetCurrentTime();
 }
 
 void setCVStartingCondition(double iniflow)

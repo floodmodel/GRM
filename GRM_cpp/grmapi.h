@@ -11,6 +11,8 @@
 
 extern "C" // for python //grmWSinfo의 내용을  재정의 한다. 
 {
+
+	// 여기부터는 grmWSinfo 클래스 관련=============================================
 	GRMDLL_API grmWSinfo* grmWSinfo_new_inputFiles(char* fdirType,
 		char* fpnDomain,
 		char* slopeFPN, 
@@ -209,7 +211,6 @@ extern "C" // for python //grmWSinfo의 내용을  재정의 한다.
 		return f->mostDownStreamWSCount;
 	}
 
-
 	GRMDLL_API int cellCountInWatershed(grmWSinfo* f)
 	{
 		return f->cellCountInWatershed;
@@ -219,5 +220,6 @@ extern "C" // for python //grmWSinfo의 내용을  재정의 한다.
 	{
 		return f->cellSize;
 	}
+// 여기까지 grmWSinfo 클래스 관련=============================================
 }
 	

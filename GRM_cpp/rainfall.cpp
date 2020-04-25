@@ -71,8 +71,9 @@ int setRainfallData()
             break;
         }
         if (prj.isDateTimeFormat == 1) {
-            r.DataTime = timeElaspedToDateTimeFormat(prj.simStartTime, 
-                prj.rfinterval_min * 60 * n, false, dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+            r.DataTime = timeElaspedToDateTimeFormat2(prj.simStartTime,
+                prj.rfinterval_min * 60 * n, timeUnitToShow::toMinute,
+                dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
         }
         else {
             r.DataTime = to_string(prj.rfinterval_min * n);
@@ -194,6 +195,13 @@ int setCVRF(int order)
          }
      }
  }
+
+
+ void updateRFinfoGRMRT(string strDate)
+ {
+
+ }
+
      
  inline double rfintensity_mPsec(double rf_mm, double dtrf_sec)
  {

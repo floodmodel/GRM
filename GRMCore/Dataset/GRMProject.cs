@@ -4,6 +4,10 @@
 
     partial class GRMProject
     {
+        partial class RTenvDataTable
+        {
+        }
+
         partial class SubWatershedSettingsDataTable
         {
         }

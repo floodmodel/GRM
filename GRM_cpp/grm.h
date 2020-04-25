@@ -639,7 +639,7 @@ typedef struct _projectFile
 	string simStartTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
 	double simDuration_hr = 0.0;
 	int dtsec = 0;
-	int IsFixedTimeStep = 0;// true : 1, false : -1
+	int isFixedTimeStep = 0;// true : 1, false : -1
 	int dtPrint_min = 0;
 	int simInfiltration = 0;// true : 1, false : -1
 	int simSubsurfaceFlow = 0;// true : 1, false : -1
@@ -684,6 +684,7 @@ typedef struct _projectFile
 typedef struct _thisSimulation
 {
 	int setupGRMisNormal = 0; // Todo : 필요여부 확인 필요.
+	int isPrediction = -1;// true : 1, false : -1
 	int grmStarted = 0;
 	int stopSim = 0;
 	int rfDataCountTotal = -1;
@@ -706,19 +707,15 @@ typedef struct _thisSimulation
 
 	int runByAnalyzer = 0;
 
-	tm g_RT_tStart_from_MonitorEXE;
 	COleDateTime time_thisSimStarted;
-
 	double vMaxInThisStep;
 	
 } thisSimulation;
-
 
 typedef struct _globalVinner // 계산 루프로 전달하기 위한 최소한의 전역 변수. gpu 고려
 {
 	int mdp = 0;//-1일 경우는 최대 값으로 자동으로 설정, 1일 경우는 serial 계산
 } globalVinner;
-
 
 double calBFlowAndGetCSAaddedByBFlow(int i, 
 	int dtsec, 	double cellSize_m);//i는 cv array index
@@ -736,6 +733,7 @@ void calReservoirOperation(int i, double nowTmin);
 void calReservoirOutFlowInReservoirOperation(int i,
 	double Qout_cms, double dy_m);
 void calSinkOrSourceFlow(int i, double nowTmin);
+int changeOutputFileDisk(char targetDisk);
 
 void disposeDynamicVars();
 int deleteAllOutputFiles();
@@ -759,6 +757,7 @@ double getChDepthUsingCSA(double baseWidthLRegion,
 	double chCSAinput, int isCompoundCS,
 	double baseWidthURegion, double LRegionArea,
 	double LRegionHeight, double chBankConst);
+int getCVidxByFcName(string fcName);
 
 int getDTsec(double cfln, double dx, 
 	double vMax, int dtMax_min, 
@@ -859,6 +858,10 @@ int simulateSingleEvent();
 int simulateRunoff(double nowTmin);
 void simulateRunoffCore(int i, double nowTmin);
 int startSimulationSingleEvent();
+int startSingleEventRun(string fpnGMP, 
+	int isPrediction, string outString);
+int startGMPsRun(vector<string> gmpFiles, 
+	int isPrediction, string outString);
 
 double totalSSFfromCVwOFcell_m3Ps(int i);
 
@@ -934,8 +937,8 @@ public:
 	int soilTextureValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
 	int soilDepthValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
 	vector<string> allCellsInUpstreamArea(int colXAryidx, int rowYAryidx);
-	vector<string> allCellsInUpstreamArea_Array(int colXAryidx, //    Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
-		int rowYAryidx);
+	//vector<string> allCellsInUpstreamArea_Array(int colXAryidx, //    Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
+		//int rowYAryidx);
 	int cellCountInUpstreamArea(int colXAryidx, //  Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
 		int rowYAryidx);
 
@@ -950,5 +953,9 @@ public:
 	swsParameters subwatershedPars(int wsid);
 	bool removeUserParametersSetting(int wsid);
 };
+
+
+
+
 
 

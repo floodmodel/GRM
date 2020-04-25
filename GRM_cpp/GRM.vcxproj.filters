@@ -33,9 +33,6 @@
     <ClCompile Include="output.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="realTime.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="rainfall.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -67,6 +64,18 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="network.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="realTimeLauncher.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="realTime_DBMS.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="realTime.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="simulatorRT.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

@@ -24,10 +24,8 @@ int updateFCCellinfoAndData()
     fcs_tmp = prj.fcs;
     prj.fcs.clear();
     for (iter = fcs_tmp.begin(); iter != fcs_tmp.end(); ++iter) {
-    //for (flowControlinfo afc : prj.fcs) {
         flowControlinfo afc = iter->second;
         int aidx = cvais[afc.fcColX][afc.fcRowY];
-        //int aidx = aidx + 1;
         prj.fcs[aidx] = afc;
         fccds.cvidxsFCcell.push_back(aidx);
         fccds.curDorder[aidx] = 0;
@@ -46,9 +44,9 @@ int updateFCCellinfoAndData()
             for (int i = 0; i < vs.size(); ++i) {
                 timeSeries ts;
                 if (prj.isDateTimeFormat == 1) {
-                    ts.dataTime = timeElaspedToDateTimeFormat(prj.simStartTime,
-                        afc.fcDT_min * 60 * i, false
-                        , dateTimeFormat::yyyy_mm_dd_HHcolMMcolSS);
+                    ts.dataTime = timeElaspedToDateTimeFormat2(prj.simStartTime,
+                        afc.fcDT_min * 60 * i,  timeUnitToShow::toMinute
+                        , dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
                 }
                 else {
                     ts.dataTime = afc.fcDT_min * i;
@@ -68,29 +66,17 @@ int updateFCCellinfoAndData()
 void calFCReservoirOutFlow(int i, double nowTmin)
 {// nowTmin의 최소값은 dtsec/60이다.
     int dtfc = prj.fcs[i].fcDT_min;
-    //cout << i << endl;
-    //int nowOrder = fccds.curDorder[i];
-    // nowTmin= dtfc* fccds.curDorder[i]인 경우에는 
     if (nowTmin > dtfc* fccds.curDorder[i]) {
         if (fccds.curDorder[i] < fccds.flowData_m3Ps[i].size()) {
             fccds.curDorder[i]++;
         }
         else {
-            //fccds.curDorder[i] = INT_MAX;
             // 아래 조건 주석처리하면, 마지막 자료가 끝까지 사용된다..
             setNoFluxCVCH(i);
             fccds.fcDataAppliedNowT_m3Ps[i] = 0;
             return;
         }
     }
-    //else {
-    //    // //이 조건으로 사용하면, 마지막 자료가 끝까지 사용된다..
-    //    // fccds.curDorder[id]= fccds.flowData[id].size() - 1; }
-    //    // 아래 조건으로 사용하면, 입력된 자료 만큼만 반영되고, 그 이후는 0
-    //    setNoFluxCVCH(i);
-    //    fccds.fcDataAppliedNowT_m3Ps[i] = 0;
-    //    return;
-    //}
     int orderidx = fccds.curDorder[i] -1 ;//vector index, 이 지점에서  fccds.curDorder[i]의 최소값은 1
     double v = fccds.flowData_m3Ps[i][orderidx].value;
     if (v < 0) { v = 0; }
@@ -121,20 +107,12 @@ void calSinkOrSourceFlow(int i, double nowTmin)
             fccds.curDorder[i]++;
         }
         else {
-            //fccds.curDorder[i] = INT_MAX;
             // 아래 조건 주석처리하면, 마지막 자료가 끝까지 사용된다..
             setNoFluxCVCH(i);
             fccds.fcDataAppliedNowT_m3Ps[i] = 0.0;
             return; //sink, source flow 모의하지 않는다
         }
     }
-    //else {
-    //    // //이 조건으로 사용하면, 마지막 자료가 끝까지 사용된다..
-    //    // fccds.curDorder[id]= fccds.flowData[id].size() - 1; }
-    //    // 아래 조건으로 사용하면, 입력된 자료 만큼만 반영되고, 그 이후는 sin, source 는 0
-    //    fccds.fcDataAppliedNowT_m3Ps[i] = 0.0;
-    //    return; //sink, source flow 모의하지 않는다
-    //}
     int orderidx = fccds.curDorder[i]-1 ;//vector index, 이 지점에서 fccds.curDorder[i] 의 최소값은 1
     double v = fccds.flowData_m3Ps[i][orderidx].value;
     double QtoApp = fccds.flowData_m3Ps[i][orderidx].value;
@@ -244,9 +222,6 @@ void calReservoirOperation(int i, double nowTmin)
         break;
     }
     case reservoirOperationType::ConstantQ: {
-        //calReservoirConstantQ(i, prj.fcs[id].roConstQ_cms,
-        //    prj.fcs[id].maxStorage_m3 * prj.fcs[id].maxStorageR,
-        //    inOutflowDuration);
         if (nowTmin <= prj.fcs[i].roConstQDuration_hr * 60) {
             //여기서는 최대 저류 가능량에 상관 없이 일정량 방류            
             if (cvs[i].storageCumulative_m3 <= prj.fcs[i].roConstQ_cms * ts.dtsec) {
@@ -309,4 +284,15 @@ void calReservoirOutFlowInReservoirOperation(int i,
         cvs[i].stream.uCH = 0;
         cvs[i].stream.QCH_m3Ps = 0;
     }
+}
+
+
+int getCVidxByFcName(string fcName)
+{
+    for (int idx : fccds.cvidxsFCcell) {
+        if (fcName == prj.fcs[idx].fcName) {
+            return idx;
+        }
+    }
+    return -1;
 }
