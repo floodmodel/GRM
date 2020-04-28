@@ -3,7 +3,9 @@
 #include <sstream>
 #include <stdio.h>
 #include <io.h>
+#include <stdlib.h>
 #include <string>
+#include<ATLComTime.h>
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"
@@ -16,6 +18,7 @@ extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
 
 extern flowControlCellAndData fccds;
+extern vector<rainfallData> rfs;
 
 extern thisSimulation ts;
 extern thisSimulationRT tsrt;
@@ -35,7 +38,6 @@ grmRealTime::grmRealTime(string fpn_REF, string strGUID,
         rtef.rtstartingTime = RTStartDateTime;
     }    
     ppi = getProjectFileInfo(rtef.fpnPrj);// 여기서 gmp 파일경로 설정
-    //GRMRT = realTime();
     // 여기서 thisprocess rt 변수 설정 시작. ====================
     tsrt.g_performance_log_GUID = strGUID;
     tsrt.g_dtStart_from_MonitorEXE = dateTimeStart;    
@@ -75,13 +77,16 @@ void grmRealTime::setUpAndStartGRMRT()
     prj.simStartTime = rtef.rtstartingTime;
     prj.rfinterval_min = rtef.rfinterval_min;
 
+    rfs.clear();// 사용할 강우자료 초기화
+
     ts.simDuration_min = tsrt.simDurationrRT_h * 60;
-    ts.isPrediction = tsrt.isPrediction;
+    ts.enforceFCautoROM = tsrt.isPrediction;
+    ts.rfDataCountTotal = 0;
 
     picWidth = CONST_PIC_WIDTH;
     picHeight = CONST_PIC_HEIGHT;
 
-    runGRMRT();
+    grmRealTime::runGRMRT();
 }
 
 void grmRealTime::setupGRMforRT() // fc 자료는 항상 db를 사용하는 것으로 수정, Optional FPNfcdata As String = "")
@@ -152,8 +157,6 @@ void grmRealTime::setupDBMSforRT()
 void grmRealTime::runGRMRT()
 {
     mbSimulationRTisOngoing = true;
-    //mlstRFdataRT = new List<cRainfall.RainfallData>();
-    tsrt.rfDataCountToApply_RT = 0;
     if (CONST_bUseDBMS_FOR_RealTimeSystem) {
         if (false) {//'2018.8 부터 이제 과거 분석 기록은 보존됨..그래서 삭제 code는 미수행.
             clear_DBMS_Table_Qwatershed(ppi.fn_prj);
@@ -174,33 +177,16 @@ void grmRealTime::runGRMRT()
             + "\\" + rtef.rtstartingTime + ".asc";
     }
     else {
-        tm tmS = stringToDateTime(rtef.rtstartingTime);
-        tm tmB = stringToDateTime(tsrt.g_strTimeTagBase_KST);
-        COleDateTime oleTstart_KST;
-        COleDateTime oleTBase_KST;
-        oleTstart_KST.SetDateTime(tmS.tm_year, tmS.tm_mon, tmS.tm_mday,
-            tmS.tm_hour, tmS.tm_min, 0);
-        oleTBase_KST.SetDateTime(tmB.tm_year, tmB.tm_mon, tmB.tm_mday,
-            tmB.tm_hour, tmB.tm_min, 0);
-        COleDateTimeSpan tspan = oleTstart_KST - oleTBase_KST;
-        stringstream ss;
-        ss << setw(3) << std::setprecision(0) << tspan.GetTotalHours();
-        string strDIFF = ss.str();
-        // 가정.. ref의 시작 시간을.. l030_v070_m00_h004.2016100400.gb2_1_clip.asc,,  에 맞추고... h000만 조정...
-        // 즉 KST로 시작 시간 지정은. 201610040900 + 4  즉 2016100413이 됨
-        string strFileLEns = "l030_v070_" + tsrt.g_strModel +
-            "_h" + strDIFF + "." + tsrt.g_strTimeTagBase_UCT + ".gb2_1_clip.asc";
-        fpn_rfASC = rtef.fpRTRFfolder + "\\" + strFileLEns;
+        fpn_rfASC= getLENSrfFPNusingTimeString(rtef.rtstartingTime);
     }
 
     if (_access(fpn_rfASC.c_str(), 0) != 0) {
         writeLog(fpnLog, "유출해석 시작 시간에서의 강우자료가 없습니다.", 1, 1);
         writeLog(fpnLog, "강우자료와 유출해석 시작 시간을 확인하시길 바랍니다.", 1, 1);
     }
-
-    if (prj.simFlowControl == 1 && prj.fcs.size() > 0) {
-        for (int idx : fccds.cvidxsFCcell) {
-            mbNewFCdataAddedRT[idx] = true;
+    if (prj.applyFC == 1) {
+     for (int idx : fccds.cvidxsFCcell) {
+         tsrt.newFcDataAddedRT.clear();
             mbFCDataOrder[idx] = 0;
         }
         fccds.flowData_m3Ps.clear();
@@ -277,7 +263,7 @@ int readDBandFillFCdataForRealTime(string targetDateTime)
 }
 
 int readCSVandFillFCdataForRealTime(string fpnFCcvs, string targetDateTime)
-{
+{// 모든 cvidx 에 대해서 자료를 읽는다..
     int intL = 0;
     if (fpnFCcvs != "" && _access(fpnFCcvs.c_str(), 0) != 0) {
         string outstr = "Flow control data file [" + fpnFCcvs
@@ -290,15 +276,146 @@ int readCSVandFillFCdataForRealTime(string fpnFCcvs, string targetDateTime)
     for (int i = 0; i < sv.size(); ++i) {
         vector<string> sv_aline = splitToStringVector(sv[i], ',');
         // cvs 파일은 cv_index, DataTime, Value 순서이다.
-        timeSeries ts;
-        int cellidx = stoi(sv_aline[0]);
-        ts.dataTime = sv_aline[1];
-        ts.value = stod(sv_aline[2]);
         if (sv_aline[1] == targetDateTime) {
+            timeSeries ts;
+            int cellidx = stoi(sv_aline[0]);
+            ts.dataTime = sv_aline[1];
+            ts.value = stod(sv_aline[2]);
             fccds.flowData_m3Ps[cellidx].push_back(ts);
+            tsrt.newFcDataAddedRT[cellidx] = 1;
         }
     }
 }
+
+void updateFcDataStatusForEachFCcellGRMRT(string t_yyyymmddHHMM, int idx)
+{
+    string fcname = prj.fcs[idx].fcName;
+    string msg = "";
+    double value = 0;;
+    vector<timeSeries> QsFC = fccds.flowData_m3Ps[idx];
+    int vsize = QsFC.size();
+    int added = -1;
+    for (timeSeries ats : QsFC) {
+        if (ats.dataTime == t_yyyymmddHHMM) {
+            value = ats.value;
+            added = 1;
+            break;
+        }
+    }
+    if (added == 1) {
+        tsrt.newFcDataAddedRT[idx] = 1;
+        stringstream ss_fcname;
+        ss_fcname << right << setw(13) << fcname;
+        stringstream ss_idx;
+        ss_idx << left << setw(6) << idx;
+        stringstream ss_value;
+        ss_value << left << setw(8) << value;
+        msg = "  FC Data 입력완료...("
+            + t_yyyymmddHHMM + " "
+            + ss_fcname.str()
+            + ", CVID=" + ss_idx.str()
+            + ", Value=" + ss_value.str() + ")\n";
+    }
+    else {
+        tsrt.newFcDataAddedRT[idx] = -1;
+        msg = "FC 자료(" + fcname + ", CVID=" + to_string(idx) + ", "
+            + t_yyyymmddHHMM + ") 수신대기 중...\n";
+    }
+    cout << msg;
+}
+
+
+void updateRFinfoGRMRT(string t_yyyymmddHHMM)
+{
+    COleDateTime timeNow;
+    timeNow = COleDateTime::GetCurrentTime();
+    COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
+    string tFromStart;
+    tFromStart = toStrWithPrecision(tsTotalSim.GetTotalMinutes(), 2);
+    if (ts.rfDataCountTotal > 0 & tsrt.newRFAddedRT == 1) {
+        rainfallData arf;
+        arf = rfs[ts.rfDataCountTotal];
+        writeLog(fpnLog, arf.FileName + "for " + t_yyyymmddHHMM +
+            " 분석완료 .. " + tFromStart + "분 경과 \n", 1, 1);
+        tsrt.newRFAddedRT = -1;
+    }
+    switch (prj.rfDataType)
+    {
+    case rainfallDataType::TextFileASCgrid_mmPhr:
+        writeLog(fpnLog, "[TextFileASCgrid_mmPhr] rainfall data  type is not supported yet.\n", 1, 1);
+        return;
+    case rainfallDataType::TextFileMAP:
+        writeLog(fpnLog, "[TextFileMAP] rainfall data  type is not supported yet.\n", 1, 1);
+        return;
+    case rainfallDataType::TextFileASCgrid: {
+        string rfFileName;    // 2018년 8.8 현재 산출 naming
+        string ascFPN;        // 2018년 8.8 현재 산출 naming
+        if (tsrt.g_strModel == "") {
+            rfFileName = "RDR_COMP_ADJ_" + t_yyyymmddHHMM + ".RKDP.bin.asc";
+            ascFPN = rtef.fpRTRFfolder + "\\"
+                + getYYYYMMfromYYYYMMddHHmm(t_yyyymmddHHMM)
+                + "\\" + rfFileName;
+        }
+        else {
+            ascFPN = getLENSrfFPNusingTimeString(t_yyyymmddHHMM);
+            fs::path fpn_arf = fs::path(ascFPN.c_str());
+            rfFileName = fpn_arf.filename().string();
+        }
+
+        if (_access(ascFPN.c_str(), 0) == 0) {
+            ts.rfDataCountTotal += 1;
+            int rfOrder = ts.rfDataCountTotal;
+            rainfallData nrf;
+            nrf.Order = rfOrder;
+            nrf.DataTime = t_yyyymmddHHMM;
+            nrf.Rainfall = rfFileName; // 
+
+        //LENS 인 경우 yyyymm 폴더 구분 하지 않음
+            if (tsrt.g_strModel == "") {
+                nrf.FilePath = rtef.fpRTRFfolder + "\\"
+                    + getYYYYMMfromYYYYMMddHHmm(t_yyyymmddHHMM);
+            }
+            else {
+                nrf.FilePath = rtef.fpRTRFfolder;
+            }
+            nrf.FileName = rfFileName;
+            rfs.push_back(nrf);
+            writeLog(fpnLog, rfFileName + " 입력완료(강우)", 1, 1);
+            tsrt.newRFAddedRT = 1;
+            return;
+        }
+        break;
+    }
+    }
+    cout << "강우자료(" + t_yyyymmddHHMM + ") 수신대기 중.. \n";
+}
+
+string getLENSrfFPNusingTimeString(string t_yyyymmddHHMM)
+{
+    tm tmTarget = stringToDateTime(t_yyyymmddHHMM);
+    tm tmB = stringToDateTime(tsrt.g_strTimeTagBase_KST);
+    COleDateTime oleTstart_KST;
+    COleDateTime oleTBase_KST;
+    oleTstart_KST.SetDateTime(tmTarget.tm_year, tmTarget.tm_mon, tmTarget.tm_mday,
+        tmTarget.tm_hour, tmTarget.tm_min, 0);
+    oleTBase_KST.SetDateTime(tmB.tm_year, tmB.tm_mon, tmB.tm_mday,
+        tmB.tm_hour, tmB.tm_min, 0);
+    COleDateTimeSpan tspan = oleTstart_KST - oleTBase_KST;
+    stringstream ss;
+    ss << setw(3) << std::setprecision(0) << tspan.GetTotalHours();
+    string strDIFF = ss.str();
+    if (strDIFF == "073") { 
+        writeLog(fpnLog, "LENS : completed",1,1); 
+        exit(0); 
+    }
+    // 가정.. ref의 시작 시간을.. l030_v070_m00_h004.2016100400.gb2_1_clip.asc,,  에 맞추고... h000만 조정...
+    // 즉 KST로 시작 시간 지정은. 201610040900 + 4  즉 2016100413이 됨
+    string strFileLEns = "l030_v070_" + tsrt.g_strModel +
+        "_h" + strDIFF + "." + tsrt.g_strTimeTagBase_UCT + ".gb2_1_clip.asc";
+    string fpn_rfASC = rtef.fpRTRFfolder + "\\" + strFileLEns;
+    return fpn_rfASC;
+}
+
 
 
 

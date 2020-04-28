@@ -13,8 +13,8 @@ extern fs::path fpnLog;
 
 thisSimulationRT tsrt;
 
-// 실시간 수신자료 이용은 옵션은 /rt, 예측은 /p 이다.
-// args[0] : grm.exe,               args[1] : /rt 혹은 /p,   args[2] : /rt 혹은 /p,          
+// 실시간 수신자료 이용은 옵션은 /r, 예측은 /p 이다.
+// args[0] : grm.exe,               args[1] : /r 혹은 /p,   args[2] : /r 혹은 /p,          
 // args[3] : fpnRef,                 args[4] : strGUID,       args[5] : dtStartLine(모의시점 ? ? ), 
 // args[6] : strRTStartDateTime, agrs[7] : strMODEL
 int grmRTLauncher(int argc, char** args, int isPrediction)

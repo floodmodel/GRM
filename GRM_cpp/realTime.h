@@ -56,8 +56,9 @@ typedef struct _thisSimulationRT // real time 전용
 
     int simDurationrRT_h = 0;
     int  isPrediction = -1;//2019.10.01. 최. prediction 관련
-    bool mbNewRFAddedRT = false;
-    int rfDataCountToApply_RT = -1;
+    int newRFAddedRT = -1; //1: true, -1 : false
+    map<int, int> newFcDataAddedRT;   // idx 로 구분, //1: true, -1 : false
+    //int rfDataCountToApply_RT = -1;
 
 } thisSimulationRT;
 
@@ -74,10 +75,9 @@ public:
     static char CONST_Output_File_Target_DISK; // png 등의 모의 결과를 c ,.d  어디에 기입할지. 구분 
     //int mSimDurationrRT_Hour = -1;
     //bool mbNewRFAddedRT = false;
-    vector<rainfallData> mlstRFdataRT;
+    vector<rainfallData> rfsForRT;
     //public Dictionary<int, int> mdicFCDataCountForEachCV;
-    //public Dictionary<int, string> mdicFCNameForEachCV;
-    map<int, bool> mbNewFCdataAddedRT;   // idx 로 구분
+    //public Dictionary<int, string> mdicFCNameForEachCV;    
    map <int, int> mbFCDataOrder; // idx 로 구분
         bool mbSimulationRTisOngoing = false;
 
@@ -104,6 +104,7 @@ inline string IO_Path_ChangeDrive(char strV, string strPath)
 }
 
 
+string getLENSrfFPNusingTimeString(string t_yyyymmddHHMM);
 int grmRTLauncher(int argc, char** args, int isPrediction);
 int openRtEnvFile(string fpnref);
 int readCSVandFillFCdataForRealTime(string fpnFCcvs, 
@@ -112,7 +113,9 @@ int readDBandFillFCdataForRealTime(string targetDateTime);
 
 int startSimulationRT();
 
-void updateRFinfoGRMRT(string strDate);
+void updateFcDataStatusForEachFCcellGRMRT(string t_yyyymmddHHMM,
+    int cvidx); // added=1 이면 새로운 데이터 입력된 것
+void updateRFinfoGRMRT(string t_yyyymmddHHMM);
 void writeDBRealTime(int nowTmin, double cinterp);
 
 // 여기는 realTime_DBMS.cpp 에 있는 함수들

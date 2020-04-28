@@ -83,9 +83,9 @@ void main(int argc, char** args)
 	rtOption1 = lower(trim(rtOption1));
 	rtOption2 = lower(trim(rtOption2));
 	int isRealTime = -1;
-	if (rtOption1 == "/rt" || rtOption2 == "/rt") {
-		// 실시간 수신자료 적용 옵션은 /rt, 예측은 /p 이다.
-		// args[0] : grm.exe,               args[1] : /rt 혹은 /p,   args[2] : /rt 혹은 /p,          
+	if (rtOption1 == "/r" || rtOption2 == "/r") {
+		// 실시간 수신자료 적용 옵션은 /r, 예측은 /p 이다.
+		// args[0] : grm.exe,               args[1] : /r 혹은 /p,   args[2] : /r 혹은 /p,          
 		// args[3] : fpnRef,                 args[4] : strGUID,       args[5] : dtStartLine(모의시점 ? ? ), 
 		// args[6] : strRTStartDateTime, agrs[7] : strMODEL
 		isRealTime = 1;
@@ -194,7 +194,7 @@ int startSingleEventRun(string fpnGMP, int isPrediction, string outString)
 	}
 	else if (nResult == 0) {
 		ppi = getProjectFileInfo(fpnGMP);
-		ts.isPrediction = isPrediction;
+		ts.enforceFCautoROM = isPrediction;
 		writeNewLog(fpnLog, outString, 1, -1);
 		if (simulateSingleEvent() == -1) {
 			waitEnterKey();
@@ -207,7 +207,7 @@ int startGMPsRun(vector<string> gmpFiles, int isPrediction, string outString)
 {
 	clock_t  startT = clock();
 	int nFiles = gmpFiles.size();
-	ts.isPrediction = isPrediction;
+	ts.enforceFCautoROM = isPrediction;
 	for (int n = 0; n < nFiles; n++) {// /f 혹은 /fd 인 경우 여기서 실행
 		ppi = getProjectFileInfo(gmpFiles[n]);
 		writeNewLog(fpnLog, outString, 1, -1);

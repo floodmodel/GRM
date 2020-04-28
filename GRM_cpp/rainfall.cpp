@@ -195,13 +195,6 @@ int setCVRF(int order)
          }
      }
  }
-
-
- void updateRFinfoGRMRT(string strDate)
- {
-
- }
-
      
  inline double rfintensity_mPsec(double rf_mm, double dtrf_sec)
  {

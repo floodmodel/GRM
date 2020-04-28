@@ -114,7 +114,6 @@ void calSinkOrSourceFlow(int i, double nowTmin)
         }
     }
     int orderidx = fccds.curDorder[i]-1 ;//vector index, 이 지점에서 fccds.curDorder[i] 의 최소값은 1
-    double v = fccds.flowData_m3Ps[i][orderidx].value;
     double QtoApp = fccds.flowData_m3Ps[i][orderidx].value;
     if (cvs[i].flowType == cellFlowType::OverlandFlow) {
         switch (cvs[i].fcType) {

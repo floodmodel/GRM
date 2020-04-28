@@ -256,17 +256,21 @@ int openProjectFile(int forceRealTime)
 	}
 
 	// 여기서 부터 검증
-	if (prj.fcs.size() > 0) {
-		map<int, flowControlinfo>::iterator iter;
-		for (iter = prj.fcs.begin(); iter != prj.fcs.end(); ++iter) {
-			int idx = iter->first;
-			flowControlinfo afci;
-			afci = prj.fcs[idx];
-			if (afci.roType != reservoirOperationType::None
-				&& (afci.maxStorage_m3 <= 0
-					|| afci.maxStorageR <= 0)) {
-				writeLog(fpnLog, " Max. storage and max. storage ratio must be greater than zero when reservoir operation type is applied.\n", 1, 1);
-				return -1;
+	prj.applyFC = -1;
+	if (prj.simFlowControl == 1) {
+		if (prj.fcs.size() > 0) {
+			prj.applyFC = 1;
+			map<int, flowControlinfo>::iterator iter;
+			for (iter = prj.fcs.begin(); iter != prj.fcs.end(); ++iter) {
+				int idx = iter->first;
+				flowControlinfo afci;
+				afci = prj.fcs[idx];
+				if (afci.roType != reservoirOperationType::None
+					&& (afci.maxStorage_m3 <= 0
+						|| afci.maxStorageR <= 0)) {
+					writeLog(fpnLog, " Max. storage and max. storage ratio must be greater than zero when reservoir operation type is applied.\n", 1, 1);
+					return -1;
+				}
 			}
 		}
 	}
@@ -364,7 +368,6 @@ int openProjectFile(int forceRealTime)
 		prj.mdp = prj.cpusi.totalNumOfLP;
 	}
 
-
 	//di.dmids.clear();
 	//map<int, domaininfo>::iterator iter;
 	//for (int n = 0; n < prj.swps.size(); n++) {
@@ -385,7 +388,6 @@ int openProjectFile(int forceRealTime)
 	else {
 		prj.makeASCorIMGfile = -1;
 	}
-
 	return 1;
 }
 

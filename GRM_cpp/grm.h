@@ -672,6 +672,7 @@ typedef struct _projectFile
 	int icfFileApplied = 0;
 	int issrFileApplied = 0;
 	int makeASCorIMGfile = 0;
+	int applyFC = 0;
 
 	CPUsInfo cpusi;
 	int deleteAllFilesExceptDischargeOut = -1;
@@ -684,7 +685,7 @@ typedef struct _projectFile
 typedef struct _thisSimulation
 {
 	int setupGRMisNormal = 0; // Todo : 필요여부 확인 필요.
-	int isPrediction = -1;// true : 1, false : -1
+	int enforceFCautoROM = -1;// true : 1, false : -1
 	int grmStarted = 0;
 	int stopSim = 0;
 	int rfDataCountTotal = -1;
