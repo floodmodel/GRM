@@ -17,8 +17,8 @@ typedef struct _realTimeEnvFileFieldName
 {
     const string ProjectFPN = "ProjectFPN";
     const string RTRFfolderName = "RTRFfolderName";
-    const string RFfileHeadTextBeforeTimeString = "RFfileHeadText_BeforeTimeString";
-    const string RFfileTailText_AfterTimeString = "RFfileTailText_AfterTimeStringWithExtension"; 
+    const string RFfileTextBeforeTString = "RFfileText_BeforeTString";
+    const string RFfileText_AfterTStringWithExt = "RFfileText_AfterTStringWithExt"; 
     const string IsFC = "IsFC";
     const string RTFCdataFPN = "RTFCdataFPN";
     const string IsDWSExist = "IsDWSExist";
@@ -45,8 +45,8 @@ typedef struct _realTimeEnvFile
     int rfinterval_min = 0;
     int outputInterval_min = 0;
     string rtstartDataTime = "";   // yyyymmddHHMM, 201209160000
-    string headText_BeforeTimeString_RFN = "";
-    string tailText_AfterTimeString_RFN_withExt = "";// 파일확장자 포함된 문자열
+    string headText_BeforeTString_RFN = "";
+    string tailText_AfterTString_RFN_withExt = "";// 파일확장자 포함된 문자열
 } realTimeEnvFile;
 
 typedef struct _thisSimulationRT // real time 전용

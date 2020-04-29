@@ -364,8 +364,8 @@ void updateRFdataGRMRT(string t_yyyymmddHHMM)
         string ascFPN;        // 2018년 8.8 현재 산출 naming
         if (tsrt.g_strModel == "") {
             // 강우파일의 시간 스트링 앞뒤의 문자는 ref 파일에서 받는다.
-            rfFileName =  rtef.headText_BeforeTimeString_RFN
-                + t_yyyymmddHHMM + rtef.tailText_AfterTimeString_RFN_withExt;
+            rfFileName =  rtef.headText_BeforeTString_RFN
+                + t_yyyymmddHHMM + rtef.tailText_AfterTString_RFN_withExt;
             ascFPN = rtef.fpRTRFfolder + "\\"
                 + getYYYYMMfromYYYYMMddHHmm(t_yyyymmddHHMM)
                 + "\\" + rfFileName;
@@ -468,14 +468,14 @@ int openRtEnvFile(string fpnref)
             }
             continue;
         }
-        if (aline.find(fn.RFfileHeadTextBeforeTimeString) != string::npos) {
-            vString = getValueStringFromXmlLine(aline, fn.RFfileHeadTextBeforeTimeString);
-            rtef.headText_BeforeTimeString_RFN = trim(vString);
+        if (aline.find(fn.RFfileTextBeforeTString) != string::npos) {
+            vString = getValueStringFromXmlLine(aline, fn.RFfileTextBeforeTString);
+            rtef.headText_BeforeTString_RFN = trim(vString);
             continue;
         }
-        if (aline.find(fn.RFfileTailText_AfterTimeString) != string::npos) {
-            vString = getValueStringFromXmlLine(aline, fn.RFfileTailText_AfterTimeString);
-            rtef.tailText_AfterTimeString_RFN_withExt = trim(vString);
+        if (aline.find(fn.RFfileText_AfterTStringWithExt) != string::npos) {
+            vString = getValueStringFromXmlLine(aline, fn.RFfileText_AfterTStringWithExt);
+            rtef.tailText_AfterTString_RFN_withExt = trim(vString);
             continue;
         }
         if (aline.find(fn.RTFCdataFPN) != string::npos) {
