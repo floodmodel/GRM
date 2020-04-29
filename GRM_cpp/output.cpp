@@ -19,6 +19,7 @@ extern domaininfo di;
 extern wpinfo wpis;
 extern flowControlCellAndData fccds;
 extern thisSimulation ts;
+extern thisSimulationRT tsrt;
 
 extern cvAtt* cvsb;
 extern map<int, double> fcdAb;
@@ -220,14 +221,20 @@ int initOutputFiles()
 	ofs.ofpRFDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "_" + CONST_DIST_RF_DIRECTORY_TAG;
 	ofs.ofpRFAccDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "_" + CONST_DIST_RFACC_DIRECTORY_TAG;
 	ofs.ofpFlowDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "_" + CONST_DIST_FLOW_DIRECTORY_TAG;
+
+    string ensbModel = "";
+    if (tsrt.g_strModel != "") {
+        ensbModel = "_m" + tsrt.g_strModel;
+    }
     for (wpLocationRC awp : prj.wps) {
         string wpName = replaceText(awp.wpName, ",", "_");
-        string wpfpn = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "WP_" + wpName + ".out";
+        string wpfpn = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "WP_" + wpName
+            + ensbModel + ".out";
         int adix = cvais[awp.wpColX][awp.wpRowY];
         ofs.ofpnWPs[adix] = wpfpn;
     }	
     if (prj.simType == simulationType::RealTime){
-        changeOutputFileDisk(grmRealTime::CONST_Output_File_Target_DISK);
+        changeOutputFileDisk(tsrt.Output_File_Target_DISK);
     }
     if (deleteAllOutputFiles() == -1) {
         string outstr = "An error was occured while deleting previous ouput files or folders. Try starting the model again. \n";
@@ -245,23 +252,6 @@ int initOutputFiles()
 	return 1;
 }
 
-int changeOutputFileDisk(char targetDisk)
-{
-	int isnormal = -1;
-	ofs.ofpnDischarge = IO_Path_ChangeDrive(targetDisk, ofs.ofpnDischarge);
-	ofs.ofpnDepth = IO_Path_ChangeDrive(targetDisk, ofs.ofpnDepth);
-	ofs.ofpnRFGrid = IO_Path_ChangeDrive(targetDisk, ofs.ofpnRFGrid);
-	ofs.ofpnRFMean = IO_Path_ChangeDrive(targetDisk, ofs.ofpnRFMean);
-	//ofs.OFNPSwsPars = IO_Path_ChangeDrive(targetDisk, ofs.OFNPSwsPars);
-	ofs.ofpnFCData = IO_Path_ChangeDrive(targetDisk, ofs.ofpnFCData);
-	ofs.ofpnFCStorage = IO_Path_ChangeDrive(targetDisk, ofs.ofpnFCStorage);
-	ofs.ofpSSRDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpSSRDistribution);
-	ofs.ofpRFDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpRFDistribution);
-	ofs.ofpRFAccDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpRFAccDistribution);
-	ofs.ofpFlowDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpFlowDistribution);
-	isnormal = 1;
-	return isnormal;
-}
 
 
 int deleteAllOutputFiles()
@@ -272,6 +262,7 @@ int deleteAllOutputFiles()
     fpns.push_back(ofs.ofpnRFGrid);
     fpns.push_back(ofs.ofpnRFMean);
     fpns.push_back(ofs.ofpnFCStorage);
+    fpns.push_back(ofs.ofpnFCData);
     fpns.push_back(ofs.ofpSSRDistribution);
     fpns.push_back(ofs.ofpRFDistribution);
     fpns.push_back(ofs.ofpRFAccDistribution);
@@ -376,163 +367,174 @@ int makeNewOutputFiles()
             heads = comHeader
                 + "Output data : All the results for watch point '"
                 + awpName + "'" + "\n\n";
-            heads = heads + CONST_OUTPUT_TABLE_TIME_FIELD_NAME + "\t"
-                + "Discharge[cms]" + "\t"
-                + "BaseFlowDepth[m]" + "\t"
-                + "SoilWaterContent[m]" + "\t"
-                + "SoilSatR" + "\t" + "RFGrid" + "\t"
-                + "RFUpMean" + "\t" + "FCData" + "\t"
-                + "FCResStor" + "\n";
+            if (prj.simType == simulationType::RealTime) {
+                heads = heads + CONST_OUTPUT_TABLE_TIME_FIELD_NAME + "\t"
+                    + "Flow_sim[cms]" + "\t"
+                    + "Flow_obs[m]" + "\t"
+                    + "RFUpMean" + "\t"
+                    + "FromStarting[min]" + "\n";
+            }
+            else {
+                heads = heads + CONST_OUTPUT_TABLE_TIME_FIELD_NAME + "\t"
+                    + "Discharge[cms]" + "\t"
+                    + "BaseFlowDepth[m]" + "\t"
+                    + "SoilWaterContent[m]" + "\t"
+                    + "SoilSatR" + "\t" + "RFGrid" + "\t"
+                    + "RFUpMean" + "\t" + "FCData" + "\t"
+                    + "FCResStor" + "\n";
+            }
+
             int aidx = cvais[awp.wpColX][awp.wpRowY] ;
             string nFPN = ofs.ofpnWPs[aidx];
             appendTextToTextFile(nFPN, heads);
         }
+        if (prj.simType != simulationType::RealTime) {
+            // ----------------------------------------------------
+            // 이건 유량
+            heads = comHeader
+                + "Output data : Discharge[CMS]\n\n"
+                + time_wpNames + "\t" + "Rainfall_Mean" + "\t" + "FromStarting[sec]" + "\n";
+            appendTextToTextFile(ofs.ofpnDischarge, heads);
 
-        // ----------------------------------------------------
-        // 이건 유량
-        heads = comHeader
-            + "Output data : Discharge[CMS]\n\n"
-            + time_wpNames + "\t" + "Rainfall_Mean" + "\t" + "FromStarting[sec]" + "\n";
-        appendTextToTextFile(ofs.ofpnDischarge, heads);
+            // ----------------------------------------------------
+            //// 이건 수심
+            //heads = comHeader
+            //    + "Output data : Depth[m]\n\n"
+            //    + time_wpNames + "\t" + "Rainfall_Mean" + "\t" + "FromStarting[sec]" + "\n";
+            //appendTextToTextFile(ofs.ofpnDepth, heads);
 
-        // ----------------------------------------------------
-        //// 이건 수심
-        //heads = comHeader
-        //    + "Output data : Depth[m]\n\n"
-        //    + time_wpNames + "\t" + "Rainfall_Mean" + "\t" + "FromStarting[sec]" + "\n";
-        //appendTextToTextFile(ofs.ofpnDepth, heads);
-
-        // ----------------------------------------------------
-        // 여기는 flow control 모듈 관련
-        if (prj.simFlowControl == 1 && prj.fcs.size()>0)
-        {
-            string fcNameApp;
-            string fcTypeApp;
-            string sourceDT;
-            string resOperation;
-            string roiniStorage;
-            string romaxStorage;
-            string romaxStorageRatio;
-            string romaxStorageApp;
-            string roType;
-            string roConstQ;
-            string roConstQduration;
-            fcNameApp = "FC name :" ;
-            fcTypeApp = "FC type :";
-            sourceDT = "Source data interval[min] :";
-            resOperation = "Res. operation :";
-            roiniStorage = "Ini. storage :";
-            romaxStorage = "Max. storage :";
-            romaxStorageRatio = "Max. storage ratio :";
-            romaxStorageApp = "Max. storageMax applied :";
-            roType = "RO type :";
-            roConstQ = "Constant Q :";
-            roConstQduration = "Constant Q duration :";
-            string fcDataField = CONST_OUTPUT_TABLE_TIME_FIELD_NAME;
-            for (int n : fccds.cvidxsFCcell) {
-                flowControlinfo afc = prj.fcs[n];
-                fcDataField = fcDataField + "\t" + afc.fcName;
-                fcNameApp = fcNameApp + "\t" + afc.fcName;
-                string fct=ENUM_TO_STR(None);
-                switch (afc.fcType) {
-                case flowControlType::Inlet:
-                    fct= ENUM_TO_STR(Inlet);
-                case flowControlType::ReservoirOperation:
-                    fct = ENUM_TO_STR(ReservoirOperation);
-                case flowControlType::ReservoirOutflow:
-                    fct = ENUM_TO_STR(ReservoirOutflow);
-                case flowControlType::SinkFlow:
-                    fct = ENUM_TO_STR(SinkFlow);
-                case flowControlType::SourceFlow:
-                    fct = ENUM_TO_STR(SourceFlow);
-                case flowControlType::None:
-                    fct = ENUM_TO_STR(None);
-                }
-                fcTypeApp = fcTypeApp + "\t" + fct;
-                if (afc.fcType == flowControlType::ReservoirOutflow
-                    || afc.fcType == flowControlType::Inlet
-                    || afc.fcType== flowControlType::SinkFlow
-                    || afc.fcType== flowControlType::SourceFlow) {
-                    sourceDT = sourceDT + "\t" + to_string(afc.fcDT_min);
-                    resOperation = resOperation + "\t" + "False";
-                }
-                else {
-                    sourceDT = sourceDT + "\t" + "None";
-                    if (afc.maxStorage_m3 > 0 && afc.maxStorageR > 0) {
-                        resOperation = resOperation + "\t" + "True";
+            // ----------------------------------------------------
+            // 여기는 flow control 모듈 관련
+            if (prj.simFlowControl == 1 && prj.fcs.size() > 0)
+            {
+                string fcNameApp;
+                string fcTypeApp;
+                string sourceDT;
+                string resOperation;
+                string roiniStorage;
+                string romaxStorage;
+                string romaxStorageRatio;
+                string romaxStorageApp;
+                string roType;
+                string roConstQ;
+                string roConstQduration;
+                fcNameApp = "FC name :";
+                fcTypeApp = "FC type :";
+                sourceDT = "Source data interval[min] :";
+                resOperation = "Res. operation :";
+                roiniStorage = "Ini. storage :";
+                romaxStorage = "Max. storage :";
+                romaxStorageRatio = "Max. storage ratio :";
+                romaxStorageApp = "Max. storageMax applied :";
+                roType = "RO type :";
+                roConstQ = "Constant Q :";
+                roConstQduration = "Constant Q duration :";
+                string fcDataField = CONST_OUTPUT_TABLE_TIME_FIELD_NAME;
+                for (int n : fccds.cvidxsFCcell) {
+                    flowControlinfo afc = prj.fcs[n];
+                    fcDataField = fcDataField + "\t" + afc.fcName;
+                    fcNameApp = fcNameApp + "\t" + afc.fcName;
+                    string fct = ENUM_TO_STR(None);
+                    switch (afc.fcType) {
+                    case flowControlType::Inlet:
+                        fct = ENUM_TO_STR(Inlet);
+                    case flowControlType::ReservoirOperation:
+                        fct = ENUM_TO_STR(ReservoirOperation);
+                    case flowControlType::ReservoirOutflow:
+                        fct = ENUM_TO_STR(ReservoirOutflow);
+                    case flowControlType::SinkFlow:
+                        fct = ENUM_TO_STR(SinkFlow);
+                    case flowControlType::SourceFlow:
+                        fct = ENUM_TO_STR(SourceFlow);
+                    case flowControlType::None:
+                        fct = ENUM_TO_STR(None);
                     }
-                    else {
+                    fcTypeApp = fcTypeApp + "\t" + fct;
+                    if (afc.fcType == flowControlType::ReservoirOutflow
+                        || afc.fcType == flowControlType::Inlet
+                        || afc.fcType == flowControlType::SinkFlow
+                        || afc.fcType == flowControlType::SourceFlow) {
+                        sourceDT = sourceDT + "\t" + to_string(afc.fcDT_min);
                         resOperation = resOperation + "\t" + "False";
                     }
-                }
-                if (afc.fcType == flowControlType::ReservoirOperation) {
-                    if (afc.roType != reservoirOperationType::None) {
-                        roType = roType + "\t" + ENUM_TO_STR(afc.roType);
-                    }
                     else {
-                        writeLog(fpnLog, "Reservoir operation type is invalid.\n", 1, 1);
-                        return -1;
-                    }
-
-                    if (afc.iniStorage_m3 >= 0) {
-                        roiniStorage = roiniStorage + "\t" + to_string(afc.iniStorage_m3);
-                    }
-                    else {
-                        writeLog(fpnLog, "Initial reservoir storage is invalid.\n", 1, 1);
-                        return -1;
-                    }
-                    if (afc.maxStorage_m3 > 0 || afc.maxStorageR > 0) {
-                        romaxStorage = romaxStorage + "\t" + to_string(afc.maxStorage_m3);
-                        if (afc.maxStorageR > 0) {
-                            romaxStorageRatio = romaxStorageRatio + "\t" + to_string(afc.maxStorageR);
-                            double storApp = afc.maxStorage_m3 * afc.maxStorageR;
-                            romaxStorageApp = romaxStorageApp + "\t" + to_string(storApp);
-                        }
-                    }
-                    else {
-                        writeLog(fpnLog, "Maximum reservoir storage or storage ratio is invalid.\n", 1, 1);
-                        return -1;
-                    }
-                    if (afc.roType == reservoirOperationType::ConstantQ && afc.roConstQ_cms < 0) {
-                        roConstQ = roConstQ + "\t" + to_string(afc.roConstQ_cms);
-                        if (afc.roConstQDuration_hr > 0) {
-                            roConstQduration = roConstQduration + "\t" + to_string(afc.roConstQDuration_hr);
+                        sourceDT = sourceDT + "\t" + "None";
+                        if (afc.maxStorage_m3 > 0 && afc.maxStorageR > 0) {
+                            resOperation = resOperation + "\t" + "True";
                         }
                         else {
-                            writeLog(fpnLog, "Constant reservoir outflow duration is invalid.\n", 1, 1);
+                            resOperation = resOperation + "\t" + "False";
+                        }
+                    }
+                    if (afc.fcType == flowControlType::ReservoirOperation) {
+                        if (afc.roType != reservoirOperationType::None) {
+                            roType = roType + "\t" + ENUM_TO_STR(afc.roType);
+                        }
+                        else {
+                            writeLog(fpnLog, "Reservoir operation type is invalid.\n", 1, 1);
+                            return -1;
+                        }
+
+                        if (afc.iniStorage_m3 >= 0) {
+                            roiniStorage = roiniStorage + "\t" + to_string(afc.iniStorage_m3);
+                        }
+                        else {
+                            writeLog(fpnLog, "Initial reservoir storage is invalid.\n", 1, 1);
+                            return -1;
+                        }
+                        if (afc.maxStorage_m3 > 0 || afc.maxStorageR > 0) {
+                            romaxStorage = romaxStorage + "\t" + to_string(afc.maxStorage_m3);
+                            if (afc.maxStorageR > 0) {
+                                romaxStorageRatio = romaxStorageRatio + "\t" + to_string(afc.maxStorageR);
+                                double storApp = afc.maxStorage_m3 * afc.maxStorageR;
+                                romaxStorageApp = romaxStorageApp + "\t" + to_string(storApp);
+                            }
+                        }
+                        else {
+                            writeLog(fpnLog, "Maximum reservoir storage or storage ratio is invalid.\n", 1, 1);
+                            return -1;
+                        }
+                        if (afc.roType == reservoirOperationType::ConstantQ && afc.roConstQ_cms < 0) {
+                            roConstQ = roConstQ + "\t" + to_string(afc.roConstQ_cms);
+                            if (afc.roConstQDuration_hr > 0) {
+                                roConstQduration = roConstQduration + "\t" + to_string(afc.roConstQDuration_hr);
+                            }
+                            else {
+                                writeLog(fpnLog, "Constant reservoir outflow duration is invalid.\n", 1, 1);
+                                return -1;
+                            }
+                        }
+
+                        else {
+                            writeLog(fpnLog, "Constant reservoir outflow is invalid.\n", 1, 1);
                             return -1;
                         }
                     }
-
-                    else {
-                        writeLog(fpnLog, "Constant reservoir outflow is invalid.\n", 1, 1);
-                        return -1;
-                    }
                 }
+                // FCApp - flow control data
+                heads = comHeader
+                    + "Output data : Flow control data input[CMS]\n\n"
+                    + fcNameApp + "\n"
+                    + fcTypeApp + "\n"
+                    + sourceDT + "\n"
+                    + resOperation + "\n"
+                    + fcDataField + "\n";
+                appendTextToTextFile(ofs.ofpnFCData, heads);
+                // reservoir operation
+                heads = comHeader
+                    + "Output data : Storage data[m^3]\n\n"
+                    + fcNameApp + "\n"
+                    + fcTypeApp + "\n"
+                    + roiniStorage + "\n"
+                    + romaxStorage + "\n"
+                    + romaxStorageRatio + "\n"
+                    + romaxStorageApp + "\n"
+                    + roType + "\n"
+                    + roConstQ + "\n"
+                    + roConstQduration + "\n"
+                    + fcDataField + "\n";
+                appendTextToTextFile(ofs.ofpnFCStorage, heads);
             }
-            // FCApp - flow control data
-            heads = comHeader
-                + "Output data : Flow control data input[CMS]\n\n"
-                + fcNameApp + "\n"
-                + fcTypeApp + "\n"
-                + sourceDT + "\n"
-                + resOperation + "\n"
-                + fcDataField + "\n";
-            appendTextToTextFile(ofs.ofpnFCData, heads);
-            // reservoir operation
-            heads = comHeader
-                +  "Output data : Storage data[m^3]\n\n"
-                + fcNameApp + "\n"
-                + fcTypeApp + "\n"
-                + roiniStorage + "\n"
-                + romaxStorage + "\n"
-                + romaxStorageRatio + "\n"
-                + romaxStorageApp + "\n"
-                + roType + "\n"
-                +roConstQ + "\n"
-                + roConstQduration + "\n"
-                + fcDataField + "\n";
-            appendTextToTextFile(ofs.ofpnFCStorage, heads);
         }
     }
     return 1;

@@ -1,5 +1,6 @@
 
 #include <io.h>
+#include <string>
 #include "grm.h"
 using namespace std;
 
@@ -285,7 +286,6 @@ void calReservoirOutFlowInReservoirOperation(int i,
     }
 }
 
-
 int getCVidxByFcName(string fcName)
 {
     for (int idx : fccds.cvidxsFCcell) {
@@ -294,4 +294,16 @@ int getCVidxByFcName(string fcName)
         }
     }
     return -1;
+}
+
+void convertFCtypeToAutoROM(string strDate, int cvidx)
+{
+    prj.fcs[cvidx].fcType = flowControlType::ReservoirOperation;
+    prj.fcs[cvidx].roType = reservoirOperationType::AutoROM;
+    cvs[cvidx].fcType = flowControlType::ReservoirOperation;
+    string fcname = prj.fcs[cvidx].fcName;
+    string msg = "  Reservoir operation type was converted to AutoROM ("
+        + fcname + ", CVID=" + to_string(cvidx) + ", " + strDate
+        + ").\n";
+    writeLog(fpnLog, msg, 1, 1);
 }

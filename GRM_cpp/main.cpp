@@ -6,7 +6,6 @@
 #include <time.h>
 #include <io.h>
 #include <omp.h>
-//#include <thread>
 #include <string>
 #include <filesystem>
 #include <sys/types.h>
@@ -70,71 +69,99 @@ void main(int argc, char** args)
 	prj.forSimulation = 1;// exe로 진입하는 것은 1
 	if (argc == 2) {
 		string arg1(args[1]);
-		arg1 = lower(trim(arg1));
-		if (arg1 == "/?" || arg1 == "/help") {
+		string arg1L = lower(trim(arg1));
+		if (arg1L == "/?" || arg1L == "/help") {
 			grmHelp();
 			return;
 		}
 		// 이경우는 grm.exe  fpn_gmp 인 경우
 		startSingleEventRun(arg1, -1, outString);
 	}
-	string rtOption1(args[1]);
-	string rtOption2(args[2]);
-	rtOption1 = lower(trim(rtOption1));
-	rtOption2 = lower(trim(rtOption2));
-	int isRealTime = -1;
-	if (rtOption1 == "/r" || rtOption2 == "/r") {
-		// 실시간 수신자료 적용 옵션은 /r, 예측은 /p 이다.
-		// args[0] : grm.exe,               args[1] : /r 혹은 /p,   args[2] : /r 혹은 /p,          
-		// args[3] : fpnRef,                 args[4] : strGUID,       args[5] : dtStartLine(모의시점 ? ? ), 
-		// args[6] : strRTStartDateTime, agrs[7] : strMODEL
-		isRealTime = 1;
-		string arg1(args[1]); // /rt 혹은 /p
-		string arg2(args[2]); // /rt 혹은 /p
-		string arg3(args[3]); // ref 파일 경로, 이름
-		arg1 = lower(trim(arg1));
-		arg2 = lower(trim(arg2));
-		arg3 = lower(trim(arg3));
-		fs::path fpn_ref = fs::path(arg3.c_str());
-		int nResult = _access(args[3], 0);
-		if (nResult == -1
-			|| lower(fpn_ref.extension().string()) != ".ref") {
-			printf("GRM real time simulation environment file(%s) is invalid.\n", args[2]);
-			waitEnterKey();
-			return;
-		}
-		else {
+	else {
+		string rtOption1(args[1]);
+		string rtOption2(args[2]);
+		rtOption1 = lower(trim(rtOption1));
+		rtOption2 = lower(trim(rtOption2));
+		int isRealTime = -1;
+		if (rtOption1 == "/r" || rtOption2 == "/r") {
+			// 실시간 수신자료 적용 옵션은 /r 
+			// 최대 옵션은 아래와 같다. 
+			// args[0] : grm.exe,               args[1] : /r 혹은 /p,   args[2] : /r 혹은 /p,          
+			// args[3] : fpnRef,                 args[4] : strGUID,       args[5] : startCommandTime, 
+			// args[6] : rtStartDataTime, agrs[7] : strMODEL
+			isRealTime = 1;
+			string arg1(args[1]); // /r 혹은 /p
+			string arg2(args[2]); // /r 혹은 /p
+			//string arg3(args[3]); // ref 파일 경로, 이름
+			arg1 = lower(trim(arg1));
+			arg2 = lower(trim(arg2));
+			//arg3 = lower(trim(arg3));
 			int isPrediction = -1;
 			if (arg1 == "/p" || arg2 == "/p") {
 				isPrediction = 1;
 			}
-			grmRTLauncher(argc, args, isPrediction);
+			if (grmRTLauncher(argc, args, isPrediction) == -1) {
+				return;
+			}
 		}
-	}
 
-	if (isRealTime == -1 && argc == 3) {
-		// 이경우는 /p, /f, /fd 중 하나의 옵션이 사용된 경우 
-		string arg1(args[1]); // 이건 옵션
-		string arg2(args[2]); // 이건 gmp 파일, 혹은 gmps 폴더
-		arg1 = lower(trim(arg1));
-		arg2 = lower(trim(arg2));
-		if (arg1 == "/p") {
-			startSingleEventRun(arg1, 1, outString);
+		if (isRealTime == -1 && argc == 3) {
+			// 이경우는 /p, /f, /fd 중 하나의 옵션이 사용된 경우 
+			string arg1(args[1]); // 이건 옵션
+			string arg2(args[2]); // 이건 gmp 파일, 혹은 gmps 폴더
+			arg1 = lower(trim(arg1));
+			arg2 = lower(trim(arg2));
+			if (arg1 == "/p") {
+				startSingleEventRun(arg1, 1, outString);
+			}
+			if (arg1 == "/f" || arg1 == "/fd") {
+				struct stat finfo;
+				if (stat(arg2.c_str(), &finfo) == 0) { //폴더가 있으면
+					vector<string> gmpFiles;
+					gmpFiles = getFileListInNaturalOrder(arg2, ".gmp");
+					if (gmpFiles.size() == 0) {
+						printf("There is no GRM project file in this directory.\n");
+						waitEnterKey();
+						return;
+					}
+					if (arg1 == "/fd") {
+						prj.deleteAllFilesExceptDischargeOut = 1;
+					}
+					startGMPsRun(gmpFiles, -1, outString);
+				}
+				else {
+					printf("Project folder is invalid!!\n");
+					waitEnterKey();
+					return;
+				}
+			}
 		}
-		if (arg1 == "/f" || arg1 == "/fd") {
+
+		if (isRealTime == -1 && argc == 4) {
+			// 이경우는 /p, /f 혹은 /p, /fd 옵션이 사용된 경우 
+			string arg1(args[1]); // /p, /f , /fd 옵션
+			string arg2(args[2]);// /p, /f , /fd 옵션
+			string arg3(args[3]);// gmps 폴더
+			arg1 = lower(trim(arg1));
+			arg2 = lower(trim(arg2));
+			arg3 = lower(trim(arg3));
+			int isP = -1;
+			if (arg1 == "/p" || arg2 == "/p") {
+				isP = 1;
+			}
+			if (arg1 == "/f" || arg1 == "/fd") {
+				prj.deleteAllFilesExceptDischargeOut = 1;
+			}
 			struct stat finfo;
-			if (stat(arg2.c_str(), &finfo) == 0) { //폴더가 있으면
+			if (stat(arg3.c_str(), &finfo) == 0) { //폴더가 있으면
 				vector<string> gmpFiles;
-				gmpFiles = getFileListInNaturalOrder(arg2, ".gmp");
+				gmpFiles = getFileListInNaturalOrder(arg3, ".gmp");
 				if (gmpFiles.size() == 0) {
 					printf("There is no GRM project file in this directory.\n");
 					waitEnterKey();
 					return;
 				}
-				if (arg1 == "/fd") {
-					prj.deleteAllFilesExceptDischargeOut = 1;
-				}
-				startGMPsRun(gmpFiles, -1, outString);
+				startGMPsRun(gmpFiles, isP, outString);
 			}
 			else {
 				printf("Project folder is invalid!!\n");
@@ -143,40 +170,6 @@ void main(int argc, char** args)
 			}
 		}
 	}
-
-	if (isRealTime == -1 && argc == 4) {
-		// 이경우는 /p, /f 혹은 /p, /fd 옵션이 사용된 경우 
-		string arg1(args[1]); // /p, /f , /fd 옵션
-		string arg2(args[2]);// /p, /f , /fd 옵션
-		string arg3(args[3]);// gmps 폴더
-		arg1 = lower(trim(arg1));
-		arg2 = lower(trim(arg2));
-		arg3 = lower(trim(arg3));
-		int isP = -1;
-		if (arg1 == "/p" || arg2 == "/p") {
-			isP = 1;
-		}
-		if (arg1 == "/fd" || arg1 == "/fd") {
-			prj.deleteAllFilesExceptDischargeOut = 1;
-		}
-		struct stat finfo;
-		if (stat(arg3.c_str(), &finfo) == 0) { //폴더가 있으면
-			vector<string> gmpFiles;
-			gmpFiles = getFileListInNaturalOrder(arg3, ".gmp");
-			if (gmpFiles.size() == 0) {
-				printf("There is no GRM project file in this directory.\n");
-				waitEnterKey();
-				return;
-			}
-			startGMPsRun(gmpFiles, isP, outString);
-		}
-		else {
-			printf("Project folder is invalid!!\n");
-			waitEnterKey();
-			return;
-		}
-	}
-
 	disposeDynamicVars();
 	return;
 }

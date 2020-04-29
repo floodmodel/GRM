@@ -636,7 +636,7 @@ typedef struct _projectFile
 	int rfinterval_min = -1;
 	flowDirectionType fdType = flowDirectionType::None;
 	int mdp = 0;
-	string simStartTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
+	string simStartTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용. 실시간에서는 yyyymmddHHMM 포맷
 	double simDuration_hr = 0.0;
 	int dtsec = 0;
 	int isFixedTimeStep = 0;// true : 1, false : -1
@@ -688,7 +688,7 @@ typedef struct _thisSimulation
 	int enforceFCautoROM = -1;// true : 1, false : -1
 	int grmStarted = 0;
 	int stopSim = 0;
-	int rfDataCountTotal = -1;
+	int rfDataCountTotal = 0;
 	double rfAveForDT_m = 0;
 	double rfAveSumAllCells_dtP_m = 0;
 	double rfiSumAllCellsInCurRFData_mPs; //rfi : rf intensity
@@ -734,7 +734,7 @@ void calReservoirOperation(int i, double nowTmin);
 void calReservoirOutFlowInReservoirOperation(int i,
 	double Qout_cms, double dy_m);
 void calSinkOrSourceFlow(int i, double nowTmin);
-int changeOutputFileDisk(char targetDisk);
+void convertFCtypeToAutoROM(string strDate, int cvid);
 
 void disposeDynamicVars();
 int deleteAllOutputFiles();

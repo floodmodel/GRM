@@ -171,7 +171,7 @@ void simulateRunoffCore(int i, double nowTmin)
       if (cvs[i].fcType== flowControlType::SinkFlow
           || cvs[i].fcType == flowControlType::SourceFlow
           || cvs[i].fcType == flowControlType::ReservoirOperation) {
-          fccds.fcDataAppliedNowT_m3Ps[i+1] = 0;
+          fccds.fcDataAppliedNowT_m3Ps[i] = 0;
           if (cvs[i].fcType == flowControlType::SinkFlow
               || cvs[i].fcType == flowControlType::SourceFlow) {
               calSinkOrSourceFlow(i, nowTmin);
@@ -190,7 +190,7 @@ void initThisSimulation()
         ts.rfDataCountTotal = (int)rfs.size();
     }
     else {
-        ts.rfDataCountTotal = -1;
+        ts.rfDataCountTotal = 0;
     }
     // 이렇게 해야 모의기간에 맞게 실행된다. 
     //왜냐하면, 첫번째 실행 결과가 0 시간으로 출력되기 때문에
@@ -434,7 +434,7 @@ void writeBySimType(int nowTP_min,
         break;
     }
     case simulationType::RealTime: {
-        writeDBRealTime(nowTP_min, cinterp);
+        writeRealTimeSimResults(nowTP_min, cinterp);
         break;
     }
     }
