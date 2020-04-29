@@ -85,8 +85,8 @@ public:
     bool mbCreateDistributionFiles = false;
     //cRasterOutput mRasterFileOutput;
 
-    grmRealTime(string fpn_REF, string strGUID,
-        string startCommandTime, string rtStartDataTime = "",
+    grmRealTime(string fpn_REF, string strGUID="1",
+        string startCommandTime="", string rtStartDataTime = "",
         string nameLensModel = "");
     ~grmRealTime();
     void setupGRMforRT();

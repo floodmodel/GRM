@@ -330,7 +330,7 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 }
 
 
-void grmHelp()
+void grmH elp() // /r, /p 설명 추가
 {
 	printf("\n");
 	printf(" Usage : GRM [Current project file full path and name to simulate]\n");

@@ -44,8 +44,8 @@ int grmRTLauncher(int argc, char** args, int isPrediction)
     int nResult = _access(fpnRef.c_str(), 0);
     if (nResult == -1
         || lower(fpn_ref.extension().string()) != ".ref") {
-        cout << "GRM real time simulation environment file"
-            + fpn_ref.string() + ") is invalid.\n";
+        cout << "GRM real time simulation environment file ("
+            + fpn_ref.string() + ") is not exist.\n";
         waitEnterKey();
         return -1;
     }
@@ -69,10 +69,25 @@ int grmRTLauncher(int argc, char** args, int isPrediction)
             else if (argc == 6) { //2017.6.20 원 : 디버깅 위해 1개 유역 call 한 경우
                 //strGUID = "????????-????-????-????-????????????";
                 strGUID = "9998";   //2018.8.10
-                //dtStartLine = DateTime.Now; //위에서 default로 지정됨. 2020.04.23.최
+                // startCommandTime 위에서 default로 지정됨. 2020.04.23.최
+                // rtStartDataTime 는 ref 파일에 있음
+            }
+            else if (argc == 5) { 
+                strGUID = args[4];
+                // startCommandTime 위에서 default로 지정됨. 2020.04.23.최
+                // rtStartDataTime 는 ref 파일에 있음
+            }
+            else if (argc == 4) {
+                strGUID = "1";
+                // startCommandTime 위에서 default로 지정됨. 2020.04.23.최
+                // rtStartDataTime 는 ref 파일에 있음
             }
             else {
-                cout << "args.Length Error. Typical statement is below." << endl;
+                cout << "args.Length Error. Typical statements are below." << endl;
+                cout << " grm.exe /r /p fpnRef " << endl;
+                cout << " grm.exe /r /p fpnRef strGUID" << endl;
+                cout << " grm.exe /r /p fpnRef strGUID startCommandTime " << endl;
+                cout << " grm.exe /r /p fpnRef strGUID startCommandTime rtStartDataTime" << endl;
                 cout << " grm.exe /r /p fpnRef strGUID startCommandTime rtStartDataTime strMODEL" << endl;
                 return -1 ;
             }
@@ -97,9 +112,24 @@ int grmRTLauncher(int argc, char** args, int isPrediction)
                 //strGUID = "????????-????-????-????-????????????";
                 strGUID = "9998";   //2018.8.10
                 // startCommandTime= //위에서 default로 지정됨. 2020.04.23.최
+                // rtStartDataTime 는 ref 파일에 있음
+            }
+            else if (argc == 4) {
+                strGUID = args[3];
+                // startCommandTime 위에서 default로 지정됨. 2020.04.23.최
+                // rtStartDataTime 는 ref 파일에 있음
+            }
+            else if (argc == 3) {
+                strGUID = "1";
+                // startCommandTime 위에서 default로 지정됨. 2020.04.23.최
+                // rtStartDataTime 는 ref 파일에 있음
             }
             else {
-                cout << "args.Length Error. Typical statement is below." << endl;
+                cout << "args.Length Error. Typical statements are below." << endl;
+                cout << " grm.exe /r fpnRef " << endl;
+                cout << " grm.exe /r fpnRef strGUID " << endl;
+                cout << " grm.exe /r fpnRef strGUID startCommandTime" << endl;
+                cout << " grm.exe /r fpnRef strGUID startCommandTime rtStartDataTime" << endl;
                 cout << " grm.exe /r fpnRef strGUID startCommandTime rtStartDataTime strMODEL" << endl;
                 return -1;
             }
