@@ -337,10 +337,11 @@ int makeNewOutputFiles()
         // ÇØ´õ
         string outPutLine;
         string comHeader;
-        tm ltm;
-        time_t now = time(0);
-        localtime_s(&ltm, &now);
-        string nowT = timeToString(ltm,
+        //tm ltm;
+        //time_t now = time(0);
+        //localtime_s(&ltm, &now);
+        COleDateTime tnow = COleDateTime::GetCurrentTime();
+        string nowT = timeToString(tnow,
             false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
         version grmVersion = getCurrentFileVersion();
         string ver = "GRM v."+to_string(grmVersion.major)+"."
