@@ -326,7 +326,7 @@ void updateFcDataStatusForEachFCcellGRMRT(string t_yyyymmddHHMM, int idx)
         msg = "  FC data 입력완료 ("
             + fcname + " [cvidx=" + to_string(idx) + "], "
             + t_yyyymmddHHMM
-            + ", Value=" + toStrWithPrecision(value,2) + ").\n";
+            + ", Value=" + dtos(value,2) + ").\n";
     }
     else {
         tsrt.newFcDataAddedRT[idx] = -1;
@@ -343,22 +343,55 @@ void updateRFdataGRMRT(string t_yyyymmddHHMM)
     timeNow = COleDateTime::GetCurrentTime();
     COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
     string tFromStart;
-    tFromStart = toStrWithPrecision(tsTotalSim.GetTotalMinutes(), 2);
+    tFromStart = dtos(tsTotalSim.GetTotalMinutes(), 2);
     if (tsrt.newRFAddedRT == 1 && ts.rfDataCountTotal > 0) {
         rainfallData arf;
         arf = rfs[ts.rfDataCountTotal-1];
-        writeLog(fpnLog, "  Rainfall data ("+arf.FileName + ") 분석완료. " 
+        writeLog(fpnLog, "  Rainfall data ("+arf.Rainfall + ") 분석완료. " 
             + tFromStart + "분 경과 \n", 1, 1);
         tsrt.newRFAddedRT = -1;
     }
+    //string fpn_map = "";
     switch (prj.rfDataType)
     {
     case rainfallDataType::TextFileASCgrid_mmPhr:
         writeLog(fpnLog, "[TextFileASCgrid_mmPhr] rainfall data  type is not supported yet.\n", 1, 1);
         return;
-    case rainfallDataType::TextFileMAP:
-        writeLog(fpnLog, "[TextFileMAP] rainfall data  type is not supported yet.\n", 1, 1);
-        return;
+    case rainfallDataType::TextFileMAP: {
+        // map는 지정된 폴더(RTRFfolderName)의 yyyymm.txt 파일에서 실시간 강우자료를 받는다.
+        // RTRFfolderName\\yyyymm.txt
+        // 데이터는 csv 형식이고, DataTime(yyyymmddHHMM), Value 순서이다.
+        string fpn_map;
+        string rfFileName;
+        rfFileName = rtef.headText_BeforeTString_RFN
+            + getYYYYMMfromYYYYMMddHHmm(t_yyyymmddHHMM)
+            + rtef.tailText_AfterTString_RFN_withExt;
+        fpn_map = rtef.fpRTRFfolder + "\\"+ rfFileName;
+        if (_access(fpn_map.c_str(), 0) != 0) {
+            break;
+        }
+        vector<string> sv;
+        sv = readTextFileToStringVector(fpn_map);
+        for (int i = 0; i < sv.size(); ++i) {
+            vector<string> sv_aline = splitToStringVector(sv[i], ',');
+            // cvs 파일은 DataTime, Value 순서이다.
+            if (sv_aline[0] == t_yyyymmddHHMM) {
+                ts.rfDataCountTotal += 1;
+                int rfOrder = ts.rfDataCountTotal;
+                rainfallData nrf;
+                nrf.Order = rfOrder;
+                nrf.DataTime = t_yyyymmddHHMM;
+                nrf.Rainfall = sv_aline[1]; // 
+                nrf.FileName = fpn_map;
+                rfs.push_back(nrf);
+                writeLog(fpnLog, "  Rainfall data 입력완료 ("+ nrf.Rainfall +
+                    " for "+ t_yyyymmddHHMM+" from "+ fpn_map + ").\n", 1, 1);
+                tsrt.newRFAddedRT = 1;
+                return;
+            }
+        }
+        break;
+    }
     case rainfallDataType::TextFileASCgrid: {
         string rfFileName;    // 2018년 8.8 현재 산출 naming
         string ascFPN;        // 2018년 8.8 현재 산출 naming
@@ -478,24 +511,24 @@ int openRtEnvFile(string fpnref)
             rtef.tailText_AfterTString_RFN_withExt = trim(vString);
             continue;
         }
+        if (aline.find(fn.IsFC) != string::npos) {
+            vString = getValueStringFromXmlLine(aline, fn.IsFC);
+            rtef.isFC = -1;
+            if (lower(vString) == "true") {
+                rtef.isFC = 1;
+            }
+            continue;
+        }
         if (aline.find(fn.RTFCdataFPN) != string::npos) {
             vString = getValueStringFromXmlLine(aline, fn.RTFCdataFPN);
             rtef.fpnRTFCdata = "";
             if (vString != "" && _access(vString.c_str(), 0) == 0) {
                 rtef.fpnRTFCdata = vString;
             }
-            else {
+            else if(rtef.isFC==1){
                 writeLog(fpnLog, "Real time flow control data file ["
                     + vString + "] is invalid.\n", 1, 1);
                 return -1;
-            }
-            continue;
-        }
-        if (aline.find(fn.IsFC) != string::npos) {
-            vString = getValueStringFromXmlLine(aline, fn.IsFC);
-            rtef.isFC = -1;
-            if (lower(vString) == "true") {
-                rtef.isFC = 1;
             }
             continue;
         }

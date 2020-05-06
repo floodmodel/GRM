@@ -42,9 +42,18 @@ flowControlCellAndData fccds;
 thisSimulation ts;
 
 
+extern double** ssrAry;
+extern double** rfAry;
+extern double** rfaccAry;
+extern double** QAry;
+//extern double** ssrAryL;
+//extern double** rfAryL;
+//extern double** rfaccAryL;
+//extern double** QAryL;
+
 string msgFileProcess;
 
-void main(int argc, char** args)
+int main(int argc, char** args)
 {
 	string exeName = "GRM";
 	version grmVersion = getCurrentFileVersion();
@@ -61,7 +70,7 @@ void main(int argc, char** args)
 	if (argc == 1) {
 		printf("GRM project file was not entered or invalid arguments.\n");
 		grmHelp();
-		return;
+		return 1;
 	}
 	prj.deleteAllFilesExceptDischargeOut = -1;
 	setlocale(LC_ALL, "korean");
@@ -72,7 +81,7 @@ void main(int argc, char** args)
 		string arg1L = lower(trim(arg1));
 		if (arg1L == "/?" || arg1L == "/help") {
 			grmHelp();
-			return;
+			return 1;
 		}
 		// 이경우는 grm.exe  fpn_gmp 인 경우
 		startSingleEventRun(arg1, -1, outString);
@@ -101,7 +110,7 @@ void main(int argc, char** args)
 				isPrediction = 1;
 			}
 			if (grmRTLauncher(argc, args, isPrediction) == -1) {
-				return;
+				return 1;
 			}
 		}
 
@@ -122,7 +131,7 @@ void main(int argc, char** args)
 					if (gmpFiles.size() == 0) {
 						printf("There is no GRM project file in this directory.\n");
 						waitEnterKey();
-						return;
+						return -1;
 					}
 					if (arg1 == "/fd") {
 						prj.deleteAllFilesExceptDischargeOut = 1;
@@ -132,7 +141,7 @@ void main(int argc, char** args)
 				else {
 					printf("Project folder is invalid!!\n");
 					waitEnterKey();
-					return;
+					return -1;
 				}
 			}
 		}
@@ -159,19 +168,19 @@ void main(int argc, char** args)
 				if (gmpFiles.size() == 0) {
 					printf("There is no GRM project file in this directory.\n");
 					waitEnterKey();
-					return;
+					return -1;
 				}
 				startGMPsRun(gmpFiles, isP, outString);
 			}
 			else {
 				printf("Project folder is invalid!!\n");
 				waitEnterKey();
-				return;
+				return -1;
 			}
 		}
 	}
 	disposeDynamicVars();
-	return;
+	return 1;
 }
 
 int startSingleEventRun(string fpnGMP, int isPrediction, string outString)
@@ -205,7 +214,7 @@ int startGMPsRun(vector<string> gmpFiles, int isPrediction, string outString)
 		ppi = getProjectFileInfo(gmpFiles[n]);
 		writeNewLog(fpnLog, outString, 1, -1);
 		string progF = to_string(n + 1) + '/' + to_string(gmpFiles.size());
-		string progR = toStrWithPrecision(((n + 1) / nFiles * 100), 2);
+		string progR = dtos(((n + 1) / nFiles * 100), 2);
 		msgFileProcess = "Total progress: " + progF + "(" + progR + "%). ";
 		if (simulateSingleEvent() == -1) {
 			waitEnterKey();
@@ -232,7 +241,9 @@ void disposeDynamicVars()
 		for (int i = 0; i < di.nCols; ++i) {
 			if (cvais[i] != NULL) { delete[] cvais[i]; }
 		}
+		delete[] cvais;
 	}
+	
 	if (cvs != NULL) { delete[] cvs; }
 	if (cvsb != NULL) { delete[] cvsb; }
 
@@ -245,6 +256,55 @@ void disposeDynamicVars()
 			}				
 		}
 	}
+
+	if (ssrAry != NULL) {
+		for (int i = 0; i < di.nCols; ++i) {
+			if (ssrAry[i] != NULL) { delete[] ssrAry[i]; }
+		}
+		delete[] ssrAry;
+	}
+	if (rfAry != NULL) {
+		for (int i = 0; i < di.nCols; ++i) {
+			if (rfAry[i] != NULL) { delete[] rfAry[i]; }
+		}
+		delete[] rfAry;
+	}
+	if (rfaccAry != NULL) {
+		for (int i = 0; i < di.nCols; ++i) {
+			if (rfaccAry[i] != NULL) { delete[] rfaccAry[i]; }
+		}
+		delete[] rfaccAry;
+	}
+	if (QAry != NULL) {
+		for (int i = 0; i < di.nCols; ++i) {
+			if (QAry[i] != NULL) { delete[] QAry[i]; }
+		}
+		delete[] QAry;
+	}
+	//if (ssrAryL != NULL) {
+	//	for (int i = 0; i < di.nCols; ++i) {
+	//		if (ssrAryL[i] != NULL) { delete[] ssrAryL[i]; }
+	//	}
+	//	delete[] ssrAryL;
+	//}
+	//if (rfAryL != NULL) {
+	//	for (int i = 0; i < di.nCols; ++i) {
+	//		if (rfAryL[i] != NULL) { delete[] rfAryL[i]; }
+	//	}
+	//	delete[] rfAryL;
+	//}
+	//if (rfaccAryL != NULL) {
+	//	for (int i = 0; i < di.nCols; ++i) {
+	//		if (rfaccAryL[i] != NULL) { delete[] rfaccAryL[i]; }
+	//	}
+	//	delete[] rfaccAryL;
+	//}
+	//if (QAryL != NULL) {
+	//	for (int i = 0; i < di.nCols; ++i) {
+	//		if (QAryL[i] != NULL) { delete[] QAryL[i]; }
+	//	}
+	//	delete[] QAryL;
+	//}
 }
 
 int simulateSingleEvent()
@@ -330,7 +390,7 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 }
 
 
-void grmH elp() // /r, /p 설명 추가
+void grmHelp() // /r, /p 설명 추가
 {
 	printf("\n");
 	printf(" Usage : GRM [Current project file full path and name to simulate]\n");

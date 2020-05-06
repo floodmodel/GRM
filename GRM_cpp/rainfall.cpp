@@ -143,7 +143,7 @@ int setCVRF(int order)
         }
         ts.rfiSumAllCellsInCurRFData_mPs = inRF_mPs * di.cellNtobeSimulated;
         for (int idx : wpis.wpCVidxes) {
-            wpis.rfiReadSumUpWS_mPs[idx] = inRF_mm * wpis.cvCountAllup[idx];
+            wpis.rfiReadSumUpWS_mPs[idx] = inRF_mPs * wpis.cvCountAllup[idx];
         }
     }
     else {
@@ -169,7 +169,7 @@ int setCVRF(int order)
     }
 }
 
- void calCumulRFduringDTP(int dtsec)
+ void calWPCumulRFduringDTP(int dtsec)
  {
      ts.rfAveForDT_m = ts.rfiSumAllCellsInCurRFData_mPs * dtsec
          / di.cellNtobeSimulated;
@@ -182,17 +182,6 @@ int setCVRF(int order)
              + wpis.rfUpWSAveForDt_mm[idx];
          wpis.rfWPGridForDtP_mm[idx] = wpis.rfWPGridForDtP_mm[idx]
              + cvs[idx].rfiRead_mPsec * 1000 * dtsec;
-     }
-     if (prj.makeASCorIMGfile == 1 ) {
-         if (prj.makeRfDistFile == 1 || prj.makeRFaccDistFile == 1) {
-#pragma omp parallel for schedule(guided)
-             for (int i = 0; i < di.cellNtobeSimulated; ++i) {
-                 cvs[i].rf_dtPrint_m = cvs[i].rf_dtPrint_m
-                     + cvs[i].rfiRead_mPsec * dtsec;
-                 cvs[i].rfAcc_fromStart_m = cvs[i].rfAcc_fromStart_m
-                     + cvs[i].rfiRead_mPsec * dtsec;
-             }
-         }
      }
  }
      

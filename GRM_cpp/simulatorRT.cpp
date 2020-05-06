@@ -41,12 +41,12 @@ int startSimulationRT()
         //dtsec = ts.dtsec;        
         // dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
         if (rfOrder == 0 || nowTsec > dtRF_sec * ts.rfDataCountTotal) {
-            string targetRFLayerTime;
+            string targetRFTime;
             int rft_sec = rfOrder * dtRF_sec;
-            targetRFLayerTime = timeElaspedToDateTimeFormat(prj.simStartTime, rft_sec,
+            targetRFTime = timeElaspedToDateTimeFormat(prj.simStartTime, rft_sec,
                 timeUnitToShow::toMinute, dateTimeFormat::yyyymmddHHMMSS);
             while (ts.stopSim == -1) {
-                updateRFdataGRMRT(targetRFLayerTime);
+                updateRFdataGRMRT(targetRFTime);
                 if (rfOrder < ts.rfDataCountTotal) { break; }
                 _sleep(2000);// 2초 지연 적절함
             }
@@ -66,8 +66,8 @@ int startSimulationRT()
                     if (nowTsec > dt_min * 60 * fccds.curDorder[idx]
                         || fccds.curDorder[idx] == 0) {
                         string targetDataTime;
-                        int fct_sec = fccds.curDorder[idx] * dt_min * 60;
-                        targetDataTime = timeElaspedToDateTimeFormat(prj.simStartTime, fct_sec,
+                        int fcdt_sec = fccds.curDorder[idx] * dt_min * 60;
+                        targetDataTime = timeElaspedToDateTimeFormat(prj.simStartTime, fcdt_sec,
                             timeUnitToShow::toMinute, dateTimeFormat::yyyymmddHHMMSS);
                         while (ts.stopSim == -1) {
                             if (CONST_bUseDBMS_FOR_RealTimeSystem == true) {
@@ -104,7 +104,7 @@ int startSimulationRT()
         }
         nowTmin = nowTsec / 60.0;
         if (simulateRunoff(nowTmin) == -1) { return -1; }
-        calCumulRFduringDTP(ts.dtsec);
+        calWPCumulRFduringDTP(ts.dtsec);
         outputManager(nowTsec, rfOrder);
         if (nowTsec + ts.dtsec > endingT_sec) {
             ts.dtsec = nowTsec + ts.dtsec - endingT_sec;

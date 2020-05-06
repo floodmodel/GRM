@@ -1,6 +1,7 @@
 #include <io.h>
 #include <string>
 #include <thread>
+#include <algorithm>
 
 #include "grm.h"
 #include "gentle.h"
@@ -32,6 +33,10 @@ double** ssrAry;
 double** rfAry;
 double** rfaccAry;
 double** QAry;
+//double** ssrAryL;
+//double** rfAryL;
+//double** rfaccAryL;
+//double** QAryL;
 int bssr =0;
 int brf = 0;
 int brfacc = 0;
@@ -51,28 +56,44 @@ void initRasterOutput()
 {
     if (prj.makeSoilSaturationDistFile == 1) {
         ssrAry = new double* [di.nCols];
+        //ssrAryL = new double* [di.nCols];
         for (int i = 0; i < di.nCols; ++i) {
             ssrAry[i] = new double[di.nRows];
+            //ssrAryL[i] = new double[di.nRows];
         }
     }
     if (prj.makeRfDistFile == 1) {
         rfAry = new double* [di.nCols];
+        //rfAryL = new double* [di.nCols];
         for (int i = 0; i < di.nCols; ++i) {
             rfAry[i] = new double[di.nRows];
+            //rfAryL[i] = new double[di.nRows];
         }
     }
     if (prj.makeRFaccDistFile == 1) {
         rfaccAry = new double* [di.nCols];
+        //rfaccAryL = new double* [di.nCols];
         for (int i = 0; i < di.nCols; ++i) {
             rfaccAry[i] = new double[di.nRows];
+            //rfaccAryL[i] = new double[di.nRows];
         }
     }
     if (prj.makeFlowDistFile == 1) {
         QAry = new double* [di.nCols];
+        //QAryL = new double* [di.nCols];
         for (int i = 0; i < di.nCols; ++i) {
             QAry[i] = new double[di.nRows];
+            //QAryL[i] = new double[di.nRows];
         }
     }
+    //memset(ssrAry, 0, sizeof(ssrAry)); 
+    //memset(rfAry, 0, sizeof(rfAry));
+    //memset(rfaccAry, 0, sizeof(rfaccAry));
+    //memset(QAry, 0, sizeof(QAry));
+    //memset(ssrAryL, 0, sizeof(ssrAryL));
+    //memset(rfAryL, 0, sizeof(rfAryL));
+    //memset(rfaccAryL, 0, sizeof(rfaccAryL));
+    //memset(QAryL, 0, sizeof(QAryL));
     bssr = prj.makeSoilSaturationDistFile;
     brf = prj.makeRfDistFile;
     brfacc = prj.makeRFaccDistFile;
@@ -172,12 +193,73 @@ void makeRasterOutput(int nowTmin)
             }
         }
     }
-    joinOutputThreads();
+    //joinOutputThreads();
 }
 
+//int setRasterOutputArray()
+//{
+//
+//#pragma omp parallel for 
+//    for (int ry = 0; ry < di.nRows; ++ry) {
+//        for (int cx = 0; cx < di.nCols; ++cx) {
+//            int i = cvais[cx][ry];
+//            if (i > 0 && cvs[i].toBeSimulated == 1) {
+//                if (bssr == 1) {
+//                    ssrAryL[cx][ry] = cvs[i].ssr;
+//                }
+//                if (brf == 1) {
+//                    rfAryL[cx][ry] = cvs[i].rf_dtPrint_m * 1000;
+//                }
+//                if (brfacc == 1) {
+//                    rfaccAryL[cx][ry] = cvs[i].rfAcc_fromStart_m * 1000;
+//                }
+//                if (bQ == 1) {
+//                    double v;
+//                    if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+//                        v = cvs[i].QOF_m3Ps;
+//                    }
+//                    else {
+//                        v = cvs[i].stream.QCH_m3Ps;
+//                    }
+//                    QAryL[cx][ry] = v;
+//                }
+//                cvs[i].rf_dtPrint_m = 0; // 여기서 바로 초기화 한다.
+//            }
+//            else {
+//                if (bssr == 1) {
+//                    ssrAryL[cx][ry] = -9999;
+//                }
+//                if (brf == 1) {
+//                    rfAryL[cx][ry] = -9999;
+//                }
+//                if (brfacc == 1) {
+//                    rfaccAryL[cx][ry] = -9999;
+//                }
+//                if (bQ == 1) {
+//                    QAryL[cx][ry] = -9999;
+//                }
+//            }
+//        }
+//    }
+//    if (bssr == 1) {
+//        copy(&ssrAryL[0][0], &ssrAryL[0][0] + di.nRows * di.nCols, &ssrAry[0][0]);
+//    }
+//    if (brf == 1) {
+//        copy(&rfAryL[0][0], &rfAryL[0][0] + di.nRows * di.nCols, &rfAry[0][0]);
+//    }
+//    if (brfacc == 1) {
+//        copy(&rfaccAryL[0][0], &rfaccAryL[0][0] + di.nRows * di.nCols, &rfaccAry[0][0]);
+//    }
+//    if (bQ == 1) {
+//        copy(&QAryL[0][0], &QAryL[0][0] + di.nRows * di.nCols, &QAry[0][0]);
+//    }
+//    return 1;
+//}
 
 int setRasterOutputArray()
 {
+
+#pragma omp parallel for 
     for (int ry = 0; ry < di.nRows; ++ry) {
         for (int cx = 0; cx < di.nCols; ++cx) {
             int i = cvais[cx][ry];

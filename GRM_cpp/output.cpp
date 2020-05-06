@@ -31,11 +31,10 @@ extern string msgFileProcess;
 void writeSimStep(int elapsedT_min)
 {
     double nowStep;
-    string curProgressRatio = "";
     double simDur_min = prj.simDuration_hr * 60.0;
+    //nowStep = elapsedT_min / (double)ts.simDuration_min * 100.0;
     nowStep = elapsedT_min / simDur_min * 100.0;
-    curProgressRatio = toStrWithPrecision(nowStep, 0);
-    cout<<"\rCurrent progress: " + curProgressRatio + "%..." + msgFileProcess;
+    printf("\rCurrent progress: %.0f%%... %s", nowStep, msgFileProcess);
 }
 
 
@@ -49,14 +48,14 @@ void writeSingleEvent(int nowTmin, double cinterp)
     aveRFSumForDTP_mm = ts.rfAveSumAllCells_dtP_m * 1000.0;
     timeNow = COleDateTime::GetCurrentTime();
     COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
-    tsFromStarting_sec = toStrWithPrecision(tsTotalSim.GetTotalSeconds(), 0);
+    tsFromStarting_sec = dtos(tsTotalSim.GetTotalSeconds(), 0);
     if (prj.isDateTimeFormat == 1) {
         tStrToPrint = timeElaspedToDateTimeFormat2(prj.simStartTime,
             nowTmin * 60,  timeUnitToShow::toMinute, 
             dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
     }
     else {
-        tStrToPrint = toStrWithPrecision(nowTmin / 60.0, 2);
+        tStrToPrint = dtos(nowTmin / 60.0, 2);
     }
     // À¯·® =================================================
     string lineToP;
@@ -64,26 +63,26 @@ void writeSingleEvent(int nowTmin, double cinterp)
     for (int i : wpis.wpCVidxes) {
         if (cinterp == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                vToP = toStrWithPrecision(cvs[i].QOF_m3Ps, 2);
+                vToP = dtos(cvs[i].QOF_m3Ps, 2);
             }
             else {
-                vToP = toStrWithPrecision(cvs[i].stream.QCH_m3Ps, 2);
+                vToP = dtos(cvs[i].stream.QCH_m3Ps, 2);
             }
         }
         else if (ts.isbak == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                vToP = toStrWithPrecision(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
+                vToP = dtos(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
                     cvs[i].QOF_m3Ps, cinterp), 2);
             }
             else {
-                vToP = toStrWithPrecision(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
+                vToP = dtos(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
                     cvs[i].stream.QCH_m3Ps, cinterp), 2);
             }
         }
         else {
             vToP = "0";
         }
-        lineToP = lineToP + "\t" + vToP;
+        lineToP +=  "\t" + vToP;
         double sv = stod(vToP);
         wpis.totalFlow_cms[i] = wpis.totalFlow_cms[i] + sv;
         wpis.qprint_cms[i] = sv;
@@ -93,7 +92,7 @@ void writeSingleEvent(int nowTmin, double cinterp)
         }
         writeWPouput(tStrToPrint, i, cinterp);
     }
-    lineToP = lineToP + "\t" + toStrWithPrecision(aveRFSumForDTP_mm, 2)
+    lineToP += "\t" + dtos(aveRFSumForDTP_mm, 2)
         + "\t" + tsFromStarting_sec + "\n";
     appendTextToTextFile(ofs.ofpnDischarge, lineToP);
 
@@ -105,24 +104,24 @@ void writeSingleEvent(int nowTmin, double cinterp)
         fcStorage = tStrToPrint;
         if (cinterp == 1) {
             for (int idx : fccds.cvidxsFCcell) {
-                fcflow = fcflow + "\t" 
-                    + toStrWithPrecision(fccds.fcDataAppliedNowT_m3Ps[idx], 2);
-                fcStorage = fcStorage + "\t" 
-                    + toStrWithPrecision(cvs[idx].storageCumulative_m3, 2);
+                fcflow += "\t" 
+                    + dtos(fccds.fcDataAppliedNowT_m3Ps[idx], 2);
+                fcStorage += "\t" 
+                    + dtos(cvs[idx].storageCumulative_m3, 2);
             }
         }
         else if(ts.isbak==1){
             for (int idx : fccds.cvidxsFCcell) {
-                fcflow = fcflow + "\t"
-                    + toStrWithPrecision(getinterpolatedVLinear( fcdAb[idx],
+                fcflow += "\t"
+                    + dtos(getinterpolatedVLinear( fcdAb[idx],
                         fccds.fcDataAppliedNowT_m3Ps[idx], cinterp), 2);
-                fcStorage = fcStorage + "\t"
-                    + toStrWithPrecision(getinterpolatedVLinear(cvsb[idx].storageCumulative_m3,
+                fcStorage += "\t"
+                    + dtos(getinterpolatedVLinear(cvsb[idx].storageCumulative_m3,
                         cvs[idx].storageCumulative_m3, cinterp), 2);
             }
         }        
-        fcflow = fcflow + "\n";
-        fcStorage = fcStorage + "\n";
+        fcflow += "\n";
+        fcStorage += "\n";
         appendTextToTextFile(ofs.ofpnFCData, fcflow);
         appendTextToTextFile(ofs.ofpnFCStorage, fcStorage);
     }
@@ -135,30 +134,30 @@ void writeWPouput(string nowTP, int i, double cinterp)
     //int i = i + 1;
     string oStr;
     oStr.append(nowTP + "\t");
-    oStr.append(toStrWithPrecision(wpis.qprint_cms[i], 2) + "\t");
+    oStr.append(dtos(wpis.qprint_cms[i], 2) + "\t");
     if (cinterp == 1) {
-        oStr.append(toStrWithPrecision(cvs[i].hUAQfromChannelBed_m, 4) + "\t");
-        oStr.append(toStrWithPrecision(cvs[i].soilWaterC_m, 4) + "\t");
-        oStr.append(toStrWithPrecision(cvs[i].ssr, 4) + "\t");
-        oStr.append(toStrWithPrecision(wpis.rfWPGridForDtP_mm[i], 2) + "\t");
-        oStr.append(toStrWithPrecision(wpis.rfUpWSAveForDtP_mm[i], 2) + "\t");
-        oStr.append(toStrWithPrecision(wpis.qFromFCData_cms[i], 2) + "\t");
-        oStr.append(toStrWithPrecision(cvs[i].storageCumulative_m3, 2) + "\n");
+        oStr.append(dtos(cvs[i].hUAQfromChannelBed_m, 4) + "\t");
+        oStr.append(dtos(cvs[i].soilWaterC_m, 4) + "\t");
+        oStr.append(dtos(cvs[i].ssr, 4) + "\t");
+        oStr.append(dtos(wpis.rfWPGridForDtP_mm[i], 2) + "\t");
+        oStr.append(dtos(wpis.rfUpWSAveForDtP_mm[i], 2) + "\t");
+        oStr.append(dtos(wpis.qFromFCData_cms[i], 2) + "\t");
+        oStr.append(dtos(cvs[i].storageCumulative_m3, 2) + "\n");
     }
     else if (ts.isbak == 1) {
-        oStr.append(toStrWithPrecision(getinterpolatedVLinear(cvsb[i].hUAQfromChannelBed_m,
+        oStr.append(dtos(getinterpolatedVLinear(cvsb[i].hUAQfromChannelBed_m,
             cvs[i].hUAQfromChannelBed_m, cinterp), 4) + "\t");
-        oStr.append(toStrWithPrecision(getinterpolatedVLinear(cvsb[i].soilWaterC_m,
+        oStr.append(dtos(getinterpolatedVLinear(cvsb[i].soilWaterC_m,
             cvs[i].soilWaterC_m, cinterp), 4) + "\t");
-        oStr.append(toStrWithPrecision(getinterpolatedVLinear(cvsb[i].ssr,
+        oStr.append(dtos(getinterpolatedVLinear(cvsb[i].ssr,
             cvs[i].ssr, cinterp), 4) + "\t");
-        oStr.append(toStrWithPrecision(getinterpolatedVLinear(wpisb.rfWPGridForDtP_mm[i],
+        oStr.append(dtos(getinterpolatedVLinear(wpisb.rfWPGridForDtP_mm[i],
             wpis.rfWPGridForDtP_mm[i], cinterp), 2) + "\t");
-        oStr.append(toStrWithPrecision(getinterpolatedVLinear(wpisb.rfUpWSAveForDtP_mm[i],
+        oStr.append(dtos(getinterpolatedVLinear(wpisb.rfUpWSAveForDtP_mm[i],
             wpis.rfUpWSAveForDtP_mm[i], cinterp), 2) + "\t");
-        oStr.append(toStrWithPrecision(getinterpolatedVLinear(wpisb.qFromFCData_cms[i],
+        oStr.append(dtos(getinterpolatedVLinear(wpisb.qFromFCData_cms[i],
             wpis.qFromFCData_cms[i], cinterp), 2) + "\t");
-        oStr.append(toStrWithPrecision(getinterpolatedVLinear(cvsb[i].storageCumulative_m3,
+        oStr.append(dtos(getinterpolatedVLinear(cvsb[i].storageCumulative_m3,
             cvs[i].storageCumulative_m3, cinterp), 2) + "\n");
     }
     appendTextToTextFile(ofs.ofpnWPs[i], oStr);
@@ -172,19 +171,19 @@ void writeDischargeOnly(double cinterp, int writeWPfiles)
     for (int idx : wpis.wpCVidxes) {
         if (cinterp == 1) {
             if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
-                vToP = toStrWithPrecision(cvs[idx].QOF_m3Ps, 2);
+                vToP = dtos(cvs[idx].QOF_m3Ps, 2);
             }
             else {
-                vToP = toStrWithPrecision(cvs[idx].stream.QCH_m3Ps, 2);
+                vToP = dtos(cvs[idx].stream.QCH_m3Ps, 2);
             }
         }
         else if (ts.isbak == 1) {
             if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
-                vToP = toStrWithPrecision(getinterpolatedVLinear(cvsb[idx].QOF_m3Ps,
+                vToP = dtos(getinterpolatedVLinear(cvsb[idx].QOF_m3Ps,
                     cvs[idx].QOF_m3Ps, cinterp), 2);
             }
             else {
-                vToP = toStrWithPrecision(getinterpolatedVLinear(cvsb[idx].stream.QCH_m3Ps,
+                vToP = dtos(getinterpolatedVLinear(cvsb[idx].stream.QCH_m3Ps,
                     cvs[idx].stream.QCH_m3Ps, cinterp), 2);
             }
         }

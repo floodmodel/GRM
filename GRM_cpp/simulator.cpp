@@ -51,7 +51,7 @@ int startSimulationSingleEvent()
         }
         nowTmin = nowTsec / 60.0;
         if (simulateRunoff(nowTmin) == -1) { return -1; }
-        calCumulRFduringDTP(ts.dtsec);
+        calWPCumulRFduringDTP(ts.dtsec);
         outputManager(nowTsec, rfOrder);
         if (nowTsec + ts.dtsec > endingT_sec) {
             ts.dtsec = nowTsec + ts.dtsec - endingT_sec;
@@ -100,7 +100,7 @@ int simulateRunoff(double nowTmin)
             // 배열 사용하는 것이 critical 보다 빠르다..
             int nth = omp_get_thread_num();
             uMax[nth] = DBL_MIN;
-#pragma omp for//  guided 안쓰는더 더 빠르다..
+#pragma omp for//  guided 안쓰는게 더 빠르다..
             for (int e = 0; e < iterLimit; ++e) {
                 int i = cvaisToFA[fac][e];
                 if (cvs[i].toBeSimulated == 1) {
@@ -134,6 +134,12 @@ void simulateRunoffCore(int i, double nowTmin)
     int fac = cvs[i].fac;
     int dtsec = ts.dtsec;
     double cellsize = di.cellSize;
+    if (prj.makeRFraster == 1){
+        cvs[i].rf_dtPrint_m = cvs[i].rf_dtPrint_m
+            + cvs[i].rfiRead_mPsec * dtsec;
+        cvs[i].rfAcc_fromStart_m = cvs[i].rfAcc_fromStart_m
+            + cvs[i].rfiRead_mPsec * dtsec;
+    }
     if (prj.simFlowControl == 1 &&
         (cvs[i].fcType == flowControlType::ReservoirOutflow ||
             cvs[i].fcType == flowControlType::Inlet)) {

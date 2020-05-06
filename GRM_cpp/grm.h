@@ -672,6 +672,7 @@ typedef struct _projectFile
 	int icfFileApplied = 0;
 	int issrFileApplied = 0;
 	int makeASCorIMGfile = 0;
+	int makeRFraster = 0;
 	int applyFC = 0;
 
 	CPUsInfo cpusi;
@@ -725,7 +726,7 @@ double calRFlowAndSSFlow(int i,
 void calBFLateralMovement(int i,
 	int facMin, double dY_m, double dtsec);
 void calChannelFlow(int i, double chCSACVw_tp1);
-void calCumulRFduringDTP(int dtsec);
+void calWPCumulRFduringDTP(int dtsec);
 void calFCReservoirOutFlow(int i, double nowTmin); //i´Â cv array index
 void calEffectiveRainfall(int i, int dtrf_sec, int dtsec);
 void calOverlandFlow(int i, double hCVw_tp1,

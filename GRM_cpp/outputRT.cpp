@@ -37,19 +37,19 @@ void writeRealTimeSimResults(int nowTmin, double cinterp)
     for (int i : wpis.wpCVidxes) {
         if (cinterp == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                vToP = toStrWithPrecision(cvs[i].QOF_m3Ps, 2);
+                vToP = dtos(cvs[i].QOF_m3Ps, 2);
             }
             else {
-                vToP = toStrWithPrecision(cvs[i].stream.QCH_m3Ps, 2);
+                vToP = dtos(cvs[i].stream.QCH_m3Ps, 2);
             }
         }
         else if (ts.isbak == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-                vToP = toStrWithPrecision(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
+                vToP = dtos(getinterpolatedVLinear(cvsb[i].QOF_m3Ps,
                     cvs[i].QOF_m3Ps, cinterp), 2);
             }
             else {
-                vToP = toStrWithPrecision(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
+                vToP = dtos(getinterpolatedVLinear(cvsb[i].stream.QCH_m3Ps,
                     cvs[i].stream.QCH_m3Ps, cinterp), 2);
             }
         }
@@ -60,9 +60,9 @@ void writeRealTimeSimResults(int nowTmin, double cinterp)
             string strOutPutLine;
             // 출력 순서는 시간, 모의유량, 관측유량, 강우, 시간
             strOutPutLine = tStrToPrint
-                + "\t" + vToP + "\t" + toStrWithPrecision(Qobs_cms, 2)
-                + "\t" + toStrWithPrecision(wpis.rfUpWSAveForDtP_mm[i], 2)
-                + "\t" + toStrWithPrecision(tsFromStarting_sec / 60.0, 2) + "\n";
+                + "\t" + vToP + "\t" + dtos(Qobs_cms, 2)
+                + "\t" + dtos(wpis.rfUpWSAveForDtP_mm[i], 2)
+                + "\t" + dtos(tsFromStarting_sec / 60.0, 2) + "\n";
             appendTextToTextFile(ofs.ofpnWPs[i], strOutPutLine);
         }
 

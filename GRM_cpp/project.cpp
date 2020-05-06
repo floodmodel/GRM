@@ -384,6 +384,12 @@ int openProjectFile(int forceRealTime)
 
 	if (prj.makeASCFile == 1 || prj.makeIMGFile == 1) {
 		prj.makeASCorIMGfile = 1;
+		if (prj.makeRfDistFile == 1 || prj.makeRFaccDistFile == 1) {
+			prj.makeRFraster = 1;
+		}
+		else {
+			prj.makeRFraster = -1;
+		}
 	}
 	else {
 		prj.makeASCorIMGfile = -1;
