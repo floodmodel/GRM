@@ -5,6 +5,10 @@
 using namespace std;
 namespace fs = std::filesystem;
 
+#define CFL_NUMBER  1.0
+#define TOLERANCE  0.001
+#define WETDRY_CRITERIA 0.000001
+
 //const string CONST_GMP_FILE_EXTENSION = ".gmp";
 const string CONST_TAG_DISCHARGE = "Discharge.out";
 const string CONST_TAG_DEPTH = "Depth.out";
@@ -26,11 +30,9 @@ const string CONST_OUTPUT_TABLE_TIME_FIELD_NAME = "DataTime";
 const string CONST_OUTPUT_TABLE_MEAN_RAINFALL_FIELD_NAME = "Rainfall_Mean";
 
 const double CONST_MIN_SLOPE = 0.000001;
-const double CONST_CFL_NUMBER = 1.0;
 const double CONST_EXPONENTIAL_NUMBER_UNSATURATED_K = 6.4;
-const double CONST_WEDGE_FLOW_COEFF = 1; // 최상류 셀의 쐐기 흐름 계산시 p의 수심에 곱해지는 계수
-const double CONST_WET_AND_DRY_CRITERIA = 0.000001;
-const double CONST_TOLERANCE = 0.001;
+//const double CONST_WEDGE_FLOW_COEFF = 1; // 최상류 셀의 쐐기 흐름 계산시 p의 수심에 곱해지는 계수
+
 const double CONST_DEPTH_TO_BEDROCK = 20;// 암반까지의 깊이[m]
 const double CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN = 10;// 산악지역에서의 암반까지의 깊이[m]
 const double CONST_DEPTH_TO_UNCONFINED_GROUNDWATERTABEL = 10;// 비피압대수층까지의 깊이[m]
@@ -343,7 +345,6 @@ typedef struct _swsParameters
 typedef struct _wsNetwork
 {
 	map <int, vector<int>> wsidsNearbyUp; //상류는 여러개일 수 있다.
-	//map <int, vector<int>> wsidsNearbyDown; 
 	map <int, int> wsidNearbyDown; //하류는 하나다
 	map <int, vector<int>> wsidsAllUp;
 	map <int, vector<int>> wsidsAllDown;
@@ -761,7 +762,7 @@ double getChDepthUsingCSA(double baseWidthLRegion,
 	double LRegionHeight, double chBankConst);
 int getCVidxByFcName(string fcName);
 
-int getDTsec(double cfln, double dx, 
+int getDTsec(double dx, 
 	double vMax, int dtMax_min, 
 	int dtMin_min);
 double getinfiltrationForDtAfterPonding(int i, int dtSEC,
@@ -804,16 +805,7 @@ void makeASC_flow();
 int makeNewOutputFiles();
 void makeRasterOutput(int nowTmin);
 
-//channelSettingInfo nullChannelSettingInfo();
-//flowControlinfo nullFlowControlinfo();
-//swsParameters nullSwsParameters();
-//wpLocationRC nullWatchPointInfo();
-//soilTextureInfo nullSoilTextureInfo();
-//soilDepthInfo nullSoilDepthInfo();
-//landCoverInfo nullLandCoverInfo();
-
 int openProjectFile(int forceRealTime);
-//int openProjectFile_old(int forceRealTime);
 int openPrjAndSetupModel(int forceRealTime);//1:true, -1:false
 void outputManager(int nowTsec,
 	int nowRForder);
@@ -939,8 +931,6 @@ public:
 	int soilTextureValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
 	int soilDepthValue(int colXAryidx, int rowYAryidx);// 배열 인덱스 사용
 	vector<string> allCellsInUpstreamArea(int colXAryidx, int rowYAryidx);
-	//vector<string> allCellsInUpstreamArea_Array(int colXAryidx, //    Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
-		//int rowYAryidx);
 	int cellCountInUpstreamArea(int colXAryidx, //  Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
 		int rowYAryidx);
 

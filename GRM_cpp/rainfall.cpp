@@ -72,7 +72,7 @@ int setRainfallData()
         }
         if (prj.isDateTimeFormat == 1) {
             r.DataTime = timeElaspedToDateTimeFormat2(prj.simStartTime,
-                prj.rfinterval_min * 60 * n, timeUnitToShow::toMinute,
+                prj.rfinterval_min * 60 * n, timeUnitToShow::toM,
                 dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
         }
         else {

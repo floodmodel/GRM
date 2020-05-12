@@ -152,7 +152,7 @@ double getinfiltrationForDtAfterPonding(int i, int dtSEC,
         dFx = 1 - CONSTGreenAmpt / (CI_n + CONSTGreenAmpt);
         CI_nP1 = CI_n - Fx / dFx;
         err = abs(CI_nP1 - CI_n);
-        conCriteria = (CI_n * CONST_TOLERANCE);
+        conCriteria = (CI_n * TOLERANCE);
         if (err < conCriteria) {
             double dF = CI_nP1 - constCI_tm1;
             if (dF < 0)

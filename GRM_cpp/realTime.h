@@ -10,7 +10,7 @@ const bool CONST_bWriteTextFileOutput_FOR_RealTimeSystem = true;
 const string g_strDBMSCnn = 
 "data source=REALGRM\\SQLEXPRESS;Initial catalog=RealTimeGRM;Integrated Security=true";  // 2018.8.
 
-const bool isPrediction = false;//2019.10.01. 최. prediction 관련
+//const bool isPrediction = false;//2019.10.01. 최. prediction 관련
 
 
 typedef struct _realTimeEnvFileFieldName

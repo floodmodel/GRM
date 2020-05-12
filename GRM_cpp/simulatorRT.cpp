@@ -44,7 +44,7 @@ int startSimulationRT()
             string targetRFTime;
             int rft_sec = rfOrder * dtRF_sec;
             targetRFTime = timeElaspedToDateTimeFormat(prj.simStartTime, rft_sec,
-                timeUnitToShow::toMinute, dateTimeFormat::yyyymmddHHMMSS);
+                timeUnitToShow::toM, dateTimeFormat::yyyymmddHHMMSS);
             while (ts.stopSim == -1) {
                 updateRFdataGRMRT(targetRFTime);
                 if (rfOrder < ts.rfDataCountTotal) { break; }
@@ -68,7 +68,7 @@ int startSimulationRT()
                         string targetDataTime;
                         int fcdt_sec = fccds.curDorder[idx] * dt_min * 60;
                         targetDataTime = timeElaspedToDateTimeFormat(prj.simStartTime, fcdt_sec,
-                            timeUnitToShow::toMinute, dateTimeFormat::yyyymmddHHMMSS);
+                            timeUnitToShow::toM, dateTimeFormat::yyyymmddHHMMSS);
                         while (ts.stopSim == -1) {
                             if (CONST_bUseDBMS_FOR_RealTimeSystem == true) {
                                 if (readDBandFillFCdataForRealTime(targetDataTime) == -1) {
@@ -115,8 +115,8 @@ int startSimulationRT()
             nowTsec = nowTsec + ts.dtsec; // dtsec 만큼 전진
             ts.dtsecUsed_tm1 = ts.dtsec;
             if (prj.isFixedTimeStep == -1) {
-                ts.dtsec = getDTsec(CONST_CFL_NUMBER,
-                    di.cellSize, ts.vMaxInThisStep, ts.dtMaxLimit_sec,
+                ts.dtsec = getDTsec(di.cellSize, 
+					ts.vMaxInThisStep, ts.dtMaxLimit_sec,
                     ts.dtMinLimit_sec);
             }
         }

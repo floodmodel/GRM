@@ -135,7 +135,7 @@ void calOverlandFlow(int i, double hCVw_tp1, double effDy_m)
             setNoFluxCVOF(i);
             break;
         }
-        double tolerance = Hp_n * CONST_TOLERANCE;
+        double tolerance = Hp_n * TOLERANCE;
         double err = abs(Hp_nP1 - Hp_n);
         if (err < tolerance) {
             cvs[i].hOF = Hp_nP1;
@@ -201,7 +201,7 @@ void calChannelFlow(int i, double chCSACVw_tp1)
         double u_nP1 = vByManningEq(HRch, cvs[i].stream.slopeCH,
             cvs[i].stream.chRC);
         double QnP1 = u_nP1 * CSAch_nP1;
-        double tolerance = Qn * CONST_TOLERANCE;
+        double tolerance = Qn * TOLERANCE;
         double err = abs(Qn - QnP1);
         double hCh_nP1 = getChDepthUsingCSA(cvs[i].stream.chBaseWidth,
             CSAch_nP1, cvs[i].stream.isCompoundCS,
@@ -277,7 +277,7 @@ double getChCSAatCVW(int i)
         + qSumCViM1_m3Ps * ts.dtsec;
     if (nEffCVFlowintoCVw < 1) { nEffCVFlowintoCVw = 1; }
     cvs[i].effCVnFlowintoCVw = nEffCVFlowintoCVw;
-    if (CSAeSum_iM1 < CONST_WET_AND_DRY_CRITERIA) {
+    if (CSAeSum_iM1 < WETDRY_CRITERIA) {
         return 0;
     }
     double CSAw_n = CSAeSum_iM1;
@@ -300,7 +300,7 @@ double getChCSAatCVW(int i)
             / (cvs[i].stream.chRC * pow(chCSPeri, 0.66667));
         CSAw_nP1 = CSAw_n - Fx / dFx;
         double err = abs(CSAw_nP1 - CSAw_n) / CSAw_n;
-        if (err < CONST_TOLERANCE) {
+        if (err < TOLERANCE) {
             return CSAw_nP1;
         }
         CSAw_n = CSAw_nP1;
@@ -361,7 +361,7 @@ double getChCSAusingQbyiteration(cvAtt cv, double CSAini, double Q_m3Ps)
         dFx = 1.66667 * pow(CSA_n, 0.66667) * sqrt(cv.stream.slopeCH)
             / (cv.stream.chRC * pow(ChCrossSecPer, 0.66667));
         CSA_nP1 = CSA_n - Fx / dFx;
-        double toler = CSA_n * CONST_TOLERANCE;
+        double toler = CSA_n * TOLERANCE;
         double err = abs(CSA_nP1 - CSA_n);
         if (err < toler) {
             return CSA_nP1;
@@ -417,13 +417,13 @@ double getChCrossSectionPerimeter(double LRegionBaseWidth,
     return 0;
 }
 
- int getDTsec(double cfln, double dx, 
+ int getDTsec(double dx, 
      double vMax, int dtMax_min, int dtMin_min)
 {
     if (vMax <= 0)    {
         return dtMax_min;
     }
-    double dtsec_tmp = (int) (cfln * dx / (double)vMax);
+    double dtsec_tmp = (int) (CFL_NUMBER * dx / (double)vMax);
     int dtsec =(int)floor(dtsec_tmp);
     if (dtsec > dtMax_min)    {
         dtsec = dtMax_min;

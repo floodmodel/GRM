@@ -26,7 +26,7 @@ void writeRealTimeSimResults(int nowTmin, double cinterp)
     COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
     tsFromStarting_sec = tsTotalSim.GetTotalSeconds();
     tStrToPrint = timeElaspedToDateTimeFormat(prj.simStartTime,
-        nowTmin * 60, timeUnitToShow::toMinute,
+        nowTmin * 60, timeUnitToShow::toM,
         dateTimeFormat::yyyymmddHHMMSS);
     string strWPName;
     string strFNP;

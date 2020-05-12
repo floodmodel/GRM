@@ -107,7 +107,7 @@ void makeRasterOutput(int nowTmin)
     string tToP = "";
     if (prj.isDateTimeFormat == 1) {
         tToP = timeElaspedToDateTimeFormat2(prj.simStartTime,
-            nowTmin * 60, timeUnitToShow::toMinute, 
+            nowTmin * 60, timeUnitToShow::toM, 
             dateTimeFormat::yyyymmddHHMMSS);
     }
     setRasterOutputArray();

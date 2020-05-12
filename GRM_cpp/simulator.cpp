@@ -62,7 +62,7 @@ int startSimulationSingleEvent()
             nowTsec = nowTsec + ts.dtsec; // dtsec 만큼 전진
             ts.dtsecUsed_tm1 = ts.dtsec;
             if (prj.isFixedTimeStep == -1) {
-                ts.dtsec = getDTsec(CONST_CFL_NUMBER,
+                ts.dtsec = getDTsec(
                     di.cellSize, ts.vMaxInThisStep, ts.dtMaxLimit_sec, 
                     ts.dtMinLimit_sec);
             }

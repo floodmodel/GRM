@@ -58,10 +58,10 @@ grmRealTime::grmRealTime(string fpn_REF, string strGUID,
     // 다른 포맷으로 사용하려면 dateTimeFormat:: 에서 바꿔 준다.
     int tsec = -4 * 60 * 60;
     tsrt.g_strTimeTagBase_KST = timeElaspedToDateTimeFormat(rtef.rtstartDataTime,
-        tsec, timeUnitToShow::toHour, dateTimeFormat::yyyymmddHHMMSS);
+        tsec, timeUnitToShow::toH, dateTimeFormat::yyyymmddHHMMSS);
     tsec = (-4 - 9) * 60 * 60;
     tsrt.g_strTimeTagBase_UCT = timeElaspedToDateTimeFormat(rtef.rtstartDataTime,
-        tsec, timeUnitToShow::toHour, dateTimeFormat::yyyymmddHHMMSS);
+        tsec, timeUnitToShow::toH, dateTimeFormat::yyyymmddHHMMSS);
 
     tsrt.simDurationrRT_h = 24 * 365; // 충분히 365일 동안 모의하는 것으로 설정
     // thisprocess rt 변수 설정 끝.====================

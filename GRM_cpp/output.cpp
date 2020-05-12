@@ -51,7 +51,7 @@ void writeSingleEvent(int nowTmin, double cinterp)
     tsFromStarting_sec = dtos(tsTotalSim.GetTotalSeconds(), 0);
     if (prj.isDateTimeFormat == 1) {
         tStrToPrint = timeElaspedToDateTimeFormat2(prj.simStartTime,
-            nowTmin * 60,  timeUnitToShow::toMinute, 
+            nowTmin * 60,  timeUnitToShow::toM, 
             dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
     }
     else {

@@ -46,7 +46,7 @@ int updateFCCellinfoAndData()
                 timeSeries ts;
                 if (prj.isDateTimeFormat == 1) {
                     ts.dataTime = timeElaspedToDateTimeFormat2(prj.simStartTime,
-                        afc.fcDT_min * 60 * i,  timeUnitToShow::toMinute
+                        afc.fcDT_min * 60 * i,  timeUnitToShow::toM
                         , dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
                 }
                 else {
