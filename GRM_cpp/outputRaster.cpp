@@ -109,7 +109,11 @@ void makeRasterOutput(int nowTmin)
         tToP = timeElaspedToDateTimeFormat2(prj.simStartTime,
             nowTmin * 60, timeUnitToShow::toM, 
             dateTimeFormat::yyyymmddHHMMSS);
-    }
+	}
+	else {
+		double tsec = nowTmin / 60.0;
+		tToP = dtos(tsec, 2);
+	}
     setRasterOutputArray();
     if (bssr == 1) {
         if (fs::exists(ofs.ofpSSRDistribution) == false) {
