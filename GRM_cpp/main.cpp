@@ -186,6 +186,13 @@ int main(int argc, char** args)
 int startSingleEventRun(string fpnGMP, int isPrediction, string outString)
 {
 	fs::path in_arg = fs::path(fpnGMP.c_str());
+	string fp = in_arg.parent_path().string();
+	if (trim(fp) == "") {
+		string fpn_exe = getCurrentExeFilePathName();
+		fs::path grmexef = fs::path(fpn_exe.c_str());
+		string fp_exe = grmexef.parent_path().string();
+		fpnGMP = fp_exe + "\\" + fpnGMP;
+	}
 	int nResult = _access(fpnGMP.c_str(), 0);
 	if (nResult == -1
 		|| lower(in_arg.extension().string()) != ".gmp") {
@@ -408,11 +415,12 @@ void grmHelp() // /r, /p 설명 추가
 	printf("         -- GRM 모델을 파일단위로 실행시킨다.\n");
 	printf("         -- 이때 full path, name을 넣어야 하지만, \n");
 	printf("             프로젝트 파일이 GRM.exe 파일과 동일한 폴더에 있을 경우에는,\n");
-	printf("             path는 입력하지 않아도 된다.\n");
-	printf("         -- 프로젝트 이름과 경로에 공백이 포함될 경우 큰따옴표로 묶어서 입력한다.\n\n");
+	printf("             file path는 입력하지 않아도 된다.\n");
+	printf("         -- 프로젝트 이름과 경로에 공백이 포함될 경우 큰따옴표로 묶어서 입력한다.\n");
 	printf("         -- 예문(grm.exe가 d://GRMrun에 있을 경우)\n");
 	printf("           --- Case1. grm.exe와 다른 폴더에 프로젝트 파일이 있을 경우\n");
 	printf("               D://GRMrun>grm D://GRMTest//TestProject//test.gmp\n");
+	printf("               D://GRMrun>grm \"D://GRMTest//Test Project//test.gmp\"\n");
 	printf("           --- Case 2. grm.exe와 같은 폴더에 프로젝트 파일이 있을 경우\n");
 	printf("               D://GRMrun>grm test.gmp\n");
 	printf("      - /f 폴더경로\n");
@@ -422,6 +430,13 @@ void grmHelp() // /r, /p 설명 추가
 	printf("         -- grm을 폴더 단위로 실행시킨다.\n");
 	printf("         -- 유량 모의결과인 *discharge.out을 제외한 모든 파일을 지운다(*.gmp, *Depth.out, 등)\n");
 	printf("         -- 예문 : D://GRMrun>grm /fd d://GRMrun//TestProject\n");
+	printf("      - /r REF 파일경로와 이름\n");
+	printf("         -- 실시간 유출해석을 시작한다.\n");
+	printf("         -- 예문 : D://GRMrun>grm /r D://GRMTest//TestProject//test.ref\n");
+	printf("      - /p 프로젝트 파일(혹은 REF 파일) 경로와 이름\n");
+	printf("         -- 저수지 운영시 AutoROM을 적용해서 prediction 모의를 시작한다.\n");
+	printf("         -- 예문 : D://GRMrun>grm /p D://GRMTest//TestProject//test.gmp\n");
+	printf("         -- 예문 : D://GRMrun>grm /r /p D://GRMTest//TestProject//test.ref\n");
 	printf("\n");
 	printf("** Usage (in English)\n");
 	printf("  1. Make a gmp file by using a text editor or the QGIS-GRM.\n");
@@ -430,21 +445,29 @@ void grmHelp() // /r, /p 설명 추가
 	printf("  3. argument\n");
 	printf("      - /?\n");
 	printf("          Help\n");
-	printf("      - Project file path and name\n");
+	printf("      - gmp file path and name\n");
 	printf("         -- Run the GRM model for a single gmp file.\n");
 	printf("         -- When the GRM.exe and gmp files are in the same folder,\n");
 	printf("             the project file path does not have to be entered.\n");
-	printf("         -- If there are spaces in the project file name or path, quotation marks “ ” are used to enclose it for input.\n\n");
+	printf("         -- If there are spaces in the project file name or path, quotation marks “ ” are used to enclose it for input.\n");
 	printf("         -- Example(when grm.exe is in 'd://GRMrun' folder)\n");
 	printf("           --- Case1. gmp file is in different folder with grm.exe\n");
 	printf("               D://GRMrun>grm D://GRMTest//TestProject//test.gmp\n");
+	printf("               D://GRMrun>grm \"D://GRMTest//Test Project//test.gmp\"\n");
 	printf("           --- Case 2. gmp file is in the same folder with grm.exe\n");
 	printf("               D://GRMrun>grm test.gmp\n");
-	printf("      - /f [folder path]\n");
+	printf("      - /f folder path\n");
 	printf("         -- The GRM can run at once for all gmp files in the corresponding folder.\n");
 	printf("         -- Example : D://GRMrun>grm /f d://GRMrun//TestProject\n");
-	printf("      - /fd 폴더경로\n");
+	printf("      - /fd folder path\n");
 	printf("         -- The GRM can run at once for all gmp files in the corresponding folder.\n");
 	printf("         -- And all files, except for the discharge file (*discharge.out), are deleted (*.gmp, *Depth.out, etc.).\n");
 	printf("         -- Example : D://GRMrun>grm /fd d://GRMrun//TestProject\n");
+	printf("      - /r ref file path and name \n");
+	printf("         -- Start real time simulation.\n");
+	printf("         -- Example : D://GRMrun>grm /r D://GRMTest//TestProject//test.ref\n");
+	printf("      - /p gmp file (or ref file) path and name\n");
+	printf("         -- Start prediction simulation using AutoROM for reservoir operation.\n");
+	printf("         -- Example : D://GRMrun>grm /p D://GRMTest//TestProject//test.gmp\n");
+	printf("         -- Example : D://GRMrun>grm /r /p D://GRMTest//TestProject//test.ref\n");
 }
