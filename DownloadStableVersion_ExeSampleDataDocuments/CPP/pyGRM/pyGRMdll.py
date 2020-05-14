@@ -381,7 +381,7 @@ a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(swp.wsid,  swp.iniSaturation#  
                            , swp.ccSoilDepth, swp.ccPorosity, swp.ccWFSuctionHead
                            , swp.ccHydraulicK, swp.iniFlow) 
 			#int wsid, double iniSat,
-			#double minSlopeLandSurface, string unSKType, double coefUnsK,
+			#double minSlopeLandSurface, int unSKType, double coefUnsK,
 			#double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
 			#int dryStreamOrder, double ccLCRoughness,
 			#double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
