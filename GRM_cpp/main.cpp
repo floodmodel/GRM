@@ -95,18 +95,18 @@ int main(int argc, char** args)
 		if (rtOption1 == "/r" || rtOption2 == "/r") {
 			// 실시간 수신자료 적용 옵션은 /r 
 			// 최대 옵션은 아래와 같다. 
-			// args[0] : grm.exe,               args[1] : /r 혹은 /p,   args[2] : /r 혹은 /p,          
+			// args[0] : grm.exe,               args[1] : /r 혹은 /a,   args[2] : /r 혹은 /a,          
 			// args[3] : fpnRef,                 args[4] : strGUID,       args[5] : startCommandTime, 
 			// args[6] : rtStartDataTime, agrs[7] : strMODEL
 			isRealTime = 1;
-			string arg1(args[1]); // /r 혹은 /p
-			string arg2(args[2]); // /r 혹은 /p
+			string arg1(args[1]); // /r 혹은 /a
+			string arg2(args[2]); // /r 혹은 /a
 			//string arg3(args[3]); // ref 파일 경로, 이름
 			arg1 = lower(trim(arg1));
 			arg2 = lower(trim(arg2));
 			//arg3 = lower(trim(arg3));
 			int isPrediction = -1;
-			if (arg1 == "/p" || arg2 == "/p") {
+			if (arg1 == "/a" || arg2 == "/a") {
 				isPrediction = 1;
 			}
 			if (grmRTLauncher(argc, args, isPrediction) == -1) {
@@ -115,12 +115,12 @@ int main(int argc, char** args)
 		}
 
 		if (isRealTime == -1 && argc == 3) {
-			// 이경우는 /p, /f, /fd 중 하나의 옵션이 사용된 경우 
+			// 이경우는 /a, /f, /fd 중 하나의 옵션이 사용된 경우 
 			string arg1(args[1]); // 이건 옵션
 			string arg2(args[2]); // 이건 gmp 파일, 혹은 gmps 폴더
 			arg1 = lower(trim(arg1));
 			arg2 = lower(trim(arg2));
-			if (arg1 == "/p") {
+			if (arg1 == "/a") {
 				startSingleEventRun(arg1, 1, outString);
 			}
 			if (arg1 == "/f" || arg1 == "/fd") {
@@ -147,15 +147,15 @@ int main(int argc, char** args)
 		}
 
 		if (isRealTime == -1 && argc == 4) {
-			// 이경우는 /p, /f 혹은 /p, /fd 옵션이 사용된 경우 
-			string arg1(args[1]); // /p, /f , /fd 옵션
-			string arg2(args[2]);// /p, /f , /fd 옵션
+			// 이경우는 /a, /f 혹은 /a, /fd 옵션이 사용된 경우 
+			string arg1(args[1]); // /a, /f , /fd 옵션
+			string arg2(args[2]);// /a, /f , /fd 옵션
 			string arg3(args[3]);// gmps 폴더
 			arg1 = lower(trim(arg1));
 			arg2 = lower(trim(arg2));
 			arg3 = lower(trim(arg3));
 			int isP = -1;
-			if (arg1 == "/p" || arg2 == "/p") {
+			if (arg1 == "/a" || arg2 == "/a") {
 				isP = 1;
 			}
 			if (arg1 == "/f" || arg1 == "/fd") {
@@ -397,7 +397,7 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 }
 
 
-void grmHelp() // /r, /p 설명 추가
+void grmHelp() // /r, /a 설명 추가
 {
 	printf("\n");
 	printf(" Usage : GRM [Current project file full path and name to simulate]\n");
@@ -433,10 +433,10 @@ void grmHelp() // /r, /p 설명 추가
 	printf("      - /r REF 파일경로와 이름\n");
 	printf("         -- 실시간 유출해석을 시작한다.\n");
 	printf("         -- 예문 : D://GRMrun>grm /r D://GRMTest//TestProject//test.ref\n");
-	printf("      - /p 프로젝트 파일(혹은 REF 파일) 경로와 이름\n");
-	printf("         -- 저수지 운영시 AutoROM을 적용해서 prediction 모의를 시작한다.\n");
-	printf("         -- 예문 : D://GRMrun>grm /p D://GRMTest//TestProject//test.gmp\n");
-	printf("         -- 예문 : D://GRMrun>grm /r /p D://GRMTest//TestProject//test.ref\n");
+	printf("      - /a 프로젝트 파일(혹은 REF 파일) 경로와 이름\n");
+	printf("         -- 저수지 운영시 입력된 자료를 모두 사용하면, AutoROM을 적용한다.\n");
+	printf("         -- 예문 : D://GRMrun>grm /a D://GRMTest//TestProject//test.gmp\n");
+	printf("         -- 예문 : D://GRMrun>grm /r /a D://GRMTest//TestProject//test.ref\n");
 	printf("\n");
 	printf("** Usage (in English)\n");
 	printf("  1. Make a gmp file by using a text editor or the QGIS-GRM.\n");
@@ -466,8 +466,8 @@ void grmHelp() // /r, /p 설명 추가
 	printf("      - /r ref file path and name \n");
 	printf("         -- Start real time simulation.\n");
 	printf("         -- Example : D://GRMrun>grm /r D://GRMTest//TestProject//test.ref\n");
-	printf("      - /p gmp file (or ref file) path and name\n");
-	printf("         -- Start prediction simulation using AutoROM for reservoir operation.\n");
-	printf("         -- Example : D://GRMrun>grm /p D://GRMTest//TestProject//test.gmp\n");
-	printf("         -- Example : D://GRMrun>grm /r /p D://GRMTest//TestProject//test.ref\n");
+	printf("      - /a gmp file (or ref file) path and name\n");
+	printf("         -- Apply AutoROM after using all the data entered for reservoir operation.\n");
+	printf("         -- Example : D://GRMrun>grm /a D://GRMTest//TestProject//test.gmp\n");
+	printf("         -- Example : D://GRMrun>grm /r /a D://GRMTest//TestProject//test.ref\n");
 }
