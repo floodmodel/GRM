@@ -428,7 +428,8 @@ void writeBySimType(int nowTP_min,
     switch (simType) {
     case simulationType::SingleEvent: {
         writeSimStep(nowTP_min);
-        if (prj.printOption == GRMPrintType::All) {
+        if (prj.printOption == GRMPrintType::All
+			|| prj.printOption == GRMPrintType::DischargeFile) {
             writeSingleEvent(nowTP_min, cinterp);
         }
         if (prj.printOption == GRMPrintType::DischargeFileQ) {

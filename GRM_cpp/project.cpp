@@ -984,6 +984,8 @@ int readXmlRowProjectSettings(string aline)
 		if (vString != "") {
 			if (lower(vString) == "all") {
 				prj.printOption = GRMPrintType::All;
+			}else if (lower(vString) == "dischargefile") {
+				prj.printOption = GRMPrintType::DischargeFile;
 			}
 			else if (lower(vString) == "dischargefileq") {
 				prj.printOption = GRMPrintType::DischargeFileQ;

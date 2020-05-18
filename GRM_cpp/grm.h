@@ -95,6 +95,7 @@ enum class flowDirectionType
 enum class GRMPrintType
 {
 	All,
+	DischargeFile,
 	DischargeFileQ,
 	AllQ,
 	None

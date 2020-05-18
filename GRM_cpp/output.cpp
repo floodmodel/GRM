@@ -90,7 +90,9 @@ void writeSingleEvent(int nowTmin, double cinterp)
             wpis.maxFlow_cms[i] = sv;
             wpis.maxFlowTime[i] = tStrToPrint;
         }
-        writeWPouput(tStrToPrint, i, cinterp);
+		if (prj.printOption == GRMPrintType::All) {
+			writeWPouput(tStrToPrint, i, cinterp);
+		}
     }
     lineToP += "\t" + dtos(aveRFSumForDTP_mm, 2)
         + "\t" + tsFromStarting_sec + "\n";
@@ -270,8 +272,8 @@ int deleteAllOutputFiles()
         fpns.push_back(ofs.ofpnWPs[id]);
     }
     vector<string> fps;
-    if (prj.printOption == GRMPrintType::All)    {
-        if (prj.makeASCFile==1 || prj.makeIMGFile == 1)        {
+    //if (prj.printOption == GRMPrintType::All)    {
+        //if (prj.makeASCFile==1 || prj.makeIMGFile == 1)        {
             if (prj.makeSoilSaturationDistFile== 1)            {
                 fps.push_back( ofs.ofpSSRDistribution);
             }
@@ -284,8 +286,8 @@ int deleteAllOutputFiles()
             if (prj.makeFlowDistFile == 1)            {
                 fps.push_back(ofs.ofpFlowDistribution);
             }
-        }
-    }
+        //}
+    //}
     bool beenRun = false;
     for (string fpn : fpns) {
         if (fs::exists(fpn) == true) {
@@ -318,7 +320,8 @@ int deleteAllOutputFiles()
 
 int makeNewOutputFiles()
 {  
-    if (prj.printOption == GRMPrintType::All) {
+    if (prj.printOption == GRMPrintType::All
+		|| prj.printOption==GRMPrintType::DischargeFile) {
         if (prj.makeASCFile == 1 || prj.makeIMGFile == 1) {
             if (prj.makeSoilSaturationDistFile == 1) {
                 fs::create_directories(ofs.ofpSSRDistribution);
@@ -386,7 +389,9 @@ int makeNewOutputFiles()
 
             int aidx = cvais[awp.wpColX][awp.wpRowY] ;
             string nFPN = ofs.ofpnWPs[aidx];
-            appendTextToTextFile(nFPN, heads);
+			if (prj.printOption == GRMPrintType::All) {
+				appendTextToTextFile(nFPN, heads);
+			}
         }
         if (prj.simType != simulationType::RealTime) {
             // ----------------------------------------------------
