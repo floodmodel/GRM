@@ -308,14 +308,14 @@ a = wsi.upStreamWSCount(wsid) # current ws id / [ctypes.c_int] -> ctypes.c_int
 print("upStreamWSCount :", a)
 
 a = wsi.upStreamWSIDs(wsid) # current ws id / [ctypes.c_int] -> ctypes.POINTER(ctypes.c_int)
-for i in range(wsi.upStreamWSCount(wsid)):
+for i in range(wsi.upStreamWSCount(wsid)): # Because 'a' is pointer, it have to be iterated by using wsi.upStreamWSCount(wsid)
     print("  upStreamWSIDs :", a[i]) # if -1, there is no upstream watershed.
 
 a = wsi.downStreamWSCount(wsid) # current ws id / [ctypes.c_int] -> ctypes.c_int
 print("downStreamWSCount :", a)
 
 a = wsi.downStreamWSIDs(wsid) # current ws id / [ctypes.c_int] -> types.POINTER(ctypes.c_int) 
-for i in range(wsi.downStreamWSCount(wsid)):
+for i in range(wsi.downStreamWSCount(wsid)):  # Because 'a' is pointer, it have to be iterated by using wsi.downStreamWSCount(wsid)
     print("  downStreamWSIDs :", a[i]) # if -1, there is no downstream watershed.
 
 a = wsi.watershedID(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
@@ -350,7 +350,7 @@ a = wsi.cellCountInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_in
 print("cellCountInUpstreamArea :", a)  
 
 a= wsi.allCellsInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.POINTER(ctypes.c_char_p)
-for i in range(wsi.cellCountInUpstreamArea(xCol, yRow)):
+for i in range(wsi.cellCountInUpstreamArea(xCol, yRow)):  # Because 'a' is pointer, it have to be iterated by using wsi.cellCountInUpstreamArea(xCol, yRow)
     print("  allCellsInUpstreamArea :", a[i].decode('utf-8')) # if -1, there is no upstream cell.
 
 swp=swsParameters()
@@ -405,14 +405,14 @@ a = wsi.WScount #  property -> ctypes.c_int
 print("WScount :", a)
 
 a = wsi.WSIDsAll #  property ->  ctypes.POINTER(ctypes.c_int)
-for i in range(wsi.WScount):
+for i in range(wsi.WScount):   # Because 'a' is pointer, it have to be iterated by using wsi.WScount
     print("  WSIDsAll :", a[i]) # if -1, there is no downstream watershed.
 
 a = wsi.mostDownStreamWSCount #  property ->  ctypes.POINTER(ctypes.c_int)
 print("mostDownStreamWSCount :", a)
 
 a = wsi.mostDownStreamWSIDs #  property ->  ctypes.POINTER(ctypes.c_int)
-for i in range(wsi.mostDownStreamWSCount):
+for i in range(wsi.mostDownStreamWSCount): # Because 'a' is pointer, it have to be iterated by using wsi.mostDownStreamWSCount 
     print("  mostDownStreamWSIDs :", a[i]) # if -1, there is no downstream watershed.
 
 a = wsi.cellCountInWatershed #  property -> ctypes.c_int
