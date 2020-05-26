@@ -117,9 +117,9 @@ namespace GRMCore
             mWSIDsNearbyUp.Clear();
         }
 
-        public void ClearDownstreamWSIDs()
+        public void ClearDownstreamWSID(int NowWSID)
         {
-            mWSIDsNearbyDown.Clear();
+            mWSIDsNearbyDown[NowWSID].Clear();
         }
 
         public int WSoutletCVID(int wsid)

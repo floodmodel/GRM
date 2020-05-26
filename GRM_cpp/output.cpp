@@ -34,7 +34,13 @@ void writeSimStep(int elapsedT_min)
     double simDur_min = prj.simDuration_hr * 60.0;
     //nowStep = elapsedT_min / (double)ts.simDuration_min * 100.0;
     nowStep = elapsedT_min / simDur_min * 100.0;
-    printf("\rCurrent progress: %.0f%%... %s", nowStep, msgFileProcess);
+	if (msgFileProcess == "") {
+		printf("\rCurrent progress: %.0f%%... ", nowStep);
+	}
+	else {
+		printf("\rCurrent progress: %.0f%%... %s", nowStep, msgFileProcess);
+	}
+
 }
 
 

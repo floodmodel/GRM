@@ -454,6 +454,7 @@ namespace GRMCore
                             if (targetCell == null)
                             {
                                 //WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
+                                WSNetwork.ClearDownstreamWSID(cell.WSID);
                                 if (WSNetwork.WSoutletCVID(cell.WSID) < 0 || cell.FAc > CVs[WSNetwork.WSoutletCVID(cell.WSID) - 1].FAc)
                                 {
                                     WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
@@ -487,6 +488,7 @@ namespace GRMCore
                             cell.DownCellidToFlow = -1;
                             cell.DeltaXDownHalf_m = deltaXe;
                             //WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);
+                            WSNetwork.ClearDownstreamWSID(cell.WSID);
                             if (WSNetwork.WSoutletCVID(cell.WSID) < 0 || cell.FAc > CVs[WSNetwork.WSoutletCVID(cell.WSID) - 1].FAc)
                             {
                                 WSNetwork.SetWSoutletCVID(cell.WSID, cell.CVID);

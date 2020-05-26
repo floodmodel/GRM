@@ -199,7 +199,6 @@ int updateCVbyUserSettings()
             cvs[i].slopeOF = cvs[i].slope;
         }
         cvs[i].rcOF = cvs[i].rcOFori * ups.ccLCRoughness;
-
         // «œ√µ
         if (prj.streamFileApplied == 1
             && cvs[i].flowType == cellFlowType::ChannelFlow) {

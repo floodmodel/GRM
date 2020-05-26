@@ -574,96 +574,95 @@ int readSoilDepthFile()
 
 flowDirection8 getFlowDirection(int fdirV, flowDirectionType fdt)
 {
-    if (fdt == flowDirectionType::StartsFromNE)
-    {
-        switch (fdirV) {
-        case 1:
-            return flowDirection8::NE8;
-        case 2:
-            return flowDirection8::E8;
-        case 4:
-            return flowDirection8::SE8;
-        case 8:
-            return flowDirection8::S8;
-        case 16:
-            return flowDirection8::SW8;
-        case 32:
-            return flowDirection8::W8;
-        case 64:
-            return flowDirection8::NW8;
-        case 128:
-            return flowDirection8::N8;
-        default:
-            return flowDirection8::None8;
-        }
-    }
-    if (fdt == flowDirectionType::StartsFromN) {
-        switch (fdirV) {
-        case 1:
-            return flowDirection8::N8;
-        case 2:
-            return flowDirection8::NE8;
-        case 4:
-            return flowDirection8::E8;
-        case 8:
-            return flowDirection8::SE8;
-        case 16:
-            return flowDirection8::S8;
-        case 32:
-            return flowDirection8::SW8;
-        case 64:
-            return flowDirection8::W8;
-        case 128:
-            return flowDirection8::NW8;
-        default:
-            return flowDirection8::None8;
-        }
-    }
-    if (fdt == flowDirectionType::StartsFromE) {
-        switch (fdirV) {
-        case 1:
-            return flowDirection8::E8;
-        case 2:
-            return flowDirection8::SE8;
-        case 4:
-            return flowDirection8::S8;
-        case 8:
-            return flowDirection8::SW8;
-        case 16:
-            return flowDirection8::W8;
-        case 32:
-            return flowDirection8::NW8;
-        case 64:
-            return flowDirection8::N8;
-        case 128:
-            return flowDirection8::NE8;
-        default:
-            return flowDirection8::None8;
-        }
-    }
-    if (fdt == flowDirectionType::StartsFromE_TauDEM) {
-        switch (fdirV) {
-        case 1:
-            return flowDirection8::E8;
-        case 2:
-            return flowDirection8::NE8;
-        case 3:
-            return flowDirection8::N8;
-        case 4:
-            return flowDirection8::NW8;
-        case 5:
-            return flowDirection8::W8;
-        case 6:
-            return flowDirection8::SW8;
-        case 7:
-            return flowDirection8::S8;
-        case 8:
-            return flowDirection8::SE8;
-        default:
-            return flowDirection8::None8;
-        }
-    }
-    return flowDirection8::None8;
+	if (fdt == flowDirectionType::StartsFromE_TauDEM) {
+		switch (fdirV) {
+		case 1:
+			return flowDirection8::E8;
+		case 2:
+			return flowDirection8::NE8;
+		case 3:
+			return flowDirection8::N8;
+		case 4:
+			return flowDirection8::NW8;
+		case 5:
+			return flowDirection8::W8;
+		case 6:
+			return flowDirection8::SW8;
+		case 7:
+			return flowDirection8::S8;
+		case 8:
+			return flowDirection8::SE8;
+		default:
+			return flowDirection8::None8;
+		}
+	}
+	else if (fdt == flowDirectionType::StartsFromNE) {
+		switch (fdirV) {
+		case 1:
+			return flowDirection8::NE8;
+		case 2:
+			return flowDirection8::E8;
+		case 4:
+			return flowDirection8::SE8;
+		case 8:
+			return flowDirection8::S8;
+		case 16:
+			return flowDirection8::SW8;
+		case 32:
+			return flowDirection8::W8;
+		case 64:
+			return flowDirection8::NW8;
+		case 128:
+			return flowDirection8::N8;
+		default:
+			return flowDirection8::None8;
+		}
+	}
+	else if (fdt == flowDirectionType::StartsFromN) {
+		switch (fdirV) {
+		case 1:
+			return flowDirection8::N8;
+		case 2:
+			return flowDirection8::NE8;
+		case 4:
+			return flowDirection8::E8;
+		case 8:
+			return flowDirection8::SE8;
+		case 16:
+			return flowDirection8::S8;
+		case 32:
+			return flowDirection8::SW8;
+		case 64:
+			return flowDirection8::W8;
+		case 128:
+			return flowDirection8::NW8;
+		default:
+			return flowDirection8::None8;
+		}
+	}
+	else if (fdt == flowDirectionType::StartsFromE) {
+		switch (fdirV) {
+		case 1:
+			return flowDirection8::E8;
+		case 2:
+			return flowDirection8::SE8;
+		case 4:
+			return flowDirection8::S8;
+		case 8:
+			return flowDirection8::SW8;
+		case 16:
+			return flowDirection8::W8;
+		case 32:
+			return flowDirection8::NW8;
+		case 64:
+			return flowDirection8::N8;
+		case 128:
+			return flowDirection8::NE8;
+		default:
+			return flowDirection8::None8;
+		}
+	}
+	return flowDirection8::None8;
 }
 
 

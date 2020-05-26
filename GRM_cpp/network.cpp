@@ -98,12 +98,13 @@ int setFlowNetwork()
             if (cvais[tCx][tRy] == -1) {// 하류 셀이 effect 셀 영역 외부에 있으면,
                 int wsidKey = cvps[i].wsid; // 이건 현재셀이 포함된 ws의 id
                 //di.wsn.wsOutletCVids 는 readDomainFileAndSetupCV() 에서 초기화 되어 있다.
+				di.wsn.wsidNearbyDown[cvps[i].wsid] = -1;// 하류 셀이 eff 영역 외부이면, tidx가 cvs의 영역을 벗어난다..
                 if (di.wsn.wsOutletidxs.find(wsidKey) == di.wsn.wsOutletidxs.end() ||
                     cvs[i].fac > cvs[di.wsn.wsOutletidxs[wsidKey]].fac) {
                     // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
                     //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
                     di.wsn.wsOutletidxs[wsidKey] = i;
-                    di.wsn.wsidNearbyDown[cvps[i].wsid] = -1;// 하류 셀이 eff 영역 외부이면, tidx가 cvs의 영역을 벗어난다..
+                    //di.wsn.wsidNearbyDown[cvps[i].wsid] = -1;// 하류 셀이 eff 영역 외부이면, tidx가 cvs의 영역을 벗어난다..
                 }
             }
             else {
@@ -124,16 +125,17 @@ int setFlowNetwork()
             }
             cvs[i].dxDownHalf_m = dxe;
         }
-        else {// 하류셀이 전체 raster 파일 영역 외부이면,
+        else {// 하류셀이 전체 raster 파일 영역 외부이면, 혹은 현재 셀의 Fdir 값이 null 이면
             cvs[i].downCellidxToFlow = -1;
             cvs[i].dxDownHalf_m = dxe;
             int wsidKey = cvps[i].wsid; // 이건 현재셀이 포함된 ws의 id
+			di.wsn.wsidNearbyDown[cvps[i].wsid] = -1;
             if (di.wsn.wsOutletidxs.find(wsidKey) == di.wsn.wsOutletidxs.end() ||
                 cvs[i].fac > cvs[di.wsn.wsOutletidxs[wsidKey]].fac) {
                 // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
                 //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
                 di.wsn.wsOutletidxs[wsidKey] = i;
-                di.wsn.wsidNearbyDown[cvps[i].wsid] = -1;
+				//di.wsn.wsidNearbyDown[cvps[i].wsid] = -1;
             }
         }
     }
@@ -191,7 +193,7 @@ int updateWatershedNetwork()
                 }
             }
         }
-    }
+    }					
 
     for (int wsid_cur : di.dmids) {//최하류 wsid 목록을 만들고
         if (di.wsn.wsidNearbyDown[wsid_cur] == -1) {
