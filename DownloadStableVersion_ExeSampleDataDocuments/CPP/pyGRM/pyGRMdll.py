@@ -6,6 +6,7 @@ from ctypes import *
 
 # here, grm dll file full path and name
 gdl_path = ctypes.util.find_library("D:/Github/GRM/GRM_cpp/x64/Release/GRM.dll") 
+#gdl_path = ctypes.util.find_library("D:/Github/GRM\GRM_cpp/x64/Debug/GRM.dll") // this line is for combined debugging with GRM c++ code.
 
 if not gdl_path:
     print("Unable to find the specified library.")
@@ -120,14 +121,14 @@ class grmWSinfo(object):
 
         gdl.setOneSWSParsAndUpdateAllSWSUsingNetwork.argtypes = [ctypes.c_void_p, 
             ctypes.c_int, ctypes.c_double,
-            ctypes.c_double,  ctypes.c_int, ctypes.c_double, # unSaturatedKType :  ctypes.c_int
+            ctypes.c_double,  ctypes.c_int, ctypes.c_double, 
 			ctypes.c_double, ctypes.c_double, ctypes.c_double,
 			ctypes.c_int, ctypes.c_double,
 			ctypes.c_double, ctypes.c_double, ctypes.c_double,
 			ctypes.c_double, ctypes.c_double]
      #     grmWSinfo* f, 
 			#int wsid, double iniSat,
-			#double minSlopeLandSurface, string unSKType, double coefUnsK,
+			#double minSlopeLandSurface, int unSKType, double coefUnsK,
 			#double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
 			#int dryStreamOrder, double ccLCRoughness,
 			#double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
@@ -269,11 +270,11 @@ class grmWSinfo(object):
 
 # sample code to use grmWSinfo class
 
-## gmp 파일로 grmWSinfo class 를 인스턴싱 할 경우 ==============================
-## gmp 파일에서 ProjectSetting 테이블까지만 채워져 있어도 사용할 수 있다. 
+### gmp 파일로 grmWSinfo class 를 인스턴싱 할 경우 ==============================
+### gmp 파일에서 ProjectSetting 테이블까지만 채워져 있어도 사용할 수 있다. 
 #fpn_gmp = "C:\GRM\SampleGHG\GHG500.gmp"
 #wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
-##================================================================
+###================================================================
 
 # gmp 입력 파일로 grmWSinfo class 를 인스턴싱 할 경우 ============================
 fdType = "StartsFromE_TauDEM"
@@ -297,8 +298,8 @@ wsi=grmWSinfo(fdType,
 #================================================================
 
 # 여기서는 정보를 얻고자 하는 셀위치 혹은 유역 번호를 지정 =========================
-xCol =25# 21 #9  # 정보를 얻고자 하는 셀 위치
-yRow = 69#49 #93 # 정보를 얻고자 하는 셀 위치
+xCol = 21 # 정보를 얻고자 하는 셀 위치
+yRow = 49 # 정보를 얻고자 하는 셀 위치
 wsid = 1   # 정보를 얻고자 하는 유역 번호
 
 a = wsi.isInWatershedArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_bool
@@ -354,6 +355,7 @@ for i in range(wsi.cellCountInUpstreamArea(xCol, yRow)):  # Because 'a' is point
     print("  allCellsInUpstreamArea :", a[i].decode('utf-8')) # if -1, there is no upstream cell.
 
 swp=swsParameters()
+
 #이건 gmp 파일에서 매개변수를 받는 경우 
 swp = wsi.subwatershedPars(wsid) # current ws id / [ctypes.c_int] -> swsParameters
 print("subwatershedPars. wsid :", swp.wsid)
@@ -371,21 +373,48 @@ print("subwatershedPars. ccPorosity :", swp.ccPorosity)
 print("subwatershedPars. ccWFSuctionHead :", swp.ccWFSuctionHead)
 print("subwatershedPars. ccHydraulicK :", swp.ccHydraulicK)
 print("subwatershedPars. ccSoilDepth :", swp.ccSoilDepth)
-print("subwatershedPars. userSet :", swp.userSet)    
+print("subwatershedPars. userSet :", swp.userSet)    # 1 : true, 0: false
 
-#GUI에서 받은 매개변수를 사용할 경우에는 swp의 항목을 직접 입력해 줘야 한다. 
-a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(swp.wsid,  swp.iniSaturation#  watershed parameters -> ctypes.c_bool
+#swp에 저장된 매개변수(gmp 파일로 인스턴싱 할경우 등)를 이용해서 전체 유역 매개변수 업데이트 하는 경우,  # GUI에서 받은 매개변수를 사용할 경우에는 swp의 항목을 직접 입력해 줘야 한다. 
+a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(swp.wsid,  swp.iniSaturation #  setOneSWSParsAndUpdateAllSWSUsingNetwork -> ctypes.c_bool
                            , swp.minSlopeOF, swp.unSatKType, swp.coefUnsaturatedK
                            , swp.minSlopeChBed, swp.minChBaseWidth, swp.chRoughness
                            , swp.dryStreamOrder, swp.ccLCRoughness
                            , swp.ccSoilDepth, swp.ccPorosity, swp.ccWFSuctionHead
                            , swp.ccHydraulicK, swp.iniFlow) 
-			#int wsid, double iniSat,
-			#double minSlopeLandSurface, int unSKType, double coefUnsK,
-			#double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
-			#int dryStreamOrder, double ccLCRoughness,
-			#double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
-			#double ccSoilHydraulicCond, double iniFlow = 0)
+#			#int wsid, double iniSat,
+#			#double minSlopeLandSurface, int unSKType, double coefUnsK,
+#			#double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
+#			#int dryStreamOrder, double ccLCRoughness,
+#			#double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
+#			#double ccSoilHydraulicCond, double iniFlow = 0)
+
+##GUI에서 받은 매개변수를 사용할 경우
+#a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(1,  0.5
+#                           , 0.0001, 1, 0.2
+#                           , 0.008, 30, 0.045
+#                           , 0, 1
+#                           , 1, 1,1
+#                           , 1, 20.0) 
+wsid = 1 # setOneSWSParsAndUpdateAllSWSUsingNetwork()에서 업데이트 된 매개변수 조회할 유역 id 지정
+swp = wsi.subwatershedPars(wsid) # current ws id / [ctypes.c_int] -> swsParameters
+print("subwatershedPars. wsid :", swp.wsid)
+print("subwatershedPars. iniSaturation :", swp.iniSaturation)
+print("subwatershedPars. minSlopeOF :", swp.minSlopeOF)
+print("subwatershedPars. unSatKType :", swp.unSatKType, "  Name :", unSaturatedKType(swp.unSatKType).name)  # 	Constant=0, Linear=1, Exponential=2, usKNone=3
+print("subwatershedPars. coefUnsaturatedK :", swp.coefUnsaturatedK)
+print("subwatershedPars. minSlopeChBed :", swp.minSlopeChBed)
+print("subwatershedPars. minChBaseWidth :", swp.minChBaseWidth)
+print("subwatershedPars. chRoughness :", swp.chRoughness)
+print("subwatershedPars. dryStreamOrder :", swp.dryStreamOrder)
+print("subwatershedPars. iniFlow :", swp.iniFlow)
+print("subwatershedPars. ccLCRoughness :", swp.ccLCRoughness)
+print("subwatershedPars. ccPorosity :", swp.ccPorosity)
+print("subwatershedPars. ccWFSuctionHead :", swp.ccWFSuctionHead)
+print("subwatershedPars. ccHydraulicK :", swp.ccHydraulicK)
+print("subwatershedPars. ccSoilDepth :", swp.ccSoilDepth)
+print("subwatershedPars. userSet :", swp.userSet)   # 1 : true, 0: false
+
 print("setOneSWSParsAndUpdateAllSWSUsingNetwork :", a)
 
 a = wsi.updateAllSubWatershedParametersUsingNetwork() # A funtion with no parameter. -> void

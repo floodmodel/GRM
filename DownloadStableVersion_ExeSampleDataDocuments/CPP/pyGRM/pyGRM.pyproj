@@ -12,6 +12,11 @@
     <OutputPath>.</OutputPath>
     <Name>pyGRM</Name>
     <RootNamespace>pyCPdll</RootNamespace>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <EnableNativeCodeDebugging>True</EnableNativeCodeDebugging>
+    <Environment>
+    </Environment>
+    <InterpreterArguments>-i</InterpreterArguments>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>

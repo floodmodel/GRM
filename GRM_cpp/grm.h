@@ -339,7 +339,7 @@ typedef struct _swsParameters
 	double ccWFSuctionHead = 0.0;
 	double ccHydraulicK = 0.0;
 	double ccSoilDepth = 0.0;
-	int userSet = 0;
+	int userSet = -1; //1 : true, 0 : false
 } swsParameters;
 
 
@@ -935,7 +935,6 @@ public:
 	int cellCountInUpstreamArea(int colXAryidx, //  Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
 		int rowYAryidx);
 
-	// If this class was instanced by using gmp file --"grmWS(string gmpFPN)".		
 	bool setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
 		double minSlopeLandSurface, unSaturatedKType unSKType, double coefUnsK,
 		double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
@@ -943,6 +942,8 @@ public:
 		double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
 		double ccSoilHydraulicCond, double iniFlow = 0);
 	void updateAllSubWatershedParametersUsingNetwork();
+
+	// 입력파일로 인스턴싱 했을 경우에는 setOneSWSParsAndUpdateAllSWSUsingNetwork() 이거 호출 후에 사용 가능
 	swsParameters subwatershedPars(int wsid);
 	bool removeUserParametersSetting(int wsid);
 };

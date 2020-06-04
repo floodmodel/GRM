@@ -1913,7 +1913,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->userSet = 1;
 		}
 		else if (lower(vString) == "false") {
-			ssp->userSet = -1;
+			ssp->userSet = 0;
 		}
 		return 1;
 	}
@@ -2071,8 +2071,9 @@ bool updateOneSWSParsWithOtherSWSParsSet(int targetWSid, int referenceWSid)
 	prj.swps[targetWSid].ccWFSuctionHead = spars.ccWFSuctionHead;
 	prj.swps[targetWSid].ccHydraulicK = spars.ccHydraulicK;
 	prj.swps[targetWSid].ccSoilDepth = spars.ccSoilDepth;
-	if (prj.swps[targetWSid].userSet == -1) {
+	if (prj.swps[targetWSid].userSet != 1) {
 		prj.swps[targetWSid].iniFlow = 0;
+		prj.swps[targetWSid].userSet = 0;
 	}
 	return true;
 }

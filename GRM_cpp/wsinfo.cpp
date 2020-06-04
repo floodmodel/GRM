@@ -402,6 +402,7 @@ bool grmWSinfo::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat
     double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
     double ccSoilHydraulicCond, double iniFlow)
 {
+	prj.swps[wsid].wsid = wsid;
     prj.swps[wsid].iniSaturation = iniSat;
     prj.swps[wsid].minSlopeOF = minSlopeLandSurface;
     prj.swps[wsid].unSatKType = unSKType;
@@ -434,12 +435,13 @@ void grmWSinfo::updateAllSubWatershedParametersUsingNetwork()
 
 swsParameters grmWSinfo::subwatershedPars(int wsid)
 {
+	prj.swps[wsid].wsid = wsid;
     return prj.swps[wsid];
 }
 
 bool grmWSinfo::removeUserParametersSetting(int wsid)
 {
-    prj.swps[wsid].userSet = -1;
+    prj.swps[wsid].userSet = 0;
     updateAllSWSParsUsingNetwork();
     return true;
 }

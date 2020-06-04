@@ -262,7 +262,7 @@ void setCVStartingCondition(double iniflow)
             if (prj.swps[wsid].iniFlow > 0) {//Apply ini. flow of current sws
                 iniQAtwsOutlet = prj.swps[wsid].iniFlow;
                 faAtBaseCV = cvs[di.wsn.wsOutletidxs[wsid]].fac;
-                iniStreamFlowIWasSet = true;
+                iniStreamFlowIWasSet = 1;
             }
             else {
                 int baseWSid = wsid;

@@ -156,7 +156,7 @@ extern "C" // for python //grmWSinfo의 내용을  재정의 한다.
 			minSlopeChannel, minChannelBaseWidth, roughnessChannel,
 			dryStreamOrder, ccLCRoughness,
 			ccSoilDepth, ccPorosity, ccWFSuctionHead,
-			ccSoilHydraulicCond, iniFlow = 0);
+			ccSoilHydraulicCond, iniFlow);
 	}
 
 	GRMDLL_API void updateAllSubWatershedParametersUsingNetwork(grmWSinfo* f)
