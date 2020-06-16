@@ -26,8 +26,9 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
 {
     prj.writeConsole = -1;
     prj.forSimulation = -1;
-    fpnLog = "GRMdll.log";
-    //cout << fpnLog << endl;
+	fs::path fpn_domain = fs::path(fpnDomain.c_str());
+	string fp_domain = fpn_domain.parent_path().string();
+    fpnLog = fp_domain+"\\"+"GRMdll.log";
     writeNewLog(fpnLog, "GRM.dll : grmWSinfo with input files was started.\n", 1, -1);
 
     if (_access(fpnDomain.c_str(), 0) != 0) {

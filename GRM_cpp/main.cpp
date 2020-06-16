@@ -316,35 +316,47 @@ void disposeDynamicVars()
 
 int simulateSingleEvent()
 {
-	//// 여기서 grmWSinfo class  test
-	//string fpn = "C://GRM//SampleGHG//GHG500.gmp";
-	//grmWSinfo gws = grmWSinfo(fpn);
-	////string fdType = "StartsFromE_TauDEM";
-	////string fpn_domain = "D:\\GRM_ex\\SpeedTest\\GHG/watershed/GHG_Watershed.asc";
-	////string fpn_slope = "D:\\GRM_ex\\SpeedTest\\GHG/watershed/GHG_Slope_ST.asc";
-	////string fpn_fd = "D:\\GRM_ex\\SpeedTest\\GHG/watershed/GHG_FDir.asc";
-	////string fpn_fa = "D:\\GRM_ex\\SpeedTest\\GHG/watershed/GHG_FAc.asc";
-	////string fpn_stream = "D:\\GRM_ex\\SpeedTest\\GHG/watershed/GHG_Stream.asc";
-	////string fpn_lc = "D:\\GRM_ex\\SpeedTest\\GHG/watershed/GHG_lc.asc";
-	////string fpn_st = "D:\\GRM_ex\\SpeedTest\\GHG/watershed/GHG_SoilTexture.asc";
-	////string fpn_sd = "D:\\GRM_ex\\SpeedTest\\GHG/watershed/GHG_SoilDepth.asc";
-	////grmWSinfo	gws = grmWSinfo(fdType, fpn_domain,	fpn_slope, fpn_fd,
-	////	fpn_fa, fpn_stream, fpn_lc, fpn_st, fpn_sd);
-	//swsParameters swsp = gws.subwatershedPars(1);
-	//gws.setOneSWSParsAndUpdateAllSWSUsingNetwork(1, 0.5
-	//	, 0.0001, unSaturatedKType::Linear, 0.2
-	//	, 0.008, 30, 0.045
-	//	, 0, 1
-	//	, 1, 1, 1
-	//	, 1, 20);
-	//swsp = gws.subwatershedPars(1);
-	//cout << "result[i] :  " << swsp.iniFlow << endl;
-	//string cft = gws.cellFlowType(80, 120);
-	//vector <string> sv = gws.allCellsInUpstreamArea(21, 49);
-	//char** result = stringVectorToCharPP(sv);
-	//for (int i = 0; i < sv.size(); ++i) {
-	//	cout << "result[i] :  " << result[i] << endl;
-	//}
+	//////// 여기서 grmWSinfo class  test
+	//////string fpn = "C://GRM//SampleGHG//GHG500.gmp";
+	//////string fpn = "D://Github//zTestSet_GRM_SampleWC_cpp//QGIS_GRM_test.gmp";
+	//////grmWSinfo gws = grmWSinfo(fpn);
+	//string fdType = "StartsFromE_TauDEM";
+	//string fpn_domain = "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_Watershed.asc";
+	//string fpn_slope = "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_Slope_ST.asc";
+	//string fpn_fd = "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_FDir.asc";
+	//string fpn_fa = "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_FAc.asc";
+	//string fpn_stream = "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_Stream.asc";
+	//string fpn_lc = "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_lc.asc";
+	//string fpn_st = "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_SoilTexture.asc";
+	//string fpn_sd = "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_SoilDepth.asc";
+
+	////string fpn_domain = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiWatershed.asc";
+	////string fpn_slope = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/Wi_Slope_ST.ASC";
+	////string fpn_fd = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiFDir.ASC";
+	////string fpn_fa = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiFAc.asc";
+	////string fpn_stream = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiStream6.asc";
+	////string fpn_lc = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/wilc200.asc";
+	////string fpn_st = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/wistext200.asc";
+	////string fpn_sd = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/wisdepth200.asc";
+
+
+	//grmWSinfo	gws = grmWSinfo(fdType, fpn_domain,	fpn_slope, fpn_fd,
+	//	fpn_fa, fpn_stream, fpn_lc, fpn_st, fpn_sd);
+	////swsParameters swsp = gws.subwatershedPars(1);
+	////gws.setOneSWSParsAndUpdateAllSWSUsingNetwork(1, 0.5
+	////	, 0.0001, unSaturatedKType::Linear, 0.2
+	////	, 0.008, 30, 0.045
+	////	, 0, 1
+	////	, 1, 1, 1
+	////	, 1, 20);
+	////swsp = gws.subwatershedPars(1);
+	////cout << "result[i] :  " << swsp.iniFlow << endl;
+	////string cft = gws.cellFlowType(9, 93);
+	//////vector <string> sv = gws.allCellsInUpstreamArea(21, 49);
+	//////char** result = stringVectorToCharPP(sv);
+	//////for (int i = 0; i < sv.size(); ++i) {
+	//////	cout << "result[i] :  " << result[i] << endl;
+	//////}
 
 	
 	if (openPrjAndSetupModel(-1) == -1) {

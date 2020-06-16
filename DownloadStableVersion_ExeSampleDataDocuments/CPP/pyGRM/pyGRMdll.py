@@ -168,9 +168,9 @@ class grmWSinfo(object):
         gdl.cellSize.argtypes= [ctypes.c_void_p]
         gdl.cellSize.restype = ctypes.c_double
 
-        bfpnGMPfdirTypeOR = fpnGMP_OR_fdirType.encode('utf-8')
+        bfpnGmpORfdirType = fpnGMP_OR_fdirType.encode('utf-8')
         if fpnDomain=="":
-            self.obj = gdl.grmWSinfo_new_gmpFile(bfpnGMPfdirTypeOR)
+            self.obj = gdl.grmWSinfo_new_gmpFile(bfpnGmpORfdirType)
         else :
             bfpnDomain =fpnDomain.encode('utf-8')
             bfpnSlope =fpnSlope.encode('utf-8')
@@ -183,7 +183,7 @@ class grmWSinfo(object):
             bfpnIniSoilSaturationRatio = fpnIniSoilSaturationRatio.encode('utf-8')
             bpfnIniChannelFlow = pfnIniChannelFlow.encode('utf-8')
             bfpnChannelWidth = fpnChannelWidth.encode('utf-8')
-            self.obj = gdl.grmWSinfo_new_inputFiles(bfpnGMPfdirTypeOR, bfpnDomain, bfpnSlope, 
+            self.obj = gdl.grmWSinfo_new_inputFiles(bfpnGmpORfdirType, bfpnDomain, bfpnSlope, 
                     bfpnFdir, bfpnFac, bfpnStream, 
                     bfpnLandCover, bfpnSoilTexture, bfpnSoilDepth, 
                     bfpnIniSoilSaturationRatio, bpfnIniChannelFlow, bfpnChannelWidth)
@@ -278,14 +278,37 @@ class grmWSinfo(object):
 
 # gmp 입력 파일로 grmWSinfo class 를 인스턴싱 할 경우 ============================
 fdType = "StartsFromE_TauDEM"
-fpn_domain = "C:\GRM\SampleGHG\watershed/GHG_Watershed.asc"
-fpn_slope = "C:\GRM\SampleGHG\watershed/GHG_Slope_ST.asc"
-fpn_fd = "C:\GRM\SampleGHG\watershed/GHG_FDir.asc"
-fpn_fa = "C:\GRM\SampleGHG\watershed/GHG_FAc.asc"
-fpn_stream = "C:\GRM\SampleGHG\watershed/GHG_Stream.asc"
-fpn_lc="C:\GRM\SampleGHG\watershed/GHG_lc.asc"
-fpn_st="C:\GRM\SampleGHG\watershed/GHG_SoilTexture.asc"
-fpn_sd="C:\GRM\SampleGHG\watershed/GHG_SoilDepth.asc"
+#fpn_domain = "C:\GRM\SampleGHG\watershed/GHG_Watershed.asc"
+#fpn_slope = "C:\GRM\SampleGHG\watershed/GHG_Slope_ST.asc"
+#fpn_fd = "C:\GRM\SampleGHG\watershed/GHG_FDir.asc"
+#fpn_fa = "C:\GRM\SampleGHG\watershed/GHG_FAc.asc"
+#fpn_stream = "C:\GRM\SampleGHG\watershed/GHG_Stream.asc"
+#fpn_lc="C:\GRM\SampleGHG\watershed/GHG_lc.asc"
+#fpn_st="C:\GRM\SampleGHG\watershed/GHG_SoilTexture.asc"
+#fpn_sd="C:\GRM\SampleGHG\watershed/GHG_SoilDepth.asc"
+
+#fpn_domain = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiWatershed.asc";
+#fpn_slope = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/Wi_Slope_ST.ASC";
+#fpn_fd = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiFDir.ASC";
+#fpn_fa = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiFAc.asc";
+#fpn_stream = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiStream6.asc";
+#fpn_lc = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/wilc200.asc";
+#fpn_st = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/wistext200.asc";
+#fpn_sd = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/wisdepth200.asc";
+
+fpn_domain = 'D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_Watershed.asc';
+fpn_slope = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_Slope_ST.asc";
+fpn_fd = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_FDir.asc";
+fpn_fa = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_FAc.asc";
+fpn_stream = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_Stream.asc";
+fpn_lc = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_lc.asc";
+fpn_st = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_SoilTexture.asc";
+fpn_sd = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_SoilDepth.asc";
+fpn_ssi=''
+fpn_iniCF=''
+fpn_CW=''
+
+
 wsi=grmWSinfo(fdType,  
     fpn_domain,
     fpn_slope,
@@ -294,7 +317,7 @@ wsi=grmWSinfo(fdType,
     fpn_stream, 
     fpn_lc,
     fpn_st,
-    fpn_sd, "", "", "")
+    fpn_sd, fpn_ssi, fpn_iniCF, fpn_CW)
 #================================================================
 
 # 여기서는 정보를 얻고자 하는 셀위치 혹은 유역 번호를 지정 =========================
