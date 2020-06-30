@@ -191,6 +191,9 @@ void grmWSinfo::setPublicVariables()
     cellSize = di.cellSize;    
     writeLog(fpnLog, "GRM.dll : setPublicVariables was ended.\n", 1, -1);
     writeLog(fpnLog, "GRM.dll : facMaxCellxCol : "+to_string(facMaxCellxCol)+"\n", 1, -1);
+	writeLog(fpnLog, "GRM.dll : WScount : " + to_string(WScount) + "\n", 1, -1);
+	writeLog(fpnLog, "GRM.dll : di.cellSize : " + to_string(di.cellSize) + "\n", 1, -1);
+	writeLog(fpnLog, "GRM.dll : cellSize : " + to_string(cellSize) + "\n", 1, -1);
 }
 
 bool grmWSinfo::isInWatershedArea(int colXAryidx, int rowYAryidx)

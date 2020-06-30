@@ -6,7 +6,7 @@ from ctypes import *
 
 # here, grm dll file full path and name
 gdl_path = ctypes.util.find_library("D:/Github/GRM/GRM_cpp/x64/Release/GRM.dll") 
-#gdl_path = ctypes.util.find_library("D:/Github/GRM\GRM_cpp/x64/Debug/GRM.dll") // this line is for combined debugging with GRM c++ code.
+#gdl_path = ctypes.util.find_library("D:/Github/GRM\GRM_cpp/x64/Debug/GRM.dll") # this line is for combined debugging with GRM c++ code.
 
 if not gdl_path:
     print("Unable to find the specified library.")
