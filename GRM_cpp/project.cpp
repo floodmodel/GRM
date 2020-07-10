@@ -1927,7 +1927,7 @@ int isNormalChannelSettingInfo(channelSettingInfo *ci)
 	if (ci->mdWsid == aci_ini.mdWsid) { return -1; }
 	if (ci->csType == aci_ini.csType) { return -1; }
 	if (ci->csWidthType == aci_ini.csWidthType) { return -1; }
-	if (ci->csWidthType == channelWidthType::CWGeneration) {
+	if (ci->csWidthType == channelWidthType::CWEquation) {
 		if (ci->cwEQc == aci_ini.cwEQc) { return -1; }
 		if (ci->cwEQd == aci_ini.cwEQd) { return -1; }
 		if (ci->cwEQe == aci_ini.cwEQe) { return -1; }
