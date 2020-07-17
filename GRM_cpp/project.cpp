@@ -1416,6 +1416,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		|| fci->fcType == flowControlType::SinkFlow) {
 		if (aline.find(fn.IniStorage) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.IniStorage);
+			vString = replaceText(vString, ",", "");
 			if (vString != "" && stod(vString) >= 0) {
 				fci->iniStorage_m3 = stod(vString);
 			}
@@ -1428,6 +1429,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		}
 		if (aline.find("<"+fn.MaxStorage+">") != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.MaxStorage);
+			vString = replaceText(vString, ",", "");
 			if (vString != "" && stod(vString) >= 0) {// max storage must be greater than zero.
 				if (fci->fcType == flowControlType::ReservoirOperation
 					&& stod(vString) == 0) {
@@ -1623,6 +1625,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 	}
 	if (aline.find(fn.ChannelWidthMostDownStream) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fn.ChannelWidthMostDownStream);
+		vString = replaceText(vString, ",", "");
 		if (vString != "" && stod(vString) > 0) {
 			csi->cwMostDownStream = stod(vString);
 		}
@@ -1960,8 +1963,10 @@ int isNormalFlowControlinfo(flowControlinfo *fci)
 		if (fci->maxStorage_m3 == afc_ini.maxStorage_m3) { return -1; }
 		if (fci->maxStorageR == afc_ini.maxStorageR) { return -1; }
 		if (fci->roType == afc_ini.roType) { return -1; }
-		if (fci->roConstQ_cms == afc_ini.roConstQ_cms) { return -1; }
-		if (fci->roConstQDuration_hr == afc_ini.roConstQDuration_hr) { return -1; }
+		if (fci->roType == reservoirOperationType::ConstantQ)	{
+			if (fci->roConstQ_cms == afc_ini.roConstQ_cms) { return -1; }
+			if (fci->roConstQDuration_hr == afc_ini.roConstQDuration_hr) { return -1; }
+		}
 	} else 	if (fci->fpnFCData == afc_ini.fpnFCData){ return -1; }
 	return 1;
 }

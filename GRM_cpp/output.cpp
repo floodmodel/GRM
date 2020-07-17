@@ -505,21 +505,22 @@ int makeNewOutputFiles()
                             writeLog(fpnLog, "Maximum reservoir storage or storage ratio is invalid.\n", 1, 1);
                             return -1;
                         }
-                        if (afc.roType == reservoirOperationType::ConstantQ && afc.roConstQ_cms < 0) {
-                            roConstQ = roConstQ + "\t" + to_string(afc.roConstQ_cms);
-                            if (afc.roConstQDuration_hr > 0) {
-                                roConstQduration = roConstQduration + "\t" + to_string(afc.roConstQDuration_hr);
-                            }
-                            else {
-                                writeLog(fpnLog, "Constant reservoir outflow duration is invalid.\n", 1, 1);
-                                return -1;
-                            }
-                        }
-
-                        else {
-                            writeLog(fpnLog, "Constant reservoir outflow is invalid.\n", 1, 1);
-                            return -1;
-                        }
+						if (afc.roType == reservoirOperationType::ConstantQ) {
+							if (afc.roConstQ_cms < 0) {
+								writeLog(fpnLog, "Constant reservoir outflow is invalid.\n", 1, 1);
+								return -1;
+							}
+							else{
+								roConstQ = roConstQ + "\t" + to_string(afc.roConstQ_cms);
+								if (afc.roConstQDuration_hr > 0) {
+									roConstQduration = roConstQduration + "\t" + to_string(afc.roConstQDuration_hr);
+								}
+								else {
+									writeLog(fpnLog, "Constant reservoir outflow duration is invalid.\n", 1, 1);
+									return -1;
+								}
+							}
+						}
                     }
                 }
                 // FCApp - flow control data

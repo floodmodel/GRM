@@ -409,12 +409,12 @@ typedef struct _flowControlinfo
 	flowControlType fcType = flowControlType::None;
 	int fcDT_min = 0;
 	string fpnFCData = "";
-	double iniStorage_m3 = 0.0;
-	double maxStorage_m3 = 0.0;
-	double maxStorageR = 0.0;
+	double iniStorage_m3 = -1.0;
+	double maxStorage_m3 = -1.0;
+	double maxStorageR = -1.0;
 	reservoirOperationType roType= reservoirOperationType::None;
-	double roConstQ_cms = 0.0;
-	double roConstQDuration_hr = 0.0;
+	double roConstQ_cms = -1.0;
+	double roConstQDuration_hr = -1.0;
 } flowControlinfo;
 
 typedef struct _flowControlCellAndData
