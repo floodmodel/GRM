@@ -398,8 +398,7 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 		}
 	}
 	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, prj.writeConsole);
-	if (setupModelAfterOpenProjectFile() == -1) {
-		
+	if (setupModelAfterOpenProjectFile() == -1) {		
 		if (prj.forSimulation == 1) { return -1; }
 	}
 	string isparallel = "true";

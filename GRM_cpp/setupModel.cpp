@@ -32,7 +32,6 @@ int setupModelAfterOpenProjectFile()
 	}
     if (setupByFAandNetwork() == -1) { return -1; }
     if (updateCVbyUserSettings() == -1) { return -1; }
-
 	return 1;
 }
 

@@ -42,6 +42,9 @@ int updateFCCellinfoAndData()
             }
             vector<double> vs;
             vs = readTextFileToDoubleVector(afc.fpnFCData);
+			if (vs.size() == 0) {
+				return -1;
+			}
             for (int i = 0; i < vs.size(); ++i) {
                 timeSeries ts;
                 if (prj.isDateTimeFormat == 1) {
