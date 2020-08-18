@@ -365,7 +365,14 @@ int openProjectFile(int forceRealTime)
 	}
 
 	if (prj.mdp == -1) {
-		prj.mdp = prj.cpusi.totalNumOfLP;
+		if (prj.cpusi.totalNumOfLP != 0) {
+			prj.mdp = prj.cpusi.totalNumOfLP;
+		}
+		else {
+			prj.mdp = 12;
+			writeLog(fpnLog, "The number of CPUs could not be encountered. Max. degree of parallelism was set to 12.\n"
+				, 1, 1);
+		}
 	}
 
 	//di.dmids.clear();
