@@ -38,7 +38,7 @@ void writeSimStep(int elapsedT_min)
 		printf("\rCurrent progress: %.0f%%... ", nowStep);
 	}
 	else {
-		printf("\rCurrent progress: %.0f%%... %s", nowStep, msgFileProcess);
+		printf("\rCurrent progress: %.0f%%... %s", nowStep, msgFileProcess.c_str());
 	}
 
 }
