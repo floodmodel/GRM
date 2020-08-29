@@ -35,6 +35,12 @@ int openProjectFile(int forceRealTime)
 	if (_access(ppi.fpn_prj.c_str(), 0) != 0) {
 		 return -1; 
 	}
+	//prj.swps.clear();
+	//prj.css.clear();
+	//prj.wps.clear();
+	//prj.sts.clear();
+	//prj.sds.clear();
+	//prj.lcs.clear();
 	projectFileFieldName fn;
 	swsParameters* aswp;
 	aswp = new swsParameters;
@@ -400,6 +406,28 @@ int openProjectFile(int forceRealTime)
 	}
 	else {
 		prj.makeASCorIMGfile = -1;
+	}
+
+	if (aswp != NULL) {
+		delete aswp;
+	}
+	if (acs != NULL) {
+		delete acs;
+	}
+	if (afc != NULL) {
+		delete afc;
+	}
+	if (awp != NULL) {
+		delete awp;
+	}
+	if (ast != NULL) {
+		delete ast;
+	}
+	if (asd != NULL) {
+		delete asd;
+	}
+	if (alc != NULL) {
+		delete alc;
 	}
 	return 1;
 }

@@ -119,7 +119,7 @@ int main(int argc, char** args)
 			string arg1(args[1]); // 이건 옵션
 			string arg2(args[2]); // 이건 gmp 파일, 혹은 gmps 폴더
 			arg1 = lower(trim(arg1));
-			arg2 = lower(trim(arg2));
+			arg2 = trim(arg2);
 			if (arg1 == "/a") {
 				startSingleEventRun(arg1, 1, outString);
 			}
@@ -137,6 +137,7 @@ int main(int argc, char** args)
 						prj.deleteAllFilesExceptDischargeOut = 1;
 					}
 					startGMPsRun(gmpFiles, -1, outString);
+					return 1;
 				}
 				else {
 					printf("Project folder is invalid!!\n");
@@ -153,7 +154,7 @@ int main(int argc, char** args)
 			string arg3(args[3]);// gmps 폴더
 			arg1 = lower(trim(arg1));
 			arg2 = lower(trim(arg2));
-			arg3 = lower(trim(arg3));
+			arg3 = trim(arg3);
 			int isP = -1;
 			if (arg1 == "/a" || arg2 == "/a") {
 				isP = 1;
@@ -171,6 +172,7 @@ int main(int argc, char** args)
 					return -1;
 				}
 				startGMPsRun(gmpFiles, isP, outString);
+				return 1;
 			}
 			else {
 				printf("Project folder is invalid!!\n");
@@ -230,6 +232,7 @@ int startGMPsRun(vector<string> gmpFiles, int isPrediction, string outString)
 		if ((n + 1) % 100 == 0) {
 			system("cls");
 		}
+		disposeDynamicVars();
 	}
 	clock_t finishT = clock();
 	long elapseT_sec = (long)(finishT - startT) / CLOCKS_PER_SEC;
@@ -250,7 +253,7 @@ void disposeDynamicVars()
 		}
 		delete[] cvais;
 	}
-	
+	if (cvps != NULL) { delete[] cvps; }
 	if (cvs != NULL) { delete[] cvs; }
 	if (cvsb != NULL) { delete[] cvsb; }
 
@@ -288,30 +291,14 @@ void disposeDynamicVars()
 		}
 		delete[] QAry;
 	}
-	//if (ssrAryL != NULL) {
-	//	for (int i = 0; i < di.nCols; ++i) {
-	//		if (ssrAryL[i] != NULL) { delete[] ssrAryL[i]; }
-	//	}
-	//	delete[] ssrAryL;
-	//}
-	//if (rfAryL != NULL) {
-	//	for (int i = 0; i < di.nCols; ++i) {
-	//		if (rfAryL[i] != NULL) { delete[] rfAryL[i]; }
-	//	}
-	//	delete[] rfAryL;
-	//}
-	//if (rfaccAryL != NULL) {
-	//	for (int i = 0; i < di.nCols; ++i) {
-	//		if (rfaccAryL[i] != NULL) { delete[] rfaccAryL[i]; }
-	//	}
-	//	delete[] rfaccAryL;
-	//}
-	//if (QAryL != NULL) {
-	//	for (int i = 0; i < di.nCols; ++i) {
-	//		if (QAryL[i] != NULL) { delete[] QAryL[i]; }
-	//	}
-	//	delete[] QAryL;
-	//}
+	prj.swps.clear();
+	prj.css.clear();
+	prj.fcs.clear();
+	prj.wps.clear();
+	prj.sts.clear();
+	prj.sds.clear();
+	prj.lcs.clear();
+
 }
 
 int simulateSingleEvent()

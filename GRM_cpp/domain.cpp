@@ -304,6 +304,7 @@ int readLandCoverFileAndSetCVbyVAT()
             cvs[i].lcCode = lc.lcCode;
         }
     }
+	lcvat.clear();
     return 1;
 }
 
@@ -411,6 +412,7 @@ int readSoilTextureFileAndSetCVbyVAT()
             cvs[i].stCode = st.stCode;
         }
     }
+	stvat.clear();
     return 1;
 }
 
@@ -527,6 +529,7 @@ int readSoilDepthFileAndSetCVbyVAT()
             cvs[i].sdCode = sd.sdCode;
         }
     }
+	sdvat.clear();
     return 1;
 }
 

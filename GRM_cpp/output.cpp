@@ -593,6 +593,9 @@ int deleteAllFilesExceptDischarge()
     if (fs::exists(ppi.fpn_prj)) {
         std::remove(ppi.fpn_prj.c_str());
     }
+	if (fs::exists(fpnLog)) {
+		std::remove(fpnLog.string().c_str());
+	}
     return 1;
 }
 

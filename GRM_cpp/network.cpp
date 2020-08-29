@@ -96,9 +96,6 @@ int setFlowNetwork()
         if (tCx >= 0 && tCx < di.nCols && tRy >= 0 && tRy < di.nRows) {
             //하류 셀이 전체 raster 영역 내부이면,
             if (cvais[tCx][tRy] == -1) {// 하류 셀이 effect 셀 영역 외부에 있으면,
-				if (cvps[i].wsid == 2301) {
-					int a = 1;
-				}
                 int wsidKey = cvps[i].wsid; // 이건 현재셀이 포함된 ws의 id
                 //di.wsn.wsOutletCVids 는 readDomainFileAndSetupCV() 에서 초기화 되어 있다.
 				di.wsn.wsidNearbyDown[cvps[i].wsid] = -1;// 하류 셀이 eff 영역 외부이면, tidx가 cvs의 영역을 벗어난다..
@@ -111,9 +108,6 @@ int setFlowNetwork()
                 }
             }
             else {
-				if (cvps[i].wsid == 2301) {
-					int a = 1;
-				}
                 int tidx = cvais[tCx][tRy]; // target cell index
                 cvs[tidx].neighborCVidxFlowintoMe.push_back(i);
                 cvs[tidx].dxWSum = cvs[tidx].dxWSum + dxe;
