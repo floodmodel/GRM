@@ -258,11 +258,11 @@ void setCVStartingCondition(double iniflow)
         cvs[i].csaOF = 0;
         if (cvs[i].flowType == cellFlowType::ChannelFlow
             || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
-            int iniStreamFlowIWasSet = -1;
+            int iniStreamFlowWasSet = -1;
             if (prj.swps[wsid].iniFlow > 0) {//Apply ini. flow of current sws
                 iniQAtwsOutlet = prj.swps[wsid].iniFlow;
                 faAtBaseCV = cvs[di.wsn.wsOutletidxs[wsid]].fac;
-                iniStreamFlowIWasSet = 1;
+                iniStreamFlowWasSet = 1;
             }
             else {
                 int baseWSid = wsid;
@@ -271,7 +271,7 @@ void setCVStartingCondition(double iniflow)
                     if (prj.swps[downWSid].iniFlow > 0) {// If this condition is satisfied, apply ini. flow of downstream ws.
                         iniQAtwsOutlet = prj.swps[downWSid].iniFlow;
                         faAtBaseCV = cvs[di.wsn.wsOutletidxs[downWSid]].fac;
-                        iniStreamFlowIWasSet = 1;
+                        iniStreamFlowWasSet = 1;
                         break;
                     }
                     else {// Search next downstream ws
@@ -283,7 +283,7 @@ void setCVStartingCondition(double iniflow)
             hChCVini = 0;
             qChCVini = 0;
             uChCVini = 0;
-            if (iniStreamFlowIWasSet == 1) {
+            if (iniStreamFlowWasSet == 1) {
                 if (prj.simType == simulationType::SingleEventPE_SSR) {
                     qChCVini = iniflow * (cvs[i].fac - di.facMostUpChannelCell)
                         / (double)(faAtBaseCV - di.facMostUpChannelCell);

@@ -536,7 +536,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLog(fpnLog, "Stream file was not set.\n", 1, -1);
 			}
 			else {
-				writeLog(fpnLog, "Stream file [" + vString + "] is invalid.\n", 1, -1);
+				writeLog(fpnLog, "Stream file [" + vString + "] is invalid.\n", 1, 1);
 			}
 			prj.streamFileApplied = -1;
 		}
@@ -555,7 +555,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLog(fpnLog, "Channel width file was not set.\n", 1, -1);
 			}
 			else {
-				writeLog(fpnLog, "Channel width file [" + vString + "] is invalid.\n", 1, -1);
+				writeLog(fpnLog, "Channel width file [" + vString + "] is invalid.\n", 1, 1);
 			}
 
 			prj.cwFileApplied = -1;
@@ -575,7 +575,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLog(fpnLog, "Soil saturation ratio file was not set.\n", 1, -1);
 			}
 			else {
-				writeLog(fpnLog, "Soil saturation ratio file [" + vString + "] is invalid.\n", 1, -1);
+				writeLog(fpnLog, "Soil saturation ratio file [" + vString + "] is invalid.\n", 1, 1);
 			}
 
 			prj.issrFileApplied = -1;
@@ -595,7 +595,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLog(fpnLog, "Initial stream flow file was not set.\n", 1, -1);
 			}
 			else {
-				writeLog(fpnLog, "Initial stream flow file [" + vString + "] is invalid.\n", 1, -1);
+				writeLog(fpnLog, "Initial stream flow file [" + vString + "] is invalid.\n", 1, 1);
 			}
 			prj.icfFileApplied = -1;
 		}
