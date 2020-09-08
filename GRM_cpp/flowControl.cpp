@@ -43,7 +43,9 @@ int updateFCCellinfoAndData()
             vector<double> vs;
             vs = readTextFileToDoubleVector(afc.fpnFCData);
 			if (vs.size() == 0) {
-				return -1;
+				string outstr = "Flow control data file (" + afc.fpnFCData
+					+ ") has no value.\n";
+				writeLog(fpnLog, outstr, 1, 1);
 			}
             for (int i = 0; i < vs.size(); ++i) {
                 timeSeries ts;
