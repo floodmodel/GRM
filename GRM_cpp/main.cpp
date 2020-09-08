@@ -121,7 +121,7 @@ int main(int argc, char** args)
 			arg1 = lower(trim(arg1));
 			arg2 = trim(arg2);
 			if (arg1 == "/a") {
-				startSingleEventRun(arg1, 1, outString);
+				startSingleEventRun(arg2, 1, outString);
 			}
 			if (arg1 == "/f" || arg1 == "/fd") {
 				struct stat finfo;

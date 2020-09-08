@@ -1440,11 +1440,11 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		if (vString != "" && _access(vString.c_str(), 0) == 0) {
 			fci->fpnFCData = vString;
 		}
-		//else if(){
-		//	writeLog(fpnLog, "Flow control data file of ["
-		//		+ fci->fcName + "] is invalid.\n", 1, 1);
+		else if (vString != ""){
+			writeLog(fpnLog, "Flow control data file of ["
+				+ fci->fcName + "]("+ vString+") is invalid.\n", 1, 1);
 		//	return -1;
-		//}
+		}
 	}
 	if (fci->fcType == flowControlType::ReservoirOperation
 		|| fci->fcType == flowControlType::SourceFlow

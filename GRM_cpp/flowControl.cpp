@@ -70,17 +70,22 @@ int updateFCCellinfoAndData()
 void calFCReservoirOutFlow(int i, double nowTmin)
 {// nowTmin의 최소값은 dtsec/60이다.
     int dtfc = prj.fcs[i].fcDT_min;
-    if (nowTmin > dtfc* fccds.curDorder[i]) {
-        if (fccds.curDorder[i] < fccds.flowData_m3Ps[i].size()) {
-            fccds.curDorder[i]++;
-        }
-        else {
-            // 아래 조건 주석처리하면, 마지막 자료가 끝까지 사용된다..
-            setNoFluxCVCH(i);
-            fccds.fcDataAppliedNowT_m3Ps[i] = 0;
-            return;
-        }
-    }
+	if (nowTmin > dtfc * fccds.curDorder[i]) {
+		if (fccds.curDorder[i] < fccds.flowData_m3Ps[i].size()) {
+			fccds.curDorder[i]++;
+		}
+		else {
+			// 아래 조건 주석처리하면, 마지막 자료가 끝까지 사용된다..
+			if (ts.enforceFCautoROM == -1) {
+				setNoFluxCVCH(i);
+				fccds.fcDataAppliedNowT_m3Ps[i] = 0;
+			}
+			else if (ts.enforceFCautoROM == 1) {				
+				convertFCtypeToAutoROM(dtos(nowTmin, 2) +" min", i);
+			}
+			return;
+		}
+	}
     int orderidx = fccds.curDorder[i] -1 ;//vector index, 이 지점에서  fccds.curDorder[i]의 최소값은 1
     double v = fccds.flowData_m3Ps[i][orderidx].value;
     if (v < 0) { v = 0; }
@@ -106,17 +111,22 @@ void calSinkOrSourceFlow(int i, double nowTmin)
 {// nowTmin의 최소값은 dtsec/60이다.
     int dtfc = prj.fcs[i].fcDT_min;
     double cellsize = di.cellSize;
-    if (nowTmin > dtfc* fccds.curDorder[i]) {
-        if (fccds.curDorder[i] < fccds.flowData_m3Ps[i].size()) {
-            fccds.curDorder[i]++;
-        }
-        else {
-            // 아래 조건 주석처리하면, 마지막 자료가 끝까지 사용된다..
-            setNoFluxCVCH(i);
-            fccds.fcDataAppliedNowT_m3Ps[i] = 0.0;
-            return; //sink, source flow 모의하지 않는다
-        }
-    }
+	if (nowTmin > dtfc * fccds.curDorder[i]) {
+		if (fccds.curDorder[i] < fccds.flowData_m3Ps[i].size()) {
+			fccds.curDorder[i]++;
+		}
+		else {
+			// 아래 조건 주석처리하면, 마지막 자료가 끝까지 사용된다..
+			if (ts.enforceFCautoROM == -1) {
+				setNoFluxCVCH(i);
+				fccds.fcDataAppliedNowT_m3Ps[i] = 0.0;
+			}
+			else if (ts.enforceFCautoROM == 1) {
+				convertFCtypeToAutoROM(to_string(nowTmin), i);
+			}
+			return; //sink, source flow 모의하지 않는다
+		}
+	}
     int orderidx = fccds.curDorder[i]-1 ;//vector index, 이 지점에서 fccds.curDorder[i] 의 최소값은 1
     double QtoApp = fccds.flowData_m3Ps[i][orderidx].value;
     if (cvs[i].flowType == cellFlowType::OverlandFlow) {
@@ -305,8 +315,8 @@ void convertFCtypeToAutoROM(string strDate, int cvidx)
     prj.fcs[cvidx].roType = reservoirOperationType::AutoROM;
     cvs[cvidx].fcType = flowControlType::ReservoirOperation;
     string fcname = prj.fcs[cvidx].fcName;
-    string msg = "  Reservoir operation type was converted to AutoROM ("
-        + fcname + ", CVID=" + to_string(cvidx) + ", " + strDate
+    string msg = "  Reservoir operation type was converted to AutoROM (FC Name:"
+        + fcname + ", CVID:" + to_string(cvidx) + ", Time:" + strDate
         + ").\n";
     writeLog(fpnLog, msg, 1, 1);
 }
