@@ -46,6 +46,9 @@ int updateFCCellinfoAndData()
 				string outstr = "Flow control data file (" + afc.fpnFCData
 					+ ") has no value.\n";
 				writeLog(fpnLog, outstr, 1, 1);
+				if (ts.enforceFCautoROM == -1) {
+					return -1;
+				}
 			}
             for (int i = 0; i < vs.size(); ++i) {
                 timeSeries ts;
