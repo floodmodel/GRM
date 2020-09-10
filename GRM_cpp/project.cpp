@@ -263,19 +263,42 @@ int openProjectFile(int forceRealTime)
 
 	// 여기서 부터 검증
 	prj.applyFC = -1;
-	if (prj.simFlowControl == 1) {
-		if (prj.fcs.size() > 0) {
-			prj.applyFC = 1;
-			map<int, flowControlinfo>::iterator iter;
-			for (iter = prj.fcs.begin(); iter != prj.fcs.end(); ++iter) {
-				int idx = iter->first;
-				flowControlinfo afci;
-				afci = prj.fcs[idx];
-				if (afci.roType != reservoirOperationType::None
-					&& (afci.maxStorage_m3 <= 0
-						|| afci.maxStorageR <= 0)) {
-					writeLog(fpnLog, " Max. storage and max. storage ratio must be greater than zero when reservoir operation type is applied.\n", 1, 1);
-					return -1;
+	if (prj.simFlowControl == 1 && prj.fcs.size() > 0) {
+		prj.applyFC = 1;
+		map<int, flowControlinfo>::iterator iter;
+		for (iter = prj.fcs.begin(); iter != prj.fcs.end(); ++iter) {
+			int idx = iter->first;
+			flowControlinfo afci;
+			afci = prj.fcs[idx];
+			if (afci.roType != reservoirOperationType::None
+				&& (afci.maxStorage_m3 <= 0
+					|| afci.maxStorageR <= 0)) {
+				writeLog(fpnLog, " Max. storage and max. storage ratio must be greater than zero when reservoir operation type is applied.\n", 1, 1);
+				return -1;
+			}
+			if (afci.fcType != flowControlType::Inlet) {
+				int bsimStorage = 1;
+				if (afci.iniStorage_m3 < 0) {
+					writeLog(fpnLog, "Ini. storage of reservoir ["
+						+ afci.fcName + "] was set to '0'.\n", 1, 1);
+					prj.fcs[idx].iniStorage_m3 = 0.0;
+					bsimStorage = -1;
+				}
+				if (afci.maxStorage_m3 <= 0) {
+					writeLog(fpnLog, "Max storage of reservoir ["
+						+ afci.fcName + "] was set to '0'.\n", 1, 1);
+					prj.fcs[idx].maxStorage_m3 = 0.0;
+					bsimStorage = -1;
+				}
+				if (afci.maxStorageR <= 0) {
+					writeLog(fpnLog, "Max storage ratio of reservoir ["
+						+ afci.fcName + "] was set to '0.0'.\n", 1, 1);
+					prj.fcs[idx].maxStorageR = 0.0;
+					bsimStorage = -1;
+				}
+				if (bsimStorage == -1) {
+					writeLog(fpnLog, "The storage of reservoir ["
+						+ afci.fcName + "] will not be simulated.\n", 1, 1);
 				}
 			}
 		}
@@ -1446,16 +1469,17 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		//	return -1;
 		}
 	}
-	if (fci->fcType == flowControlType::ReservoirOperation
+/*	if (fci->fcType == flowControlType::ReservoirOperation
 		|| fci->fcType == flowControlType::SourceFlow
-		|| fci->fcType == flowControlType::SinkFlow) {
+		|| fci->fcType == flowControlType::SinkFlow)*/ 
+	if (fci->fcType != flowControlType::Inlet) {
 		if (aline.find(fn.IniStorage) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fn.IniStorage);
 			vString = replaceText(vString, ",", "");
 			if (vString != "" && stod(vString) >= 0) {
 				fci->iniStorage_m3 = stod(vString);
 			}
-			else {
+			else if(fci->fcType == flowControlType::ReservoirOperation){
 				writeLog(fpnLog, "Ini. storage of reservoir ["
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
@@ -1474,7 +1498,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 				}
 				fci->maxStorage_m3 = stod(vString);
 			}
-			else {
+			else if(fci->fcType == flowControlType::ReservoirOperation){
 				writeLog(fpnLog, "Max. storage of reservoir ["
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
@@ -1492,7 +1516,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 				}
 				fci->maxStorageR = stod(vString);
 			}
-			else {
+			else if(fci->fcType == flowControlType::ReservoirOperation) {
 				writeLog(fpnLog, "Max. storage ratio of reservoir ["
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
@@ -1521,7 +1545,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 					return -1;
 				}
 			}
-			else {
+			else if(fci->fcType == flowControlType::ReservoirOperation){
 				writeLog(fpnLog, "Reservoir operation type of ["
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;

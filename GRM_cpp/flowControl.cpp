@@ -106,7 +106,7 @@ void calFCReservoirOutFlow(int i, double nowTmin)
     cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
         + cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
         - fccds.fcDataAppliedNowT_m3Ps[i] * ts.dtsec;
-    if (cvs[i].storageCumulative_m3, 0) {
+    if (cvs[i].storageCumulative_m3< 0) {
         cvs[i].storageCumulative_m3 = 0;
     }
 }
@@ -175,7 +175,21 @@ void calSinkOrSourceFlow(int i, double nowTmin)
             cvs[i].stream.chLRHeight, cvs[i].stream.bankCoeff);
         cvs[i].stream.uCH = cvs[i].stream.QCH_m3Ps / cvs[i].stream.csaCH;
     }
-    fccds.fcDataAppliedNowT_m3Ps[i] = QtoApp;
+    fccds.fcDataAppliedNowT_m3Ps[i] = QtoApp;   
+	int dtsec = ts.dtsec;
+	if (cvs[i].fcType == flowControlType::SinkFlow) {
+		cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
+			+ cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
+			- fccds.fcDataAppliedNowT_m3Ps[i] * dtsec;
+	}
+	else if (cvs[i].fcType == flowControlType::SourceFlow) {//이전에 source flow 가 계산되었으면..
+		cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
+			+ cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
+			+ fccds.fcDataAppliedNowT_m3Ps[i] * dtsec;
+	}
+	if (cvs[i].storageCumulative_m3 < 0) {
+		cvs[i].storageCumulative_m3 = 0;
+	}
 }
 
 void calReservoirOperation(int i, double nowTmin)
@@ -184,22 +198,17 @@ void calReservoirOperation(int i, double nowTmin)
     //int i = i + 1;
     double QforDTbySinkOrSourceFlow = 0;
     double cellsize = di.cellSize;
-    //여기서는 ro 하기 전의 storage 계산
-    if (cvs[i].fcType == flowControlType::SinkFlow) {//이전에 sinkflow 가 계산되었으면..
-        cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
-            + cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
-            - fccds.fcDataAppliedNowT_m3Ps[i] * dtsec;
-    }
-    else if (cvs[i].fcType == flowControlType::SourceFlow) {//이전에 source flow 가 계산되었으면..
-        cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
-            + cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
-            + fccds.fcDataAppliedNowT_m3Ps[i] * dtsec;
-    }
-    else {//이전에 sinkflow or source flow 가 아니었으면, 그냥 강우와 상류, 횡방향만 추가한다.
+   //이전에 sinkflow or source flow 였으면, calSinkOrSourceFlow(int i, double nowTmin) 에서 cell storage 미리 계산된다.
+	//이전에 sinkflow or source flow 가 아니었으면, 현재상태에서의 cell storage 한번 계산한다.
+	if (cvs[i].fcType != flowControlType::SinkFlow &&
+	    cvs[i].fcType != flowControlType::SourceFlow){
         cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
             + cvs[i].storageAddedForDTbyRF_m3
             + cvs[i].QsumCVw_dt_m3;
     }
+	if (cvs[i].storageCumulative_m3 < 0) {
+		cvs[i].storageCumulative_m3 = 0;
+	}
     double Qout_cms = 0.0;
     double dy_m = di.cellSize;
     double maxStorageApp = prj.fcs[i].maxStorage_m3 * prj.fcs[i].maxStorageR;
@@ -215,8 +224,6 @@ void calReservoirOperation(int i, double nowTmin)
         break;
     }
     case reservoirOperationType::RigidROM: {
-        //calReservoirRigidROM(i, prj.fcs[id].maxStorage_m3 * prj.fcs[id].maxStorageR, 
-        //    prj.fcs[id].roConstQ_cms);
         if (cvs[i].storageCumulative_m3 >= maxStorageApp) {
             Qout_cms = (cvs[i].storageCumulative_m3
                 - maxStorageApp) / ts.dtsec; // 차이만큼 모두 유출
@@ -316,12 +323,18 @@ int getCVidxByFcName(string fcName)
 
 void convertFCtypeToAutoROM(string strDate, int cvidx)
 {
-    prj.fcs[cvidx].fcType = flowControlType::ReservoirOperation;
-    prj.fcs[cvidx].roType = reservoirOperationType::AutoROM;
-    cvs[cvidx].fcType = flowControlType::ReservoirOperation;
+	reservoirOperationType rot_bak;
+	rot_bak = prj.fcs[cvidx].roType;
+	prj.fcs[cvidx].fcType = flowControlType::ReservoirOperation;
+	prj.fcs[cvidx].roType = reservoirOperationType::AutoROM;
+	cvs[cvidx].fcType = flowControlType::ReservoirOperation;
     string fcname = prj.fcs[cvidx].fcName;
-    string msg = "  Reservoir operation type was converted to AutoROM (FC Name:"
-        + fcname + ", CVID:" + to_string(cvidx) + ", Time:" + strDate
-        + ").\n";
-    writeLog(fpnLog, msg, 1, 1);
+	if (rot_bak != reservoirOperationType::AutoROM) {
+		string msg = "  Reservoir operation type was converted to AutoROM (FC Name:"
+			+ fcname + ", (ColX, RowY):(" + to_string(prj.fcs[cvidx].fcColX)
+			+", "+ to_string(prj.fcs[cvidx].fcRowY) + "), Time:" + strDate
+			+ ").\n";
+		writeLog(fpnLog, msg, 1, 1);
+	}
+	
 }

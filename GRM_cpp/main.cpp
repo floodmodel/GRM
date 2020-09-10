@@ -133,6 +133,7 @@ int main(int argc, char** args)
 						waitEnterKey();
 						return -1;
 					}
+					prj.deleteAllFilesExceptDischargeOut = -1;
 					if (arg1 == "/fd") {
 						prj.deleteAllFilesExceptDischargeOut = 1;
 					}
@@ -159,7 +160,8 @@ int main(int argc, char** args)
 			if (arg1 == "/a" || arg2 == "/a") {
 				isP = 1;
 			}
-			if (arg1 == "/f" || arg1 == "/fd") {
+			prj.deleteAllFilesExceptDischargeOut = -1;
+			if (arg1 == "/fd" || arg2 == "/fd") {
 				prj.deleteAllFilesExceptDischargeOut = 1;
 			}
 			struct stat finfo;
@@ -234,14 +236,16 @@ int startGMPsRun(vector<string> gmpFiles, int isPrediction, string outString)
 		}
 		disposeDynamicVars();
 	}
-	clock_t finishT = clock();
-	long elapseT_sec = (long)(finishT - startT) / CLOCKS_PER_SEC;
-	tm ts_total = secToHHMMSS(elapseT_sec);
-	string endingStr = "Total simulation was completed. Run time : " 
-		+ to_string(ts_total.tm_hour) + "hrs " 
-		+ to_string(ts_total.tm_min) + "min " 
-		+ to_string(ts_total.tm_sec) + "sec.\n";
-	writeLog(fpnLog, endingStr, 1, 1);
+	if (prj.deleteAllFilesExceptDischargeOut != 1) {
+		clock_t finishT = clock();
+		long elapseT_sec = (long)(finishT - startT) / CLOCKS_PER_SEC;
+		tm ts_total = secToHHMMSS(elapseT_sec);
+		string endingStr = "Total simulation was completed. Run time : "
+			+ to_string(ts_total.tm_hour) + "hrs "
+			+ to_string(ts_total.tm_min) + "min "
+			+ to_string(ts_total.tm_sec) + "sec.\n";
+		writeLog(fpnLog, endingStr, 1, 1);
+	}
 	return 1;
 }
 

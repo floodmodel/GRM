@@ -433,10 +433,10 @@ void writeBySimType(int nowTP_min,
             writeSingleEvent(nowTP_min, cinterp);
         }
         if (prj.printOption == GRMPrintType::DischargeFileQ) {
-            writeDischargeOnly(cinterp, -1);
+            writeDischargeOnly(cinterp, -1, -1);
         }
         if (prj.printOption == GRMPrintType::AllQ) {
-            writeDischargeOnly(cinterp, 1);
+            writeDischargeOnly(cinterp, 1, 1);
         }
         break;
     }

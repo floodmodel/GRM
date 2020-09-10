@@ -870,11 +870,13 @@ bool updateOneSWSParsWithOtherSWSParsSet(int TargetWSid,
 void writeBySimType(int nowTP_min,
 	double cinterp);
 void writeDischargeOnly(double cinterp, 
-	int writeWPfiles);
+	int writeWPfiles, int writeFCfiles);
+void writeFCoutput(string tStrToPrint,
+	double cinterp);
 void writeSimStep(int elapsedT_min);
 void writeSingleEvent(int nowTmin, 
 	double interCoef);
-void writeWPouput(string nowTP, 
+void writeWPoutput(string nowTP, 
 	int i, double cinterp);
 
 inline double  getinterpolatedVLinear(double firstV,
