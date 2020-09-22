@@ -66,7 +66,11 @@ void writeSingleEvent(int nowTmin, double cinterp)
     }
     // 유량 =================================================
     string lineToP;
+	string rfUpMean;
+	string rfGrid;
     lineToP = tStrToPrint;
+	rfUpMean= tStrToPrint;
+	rfGrid = tStrToPrint;
     for (int i : wpis.wpCVidxes) {
         if (cinterp == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
@@ -99,11 +103,19 @@ void writeSingleEvent(int nowTmin, double cinterp)
         }
 		if (prj.printOption == GRMPrintType::All) {
 			writeWPoutput(tStrToPrint, i, cinterp);
+			rfGrid.append("\t" + dtos(wpis.rfWPGridForDtP_mm[i], 2));
+			rfUpMean.append("\t"+dtos(wpis.rfUpWSAveForDtP_mm[i], 2) );
 		}
     }
     lineToP += "\t" + dtos(aveRFSumForDTP_mm, 2)
         + "\t" + tsFromStarting_sec + "\n";
     appendTextToTextFile(ofs.ofpnDischarge, lineToP);
+	if (prj.printOption == GRMPrintType::All) {
+		rfGrid.append("\n");
+		rfUpMean.append(+"\n");
+		appendTextToTextFile(ofs.ofpnRFMean, rfUpMean);
+		appendTextToTextFile(ofs.ofpnRFGrid, rfGrid);
+	}
 
     // FCAppFlow, FCStorage===================================
 	if (prj.printOption == GRMPrintType::All) {
@@ -435,7 +447,7 @@ int makeNewOutputFiles()
 			if (prj.printOption == GRMPrintType::All) {
 				string awpName = replaceText(awp.wpName, ",", "_");
 				heads = comHeader
-					+ "Output data : All the results for watch point '"
+					+ "Output data : All the results for watch point(s) '"
 					+ awpName + "'" + "\n\n";
 				if (prj.simType == simulationType::RealTime) {
 					heads = heads + CONST_OUTPUT_TABLE_TIME_FIELD_NAME + "\t"
@@ -477,6 +489,18 @@ int makeNewOutputFiles()
 			//    + "Output data : Depth[m]\n\n"
 			//    + time_wpNames + "\t" + "Rainfall_Mean" + "\t" + "FromStarting[sec]" + "\n";
 			//appendTextToTextFile(ofs.ofpnDepth, heads);
+
+			// 이건 강우
+			if (prj.printOption == GRMPrintType::All) {
+				heads = comHeader
+					+ "Output data : Grid rainfall for each watchpoint [mm]\n\n"
+					+ time_wpNames +"\n";
+				appendTextToTextFile(ofs.ofpnRFGrid, heads);
+				heads = comHeader
+					+ "Output data : Average rainfall for each watchpoint catchment [mm]\n\n"
+					+ time_wpNames + "\n";
+				appendTextToTextFile(ofs.ofpnRFMean, heads);
+			}
 
 			// ----------------------------------------------------
 			// 여기는 flow control 모듈 관련
