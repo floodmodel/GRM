@@ -87,14 +87,16 @@ int setCVRF(int order)
 {
     int dtrf_sec = prj.rfinterval_min * 60;
     int dtrf_min = prj.rfinterval_min;
-    string fpnRF = rfs[order - 1].FilePath + "\\" + rfs[order - 1].FileName;
+	string fpnRF = ""; rfs[order - 1].FilePath + "\\" + rfs[order - 1].FileName;
     double cellSize = di.cellSize;
     ts.rfiSumAllCellsInCurRFData_mPs = 0;
+	int returnv = -1;
     for (int idx : wpis.wpCVidxes) {
         wpis.rfiReadSumUpWS_mPs[idx] = 0;
     }
     if (prj.rfDataType == rainfallDataType::TextFileASCgrid
         || prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
+		fpnRF = rfs[order - 1].FilePath + "\\" + rfs[order - 1].FileName;
         ascRasterFile rfasc = ascRasterFile(fpnRF);
         //#pragma omp parallel for// schedule(guided)
         for (int i = 0; i < di.cellNnotNull; ++i) {
@@ -122,6 +124,7 @@ int setCVRF(int order)
                 ts.rfiSumAllCellsInCurRFData_mPs
                 + cvs[i].rfiRead_mPsec;
         }
+		returnv = 1;
     }
     else if (prj.rfDataType == rainfallDataType::TextFileMAP) {
         string value = rfs[order - 1].Rainfall;
@@ -145,12 +148,17 @@ int setCVRF(int order)
         for (int idx : wpis.wpCVidxes) {
             wpis.rfiReadSumUpWS_mPs[idx] = inRF_mPs * wpis.cvCountAllup[idx];
         }
+		returnv = 1;
     }
     else {
         writeLog(fpnLog, "Error: Rainfall data type is invalid.\n", 1, 1);
         return -1;
     }
-    return 1;
+	if (returnv == -1) {
+		writeLog(fpnLog, "An error was occurred while reading rainfall data.\n", 1, 1);
+		writeLog(fpnLog, "Rainfall file : " + fpnRF + ".\n", 1, 1);
+	}
+    return returnv;
 }
 
  void setRFintensityAndDTrf_Zero()
