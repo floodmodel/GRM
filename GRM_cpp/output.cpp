@@ -534,7 +534,7 @@ int makeNewOutputFiles()
 						flowControlinfo afc = prj.fcs[n];
 						fcDataField = fcDataField + "\t" + afc.fcName;
 						fcNameApp = fcNameApp + "\t" + afc.fcName;
-						string fct = ENUM_TO_STR(None);
+						string fct = ENUM_TO_STR(None); 
 						switch (afc.fcType) {
 						case flowControlType::ReservoirOperation:
 							fct = ENUM_TO_STR(ReservoirOperation);
