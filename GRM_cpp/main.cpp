@@ -60,7 +60,7 @@ int main(int argc, char** args)
 	string outString;
 	outString = "GRM v." + to_string(grmVersion.major) + "."
 		+ to_string(grmVersion.minor) + "."
-		+ to_string(grmVersion.build) + ". Built in "
+		+ to_string(grmVersion.build) + ". Modified in "
 		+ grmVersion.LastWrittenTime + ".\n";
 	prj.cpusi = getCPUinfo();
 	cout << outString;
