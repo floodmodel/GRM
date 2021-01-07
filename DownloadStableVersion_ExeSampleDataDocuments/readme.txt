@@ -1,1 +1,0 @@
-Copy sample data and executable files to C:\GRM.

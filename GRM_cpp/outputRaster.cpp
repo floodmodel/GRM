@@ -56,44 +56,28 @@ void initRasterOutput()
 {
     if (prj.makeSoilSaturationDistFile == 1) {
         ssrAry = new double* [di.nCols];
-        //ssrAryL = new double* [di.nCols];
         for (int i = 0; i < di.nCols; ++i) {
             ssrAry[i] = new double[di.nRows];
-            //ssrAryL[i] = new double[di.nRows];
         }
     }
     if (prj.makeRfDistFile == 1) {
         rfAry = new double* [di.nCols];
-        //rfAryL = new double* [di.nCols];
         for (int i = 0; i < di.nCols; ++i) {
             rfAry[i] = new double[di.nRows];
-            //rfAryL[i] = new double[di.nRows];
         }
     }
     if (prj.makeRFaccDistFile == 1) {
         rfaccAry = new double* [di.nCols];
-        //rfaccAryL = new double* [di.nCols];
         for (int i = 0; i < di.nCols; ++i) {
             rfaccAry[i] = new double[di.nRows];
-            //rfaccAryL[i] = new double[di.nRows];
         }
     }
     if (prj.makeFlowDistFile == 1) {
         QAry = new double* [di.nCols];
-        //QAryL = new double* [di.nCols];
         for (int i = 0; i < di.nCols; ++i) {
             QAry[i] = new double[di.nRows];
-            //QAryL[i] = new double[di.nRows];
         }
     }
-    //memset(ssrAry, 0, sizeof(ssrAry)); 
-    //memset(rfAry, 0, sizeof(rfAry));
-    //memset(rfaccAry, 0, sizeof(rfaccAry));
-    //memset(QAry, 0, sizeof(QAry));
-    //memset(ssrAryL, 0, sizeof(ssrAryL));
-    //memset(rfAryL, 0, sizeof(rfAryL));
-    //memset(rfaccAryL, 0, sizeof(rfaccAryL));
-    //memset(QAryL, 0, sizeof(QAryL));
     bssr = prj.makeSoilSaturationDistFile;
     brf = prj.makeRfDistFile;
     brfacc = prj.makeRFaccDistFile;
@@ -329,7 +313,7 @@ void makeIMG_rfacc()
 void makeIMG_flow()
 {
     makeBMPFileUsingArrayGTzero_InParallel(fpnQ_img, QAry,
-        di.nCols, di.nRows, rendererType::Depth, 1000, di.nodata_value);
+        di.nCols, di.nRows, rendererType::Depth, 2000, di.nodata_value);
 }
 
 void makeASC_ssr()
