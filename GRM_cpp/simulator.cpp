@@ -85,7 +85,6 @@ int startSimulationSingleEvent()
     return 1;
 }
 
-
 int simulateRunoff(double nowTmin)
 {
     int maxLimit = di.facMax + 1;
@@ -190,6 +189,7 @@ void simulateRunoffCore(int i, double nowTmin)
     }
 }
 
+
 void initThisSimulation()
 {
     if (prj.simType != simulationType::RealTime) {
@@ -198,6 +198,7 @@ void initThisSimulation()
     else {
         ts.rfDataCountTotal = 0;
     }
+	initRFvars();
     // 이렇게 해야 모의기간에 맞게 실행된다. 
     //왜냐하면, 첫번째 실행 결과가 0 시간으로 출력되기 때문에
     ts.simDuration_min = (int)prj.simDuration_hr * 60

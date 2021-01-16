@@ -361,6 +361,10 @@ int updateCVbyUserSettings()
     }
 
     // wp 별로, 상류에 있는 cv 개수 설정
+	di.cellNtobeSimulated = 0;
+	for (int idx : wpis.wpCVidxes) {
+		wpis.cvCountAllup[idx] =0;
+	}
     for (int i = 0; i < di.cellNnotNull; i++) {
         // 상류 cv 개수에 이 조건 추가하려면 주석 해제.
         //if (cvs[i].toBeSimulated == -1) { continue; }

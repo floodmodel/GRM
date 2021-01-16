@@ -778,6 +778,7 @@ void updatetCVbyRFandSoil(int i); // i´Â cv array index
 int initOutputFiles();
 void initRasterOutput();
 void initThisSimulation();
+void initRFvars();
 int initWatershedNetwork();
 int initWPinfos();
 int isNormalChannelSettingInfo(channelSettingInfo *csi);

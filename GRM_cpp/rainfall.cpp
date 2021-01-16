@@ -164,11 +164,14 @@ int setCVRF(int order)
  void setRFintensityAndDTrf_Zero()
 {
      ts.rfAveForDT_m = 0;
+	 ts.rfAveSumAllCells_dtP_m = 0;
      ts.rfiSumAllCellsInCurRFData_mPs = 0;
+#pragma omp parallel for
      for (int i = 0; i < di.cellNnotNull; ++i)    {
         cvs[i].rfiRead_mPsec = 0;
         cvs[i].rfApp_dt_m = 0;
     }
+
     for(int wpcvid : wpis.wpCVidxes)    {
         wpis.rfWPGridForDtP_mm[wpcvid] = 0;
         wpis.rfUpWSAveForDt_mm[wpcvid] = 0;
@@ -184,8 +187,8 @@ int setCVRF(int order)
      ts.rfAveSumAllCells_dtP_m = ts.rfAveSumAllCells_dtP_m
          + ts.rfAveForDT_m;
      for (int idx : wpis.wpCVidxes) {
-         wpis.rfUpWSAveForDt_mm[idx] = wpis.rfiReadSumUpWS_mPs[idx]
-             * dtsec * 1000 / (double)(cvs[idx].fac + 1);
+		 wpis.rfUpWSAveForDt_mm[idx] = wpis.rfiReadSumUpWS_mPs[idx]
+			 * dtsec * 1000 / (double)wpis.cvCountAllup[idx]; //(double)(cvs[idx].fac + 1);
          wpis.rfUpWSAveForDtP_mm[idx] = wpis.rfUpWSAveForDtP_mm[idx]
              + wpis.rfUpWSAveForDt_mm[idx];
          wpis.rfWPGridForDtP_mm[idx] = wpis.rfWPGridForDtP_mm[idx]
@@ -196,6 +199,19 @@ int setCVRF(int order)
  inline double rfintensity_mPsec(double rf_mm, double dtrf_sec)
  {
      return rf_mm / 1000.0 / dtrf_sec;
+ }
+
+ void initRFvars()
+ {
+	 ts.rfAveForDT_m = 0;
+	 ts.rfAveSumAllCells_dtP_m = 0;
+	 ts.rfiSumAllCellsInCurRFData_mPs = 0;
+	 for (int wpcvid : wpis.wpCVidxes) {
+		 wpis.rfWPGridForDtP_mm[wpcvid] = 0;
+		 wpis.rfUpWSAveForDt_mm[wpcvid] = 0;
+		 wpis.rfiReadSumUpWS_mPs[wpcvid] = 0;
+		 wpis.rfUpWSAveForDtP_mm[wpcvid] = 0;
+	 }
  }
 
 
