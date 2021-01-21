@@ -57,9 +57,6 @@
   <ItemGroup>
     <ResourceCompile Include="grm.rc" />
   </ItemGroup>
-  <ItemGroup>
-    <None Include="..\DownloadStableVersion_ExeSampleDataDocuments\pyGRM\pyGRM.pyproj" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{A514D1B5-73E2-4655-9477-D2F03B69EF17}</ProjectGuid>
