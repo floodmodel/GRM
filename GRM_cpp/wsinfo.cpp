@@ -25,7 +25,7 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     string fpnChannelWidth)
 {
     prj.writeConsole = -1;
-    prj.forSimulation = -1;
+    prj.forSimulation = -1; // exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	fs::path fpn_domain = fs::path(fpnDomain.c_str());
 	string fp_domain = fpn_domain.parent_path().string();
     fpnLog = fp_domain+"\\"+"GRMdll.log";
@@ -143,7 +143,7 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
 grmWSinfo::grmWSinfo(string gmpFPN)
 {
     prj.writeConsole = -1;
-    prj.forSimulation = -1;
+    prj.forSimulation = -1;  // exe로 진입하는 것은 1, dll로 진입하는 것은 -1
     ppi=getProjectFileInfo(gmpFPN);
     fpnLog = "GRMdll.log";
     //cout << fpnLog << endl;

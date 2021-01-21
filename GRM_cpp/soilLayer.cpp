@@ -34,7 +34,7 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
     cvs[i].ssr = soilSSRbyCumulF(cvs[i].soilWaterC_tm1_m,
         cvs[i].sdEffAsWaterDepth_m, cvs[i].flowType);
     if (cvs[i].ssr > 0.99 
-        || (prj.simType == simulationType::SingleEventPE_SSR 
+        || (prj.simType == simulationType::Normal_PE_SSR 
             && cvs[i].ssr == 1))
     {
         if (cvs[i].ssr == 1)
@@ -367,7 +367,9 @@ double Kunsaturated(cvAtt cv)
             return Ks * pow(ssr, CoefUnsaturatedK);
         }
         case unSaturatedKType::Constant: {
-            return Ks * CoefUnsaturatedK;
+			// constant를 선택하고, 계수로 1을 입력하면
+			// (default 투수계수) * (투수계수보정계수)의 값이 그대로 적용된다.
+            return Ks * CoefUnsaturatedK; 
         }
         default: {
             return Ks * ssr * CoefUnsaturatedK;

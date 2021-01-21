@@ -75,7 +75,7 @@ int main(int argc, char** args)
 	prj.deleteAllFilesExceptDischargeOut = -1;
 	setlocale(LC_ALL, "korean");
 	prj.writeConsole = 1; // exe로 진입하는 것은 1
-	prj.forSimulation = 1;// exe로 진입하는 것은 1
+	prj.forSimulation = 1;// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	if (argc == 2) {
 		string arg1(args[1]);
 		string arg1L = lower(trim(arg1));
@@ -84,7 +84,7 @@ int main(int argc, char** args)
 			return 1;
 		}
 		// 이경우는 grm.exe  fpn_gmp 인 경우
-		startSingleEventRun(arg1, -1, outString);
+		startSingleRun(arg1, -1, outString);
 	}
 	else {
 		string rtOption1(args[1]);
@@ -105,11 +105,11 @@ int main(int argc, char** args)
 			arg1 = lower(trim(arg1));
 			arg2 = lower(trim(arg2));
 			//arg3 = lower(trim(arg3));
-			int isPrediction = -1;
+			int isForceAutoROM = -1;
 			if (arg1 == "/a" || arg2 == "/a") {
-				isPrediction = 1;
+				isForceAutoROM = 1;
 			}
-			if (grmRTLauncher(argc, args, isPrediction) == -1) {
+			if (grmRTLauncher(argc, args, isForceAutoROM) == -1) {
 				return 1;
 			}
 		}
@@ -121,7 +121,7 @@ int main(int argc, char** args)
 			arg1 = lower(trim(arg1));
 			arg2 = trim(arg2);
 			if (arg1 == "/a") {
-				startSingleEventRun(arg2, 1, outString);
+				startSingleRun(arg2, 1, outString);
 			}
 			if (arg1 == "/f" || arg1 == "/fd") {
 				struct stat finfo;
@@ -187,7 +187,7 @@ int main(int argc, char** args)
 	return 1;
 }
 
-int startSingleEventRun(string fpnGMP, int isPrediction, string outString)
+int startSingleRun(string fpnGMP, int isPrediction, string outString)
 {
 	fs::path in_arg = fs::path(fpnGMP.c_str());
 	string fp = in_arg.parent_path().string();
@@ -209,7 +209,7 @@ int startSingleEventRun(string fpnGMP, int isPrediction, string outString)
 		ppi = getProjectFileInfo(fpnGMP);
 		ts.enforceFCautoROM = isPrediction;
 		writeNewLog(fpnLog, outString, 1, -1);
-		if (simulateSingleEvent() == -1) {
+		if (setupAndStartSimulation() == -1) {
 			waitEnterKey();
 			return -1;
 		}
@@ -227,7 +227,7 @@ int startGMPsRun(vector<string> gmpFiles, int isPrediction, string outString)
 		string progF = to_string(n + 1) + '/' + to_string(gmpFiles.size());
 		string progR = dtos(((n + 1) / nFiles * 100), 2);
 		msgFileProcess = "Total progress: " + progF + "(" + progR + "%). ";
-		if (simulateSingleEvent() == -1) {
+		if (setupAndStartSimulation() == -1) {
 			waitEnterKey();
 			return -1;
 		}
@@ -305,7 +305,7 @@ void disposeDynamicVars()
 
 }
 
-int simulateSingleEvent()
+int setupAndStartSimulation()
 {
 	//===== 여기서 grmWSinfo class  test ===============
 	////string fpn = "C://GRM//SampleGHG//GHG500.gmp";
@@ -349,12 +349,12 @@ int simulateSingleEvent()
 	
 	if (openPrjAndSetupModel(-1) == -1) {
 		writeLog(fpnLog, "Model setup failed !!!\n", 1, prj.writeConsole);
-		if (prj.forSimulation == 1) {
+		if (prj.forSimulation == 1) {// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 			return -1;
 		}
 	}
 	writeLog(fpnLog, "Simulation was started.\n", 1, 1);
-	if (startSimulationSingleEvent() == -1) {
+	if (startSimulation() == -1) {
 		writeNewLog(fpnLog, "An error was occurred while simulation...\n", 1, 1);
 		return -1;
 	}
@@ -371,13 +371,13 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 {	
 	if (openProjectFile(forceRealTime) < 0)	{
 		writeLog(fpnLog, "Open "+ ppi.fpn_prj+" was failed.\n", 1, prj.writeConsole);
-		if (prj.forSimulation == 1) {
+		if (prj.forSimulation == 1) {// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 			return -1;
 		}
 	}
 	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, prj.writeConsole);
 	if (setupModelAfterOpenProjectFile() == -1) {		
-		if (prj.forSimulation == 1) { return -1; }
+		if (prj.forSimulation == 1) { return -1; }// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	}
 	string isparallel = "true";
 	omp_set_num_threads(prj.mdp);
@@ -390,7 +390,7 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 	//	prj.mdp = 1;
 	//	isparallel = "false";
 	//}
-	if (prj.forSimulation == 1) {
+	if (prj.forSimulation == 1) {// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 		if (initOutputFiles() == -1) {
 			writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
 			return -1;

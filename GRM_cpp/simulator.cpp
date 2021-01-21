@@ -25,7 +25,7 @@ extern cvAtt* cvsb;
 map<int, double> fcdAb;// <idx, value> t-dt 시간에 적용된 flow control data 값
 wpinfo wpisb;
 
-int startSimulationSingleEvent()
+int startSimulation()
 {
     initThisSimulation();
     setCVStartingCondition(0);
@@ -285,7 +285,7 @@ void setCVStartingCondition(double iniflow)
             qChCVini = 0;
             uChCVini = 0;
             if (iniStreamFlowWasSet == 1) {
-                if (prj.simType == simulationType::SingleEventPE_SSR) {
+                if (prj.simType == simulationType::Normal_PE_SSR) {
                     qChCVini = iniflow * (cvs[i].fac - di.facMostUpChannelCell)
                         / (double)(faAtBaseCV - di.facMostUpChannelCell);
                 }
@@ -427,7 +427,7 @@ void writeBySimType(int nowTP_min,
 {
     simulationType simType = prj.simType;
     switch (simType) {
-    case simulationType::SingleEvent: {
+    case simulationType::Normal: {
         writeSimStep(nowTP_min);
         if (prj.printOption == GRMPrintType::All
 			|| prj.printOption == GRMPrintType::DischargeFile) {

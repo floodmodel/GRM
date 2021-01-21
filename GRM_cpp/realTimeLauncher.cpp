@@ -14,7 +14,7 @@ extern fs::path fpnLog;
 
 thisSimulationRT tsrt;
 
-// 실시간 수신자료 이용은 옵션은 /r, 예측은 /p 이다.
+// 실시간 수신자료 이용은 옵션은 /r 
 int grmRTLauncher(int argc, char** args, int isPrediction)
 {
     // 이부분 모르겠다.  원이사님 검토 필요. 2020.04.23.최

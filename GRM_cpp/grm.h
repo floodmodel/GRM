@@ -103,18 +103,41 @@ enum class GRMPrintType
 
 enum class simulationType
 {
-	SingleEvent,
-	SingleEventPE_SSR,
+	Normal, //2021.01.19. SingleEvent를 Normal로 수정
+	Normal_PE_SSR,
 	RealTime,
 	None
 };
 
+//불포화 투수계수 산정 방법
 enum class unSaturatedKType //python 인터페이스와 맞춘다.
 {
 	Constant = 0,
 	Linear = 1,
 	Exponential = 2,
 	None = 3
+};
+
+enum class PETmethod
+{
+	UserData = 0,
+	PenmanMonteith = 1,
+	PriestleyTaylor = 2,
+	Hargreaves = 3,
+	JensenHaise = 4,
+	BlaneyCriddle = 5,
+	Hamon = 6,
+	Turc = 7,
+	None = 8,
+	notSet = 9
+};
+
+enum class snowMeltMethod
+{
+	UserData = 0,
+	Amethod = 1,
+	None = 2,
+	notSet = 3
 };
 
 enum class cellFlowType
@@ -175,6 +198,7 @@ typedef struct _projectFileTable
 	const string nProjectSettings = "ProjectSettings";
 	const string nSubWatershedSettings = "SubWatershedSettings";
 	const string nChannelSettings = "ChannelSettings";
+	const string nPETnSnowMeltSettings = "PETnSnowMeltSettings";
 	const string nWatchPoints = "WatchPoints";
 	const string nGreenAmptParameter = "GreenAmptParameter";
 	const string nSoilDepth = "SoilDepth";
@@ -184,6 +208,7 @@ typedef struct _projectFileTable
 	int sProjectSettings = 0; //0::비활성, 1: 활성
 	int sSubWatershedSettings = 0; //0:비활성, 1: 활성
 	int sChannelSettings = 0; //0:비활성, 1: 활성
+	int sPETnSowMeltSettings = 0;//0:비활성, 1: 활성
 	int sWatchPoints = 0; //0:비활성, 1: 활성
 	int sGreenAmptParameter = 0; //0:비활성, 1: 활성
 	int sSoilDepth = 0; //0:비활성, 1: 활성
@@ -237,6 +262,8 @@ typedef struct _projectFileFieldName
 	const string SimulateInfiltration = "SimulateInfiltration";
 	const string SimulateSubsurfaceFlow = "SimulateSubsurfaceFlow";
 	const string SimulateBaseFlow = "SimulateBaseFlow";
+	const string SimulateEvTr = "SimulateEvTr";
+	const string SimulateSnowMelt = "SimulateSnowMelt";
 	const string SimulateFlowControl = "SimulateFlowControl";
 	const string MakeIMGFile = "MakeIMGFile";
 	const string MakeASCFile = "MakeASCFile";
@@ -246,11 +273,12 @@ typedef struct _projectFileFieldName
 	const string MakeFlowDistFile = "MakeFlowDistFile";
 	const string PrintOption = "PrintOption";
 	//const string WriteLog = "WriteLog";
+	// SubWatershedSettings table
 	const string ID_SWP = "ID";
 	const string IniSaturation = "IniSaturation";
-	const string MinSlopeOF = "MinSlopeOF";
 	const string UnsaturatedKType = "UnsaturatedKType";
 	const string CoefUnsaturatedK = "CoefUnsaturatedK";
+	const string MinSlopeOF = "MinSlopeOF";
 	const string MinSlopeChBed = "MinSlopeChBed";
 	const string MinChBaseWidth = "MinChBaseWidth";
 	const string ChRoughness = "ChRoughness";
@@ -261,6 +289,7 @@ typedef struct _projectFileFieldName
 	const string CalCoefWFSuctionHead = "CalCoefWFSuctionHead";
 	const string CalCoefHydraulicK = "CalCoefHydraulicK";
 	const string CalCoefSoilDepth = "CalCoefSoilDepth";
+	//ChannelSettings table
 	const string UserSet = "UserSet";
 	const string WSID_CH = "WSID";
 	const string CrossSectionType = "CrossSectionType";
@@ -275,6 +304,7 @@ typedef struct _projectFileFieldName
 	const string CompoundCSChannelWidthLimit = "CompoundCSChannelWidthLimit";
 	const string BankSideSlopeRight = "BankSideSlopeRight";
 	const string BankSideSlopeLeft = "BankSideSlopeLeft";
+	// FlowControlGrid table
 	const string Name_FCG = "Name";
 	const string ColX_FCG = "ColX";
 	const string RowY_FCG = "RowY";
@@ -287,19 +317,31 @@ typedef struct _projectFileFieldName
 	const string ROType = "ROType";
 	const string ROConstQ = "ROConstQ";
 	const string ROConstQDuration = "ROConstQDuration";
+	// PETnSowMelt table
+	const string ID_PETSM = "ID";
+	const string PETMethod = "PETMethod";
+	const string PETDataFile = "PETDataFile";
+	const string PETcoeffPlant = "PETcoeffPlant";
+	const string PETcoeffSoil = "PETcoeffSoil";
+	const string SnowMeltMethod = "SnowMeltMethod";
+	const string SnowMeltDataFile = "SnowMeltDataFile";
+	// WatchPoint table
 	const string Name_WP = "Name";
 	const string ColX_WP = "ColX";
 	const string RowY_WP = "RowY";
+	// GreenAmptParameters table
 	const string GridValue_ST = "GridValue";
 	const string GRMCode_ST = "GRMCode";
 	const string Porosity = "Porosity";
 	const string EffectivePorosity = "EffectivePorosity";
 	const string WFSuctionHead = "WFSoilSuctionHead";
 	const string HydraulicConductivity = "HydraulicConductivity";
+	// SoilDepth table
 	const string GridValue_SD = "GridValue";
 	const string GRMCode_SD = "GRMCode";
 	const string SoilDepthValue_01 = "SoilDepth";
 	const string SoilDepthValue_02 = "SoilDepth_cm";
+	// LandCover table
 	const string GridValue_LC = "GridValue";
 	const string GRMCode_LC = "GRMCode";
 	const string RoughnessCoeff = "RoughnessCoefficient";
@@ -326,9 +368,9 @@ typedef struct _swsParameters
 {
 	int wsid = -1;
 	double iniSaturation =-1.0;
-	double minSlopeOF = 0.0;
-	unSaturatedKType unSatKType= unSaturatedKType::None;
+	unSaturatedKType unSatKType = unSaturatedKType::None;
 	double coefUnsaturatedK = 0.0;
+	double minSlopeOF = 0.0;
 	double minSlopeChBed = 0.0;
 	double minChBaseWidth = 0.0;
 	double chRoughness = 0.0;
@@ -459,6 +501,20 @@ typedef struct _rainfallData
 	string FilePath = "";
 	string FileName = "";
 } rainfallData;
+
+typedef struct _PETnSnowMeltInfo
+{
+	// continuous 로 검색
+	// 이건 continuous 용 =====================
+	int wsid = -1;
+	PETmethod petMethod = PETmethod::notSet;
+	string fpnPET = "";
+	double PETcoeffPlant = -1.0;
+	double PETcoeffSoil = -1.0;
+	snowMeltMethod smMethod = snowMeltMethod::notSet;
+	string fpnSnowMelt = "";
+	// =====================
+} PETnSMinfo;
 
 typedef struct _grmOutFiles
 {
@@ -643,9 +699,12 @@ typedef struct _projectFile
 	int dtsec = 0;
 	int isFixedTimeStep = 0;// true : 1, false : -1
 	int dtPrint_min = 0;
+
 	int simInfiltration = 0;// true : 1, false : -1
 	int simSubsurfaceFlow = 0;// true : 1, false : -1
 	int simBaseFlow = 0;// true : 1, false : -1
+	int simEvTr = 0;// true : 1, false : -1
+	int simSnowMelt = 0;// true : 1, false : -1
 	int simFlowControl = 0;// true : 1, false : -1
 
 	int makeIMGFile = 0;// true : 1, false : -1
@@ -662,6 +721,7 @@ typedef struct _projectFile
 	map <int, swsParameters> swps; // <wsid, paras>
 	map <int, channelSettingInfo> css; //<wsid. paras>
 	map <int, flowControlinfo> fcs; // <idx, paras>
+	map <int, PETnSMinfo> petsms; //<wsid. paras>
 	vector <wpLocationRC> wps; // 
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;
@@ -784,6 +844,7 @@ int initWPinfos();
 int isNormalChannelSettingInfo(channelSettingInfo *csi);
 int isNormalFlowControlinfo(flowControlinfo *fci);
 int isNormalSwsParameter(swsParameters *swp);
+int isNormalPETnSnowMelt(PETnSMinfo* petsmi);
 int isNormalWatchPointInfo(wpLocationRC *wpL);
 int isNormalSoilTextureInfo(soilTextureInfo *st);
 int isNormalSoilDepthInfo(soilDepthInfo *sd);
@@ -828,6 +889,8 @@ int readXmlRowSubWatershedSettings(string aline,
 	swsParameters *swp);
 int readXmlRowFlowControlGrid(string aline, 
 	flowControlinfo *fci);
+int readXmlPETnSnowMelt(string aline,
+	PETnSMinfo* petsmi);
 int readXmlRowWatchPoint(string aline, 
 	wpLocationRC *wpl);
 int readXmlRowSoilTextureInfo(string aline,
@@ -848,13 +911,13 @@ int setFlowNetwork();
 int setRainfallData();
 void setRFintensityAndDTrf_Zero();
 int setRasterOutputArray();
+int setupAndStartSimulation();
 int setupByFAandNetwork();
 int setupModelAfterOpenProjectFile();
-int simulateSingleEvent();
 int simulateRunoff(double nowTmin);
 void simulateRunoffCore(int i, double nowTmin);
-int startSimulationSingleEvent();
-int startSingleEventRun(string fpnGMP, 
+int startSimulation();
+int startSingleRun(string fpnGMP, 
 	int isPrediction, string outString);
 int startGMPsRun(vector<string> gmpFiles, 
 	int isPrediction, string outString);
