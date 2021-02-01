@@ -793,6 +793,8 @@ void calFCReservoirOutFlow(int i, double nowTmin); //i´Â cv array index
 void calEffectiveRainfall(int i, int dtrf_sec, int dtsec);
 void calOverlandFlow(int i, double hCVw_tp1,
 	double effDy_m);
+void calPET_PriestleyTaylor(int i,
+	int dtsec, double dy_m);
 void calReservoirOperation(int i, double nowTmin);
 void calReservoirOutFlowInReservoirOperation(int i,
 	double Qout_cms, double dy_m);
