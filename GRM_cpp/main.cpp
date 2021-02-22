@@ -58,9 +58,12 @@ int main(int argc, char** args)
 	string exeName = "GRM";
 	version grmVersion = getCurrentFileVersion();
 	string outString;
-	outString = "GRM v." + to_string(grmVersion.major) + "."
-		+ to_string(grmVersion.minor) + "."
-		+ to_string(grmVersion.build) + ". Modified in "
+	outString = "GRM v." + to_string(grmVersion.pmajor) + "."
+		+ to_string(grmVersion.pminor) + "."
+		+ to_string(grmVersion.pbuild) + ". File version : "
+		+ to_string(grmVersion.fmajor) + "."
+		+ to_string(grmVersion.fminor) + "."
+		+ to_string(grmVersion.fbuild) + ". Modified in "
 		+ grmVersion.LastWrittenTime + ".\n";
 	prj.cpusi = getCPUinfo();
 	cout << outString;

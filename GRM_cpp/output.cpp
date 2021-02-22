@@ -426,9 +426,9 @@ int makeNewOutputFiles()
 		string nowT = timeToString(tnow,
 			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 		version grmVersion = getCurrentFileVersion();
-		string ver = "GRM v." + to_string(grmVersion.major) + "."
-			+ to_string(grmVersion.minor)
-			+ "." + to_string(grmVersion.build)
+		string ver = "GRM v." + to_string(grmVersion.fmajor) + "."
+			+ to_string(grmVersion.fminor)
+			+ "." + to_string(grmVersion.fbuild)
 			+ " Built in " + grmVersion.LastWrittenTime;
 
 		if (prj.simType == simulationType::RealTime) {
