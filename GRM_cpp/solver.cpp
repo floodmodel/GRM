@@ -120,7 +120,7 @@ void calOverlandFlow(int i, double hCVw_tp1, double effDy_m)
         uCVw_n = vByManningEq(hCVw_n, cvs[i].slopeOF, cvs[i].rcOF);
         cCVw_n = uCVw_n * CONST_DtPDx * hCVw_n;
     }
-    for (int iter = 0; iter < 20000; iter++) {
+    for (int iter = 0; iter < 1000; iter++) {
         double hCVe_n = Hp_n;
         double uCVe_n = vByManningEq(hCVe_n, cvs[i].slopeOF, cvs[i].rcOF);
         double cCVe_n = uCVe_n * CONST_DtPDx * hCVe_n;
@@ -174,7 +174,7 @@ void calChannelFlow(int i, double chCSACVw_tp1)
     double CSAchCVp_j = cvs[i].stream.csaCH;
     double CSAp_n = CSAchCVp_j;
     double hChp_n = cvs[i].stream.hCH;
-    for (int iter = 0; iter < 20000; iter++) {
+    for (int iter = 0; iter < 1000; iter++) {
         double hChCVe_n = hChp_n;
         double CSAChCVe_n = CSAp_n;
         CSPer = getChCrossSectionPerimeter(cvs[i].stream.chBaseWidth,

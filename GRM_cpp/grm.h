@@ -624,6 +624,8 @@ typedef struct _cvAtt
 	double ifRatef_mPsec = 0.0;//t 시간에서 계산된 침투률[m/s]
 	double ifRatef_tm1_mPsec = 0.0;//t-1 시간에서 적용된 침투률[m/s]
 	double ifF_mPdt = 0.0;//t 시간에서 계산된 dt 시간동안의 침투량[m/dt]
+	//double pet_m = 0.0; // 잠재증발산량
+	double aet_m = 0.0; //실제 증발산량
 	int isAfterSaturated = 0;// -1 : false, 1: true
 	soilTextureCode stCode;
 	int stCellValue = -1;//토성레이어의 값, VAT참조 // 0 값은 상수를 의미하게 한다.
@@ -794,6 +796,8 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec);
 void calOverlandFlow(int i, double hCVw_tp1,
 	double effDy_m);
 void calPET_PriestleyTaylor(int i,
+	int dtsec, double dy_m);
+void calPET_Hargreaves(int i,
 	int dtsec, double dy_m);
 void calReservoirOperation(int i, double nowTmin);
 void calReservoirOutFlowInReservoirOperation(int i,
