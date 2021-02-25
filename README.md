@@ -11,3 +11,4 @@
 2020.09.10. Bug fix in Flow control simulation  
 2021.01.07. Bug fix in bitmap image output renderer  
 2021.01.16. Bug fix in calculating average rainfall when using '/f' option  
+2021.02.22. Bug fix in writing GRM version
