@@ -324,6 +324,17 @@ int openProjectFile(int forceRealTime)
 					writeLog(fpnLog, "The storage of reservoir ["
 						+ afci.fcName + "] will not be simulated.\n", 1, 1);
 				}
+				if (afci.iniStorage_m3 > afci.maxStorage_m3 * afci.maxStorageR) {
+					double effStorage = afci.maxStorage_m3 * afci.maxStorageR;
+					writeLog(fpnLog, "[" + afci.fcName + "] Initial storage(" + dtos(afci.iniStorage_m3, 0)
+						+ "m^3) is greater than effective storage(" + dtos(effStorage, 0) + "m^3). \n", 1, 1);
+					writeLog(fpnLog, "[" + afci.fcName + "] Initial storage was set to effective storage(" 
+						+ dtos(effStorage, 0) + "m^3).\n", 1, 1);
+					// 초기저수량이 유효저수량보다 크면, 초기저수량을 유효저수량으로 설정한다.
+					prj.fcs[idx].iniStorage_m3 = afci.maxStorage_m3 * afci.maxStorageR;
+
+				}
+
 			}
 		}
 	}

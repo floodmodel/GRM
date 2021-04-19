@@ -3,8 +3,8 @@
 #include <thread>
 #include <algorithm>
 
-#include "grm.h"
 #include "gentle.h"
+#include "grm.h"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -295,25 +295,25 @@ int setRasterOutputArray()
 void makeIMG_ssr()
 {
     makeBMPFileUsingArrayGTzero_InParallel( fpnssr_img, ssrAry,
-        di.nCols, di.nRows, rendererType::Risk, 1, di.nodata_value);
+        di.nCols, di.nRows, rendererType::Risk, 1.0, di.nodata_value);
 }
 
 void makeIMG_rf()
 {
     makeBMPFileUsingArrayGTzero_InParallel(fpnrf_img, rfAry,
-        di.nCols, di.nRows, rendererType::Depth, 100, di.nodata_value);
+        di.nCols, di.nRows, rendererType::Depth, 100.0, di.nodata_value);
 }
 
 void makeIMG_rfacc()
 {
     makeBMPFileUsingArrayGTzero_InParallel(fpnrfacc_img, rfaccAry,
-        di.nCols, di.nRows, rendererType::Depth, 500, di.nodata_value);
+        di.nCols, di.nRows, rendererType::Depth, 500.0, di.nodata_value);
 }
 
 void makeIMG_flow()
 {
     makeBMPFileUsingArrayGTzero_InParallel(fpnQ_img, QAry,
-        di.nCols, di.nRows, rendererType::Depth, 2000, di.nodata_value);
+        di.nCols, di.nRows, rendererType::Depth, 2000.0, di.nodata_value);
 }
 
 void makeASC_ssr()

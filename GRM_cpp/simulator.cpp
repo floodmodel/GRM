@@ -142,7 +142,7 @@ void simulateRunoffCore(int i, double nowTmin)
     if (prj.simFlowControl == 1 &&
         (cvs[i].fcType == flowControlType::ReservoirOutflow ||
             cvs[i].fcType == flowControlType::Inlet)) {
-        fccds.fcDataAppliedNowT_m3Ps[i ] = 0;
+        fccds.fcDataAppliedNowT_m3Ps[i] = 0;
         calFCReservoirOutFlow(i, nowTmin);
     }
     else {
