@@ -1,4 +1,4 @@
-#include <string>
+#include "stdafx.h"
 #include <algorithm>
 #include "gentle.h"
 #include "grm.h"

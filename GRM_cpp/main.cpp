@@ -1,13 +1,10 @@
-
+#include "stdafx.h"
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #include <time.h>
-#include <io.h>
 #include <omp.h>
-#include <string>
-#include <filesystem>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <locale>
@@ -217,6 +214,7 @@ int startSingleRun(string fpnGMP, int isPrediction, string outString)
 			return -1;
 		}
 	}
+	return 1;
 }
 
 int startGMPsRun(vector<string> gmpFiles, int isPrediction, string outString)

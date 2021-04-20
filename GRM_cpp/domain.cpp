@@ -1,9 +1,7 @@
-#include <io.h>
-#include <filesystem>
+#include "stdafx.h"
 #include <map>
 #include<vector>
 #include <omp.h>
-#include <string>
 #include<math.h>
 
 #include "gentle.h"

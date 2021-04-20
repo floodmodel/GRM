@@ -1,4 +1,4 @@
-
+#include "stdafx.h"
 #include "grm.h"
 
 extern cvAtt* cvs;

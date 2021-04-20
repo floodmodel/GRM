@@ -1,3 +1,4 @@
+#include "stdafx.h"
 #include <omp.h>
 
 #include "gentle.h"

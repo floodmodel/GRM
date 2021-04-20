@@ -1,5 +1,4 @@
-#include <io.h>
-#include <string>
+#include "stdafx.h"
 #include <thread>
 #include <algorithm>
 

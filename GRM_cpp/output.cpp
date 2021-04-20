@@ -1,5 +1,5 @@
+#include "stdafx.h"
 #include <io.h>
-#include <string>
 #include<ATLComTime.h>
 
 #include "grm.h"

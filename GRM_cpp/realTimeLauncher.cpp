@@ -1,8 +1,8 @@
-// 이 문서의 코드는 최가 초안 작성, 헤르메시스에서 유지관리. 2020.04.23.
+// 이 문서의 코드는 최가 초안 작성, 실시간 시스템 구축시 유지관리. 2020.04.23. 최
+
+#include "stdafx.h"
 #include <stdio.h>
 #include <iostream>
-#include <string>
-#include <io.h>
 #include "grm.h"
 #include "gentle.h"
 #include "realTime.h"
@@ -20,7 +20,7 @@ int grmRTLauncher(int argc, char** args, int isPrediction)
     // 이부분 모르겠다.  원이사님 검토 필요. 2020.04.23.최
     string delaySec = "1"; //  GRMLauncher2018.Properties.Settings.Default.DelaySecond_for_remote_debug.ToString(); 
     int delaymilSec = stod(delaySec) * 100;
-    _sleep(delaymilSec);  
+    Sleep(delaymilSec);  
     string strGUID = "";
     string startCommandTime = ""; //이건 모의 시작 버튼을 누른 시간
     string rtStartDataTime = ""; // 이게 모의 시작 데이터 시간
@@ -154,4 +154,5 @@ int grmRTLauncher(int argc, char** args, int isPrediction)
         waitEnterKey();
         return -1;
     }
+	return 1;
 }

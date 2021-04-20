@@ -1,6 +1,5 @@
-// 이 문서의 코드는 헤르메시스에서 유지관리. 2020.04.23.
-
-#include <string>
+// 이 문서의 코드는 실시간 시스템 구축시 보완, 유지관리. 2020.04.23. 최
+#include "stdafx.h"
 //#include <sqlext.h>
 
 #include "gentle.h"
@@ -83,7 +82,7 @@ void clear_DBMS_Table_Qwatershed(string strName)
     //    oSQLCon.Open();
     //string strSQL = string.Format("delete [Q_CAL] where runid={0}", cRealTime_Common.g_performance_log_GUID);   // '2018.8.8 부터 임시 적용. 한시적
     //SqlCommand oSQLCMD = new SqlCommand(strSQL, oSQLCon);
-    int intAffectedRecords;
+    int intAffectedRecords=0;
     // intAffectedRecords = oSQLCMD.ExecuteNonQuery();
     string strMsg = "[Q_CAL] Table에서 " + strName + " 유역 " 
         + to_string(intAffectedRecords) + ":건 Data 삭제됨. 초기화 완료.";

@@ -1,6 +1,5 @@
-
+#include "stdafx.h"
 #include <omp.h>
-#include <string>
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"

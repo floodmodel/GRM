@@ -1,7 +1,4 @@
-#include <io.h>
-#include <string>
-
-
+#include "stdafx.h"
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"

@@ -1,6 +1,4 @@
-
-#include <io.h>
-#include <string>
+#include "stdafx.h"
 #include "grm.h"
 using namespace std;
 

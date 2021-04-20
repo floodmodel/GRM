@@ -1,10 +1,9 @@
-// 이 문서의 코드는 최가 초안 작성, 헤르메시스검토 보완. 특히 dbms 부분. 2020.04.23. 최
+// 이 문서의 코드는 최가 초안 작성, 실시간 시스템 구축시 보완. 특히 dbms 부분. 2020.04.23. 최
+#include "stdafx.h"
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
-#include <io.h>
 #include <stdlib.h>
-#include <string>
 #include<ATLComTime.h>
 #include "gentle.h"
 #include "grm.h"
@@ -293,6 +292,7 @@ int readCSVandFillFCdataForRealTime(string fpnFCcvs, string targetDateTime)
             tsrt.newFcDataAddedRT[cvidx] = 1;
         }
     }
+	return 1;
 }
 
 void updateFcDataStatusForEachFCcellGRMRT(string t_yyyymmddHHMM, int idx)
@@ -594,4 +594,5 @@ int openRtEnvFile(string fpnref)
             continue;
         }
     }
+	return 1;
 }

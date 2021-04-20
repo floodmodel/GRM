@@ -1,6 +1,5 @@
-
+#include "stdafx.h"
 #include <omp.h>
-#include <string>
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"
@@ -48,7 +47,7 @@ int startSimulationRT()
             while (ts.stopSim == -1) {
                 updateRFdataGRMRT(targetRFTime);
                 if (rfOrder < ts.rfDataCountTotal) { break; }
-                _sleep(2000);// 2초 지연 적절함
+                Sleep(2000);// 2초 지연 적절함
             }
             if (ts.stopSim == 1) {
                 writeLog(fpnLog, "Real time simulation was stopped.\n", 1, 1);
@@ -91,7 +90,7 @@ int startSimulationRT()
                                 convertFCtypeToAutoROM(targetDataTime, idx);
                                 break;
                             }
-                            _sleep(2000);
+                            Sleep(2000);
                         }
                         fccds.curDorder[idx] += 1;
                         if (ts.stopSim == 1) {

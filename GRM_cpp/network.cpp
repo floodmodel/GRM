@@ -1,4 +1,4 @@
-
+#include "stdafx.h"
 #include "gentle.h"
 #include "grm.h"
 
