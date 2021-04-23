@@ -494,7 +494,7 @@ int makeNewOutputFiles()
 			if (prj.printOption == GRMPrintType::All) {
 				heads = comHeader
 					+ "Output data : Grid rainfall for each watchpoint [mm]\n\n"
-					+ time_wpNames +"\n";
+					+ time_wpNames + "\n";
 				appendTextToTextFile(ofs.ofpnRFGrid, heads);
 				heads = comHeader
 					+ "Output data : Average rainfall for each watchpoint catchment [mm]\n\n"
@@ -512,9 +512,11 @@ int makeNewOutputFiles()
 					string sourceDT;
 					string resOperation;
 					string roiniStorage;
-					string romaxStorage;
-					string romaxStorageRatio;
-					string romaxStorageApp;
+					string roMaxStorage;
+					string roNormalHighStorage;
+					string roRestrictedStorage;
+					string roRestrictedPeriod_Start;
+					string roRestrictedPeriod_End;
 					string roType;
 					string roConstQ;
 					string roConstQduration;
@@ -523,9 +525,11 @@ int makeNewOutputFiles()
 					sourceDT = "Source data interval[min] :";
 					resOperation = "Res. operation :";
 					roiniStorage = "Ini. storage :";
-					romaxStorage = "Max. storage :";
-					romaxStorageRatio = "Max. storage ratio :";
-					romaxStorageApp = "Max. storageMax applied :";
+					roMaxStorage = "Max. storage :";
+					roNormalHighStorage = "Normal high water level storage :";
+					roRestrictedStorage = "Restricted water level storage :";
+					roRestrictedPeriod_Start = "First time of restricted water level storage period :";
+					roRestrictedPeriod_End = "Last time of restricted water level storage period :";
 					roType = "RO type :";
 					roConstQ = "Constant Q :";
 					roConstQduration = "Constant Q duration :";
@@ -534,7 +538,7 @@ int makeNewOutputFiles()
 						flowControlinfo afc = prj.fcs[n];
 						fcDataField = fcDataField + "\t" + afc.fcName;
 						fcNameApp = fcNameApp + "\t" + afc.fcName;
-						string fct = ENUM_TO_STR(None); 
+						string fct = ENUM_TO_STR(None);
 						switch (afc.fcType) {
 						case flowControlType::ReservoirOperation:
 							fct = ENUM_TO_STR(ReservoirOperation);
@@ -565,7 +569,7 @@ int makeNewOutputFiles()
 						}
 						else {
 							sourceDT = sourceDT + "\t" + "None";
-							if (afc.maxStorage_m3 > 0 && afc.maxStorageR > 0) {
+							if (afc.maxStorage_m3 > 0) {
 								resOperation = resOperation + "\t" + "True";
 							}
 							else {
@@ -573,61 +577,98 @@ int makeNewOutputFiles()
 							}
 						}
 						/*if (afc.fcType == flowControlType::ReservoirOperation) {*/
-						if (afc.fcType != flowControlType::Inlet) {
-							if (afc.fcType == flowControlType::ReservoirOperation) {
-								if (afc.roType != reservoirOperationType::None) {
-									roType = roType + "\t" + ENUM_TO_STR(afc.roType);
-								}
-								else {
-									writeLog(fpnLog, "Reservoir operation type is invalid.\n", 1, 1);
-									return -1;
-								}
-							}
-
-							if (afc.iniStorage_m3 >= 0) {
-								roiniStorage = roiniStorage + "\t" + to_string(afc.iniStorage_m3);
+						//if (afc.fcType != flowControlType::Inlet) {
+							//if (afc.fcType == flowControlType::ReservoirOperation) {
+								//if (afc.roType != reservoirOperationType::None) {
+						string roTypeStr = "";
+						if (afc.roType == reservoirOperationType::AutoROM) {
+							roTypeStr = ENUM_TO_STR(AutoROM);
+						}
+						else if (afc.roType == reservoirOperationType::RigidROM) {
+							roTypeStr = ENUM_TO_STR(RigidROM);
+						}
+						else if (afc.roType == reservoirOperationType::ConstantQ) {
+							roTypeStr = ENUM_TO_STR(ConstantQ);
+						}
+						else if (afc.roType == reservoirOperationType::SDEqation) {
+							roTypeStr = ENUM_TO_STR(SDEqation);
+						}
+						else if (afc.roType == reservoirOperationType::None) {
+							roTypeStr = ENUM_TO_STR(None);
+						}
+						else {
+							writeLog(fpnLog, "Reservoir operation type of ["
+								+ afc.fcName + "] is invalid.\n", 1, 1);
+							return -1;
+						}
+						roType = roType + "\t" + roTypeStr;
+						if (afc.iniStorage_m3 >= 0) {
+							roiniStorage = roiniStorage + "\t" + dtos(afc.iniStorage_m3,2);
+						}
+						else {
+							writeLog(fpnLog, "Initial reservoir storage is invalid.\n", 1, 1);
+							return -1;
+						}
+						if (afc.maxStorage_m3 >= 0) {
+							roMaxStorage = roMaxStorage + "\t" + dtos(afc.maxStorage_m3,2);
+						}
+						else if (afc.fcType == flowControlType::ReservoirOperation) {
+							writeLog(fpnLog, "Maximum reservoir storage or storage ratio is invalid.\n", 1, 1);
+							return -1;
+						}
+						if (afc.NormalHighStorage_m3 >= 0) {
+							roNormalHighStorage = roNormalHighStorage + "\t" + dtos(afc.NormalHighStorage_m3,2);
+						}
+						else if (afc.fcType == flowControlType::ReservoirOperation) {
+							writeLog(fpnLog, "Normal high water level storage is invalid.\n", 1, 1);
+							return -1;
+						}
+						if (afc.RestrictedStorage_m3 >= 0) {
+							roRestrictedStorage = roRestrictedStorage + "\t" + dtos(afc.RestrictedStorage_m3,2);
+						}
+						else if (afc.fcType == flowControlType::ReservoirOperation) {
+							writeLog(fpnLog, "Restricted water level storage is invalid.\n", 1, 1);
+							return -1;
+						}
+						if (afc.RestrictedPeriod_Start != "") {
+							roRestrictedPeriod_Start = roRestrictedPeriod_Start + "\t" + afc.RestrictedPeriod_Start;
+						}
+						else if (afc.fcType == flowControlType::ReservoirOperation && afc.RestrictedStorage_m3 > 0) {
+							writeLog(fpnLog, "Starting time of applying restricted water level storage is invalid.\n", 1, 1);
+							return -1;
+						}
+						if (afc.RestrictedPeriod_End != "") {
+							roRestrictedPeriod_End = roRestrictedPeriod_End + "\t" + afc.RestrictedPeriod_End;
+						}
+						else if (afc.fcType == flowControlType::ReservoirOperation && afc.RestrictedStorage_m3 > 0) {
+							writeLog(fpnLog, "Ending time of applying restricted water level storage is invalid.\n", 1, 1);
+							return -1;
+						}
+						if (afc.roType == reservoirOperationType::ConstantQ) {
+							if (afc.roConstQ_cms < 0) {
+								writeLog(fpnLog, "Constant reservoir outflow is invalid.\n", 1, 1);
+								return -1;
 							}
 							else {
-								writeLog(fpnLog, "Initial reservoir storage is invalid.\n", 1, 1);
-								return -1;
-							}
-							if (afc.maxStorage_m3 > 0 || afc.maxStorageR > 0) {
-								romaxStorage = romaxStorage + "\t" + to_string(afc.maxStorage_m3);
-								if (afc.maxStorageR > 0) {
-									romaxStorageRatio = romaxStorageRatio + "\t" + to_string(afc.maxStorageR);
-									double storApp = afc.maxStorage_m3 * afc.maxStorageR;
-									romaxStorageApp = romaxStorageApp + "\t" + to_string(storApp);
-								}
-							}
-							else if (afc.fcType == flowControlType::ReservoirOperation) {
-								writeLog(fpnLog, "Maximum reservoir storage or storage ratio is invalid.\n", 1, 1);
-								return -1;
-							}							
-							if (afc.roType == reservoirOperationType::ConstantQ) {
-								if (afc.roConstQ_cms < 0) {
-									writeLog(fpnLog, "Constant reservoir outflow is invalid.\n", 1, 1);
-									return -1;
+								roConstQ = roConstQ + "\t" + dtos(afc.roConstQ_cms,2);
+								if (afc.roConstQDuration_hr > 0) {
+									roConstQduration = roConstQduration + "\t" + to_string(afc.roConstQDuration_hr);
 								}
 								else {
-									roConstQ = roConstQ + "\t" + to_string(afc.roConstQ_cms);
-									if (afc.roConstQDuration_hr > 0) {
-										roConstQduration = roConstQduration + "\t" + to_string(afc.roConstQDuration_hr);
-									}
-									else {
-										writeLog(fpnLog, "Constant reservoir outflow duration is invalid.\n", 1, 1);
-										return -1;
-									}
+									writeLog(fpnLog, "Constant reservoir outflow duration is invalid.\n", 1, 1);
+									return -1;
 								}
 							}
 						}
 					}
+					//}
 					// FCApp - flow control data
 					heads = comHeader
 						+ "Output data : Flow control data input[CMS]\n\n"
 						+ fcNameApp + "\n"
 						+ fcTypeApp + "\n"
 						+ sourceDT + "\n"
-						+ resOperation + "\n"
+						+ resOperation + "\n\n"
 						+ fcDataField + "\n";
 					appendTextToTextFile(ofs.ofpnFCData, heads);
 					// reservoir operation
@@ -636,12 +677,14 @@ int makeNewOutputFiles()
 						+ fcNameApp + "\n"
 						+ fcTypeApp + "\n"
 						+ roiniStorage + "\n"
-						+ romaxStorage + "\n"
-						+ romaxStorageRatio + "\n"
-						+ romaxStorageApp + "\n"
+						+ roMaxStorage + "\n"
+						+ roNormalHighStorage + "\n"
+						+ roRestrictedStorage + "\n"
+						+ roRestrictedPeriod_Start + "\n"
+						+ roRestrictedPeriod_End + "\n"
 						+ roType + "\n"
 						+ roConstQ + "\n"
-						+ roConstQduration + "\n"
+						+ roConstQduration + "\n\n"
 						+ fcDataField + "\n";
 					appendTextToTextFile(ofs.ofpnFCStorage, heads);
 				}

@@ -313,7 +313,11 @@ typedef struct _projectFileFieldName
 	const string FlowDataFile = "FlowDataFile";
 	const string IniStorage = "IniStorage";
 	const string MaxStorage = "MaxStorage";
-	const string MaxStorageR = "MaxStorageR";
+	//const string MaxStorageR = "MaxStorageR";
+	const string NormalHighStorage = "NormalHighStorage";
+	const string RestrictedStorage = "RestrictedStorage";
+	const string RestrictedPeriod_Start = "RestrictedPeriod_Start";
+	const string RestrictedPeriod_End = "RestrictedPeriod_End";
 	const string ROType = "ROType";
 	const string ROConstQ = "ROConstQ";
 	const string ROConstQDuration = "ROConstQDuration";
@@ -453,7 +457,18 @@ typedef struct _flowControlinfo
 	string fpnFCData = "";
 	double iniStorage_m3 = -1.0;
 	double maxStorage_m3 = -1.0;
-	double maxStorageR = -1.0;
+	//double maxStorageR = -1.0;
+	double NormalHighStorage_m3 = -1.0;
+	double RestrictedStorage_m3=-1.0;
+	string RestrictedPeriod_Start = ""; // mmMddD 포맷 혹은 시간단위 숫자
+	string RestrictedPeriod_End = "";// mmMddD 포맷 혹은 시간단위 숫자
+	int RestrictedPeriod_Start_min = -1;
+	int RestrictedPeriod_End_min = -1;
+	int restricedP_SM = -1;
+	int restricedP_SD = -1;
+	int restricedP_EM = -1;
+	int restricedP_ED = -1;
+
 	reservoirOperationType roType= reservoirOperationType::None;
 	double roConstQ_cms = -1.0;
 	double roConstQDuration_hr = -1.0;
@@ -737,7 +752,7 @@ typedef struct _projectFile
 	int issrFileApplied = 0;
 	int makeASCorIMGfile = 0;
 	int makeRFraster = 0;
-	int applyFC = 0;
+	//int applyFC = 0;
 
 	CPUsInfo cpusi;
 	int deleteAllFilesExceptDischargeOut = -1;
@@ -774,8 +789,10 @@ typedef struct _thisSimulation
 	int runByAnalyzer = 0;
 
 	COleDateTime time_thisSimStarted;
-	double vMaxInThisStep;
-	
+	double vMaxInThisStep=-9999.0;
+
+	int tElapsed_DateTime_Month = 0;
+	int tElapsed_DateTime_Day = 0;
 } thisSimulation;
 
 typedef struct _globalVinner // 계산 루프로 전달하기 위한 최소한의 전역 변수. gpu 고려

@@ -49,6 +49,14 @@ int startSimulation()
             }
         }
         nowTmin = nowTsec / 60.0;
+		if (prj.isDateTimeFormat == 1 && prj.simFlowControl == 1) {
+			string tElapsedStr = timeElaspedToDateTimeFormat2(prj.simStartTime,
+				nowTmin * 60, timeUnitToShow::toM,
+				dateTimeFormat::yyyymmddHHMMSS);
+			tm tElapsed = stringToDateTime(tElapsedStr);
+			ts.tElapsed_DateTime_Month = tElapsed.tm_mon;
+			ts.tElapsed_DateTime_Day = tElapsed.tm_mday;
+		}
         if (simulateRunoff(nowTmin) == -1) { return -1; }
         calWPCumulRFduringDTP(ts.dtsec);
         outputManager(nowTsec, rfOrder);

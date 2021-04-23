@@ -73,7 +73,8 @@ int updateFCCellinfoAndData()
 void calFCReservoirOutFlow(int i, double nowTmin)
 {// nowTmin의 최소값은 dtsec/60이다.
     int dtfc = prj.fcs[i].fcDT_min;
-	if (nowTmin > dtfc * fccds.curDorder[i]) {
+	if (nowTmin >= dtfc * fccds.curDorder[i]) {
+		double t_currentFC = dtfc * fccds.curDorder[i];
 		if (fccds.curDorder[i] < fccds.flowData_m3Ps[i].size()) {
 			fccds.curDorder[i]++;
 		}
@@ -84,7 +85,7 @@ void calFCReservoirOutFlow(int i, double nowTmin)
 				fccds.fcDataAppliedNowT_m3Ps[i] = 0;
 			}
 			else if (ts.enforceFCautoROM == 1) {				
-				convertFCtypeToAutoROM(dtos(nowTmin, 2) +" min", i);
+				convertFCtypeToAutoROM(dtos(t_currentFC, 2) +" min", i);
 			}
 			return;
 		}
@@ -115,6 +116,7 @@ void calSinkOrSourceFlow(int i, double nowTmin)
     int dtfc = prj.fcs[i].fcDT_min;
     double cellsize = di.cellSize;
 	if (nowTmin > dtfc * fccds.curDorder[i]) {
+		double t_currentFC = dtfc * fccds.curDorder[i];
 		if (fccds.curDorder[i] < fccds.flowData_m3Ps[i].size()) {
 			fccds.curDorder[i]++;
 		}
@@ -125,7 +127,7 @@ void calSinkOrSourceFlow(int i, double nowTmin)
 				fccds.fcDataAppliedNowT_m3Ps[i] = 0.0;
 			}
 			else if (ts.enforceFCautoROM == 1) {
-				convertFCtypeToAutoROM(to_string(nowTmin), i);
+				convertFCtypeToAutoROM(dtos(t_currentFC, 2) + " min", i);
 			}
 			return; //sink, source flow 모의하지 않는다
 		}
@@ -194,6 +196,8 @@ void calReservoirOperation(int i, double nowTmin)
 {
     int dtsec = ts.dtsec;
     //int i = i + 1;
+	flowControlinfo afci;
+	afci = prj.fcs[i];
     double QforDTbySinkOrSourceFlow = 0;
     double cellsize = di.cellSize;
    //이전에 sinkflow or source flow 였으면, calSinkOrSourceFlow(int i, double nowTmin) 에서 cell storage 미리 계산된다.
@@ -209,8 +213,29 @@ void calReservoirOperation(int i, double nowTmin)
 	}
     double Qout_cms = 0.0;
     double dy_m = di.cellSize;
-    double maxStorageApp = prj.fcs[i].maxStorage_m3 * prj.fcs[i].maxStorageR;
-    switch (prj.fcs[i].roType) {
+	double maxStorageApp=0;
+	maxStorageApp = afci.NormalHighStorage_m3;
+	if (prj.isDateTimeFormat == 1) { // RestrictedStorage_m3>0 인 경우에만 적용
+		if (afci.RestrictedStorage_m3 > 0) {
+			if (ts.tElapsed_DateTime_Month >= afci.restricedP_SM
+				&& ts.tElapsed_DateTime_Day >= afci.restricedP_SD) {
+				if (ts.tElapsed_DateTime_Month <= afci.restricedP_EM
+					&& ts.tElapsed_DateTime_Day <= afci.restricedP_ED) {
+					maxStorageApp = afci.RestrictedStorage_m3;
+				}
+			}
+		}
+	}
+	else {
+		if (afci.RestrictedStorage_m3 > 0) {
+			if (afci.RestrictedPeriod_Start_min >= nowTmin
+				&& afci.RestrictedPeriod_End_min <= nowTmin) {
+				maxStorageApp = afci.RestrictedStorage_m3;
+			}
+		}
+	}
+    //double maxStorageApp = afci.maxStorage_m3 * afci.maxStorageR;
+    switch (afci.roType) {
     case reservoirOperationType::AutoROM: {
         if (cvs[i].storageCumulative_m3 >= maxStorageApp) {
             Qout_cms = (cvs[i].storageCumulative_m3
@@ -227,15 +252,15 @@ void calReservoirOperation(int i, double nowTmin)
                 - maxStorageApp) / ts.dtsec; // 차이만큼 모두 유출
             cvs[i].storageCumulative_m3 = maxStorageApp;
         }
-        else  if (cvs[i].storageCumulative_m3 < prj.fcs[i].roConstQ_cms * ts.dtsec) {
+        else  if (cvs[i].storageCumulative_m3 < afci.roConstQ_cms * ts.dtsec) {
             // 현재 저류량이 dtsec 유출량 보다 작은 경우, 저류된 모든 양이 유출
             Qout_cms = cvs[i].storageCumulative_m3 / ts.dtsec;
             cvs[i].storageCumulative_m3 = 0;
         }
         else {
-            Qout_cms = prj.fcs[i].roConstQ_cms;
+            Qout_cms = afci.roConstQ_cms;
             cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
-                - prj.fcs[i].roConstQ_cms;
+                - afci.roConstQ_cms;
             if (cvs[i].storageCumulative_m3 < 0) {
                 cvs[i].storageCumulative_m3 = 0;
             }
@@ -245,17 +270,17 @@ void calReservoirOperation(int i, double nowTmin)
         break;
     }
     case reservoirOperationType::ConstantQ: {
-        if (nowTmin <= prj.fcs[i].roConstQDuration_hr * 60) {
+        if (nowTmin <= afci.roConstQDuration_hr * 60) {
             //여기서는 최대 저류 가능량에 상관 없이 일정량 방류            
-            if (cvs[i].storageCumulative_m3 <= prj.fcs[i].roConstQ_cms * ts.dtsec) {
+            if (cvs[i].storageCumulative_m3 <= afci.roConstQ_cms * ts.dtsec) {
                 // 이경우는 저류량이 모두 유출
                 Qout_cms = cvs[i].storageCumulative_m3 / ts.dtsec;
                 cvs[i].storageCumulative_m3 = 0;
             }
             else {
-                Qout_cms = prj.fcs[i].roConstQ_cms * ts.dtsec;
+                Qout_cms = afci.roConstQ_cms * ts.dtsec;
                 cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
-                    - prj.fcs[i].roConstQ_cms * ts.dtsec;
+                    - afci.roConstQ_cms * ts.dtsec;
                 if (cvs[i].storageCumulative_m3 < 0) {
                     cvs[i].storageCumulative_m3 = 0;
                 }

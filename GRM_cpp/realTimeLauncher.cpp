@@ -19,7 +19,7 @@ int grmRTLauncher(int argc, char** args, int isPrediction)
 {
     // 이부분 모르겠다.  원이사님 검토 필요. 2020.04.23.최
     string delaySec = "1"; //  GRMLauncher2018.Properties.Settings.Default.DelaySecond_for_remote_debug.ToString(); 
-    int delaymilSec = stod(delaySec) * 100;
+    int delaymilSec = stoi(delaySec) * 100;
     Sleep(delaymilSec);  
     string strGUID = "";
     string startCommandTime = ""; //이건 모의 시작 버튼을 누른 시간

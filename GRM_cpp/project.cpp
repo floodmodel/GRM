@@ -283,9 +283,10 @@ int openProjectFile(int forceRealTime)
 	}
 
 	// 여기서 부터 검증
-	prj.applyFC = -1;
+	// flow control 관련
+	//prj.applyFC = -1;
 	if (prj.simFlowControl == 1 && prj.fcs.size() > 0) {
-		prj.applyFC = 1;
+		//prj.applyFC = 1;
 		map<int, flowControlinfo>::iterator iter;
 		for (iter = prj.fcs.begin(); iter != prj.fcs.end(); ++iter) {
 			int idx = iter->first;
@@ -293,8 +294,9 @@ int openProjectFile(int forceRealTime)
 			afci = prj.fcs[idx];
 			if (afci.roType != reservoirOperationType::None
 				&& (afci.maxStorage_m3 <= 0
-					|| afci.maxStorageR <= 0)) {
-				writeLog(fpnLog, " Max. storage and max. storage ratio must be greater than zero when reservoir operation type is applied.\n", 1, 1);
+					|| afci.NormalHighStorage_m3 <= 0)
+				|| afci.RestrictedStorage_m3 <= 0) {
+				writeLog(fpnLog, " MaxStorage, NormalHighStorage, and  RestrictedStorage must be greater than zero when reservoir operation type is applied.\n", 1, 1);
 				return -1;
 			}
 			if (afci.fcType != flowControlType::Inlet) {
@@ -305,35 +307,83 @@ int openProjectFile(int forceRealTime)
 					prj.fcs[idx].iniStorage_m3 = 0.0;
 					bsimStorage = -1;
 				}
-				if (afci.maxStorage_m3 <= 0) {
+				if (afci.maxStorage_m3 < 0) {
 					writeLog(fpnLog, "Max storage of reservoir ["
 						+ afci.fcName + "] was set to '0'.\n", 1, 1);
 					prj.fcs[idx].maxStorage_m3 = 0.0;
 					bsimStorage = -1;
 				}
-				if (afci.maxStorageR <= 0) {
-					writeLog(fpnLog, "Max storage ratio of reservoir ["
+				if (afci.NormalHighStorage_m3 < 0) {
+					writeLog(fpnLog, "NormalHighStorage of reservoir ["
 						+ afci.fcName + "] was set to '0.0'.\n", 1, 1);
-					prj.fcs[idx].maxStorageR = 0.0;
+					prj.fcs[idx].NormalHighStorage_m3 = 0.0;
+					bsimStorage = -1;
+				}
+				if (afci.RestrictedStorage_m3 < 0) {
+					writeLog(fpnLog, "RestrictedStorage of reservoir ["
+						+ afci.fcName + "] was set to '0.0'.\n", 1, 1);
+					prj.fcs[idx].RestrictedStorage_m3 = 0.0;
 					bsimStorage = -1;
 				}
 				if (bsimStorage == -1) {
 					writeLog(fpnLog, "The storage of reservoir ["
 						+ afci.fcName + "] will not be simulated.\n", 1, 1);
 				}
-				if (afci.iniStorage_m3 > afci.maxStorage_m3 * afci.maxStorageR) {
-					double effStorage = afci.maxStorage_m3 * afci.maxStorageR;
+				if (afci.iniStorage_m3 > afci.maxStorage_m3) {
 					writeLog(fpnLog, "[" + afci.fcName + "] Initial storage(" + dtos(afci.iniStorage_m3, 0)
-						+ "m^3) is greater than effective storage(" + dtos(effStorage, 0) + "m^3). \n", 1, 1);
-					writeLog(fpnLog, "[" + afci.fcName + "] Initial storage was set to effective storage(" 
-						+ dtos(effStorage, 0) + "m^3).\n", 1, 1);
-					// 초기저수량이 유효저수량보다 크면, 초기저수량을 유효저수량으로 설정한다.
-					prj.fcs[idx].iniStorage_m3 = afci.maxStorage_m3 * afci.maxStorageR;
-
+						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
+					return -1;
+				}
+				if (afci.NormalHighStorage_m3 > afci.maxStorage_m3) {
+					writeLog(fpnLog, "[" + afci.fcName + "] NormalHighStorage storage(" + dtos(afci.NormalHighStorage_m3, 0)
+						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
+					return -1;
+				}
+				if (afci.RestrictedStorage_m3 > afci.maxStorage_m3) {
+					writeLog(fpnLog, "[" + afci.fcName + "] RestrictedStorage storage(" + dtos(afci.RestrictedStorage_m3, 0)
+						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
+					return -1;
+				}
+			}
+			if (prj.isDateTimeFormat == 1 ){
+				if (isNumeric(afci.RestrictedPeriod_Start) == true) {
+					writeLog(fpnLog, "RestrictedPeriod_Start value must have 'mmMddD' format.\n", 1, 1);
+					return -1;
+				}
+				else {
+					prj.fcs[idx].restricedP_SM = stoi(afci.RestrictedPeriod_Start.substr(0, 2));
+					prj.fcs[idx].restricedP_SD = stoi(afci.RestrictedPeriod_Start.substr(3, 2));
+				}
+				if (isNumeric(afci.RestrictedPeriod_End) == true) {
+					writeLog(fpnLog, "RestrictedPeriod_End value must have 'mmMddD' format.\n", 1, 1);
+					return -1;
+				}
+				else {
+					prj.fcs[idx].restricedP_EM = stoi(afci.RestrictedPeriod_End.substr(0, 2));
+					prj.fcs[idx].restricedP_ED = stoi(afci.RestrictedPeriod_End.substr(3, 2));
+				}
+			}
+			if (prj.isDateTimeFormat == -1) {
+				if (isNumeric(afci.RestrictedPeriod_Start) == false) {
+					writeLog(fpnLog, "RestrictedPeriod_Start has to be numeric value.\n", 1, 1);
+					return -1;
+				}
+				else {
+					prj.fcs[idx].RestrictedPeriod_Start_min = stoi(afci.RestrictedPeriod_Start) * 60;
+				}
+				if (isNumeric(afci.RestrictedPeriod_End) == false) {
+					writeLog(fpnLog, "RestrictedPeriod_End has to be numeric value.\n", 1, 1);
+					return -1;
+				}
+				else {
+					prj.fcs[idx].RestrictedPeriod_End_min = stoi(afci.RestrictedPeriod_End) * 60;
 				}
 
 			}
 		}
+	}
+	else {
+		prj.simFlowControl == -1;
 	}
 
 	// 이건 continuous 용 =====================
@@ -1720,9 +1770,9 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 	if (fci->fcType != flowControlType::Inlet) {
 		if (aline.find(fldName.IniStorage) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fldName.IniStorage);
-			vString = replaceText(vString, ",", "");
-			if (vString != "" && stod(vString) >= 0) {
-				fci->iniStorage_m3 = stod(vString);
+			//vString = replaceText(vString, ",", "");
+			if (vString != "" && stod_c(vString) >= 0) {
+				fci->iniStorage_m3 = stod_c(vString);
 			}
 			else if(fci->fcType == flowControlType::ReservoirOperation){
 				writeLog(fpnLog, "Ini. storage of reservoir ["
@@ -1733,15 +1783,15 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		}
 		if (aline.find("<"+fldName.MaxStorage+">") != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fldName.MaxStorage);
-			vString = replaceText(vString, ",", "");
-			if (vString != "" && stod(vString) >= 0) {// max storage must be greater than zero.
+			//vString = replaceText(vString, ",", "");
+			if (vString != "" && stod_c(vString) >= 0) {// max storage must be greater than zero.
 				if (fci->fcType == flowControlType::ReservoirOperation
-					&& stod(vString) == 0) {
+					&& stod_c(vString) == 0) {
 					writeLog(fpnLog, "Max. storage of reservoir ["
 						+ fci->fcName + "] is invalid.\n", 1, 1);
 					return -1;
 				}
-				fci->maxStorage_m3 = stod(vString);
+				fci->maxStorage_m3 = stod_c(vString);
 			}
 			else if(fci->fcType == flowControlType::ReservoirOperation){
 				writeLog(fpnLog, "Max. storage of reservoir ["
@@ -1750,24 +1800,76 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			}
 			return 1;
 		}
-		if (aline.find("<"+fldName.MaxStorageR+">") != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fldName.MaxStorageR);
-			if (vString != "" && stod(vString) >= 0) {// max storage must be greater than zero.
+		if (aline.find("<" + fldName.NormalHighStorage + ">") != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fldName.NormalHighStorage);
+			if (vString != "" && stod_c(vString) >= 0) {// max storage must be greater than zero.
 				if (fci->fcType == flowControlType::ReservoirOperation
-					&& stod(vString) == 0) {
-					writeLog(fpnLog, "Max. storage ratio of reservoir ["
+					&& stod_c(vString) == 0) {
+					writeLog(fpnLog, "NormalHighStorage of reservoir ["
 						+ fci->fcName + "] is invalid.\n", 1, 1);
 					return -1;
 				}
-				fci->maxStorageR = stod(vString);
+				fci->NormalHighStorage_m3 = stod_c(vString);
 			}
-			else if(fci->fcType == flowControlType::ReservoirOperation) {
-				writeLog(fpnLog, "Max. storage ratio of reservoir ["
+			else if (fci->fcType == flowControlType::ReservoirOperation) {
+				writeLog(fpnLog, "NormalHighStorage of reservoir ["
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			return 1;
 		}
+		if (aline.find("<" + fldName.RestrictedStorage + ">") != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fldName.RestrictedStorage);
+			if (vString != "" && stod_c(vString) >= 0) {// max storage must be greater than zero.
+				if (fci->fcType == flowControlType::ReservoirOperation
+					&& stod_c(vString) == 0) {
+					writeLog(fpnLog, "RestrictedStorage of reservoir ["
+						+ fci->fcName + "] is invalid.\n", 1, 1);
+					return -1;
+				}
+				fci->RestrictedStorage_m3 = stod_c(vString);
+			}
+			else if (fci->fcType == flowControlType::ReservoirOperation) {
+				writeLog(fpnLog, "RestrictedStorage of reservoir ["
+					+ fci->fcName + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			return 1;
+		}
+		if (aline.find("<" + fldName.RestrictedPeriod_Start + ">") != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fldName.RestrictedPeriod_Start);
+			if (vString != "") {
+				fci->RestrictedPeriod_Start= vString;
+			}
+			return 1;
+		}
+		if (aline.find("<" + fldName.RestrictedPeriod_End + ">") != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fldName.RestrictedPeriod_End);
+			if (vString != "") {
+				fci->RestrictedPeriod_End = vString;
+			}
+			return 1;
+		}
+
+		//if (aline.find("<"+fldName.MaxStorageR+">") != string::npos) {
+		//	vString = getValueStringFromXmlLine(aline, fldName.MaxStorageR);
+		//	if (vString != "" && stod(vString) >= 0) {// max storage must be greater than zero.
+		//		if (fci->fcType == flowControlType::ReservoirOperation
+		//			&& stod(vString) == 0) {
+		//			writeLog(fpnLog, "Max. storage ratio of reservoir ["
+		//				+ fci->fcName + "] is invalid.\n", 1, 1);
+		//			return -1;
+		//		}
+		//		fci->maxStorageR = stod(vString);
+		//	}
+		//	else if(fci->fcType == flowControlType::ReservoirOperation) {
+		//		writeLog(fpnLog, "Max. storage ratio of reservoir ["
+		//			+ fci->fcName + "] is invalid.\n", 1, 1);
+		//		return -1;
+		//	}
+		//	return 1;
+		//}
+
 		if (aline.find(fldName.ROType) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fldName.ROType);
 			reservoirOperationType  arot = reservoirOperationType::None;
@@ -1801,8 +1903,8 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		if (fci->roType == reservoirOperationType::ConstantQ) {
 			if (aline.find(fldName.ROConstQ) != string::npos) {
 				vString = getValueStringFromXmlLine(aline, fldName.ROConstQ);
-				if (vString != "" && stod(vString) >= 0) {
-					fci->roConstQ_cms = stod(vString);
+				if (vString != "" && stod_c(vString) >= 0) {
+					fci->roConstQ_cms = stod_c(vString);
 				}
 				else {
 					writeLog(fpnLog, "Constant outlfow of reservoir ["
@@ -1813,8 +1915,8 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			}
 			if (aline.find(fldName.ROConstQDuration) != string::npos) {
 				vString = getValueStringFromXmlLine(aline, fldName.ROConstQDuration);
-				if (vString != "" && stod(vString) >= 0) {
-					fci->roConstQDuration_hr = stod(vString);
+				if (vString != "" && stod_c(vString) >= 0) {
+					fci->roConstQDuration_hr = stod_c(vString);
 				}
 				else {
 					writeLog(fpnLog, "Constant outlfow duration of reservoir ["
@@ -2266,7 +2368,14 @@ int isNormalFlowControlinfo(flowControlinfo* fci)
 	if (fci->fcType == flowControlType::ReservoirOperation) {
 		if (fci->iniStorage_m3 == afc_ini.iniStorage_m3) { return -1; }
 		if (fci->maxStorage_m3 == afc_ini.maxStorage_m3) { return -1; }
-		if (fci->maxStorageR == afc_ini.maxStorageR) { return -1; }
+		if (fci->NormalHighStorage_m3 == afc_ini.NormalHighStorage_m3) { return -1; }
+		if (fci->RestrictedStorage_m3 == afc_ini.RestrictedStorage_m3) { return -1; }
+		if (fci->RestrictedPeriod_Start == afc_ini.RestrictedPeriod_Start) { return -1; }
+		if (fci->RestrictedPeriod_End == afc_ini.RestrictedPeriod_End) { return -1; }
+		if (prj.isDateTimeFormat == -1) {
+			if (fci->RestrictedPeriod_Start_min == afc_ini.RestrictedPeriod_Start_min) { return -1; }
+			if (fci->RestrictedPeriod_End_min == afc_ini.RestrictedPeriod_End_min) { return -1; }
+		}
 		if (fci->roType == afc_ini.roType) { return -1; }
 		if (fci->roType == reservoirOperationType::ConstantQ) {
 			if (fci->roConstQ_cms == afc_ini.roConstQ_cms) { return -1; }

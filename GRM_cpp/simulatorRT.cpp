@@ -56,7 +56,7 @@ int startSimulationRT()
             rfOrder = rfOrder + 1; // 이렇게 하면 마지막 레이어 적용
             setCVRF(rfOrder);
         }
-        if (prj.applyFC == 1) {// 신규 fc 자료 검색 조건
+        if (prj.simFlowControl == 1) {// 신규 fc 자료 검색 조건
             //string targetDataTime_Previous = "";
             for (int idx : fccds.cvidxsFCcell) {
                 flowControlinfo afc = prj.fcs[idx];
