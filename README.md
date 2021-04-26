@@ -14,5 +14,5 @@
 2021.02.22. Bug fix in writing GRM version  
 2021.04.19. Add an error check process for initial storages of reservoirs  
 2021.04.23. GRM v2021.04 was released  
-2021.04.23. The GRM was improved to enable more detailed simulation for reservoir operation  
+               The GRM was improved to enable more detailed simulation for reservoir operation  
                
