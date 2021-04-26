@@ -292,12 +292,46 @@ int openProjectFile(int forceRealTime)
 			int idx = iter->first;
 			flowControlinfo afci;
 			afci = prj.fcs[idx];
-			if (afci.roType != reservoirOperationType::None
-				&& (afci.maxStorage_m3 <= 0
-					|| afci.NormalHighStorage_m3 <= 0)
-				|| afci.RestrictedStorage_m3 <= 0) {
-				writeLog(fpnLog, " MaxStorage, NormalHighStorage, and  RestrictedStorage must be greater than zero when reservoir operation type is applied.\n", 1, 1);
-				return -1;
+			if (afci.roType != reservoirOperationType::None){
+				if (afci.maxStorage_m3 <= 0 || afci.NormalHighStorage_m3 <= 0 
+					|| afci.RestrictedStorage_m3 <= 0) {
+					writeLog(fpnLog, " MaxStorage, NormalHighStorage, and  RestrictedStorage must be greater than zero when reservoir operation type is applied.\n", 1, 1);
+					return -1;
+				}
+				if (prj.isDateTimeFormat == 1) {
+					if (isNumeric(afci.RestrictedPeriod_Start) == true) {
+						writeLog(fpnLog, "RestrictedPeriod_Start value must have 'mmMddD' format.\n", 1, 1);
+						return -1;
+					}
+					else {
+						prj.fcs[idx].restricedP_SM = stoi(afci.RestrictedPeriod_Start.substr(0, 2));
+						prj.fcs[idx].restricedP_SD = stoi(afci.RestrictedPeriod_Start.substr(3, 2));
+					}
+					if (isNumeric(afci.RestrictedPeriod_End) == true) {
+						writeLog(fpnLog, "RestrictedPeriod_End value must have 'mmMddD' format.\n", 1, 1);
+						return -1;
+					}
+					else {
+						prj.fcs[idx].restricedP_EM = stoi(afci.RestrictedPeriod_End.substr(0, 2));
+						prj.fcs[idx].restricedP_ED = stoi(afci.RestrictedPeriod_End.substr(3, 2));
+					}
+				}
+				if (prj.isDateTimeFormat == -1) {
+					if (isNumeric(afci.RestrictedPeriod_Start) == false) {
+						writeLog(fpnLog, "RestrictedPeriod_Start has to be numeric value.\n", 1, 1);
+						return -1;
+					}
+					else {
+						prj.fcs[idx].RestrictedPeriod_Start_min = stoi(afci.RestrictedPeriod_Start) * 60;
+					}
+					if (isNumeric(afci.RestrictedPeriod_End) == false) {
+						writeLog(fpnLog, "RestrictedPeriod_End has to be numeric value.\n", 1, 1);
+						return -1;
+					}
+					else {
+						prj.fcs[idx].RestrictedPeriod_End_min = stoi(afci.RestrictedPeriod_End) * 60;
+					}
+				}
 			}
 			if (afci.fcType != flowControlType::Inlet) {
 				int bsimStorage = 1;
@@ -344,41 +378,6 @@ int openProjectFile(int forceRealTime)
 						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
 					return -1;
 				}
-			}
-			if (prj.isDateTimeFormat == 1 ){
-				if (isNumeric(afci.RestrictedPeriod_Start) == true) {
-					writeLog(fpnLog, "RestrictedPeriod_Start value must have 'mmMddD' format.\n", 1, 1);
-					return -1;
-				}
-				else {
-					prj.fcs[idx].restricedP_SM = stoi(afci.RestrictedPeriod_Start.substr(0, 2));
-					prj.fcs[idx].restricedP_SD = stoi(afci.RestrictedPeriod_Start.substr(3, 2));
-				}
-				if (isNumeric(afci.RestrictedPeriod_End) == true) {
-					writeLog(fpnLog, "RestrictedPeriod_End value must have 'mmMddD' format.\n", 1, 1);
-					return -1;
-				}
-				else {
-					prj.fcs[idx].restricedP_EM = stoi(afci.RestrictedPeriod_End.substr(0, 2));
-					prj.fcs[idx].restricedP_ED = stoi(afci.RestrictedPeriod_End.substr(3, 2));
-				}
-			}
-			if (prj.isDateTimeFormat == -1) {
-				if (isNumeric(afci.RestrictedPeriod_Start) == false) {
-					writeLog(fpnLog, "RestrictedPeriod_Start has to be numeric value.\n", 1, 1);
-					return -1;
-				}
-				else {
-					prj.fcs[idx].RestrictedPeriod_Start_min = stoi(afci.RestrictedPeriod_Start) * 60;
-				}
-				if (isNumeric(afci.RestrictedPeriod_End) == false) {
-					writeLog(fpnLog, "RestrictedPeriod_End has to be numeric value.\n", 1, 1);
-					return -1;
-				}
-				else {
-					prj.fcs[idx].RestrictedPeriod_End_min = stoi(afci.RestrictedPeriod_End) * 60;
-				}
-
 			}
 		}
 	}
