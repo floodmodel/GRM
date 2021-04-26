@@ -13,6 +13,6 @@
 2021.01.16. Bug fix in calculating average rainfall when using '/f' option  
 2021.02.22. Bug fix in writing GRM version  
 2021.04.19. Add an error check process for initial storages of reservoirs  
-2021.04.23. GRM v2021.04 was released
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The GRM was improved to enable more detailed simulation for reservoir operation  
+2021.04.23. GRM v2021.04 was released  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The GRM was improved to enable more detailed simulation for reservoir operation  
                
