@@ -1,5 +1,4 @@
 #include "stdafx.h"
-#include <io.h>
 #include<ATLComTime.h>
 
 #include "grm.h"
@@ -25,7 +24,6 @@ extern cvAtt* cvsb;
 extern map<int, double> fcdAb;
 extern wpinfo wpisb;;
 extern string msgFileProcess;
-
 
 
 void writeSimStep(int elapsedT_min)

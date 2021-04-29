@@ -1,12 +1,10 @@
 #include "stdafx.h"
-#include <algorithm>
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"
 
 using namespace std;
 
-//extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
 extern projectFile prj;
 
@@ -20,8 +18,6 @@ extern vector<int> fas;
 extern map<int, int> faCount;
 extern wpinfo wpis;
 extern flowControlCellAndData fccds;
-
-
 
 int setupModelAfterOpenProjectFile()
 {

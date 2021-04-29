@@ -1,14 +1,4 @@
 #include "stdafx.h"
-#include <iostream>
-#include <stdio.h>
-#include <stdlib.h>
-#include <conio.h>
-#include <time.h>
-#include <omp.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <locale>
-
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"
@@ -35,18 +25,12 @@ vector<int> fas;
 map<int, int> faCount;
 wpinfo wpis;
 flowControlCellAndData fccds;
-
 thisSimulation ts;
-
 
 extern double** ssrAry;
 extern double** rfAry;
 extern double** rfaccAry;
 extern double** QAry;
-//extern double** ssrAryL;
-//extern double** rfAryL;
-//extern double** rfaccAryL;
-//extern double** QAryL;
 
 string msgFileProcess;
 

@@ -1,13 +1,10 @@
 #include "stdafx.h"
-#include <math.h>
 #include "grm.h"
 
 extern projectFile prj;
 extern cvAtt* cvs;
 extern cvpos* cvps;
 extern domaininfo di;
-
-
 
 void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
 {

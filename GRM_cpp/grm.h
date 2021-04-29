@@ -38,8 +38,6 @@ const double CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN = 10;// 산악지역에서의 암반까지
 const double CONST_DEPTH_TO_UNCONFINED_GROUNDWATERTABEL = 10;// 비피압대수층까지의 깊이[m]
 const double CONST_UAQ_HEIGHT_FROM_BEDROCK = 5;//   암반에서 비피압대수층 상단까지의 높이[m]
 
-
-
 enum class channelWidthType
 {
 	CWEquation,
@@ -758,9 +756,6 @@ typedef struct _projectFile
 	int deleteAllFilesExceptDischargeOut = -1;
 	
 } projectFile;
-
-
-
 
 typedef struct _thisSimulation
 {

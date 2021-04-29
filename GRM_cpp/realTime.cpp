@@ -1,9 +1,5 @@
 // 이 문서의 코드는 최가 초안 작성, 실시간 시스템 구축시 보완. 특히 dbms 부분. 2020.04.23. 최
 #include "stdafx.h"
-#include <iostream>
-#include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
 #include<ATLComTime.h>
 #include "gentle.h"
 #include "grm.h"

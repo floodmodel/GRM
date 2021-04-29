@@ -1,6 +1,4 @@
 #include "stdafx.h"
-#include <omp.h>
-
 #include "gentle.h"
 #include "grm.h"
 
@@ -9,7 +7,6 @@ extern domaininfo di;
 extern cvAtt* cvs;
 
 extern thisSimulation ts;
-
 
 void updatetCVbyRFandSoil(int i)
 {

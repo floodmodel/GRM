@@ -1,16 +1,10 @@
 #include "stdafx.h"
-#include <map>
-#include<vector>
-#include <omp.h>
-#include<math.h>
-
 #include "gentle.h"
 #include "grm.h"
 
 using namespace std;
 namespace fs = std::filesystem;
 
-extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
 extern projectFile prj;
 

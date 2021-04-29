@@ -1,7 +1,4 @@
 #include "stdafx.h"
-#include <thread>
-#include <algorithm>
-
 #include "gentle.h"
 #include "grm.h"
 
