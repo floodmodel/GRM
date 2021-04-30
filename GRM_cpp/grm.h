@@ -12,10 +12,11 @@ namespace fs = std::filesystem;
 //const string CONST_GMP_FILE_EXTENSION = ".gmp";
 const string CONST_TAG_DISCHARGE = "Discharge.out";
 const string CONST_TAG_DEPTH = "Depth.out";
-const string CONST_TAG_RFGRID = "RFGrid.out";
-const string CONST_TAG_RFMEAN = "RFUpMean.out";
-const string CONST_TAG_FCDATA_APP = "FCData.out";
-const string CONST_TAG_FCSTORAGE = "FCStorage.out";
+const string CONST_TAG_RF_GRID = "RFGrid.out";
+const string CONST_TAG_RF_MEAN = "RFUpMean.out";
+const string CONST_TAG_FC_DATA_APP = "FCData.out";
+const string CONST_TAG_FC_STORAGE = "FCStorage.out";
+const string CONST_TAG_FC_INFLOW = "FCinflow.out";
 //const string CONST_TAG_SWSPARSTEXTFILE = "SWSPars.out";
 const string CONST_DIST_SSR_DIRECTORY_TAG = "SSD";
 const string CONST_DIST_RF_DIRECTORY_TAG = "RFD";
@@ -94,6 +95,7 @@ enum class GRMPrintType
 {
 	All,
 	DischargeFile,
+	DischargeAndFcFile,
 	DischargeFileQ,
 	AllQ,
 	None
@@ -477,7 +479,7 @@ typedef struct _flowControlCellAndData
 	map <int, double> fcDataAppliedNowT_m3Ps;// <idx, value>현재의 모델링 시간(t)에 적용된 flow control data 값
 	vector<int> cvidxsinlet;
 	vector<int> cvidxsFCcell;
-	map<int, vector<timeSeries>> flowData_m3Ps; //<idx, data>, 분단위
+	map<int, vector<timeSeries>> inputFlowData_m3Ps; //<idx, data>, 분단위
 	map<int, int> curDorder;// <idx, order>현재 적용될 데이터의 순서
 } flowControlCellAndData;
 
@@ -537,7 +539,7 @@ typedef struct _grmOutFiles
 	string ofpnRFMean;
 	string ofpnFCData;
 	string ofpnFCStorage;
-	//string OFNPSwsPars;
+	string ofpnFCinflow;
 	string ofpSSRDistribution;
 	string ofpRFDistribution;
 	string ofpRFAccDistribution;
@@ -622,10 +624,12 @@ typedef struct _cvAtt
 	double uOF = 0.0;//t 시간에서 유출해석 결과 overland flow 검사체적의 유속
 	double hOF = 0.0;  //t 시간에서 유출해석 결과 overland flow 검사체적의 수심
 	double csaOF = 0.0;//t 시간에서 유출해석 결과 overland flow의 흐름 단면적
+	//double qinflow_m2Ps = 0.0;//단위폭당 현재 셀로의 유입 유량
 	double qOF_m2Ps = 0.0; //단위폭당 overland flow 유량
 	double QOF_m3Ps = 0.0;//t 시간에서의 유출해석 결과 overland flow의 유량 [m^3/s]
 	double QSSF_m3Ps = 0.0;//t 시간에서의 현재 셀에서 다음셀로 지표하에서 유출되는 유량 [m^3/s]
 	double QsumCVw_dt_m3 = 0.0;//상류인접 CV에서 현재 CV로 유입되는 유량 단순합. 이건 CVi에서의 연속방정식, 고려하지 않은 단순 합.[m^3/dt]
+	double QsumCVw_m3Ps = 0.0;//상류인접 CV에서 현재 CV로 유입되는 유량 단순합. 이건 CVi에서의 연속방정식, 고려하지 않은 단순 합.[m^3/s]
 	double rfApp_dt_m = 0.0;//dt 시간 동안의 강우량
 	double rfiRead_mPsec = 0.0;//현재 강우입력자료에서 읽은 강우강도 m/s rfi.
 	double rfiRead_tm1_mPsec = 0.0;//이전 시간의 강우강도 m/s rfi.
@@ -819,6 +823,7 @@ void convertFCtypeToAutoROM(string strDate, int cvid);
 
 void disposeDynamicVars();
 int deleteAllOutputFiles();
+// 프로젝트 파일과 로그파일도 지워진다. 주의 필요
 int deleteAllFilesExceptDischarge();
 
 vector<int> getAllUpstreamCells(int startingidx);

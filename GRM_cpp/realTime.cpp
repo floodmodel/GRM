@@ -175,7 +175,7 @@ void grmRealTime::runGRMRT()
     else {
         fpn_rfASC= getLENSrfFPNusingTimeString(rtef.rtstartDataTime);
     }
-    fccds.flowData_m3Ps.clear();
+    fccds.inputFlowData_m3Ps.clear();
 
     // 시작 시간에서의 자료 확인 하지 말자.. 2020.04.29. 최
     //if (_access(fpn_rfASC.c_str(), 0) != 0) {
@@ -284,7 +284,7 @@ int readCSVandFillFCdataForRealTime(string fpnFCcvs, string targetDateTime)
             int cvidx = getCVidxByFcName(sv_aline[0]);;
             ts.dataTime = sv_aline[1];
             ts.value = stod(sv_aline[2]);
-            fccds.flowData_m3Ps[cvidx].push_back(ts);
+            fccds.inputFlowData_m3Ps[cvidx].push_back(ts);
             tsrt.newFcDataAddedRT[cvidx] = 1;
         }
     }
@@ -296,7 +296,7 @@ void updateFcDataStatusForEachFCcellGRMRT(string t_yyyymmddHHMM, int idx)
     string fcname = prj.fcs[idx].fcName;
     string msg = "";
     double value = 0;;
-    vector<timeSeries> QsFC = fccds.flowData_m3Ps[idx];
+    vector<timeSeries> QsFC = fccds.inputFlowData_m3Ps[idx];
     int vsize = QsFC.size();
     int added = -1;
     for (timeSeries ats : QsFC) {

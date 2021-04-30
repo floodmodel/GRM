@@ -99,52 +99,31 @@ void writeSingleEvent(int nowTmin, double cinterp)
             wpis.maxFlow_cms[i] = sv;
             wpis.maxFlowTime[i] = tStrToPrint;
         }
+		// 여기서는 wp 별 출력  ================
 		if (prj.printOption == GRMPrintType::All) {
 			writeWPoutput(tStrToPrint, i, cinterp);
 			rfGrid.append("\t" + dtos(wpis.rfWPGridForDtP_mm[i], 2));
 			rfUpMean.append("\t"+dtos(wpis.rfUpWSAveForDtP_mm[i], 2) );
 		}
+		//===============================
     }
     lineToP += "\t" + dtos(aveRFSumForDTP_mm, 2)
         + "\t" + tsFromStarting_sec + "\n";
     appendTextToTextFile(ofs.ofpnDischarge, lineToP);
+	// 여기서는 강우량 파일 출력====================
 	if (prj.printOption == GRMPrintType::All) {
 		rfGrid.append("\n");
 		rfUpMean.append(+"\n");
 		appendTextToTextFile(ofs.ofpnRFMean, rfUpMean);
 		appendTextToTextFile(ofs.ofpnRFGrid, rfGrid);
 	}
+	//=====================================
 
     // FCAppFlow, FCStorage===================================
-	if (prj.printOption == GRMPrintType::All) {
+	if (prj.printOption == GRMPrintType::All
+		|| prj.printOption == GRMPrintType::DischargeAndFcFile) {
 		if (prj.simFlowControl == 1 && prj.fcs.size() > 0) {
 			writeFCoutput(tStrToPrint, cinterp);
-			//string fcflow;
-			//string fcStorage;
-			//fcflow = tStrToPrint;
-			//fcStorage = tStrToPrint;
-			//if (cinterp == 1) {
-			//	for (int idx : fccds.cvidxsFCcell) {
-			//		fcflow += "\t"
-			//			+ dtos(fccds.fcDataAppliedNowT_m3Ps[idx], 2);
-			//		fcStorage += "\t"
-			//			+ dtos(cvs[idx].storageCumulative_m3, 2);
-			//	}
-			//}
-			//else if (ts.isbak == 1) {
-			//	for (int idx : fccds.cvidxsFCcell) {
-			//		fcflow += "\t"
-			//			+ dtos(getinterpolatedVLinear(fcdAb[idx],
-			//				fccds.fcDataAppliedNowT_m3Ps[idx], cinterp), 2);
-			//		fcStorage += "\t"
-			//			+ dtos(getinterpolatedVLinear(cvsb[idx].storageCumulative_m3,
-			//				cvs[idx].storageCumulative_m3, cinterp), 2);
-			//	}
-			//}
-			//fcflow += "\n";
-			//fcStorage += "\n";
-			//appendTextToTextFile(ofs.ofpnFCData, fcflow);
-			//appendTextToTextFile(ofs.ofpnFCStorage, fcStorage);
 		}
 	}
     // ==================================
@@ -152,54 +131,74 @@ void writeSingleEvent(int nowTmin, double cinterp)
 
 void writeFCoutput(string tStrToPrint, double cinterp)
 {
-	string fcflow;
-	string fcStorage;
-	fcflow = tStrToPrint;
-	fcStorage = tStrToPrint;
+	string fc_inputDataFlow="";
+	string fc_storage = "";
+	string fc_inflow = "";
+	fc_inputDataFlow = tStrToPrint;
+	fc_storage = tStrToPrint;
+	fc_inflow = tStrToPrint;
 	if (cinterp == 1) {
 		for (int idx : fccds.cvidxsFCcell) {
-			if (fcflow == "") {
-				fcflow = dtos(fccds.fcDataAppliedNowT_m3Ps[idx], 2);
+			if (fc_inputDataFlow == "") {
+				fc_inputDataFlow = dtos(fccds.fcDataAppliedNowT_m3Ps[idx], 2);
 			}
 			else {
-				fcflow += "\t"
+				fc_inputDataFlow += "\t"
 					+ dtos(fccds.fcDataAppliedNowT_m3Ps[idx], 2);
 			}
-			if (fcStorage == "") {
-				fcStorage = dtos(cvs[idx].storageCumulative_m3, 2);
+			if (fc_storage == "") {
+				fc_storage = dtos(cvs[idx].storageCumulative_m3, 2);
 			}
 			else {
-				fcStorage += "\t"
+				fc_storage += "\t"
 					+ dtos(cvs[idx].storageCumulative_m3, 2);
+			}
+			if (fc_inflow == "") {
+				fc_inflow = dtos(cvs[idx].QsumCVw_m3Ps, 2);
+			}
+			else {
+				fc_inflow += "\t"
+					+ dtos(cvs[idx].QsumCVw_m3Ps, 2);
 			}
 		}
 	}
 	else if (ts.isbak == 1) {
 		for (int idx : fccds.cvidxsFCcell) {
-			if (fcflow == "") {
-				fcflow = dtos(getinterpolatedVLinear(fcdAb[idx],
+			if (fc_inputDataFlow == "") {
+				fc_inputDataFlow = dtos(getinterpolatedVLinear(fcdAb[idx],
 						fccds.fcDataAppliedNowT_m3Ps[idx], cinterp), 2);
 			}
 			else {
-				fcflow += "\t"
+				fc_inputDataFlow += "\t"
 					+ dtos(getinterpolatedVLinear(fcdAb[idx],
 						fccds.fcDataAppliedNowT_m3Ps[idx], cinterp), 2);
 			}
-			if (fcStorage == "") {
-				fcStorage = dtos(getinterpolatedVLinear(cvsb[idx].storageCumulative_m3,
+			if (fc_storage == "") {
+				fc_storage = dtos(getinterpolatedVLinear(cvsb[idx].storageCumulative_m3,
 						cvs[idx].storageCumulative_m3, cinterp), 2);
 			}
 			else {
-				fcStorage += "\t"
+				fc_storage += "\t"
 					+ dtos(getinterpolatedVLinear(cvsb[idx].storageCumulative_m3,
 						cvs[idx].storageCumulative_m3, cinterp), 2);
 			}
+			if (fc_inflow == "") {
+				fc_inflow = dtos(getinterpolatedVLinear(cvsb[idx].QsumCVw_m3Ps,
+					cvs[idx].QsumCVw_m3Ps, cinterp), 2);
+			}
+			else {
+				fc_inflow += "\t"
+					+ dtos(getinterpolatedVLinear(cvsb[idx].QsumCVw_m3Ps,
+						cvs[idx].QsumCVw_m3Ps, cinterp), 2);
+			}
 		}
 	}
-	fcflow += "\n";
-	fcStorage += "\n";
-	appendTextToTextFile(ofs.ofpnFCData, fcflow);
-	appendTextToTextFile(ofs.ofpnFCStorage, fcStorage);
+	fc_inputDataFlow += "\n";
+	fc_storage += "\n";
+	fc_inflow += "\n";
+	appendTextToTextFile(ofs.ofpnFCData, fc_inputDataFlow);
+	appendTextToTextFile(ofs.ofpnFCStorage, fc_storage);
+	appendTextToTextFile(ofs.ofpnFCinflow, fc_inflow);
 }
 
 
@@ -290,11 +289,12 @@ int initOutputFiles()
 {
 	ofs.ofpnDischarge= ppi.fp_prj +"\\"+ ppi.fn_withoutExt_prj+CONST_TAG_DISCHARGE;
 	ofs.ofpnDepth = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_DEPTH;
-	ofs.ofpnRFGrid = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_RFGRID;
-	ofs.ofpnRFMean = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_RFMEAN;
+	ofs.ofpnRFGrid = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_RF_GRID;
+	ofs.ofpnRFMean = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_RF_MEAN;
 	//ofs.OFNPSwsPars = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_SWSPARSTEXTFILE;
-	ofs.ofpnFCData = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FCDATA_APP;
-	ofs.ofpnFCStorage = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FCSTORAGE;
+	ofs.ofpnFCData = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FC_DATA_APP;
+	ofs.ofpnFCStorage = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FC_STORAGE;
+	ofs.ofpnFCinflow = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FC_INFLOW;
 	ofs.ofpSSRDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj+"_" + CONST_DIST_SSR_DIRECTORY_TAG;
 	ofs.ofpRFDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "_" + CONST_DIST_RF_DIRECTORY_TAG;
 	ofs.ofpRFAccDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + "_" + CONST_DIST_RFACC_DIRECTORY_TAG;
@@ -341,6 +341,7 @@ int deleteAllOutputFiles()
     fpns.push_back(ofs.ofpnRFMean);
     fpns.push_back(ofs.ofpnFCStorage);
     fpns.push_back(ofs.ofpnFCData);
+	fpns.push_back(ofs.ofpnFCinflow);
     fpns.push_back(ofs.ofpSSRDistribution);
     fpns.push_back(ofs.ofpRFDistribution);
     fpns.push_back(ofs.ofpRFAccDistribution);
@@ -398,22 +399,8 @@ int deleteAllOutputFiles()
 int makeNewOutputFiles()
 {
 	if (prj.printOption == GRMPrintType::All
-		|| prj.printOption == GRMPrintType::DischargeFile) {
-		if (prj.makeASCFile == 1 || prj.makeIMGFile == 1) {
-			if (prj.makeSoilSaturationDistFile == 1) {
-				fs::create_directories(ofs.ofpSSRDistribution);
-			}
-			if (prj.makeRfDistFile == 1) {
-				fs::create_directories(ofs.ofpRFDistribution);
-			}
-			if (prj.makeRFaccDistFile == 1) {
-				fs::create_directories(ofs.ofpRFAccDistribution);
-			}
-			if (prj.makeFlowDistFile == 1) {
-				fs::create_directories(ofs.ofpFlowDistribution);
-			}
-		}
-
+		|| prj.printOption == GRMPrintType::DischargeFile
+		|| prj.printOption == GRMPrintType::DischargeAndFcFile) {
 		// 해더
 		string outPutLine;
 		string comHeader;
@@ -473,13 +460,11 @@ int makeNewOutputFiles()
 		if (prj.simType != simulationType::RealTime) {
 			// ----------------------------------------------------
 			// 이건 유량
-			if (prj.printOption == GRMPrintType::All ||
-				prj.printOption == GRMPrintType::DischargeFile) {
 				heads = comHeader
 					+ "Output data : Discharge[CMS]\n\n"
 					+ time_wpNames + "\t" + "Rainfall_Mean" + "\t" + "FromStarting[sec]" + "\n";
 				appendTextToTextFile(ofs.ofpnDischarge, heads);
-			}
+			//}
 
 			// ----------------------------------------------------
 			//// 이건 수심
@@ -501,10 +486,10 @@ int makeNewOutputFiles()
 			}
 
 			// ----------------------------------------------------
-			// 여기는 flow control 모듈 관련
-			if (prj.printOption == GRMPrintType::All) {
-				if (prj.simFlowControl == 1 && prj.fcs.size() > 0)
-				{
+			// 여기는 flow control 관련
+			if (prj.printOption == GRMPrintType::All
+				|| prj.printOption == GRMPrintType::DischargeAndFcFile) {
+				if (prj.simFlowControl == 1 && prj.fcs.size() > 0)				{
 					string fcNameApp;
 					string fcTypeApp;
 					string sourceDT;
@@ -650,7 +635,7 @@ int makeNewOutputFiles()
 								return -1;
 							}
 							else {
-								roConstQ = roConstQ + "\t" + dtos(afc.roConstQ_cms,2);
+								roConstQ = roConstQ + "\t" + dtos(afc.roConstQ_cms, 2);
 								if (afc.roConstQDuration_hr > 0) {
 									roConstQduration = roConstQduration + "\t" + to_string(afc.roConstQDuration_hr);
 								}
@@ -664,14 +649,15 @@ int makeNewOutputFiles()
 					//}
 					// FCApp - flow control data
 					heads = comHeader
-						+ "Output data : Flow control data input[CMS]\n\n"
+						+ "Output data : Flow control data input[m^3/s]\n\n"
 						+ fcNameApp + "\n"
 						+ fcTypeApp + "\n"
 						+ sourceDT + "\n"
 						+ resOperation + "\n\n"
 						+ fcDataField + "\n";
 					appendTextToTextFile(ofs.ofpnFCData, heads);
-					// reservoir operation
+
+					// reservoir storage
 					heads = comHeader
 						+ "Output data : Storage data[m^3]\n\n"
 						+ fcNameApp + "\n"
@@ -687,27 +673,50 @@ int makeNewOutputFiles()
 						+ roConstQduration + "\n\n"
 						+ fcDataField + "\n";
 					appendTextToTextFile(ofs.ofpnFCStorage, heads);
+
+					// reservoir inflow
+					heads = comHeader
+						+ "Output data : Reservoir inflow[m^3/s]\n\n"
+						+ fcDataField + "\n";
+					appendTextToTextFile(ofs.ofpnFCinflow, heads);
+
 				}
 			}
+		}
+	}
+	if (prj.makeASCorIMGfile == 1) {
+		if (prj.makeSoilSaturationDistFile == 1) {
+			fs::create_directories(ofs.ofpSSRDistribution);
+		}
+		if (prj.makeRfDistFile == 1) {
+			fs::create_directories(ofs.ofpRFDistribution);
+		}
+		if (prj.makeRFaccDistFile == 1) {
+			fs::create_directories(ofs.ofpRFAccDistribution);
+		}
+		if (prj.makeFlowDistFile == 1) {
+			fs::create_directories(ofs.ofpFlowDistribution);
 		}
 	}
 	return 1;
 }
 
+// 프로젝트 파일과 로그파일도 지워진다. 주의 필요
 int deleteAllFilesExceptDischarge()
 {
     if (fs::exists(ofs.ofpnDepth)) {
         std::remove(ofs.ofpnDepth.c_str());
     }
-    //if (fs::exists(ofs.ofpnDischarge)) {
-    //    std::remove(ofs.ofpnDischarge.c_str());
-    //}
     if (fs::exists(ofs.ofpnFCData)) {
         std::remove(ofs.ofpnFCData.c_str());
     }
     if (fs::exists(ofs.ofpnFCStorage)) {
         std::remove(ofs.ofpnFCStorage.c_str());
     }
+	if (fs::exists(ofs.ofpnFCinflow)) {
+		std::remove(ofs.ofpnFCinflow.c_str());
+	}
+
     if (fs::exists(ofs.ofpnRFGrid)) {
         std::remove(ofs.ofpnRFGrid.c_str());
     }

@@ -103,7 +103,8 @@ void updatetCVbyRFandSoil(int i)
         break;
     }
     }
-    cvs[i].QsumCVw_dt_m3 = 0;
+    //cvs[i].QsumCVw_dt_m3 = 0; 
+	//cvs[i].QsumCVw_m3Ps = 0;
 }
 
 void calOverlandFlow(int i, double hCVw_tp1, double effDy_m)
@@ -219,60 +220,70 @@ void calChannelFlow(int i, double chCSACVw_tp1)
 
 double getOverlandFlowDepthCVw(int i)
 {
-    double qSumToCViM1 = 0;
+    double qSumFromCViM1 = 0;
+	double QsumCViM1_m3Ps = 0;
     double qCViM1;
-    double qWn_i;
+    double hWn_i;
     int nEffCVFlowintoCVw;
+	cvs[i].QsumCVw_dt_m3 = 0;
+	cvs[i].QsumCVw_m3Ps = 0;
     nEffCVFlowintoCVw = (int)cvs[i].neighborCVidxFlowintoMe.size();
-    for (int i : cvs[i].neighborCVidxFlowintoMe) {
-        qCViM1 = cvs[i].QOF_m3Ps / di.cellSize; // 단위폭당 유량
+    for (int iw : cvs[i].neighborCVidxFlowintoMe) {
+        qCViM1 = cvs[iw].QOF_m3Ps / di.cellSize; // 단위폭당 유량
         if (qCViM1 <= 0.0) {
             nEffCVFlowintoCVw = nEffCVFlowintoCVw - 1;
             qCViM1 = 0;
         }
-        qSumToCViM1 = qSumToCViM1 + qCViM1;
-        cvs[i].QsumCVw_dt_m3 = cvs[i].QsumCVw_dt_m3
-            + cvs[i].QOF_m3Ps * ts.dtsec;
+        qSumFromCViM1 = qSumFromCViM1 + qCViM1;
+		QsumCViM1_m3Ps += cvs[iw].QOF_m3Ps;
+
     }
+	cvs[i].QsumCVw_dt_m3 = QsumCViM1_m3Ps * ts.dtsec;
+	cvs[i].QsumCVw_m3Ps = QsumCViM1_m3Ps;
+
     if (nEffCVFlowintoCVw < 1) {
         nEffCVFlowintoCVw = 1;
     }
     cvs[i].effCVnFlowintoCVw = nEffCVFlowintoCVw;
-    qWn_i = pow(cvs[i].rcOF * qSumToCViM1 / sqrt(cvs[i].slopeOF), 0.6);
-    return qWn_i;
+    hWn_i = pow(cvs[i].rcOF * qSumFromCViM1 / sqrt(cvs[i].slopeOF), 0.6);
+    return hWn_i;
 }
 
 double getChCSAatCVW(int i)
 {    // w의 단면적 계산
     double CSAe_iM1 = 0;
     double CSAeSum_iM1 = 0;
-    double qSumCViM1_m3Ps = 0;
+    double QsumCViM1_m3Ps = 0;
+	cvs[i].QsumCVw_dt_m3 = 0;
+	cvs[i].QsumCVw_m3Ps = 0;
     int nEffCVFlowintoCVw = (int)cvs[i].neighborCVidxFlowintoMe.size();
-    for (int i : cvs[i].neighborCVidxFlowintoMe) {
-        double qCViM1_m3Ps = 0;
-        if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-            CSAe_iM1 = cvs[i].csaOF;
-            qCViM1_m3Ps = cvs[i].QOF_m3Ps;
+    for (int iw : cvs[i].neighborCVidxFlowintoMe) {
+        double Qcv_iM1_m3Ps = 0;
+        if (cvs[iw].flowType == cellFlowType::OverlandFlow) {
+            CSAe_iM1 = cvs[iw].csaOF;
+            Qcv_iM1_m3Ps = cvs[iw].QOF_m3Ps;
 
         }
-        else if (cvs[i].flowType == cellFlowType::ChannelFlow
-            || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
-            CSAe_iM1 = cvs[i].stream.csaCH;
-            qCViM1_m3Ps = cvs[i].stream.QCH_m3Ps;
-            if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
+        else if (cvs[iw].flowType == cellFlowType::ChannelFlow
+            || cvs[iw].flowType == cellFlowType::ChannelNOverlandFlow) {
+            CSAe_iM1 = cvs[iw].stream.csaCH;
+            Qcv_iM1_m3Ps = cvs[iw].stream.QCH_m3Ps;
+            if (cvs[iw].flowType == cellFlowType::ChannelNOverlandFlow) {
                 CSAe_iM1 = CSAe_iM1
-                    + cvs[i].stream.csaChAddedByOFinCHnOFcell;
-                qCViM1_m3Ps = qCViM1_m3Ps + cvs[i].QOF_m3Ps;
+                    + cvs[iw].stream.csaChAddedByOFinCHnOFcell;
+                Qcv_iM1_m3Ps = Qcv_iM1_m3Ps + cvs[iw].QOF_m3Ps;
             }
         }
-        qSumCViM1_m3Ps = qSumCViM1_m3Ps + qCViM1_m3Ps;
+		if (Qcv_iM1_m3Ps <= 0.0) {
+			nEffCVFlowintoCVw = nEffCVFlowintoCVw - 1;
+			Qcv_iM1_m3Ps = 0;
+		}
+		QsumCViM1_m3Ps = QsumCViM1_m3Ps + Qcv_iM1_m3Ps;
         CSAeSum_iM1 = CSAeSum_iM1 + CSAe_iM1;
-        if (qCViM1_m3Ps <= 0.0) {
-            nEffCVFlowintoCVw = nEffCVFlowintoCVw - 1;
-        }
     }
-    cvs[i].QsumCVw_dt_m3 = cvs[i].QsumCVw_dt_m3
-        + qSumCViM1_m3Ps * ts.dtsec;
+    cvs[i].QsumCVw_dt_m3 = QsumCViM1_m3Ps * ts.dtsec;
+	cvs[i].QsumCVw_m3Ps = QsumCViM1_m3Ps;
+
     if (nEffCVFlowintoCVw < 1) { nEffCVFlowintoCVw = 1; }
     cvs[i].effCVnFlowintoCVw = nEffCVFlowintoCVw;
     if (CSAeSum_iM1 < WETDRY_CRITERIA) {
@@ -292,7 +303,7 @@ double getChCSAatCVW(int i)
         double Fx = pow(CSAw_n, 1.66667) 
             * pow(cvs[i].stream.slopeCH, 0.5)
             / (cvs[i].stream.chRC * pow(chCSPeri, 0.66667)) 
-            - qSumCViM1_m3Ps;
+            - QsumCViM1_m3Ps;
         double dFx = 1.66667 * pow(CSAw_n, 0.66667) 
             * pow(cvs[i].stream.slopeCH, 0.5)
             / (cvs[i].stream.chRC * pow(chCSPeri, 0.66667));

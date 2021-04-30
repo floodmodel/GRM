@@ -93,8 +93,8 @@ int startSimulation()
 
 int simulateRunoff(double nowTmin)
 {
-    int maxLimit = di.facMax + 1;
     ts.vMaxInThisStep = DBL_MIN;
+	// 여기부터 parallel =============================
     int numth = prj.mdp;
     double* uMax = new double[numth];// 이렇게 하면 아주 작은 값으로 초기화 된다.
     for (int fac : fas) {
@@ -124,12 +124,38 @@ int simulateRunoff(double nowTmin)
             }
         }
     }
+
     for (int i = 0; i < prj.mdp; ++i) {
         if (ts.vMaxInThisStep < uMax[i]) {
             ts.vMaxInThisStep = uMax[i];
         }
     }
     delete[] uMax;
+	// parallel =============================
+
+	//// 여기부터 serial===========
+	//double uMax_s = DBL_MIN;
+	//for (int fac : fas) {
+	//	int iterLimit = faCount[fac];
+	//	for (int e = 0; e < iterLimit; ++e) {
+	//		int i = cvaisToFA[fac][e];
+	//		if (cvs[i].toBeSimulated == 1) {
+	//			simulateRunoffCore(i, nowTmin);
+	//			if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+	//				if (uMax_s < cvs[i].uOF) {
+	//					uMax_s = cvs[i].uOF;
+	//				}
+	//			}
+	//			else {
+	//				if (uMax_s < cvs[i].stream.uCH) {
+	//					uMax_s = cvs[i].stream.uCH;
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+	//ts.vMaxInThisStep = uMax_s;
+	//// serial===========
     return 1;
 }
 
@@ -339,6 +365,7 @@ void setCVStartingCondition(double iniflow)
         cvs[i].isAfterSaturated = -1;
         cvs[i].storageAddedForDTbyRF_m3 = 0;
         cvs[i].QsumCVw_dt_m3 = 0;
+		cvs[i].QsumCVw_m3Ps = 0;
         cvs[i].effCVnFlowintoCVw = 0;
         cvs[i].QSSF_m3Ps = 0;
         cvs[i].bfQ_m3Ps = 0;
@@ -429,40 +456,41 @@ void outputManager(int nowTsec, int rfOrder)
 }
 
 void writeBySimType(int nowTP_min,
-    double cinterp)
+	double cinterp)
 {
-    simulationType simType = prj.simType;
-    switch (simType) {
-    case simulationType::Normal: {
-        writeSimStep(nowTP_min);
-        if (prj.printOption == GRMPrintType::All
-			|| prj.printOption == GRMPrintType::DischargeFile) {
-            writeSingleEvent(nowTP_min, cinterp);
-        }
-        if (prj.printOption == GRMPrintType::DischargeFileQ) {
-            writeDischargeOnly(cinterp, -1, -1);
-        }
-        if (prj.printOption == GRMPrintType::AllQ) {
-            writeDischargeOnly(cinterp, 1, 1);
-        }
-        break;
-    }
-    case simulationType::RealTime: {
-        writeRealTimeSimResults(nowTP_min, cinterp);
-        break;
-    }
-    }
-    if (ts.runByAnalyzer == 1)    {
-        // 클래스나 전역 변수에 저장해서, 외부로 노출하고, analyzer에서 사용하는 방법은?
-        //모의 종료시 혹은 1초마다 챠트 업데이트하는 방법?
-        //SendQToAnalyzer(nowTP_min, cinterp);
-    }
-    if (prj.makeASCorIMGfile == 1)    {
-        makeRasterOutput(nowTP_min);
-    }
-    ts.rfAveSumAllCells_dtP_m = 0;
-    for (int idx : wpis.wpCVidxes) {
-        wpis.rfUpWSAveForDtP_mm[idx] = 0;
-        wpis.rfWPGridForDtP_mm[idx] = 0;
-    }
+	simulationType simType = prj.simType;
+	switch (simType) {
+	case simulationType::Normal: {
+		writeSimStep(nowTP_min);
+		if (prj.printOption == GRMPrintType::All
+			|| prj.printOption == GRMPrintType::DischargeFile
+			|| prj.printOption == GRMPrintType::DischargeAndFcFile) {
+			writeSingleEvent(nowTP_min, cinterp);
+		}
+		else if (prj.printOption == GRMPrintType::DischargeFileQ) {
+			writeDischargeOnly(cinterp, -1, -1);
+		}
+		else if (prj.printOption == GRMPrintType::AllQ) {
+			writeDischargeOnly(cinterp, 1, 1);
+		}
+		break;
+	}
+	case simulationType::RealTime: {
+		writeRealTimeSimResults(nowTP_min, cinterp);
+		break;
+	}
+	}
+	if (ts.runByAnalyzer == 1) {
+		// 클래스나 전역 변수에 저장해서, 외부로 노출하고, analyzer에서 사용하는 방법은?
+		//모의 종료시 혹은 1초마다 챠트 업데이트하는 방법?
+		//SendQToAnalyzer(nowTP_min, cinterp);
+	}
+	if (prj.makeASCorIMGfile == 1) {
+		makeRasterOutput(nowTP_min);
+	}
+	ts.rfAveSumAllCells_dtP_m = 0;
+	for (int idx : wpis.wpCVidxes) {
+		wpis.rfUpWSAveForDtP_mm[idx] = 0;
+		wpis.rfWPGridForDtP_mm[idx] = 0;
+	}
 }

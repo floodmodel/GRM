@@ -16,7 +16,7 @@ int updateFCCellinfoAndData()
     fccds.cvidxsinlet.clear();
     fccds.cvidxsFCcell.clear();
     fccds.fcDataAppliedNowT_m3Ps.clear();
-    fccds.flowData_m3Ps.clear();
+    fccds.inputFlowData_m3Ps.clear();
     fccds.curDorder.clear();
     map<int, flowControlinfo>::iterator iter;
     map<int, flowControlinfo> fcs_tmp;
@@ -59,7 +59,7 @@ int updateFCCellinfoAndData()
                     ts.dataTime = afc.fcDT_min * i;
                 }
                 ts.value = vs[i];
-                fccds.flowData_m3Ps[aidx].push_back(ts);
+                fccds.inputFlowData_m3Ps[aidx].push_back(ts);
             }
         }
     }
@@ -73,9 +73,9 @@ int updateFCCellinfoAndData()
 void calFCReservoirOutFlow(int i, double nowTmin)
 {// nowTmin의 최소값은 dtsec/60이다.
     int dtfc = prj.fcs[i].fcDT_min;
+	int calStreamFlow = 1;
 	if (nowTmin >= dtfc * fccds.curDorder[i]) {
-		double t_currentFC = dtfc * fccds.curDorder[i];
-		if (fccds.curDorder[i] < fccds.flowData_m3Ps[i].size()) {
+		if (fccds.curDorder[i] < fccds.inputFlowData_m3Ps[i].size()) {
 			fccds.curDorder[i]++;
 		}
 		else {
@@ -85,29 +85,42 @@ void calFCReservoirOutFlow(int i, double nowTmin)
 				fccds.fcDataAppliedNowT_m3Ps[i] = 0;
 			}
 			else if (ts.enforceFCautoROM == 1) {				
+				double t_currentFC = dtfc * fccds.curDorder[i];
 				convertFCtypeToAutoROM(dtos(t_currentFC, 2) +" min", i);
 			}
-			return;
+			calStreamFlow = 0;
 		}
 	}
-    int orderidx = fccds.curDorder[i] -1 ;//vector index, 이 지점에서  fccds.curDorder[i]의 최소값은 1
-    double v = fccds.flowData_m3Ps[i][orderidx].value;
-    if (v < 0) { v = 0; }
-    cvs[i].stream.QCH_m3Ps = v;
-    cvs[i].stream.csaCH = getChCSAusingQbyiteration(cvs[i], cvs[i].stream.csaCH, cvs[i].stream.QCH_m3Ps);
-    cvs[i].stream.hCH = getChDepthUsingCSA(cvs[i].stream.chBaseWidth,
-        cvs[i].stream.csaCH, cvs[i].stream.isCompoundCS, cvs[i].stream.chURBaseWidth_m,
-        cvs[i].stream.chLRArea_m2, cvs[i].stream.chLRHeight, cvs[i].stream.bankCoeff);
-    cvs[i].stream.uCH = cvs[i].stream.QCH_m3Ps / cvs[i].stream.csaCH;
-    fccds.fcDataAppliedNowT_m3Ps[i] = cvs[i].stream.QCH_m3Ps;
+	if (calStreamFlow == 1) {
+		int orderidx = fccds.curDorder[i] - 1;//vector index, 이 지점에서  fccds.curDorder[i]의 최소값은 1
+		double v = fccds.inputFlowData_m3Ps[i][orderidx].value;
+		if (v < 0) { v = 0; }
+		cvs[i].stream.QCH_m3Ps = v;
+		cvs[i].stream.csaCH = getChCSAusingQbyiteration(cvs[i], cvs[i].stream.csaCH, cvs[i].stream.QCH_m3Ps);
+		cvs[i].stream.hCH = getChDepthUsingCSA(cvs[i].stream.chBaseWidth,
+			cvs[i].stream.csaCH, cvs[i].stream.isCompoundCS, cvs[i].stream.chURBaseWidth_m,
+			cvs[i].stream.chLRArea_m2, cvs[i].stream.chLRHeight, cvs[i].stream.bankCoeff);
+		cvs[i].stream.uCH = cvs[i].stream.QCH_m3Ps / cvs[i].stream.csaCH;
+		fccds.fcDataAppliedNowT_m3Ps[i] = cvs[i].stream.QCH_m3Ps;
+	}
+
     //아래에서  cvs[i].QsumCVw_dt_m3는 t-dt 에서의 값이 저장되어 있다.
     // 그리고, fcDataAppliedNowT_m3Ps 는 현재 셀에서 하류로 방류되는 값이므로, 빼준다.
-    cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
-        + cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
-        - fccds.fcDataAppliedNowT_m3Ps[i] * ts.dtsec;
-    if (cvs[i].storageCumulative_m3< 0) {
-        cvs[i].storageCumulative_m3 = 0;
-    }
+	if (cvs[i].fcType == flowControlType::ReservoirOutflow && cvs[i].fac>0) {
+		// 여기에서 w로 부터의 유입량 계산..
+		if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+			getOverlandFlowDepthCVw(i);
+		}
+		else {
+			getChCSAatCVW(i);
+		}
+		cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
+			+ cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
+			- fccds.fcDataAppliedNowT_m3Ps[i] * ts.dtsec;
+		if (cvs[i].storageCumulative_m3 < 0) {
+			cvs[i].storageCumulative_m3 = 0;
+		}
+	}
 }
 
 
@@ -117,7 +130,7 @@ void calSinkOrSourceFlow(int i, double nowTmin)
     double cellsize = di.cellSize;
 	if (nowTmin > dtfc * fccds.curDorder[i]) {
 		double t_currentFC = dtfc * fccds.curDorder[i];
-		if (fccds.curDorder[i] < fccds.flowData_m3Ps[i].size()) {
+		if (fccds.curDorder[i] < fccds.inputFlowData_m3Ps[i].size()) {
 			fccds.curDorder[i]++;
 		}
 		else {
@@ -133,7 +146,7 @@ void calSinkOrSourceFlow(int i, double nowTmin)
 		}
 	}
     int orderidx = fccds.curDorder[i]-1 ;//vector index, 이 지점에서 fccds.curDorder[i] 의 최소값은 1
-    double QtoApp = fccds.flowData_m3Ps[i][orderidx].value;
+    double QtoApp = fccds.inputFlowData_m3Ps[i][orderidx].value;
     if (cvs[i].flowType == cellFlowType::OverlandFlow) {
         switch (cvs[i].fcType) {
         case flowControlType::SinkFlow: {
@@ -302,7 +315,7 @@ void calReservoirOutFlowInReservoirOperation(int i,
         if (cvs[i].flowType == cellFlowType::OverlandFlow) {
             cvs[i].QOF_m3Ps = Qout_cms;
             cvs[i].hOF = cvs[i].rcOF * cvs[i].QOF_m3Ps / dy_m
-                / pow(sqrt(cvs[i].slopeOF), 0.6);
+                / pow(sqrt(cvs[i].slopeOF), 0.6);  // 0.5 = 3/5
             cvs[i].stream.QCH_m3Ps = 0;
             cvs[i].stream.uCH = 0;
             cvs[i].stream.csaCH = 0;

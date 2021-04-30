@@ -599,13 +599,14 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.GRMSimulationType);
 		//prj.simType = simulationType::None;
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(SingleEvent))) { // 과거의 gmp에서 SingleEvent도 Normal로 설정한다.
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(SingleEvent))) { // 과거의 gmp에서 SingleEvent도 Normal로 설정한다.
 				prj.simType = simulationType::Normal;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(Normal))) {
+			else if (vStringL == lower(ENUM_TO_STR(Normal))) {
 				prj.simType = simulationType::Normal;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(RealTime))) {
+			else if (vStringL == lower(ENUM_TO_STR(RealTime))) {
 				prj.simType = simulationType::RealTime;
 			}
 			else {
@@ -767,10 +768,11 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.LandCoverDataType);
 		//prj.lcDataType = fileOrConstant::None;
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(File))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(File))) {
 				prj.lcDataType = fileOrConstant::File;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(Constant))) {
+			else if (vStringL == lower(ENUM_TO_STR(Constant))) {
 				prj.lcDataType = fileOrConstant::Constant;
 			}
 			else {
@@ -823,10 +825,11 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.SoilTextureDataType);
 		//prj.stDataType = fileOrConstant::None;
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(File))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(File))) {
 				prj.stDataType = fileOrConstant::File;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(Constant))) {
+			else if (vStringL == lower(ENUM_TO_STR(Constant))) {
 				prj.stDataType = fileOrConstant::Constant;
 			}
 			else {
@@ -892,10 +895,11 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.SoilDepthDataType);
 		//prj.sdDataType = fileOrConstant::None;
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(File))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(File))) {
 				prj.sdDataType = fileOrConstant::File;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(Constant))) {
+			else if (vStringL == lower(ENUM_TO_STR(Constant))) {
 				prj.sdDataType = fileOrConstant::Constant;
 			}
 			else {
@@ -936,10 +940,11 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.RainfallDataType) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.RainfallDataType);
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(TextFileMAP))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(TextFileMAP))) {
 				prj.rfDataType = rainfallDataType::TextFileMAP;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(TextFileASCgrid))) {
+			else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
 				prj.rfDataType = rainfallDataType::TextFileASCgrid;
 			}
 			else {
@@ -984,16 +989,17 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.FlowDirectionType) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.FlowDirectionType);
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(StartsFromNE))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(StartsFromNE))) {
 				prj.fdType = flowDirectionType::StartsFromNE;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(StartsFromN))) {
+			else if (vStringL == lower(ENUM_TO_STR(StartsFromN))) {
 				prj.fdType = flowDirectionType::StartsFromN;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(StartsFromE))) {
+			else if (vStringL == lower(ENUM_TO_STR(StartsFromE))) {
 				prj.fdType = flowDirectionType::StartsFromE;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(StartsFromE_TauDEM))) {
+			else if (vStringL == lower(ENUM_TO_STR(StartsFromE_TauDEM))) {
 				prj.fdType = flowDirectionType::StartsFromE_TauDEM;
 			}
 			else {
@@ -1029,6 +1035,13 @@ int readXmlRowProjectSettings(string aline)
 			}
 			else {
 				prj.isDateTimeFormat = 1;
+				tm t;
+				t= stringToDateTime2(vString);
+				if (t.tm_year == 0 || t.tm_mon == 0
+					|| t.tm_mday == 0) {
+					writeLog(fpnLog, "Simulation starting time is invalid. Check the input format. \n", 1, 1);
+					return -1;
+				}
 			}
 
 		}
@@ -1073,6 +1086,13 @@ int readXmlRowProjectSettings(string aline)
 		if (lower(vString) == "true") {
 			prj.isFixedTimeStep = 1;
 		}
+		else if (lower(vString) == "false") {
+			prj.isFixedTimeStep = -1;
+		}
+		else {
+			writeLog(fpnLog, "Computational time step type is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
+		}
 		return 1;
 	}
 
@@ -1099,6 +1119,13 @@ int readXmlRowProjectSettings(string aline)
 		if (lower(vString) == "true") {
 			prj.simInfiltration = 1;
 		}
+		else if (lower(vString) == "false") {
+			prj.simInfiltration = -1;
+		}
+		else {
+			writeLog(fpnLog, "SimulateInfiltration option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
+		}
 		return 1;
 	}
 	if (aline.find(fldName.SimulateSubsurfaceFlow) != string::npos) {
@@ -1106,6 +1133,13 @@ int readXmlRowProjectSettings(string aline)
 		prj.simSubsurfaceFlow = -1;
 		if (lower(vString) == "true") {
 			prj.simSubsurfaceFlow = 1;
+		}
+		else if (lower(vString) == "false") {
+			prj.simSubsurfaceFlow = -1;
+		}
+		else {
+			writeLog(fpnLog, "SimulateSubsurfaceFlow option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
 		}
 		return 1;
 	}
@@ -1115,6 +1149,13 @@ int readXmlRowProjectSettings(string aline)
 		if (lower(vString) == "true") {
 			prj.simBaseFlow = 1;
 		}
+		else if (lower(vString) == "false") {
+			prj.simBaseFlow = -1;
+		}
+		else {
+			writeLog(fpnLog, "SimulateBaseFlow option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
+		}
 		return 1;
 	}
 	if (aline.find(fldName.SimulateEvTr) != string::npos) {
@@ -1122,6 +1163,13 @@ int readXmlRowProjectSettings(string aline)
 		prj.simEvTr = -1;
 		if (lower(vString) == "true") {
 			prj.simEvTr = 1;
+		}
+		else if (lower(vString) == "false") {
+			prj.simEvTr = -1;
+		}
+		else {
+			writeLog(fpnLog, "SimulateEvTr option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
 		}
 		return 1;
 	}
@@ -1131,6 +1179,13 @@ int readXmlRowProjectSettings(string aline)
 		if (lower(vString) == "true") {
 			prj.simSnowMelt = 1;
 		}
+		else if (lower(vString) == "false") {
+			prj.simSnowMelt = -1;
+		}
+		else {
+			writeLog(fpnLog, "SimulateSnowMelt option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
+		}
 		return 1;
 	}
 	if (aline.find(fldName.SimulateFlowControl) != string::npos) {
@@ -1138,6 +1193,13 @@ int readXmlRowProjectSettings(string aline)
 		prj.simFlowControl = -1;
 		if (lower(vString) == "true") {
 			prj.simFlowControl = 1;
+		}
+		else if (lower(vString) == "false") {
+			prj.simFlowControl = -1;
+		}
+		else {
+			writeLog(fpnLog, "SimulateFlowControl option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
 		}
 		return 1;
 	}
@@ -1147,6 +1209,13 @@ int readXmlRowProjectSettings(string aline)
 		if (lower(vString) == "true") {
 			prj.makeIMGFile = 1;
 		}
+		else if (lower(vString) == "false") {
+			prj.makeIMGFile = -1;
+		}
+		else {
+			writeLog(fpnLog, "MakeIMGFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
+		}
 		return 1;
 	}
 	if (aline.find(fldName.MakeASCFile) != string::npos) {
@@ -1154,6 +1223,13 @@ int readXmlRowProjectSettings(string aline)
 		prj.makeASCFile = -1;
 		if (lower(vString) == "true") {
 			prj.makeASCFile = 1;
+		}
+		else if (lower(vString) == "false") {
+			prj.makeASCFile = -1;
+		}
+		else {
+			writeLog(fpnLog, "MakeASCFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
 		}
 		return 1;
 	}
@@ -1163,6 +1239,13 @@ int readXmlRowProjectSettings(string aline)
 		if (lower(vString) == "true") {
 			prj.makeSoilSaturationDistFile = 1;
 		}
+		else if (lower(vString) == "false") {
+			prj.makeSoilSaturationDistFile = -1;
+		}
+		else {
+			writeLog(fpnLog, "MakeSoilSaturationDistFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
+		}
 		return 1;
 	}
 	if (aline.find(fldName.MakeRfDistFile) != string::npos) {
@@ -1170,6 +1253,13 @@ int readXmlRowProjectSettings(string aline)
 		prj.makeRfDistFile = -1;
 		if (lower(vString) == "true") {
 			prj.makeRfDistFile = 1;
+		}
+		else if (lower(vString) == "false") {
+			prj.makeRfDistFile = -1;
+		}
+		else {
+			writeLog(fpnLog, "MakeRfDistFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
 		}
 		return 1;
 	}
@@ -1179,6 +1269,13 @@ int readXmlRowProjectSettings(string aline)
 		if (lower(vString) == "true") {
 			prj.makeRFaccDistFile = 1;
 		}
+		else if (lower(vString) == "false") {
+			prj.makeRFaccDistFile = -1;
+		}
+		else {
+			writeLog(fpnLog, "MakeRFaccDistFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
+		}
 		return 1;
 	}
 	if (aline.find(fldName.MakeFlowDistFile) != string::npos) {
@@ -1187,21 +1284,32 @@ int readXmlRowProjectSettings(string aline)
 		if (lower(vString) == "true") {
 			prj.makeFlowDistFile = 1;
 		}
+		else if (lower(vString) == "false") {
+			prj.makeFlowDistFile = -1;
+		}
+		else {
+			writeLog(fpnLog, "MakeFlowDistFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
+		}
 		return 1;
 	}
 
 	if (aline.find(fldName.PrintOption) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.PrintOption);
 		if (vString != "") {
-			if (lower(vString) == "all") {
+			string vStringL = lower(vString);
+			if (vStringL == "all") {
 				prj.printOption = GRMPrintType::All;
-			}else if (lower(vString) == "dischargefile") {
+			}else if (vStringL == "dischargefile") {
 				prj.printOption = GRMPrintType::DischargeFile;
 			}
-			else if (lower(vString) == "dischargefileq") {
+			else if (vStringL == "dischargeandfcfile") {
+				prj.printOption = GRMPrintType::DischargeAndFcFile;
+			}
+			else if (vStringL == "dischargefileq") {
 				prj.printOption = GRMPrintType::DischargeFileQ;
 			}
-			else if (lower(vString) == "allq") {
+			else if (vStringL == "allq") {
 				prj.printOption = GRMPrintType::AllQ;
 			}
 			else {
@@ -1244,31 +1352,32 @@ int readXmlRowLandCover(string aline, landCoverInfo* lc)
 	if (aline.find(fldName.GRMCode_LC) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.GRMCode_LC);
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(WATR))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(WATR))) {
 				lc->lcCode = landCoverCode::WATR;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(URBN))) {
+			else if (vStringL == lower(ENUM_TO_STR(URBN))) {
 				lc->lcCode = landCoverCode::URBN;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(BARE))) {
+			else if (vStringL == lower(ENUM_TO_STR(BARE))) {
 				lc->lcCode = landCoverCode::BARE;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(WTLD))) {
+			else if (vStringL == lower(ENUM_TO_STR(WTLD))) {
 				lc->lcCode = landCoverCode::WTLD;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(GRSS))) {
+			else if (vStringL == lower(ENUM_TO_STR(GRSS))) {
 				lc->lcCode = landCoverCode::GRSS;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(FRST))) {
+			else if (vStringL == lower(ENUM_TO_STR(FRST))) {
 				lc->lcCode = landCoverCode::FRST;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(AGRL))) {
+			else if (vStringL == lower(ENUM_TO_STR(AGRL))) {
 				lc->lcCode = landCoverCode::AGRL;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(USER))) {
+			else if (vStringL == lower(ENUM_TO_STR(USER))) {
 				lc->lcCode = landCoverCode::USER;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(CONSTV))) {
+			else if (vStringL == lower(ENUM_TO_STR(CONSTV))) {
 				lc->lcCode = landCoverCode::CONSTV;
 			}
 			else {
@@ -1329,28 +1438,29 @@ int  readXmlRowSoilDepth(string aline,	soilDepthInfo* sd)
 	if (aline.find(fldName.GRMCode_SD) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.GRMCode_SD);
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(D))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(D))) {
 				sd->sdCode = soilDepthCode::D;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(MDMS))) {
+			else if (vStringL == lower(ENUM_TO_STR(MDMS))) {
 				sd->sdCode = soilDepthCode::M;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(M))) {
+			else if (vStringL == lower(ENUM_TO_STR(M))) {
 				sd->sdCode = soilDepthCode::M;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(S))) {
+			else if (vStringL == lower(ENUM_TO_STR(S))) {
 				sd->sdCode = soilDepthCode::S;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(VD))) {
+			else if (vStringL == lower(ENUM_TO_STR(VD))) {
 				sd->sdCode = soilDepthCode::VD;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(VS))) {
+			else if (vStringL == lower(ENUM_TO_STR(VS))) {
 				sd->sdCode = soilDepthCode::VS;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(USER))) {
+			else if (vStringL == lower(ENUM_TO_STR(USER))) {
 				sd->sdCode = soilDepthCode::USER;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(CONSTV))) {
+			else if (vStringL == lower(ENUM_TO_STR(CONSTV))) {
 				sd->sdCode = soilDepthCode::CONSTV;
 			}
 			else {
@@ -1402,43 +1512,44 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 	if (aline.find(fldName.GRMCode_ST) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.GRMCode_ST);
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(C))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(C))) {
 				st->stCode = soilTextureCode::C;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(CL))) {
+			else if (vStringL == lower(ENUM_TO_STR(CL))) {
 				st->stCode = soilTextureCode::CL;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(L))) {
+			else if (vStringL == lower(ENUM_TO_STR(L))) {
 				st->stCode = soilTextureCode::L;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(LS))) {
+			else if (vStringL == lower(ENUM_TO_STR(LS))) {
 				st->stCode = soilTextureCode::LS;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(S))) {
+			else if (vStringL == lower(ENUM_TO_STR(S))) {
 				st->stCode = soilTextureCode::S;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(SC))) {
+			else if (vStringL == lower(ENUM_TO_STR(SC))) {
 				st->stCode = soilTextureCode::SC;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(SCL))) {
+			else if (vStringL == lower(ENUM_TO_STR(SCL))) {
 				st->stCode = soilTextureCode::SCL;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(SiC))) {
+			else if (vStringL == lower(ENUM_TO_STR(SiC))) {
 				st->stCode = soilTextureCode::SiC;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(SiCL))) {
+			else if (vStringL == lower(ENUM_TO_STR(SiCL))) {
 				st->stCode = soilTextureCode::SiCL;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(SiL))) {
+			else if (vStringL == lower(ENUM_TO_STR(SiL))) {
 				st->stCode = soilTextureCode::SiL;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(SL))) {
+			else if (vStringL == lower(ENUM_TO_STR(SL))) {
 				st->stCode = soilTextureCode::SL;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(USER))) {
+			else if (vStringL == lower(ENUM_TO_STR(USER))) {
 				st->stCode = soilTextureCode::USER;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(CONSTV))) {
+			else if (vStringL == lower(ENUM_TO_STR(CONSTV))) {
 				st->stCode = soilTextureCode::CONSTV;
 			}
 			else {
@@ -1552,31 +1663,32 @@ int readXmlPETnSnowMelt(string aline, PETnSMinfo* petsmi) {
 		vString = getValueStringFromXmlLine(aline, fldName.PETMethod);
 		PETmethod etm = PETmethod::notSet; // 이것으로 설정되면, 애러로 처리
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(UserData))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(UserData))) {
 				etm = PETmethod::UserData;// constant로 하고 그 값을 0으로 하면 증발산 없음.
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(PenmanMonteith))) {
+			else if (vStringL == lower(ENUM_TO_STR(PenmanMonteith))) {
 				etm = PETmethod::PenmanMonteith;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(PriestleyTaylor))) {
+			else if (vStringL == lower(ENUM_TO_STR(PriestleyTaylor))) {
 				etm = PETmethod::PriestleyTaylor;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(Hargreaves))) {
+			else if (vStringL == lower(ENUM_TO_STR(Hargreaves))) {
 				etm = PETmethod::Hargreaves;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(JensenHaise))) {
+			else if (vStringL == lower(ENUM_TO_STR(JensenHaise))) {
 				etm = PETmethod::JensenHaise;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(BlaneyCriddle))) {
+			else if (vStringL == lower(ENUM_TO_STR(BlaneyCriddle))) {
 				etm = PETmethod::BlaneyCriddle;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(Hamon))) {
+			else if (vStringL == lower(ENUM_TO_STR(Hamon))) {
 				etm = PETmethod::Hamon;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(Turc))) {
+			else if (vStringL == lower(ENUM_TO_STR(Turc))) {
 				etm = PETmethod::Turc;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(None))) {
+			else if (vStringL == lower(ENUM_TO_STR(None))) {
 				etm = PETmethod::None;
 			}
 			else {
@@ -1637,13 +1749,14 @@ int readXmlPETnSnowMelt(string aline, PETnSMinfo* petsmi) {
 		vString = getValueStringFromXmlLine(aline, fldName.SnowMeltMethod);
 		snowMeltMethod smm = snowMeltMethod::notSet; // 이것으로 설정되면, 애러로 처리 
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(UserData))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(UserData))) {
 				smm = snowMeltMethod::UserData; // constant로 하고 그 값을 0으로 하면 융설 없음.
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(Amethod))) {
+			else if (vStringL == lower(ENUM_TO_STR(Amethod))) {
 				smm = snowMeltMethod::Amethod;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(None))) {
+			else if (vStringL == lower(ENUM_TO_STR(None))) {
 				smm = snowMeltMethod::None;
 			}
 			else {
@@ -1711,19 +1824,20 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		vString = getValueStringFromXmlLine(aline, fldName.ControlType);
 		flowControlType  afct = flowControlType::None;
 		if (vString != "") {
-			if (lower(vString) == "inlet") {
+			string vStringL = lower(vString);
+			if (vStringL == "inlet") {
 				afct = flowControlType::Inlet;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(ReservoirOperation))) {
+			else if (vStringL == lower(ENUM_TO_STR(ReservoirOperation))) {
 				afct = flowControlType::ReservoirOperation;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(ReservoirOutflow))) {
+			else if (vStringL == lower(ENUM_TO_STR(ReservoirOutflow))) {
 				afct = flowControlType::ReservoirOutflow;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(SinkFlow))) {
+			else if (vStringL == lower(ENUM_TO_STR(SinkFlow))) {
 				afct = flowControlType::SinkFlow;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(SourceFlow))) {
+			else if (vStringL == lower(ENUM_TO_STR(SourceFlow))) {
 				afct = flowControlType::SourceFlow;
 			}
 			else {
@@ -1873,16 +1987,17 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			vString = getValueStringFromXmlLine(aline, fldName.ROType);
 			reservoirOperationType  arot = reservoirOperationType::None;
 			if (vString != "") {
-				if (lower(vString) == lower(ENUM_TO_STR(AutoROM))) {
+				string vStringL = lower(vString);
+				if (vStringL == lower(ENUM_TO_STR(AutoROM))) {
 					arot = reservoirOperationType::AutoROM;
 				}
-				else if (lower(vString) == lower(ENUM_TO_STR(ConstantQ))) {
+				else if (vStringL == lower(ENUM_TO_STR(ConstantQ))) {
 					arot = reservoirOperationType::ConstantQ;
 				}
-				else if (lower(vString) == lower(ENUM_TO_STR(RigidROM))) {
+				else if (vStringL == lower(ENUM_TO_STR(RigidROM))) {
 					arot = reservoirOperationType::RigidROM;
 				}
-				else if (lower(vString) == lower(ENUM_TO_STR(SDEqation))) {
+				else if (vStringL == lower(ENUM_TO_STR(SDEqation))) {
 					arot = reservoirOperationType::SDEqation;
 				}
 				else {
@@ -1948,10 +2063,11 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 		vString = getValueStringFromXmlLine(aline, fldName.CrossSectionType);
 		crossSectionType acst = crossSectionType::None;
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(CSCompound))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(CSCompound))) {
 				acst = crossSectionType::CSCompound;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(CSSingle))) {
+			else if (vStringL == lower(ENUM_TO_STR(CSSingle))) {
 				acst = crossSectionType::CSSingle;
 			}
 			else {
@@ -1972,10 +2088,11 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 		vString = getValueStringFromXmlLine(aline, fldName.SingleCSChannelWidthType);
 		channelWidthType  acwt = channelWidthType::None;
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(CWEquation))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(CWEquation))) {
 				acwt = channelWidthType::CWEquation;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(CWGeneration))) {
+			else if (vStringL == lower(ENUM_TO_STR(CWGeneration))) {
 				acwt = channelWidthType::CWGeneration;
 			}
 			else {
@@ -2161,13 +2278,14 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		vString = getValueStringFromXmlLine(aline, fldName.UnsaturatedKType);
 		unSaturatedKType uskt = unSaturatedKType::None;
 		if (vString != "") {
-			if (lower(vString) == lower(ENUM_TO_STR(Constant))) {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(Constant))) {
 				uskt = unSaturatedKType::Constant;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(Linear))) {
+			else if (vStringL == lower(ENUM_TO_STR(Linear))) {
 				uskt = unSaturatedKType::Linear;
 			}
-			else if (lower(vString) == lower(ENUM_TO_STR(Exponential))) {
+			else if (vStringL == lower(ENUM_TO_STR(Exponential))) {
 				uskt = unSaturatedKType::Exponential;
 			}
 			else {
@@ -2323,6 +2441,11 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		}
 		else if (lower(vString) == "false") {
 			ssp->userSet = 0;
+		}
+		else {
+			writeLog(fpnLog, "[UserSet] value of the watershed ["
+				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
+			return -1;
 		}
 		return 1;
 	}
