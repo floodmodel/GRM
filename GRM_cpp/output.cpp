@@ -672,7 +672,7 @@ int makeNewOutputFiles()
 						+ roConstQ + "\n"
 						+ roConstQduration + "\n\n"
 						+ fcDataField + "\n";
-					appendTextToTextFile(ofs.ofpnFCStorage, heads);
+					appendTextToTextFile(ofs.ofpnFCStorage, heads); 
 
 					// reservoir inflow
 					heads = comHeader
@@ -686,7 +686,7 @@ int makeNewOutputFiles()
 	}
 	if (prj.makeASCorIMGfile == 1) {
 		if (prj.makeSoilSaturationDistFile == 1) {
-			fs::create_directories(ofs.ofpSSRDistribution);
+			fs::create_directories(ofs.ofpSSRDistribution); 
 		}
 		if (prj.makeRfDistFile == 1) {
 			fs::create_directories(ofs.ofpRFDistribution);
