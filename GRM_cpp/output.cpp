@@ -676,7 +676,7 @@ int makeNewOutputFiles()
 
 					// reservoir inflow
 					heads = comHeader
-						+ "Output data : Reservoir inflow[m^3/s]\n\n"
+						+ "Output data : Reservoir inflow[m^3/s]\n\n" 
 						+ fcDataField + "\n";
 					appendTextToTextFile(ofs.ofpnFCinflow, heads);
 
