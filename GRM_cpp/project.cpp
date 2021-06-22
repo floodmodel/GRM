@@ -534,8 +534,9 @@ int openProjectFile(int forceRealTime)
 		}
 		else {
 			prj.mdp = 12;  //omp_get_max_threads()를 사용하면 최대 cpu를 적용하므로 grm에서는 과도한 경우가 많다..
-			writeLog(fpnLog, "The number of CPUs could not be encountered. Max. degree of parallelism was set to 12.\n"
-				, 1, 1);
+			string outString = "The number of CPUs could not be encountered. Max. degree of parallelism was set to 12.\n";
+			outString = "Change the value of <MaxDegreeOfParallelism> in the gmp file to change Max. degree of parallelism.\n";
+			writeLog(fpnLog, outString, 1, 1);
 		}
 	}
 
