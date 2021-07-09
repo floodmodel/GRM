@@ -382,7 +382,7 @@ int openProjectFile(int forceRealTime)
 		}
 	}
 	else {
-		prj.simFlowControl == -1;
+		prj.simFlowControl = -1;
 	}
 
 	// ÀÌ°Ç continuous ¿ë =====================
@@ -2365,8 +2365,15 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 	}
 	if (aline.find(fldName.IniFlow) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.IniFlow);
-		if (vString != "" && stod(vString) >= 0) {
-			ssp->iniFlow = stod(vString);
+		if (vString != "") {		
+			if (stod(vString) >= 0) {
+				ssp->iniFlow = stod(vString);
+			}
+			else {
+				writeLog(fpnLog, "Initial stream flow in the watershed ["
+					+ to_string(ssp->wsid) + "] is negative value. 0 is applied. \n", 1, 1);
+				ssp->iniFlow = 0.0;
+			}
 		}
 		else {
 			writeLog(fpnLog, "Initial stream flow in the watershed ["
