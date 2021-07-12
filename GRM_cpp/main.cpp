@@ -442,7 +442,7 @@ void grmHelp() // /r, /a 설명 추가
 	printf("         -- Run the GRM model for a single gmp file.\n");
 	printf("         -- When the GRM.exe and gmp files are in the same folder,\n");
 	printf("             the project file path does not have to be entered.\n");
-	printf("         -- If there are spaces in the project file name or path, quotation marks “ ” are used to enclose it for input.\n");
+	printf("         -- If there are spaces in the project file name or path, double quotation marks (\" \") have to be used to enclose it for input.\n");
 	printf("         -- Example(when grm.exe is in 'd://GRMrun' folder)\n");
 	printf("           --- Case1. gmp file is in different folder with grm.exe\n");
 	printf("               D://GRMrun>grm D://GRMTest//TestProject//test.gmp\n");
