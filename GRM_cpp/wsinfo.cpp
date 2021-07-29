@@ -122,7 +122,9 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     }
 
     readDomainFaFileAndSetupCV();
-    readSlopeFdirStreamCwCfSsrFileAndSetCV();    
+	if (readSlopeFdirStreamCwCfSsrFileAndSetCV() == -1) { // 0: false, 1: true
+		return;
+	}
     if (prj.lcDataType == fileOrConstant::File) {
         readLandCoverFile();
     }

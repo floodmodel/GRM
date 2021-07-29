@@ -399,8 +399,8 @@ void grmHelp() // /r, /a 설명 추가
 	printf("  1. GRM 모형의 project 파일(.gmp)과 입력자료(지형공간자료, 강우, flow control 시계열 자료)를 준비한다. \n");
 	printf("  2. 모델링할 프로젝트 이름을 스위치(argument)로 넣고 실행한다.\n");
 	printf("      - Console에서 grm.exe [argument] 로 실행한다.\n");
-	printf("      ** 주의사항 : 장기간 모의할 경우, 컴퓨터 업데이트로 인해, 종료될 수 있으니, \n");
-	printf("                       네트워크를 차단하고, 자동업데이트 하지 않음으로 설정한다.\n");
+	//printf("      ** 주의사항 : 장기간 모의할 경우, 컴퓨터 업데이트로 인해, 종료될 수 있으니, \n");
+	//printf("                       네트워크를 차단하고, 자동업데이트 하지 않음으로 설정한다.\n");
 	printf("  3. argument\n");
 	printf("      - /?\n");
 	printf("          도움말\n");

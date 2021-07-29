@@ -173,6 +173,7 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
     int nRy = di.nRows;
     int nCx = di.nCols;
     int cvCount = di.cellNnotNull;
+	int isNormal = 1; // -1: false, 1: true
 #pragma omp parallel for //schedule(guided)
     for (int idx = 0; idx < cvCount; ++idx) {
         int cx = cvps[idx].xCol;
@@ -182,6 +183,13 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
             cvs[idx].slope = CONST_MIN_SLOPE;
         }
         cvs[idx].fdir = getFlowDirection((int)fdirFile.valuesFromTL[cx][ry], prj.fdType);
+		if (cvs[idx].fdir == flowDirection8::None8) {
+			string outstr = "Flow direction value is invalid (cell location : "
+				+ to_string(cvps[idx].xCol) + ", " + to_string(cvps[idx].yRow) + ").\n";
+			writeLog(fpnLog, outstr, 1, 1);
+			isNormal= -1;
+		}
+
         if (prj.streamFileApplied == 1) {
             cvs[idx].stream.cellValue = (int)streamFile->valuesFromTL[cx][ry];
             if (cvs[idx].stream.cellValue > 0) {
@@ -239,6 +247,9 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
     if (prj.issrFileApplied == 1 && ssrFile != NULL) {
         delete ssrFile;
     }
+	if (isNormal == -1) {
+		return -1;
+	}
     return 1;
 }
 
