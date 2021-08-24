@@ -128,8 +128,7 @@ int setupByFAandNetwork()
         copy(av.begin(), av.end(), cvaisToFA[curFA]);
         faCount[curFA] = av.size();
     }
-
-
+	
     // cross section 정보 wsid 오류 확인
     if (prj.css.size() > 0) {
         vector<int> ks;
@@ -251,7 +250,21 @@ int updateCVbyUserSettings()
                 }
             }
             else {
-                writeLog(fpnLog, "Cross section type is invalid. \n", 1, 1);
+				string cstype = "";
+				if (prj.css[mdwsid].csType == crossSectionType::CSCompound) {
+				cstype = "CSCompound";
+				}
+				else if (prj.css[mdwsid].csType == crossSectionType::CSSingle) {
+					cstype = "CSSingle";
+				}
+				else if (prj.css[mdwsid].csType == crossSectionType::None) {
+					cstype = "None";
+				}
+				else {
+					cstype = "Unknown";
+				}
+                writeLog(fpnLog, "Cross section type("+ cstype +") is invalid. Current watershed ID = "+ to_string(wid)
+					+ ", most downstream ID = "+to_string(mdwsid)+" \n", 1, 1);
                 return -1;
             }
             // 최소 하폭

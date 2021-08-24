@@ -8,6 +8,7 @@ extern cvAtt* cvs;
 extern domaininfo di;
 extern int** cvais;
 extern cvpos* cvps;
+extern fs::path fpnLog;
 
 int setFlowNetwork()
 {
@@ -194,6 +195,37 @@ int updateWatershedNetwork()
             }
         }
     }					
+
+	// ID 검증 부분, 현재 유역의 upID 와 downID 에 중복 값이 있으면, 애러 메세지 
+	for (int wsid_cur : di.dmids) {// 상하류 wsid를 추가한다.
+		vector<int> upIDs = di.wsn.wsidsAllUp[wsid_cur];//여기서 wsid_cur로 없는 key가 들어가면, key가 추가되고, size 0 이 설정된다.
+		vector<int> downIDs = di.wsn.wsidsAllDown[wsid_cur];
+		for (int uid : upIDs) {
+			if (uid != wsid_cur) {
+				for (int did : downIDs) {
+					if (uid == did) {
+						writeLog(fpnLog, "The flow directions of watershed IDs " + to_string(uid) + " and " + to_string(wsid_cur) + " are recursive.\n", 1, 1);
+						return -1;
+					}
+				}
+			}
+		}
+	}
+	for (int wsid_cur : di.dmids) {// 상하류 wsid를 추가한다.
+		vector<int> upIDs = di.wsn.wsidsAllUp[wsid_cur];//여기서 wsid_cur로 없는 key가 들어가면, key가 추가되고, size 0 이 설정된다.
+		vector<int> downIDs = di.wsn.wsidsAllDown[wsid_cur];
+		for (int  did : downIDs) {
+			if (did != wsid_cur) {
+				for (int uid : upIDs) {
+					if (uid == did) {
+						writeLog(fpnLog, "The flow directions of watershed IDs " + to_string(did) + " and " + to_string(wsid_cur) + " are recursive.\n", 1, 1);
+						return -1;
+					}
+				}
+			}
+		}
+	}
+
 
     for (int wsid_cur : di.dmids) {//최하류 wsid 목록을 만들고
         if (di.wsn.wsidNearbyDown[wsid_cur] == -1) {
