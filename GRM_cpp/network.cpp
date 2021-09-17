@@ -201,7 +201,7 @@ int updateWatershedNetwork()
 		vector<int> upIDs = di.wsn.wsidsAllUp[wsid_cur];//여기서 wsid_cur로 없는 key가 들어가면, key가 추가되고, size 0 이 설정된다.
 		vector<int> downIDs = di.wsn.wsidsAllDown[wsid_cur];
 		for (int uid : upIDs) {
-			if (uid != wsid_cur) {
+			if (uid != wsid_cur && uid>0) {
 				for (int did : downIDs) {
 					if (uid == did) {
 						writeLog(fpnLog, "The flow directions of watershed IDs " + to_string(uid) + " and " + to_string(wsid_cur) + " are recursive.\n", 1, 1);
@@ -215,7 +215,7 @@ int updateWatershedNetwork()
 		vector<int> upIDs = di.wsn.wsidsAllUp[wsid_cur];//여기서 wsid_cur로 없는 key가 들어가면, key가 추가되고, size 0 이 설정된다.
 		vector<int> downIDs = di.wsn.wsidsAllDown[wsid_cur];
 		for (int  did : downIDs) {
-			if (did != wsid_cur) {
+			if (did != wsid_cur && did > 0) {
 				for (int uid : upIDs) {
 					if (uid == did) {
 						writeLog(fpnLog, "The flow directions of watershed IDs " + to_string(did) + " and " + to_string(wsid_cur) + " are recursive.\n", 1, 1);
