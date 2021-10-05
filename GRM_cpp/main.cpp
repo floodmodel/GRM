@@ -210,7 +210,7 @@ int startGMPsRun(vector<string> gmpFiles, int isPrediction, string outString)
 		ppi = getProjectFileInfo(gmpFiles[n]);
 		writeNewLog(fpnLog, outString, 1, -1);
 		string progF = to_string(n + 1) + '/' + to_string(gmpFiles.size());
-		string progR = dtos(((n + 1) / nFiles * 100), 2);
+		string progR = dtos(((n + 1) / double(nFiles) * 100.0), 2);
 		msgFileProcess = "Total progress: " + progF + "(" + progR + "%). ";
 		if (setupAndStartSimulation() == -1) {
 			waitEnterKey();

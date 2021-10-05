@@ -24,3 +24,4 @@
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Add some error messages for reading flow direction file and setting most downstream catchment.  
 2021.08. Add some error messages for setting flow network.  
 2021.09. A critial bug fix in flow network analysis(about finding recursive flow).  
+2021.10. A minor bug fix in counting gmp files progress percentage when using '/f' option.  
