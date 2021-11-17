@@ -276,7 +276,7 @@ class grmWSinfo(object):
 #wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
 ###================================================================
 
-# gmp 입력 파일로 grmWSinfo class 를 인스턴싱 할 경우 ============================
+# gmp 에 저장된 GRM 입력 파일로 grmWSinfo class 를 인스턴싱 할 경우 ============================
 fdType = "StartsFromE_TauDEM"
 #fpn_domain = "C:\GRM\SampleGHG\watershed/GHG_Watershed.asc"
 #fpn_slope = "C:\GRM\SampleGHG\watershed/GHG_Slope_ST.asc"

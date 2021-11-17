@@ -1,5 +1,6 @@
 # GRM(Grid based Rainfall-Runoff Model)
 
+The model indroduction and the download guidelines are wiki page at https://github.com/floodmodel/GRM/wiki
 
 # Update history
 2018.11.16. Convert VB .NET codes to C#  
