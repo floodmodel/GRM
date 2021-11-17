@@ -292,10 +292,18 @@ int openProjectFile(int forceRealTime)
 			int idx = iter->first;
 			flowControlinfo afci;
 			afci = prj.fcs[idx];
-			if (afci.roType != reservoirOperationType::None){
-				if (afci.maxStorage_m3 <= 0 || afci.NormalHighStorage_m3 <= 0 
-					|| afci.RestrictedStorage_m3 <= 0) {
-					writeLog(fpnLog, " MaxStorage, NormalHighStorage, and  RestrictedStorage must be greater than zero when reservoir operation type is applied.\n", 1, 1);
+			// 2021.11.17 ReservoirOutflow, Inlet, SinkFlow, SourceFlow, ReservoirOperation 모든 경우에서 AutoROM으로 전환 될 수 있어야 하므로
+			// 옵션에 상관없이 모두 저수지 제원을 입력하는 것으로 수정
+			//if (afci.roType != reservoirOperationType::None){
+			if (afci.fcType != flowControlType::Inlet) {
+				if (afci.iniStorage_m3 < 0) {
+					writeLog(fpnLog, "Ini. storage of reservoir ["
+						+ afci.fcName + "] is smaller than '0'. '0' is applied.\n", 1, 1);
+					prj.fcs[idx].iniStorage_m3 = 0.0;
+				}
+				if (afci.maxStorage_m3 < 0 || afci.NormalHighStorage_m3 < 0
+					|| afci.RestrictedStorage_m3 < 0) {
+					writeLog(fpnLog, " MaxStorage, NormalHighStorage, and  RestrictedStorage must not be negative value.\n", 1, 1);
 					return -1;
 				}
 				if (prj.isDateTimeFormat == 1) {
@@ -315,6 +323,16 @@ int openProjectFile(int forceRealTime)
 						prj.fcs[idx].restricedP_EM = stoi(afci.RestrictedPeriod_End.substr(0, 2));
 						prj.fcs[idx].restricedP_ED = stoi(afci.RestrictedPeriod_End.substr(3, 2));
 					}
+					if (prj.fcs[idx].restricedP_SM > prj.fcs[idx].restricedP_EM) {
+						writeLog(fpnLog, "Restriced storage period values are invalid.\n", 1, 1);
+						return -1;
+					}
+					if (prj.fcs[idx].restricedP_SM == prj.fcs[idx].restricedP_EM) {
+						if (prj.fcs[idx].restricedP_SD > prj.fcs[idx].restricedP_ED) {
+							writeLog(fpnLog, "Restriced storage period values are invalid.\n", 1, 1);
+							return -1;
+						}
+					}
 				}
 				if (prj.isDateTimeFormat == -1) {
 					if (isNumeric(afci.RestrictedPeriod_Start) == false) {
@@ -331,54 +349,59 @@ int openProjectFile(int forceRealTime)
 					else {
 						prj.fcs[idx].RestrictedPeriod_End_min = stoi(afci.RestrictedPeriod_End) * 60;
 					}
+					if (prj.fcs[idx].RestrictedPeriod_Start_min > prj.fcs[idx].RestrictedPeriod_End_min) {
+						writeLog(fpnLog, "Restriced storage period values are invalid.\n", 1, 1);
+						return -1;
+					}
 				}
 			}
-			if (afci.fcType != flowControlType::Inlet) {
-				int bsimStorage = 1;
-				if (afci.iniStorage_m3 < 0) {
-					writeLog(fpnLog, "Ini. storage of reservoir ["
-						+ afci.fcName + "] was set to '0'.\n", 1, 1);
-					prj.fcs[idx].iniStorage_m3 = 0.0;
-					bsimStorage = -1;
-				}
-				if (afci.maxStorage_m3 < 0) {
-					writeLog(fpnLog, "Max storage of reservoir ["
-						+ afci.fcName + "] was set to '0'.\n", 1, 1);
-					prj.fcs[idx].maxStorage_m3 = 0.0;
-					bsimStorage = -1;
-				}
-				if (afci.NormalHighStorage_m3 < 0) {
-					writeLog(fpnLog, "NormalHighStorage of reservoir ["
-						+ afci.fcName + "] was set to '0.0'.\n", 1, 1);
-					prj.fcs[idx].NormalHighStorage_m3 = 0.0;
-					bsimStorage = -1;
-				}
-				if (afci.RestrictedStorage_m3 < 0) {
-					writeLog(fpnLog, "RestrictedStorage of reservoir ["
-						+ afci.fcName + "] was set to '0.0'.\n", 1, 1);
-					prj.fcs[idx].RestrictedStorage_m3 = 0.0;
-					bsimStorage = -1;
-				}
-				if (bsimStorage == -1) {
-					writeLog(fpnLog, "The storage of reservoir ["
-						+ afci.fcName + "] will not be simulated.\n", 1, 1);
-				}
-				if (afci.iniStorage_m3 > afci.maxStorage_m3) {
-					writeLog(fpnLog, "[" + afci.fcName + "] Initial storage(" + dtos(afci.iniStorage_m3, 0)
-						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
-					return -1;
-				}
-				if (afci.NormalHighStorage_m3 > afci.maxStorage_m3) {
-					writeLog(fpnLog, "[" + afci.fcName + "] NormalHighStorage storage(" + dtos(afci.NormalHighStorage_m3, 0)
-						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
-					return -1;
-				}
-				if (afci.RestrictedStorage_m3 > afci.maxStorage_m3) {
-					writeLog(fpnLog, "[" + afci.fcName + "] RestrictedStorage storage(" + dtos(afci.RestrictedStorage_m3, 0)
-						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
-					return -1;
-				}
-			}
+			//}
+			//if (afci.fcType != flowControlType::Inlet) {
+			//	int bsimStorage = 1;
+			//	if (afci.iniStorage_m3 < 0) {
+			//		writeLog(fpnLog, "Ini. storage of reservoir ["
+			//			+ afci.fcName + "] was set to '0'.\n", 1, 1);
+			//		prj.fcs[idx].iniStorage_m3 = 0.0;
+			//		bsimStorage = -1;
+			//	}
+			//	if (afci.maxStorage_m3 < 0) {
+			//		writeLog(fpnLog, "Max storage of reservoir ["
+			//			+ afci.fcName + "] was set to '0'.\n", 1, 1);
+			//		prj.fcs[idx].maxStorage_m3 = 0.0;
+			//		bsimStorage = -1;
+			//	}
+			//	if (afci.NormalHighStorage_m3 < 0) {
+			//		writeLog(fpnLog, "NormalHighStorage of reservoir ["
+			//			+ afci.fcName + "] was set to '0.0'.\n", 1, 1);
+			//		prj.fcs[idx].NormalHighStorage_m3 = 0.0;
+			//		bsimStorage = -1;
+			//	}
+			//	if (afci.RestrictedStorage_m3 < 0) {
+			//		writeLog(fpnLog, "RestrictedStorage of reservoir ["
+			//			+ afci.fcName + "] was set to '0.0'.\n", 1, 1);
+			//		prj.fcs[idx].RestrictedStorage_m3 = 0.0;
+			//		bsimStorage = -1;
+			//	}
+			//	if (bsimStorage == -1) {
+			//		writeLog(fpnLog, "The storage of reservoir ["
+			//			+ afci.fcName + "] will not be simulated.\n", 1, 1);
+			//	}
+			//	if (afci.iniStorage_m3 > afci.maxStorage_m3) {
+			//		writeLog(fpnLog, "[" + afci.fcName + "] Initial storage(" + dtos(afci.iniStorage_m3, 0)
+			//			+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
+			//		return -1;
+			//	}
+			//	if (afci.NormalHighStorage_m3 > afci.maxStorage_m3) {
+			//		writeLog(fpnLog, "[" + afci.fcName + "] NormalHighStorage storage(" + dtos(afci.NormalHighStorage_m3, 0)
+			//			+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
+			//		return -1;
+			//	}
+			//	if (afci.RestrictedStorage_m3 > afci.maxStorage_m3) {
+			//		writeLog(fpnLog, "[" + afci.fcName + "] RestrictedStorage storage(" + dtos(afci.RestrictedStorage_m3, 0)
+			//			+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
+			//		return -1;
+			//	}
+			//}
 		}
 	}
 	else {
