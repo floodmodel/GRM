@@ -84,7 +84,7 @@ void calFCReservoirOutFlow(int i, double nowTmin)
 				setNoFluxCVCH(i);
 				fccds.fcDataAppliedNowT_m3Ps[i] = 0;
 			}
-			else if (ts.enforceFCautoROM == 1) {				
+			else if (ts.enforceFCautoROM == 1) {	
 				double t_currentFC = dtfc * fccds.curDorder[i];
 				convertFCtypeToAutoROM(dtos(t_currentFC, 2) +" min", i);
 			}

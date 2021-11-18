@@ -27,3 +27,4 @@ The model indroduction and the download guidelines are wiki page at https://gith
 2021.08. Add some error messages for setting flow network.  
 2021.09. A critial bug fix in flow network analysis(about finding recursive flow).  
 2021.10. A minor bug fix in counting gmp files progress percentage when using '/f' option.  
+2021.11. A minor bug fix in using '/a' option for a gmp file that includes 'Inlet'. 

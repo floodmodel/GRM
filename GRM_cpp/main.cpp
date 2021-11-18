@@ -171,7 +171,7 @@ int main(int argc, char** args)
 	return 1;
 }
 
-int startSingleRun(string fpnGMP, int isPrediction, string outString)
+int startSingleRun(string fpnGMP, int enforceAutoROM, string outString)
 {
 	fs::path in_arg = fs::path(fpnGMP.c_str());
 	string fp = in_arg.parent_path().string();
@@ -191,7 +191,7 @@ int startSingleRun(string fpnGMP, int isPrediction, string outString)
 	}
 	else if (nResult == 0) {
 		ppi = getProjectFileInfo(fpnGMP);
-		ts.enforceFCautoROM = isPrediction;
+		ts.enforceFCautoROM = enforceAutoROM;
 		writeNewLog(fpnLog, outString, 1, -1);
 		if (setupAndStartSimulation() == -1) {
 			waitEnterKey();
@@ -201,11 +201,11 @@ int startSingleRun(string fpnGMP, int isPrediction, string outString)
 	return 1;
 }
 
-int startGMPsRun(vector<string> gmpFiles, int isPrediction, string outString)
+int startGMPsRun(vector<string> gmpFiles, int enforceAutoROM, string outString)
 {
 	clock_t  startT = clock();
 	int nFiles = gmpFiles.size();
-	ts.enforceFCautoROM = isPrediction;
+	ts.enforceFCautoROM = enforceAutoROM;
 	for (int n = 0; n < nFiles; n++) {// /f 혹은 /fd 인 경우 여기서 실행
 		ppi = getProjectFileInfo(gmpFiles[n]);
 		writeNewLog(fpnLog, outString, 1, -1);
