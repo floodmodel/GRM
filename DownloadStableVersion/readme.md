@@ -1,1 +1,0 @@
-# Copy sample data to C:\GRM.
