@@ -372,9 +372,9 @@ typedef struct _swsParameters
 {
 	int wsid = -1;
 	double iniSaturation =-1.0;
+	double minSlopeOF = 0.0;
 	unSaturatedKType unSatKType = unSaturatedKType::None;
 	double coefUnsaturatedK = 0.0;
-	double minSlopeOF = 0.0;
 	double minSlopeChBed = 0.0;
 	double minChBaseWidth = 0.0;
 	double chRoughness = 0.0;

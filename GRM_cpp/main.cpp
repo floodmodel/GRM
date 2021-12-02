@@ -294,8 +294,8 @@ int setupAndStartSimulation()
 {
 	//===== ¿©±â¼­ grmWSinfo class  test ===============
 	////string fpn = "C://GRM//SampleGHG//GHG500.gmp";
-	////string fpn = "D://Github//zTestSet_GRM_SampleWC_cpp//QGIS_GRM_test.gmp";
-	////grmWSinfo gws = grmWSinfo(fpn);
+	//string fpn = "D://Github//zTestSet_GRM_SampleWC_cpp//SampleProject.gmp";
+	//grmWSinfo gws = grmWSinfo(fpn);
 	//string fdType = "StartsFromE_TauDEM";
 	//string fpn_domain = "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_Watershed_c.asc";
 	//string fpn_slope = "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_Slope_ST.asc";
@@ -328,7 +328,7 @@ int setupAndStartSimulation()
 	//grmWSinfo	gws = grmWSinfo(fdType, fpn_domain,	fpn_slope, fpn_fd,
 	//	fpn_fa, fpn_stream, fpn_lc, fpn_st, fpn_sd);
 	//vector <int> mdwsidsv = gws.mostDownStreamWSIDs;
-	////swsParameters swsp = gws.subwatershedPars(2022);
+	//swsParameters swsp = gws.subwatershedPars(1);
 	//===================================================
 
 	

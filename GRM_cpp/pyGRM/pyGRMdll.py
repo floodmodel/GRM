@@ -272,53 +272,53 @@ class grmWSinfo(object):
 
 ### gmp 파일로 grmWSinfo class 를 인스턴싱 할 경우 ==============================
 ### gmp 파일에서 ProjectSetting 테이블까지만 채워져 있어도 사용할 수 있다. 
-#fpn_gmp = "C:\GRM\SampleGHG\GHG500.gmp"
-#wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
+fpn_gmp = "D:\Github\zTestSet_GRM_SampleWC_cpp\SampleProject.gmp" #"C:\GRM\SampleGHG\GHG500.gmp"
+wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
 ###================================================================
 
-# gmp 에 저장된 GRM 입력 파일로 grmWSinfo class 를 인스턴싱 할 경우 ============================
-fdType = "StartsFromE_TauDEM"
-#fpn_domain = "C:\GRM\SampleGHG\watershed/GHG_Watershed.asc"
-#fpn_slope = "C:\GRM\SampleGHG\watershed/GHG_Slope_ST.asc"
-#fpn_fd = "C:\GRM\SampleGHG\watershed/GHG_FDir.asc"
-#fpn_fa = "C:\GRM\SampleGHG\watershed/GHG_FAc.asc"
-#fpn_stream = "C:\GRM\SampleGHG\watershed/GHG_Stream.asc"
-#fpn_lc="C:\GRM\SampleGHG\watershed/GHG_lc.asc"
-#fpn_st="C:\GRM\SampleGHG\watershed/GHG_SoilTexture.asc"
-#fpn_sd="C:\GRM\SampleGHG\watershed/GHG_SoilDepth.asc"
+## gmp 에 저장된 GRM 입력 파일로 grmWSinfo class 를 인스턴싱 할 경우 ============================
+#fdType = "StartsFromE_TauDEM"
+##fpn_domain = "C:\GRM\SampleGHG\watershed/GHG_Watershed.asc"
+##fpn_slope = "C:\GRM\SampleGHG\watershed/GHG_Slope_ST.asc"
+##fpn_fd = "C:\GRM\SampleGHG\watershed/GHG_FDir.asc"
+##fpn_fa = "C:\GRM\SampleGHG\watershed/GHG_FAc.asc"
+##fpn_stream = "C:\GRM\SampleGHG\watershed/GHG_Stream.asc"
+##fpn_lc="C:\GRM\SampleGHG\watershed/GHG_lc.asc"
+##fpn_st="C:\GRM\SampleGHG\watershed/GHG_SoilTexture.asc"
+##fpn_sd="C:\GRM\SampleGHG\watershed/GHG_SoilDepth.asc"
 
-#fpn_domain = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiWatershed.asc";
-#fpn_slope = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/Wi_Slope_ST.ASC";
-#fpn_fd = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiFDir.ASC";
-#fpn_fa = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiFAc.asc";
-#fpn_stream = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiStream6.asc";
-#fpn_lc = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/wilc200.asc";
-#fpn_st = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/wistext200.asc";
-#fpn_sd = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/wisdepth200.asc";
+##fpn_domain = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiWatershed.asc";
+##fpn_slope = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/Wi_Slope_ST.ASC";
+##fpn_fd = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiFDir.ASC";
+##fpn_fa = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiFAc.asc";
+##fpn_stream = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/WiStream6.asc";
+##fpn_lc = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/wilc200.asc";
+##fpn_st = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/wistext200.asc";
+##fpn_sd = "D:/Github/zTestSet_GRM_SampleWC_cpp/Data/wisdepth200.asc";
 
-fpn_domain = 'D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_Watershed.asc';
-fpn_slope = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_Slope_ST.asc";
-fpn_fd = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_FDir.asc";
-fpn_fa = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_FAc.asc";
-fpn_stream = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_Stream.asc";
-fpn_lc = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_lc.asc";
-fpn_st = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_SoilTexture.asc";
-fpn_sd = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_SoilDepth.asc";
-fpn_ssi=''
-fpn_iniCF=''
-fpn_CW=''
+#fpn_domain = 'D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_Watershed.asc';
+#fpn_slope = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_Slope_ST.asc";
+#fpn_fd = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_FDir.asc";
+#fpn_fa = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_FAc.asc";
+#fpn_stream = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_Stream.asc";
+#fpn_lc = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_lc.asc";
+#fpn_st = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_SoilTexture.asc";
+#fpn_sd = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_SoilDepth.asc";
+#fpn_ssi=''
+#fpn_iniCF=''
+#fpn_CW=''
 
 
-wsi=grmWSinfo(fdType,  
-    fpn_domain,
-    fpn_slope,
-    fpn_fd,
-    fpn_fa,
-    fpn_stream, 
-    fpn_lc,
-    fpn_st,
-    fpn_sd, fpn_ssi, fpn_iniCF, fpn_CW)
-#================================================================
+#wsi=grmWSinfo(fdType,  
+#    fpn_domain,
+#    fpn_slope,
+#    fpn_fd,
+#    fpn_fa,
+#    fpn_stream, 
+#    fpn_lc,
+#    fpn_st,
+#    fpn_sd, fpn_ssi, fpn_iniCF, fpn_CW)
+##================================================================
 
 # 여기서는 정보를 얻고자 하는 셀위치 혹은 유역 번호를 지정 =========================
 xCol = 21 # 정보를 얻고자 하는 셀 위치
