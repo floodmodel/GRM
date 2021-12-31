@@ -23,7 +23,7 @@ class unSaturatedKType(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
 	Exponential=2
 	usKNone=3
 
-class swsParameters(Structure):  #grm 코드에 있는 내용과 맞춘다.
+class swsParameters(Structure):  #grm 코드에 있는 구조체와 내용 맞춘다. 순서도 맞게 해야 한다.
 	_fields_ = [("wsid", ctypes.c_int),
         ("iniSaturation", ctypes.c_double),
         ("minSlopeOF", ctypes.c_double),
@@ -398,27 +398,37 @@ print("subwatershedPars. ccHydraulicK :", swp.ccHydraulicK)
 print("subwatershedPars. ccSoilDepth :", swp.ccSoilDepth)
 print("subwatershedPars. userSet :", swp.userSet)    # 1 : true, 0: false
 
-#swp에 저장된 매개변수(gmp 파일로 인스턴싱 할경우 등)를 이용해서 전체 유역 매개변수 업데이트 하는 경우,  # GUI에서 받은 매개변수를 사용할 경우에는 swp의 항목을 직접 입력해 줘야 한다. 
-a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(swp.wsid,  swp.iniSaturation #  setOneSWSParsAndUpdateAllSWSUsingNetwork -> ctypes.c_bool
-                           , swp.minSlopeOF, swp.unSatKType, swp.coefUnsaturatedK
-                           , swp.minSlopeChBed, swp.minChBaseWidth, swp.chRoughness
-                           , swp.dryStreamOrder, swp.ccLCRoughness
-                           , swp.ccSoilDepth, swp.ccPorosity, swp.ccWFSuctionHead
-                           , swp.ccHydraulicK, swp.iniFlow) 
-#			#int wsid, double iniSat,
-#			#double minSlopeLandSurface, int unSKType, double coefUnsK,
-#			#double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
-#			#int dryStreamOrder, double ccLCRoughness,
-#			#double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
-#			#double ccSoilHydraulicCond, double iniFlow = 0)
+# ========================================================
+# 한 유의 매개변수를 이용해서 전체 유역의 매개변수를 업데이트 하기
+# setOneSWSParsAndUpdateAllSWSUsingNetwork() function just update memory. The gmp file is not revised.
+# If you want to revise the gmp file, you need a writing process using updated parameters in memory.
+# To get the updated paramters in memory for a subwatershed, you can use subwatershedPars() function.
 
-##GUI에서 받은 매개변수를 사용할 경우
-#a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(1,  0.5
-#                           , 0.0001, 1, 0.2
-#                           , 0.008, 30, 0.045
-#                           , 0, 1
-#                           , 1, 1,1
-#                           , 1, 20.0) 
+#swp에 저장된 매개변수(gmp 파일로 인스턴싱 할경우 등)를 이용해서 전체 유역 매개변수 업데이트 하는 경우,  
+#a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(swp.wsid,  swp.iniSaturation #  setOneSWSParsAndUpdateAllSWSUsingNetwork -> ctypes.c_bool
+#                           , swp.minSlopeOF, swp.unSatKType, swp.coefUnsaturatedK
+#                           , swp.minSlopeChBed, swp.minChBaseWidth, swp.chRoughness
+#                           , swp.dryStreamOrder, swp.ccLCRoughness
+#                           , swp.ccSoilDepth, swp.ccPorosity, swp.ccWFSuctionHead
+#                           , swp.ccHydraulicK, swp.iniFlow) 
+			#int wsid, double iniSat,
+			#double minSlopeLandSurface, int unSKType, double coefUnsK,
+			#double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
+			#int dryStreamOrder, double ccLCRoughness,
+			#double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
+			#double ccSoilHydraulicCond, double iniFlow = 0)
+
+#GUI에서 받은 매개변수를 사용할 경우, GUI에서 받은 매개변수를 사용할 경우에는 swp의 매개변수 항목을 직접 입력해 줘야 한다. 
+a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(1,  0.5
+                           , 0.0001, 1, 0.2
+                           , 0.008, 30, 0.045
+                           , 0, 1
+                           , 1, 1,1
+                           , 1, 20.0) 
+
+# ========================================================
+
+# 업데이트 된 매개변수 조회하기
 wsid = 1 # setOneSWSParsAndUpdateAllSWSUsingNetwork()에서 업데이트 된 매개변수 조회할 유역 id 지정
 swp = wsi.subwatershedPars(wsid) # current ws id / [ctypes.c_int] -> swsParameters
 print("subwatershedPars. wsid :", swp.wsid)
@@ -451,7 +461,6 @@ print("facMaxCellxCol :", a)
 
 a = wsi.facMaxCellyRow # property -> ctypes.c_int
 print("facMaxCellyRow :", a)
-
 
 a = wsi.WScount #  property -> ctypes.c_int
 print("WScount :", a)

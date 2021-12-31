@@ -368,7 +368,7 @@ typedef struct _projectFileInfo
 	fs::file_time_type prjfileSavedTime;
 } projectfilePathInfo;
 
-typedef struct _swsParameters
+typedef struct _swsParameters  //pyGRMdll.py 에 있는 구조체와 내용 맞춘다. 순서도 맞게 해야 한다.
 {
 	int wsid = -1;
 	double iniSaturation =-1.0;
@@ -1024,6 +1024,9 @@ public:
 	int cellCountInUpstreamArea(int colXAryidx, //  Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".
 		int rowYAryidx);
 
+	// Just update memory. The gmp file is not revised.
+	// If you want to revise the gmp file, you need a writing process using updated parameters in memory.
+	//  To get the updated paramters in memory for a subwatershed, you can use subwatershedPars() function.
 	bool setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
 		double minSlopeLandSurface, unSaturatedKType unSKType, double coefUnsK,
 		double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
