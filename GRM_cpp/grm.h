@@ -8,6 +8,7 @@ namespace fs = std::filesystem;
 #define CFL_NUMBER  1.0
 #define TOLERANCE  0.001
 #define WETDRY_CRITERIA 0.000001
+#define ITER_NR 20000
 
 //const string CONST_GMP_FILE_EXTENSION = ".gmp";
 const string CONST_TAG_DISCHARGE = "Discharge.out";

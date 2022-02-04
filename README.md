@@ -11,10 +11,11 @@ The model indroduction and the download guidelines are wiki page at https://gith
 2020.08.29. Bug fix in /f option  
 2020.09.08. Bug fix in /a option  
 2020.09.10. Bug fix in Flow control simulation  
+2020.09.22. Bug fix in Flow control simulation  
 2021.01.07. Bug fix in bitmap image output renderer  
 2021.01.16. Bug fix in calculating average rainfall when using '/f' option  
-2021.02.22. Bug fix in writing GRM version  
-2021.04.19. Add an error check process for initial storages of reservoirs  
+2021.02.22. Add rainfall data writing process for each watch point.  
+2021.04.19. Add an error check process for initial storages of reservoirs.  
 2021.04.23. GRM v2021.04 beta was released.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The GRM was improved to enable more detailed simulation for reservoir operation.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The manuals and sample data were updated.  
@@ -27,4 +28,4 @@ The model indroduction and the download guidelines are wiki page at https://gith
 2021.08. Add some error messages for setting flow network.  
 2021.09. A critial bug fix in flow network analysis(about finding recursive flow).  
 2021.10. A minor bug fix in counting gmp files progress percentage when using '/f' option.  
-2021.11. A minor bug fix in using '/a' option for a gmp file that includes 'Inlet'. 
+2021.11. A minor bug fix in using '/a' option for the gmp file that includes 'Inlet'. 
