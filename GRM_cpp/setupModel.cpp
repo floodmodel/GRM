@@ -141,7 +141,7 @@ int setupByFAandNetwork()
         for (int i : ks) {
             if (getVectorIndex(di.wsn.mdWSIDs, i) == -1) {
                 //저장된 css 키가 최하류 wsid 리스트에 없다면,
-                string outstr = "[" + to_string(i) + "] is not most downstream watershed ID (it has the downstream watershedID "
+                string outstr = "ERROR : [" + to_string(i) + "] is not most downstream watershed ID (it has the downstream watershedID "
 					+ to_string(di.wsn.wsidNearbyDown[i])+").\n";
                 writeLog(fpnLog, outstr, 1, 1);
                 return -1;
@@ -263,7 +263,7 @@ int updateCVbyUserSettings()
 				else {
 					cstype = "Unknown";
 				}
-                writeLog(fpnLog, "Cross section type("+ cstype +") is invalid. Current watershed ID = "+ to_string(wid)
+                writeLog(fpnLog, "ERROR : Cross section type("+ cstype +") is invalid. Current watershed ID = "+ to_string(wid)
 					+ ", most downstream ID = "+to_string(mdwsid)+" \n", 1, 1);
                 return -1;
             }

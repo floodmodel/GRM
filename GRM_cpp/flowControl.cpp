@@ -33,7 +33,7 @@ int updateFCCellinfoAndData()
         }
         if (afc.fcType != flowControlType::ReservoirOperation) {
             if (afc.fpnFCData != "" && _access(afc.fpnFCData.c_str(), 0) != 0) {
-                string outstr = "Flow control data file (" + afc.fpnFCData 
+                string outstr = "ERROR : Flow control data file (" + afc.fpnFCData 
                     + ") is invalid.\n";
                 writeLog(fpnLog, outstr, 1, 1);
                 return -1;
@@ -41,7 +41,7 @@ int updateFCCellinfoAndData()
             vector<double> vs;
             vs = readTextFileToDoubleVector(afc.fpnFCData);
 			if (vs.size() == 0) {
-				string outstr = "Flow control data file (" + afc.fpnFCData
+				string outstr = "WARNNING : Flow control data file (" + afc.fpnFCData
 					+ ") has no value.\n";
 				writeLog(fpnLog, outstr, 1, 1);
 				if (ts.enforceFCautoROM == -1) {

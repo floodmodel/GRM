@@ -299,17 +299,17 @@ int openProjectFile(int forceRealTime)
 			//if (afci.roType != reservoirOperationType::None){
 			if (afci.fcType != flowControlType::Inlet) {
 				if (afci.iniStorage_m3 < 0) {
-					writeLog(fpnLog, "[" + afci.fcName + "] Ini. storage of reservoir is smaller than '0'. '0' is applied.\n", 1, 1);
+					writeLog(fpnLog, "WARNNING : [" + afci.fcName + "] Ini. storage of reservoir is smaller than '0'. '0' is applied.\n", 1, 1);
 					prj.fcs[idx].iniStorage_m3 = 0.0;
 				}
 				if (afci.maxStorage_m3 < 0 || afci.NormalHighStorage_m3 < 0
 					|| afci.RestrictedStorage_m3 < 0) {
-					writeLog(fpnLog, "["+afci.fcName + "] MaxStorage, NormalHighStorage, and  RestrictedStorage must not be negative value.\n", 1, 1);
+					writeLog(fpnLog, "ERROR : ["+afci.fcName + "] MaxStorage, NormalHighStorage, and  RestrictedStorage must not be negative value.\n", 1, 1);
 					return -1;
 				}
 				if (prj.isDateTimeFormat == 1) {
 					if (isNumeric(afci.RestrictedPeriod_Start) == true) {
-						writeLog(fpnLog, "[" + afci.fcName + "] RestrictedPeriod_Start value must have 'mmMddD' format.\n", 1, 1);
+						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedPeriod_Start value must have 'mmMddD' format.\n", 1, 1);
 						return -1;
 					}
 					else {
@@ -317,7 +317,7 @@ int openProjectFile(int forceRealTime)
 						prj.fcs[idx].restricedP_SD = stoi(afci.RestrictedPeriod_Start.substr(3, 2));
 					}
 					if (isNumeric(afci.RestrictedPeriod_End) == true) {
-						writeLog(fpnLog, "[" + afci.fcName + "] RestrictedPeriod_End value must have 'mmMddD' format.\n", 1, 1);
+						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedPeriod_End value must have 'mmMddD' format.\n", 1, 1);
 						return -1;
 					}
 					else {
@@ -325,54 +325,54 @@ int openProjectFile(int forceRealTime)
 						prj.fcs[idx].restricedP_ED = stoi(afci.RestrictedPeriod_End.substr(3, 2));
 					}
 					if (prj.fcs[idx].restricedP_SM > prj.fcs[idx].restricedP_EM) {
-						writeLog(fpnLog, "[" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
+						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
 						return -1;
 					}
 					if (prj.fcs[idx].restricedP_SM == prj.fcs[idx].restricedP_EM) {
 						if (prj.fcs[idx].restricedP_SD > prj.fcs[idx].restricedP_ED) {
-							writeLog(fpnLog, "[" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
+							writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
 							return -1;
 						}
 					}
 				}
 				if (afci.iniStorage_m3 > afci.maxStorage_m3) {
-					writeLog(fpnLog, "[" + afci.fcName + "] Initial storage(" + dtos(afci.iniStorage_m3, 0)
+					writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Initial storage(" + dtos(afci.iniStorage_m3, 0)
 						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
 					return -1;
 				}
 				if (afci.NormalHighStorage_m3 > afci.maxStorage_m3) {
-					writeLog(fpnLog, "[" + afci.fcName + "] NormalHighStorage storage(" + dtos(afci.NormalHighStorage_m3, 0)
+					writeLog(fpnLog, "ERROR : [" + afci.fcName + "] NormalHighStorage storage(" + dtos(afci.NormalHighStorage_m3, 0)
 						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
 					return -1;
 				}
 				if (afci.RestrictedStorage_m3 > afci.maxStorage_m3) {
-					writeLog(fpnLog, "[" + afci.fcName + "] RestrictedStorage storage(" + dtos(afci.RestrictedStorage_m3, 0)
+					writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedStorage storage(" + dtos(afci.RestrictedStorage_m3, 0)
 						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
 					return -1;
 				}
 				if (prj.isDateTimeFormat == -1) {
 					if (isNumeric(afci.RestrictedPeriod_Start) == false) {
-						writeLog(fpnLog, "[" + afci.fcName + "] RestrictedPeriod_Start has to be numeric value.\n", 1, 1);
+						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedPeriod_Start has to be numeric value.\n", 1, 1);
 						return -1;
 					}
 					else {
 						prj.fcs[idx].RestrictedPeriod_Start_min = stoi(afci.RestrictedPeriod_Start) * 60;
 					}
 					if (isNumeric(afci.RestrictedPeriod_End) == false) {
-						writeLog(fpnLog, "[" + afci.fcName + "] RestrictedPeriod_End has to be numeric value.\n", 1, 1);
+						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedPeriod_End has to be numeric value.\n", 1, 1);
 						return -1;
 					}
 					else {
 						prj.fcs[idx].RestrictedPeriod_End_min = stoi(afci.RestrictedPeriod_End) * 60;
 					}
 					if (prj.fcs[idx].RestrictedPeriod_Start_min > prj.fcs[idx].RestrictedPeriod_End_min) {
-						writeLog(fpnLog, "[" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
+						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
 						return -1;
 					}
 				}
 			}
 			else if (ts.enforceFCautoROM == 1) {// inlet인경우, AutoROM으로 자동 전환 못하게 한다.
-				writeLog(fpnLog, "[" + afci.fcName + "] Inlet cannot be converted to AutoROM. '/a' option cannot be applied.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Inlet cannot be converted to AutoROM. '/a' option cannot be applied.\n", 1, 1);
 				return -1;
 			}
 			//}
@@ -431,7 +431,7 @@ int openProjectFile(int forceRealTime)
 	// 이건 continuous 용 =====================
 	if (prj.simEvTr == 1)	{
 		if (prj.petsms.size() < 1) {
-			writeLog(fpnLog, "PET data is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : PET data is invalid.\n", 1, 1);
 			return -1;
 		}
 		map<int, PETnSMinfo>::iterator iter;
@@ -441,19 +441,19 @@ int openProjectFile(int forceRealTime)
 			apetsm = prj.petsms[idx];
 			if (apetsm.petMethod == PETmethod::UserData) {
 				if (apetsm.fpnPET == "" || _access(apetsm.fpnPET.c_str(), 0) == 0) {
-					writeLog(fpnLog, "PET data file is invalid.\n", 1, 1);
+					writeLog(fpnLog, "ERROR : PET data file is invalid.\n", 1, 1);
 					return -1;
 				}
 			}
 			else if (apetsm.petMethod != PETmethod::None) {
 				if (apetsm.PETcoeffPlant <= 0.0 || apetsm.PETcoeffPlant>1) {
-					writeLog(fpnLog, "PET coefficient for plant in the area ["
+					writeLog(fpnLog, "ERROR : PET coefficient for plant in the area ["
 						+ to_string(idx) + "] is invalid.\n", 1, 1);
 					writeLog(fpnLog, "PET coefficient for plant has to be (greater than 0) and (equal or less than 1).\n", 1, 1);
 					return -1;
 				}
 				if (apetsm.PETcoeffSoil <= 0.0 || apetsm.PETcoeffSoil > 1) {
-					writeLog(fpnLog, "PET coefficient for soil in the area ["
+					writeLog(fpnLog, "ERROR : PET coefficient for soil in the area ["
 						+ to_string(idx) + "] is invalid.\n", 1, 1);
 					writeLog(fpnLog, "PET coefficient for soil has to be (greater than 0) and (equal or less than 1).\n", 1, 1);
 					return -1;
@@ -464,7 +464,7 @@ int openProjectFile(int forceRealTime)
 
 	if (prj.simSnowMelt == 1)	{
 		if (prj.petsms.size() < 1) {
-			writeLog(fpnLog, "Snow melt data is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Snow melt data is invalid.\n", 1, 1);
 			return -1;
 		}
 		map<int, PETnSMinfo>::iterator iter;
@@ -474,7 +474,7 @@ int openProjectFile(int forceRealTime)
 			apetsm = prj.petsms[idx];
 			if (apetsm.smMethod == snowMeltMethod::UserData) {
 				if (apetsm.fpnSnowMelt == "" || _access(apetsm.fpnSnowMelt.c_str(), 0) == 0) {
-					writeLog(fpnLog, "Snow melt data file is invalid.\n", 1, 1);
+					writeLog(fpnLog, "ERROR : Snow melt data file is invalid.\n", 1, 1);
 					return -1;
 				}
 			}
@@ -484,89 +484,89 @@ int openProjectFile(int forceRealTime)
 
 	if (prj.lcDataType == fileOrConstant::File) {
 		if (prj.fpnLC == "") {
-			writeLog(fpnLog, "Land cover file is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Land cover file is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.fpnLCVat == "") {
-			writeLog(fpnLog, "Land cover VAT file is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Land cover VAT file is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.lcs.size() == 0) {
-			writeLog(fpnLog, "Land cover attributes from the files are invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Land cover attributes from the files are invalid.\n", 1, 1);
 			return -1;
 		}
 	}
 	else if (prj.lcDataType == fileOrConstant::Constant) {
 		if (prj.cnstRoughnessC == 0.0) {
-			writeLog(fpnLog, "Land cover constant roughness is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Land cover constant roughness is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.cnstImperviousR < 0.0) {
-			writeLog(fpnLog, "Land cover constant impervious ratio is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Land cover constant impervious ratio is invalid.\n", 1, 1);
 			return -1;
 		}
 	}
 	if (prj.stDataType == fileOrConstant::File) {
 		if (prj.fpnSD == "") {
-			writeLog(fpnLog, "Soil texture file is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil texture file is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.fpnSDVat == "") {
-			writeLog(fpnLog, "Soil texture VAT file is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil texture VAT file is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.sts.size() == 0) {
-			writeLog(fpnLog, "Soil texture attributes from the files are invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil texture attributes from the files are invalid.\n", 1, 1);
 			return -1;
 		}
 	}
 	else if (prj.stDataType == fileOrConstant::Constant) {
 		if (prj.cnstSoilEffPorosity < 0) {
-			writeLog(fpnLog, "Soil texture constant effective porosity is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil texture constant effective porosity is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.cnstSoilHydraulicK < 0) {
-			writeLog(fpnLog, "Soil texture constant hydraulic conductivity is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil texture constant hydraulic conductivity is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.cnstSoilPorosity < 0) {
-			writeLog(fpnLog, "Soil texture constant porosity is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil texture constant porosity is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.cnstSoilWFSH < 0) {
-			writeLog(fpnLog, "Soil texture constant wetting front suction head is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil texture constant wetting front suction head is invalid.\n", 1, 1);
 			return -1;
 		}
 	}
 	if (prj.sdDataType == fileOrConstant::File) {
 		if (prj.fpnSD == "") {
-			writeLog(fpnLog, "Soil depth file is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil depth file is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.fpnSDVat == "") {
-			writeLog(fpnLog, "Soil depth VAT file is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil depth VAT file is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.sds.size() == 0) {
-			writeLog(fpnLog, "Soil depth attributes from the files are invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil depth attributes from the files are invalid.\n", 1, 1);
 			return -1;
 		}
 	}
 	else if (prj.sdDataType == fileOrConstant::Constant) {
 		if (prj.cnstSoilDepth < 0) {
-			writeLog(fpnLog, "Soil depth constant value is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil depth constant value is invalid.\n", 1, 1);
 			return -1;
 		}
 	}
 
 	if (prj.dtsec == 0) {
 		if (prj.isFixedTimeStep == 1) {
-			writeLog(fpnLog, "In fixed dt, the calculation time step ["
+			writeLog(fpnLog, "ERROR : In fixed dt, the calculation time step ["
 				+ to_string(prj.dtsec) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
 		else if (prj.isFixedTimeStep == -1) {
-			writeLog(fpnLog, "In adaptive dt, the calculation time step ["
+			writeLog(fpnLog, "WARNNING : In adaptive dt, the calculation time step ["
 				+ to_string(prj.dtsec) + "] is changed to 1 minute.\n", 1, -1);
 		}
 	}
@@ -654,12 +654,12 @@ int readXmlRowProjectSettings(string aline)
 				prj.simType = simulationType::RealTime;
 			}
 			else {
-				writeLog(fpnLog, "Simulation type is invalid.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : Simulation type is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Simulation type is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Simulation type is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -685,7 +685,7 @@ int readXmlRowProjectSettings(string aline)
 			}
 		}
 		else {
-			writeLog(fpnLog, "DEM file [" + vString + "] is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : DEM file [" + vString + "] is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -698,7 +698,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.fpnSlope = vString;
 		}
 		else {
-			writeLog(fpnLog, "Slope file [" + vString + "] is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Slope file [" + vString + "] is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -711,7 +711,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.fpnFD = vString;
 		}
 		else {
-			writeLog(fpnLog, "Flow direction file [" + vString + "] is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Flow direction file [" + vString + "] is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -724,7 +724,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.fpnFA = vString;
 		}
 		else {
-			writeLog(fpnLog, "Flow accumulation file [" + vString + "] is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Flow accumulation file [" + vString + "] is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -739,10 +739,10 @@ int readXmlRowProjectSettings(string aline)
 		}
 		else {
 			if (vString == "") {
-				writeLog(fpnLog, "Stream file was not set.\n", 1, -1);
+				writeLog(fpnLog, "WARNNING : Stream file was not set.\n", 1, -1);
 			}
 			else {
-				writeLog(fpnLog, "Stream file [" + vString + "] is invalid.\n", 1, 1);
+				writeLog(fpnLog, "WARNNING : Stream file [" + vString + "] is invalid.\n", 1, 1);
 			}
 			prj.streamFileApplied = -1;
 		}
@@ -758,10 +758,10 @@ int readXmlRowProjectSettings(string aline)
 		}
 		else {
 			if (vString == "") {
-				writeLog(fpnLog, "Channel width file was not set.\n", 1, -1);
+				writeLog(fpnLog, "WARNNING : Channel width file was not set.\n", 1, -1);
 			}
 			else {
-				writeLog(fpnLog, "Channel width file [" + vString + "] is invalid.\n", 1, 1);
+				writeLog(fpnLog, "WARNNING : Channel width file [" + vString + "] is invalid.\n", 1, 1);
 			}
 
 			prj.cwFileApplied = -1;
@@ -778,10 +778,10 @@ int readXmlRowProjectSettings(string aline)
 		}
 		else {
 			if (vString == "") {
-				writeLog(fpnLog, "Soil saturation ratio file was not set.\n", 1, -1);
+				writeLog(fpnLog, "WARNNING : Soil saturation ratio file was not set.\n", 1, -1);
 			}
 			else {
-				writeLog(fpnLog, "Soil saturation ratio file [" + vString + "] is invalid.\n", 1, 1);
+				writeLog(fpnLog, "WARNNING : Soil saturation ratio file [" + vString + "] is invalid.\n", 1, 1);
 			}
 
 			prj.issrFileApplied = -1;
@@ -798,10 +798,10 @@ int readXmlRowProjectSettings(string aline)
 		}
 		else {
 			if (vString == "") {
-				writeLog(fpnLog, "Initial stream flow file was not set.\n", 1, -1);
+				writeLog(fpnLog, "WARNNING : Initial stream flow file was not set.\n", 1, -1);
 			}
 			else {
-				writeLog(fpnLog, "Initial stream flow file [" + vString + "] is invalid.\n", 1, 1);
+				writeLog(fpnLog, "WARNNING : Initial stream flow file [" + vString + "] is invalid.\n", 1, 1);
 			}
 			prj.icfFileApplied = -1;
 		}
@@ -820,12 +820,12 @@ int readXmlRowProjectSettings(string aline)
 				prj.lcDataType = fileOrConstant::Constant;
 			}
 			else {
-				writeLog(fpnLog, "Land cover data type is invalid.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : Land cover data type is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Land cover data type is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Land cover data type is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -877,12 +877,12 @@ int readXmlRowProjectSettings(string aline)
 				prj.stDataType = fileOrConstant::Constant;
 			}
 			else {
-				writeLog(fpnLog, "Soil texture data type is invalid.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : Soil texture data type is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Soil texture data type is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil texture data type is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -947,12 +947,12 @@ int readXmlRowProjectSettings(string aline)
 				prj.sdDataType = fileOrConstant::Constant;
 			}
 			else {
-				writeLog(fpnLog, "Soil depth data type is invalid.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : Soil depth data type is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Soil depth data type is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil depth data type is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -992,12 +992,12 @@ int readXmlRowProjectSettings(string aline)
 				prj.rfDataType = rainfallDataType::TextFileASCgrid;
 			}
 			else {
-				writeLog(fpnLog, "Rainfall data type is invalid.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : Rainfall data type is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Rainfall data data type is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Rainfall data data type is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1009,7 +1009,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.fpnRainfallData = vString;
 		}
 		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "Rainfall data file [" + vString + "] was not set.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Rainfall data file [" + vString + "] was not set.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1024,7 +1024,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.rfinterval_min = stoi(vString);
 		}
 		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "Rainfall data time interval was not set.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Rainfall data time interval was not set.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1047,12 +1047,12 @@ int readXmlRowProjectSettings(string aline)
 				prj.fdType = flowDirectionType::StartsFromE_TauDEM;
 			}
 			else {
-				writeLog(fpnLog, "Flow direction type is invalid.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : Flow direction type is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Flow direction type is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Flow direction type is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1083,7 +1083,7 @@ int readXmlRowProjectSettings(string aline)
 				t= stringToDateTime2(vString);
 				if (t.tm_year == 0 || t.tm_mon == 0
 					|| t.tm_mday == 0) {
-					writeLog(fpnLog, "Simulation starting time is invalid. Check the input format. \n", 1, 1);
+					writeLog(fpnLog, "ERROR : Simulation starting time is invalid. Check the input format. \n", 1, 1);
 					return -1;
 				}
 			}
@@ -1106,7 +1106,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.simDuration_hr = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Simulation duration is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Simulation duration is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1134,7 +1134,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.isFixedTimeStep = -1;
 		}
 		else {
-			writeLog(fpnLog, "Computational time step type is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Computational time step type is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1150,7 +1150,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.dtPrint_min = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "Print out time step is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Print out time step is invalid.\n", 1, 1);
 			return -1;
 		}
 
@@ -1167,7 +1167,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.simInfiltration = -1;
 		}
 		else {
-			writeLog(fpnLog, "SimulateInfiltration option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : SimulateInfiltration option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1182,7 +1182,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.simSubsurfaceFlow = -1;
 		}
 		else {
-			writeLog(fpnLog, "SimulateSubsurfaceFlow option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : SimulateSubsurfaceFlow option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1197,7 +1197,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.simBaseFlow = -1;
 		}
 		else {
-			writeLog(fpnLog, "SimulateBaseFlow option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : SimulateBaseFlow option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1212,7 +1212,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.simEvTr = -1;
 		}
 		else {
-			writeLog(fpnLog, "SimulateEvTr option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : SimulateEvTr option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1227,7 +1227,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.simSnowMelt = -1;
 		}
 		else {
-			writeLog(fpnLog, "SimulateSnowMelt option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : SimulateSnowMelt option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1242,7 +1242,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.simFlowControl = -1;
 		}
 		else {
-			writeLog(fpnLog, "SimulateFlowControl option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : SimulateFlowControl option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1257,7 +1257,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.makeIMGFile = -1;
 		}
 		else {
-			writeLog(fpnLog, "MakeIMGFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : MakeIMGFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1272,7 +1272,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.makeASCFile = -1;
 		}
 		else {
-			writeLog(fpnLog, "MakeASCFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : MakeASCFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1287,7 +1287,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.makeSoilSaturationDistFile = -1;
 		}
 		else {
-			writeLog(fpnLog, "MakeSoilSaturationDistFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : MakeSoilSaturationDistFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1302,7 +1302,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.makeRfDistFile = -1;
 		}
 		else {
-			writeLog(fpnLog, "MakeRfDistFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : MakeRfDistFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1317,7 +1317,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.makeRFaccDistFile = -1;
 		}
 		else {
-			writeLog(fpnLog, "MakeRFaccDistFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : MakeRFaccDistFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1332,7 +1332,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.makeFlowDistFile = -1;
 		}
 		else {
-			writeLog(fpnLog, "MakeFlowDistFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : MakeFlowDistFile option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1357,12 +1357,12 @@ int readXmlRowProjectSettings(string aline)
 				prj.printOption = GRMPrintType::AllQ;
 			}
 			else {
-				writeLog(fpnLog, "Print option is invalid.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : Print option is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Print option is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Print option is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1388,7 +1388,7 @@ int readXmlRowLandCover(string aline, landCoverInfo* lc)
 			lc->lcGridValue = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "Land cover raster value in gmp file is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Land cover raster value in gmp file is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1425,14 +1425,14 @@ int readXmlRowLandCover(string aline, landCoverInfo* lc)
 				lc->lcCode = landCoverCode::CONSTV;
 			}
 			else {
-				writeLog(fpnLog, "Land cover code name of the raster value ["
+				writeLog(fpnLog, "ERROR : Land cover code name of the raster value ["
 					+ to_string(lc->lcGridValue) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			return 1;
 		}
 		else {
-			writeLog(fpnLog, "Land cover code name of the raster value ["
+			writeLog(fpnLog, "ERROR : Land cover code name of the raster value ["
 				+ to_string(lc->lcGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1443,7 +1443,7 @@ int readXmlRowLandCover(string aline, landCoverInfo* lc)
 			lc->RoughnessCoefficient = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Land cover roughness coefficient of the raster value ["
+			writeLog(fpnLog, "ERROR : Land cover roughness coefficient of the raster value ["
 				+ to_string(lc->lcGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1455,7 +1455,7 @@ int readXmlRowLandCover(string aline, landCoverInfo* lc)
 			lc->ImperviousRatio = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Land cover impervious ratio of the raster value ["
+			writeLog(fpnLog, "ERROR : Land cover impervious ratio of the raster value ["
 				+ to_string(lc->lcGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1474,7 +1474,7 @@ int  readXmlRowSoilDepth(string aline,	soilDepthInfo* sd)
 			sd->sdGridValue = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "Soil depth raster value in gmp file is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil depth raster value in gmp file is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1508,14 +1508,14 @@ int  readXmlRowSoilDepth(string aline,	soilDepthInfo* sd)
 				sd->sdCode = soilDepthCode::CONSTV;
 			}
 			else {
-				writeLog(fpnLog, "Soil depth code name of the raster value ["
+				writeLog(fpnLog, "ERROR : Soil depth code name of the raster value ["
 					+ to_string(sd->sdGridValue) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			return 1;
 		}
 		else {
-			writeLog(fpnLog, "Soil depth code name of the raster value ["
+			writeLog(fpnLog, "ERROR : Soil depth code name of the raster value ["
 				+ to_string(sd->sdGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1530,7 +1530,7 @@ int  readXmlRowSoilDepth(string aline,	soilDepthInfo* sd)
 			sd->soilDepth = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Soil depth value of the raster value ["
+			writeLog(fpnLog, "ERROR : Soil depth value of the raster value ["
 				+ to_string(sd->sdGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1548,7 +1548,7 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 			st->stGridValue = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "Soil texture raster value in gmp file is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Soil texture raster value in gmp file is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1597,14 +1597,14 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 				st->stCode = soilTextureCode::CONSTV;
 			}
 			else {
-				writeLog(fpnLog, "Soil texture code name of the raster value ["
+				writeLog(fpnLog, "ERROR : Soil texture code name of the raster value ["
 					+ to_string(st->stGridValue) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			return 1;
 		}
 		else {
-			writeLog(fpnLog, "Soil texture code name of the raster value ["
+			writeLog(fpnLog, "ERROR : Soil texture code name of the raster value ["
 				+ to_string(st->stGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1615,7 +1615,7 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 			st->porosity = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Soil porosity of the raster value ["
+			writeLog(fpnLog, "ERROR : Soil porosity of the raster value ["
 				+ to_string(st->stGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1627,7 +1627,7 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 			st->effectivePorosity = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Soil effective porosity of the raster value ["
+			writeLog(fpnLog, "ERROR : Soil effective porosity of the raster value ["
 				+ to_string(st->stGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1639,7 +1639,7 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 			st->WFSuctionHead = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Soil wetting front suction head of the raster value ["
+			writeLog(fpnLog, "ERROR : Soil wetting front suction head of the raster value ["
 				+ to_string(st->stGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1651,7 +1651,7 @@ int readXmlRowSoilTextureInfo(string aline, soilTextureInfo* st)
 			st->hydraulicK = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Soil hydraulic conductivity of the raster value ["
+			writeLog(fpnLog, "ERROR : Soil hydraulic conductivity of the raster value ["
 				+ to_string(st->stGridValue) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1698,7 +1698,7 @@ int readXmlPETnSnowMelt(string aline, PETnSMinfo* petsmi) {
 			petsmi->wsid = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "ID in PET and snow melt data is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : ID in PET and snow melt data is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1736,13 +1736,13 @@ int readXmlPETnSnowMelt(string aline, PETnSMinfo* petsmi) {
 				etm = PETmethod::None;
 			}
 			else {
-				writeLog(fpnLog, "Evaportranspiration method in the watershed ["
+				writeLog(fpnLog, "ERROR : Evaportranspiration method in the watershed ["
 					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Evaportranspiration method in the watershed ["
+			writeLog(fpnLog, "ERROR : Evaportranspiration method in the watershed ["
 				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1755,7 +1755,7 @@ int readXmlPETnSnowMelt(string aline, PETnSMinfo* petsmi) {
 			petsmi->fpnPET = vString;
 		}
 		else  if (vString != ""){
-			writeLog(fpnLog, "PET data file in the watershed ["
+			writeLog(fpnLog, "ERROR : PET data file in the watershed ["
 				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1768,7 +1768,7 @@ int readXmlPETnSnowMelt(string aline, PETnSMinfo* petsmi) {
 				petsmi->PETcoeffPlant = stod(vString);
 			}
 			else {
-				writeLog(fpnLog, "PET coefficient for plant in the area ["
+				writeLog(fpnLog, "ERROR : PET coefficient for plant in the area ["
 					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
@@ -1782,7 +1782,7 @@ int readXmlPETnSnowMelt(string aline, PETnSMinfo* petsmi) {
 				petsmi->PETcoeffSoil = stod(vString);
 			}
 			else {
-				writeLog(fpnLog, "PET coefficient for soil in the area ["
+				writeLog(fpnLog, "ERROR : PET coefficient for soil in the area ["
 					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
@@ -1804,13 +1804,13 @@ int readXmlPETnSnowMelt(string aline, PETnSMinfo* petsmi) {
 				smm = snowMeltMethod::None;
 			}
 			else {
-				writeLog(fpnLog, "Snow melt method in the watershed ["
+				writeLog(fpnLog, "ERROR : Snow melt method in the watershed ["
 					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Snow melt method in the watershed ["
+			writeLog(fpnLog, "ERROR : Snow melt method in the watershed ["
 				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1823,7 +1823,7 @@ int readXmlPETnSnowMelt(string aline, PETnSMinfo* petsmi) {
 			petsmi->fpnSnowMelt = vString;
 		}
 		else  if (vString != ""){
-			writeLog(fpnLog, "Snow melt data file in the watershed ["
+			writeLog(fpnLog, "ERROR : Snow melt data file in the watershed ["
 				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1848,7 +1848,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			fci->fcColX = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "ColX value of [" + fci->fcName + "] is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : ColX value of [" + fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1859,7 +1859,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			fci->fcRowY = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "RowY  value of [" + fci->fcName + "] is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : RowY  value of [" + fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1885,13 +1885,13 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 				afct = flowControlType::SourceFlow;
 			}
 			else {
-				writeLog(fpnLog, "Flow control type of ["
+				writeLog(fpnLog, "ERROR : Flow control type of ["
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Flow control type of ["
+			writeLog(fpnLog, "ERROR : Flow control type of ["
 				+ fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1904,7 +1904,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			fci->fcDT_min = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "Flow control data time interval of ["
+			writeLog(fpnLog, "ERROR : Flow control data time interval of ["
 				+ fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -1916,9 +1916,9 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			fci->fpnFCData = vString;
 		}
 		else if (vString != ""){
-			writeLog(fpnLog, "Flow control data file of ["
+			writeLog(fpnLog, "ERROR : Flow control data file of ["
 				+ fci->fcName + "]("+ vString+") is invalid.\n", 1, 1);
-		//	return -1;
+			//return -1; // 이거 주석 맞는가? 2022.02.09 최
 		}
 	}
 /*	if (fci->fcType == flowControlType::ReservoirOperation
@@ -1932,7 +1932,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 				fci->iniStorage_m3 = stod_c(vString);
 			}
 			else if(fci->fcType == flowControlType::ReservoirOperation){
-				writeLog(fpnLog, "Ini. storage of reservoir ["
+				writeLog(fpnLog, "ERROR : Ini. storage of reservoir ["
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
 			}
@@ -1944,14 +1944,14 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			if (vString != "" && stod_c(vString) >= 0) {// max storage must be greater than zero.
 				if (fci->fcType == flowControlType::ReservoirOperation
 					&& stod_c(vString) == 0) {
-					writeLog(fpnLog, "Max. storage of reservoir ["
+					writeLog(fpnLog, "ERROR : Max. storage of reservoir ["
 						+ fci->fcName + "] is invalid.\n", 1, 1);
 					return -1;
 				}
 				fci->maxStorage_m3 = stod_c(vString);
 			}
 			else if(fci->fcType == flowControlType::ReservoirOperation){
-				writeLog(fpnLog, "Max. storage of reservoir ["
+				writeLog(fpnLog, "ERROR : Max. storage of reservoir ["
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
 			}
@@ -1962,14 +1962,14 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			if (vString != "" && stod_c(vString) >= 0) {// max storage must be greater than zero.
 				if (fci->fcType == flowControlType::ReservoirOperation
 					&& stod_c(vString) == 0) {
-					writeLog(fpnLog, "NormalHighStorage of reservoir ["
+					writeLog(fpnLog, "ERROR : NormalHighStorage of reservoir ["
 						+ fci->fcName + "] is invalid.\n", 1, 1);
 					return -1;
 				}
 				fci->NormalHighStorage_m3 = stod_c(vString);
 			}
 			else if (fci->fcType == flowControlType::ReservoirOperation) {
-				writeLog(fpnLog, "NormalHighStorage of reservoir ["
+				writeLog(fpnLog, "ERROR : NormalHighStorage of reservoir ["
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
 			}
@@ -1980,14 +1980,14 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			if (vString != "" && stod_c(vString) >= 0) {// max storage must be greater than zero.
 				if (fci->fcType == flowControlType::ReservoirOperation
 					&& stod_c(vString) == 0) {
-					writeLog(fpnLog, "RestrictedStorage of reservoir ["
+					writeLog(fpnLog, "ERROR : RestrictedStorage of reservoir ["
 						+ fci->fcName + "] is invalid.\n", 1, 1);
 					return -1;
 				}
 				fci->RestrictedStorage_m3 = stod_c(vString);
 			}
 			else if (fci->fcType == flowControlType::ReservoirOperation) {
-				writeLog(fpnLog, "RestrictedStorage of reservoir ["
+				writeLog(fpnLog, "ERROR : RestrictedStorage of reservoir ["
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
 			}
@@ -2045,13 +2045,13 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 					arot = reservoirOperationType::SDEqation;
 				}
 				else {
-					writeLog(fpnLog, "Reservoir operation type of ["
+					writeLog(fpnLog, "ERROR : Reservoir operation type of ["
 						+ fci->fcName + "] is invalid.\n", 1, 1);
 					return -1;
 				}
 			}
 			else if(fci->fcType == flowControlType::ReservoirOperation){
-				writeLog(fpnLog, "Reservoir operation type of ["
+				writeLog(fpnLog, "ERROR : Reservoir operation type of ["
 					+ fci->fcName + "] is invalid.\n", 1, 1);
 				return -1;
 			}
@@ -2065,7 +2065,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 					fci->roConstQ_cms = stod_c(vString);
 				}
 				else {
-					writeLog(fpnLog, "Constant outlfow of reservoir ["
+					writeLog(fpnLog, "ERROR : Constant outlfow of reservoir ["
 						+ fci->fcName + "] is invalid.\n", 1, 1);
 					return -1;
 				}
@@ -2077,7 +2077,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 					fci->roConstQDuration_hr = stod_c(vString);
 				}
 				else {
-					writeLog(fpnLog, "Constant outlfow duration of reservoir ["
+					writeLog(fpnLog, "ERROR : Constant outlfow duration of reservoir ["
 						+ fci->fcName + "] is invalid.\n", 1, 1);
 					return -1;
 				}
@@ -2098,7 +2098,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			csi->mdWsid = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "Most downstream watershed ID for channel setting is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Most downstream watershed ID for channel setting is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -2115,13 +2115,13 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 				acst = crossSectionType::CSSingle;
 			}
 			else {
-				writeLog(fpnLog, "Channel cross section type in the watershed ["
+				writeLog(fpnLog, "ERROR : Channel cross section type in the watershed ["
 					+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Channel cross section type in the watershed ["
+			writeLog(fpnLog, "ERROR : Channel cross section type in the watershed ["
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2140,13 +2140,13 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 				acwt = channelWidthType::CWGeneration;
 			}
 			else {
-				writeLog(fpnLog, "Channel width type in the watershed ["
+				writeLog(fpnLog, "ERROR : Channel width type in the watershed ["
 					+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Channel width type in the watershed ["
+			writeLog(fpnLog, "ERROR : Channel width type in the watershed ["
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2159,7 +2159,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			csi->cwEQc = stod(vString);
 		}
 		else if (csi->csWidthType == channelWidthType::CWEquation) {
-			writeLog(fpnLog, "EQc parameter for channel width eq. in the watershed ["
+			writeLog(fpnLog, "ERROR : EQc parameter for channel width eq. in the watershed ["
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2171,7 +2171,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			csi->cwEQd = stod(vString);
 		}
 		else if (csi->csWidthType == channelWidthType::CWEquation) {
-			writeLog(fpnLog, "EQd parameter for channel width eq. in the watershed ["
+			writeLog(fpnLog, "ERROR : EQd parameter for channel width eq. in the watershed ["
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2183,7 +2183,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			csi->cwEQe = stod(vString);
 		}
 		else if (csi->csWidthType == channelWidthType::CWEquation) {
-			writeLog(fpnLog, "EQe parameter for channel width eq. in the watershed ["
+			writeLog(fpnLog, "ERROR : EQe parameter for channel width eq. in the watershed ["
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2196,7 +2196,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			csi->cwMostDownStream = stod(vString);
 		}
 		else if (csi->csWidthType == channelWidthType::CWGeneration) {
-			writeLog(fpnLog, "The channel width at the most down stream in the watershed ["
+			writeLog(fpnLog, "ERROR : The channel width at the most down stream in the watershed ["
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2208,7 +2208,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			csi->lowRHeight = stod(vString);
 		}
 		else if (csi->csType == crossSectionType::CSCompound) {
-			writeLog(fpnLog, "Lower region height parameter in the watershed ["
+			writeLog(fpnLog, "ERROR : Lower region height parameter in the watershed ["
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2220,7 +2220,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			csi->lowRBaseWidth = stod(vString);
 		}
 		else if (csi->csType == crossSectionType::CSCompound) {
-			writeLog(fpnLog, "Lower region base width parameter in the watershed ["
+			writeLog(fpnLog, "ERROR : Lower region base width parameter in the watershed ["
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2232,7 +2232,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			csi->highRBaseWidth = stod(vString);
 		}
 		else if (csi->csType == crossSectionType::CSCompound) {
-			writeLog(fpnLog, "Upper region base width parameter in the watershed ["
+			writeLog(fpnLog, "ERROR : Upper region base width parameter in the watershed ["
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2244,7 +2244,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			csi->compoundCSChannelWidthLimit = stod(vString);
 		}
 		else if (csi->csType == crossSectionType::CSCompound) {
-			writeLog(fpnLog, "Compound cross section width limit parameter in the watershed ["
+			writeLog(fpnLog, "ERROR : Compound cross section width limit parameter in the watershed ["
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2256,7 +2256,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			csi->bankSlopeRight = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Right bank side slope parameter in the watershed ["
+			writeLog(fpnLog, "ERROR : Right bank side slope parameter in the watershed ["
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2268,7 +2268,7 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 			csi->bankSlopeLeft = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Left bank side slope parameter in the watershed ["
+			writeLog(fpnLog, "ERROR : Left bank side slope parameter in the watershed ["
 				+ to_string(csi->mdWsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2288,7 +2288,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->wsid = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "ID in subWatershed data is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : ID in subWatershed data is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -2299,7 +2299,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->iniSaturation = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Ini. saturation ratio in the watershed ["
+			writeLog(fpnLog, "ERROR : Ini. saturation ratio in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2312,7 +2312,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->minSlopeOF = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Minimum land surface slope for overland flow in the watershed ["
+			writeLog(fpnLog, "ERROR : Minimum land surface slope for overland flow in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2333,13 +2333,13 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				uskt = unSaturatedKType::Exponential;
 			}
 			else {
-				writeLog(fpnLog, "Unsaturated K type in the watershed ["
+				writeLog(fpnLog, "ERROR : Unsaturated K type in the watershed ["
 					+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Unsaturated K type in the watershed ["
+			writeLog(fpnLog, "ERROR : Unsaturated K type in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2352,7 +2352,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->coefUnsaturatedK = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Hydraulic conductivity for unsaturated soil in the watershed ["
+			writeLog(fpnLog, "ERROR : Hydraulic conductivity for unsaturated soil in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2364,7 +2364,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->minSlopeChBed = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Minimum slope of channel bed in the watershed ["
+			writeLog(fpnLog, "ERROR : Minimum slope of channel bed in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2376,7 +2376,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->minChBaseWidth = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Minimum value of channel width in the watershed ["
+			writeLog(fpnLog, "ERROR : Minimum value of channel width in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2388,7 +2388,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->chRoughness = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Roughness coefficient of channel in the watershed ["
+			writeLog(fpnLog, "ERROR : Roughness coefficient of channel in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2400,7 +2400,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->dryStreamOrder = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "Dry stream order in the watershed ["
+			writeLog(fpnLog, "ERROR : Dry stream order in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2413,13 +2413,13 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 				ssp->iniFlow = stod(vString);
 			}
 			else {
-				writeLog(fpnLog, "Initial stream flow in the watershed ["
+				writeLog(fpnLog, "WARNNING : Initial stream flow in the watershed ["
 					+ to_string(ssp->wsid) + "] is negative value. 0 is applied. \n", 1, 1);
 				ssp->iniFlow = 0.0;
 			}
 		}
 		else {
-			writeLog(fpnLog, "Initial stream flow in the watershed ["
+			writeLog(fpnLog, "ERROR : Initial stream flow in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2431,7 +2431,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->ccLCRoughness = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Calibration coeff. of roughness in the watershed ["
+			writeLog(fpnLog, "ERROR : Calibration coeff. of roughness in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2443,7 +2443,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->ccPorosity = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Calibration coeff. of porosity in the watershed ["
+			writeLog(fpnLog, "ERROR : Calibration coeff. of porosity in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2455,7 +2455,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->ccWFSuctionHead = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Calibration coeff. of wetting front suction head in the watershed ["
+			writeLog(fpnLog, "ERROR : Calibration coeff. of wetting front suction head in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2467,7 +2467,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->ccHydraulicK = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Calibration coeff. of hydraulic conductivity in the watershed ["
+			writeLog(fpnLog, "ERROR : Calibration coeff. of hydraulic conductivity in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2479,7 +2479,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->ccSoilDepth = stod(vString);
 		}
 		else {
-			writeLog(fpnLog, "Calibration coeff. of soil depth in the watershed ["
+			writeLog(fpnLog, "ERROR : Calibration coeff. of soil depth in the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}
@@ -2494,7 +2494,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			ssp->userSet = 0;
 		}
 		else {
-			writeLog(fpnLog, "[UserSet] value of the watershed ["
+			writeLog(fpnLog, "ERROR : [UserSet] value of the watershed ["
 				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
 			return -1;
 		}

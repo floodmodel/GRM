@@ -272,7 +272,7 @@ class grmWSinfo(object):
 
 ### gmp 파일로 grmWSinfo class 를 인스턴싱 할 경우 ==============================
 ### gmp 파일에서 ProjectSetting 테이블까지만 채워져 있어도 사용할 수 있다. 
-fpn_gmp = "D:\Github\zTestSet_GRM_SampleWC_cpp\SampleProject.gmp" #"C:\GRM\SampleGHG\GHG500.gmp"
+fpn_gmp = "D:\GRM_ex\Han\20220208_aju\Hanriver_GRM_calib_Run_pre.gmp" #"C:\GRM\SampleGHG\GHG500.gmp"
 wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
 ###================================================================
 
@@ -323,7 +323,7 @@ wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_
 # 여기서는 정보를 얻고자 하는 셀위치 혹은 유역 번호를 지정 =========================
 xCol = 21 # 정보를 얻고자 하는 셀 위치
 yRow = 49 # 정보를 얻고자 하는 셀 위치
-wsid = 1   # 정보를 얻고자 하는 유역 번호
+wsid = 1019   # 정보를 얻고자 하는 유역 번호
 
 a = wsi.isInWatershedArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_bool
 print("isInWatershedArea :", a)
@@ -418,13 +418,13 @@ print("subwatershedPars. userSet :", swp.userSet)    # 1 : true, 0: false
 			#double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
 			#double ccSoilHydraulicCond, double iniFlow = 0)
 
-#GUI에서 받은 매개변수를 사용할 경우, GUI에서 받은 매개변수를 사용할 경우에는 swp의 매개변수 항목을 직접 입력해 줘야 한다. 
-a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(1,  0.5
-                           , 0.0001, 1, 0.2
-                           , 0.008, 30, 0.045
-                           , 0, 1
-                           , 1, 1,1
-                           , 1, 20.0) 
+##GUI에서 받은 매개변수를 사용할 경우, GUI에서 받은 매개변수를 사용할 경우에는 swp의 매개변수 항목을 직접 입력해 줘야 한다. 
+#a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(1,  0.5
+#                           , 0.0001, 1, 0.2
+#                           , 0.008, 30, 0.045
+#                           , 0, 1
+#                           , 1, 1,1
+#                           , 1, 20.0) 
 
 # ========================================================
 

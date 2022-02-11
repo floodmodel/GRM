@@ -17,12 +17,12 @@ extern cvAtt* cvsb;
 int readDomainFaFileAndSetupCV()
 {
     if (prj.fpnDomain == "" || _access(prj.fpnDomain.c_str(), 0) != 0) {
-        string outstr = "Domain file (" + prj.fpnDomain + ") is invalid.\n";
+        string outstr = "ERROR : Domain file (" + prj.fpnDomain + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.fpnFA == "" || _access(prj.fpnFA.c_str(), 0) != 0) {
-        string outstr = "Flow accumulation file (" + prj.fpnFA + ") is invalid.\n";
+        string outstr = "ERROR : Flow accumulation file (" + prj.fpnFA + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
@@ -98,12 +98,12 @@ int readDomainFaFileAndSetupCV()
 int readSlopeFdirStreamCwCfSsrFileAndSetCV()
 {
     if (prj.fpnSlope == "" || _access(prj.fpnSlope.c_str(), 0) != 0) {
-        string outstr = "Slope file (" + prj.fpnSlope + ") is invalid.\n";
+        string outstr = "ERROR : Slope file (" + prj.fpnSlope + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.fpnFD == "" || _access(prj.fpnFD.c_str(), 0) != 0) {
-        string outstr = "Flow direction file (" + prj.fpnFD + ") is invalid.\n";
+        string outstr = "ERROR : Flow direction file (" + prj.fpnFD + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
@@ -111,7 +111,7 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
     if (prj.streamFileApplied == 1
         && (prj.fpnStream == ""
             || _access(prj.fpnStream.c_str(), 0) != 0)) {
-        string outstr = "Stream file is invalid. Simulation continues.\n";
+        string outstr = "WARNNING : Stream file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
         prj.streamFileApplied = -1;
     }
@@ -119,7 +119,7 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
     if (prj.cwFileApplied == 1
         && (prj.fpnChannelWidth == ""
             || _access(prj.fpnChannelWidth.c_str(), 0) != 0)) {
-        string outstr = "Channel width file is invalid. Simulation continues.\n";
+        string outstr = "WARNNING : Channel width file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
         prj.cwFileApplied = -1;
     }
@@ -127,14 +127,14 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
     if (prj.icfFileApplied == 1
         && (prj.fpniniChFlow == ""
             || _access(prj.fpniniChFlow.c_str(), 0) != 0)) {
-        string outstr = "Initial stream flow file is invalid. Simulation continues.\n";
+        string outstr = "WARNNING : Initial stream flow file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
         prj.icfFileApplied = -1;
     }
 
     if (prj.issrFileApplied==1
         &&(prj.fpniniSSR == "" || _access(prj.fpniniSSR.c_str(), 0) != 0)) {
-        string outstr = "Initial soil saturation ratio file is invalid. Simulation continues.\n";
+        string outstr = "WARNNING : Initial soil saturation ratio file is invalid. Simulation continues.\n";
         writeLog(fpnLog, outstr, 1, -1);
         prj.issrFileApplied = -1;
     }
@@ -184,7 +184,7 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
         }
         cvs[idx].fdir = getFlowDirection((int)fdirFile.valuesFromTL[cx][ry], prj.fdType);
 		if (cvs[idx].fdir == flowDirection8::None8) {
-			string outstr = "Flow direction value is invalid (cell location : "
+			string outstr = "ERROR : Flow direction value is invalid (cell location : "
 				+ to_string(cvps[idx].xCol) + ", " + to_string(cvps[idx].yRow) + ").\n";
 			writeLog(fpnLog, outstr, 1, 1);
 			isNormal= -1;
@@ -257,12 +257,12 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
 int readLandCoverFileAndSetCVbyVAT()
 {
     if (prj.fpnLC == "" || _access(prj.fpnLC.c_str(), 0) != 0) {
-        string outstr = "Land cover file (" + prj.fpnLC + ") is invalid.\n";
+        string outstr = "ERROR : Land cover file (" + prj.fpnLC + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.fpnLCVat == "" || _access(prj.fpnLCVat.c_str(), 0) != 0) {//속성 대응 참고를 위해 이파일 있는지 본다.
-        string outstr = "Land cover VAT file (" + prj.fpnLCVat + ") is invalid.\n";
+        string outstr = "ERROR : Land cover VAT file (" + prj.fpnLCVat + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
     }
     ascRasterFile lcFile = ascRasterFile(prj.fpnLC);
@@ -291,7 +291,7 @@ int readLandCoverFileAndSetCVbyVAT()
                 cvs[i].lcCode = lc.lcCode;
             }
             else {
-                string outstr = "Landcover VAT file [" + prj.fpnLCVat
+                string outstr = "ERROR : Landcover VAT file [" + prj.fpnLCVat
                     + "] or current project file do not have the land cover value ("
                     + to_string(v) + ").\n"
                     + "Check the land cover file or land cover VAT file. \n";
@@ -314,12 +314,12 @@ int readLandCoverFileAndSetCVbyVAT()
 int setCVbyLCConstant()
 {
     if (prj.cnstImperviousR == -1) {
-        string outstr = "Land cover constant impervious ratio is invalid.\n";
+        string outstr = "ERROR : Land cover constant impervious ratio is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.cnstRoughnessC == -1) {
-        string outstr = "Land cover constant roughness coefficient is invalid.\n";
+        string outstr = "ERROR : Land cover constant roughness coefficient is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
@@ -338,7 +338,7 @@ int setCVbyLCConstant()
 int readLandCoverFile()
 {
     if (prj.fpnLC == "" || _access(prj.fpnLC.c_str(), 0) != 0) {
-        string outstr = "Land cover file (" + prj.fpnLC + ") is invalid.\n";
+        string outstr = "ERROR : Land cover file (" + prj.fpnLC + ") is invalid.\n";
         writeLog(fpnLog, outstr, -1, 1);
         return -1;
     }
@@ -351,7 +351,7 @@ int readLandCoverFile()
             cvs[i].lcCellValue = v;
         }
         else {
-            string outstr = "Land cover file (" + prj.fpnLC + ") has invalid value.\n";
+            string outstr = "WARNNING : Land cover file (" + prj.fpnLC + ") has invalid value.\n";
             writeLog(fpnLog, outstr, -1, 1);
             isnormal = -1;
         }
@@ -362,12 +362,12 @@ int readLandCoverFile()
 int readSoilTextureFileAndSetCVbyVAT()
 {
     if (prj.fpnST == "" || _access(prj.fpnST.c_str(), 0) != 0) {
-        string outstr = "Soil texture file (" + prj.fpnST + ") is invalid.\n";
+        string outstr = "ERROR : Soil texture file (" + prj.fpnST + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.fpnSTVat == "" || _access(prj.fpnSTVat.c_str(), 0) != 0) {//속성 대응 참고를 위해 이파일 있는지 본다.
-        string outstr = "Soil texture VAT file (" + prj.fpnSTVat + ") is invalid.\n";
+        string outstr = "WARNNING : Soil texture VAT file (" + prj.fpnSTVat + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
     }
     ascRasterFile stFile = ascRasterFile(prj.fpnST);
@@ -398,7 +398,7 @@ int readSoilTextureFileAndSetCVbyVAT()
                 cvs[i].stCode = st.stCode;
             }
             else {
-                string outstr = "Soil texture VAT file [" + prj.fpnSTVat
+                string outstr = "ERROR : Soil texture VAT file [" + prj.fpnSTVat
                     + "] or current project file do not have the soil texture value (" + to_string(v) + ").\n"
                     + "Check the soil texture file or soil texture VAT file. \n";
                 writeLog(fpnLog, outstr, -1, 1);
@@ -422,22 +422,22 @@ int readSoilTextureFileAndSetCVbyVAT()
 int setCVbySTConstant()
 {
     if (prj.cnstSoilEffPorosity == -1) {
-        string outstr = "Soil texture constant effective porosity is invalid.\n";
+        string outstr = "ERROR : Soil texture constant effective porosity is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.cnstSoilHydraulicK == -1) {
-        string outstr = "Soil texture constant hydraulic conductivity is invalid.\n";
+        string outstr = "ERROR : Soil texture constant hydraulic conductivity is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.cnstSoilPorosity == -1) {
-        string outstr = "Soil texture constant porosity is invalid.\n";
+        string outstr = "ERROR : Soil texture constant porosity is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.cnstSoilWFSH == -1) {
-        string outstr = "Soil texture constant wetting front suction head is invalid.\n";
+        string outstr = "ERROR : Soil texture constant wetting front suction head is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
@@ -459,7 +459,7 @@ int setCVbySTConstant()
 int readSoilTextureFile()
 {
     if (prj.fpnST == "" || _access(prj.fpnST.c_str(), 0) != 0) {
-        string outstr = "Soil texture file (" + prj.fpnST + ") is invalid.\n";
+        string outstr = "ERROR : Soil texture file (" + prj.fpnST + ") is invalid.\n";
         writeLog(fpnLog, outstr, -1, 1);
         return -1;
     }
@@ -472,7 +472,7 @@ int readSoilTextureFile()
             cvs[i].stCellValue = v;
         }
         else {
-            string outstr = "Soil texture file (" + prj.fpnST + ") has invalid value.\n";
+            string outstr = "WARNNING : Soil texture file (" + prj.fpnST + ") has invalid value.\n";
             writeLog(fpnLog, outstr, -1, 1);
             isnormal = -1;
         }
@@ -484,12 +484,12 @@ int readSoilTextureFile()
 int readSoilDepthFileAndSetCVbyVAT()
 {
     if (prj.fpnSD == "" || _access(prj.fpnSD.c_str(), 0) != 0) {
-        string outstr = "Soil depth file (" + prj.fpnSD + ") is invalid.\n";
+        string outstr = "ERROR : Soil depth file (" + prj.fpnSD + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.fpnSDVat == "" || _access(prj.fpnSDVat.c_str(), 0) != 0) {//속성 대응 참고를 위해 이파일 있는지 본다.
-        string outstr = "Soil depth VAT file (" + prj.fpnSDVat + ") is invalid.\n";
+        string outstr = "WARNNING : Soil depth VAT file (" + prj.fpnSDVat + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
     }
     ascRasterFile sdFile = ascRasterFile(prj.fpnSD);
@@ -517,7 +517,7 @@ int readSoilDepthFileAndSetCVbyVAT()
                 cvs[i].sdCode = sd.sdCode;
             }
             else {
-                string outstr = "Soil depth VAT file [" + prj.fpnSDVat
+                string outstr = "ERROR : Soil depth VAT file [" + prj.fpnSDVat
                     + "] or current project file do not have the soil depth value ("
                     + to_string(v) + ").\n"
                     + "Check the soil depth file or soil depth VAT file. \n";
@@ -539,7 +539,7 @@ int readSoilDepthFileAndSetCVbyVAT()
 int setCVbySDConstant()
 {
     if (prj.cnstSoilDepth == -1) {
-        string outstr = "Constant soil depth value is invalid.\n";
+        string outstr = "ERROR : Constant soil depth value is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
         return -1;
     }
@@ -557,7 +557,7 @@ int setCVbySDConstant()
 int readSoilDepthFile()
 {
     if (prj.fpnSD == "" || _access(prj.fpnSD.c_str(), 0) != 0) {
-        string outstr = "Soil depth file (" + prj.fpnSD + ") is invalid.\n";
+        string outstr = "ERROR : Soil depth file (" + prj.fpnSD + ") is invalid.\n";
         writeLog(fpnLog, outstr, -1, 1);
         return -1;
     }
@@ -570,7 +570,7 @@ int readSoilDepthFile()
             cvs[i].sdCellValue = v;
         }
         else {
-            string outstr = "Soil depth file (" + prj.fpnSD + ") has invalid value.\n";
+            string outstr = "WARNNING : Soil depth file (" + prj.fpnSD + ") has invalid value.\n";
             writeLog(fpnLog, outstr, -1, 1);
             isnormal = -1;
         }

@@ -580,7 +580,7 @@ int makeNewOutputFiles()
 							roTypeStr = ENUM_TO_STR(None);
 						}
 						else {
-							writeLog(fpnLog, "Reservoir operation type of ["
+							writeLog(fpnLog, "ERROR : Reservoir operation type of ["
 								+ afc.fcName + "] is invalid.\n", 1, 1);
 							return -1;
 						}
@@ -590,48 +590,48 @@ int makeNewOutputFiles()
 								roiniStorage = roiniStorage + "\t" + dtos(afc.iniStorage_m3, 2);
 							}
 							else {
-								writeLog(fpnLog, "Initial reservoir storage is invalid.\n", 1, 1);
+								writeLog(fpnLog, "ERROR : Initial reservoir storage is invalid.\n", 1, 1);
 								return -1;
 							}
 							if (afc.maxStorage_m3 >= 0) {
 								roMaxStorage = roMaxStorage + "\t" + dtos(afc.maxStorage_m3, 2);
 							}
 							else if (afc.fcType == flowControlType::ReservoirOperation) {
-								writeLog(fpnLog, "Maximum reservoir storage or storage ratio is invalid.\n", 1, 1);
+								writeLog(fpnLog, "ERROR : Maximum reservoir storage or storage ratio is invalid.\n", 1, 1);
 								return -1;
 							}
 							if (afc.NormalHighStorage_m3 >= 0) {
 								roNormalHighStorage = roNormalHighStorage + "\t" + dtos(afc.NormalHighStorage_m3, 2);
 							}
 							else if (afc.fcType == flowControlType::ReservoirOperation) {
-								writeLog(fpnLog, "Normal high water level storage is invalid.\n", 1, 1);
+								writeLog(fpnLog, "ERROR : Normal high water level storage is invalid.\n", 1, 1);
 								return -1;
 							}
 							if (afc.RestrictedStorage_m3 >= 0) {
 								roRestrictedStorage = roRestrictedStorage + "\t" + dtos(afc.RestrictedStorage_m3, 2);
 							}
 							else if (afc.fcType == flowControlType::ReservoirOperation) {
-								writeLog(fpnLog, "Restricted water level storage is invalid.\n", 1, 1);
+								writeLog(fpnLog, "ERROR : Restricted water level storage is invalid.\n", 1, 1);
 								return -1;
 							}
 							if (afc.RestrictedPeriod_Start != "") {
 								roRestrictedPeriod_Start = roRestrictedPeriod_Start + "\t" + afc.RestrictedPeriod_Start;
 							}
 							else if (afc.fcType == flowControlType::ReservoirOperation && afc.RestrictedStorage_m3 > 0) {
-								writeLog(fpnLog, "Starting time of applying restricted water level storage is invalid.\n", 1, 1);
+								writeLog(fpnLog, "ERROR : Starting time of applying restricted water level storage is invalid.\n", 1, 1);
 								return -1;
 							}
 							if (afc.RestrictedPeriod_End != "") {
 								roRestrictedPeriod_End = roRestrictedPeriod_End + "\t" + afc.RestrictedPeriod_End;
 							}
 							else if (afc.fcType == flowControlType::ReservoirOperation && afc.RestrictedStorage_m3 > 0) {
-								writeLog(fpnLog, "Ending time of applying restricted water level storage is invalid.\n", 1, 1);
+								writeLog(fpnLog, "ERROR : Ending time of applying restricted water level storage is invalid.\n", 1, 1);
 								return -1;
 							}
 						}
 						if (afc.roType == reservoirOperationType::ConstantQ) {
 							if (afc.roConstQ_cms < 0) {
-								writeLog(fpnLog, "Constant reservoir outflow is invalid.\n", 1, 1);
+								writeLog(fpnLog, "ERROR : Constant reservoir outflow is invalid.\n", 1, 1);
 								return -1;
 							}
 							else {
@@ -640,7 +640,7 @@ int makeNewOutputFiles()
 									roConstQduration = roConstQduration + "\t" + to_string(afc.roConstQDuration_hr);
 								}
 								else {
-									writeLog(fpnLog, "Constant reservoir outflow duration is invalid.\n", 1, 1);
+									writeLog(fpnLog, "ERROR : Constant reservoir outflow duration is invalid.\n", 1, 1);
 									return -1;
 								}
 							}
