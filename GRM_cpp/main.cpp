@@ -44,8 +44,8 @@ int main(int argc, char** args)
 		+ to_string(grmVersion.pbuild) + ". File version : "
 		+ to_string(grmVersion.fmajor) + "."
 		+ to_string(grmVersion.fminor) + "."
-		+ to_string(grmVersion.fbuild) + ". Modified in "
-		+ grmVersion.LastWrittenTime + ".\n";
+		+ to_string(grmVersion.fbuild) + ".\n";
+	    //+"Modified in " + grmVersion.LastWrittenTime + ".\n";
 	prj.cpusi = getCPUinfo();
 	cout << outString;
 	cout << prj.cpusi.infoString;
