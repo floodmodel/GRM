@@ -121,24 +121,23 @@ enum class unSaturatedKType //python 인터페이스와 맞춘다.
 
 enum class PETmethod
 {
-	UserData = 0,
 	PenmanMonteith = 1,
-	PriestleyTaylor = 2,
-	Hargreaves = 3,
-	JensenHaise = 4,
-	BlaneyCriddle = 5,
-	Hamon = 6,
+	BlaneyCriddle = 2,
+	Hamon = 3,
+	PriestleyTaylor = 4,
+	Hargreaves = 5,
+	JensenHaise = 6,	
 	Turc = 7,
-	None = 8,
+	UserData = 8,
 	notSet = 9
 };
 
 enum class snowMeltMethod
 {
-	UserData = 0,
-	Amethod = 1,
-	None = 2,
-	notSet = 3
+	
+	Anderson_1976 = 1,
+	UserData = 8,
+	notSet = 9
 };
 
 enum class cellFlowType
@@ -225,6 +224,7 @@ typedef struct _projectFileFieldName
 	const string DomainFile_02 = "WatershedFile";
 	const string SlopeFile = "SlopeFile";
 	const string FlowDirectionFile = "FlowDirectionFile";
+	const string FlowDirectionType = "FlowDirectionType";
 	const string FlowAccumFile = "FlowAccumFile";
 	const string StreamFile = "StreamFile";
 	const string ChannelWidthFile = "ChannelWidthFile";
@@ -246,11 +246,28 @@ typedef struct _projectFileFieldName
 	const string SoilDepthFile = "SoilDepthFile";
 	const string SoilDepthVATFile = "SoilDepthVATFile";
 	const string ConstantSoilDepth = "ConstantSoilDepth";
-	const string RainfallDataType = "RainfallDataType";
-	const string RainfallDataFile = "RainfallDataFile";
-	const string RainfallInterval_min_01 = "RainfallInterval";
-	const string RainfallInterval_min_02 = "RainfallInterval_min";
-	const string FlowDirectionType = "FlowDirectionType";
+	const string PrecipitationDataType_01 = "RainfallDataType";
+	const string PrecipitationDataType_02 = "PrecipitationDataType";
+	const string PrecipitationDataFile_01 = "RainfallDataFile";
+	const string PrecipitationDataFile_02 = "PrecipitationDataFile";
+	const string PrecipitationInterval_min_01 = "RainfallInterval";
+	const string PrecipitationInterval_min_02 = "RainfallInterval_min";
+	const string PrecipitationInterval_min_03 = "PrecipitationInterval_min";
+
+	// continuous================
+	const string TemperatureMaxDataType = "TemperatureMaxDataType";
+	const string TemperatureMaxInterval_min = "TemperatureMaxInterval_min";
+	const string TemperatureMaxDataFile = "TemperatureMaxDataFile";
+	const string TemperatureMinDataType = "TemperatureMinDataType";
+	const string TemperatureMinInterval_min = "TemperatureMinInterval_min";
+	const string TemperatureMinDataFile = "TemperatureMinDataFile";
+	const string DurationOfSunshineDataType = "DurationOfSunshineDataType";
+	const string DurationOfSunshineInterval_min = "DurationOfSunshineInterval_min";
+	const string DurationOfSunshineDataFile = "DurationOfSunshineDataFile";
+	const string SolarRadiationDataType = "SolarRadiationDataType";
+	const string SolarRadiationInterval_min = "SolarRadiation_min";
+	const string SolarRadiationDataFile = "SolarRadiationDataFile";
+	//==========================
 	const string MaxDegreeOfParallelism = "MaxDegreeOfParallelism";
 	const string SimulStartingTime = "SimulStartingTime"; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
 	const string SimulationDuration_hr_01 = "SimulationDuration";
@@ -260,11 +277,17 @@ typedef struct _projectFileFieldName
 	const string IsFixedTimeStep = "IsFixedTimeStep";
 	const string OutputTimeStep_min_01 = "OutputTimeStep";
 	const string OutputTimeStep_min_02 = "OutputTimeStep_min";
+
 	const string SimulateInfiltration = "SimulateInfiltration";
 	const string SimulateSubsurfaceFlow = "SimulateSubsurfaceFlow";
 	const string SimulateBaseFlow = "SimulateBaseFlow";
-	const string SimulateEvTr = "SimulateEvTr";
+
+	// continuous================
+	const string SimulateEvaportranspiration = "SimulateEvaportranspiration";
 	const string SimulateSnowMelt = "SimulateSnowMelt";
+	const string SimulateInterception = "SimulateInterCeption";
+	//==========================
+
 	const string SimulateFlowControl = "SimulateFlowControl";
 	const string MakeIMGFile = "MakeIMGFile";
 	const string MakeASCFile = "MakeASCFile";
@@ -290,6 +313,26 @@ typedef struct _projectFileFieldName
 	const string CalCoefWFSuctionHead = "CalCoefWFSuctionHead";
 	const string CalCoefHydraulicK = "CalCoefHydraulicK";
 	const string CalCoefSoilDepth = "CalCoefSoilDepth";
+
+	// continuous================
+	const string PETMethod = "PETMethod";
+	const string SnowMeltMethod = "SnowMeltMethod";
+	const string SnowMeltTSR = "SnowMeltTSR";
+	const string SnowMeltSUBL = "SnowMeltSUBL";
+	const string SnowMeltCOVsnow = "SnowMeltCOVsnow";
+	const string InterceptionMethod = "InterceptionMethod";
+	const string InterceptionMaxWater_Canopy = "InterceptionMaxWater_Canopy";
+	const string InterceptionLAIRatio = "InterceptionLAIRatio";
+	// continuous================
+
+	//	// PETnSowMelt table
+	//	const string ID_PETSM = "ID";
+	//const string PETMethod = "PETMethod";
+	//const string PETDataFile = "PETDataFile";
+	//const string PETcoeffPlant = "PETcoeffPlant";
+	//const string PETcoeffSoil = "PETcoeffSoil";
+	//const string SnowMeltMethod = "SnowMeltMethod";
+	//const string SnowMeltDataFile = "SnowMeltDataFile";
 	//ChannelSettings table
 	const string UserSet = "UserSet";
 	const string WSID_CH = "WSID";
@@ -322,14 +365,7 @@ typedef struct _projectFileFieldName
 	const string ROType = "ROType";
 	const string ROConstQ = "ROConstQ";
 	const string ROConstQDuration = "ROConstQDuration";
-	// PETnSowMelt table
-	const string ID_PETSM = "ID";
-	const string PETMethod = "PETMethod";
-	const string PETDataFile = "PETDataFile";
-	const string PETcoeffPlant = "PETcoeffPlant";
-	const string PETcoeffSoil = "PETcoeffSoil";
-	const string SnowMeltMethod = "SnowMeltMethod";
-	const string SnowMeltDataFile = "SnowMeltDataFile";
+
 	// WatchPoint table
 	const string Name_WP = "Name";
 	const string ColX_WP = "ColX";
@@ -518,19 +554,19 @@ typedef struct _rainfallData
 	string FileName = "";
 } rainfallData;
 
-typedef struct _PETnSnowMeltInfo
-{
-	// continuous 로 검색
-	// 이건 continuous 용 =====================
-	int wsid = -1;
-	PETmethod petMethod = PETmethod::notSet;
-	string fpnPET = "";
-	double PETcoeffPlant = -1.0;
-	double PETcoeffSoil = -1.0;
-	snowMeltMethod smMethod = snowMeltMethod::notSet;
-	string fpnSnowMelt = "";
-	// =====================
-} PETnSMinfo;
+//typedef struct _PETnSnowMeltInfo
+//{
+//	// continuous 로 검색
+//	// 이건 continuous 용 =====================
+//	int wsid = -1;
+//	PETmethod petMethod = PETmethod::notSet;
+//	string fpnPET = "";
+//	double PETcoeffPlant = -1.0;
+//	double PETcoeffSoil = -1.0;
+//	snowMeltMethod smMethod = snowMeltMethod::notSet;
+//	string fpnSnowMelt = "";
+//	// =====================
+//} PETnSMinfo;
 
 typedef struct _grmOutFiles
 {
@@ -709,10 +745,26 @@ typedef struct _projectFile
 	string fpnSD = "";
 	string fpnSDVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
 	double cnstSoilDepth = 0.0;
-	rainfallDataType rfDataType = rainfallDataType::NoneRF;
+	weatherDataType rfDataType = weatherDataType::NoneData;
 	string fpnRainfallData = "";
 	int rfinterval_min = -1;
 	flowDirectionType fdType = flowDirectionType::None;
+
+	// continuous =====================
+	weatherDataType temperatureMaxDataType = weatherDataType::NoneData;
+	string fpnTemperatureMax = "";
+	int temperatureMaxInterval_min = -1;
+	weatherDataType temperatureMinDataType = weatherDataType::NoneData;
+	string fpnTemperatureMin = "";
+	int temperatureMinInterval_min = -1;
+	weatherDataType durationOfSunshineDataType = weatherDataType::NoneData;
+	string fpnDurationOfSunshineData = "";
+	int durationOfSunshineInterval_min = -1;
+	weatherDataType solarRadiationDataType = weatherDataType::NoneData;
+	string fpnSolarRadiationData = "";
+	int solarRadiationInterval_min = -1;
+	// =====================
+
 	int mdp = 0;
 	string simStartTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용. 실시간에서는 yyyymmddHHMM 포맷
 	double simDuration_hr = 0.0;
@@ -723,8 +775,9 @@ typedef struct _projectFile
 	int simInfiltration = 0;// true : 1, false : -1
 	int simSubsurfaceFlow = 0;// true : 1, false : -1
 	int simBaseFlow = 0;// true : 1, false : -1
-	int simEvTr = 0;// true : 1, false : -1
+	int simEvaportranspiration = 0;// true : 1, false : -1
 	int simSnowMelt = 0;// true : 1, false : -1
+	int simInterception = 0;// true : 1, false : -1
 	int simFlowControl = 0;// true : 1, false : -1
 
 	int makeIMGFile = 0;// true : 1, false : -1
@@ -741,7 +794,7 @@ typedef struct _projectFile
 	map <int, swsParameters> swps; // <wsid, paras>
 	map <int, channelSettingInfo> css; //<wsid. paras>
 	map <int, flowControlinfo> fcs; // <idx, paras>
-	map <int, PETnSMinfo> petsms; //<wsid. paras>
+	//map <int, PETnSMinfo> petsms; //<wsid. paras>
 	vector <wpLocationRC> wps; // 
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;
@@ -868,7 +921,7 @@ int initWPinfos();
 int isNormalChannelSettingInfo(channelSettingInfo *csi);
 int isNormalFlowControlinfo(flowControlinfo *fci);
 int isNormalSwsParameter(swsParameters *swp);
-int isNormalPETnSnowMelt(PETnSMinfo* petsmi);
+//int isNormalPETnSnowMelt(PETnSMinfo* petsmi);
 int isNormalWatchPointInfo(wpLocationRC *wpL);
 int isNormalSoilTextureInfo(soilTextureInfo *st);
 int isNormalSoilDepthInfo(soilDepthInfo *sd);
@@ -913,8 +966,8 @@ int readXmlRowSubWatershedSettings(string aline,
 	swsParameters *swp);
 int readXmlRowFlowControlGrid(string aline, 
 	flowControlinfo *fci);
-int readXmlPETnSnowMelt(string aline,
-	PETnSMinfo* petsmi);
+//int readXmlPETnSnowMelt(string aline,
+//	PETnSMinfo* petsmi);
 int readXmlRowWatchPoint(string aline, 
 	wpLocationRC *wpl);
 int readXmlRowSoilTextureInfo(string aline,

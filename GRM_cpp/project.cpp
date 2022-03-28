@@ -46,8 +46,8 @@ int openProjectFile(int forceRealTime)
 	acs = new channelSettingInfo;
 	flowControlinfo* afc;
 	afc = new flowControlinfo;
-	PETnSMinfo* apetsm;
-	apetsm = new PETnSMinfo;
+	//PETnSMinfo* apetsm;
+	//apetsm = new PETnSMinfo;
 	wpLocationRC* awp;
 	awp = new wpLocationRC;
 	soilTextureInfo* ast;
@@ -197,21 +197,21 @@ int openProjectFile(int forceRealTime)
 			}
 			continue;
 		}
-		if (sbPETnSowMelt == 1 && pt.sPETnSowMeltSettings == 0) {
-			sbPETnSowMelt = 0;
-			if (apetsm->wsid > 0 && isNormalPETnSnowMelt(apetsm) == 1) {
-				prj.petsms[apetsm->wsid] = *apetsm;
-				apetsm = new PETnSMinfo;
-			}
-			continue;
-		}
-		if (sbPETnSowMelt == 1 && pt.sPETnSowMeltSettings != 0) {
-			sbPETnSowMelt = 1;
-			if (readXmlPETnSnowMelt(aline, apetsm) == -1) {
-				return -1;
-			}
-			continue;
-		}
+		//if (sbPETnSowMelt == 1 && pt.sPETnSowMeltSettings == 0) {
+		//	sbPETnSowMelt = 0;
+		//	if (apetsm->wsid > 0 && isNormalPETnSnowMelt(apetsm) == 1) {
+		//		prj.petsms[apetsm->wsid] = *apetsm;
+		//		apetsm = new PETnSMinfo;
+		//	}
+		//	continue;
+		//}
+		//if (sbPETnSowMelt == 1 && pt.sPETnSowMeltSettings != 0) {
+		//	sbPETnSowMelt = 1;
+		//	if (readXmlPETnSnowMelt(aline, apetsm) == -1) {
+		//		return -1;
+		//	}
+		//	continue;
+		//}
 		if (sbWatchPoints == 1 && pt.sWatchPoints == 0) {
 			sbWatchPoints = 0;
 			if (awp->wpName != "" && isNormalWatchPointInfo(awp) == 1) {
@@ -428,59 +428,59 @@ int openProjectFile(int forceRealTime)
 		prj.simFlowControl = -1;
 	}
 
-	// 이건 continuous 용 =====================
-	if (prj.simEvTr == 1)	{
-		if (prj.petsms.size() < 1) {
-			writeLog(fpnLog, "ERROR : PET data is invalid.\n", 1, 1);
-			return -1;
-		}
-		map<int, PETnSMinfo>::iterator iter;
-		for (iter = prj.petsms.begin(); iter != prj.petsms.end(); ++iter) {
-			int idx = iter->first;
-			PETnSMinfo apetsm;
-			apetsm = prj.petsms[idx];
-			if (apetsm.petMethod == PETmethod::UserData) {
-				if (apetsm.fpnPET == "" || _access(apetsm.fpnPET.c_str(), 0) == 0) {
-					writeLog(fpnLog, "ERROR : PET data file is invalid.\n", 1, 1);
-					return -1;
-				}
-			}
-			else if (apetsm.petMethod != PETmethod::None) {
-				if (apetsm.PETcoeffPlant <= 0.0 || apetsm.PETcoeffPlant>1) {
-					writeLog(fpnLog, "ERROR : PET coefficient for plant in the area ["
-						+ to_string(idx) + "] is invalid.\n", 1, 1);
-					writeLog(fpnLog, "PET coefficient for plant has to be (greater than 0) and (equal or less than 1).\n", 1, 1);
-					return -1;
-				}
-				if (apetsm.PETcoeffSoil <= 0.0 || apetsm.PETcoeffSoil > 1) {
-					writeLog(fpnLog, "ERROR : PET coefficient for soil in the area ["
-						+ to_string(idx) + "] is invalid.\n", 1, 1);
-					writeLog(fpnLog, "PET coefficient for soil has to be (greater than 0) and (equal or less than 1).\n", 1, 1);
-					return -1;
-				}
-			}
-		}
-	}
+	//// 이건 continuous 용 =====================
+	//if (prj.simEvTr == 1)	{
+	//	if (prj.petsms.size() < 1) {
+	//		writeLog(fpnLog, "ERROR : PET data is invalid.\n", 1, 1);
+	//		return -1;
+	//	}
+	//	map<int, PETnSMinfo>::iterator iter;
+	//	for (iter = prj.petsms.begin(); iter != prj.petsms.end(); ++iter) {
+	//		int idx = iter->first;
+	//		PETnSMinfo apetsm;
+	//		apetsm = prj.petsms[idx];
+	//		if (apetsm.petMethod == PETmethod::UserData) {
+	//			if (apetsm.fpnPET == "" || _access(apetsm.fpnPET.c_str(), 0) == 0) {
+	//				writeLog(fpnLog, "ERROR : PET data file is invalid.\n", 1, 1);
+	//				return -1;
+	//			}
+	//		}
+	//		else if (apetsm.petMethod != PETmethod::None) {
+	//			if (apetsm.PETcoeffPlant <= 0.0 || apetsm.PETcoeffPlant>1) {
+	//				writeLog(fpnLog, "ERROR : PET coefficient for plant in the area ["
+	//					+ to_string(idx) + "] is invalid.\n", 1, 1);
+	//				writeLog(fpnLog, "PET coefficient for plant has to be (greater than 0) and (equal or less than 1).\n", 1, 1);
+	//				return -1;
+	//			}
+	//			if (apetsm.PETcoeffSoil <= 0.0 || apetsm.PETcoeffSoil > 1) {
+	//				writeLog(fpnLog, "ERROR : PET coefficient for soil in the area ["
+	//					+ to_string(idx) + "] is invalid.\n", 1, 1);
+	//				writeLog(fpnLog, "PET coefficient for soil has to be (greater than 0) and (equal or less than 1).\n", 1, 1);
+	//				return -1;
+	//			}
+	//		}
+	//	}
+	//}
 
-	if (prj.simSnowMelt == 1)	{
-		if (prj.petsms.size() < 1) {
-			writeLog(fpnLog, "ERROR : Snow melt data is invalid.\n", 1, 1);
-			return -1;
-		}
-		map<int, PETnSMinfo>::iterator iter;
-		for (iter = prj.petsms.begin(); iter != prj.petsms.end(); ++iter) {
-			int idx = iter->first;
-			PETnSMinfo apetsm;
-			apetsm = prj.petsms[idx];
-			if (apetsm.smMethod == snowMeltMethod::UserData) {
-				if (apetsm.fpnSnowMelt == "" || _access(apetsm.fpnSnowMelt.c_str(), 0) == 0) {
-					writeLog(fpnLog, "ERROR : Snow melt data file is invalid.\n", 1, 1);
-					return -1;
-				}
-			}
-		}
-	}
-	//=====================
+	//if (prj.simSnowMelt == 1)	{
+	//	if (prj.petsms.size() < 1) {
+	//		writeLog(fpnLog, "ERROR : Snow melt data is invalid.\n", 1, 1);
+	//		return -1;
+	//	}
+	//	map<int, PETnSMinfo>::iterator iter;
+	//	for (iter = prj.petsms.begin(); iter != prj.petsms.end(); ++iter) {
+	//		int idx = iter->first;
+	//		PETnSMinfo apetsm;
+	//		apetsm = prj.petsms[idx];
+	//		if (apetsm.smMethod == snowMeltMethod::UserData) {
+	//			if (apetsm.fpnSnowMelt == "" || _access(apetsm.fpnSnowMelt.c_str(), 0) == 0) {
+	//				writeLog(fpnLog, "ERROR : Snow melt data file is invalid.\n", 1, 1);
+	//				return -1;
+	//			}
+	//		}
+	//	}
+	//}
+	////=====================
 
 	if (prj.lcDataType == fileOrConstant::File) {
 		if (prj.fpnLC == "") {
@@ -712,6 +712,34 @@ int readXmlRowProjectSettings(string aline)
 		}
 		else {
 			writeLog(fpnLog, "ERROR : Flow direction file [" + vString + "] is invalid.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+
+	if (aline.find(fldName.FlowDirectionType) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.FlowDirectionType);
+		if (vString != "") {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(StartsFromNE))) {
+				prj.fdType = flowDirectionType::StartsFromNE;
+			}
+			else if (vStringL == lower(ENUM_TO_STR(StartsFromN))) {
+				prj.fdType = flowDirectionType::StartsFromN;
+			}
+			else if (vStringL == lower(ENUM_TO_STR(StartsFromE))) {
+				prj.fdType = flowDirectionType::StartsFromE;
+			}
+			else if (vStringL == lower(ENUM_TO_STR(StartsFromE_TauDEM))) {
+				prj.fdType = flowDirectionType::StartsFromE_TauDEM;
+			}
+			else {
+				writeLog(fpnLog, "ERROR : Flow direction type is invalid.\n", 1, 1);
+				return -1;
+			}
+		}
+		else {
+			writeLog(fpnLog, "ERROR : Flow direction type is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -981,15 +1009,22 @@ int readXmlRowProjectSettings(string aline)
 		return 1;
 	}
 
-	if (aline.find(fldName.RainfallDataType) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.RainfallDataType);
+	if (aline.find(fldName.PrecipitationDataType_01) != string::npos
+		|| aline.find(fldName.PrecipitationDataType_02) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.PrecipitationDataType_01);
+		if (vString == "") {
+			vString = getValueStringFromXmlLine(aline, fldName.PrecipitationDataType_02);
+		}
 		if (vString != "") {
 			string vStringL = lower(vString);
 			if (vStringL == lower(ENUM_TO_STR(TextFileMAP))) {
-				prj.rfDataType = rainfallDataType::TextFileMAP;
+				prj.rfDataType = weatherDataType::TextFileMEAN;
+			}
+			else if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
+				prj.rfDataType = weatherDataType::TextFileMEAN;
 			}
 			else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
-				prj.rfDataType = rainfallDataType::TextFileASCgrid;
+				prj.rfDataType = weatherDataType::TextFileASCgrid;
 			}
 			else {
 				writeLog(fpnLog, "ERROR : Rainfall data type is invalid.\n", 1, 1);
@@ -1002,23 +1037,15 @@ int readXmlRowProjectSettings(string aline)
 		}
 		return 1;
 	}
-	if (aline.find(fldName.RainfallDataFile) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.RainfallDataFile);
-		prj.fpnRainfallData = "";
-		if (vString != "" && _access(vString.c_str(), 0) == 0) {
-			prj.fpnRainfallData = vString;
-		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Rainfall data file [" + vString + "] was not set.\n", 1, 1);
-			return -1;
-		}
-		return 1;
-	}
-	if (aline.find(fldName.RainfallInterval_min_01) != string::npos
-		|| aline.find(fldName.RainfallInterval_min_02) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.RainfallInterval_min_01);
+	if (aline.find(fldName.PrecipitationInterval_min_01) != string::npos
+		|| aline.find(fldName.PrecipitationInterval_min_02) != string::npos
+		|| aline.find(fldName.PrecipitationInterval_min_03) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.PrecipitationInterval_min_01);
 		if (vString == "") {
-			vString = getValueStringFromXmlLine(aline, fldName.RainfallInterval_min_02);
+			vString = getValueStringFromXmlLine(aline, fldName.PrecipitationInterval_min_02);
+		}
+		if (vString == "") {
+			vString = getValueStringFromXmlLine(aline, fldName.PrecipitationInterval_min_03);
 		}
 		if (vString != "") {
 			prj.rfinterval_min = stoi(vString);
@@ -1029,34 +1056,208 @@ int readXmlRowProjectSettings(string aline)
 		}
 		return 1;
 	}
-
-	if (aline.find(fldName.FlowDirectionType) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.FlowDirectionType);
-		if (vString != "") {
-			string vStringL = lower(vString);
-			if (vStringL == lower(ENUM_TO_STR(StartsFromNE))) {
-				prj.fdType = flowDirectionType::StartsFromNE;
-			}
-			else if (vStringL == lower(ENUM_TO_STR(StartsFromN))) {
-				prj.fdType = flowDirectionType::StartsFromN;
-			}
-			else if (vStringL == lower(ENUM_TO_STR(StartsFromE))) {
-				prj.fdType = flowDirectionType::StartsFromE;
-			}
-			else if (vStringL == lower(ENUM_TO_STR(StartsFromE_TauDEM))) {
-				prj.fdType = flowDirectionType::StartsFromE_TauDEM;
-			}
-			else {
-				writeLog(fpnLog, "ERROR : Flow direction type is invalid.\n", 1, 1);
-				return -1;
-			}
+	if (aline.find(fldName.PrecipitationDataFile_01) != string::npos
+		|| aline.find(fldName.PrecipitationDataFile_02) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.PrecipitationDataFile_01);
+		if (vString == "") {
+			vString = getValueStringFromXmlLine(aline, fldName.PrecipitationDataFile_02);
 		}
-		else {
-			writeLog(fpnLog, "ERROR : Flow direction type is invalid.\n", 1, 1);
+		prj.fpnRainfallData = "";
+		if (vString != "" && _access(vString.c_str(), 0) == 0) {
+			prj.fpnRainfallData = vString;
+		}
+		else if (prj.simType == simulationType::Normal) {
+			writeLog(fpnLog, "ERROR : Rainfall data file [" + vString + "] was not set.\n", 1, 1);
 			return -1;
 		}
 		return 1;
 	}
+
+	// continuous================
+	if (aline.find(fldName.TemperatureMaxDataType) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMaxDataType);
+		if (vString != "") {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
+				prj.temperatureMaxDataType = weatherDataType::TextFileMEAN;
+			}
+			else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
+				prj.temperatureMaxDataType = weatherDataType::TextFileASCgrid;
+			}
+			else {
+				writeLog(fpnLog, "ERROR : Max temperature data type is invalid.\n", 1, 1);
+				return -1;
+			}
+		}
+		else {
+			writeLog(fpnLog, "ERROR : Max temperature data type is invalid.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find(fldName.TemperatureMaxInterval_min) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMaxInterval_min);
+		if (vString != "") {
+			prj.temperatureMaxInterval_min = stoi(vString);
+		}
+		else if (prj.simType == simulationType::Normal) {
+			writeLog(fpnLog, "ERROR : Max temperature data time interval was not set.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find(fldName.TemperatureMaxDataFile) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMaxDataFile);
+		prj.fpnTemperatureMax = "";
+		if (vString != "" && _access(vString.c_str(), 0) == 0) {
+			prj.fpnTemperatureMax = vString;
+		}
+		else if (prj.simType == simulationType::Normal) {
+			writeLog(fpnLog, "ERROR : Max temperature data file [" + vString + "] was not set.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+
+	if (aline.find(fldName.TemperatureMinDataType) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMinDataType);
+		if (vString != "") {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
+				prj.temperatureMinDataType = weatherDataType::TextFileMEAN;
+			}
+			else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
+				prj.temperatureMinDataType = weatherDataType::TextFileASCgrid;
+			}
+			else {
+				writeLog(fpnLog, "ERROR : Min temperature data type is invalid.\n", 1, 1);
+				return -1;
+			}
+		}
+		else {
+			writeLog(fpnLog, "ERROR : Min temperature data type is invalid.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find(fldName.TemperatureMinInterval_min) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMinInterval_min);
+		if (vString != "") {
+			prj.temperatureMinInterval_min = stoi(vString);
+		}
+		else if (prj.simType == simulationType::Normal) {
+			writeLog(fpnLog, "ERROR : Min temperature data time interval was not set.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find(fldName.TemperatureMinDataFile) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMinDataFile);
+		prj.fpnTemperatureMax = "";
+		if (vString != "" && _access(vString.c_str(), 0) == 0) {
+			prj.fpnTemperatureMin = vString;
+		}
+		else if (prj.simType == simulationType::Normal) {
+			writeLog(fpnLog, "ERROR : Min temperature data file [" + vString + "] was not set.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+
+	if (aline.find(fldName.DurationOfSunshineDataType) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.DurationOfSunshineDataType);
+		if (vString != "") {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
+				prj.durationOfSunshineDataType = weatherDataType::TextFileMEAN;
+			}
+			else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
+				prj.durationOfSunshineDataType = weatherDataType::TextFileASCgrid;
+			}
+			else {
+				writeLog(fpnLog, "ERROR : Duration of sunshine data type is invalid.\n", 1, 1);
+				return -1;
+			}
+		}
+		else {
+			writeLog(fpnLog, "ERROR : Duration of sunshine data type is invalid.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find(fldName.DurationOfSunshineInterval_min) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.DurationOfSunshineInterval_min);
+		if (vString != "") {
+			prj.durationOfSunshineInterval_min = stoi(vString);
+		}
+		else if (prj.simType == simulationType::Normal) {
+			writeLog(fpnLog, "ERROR : Duration of sunshine data time interval was not set.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find(fldName.DurationOfSunshineDataFile) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.DurationOfSunshineDataFile);
+		prj.fpnTemperatureMax = "";
+		if (vString != "" && _access(vString.c_str(), 0) == 0) {
+			prj.fpnDurationOfSunshineData = vString;
+		}
+		else if (prj.simType == simulationType::Normal) {
+			writeLog(fpnLog, "ERROR : Duration of sunshine data file [" + vString + "] was not set.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+
+
+
+
+
+	if (aline.find(fldName.SolarRadiationDataType) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.SolarRadiationDataType);
+		if (vString != "") {
+			string vStringL = lower(vString);
+			if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
+				prj.solarRadiationDataType = weatherDataType::TextFileMEAN;
+			}
+			else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
+				prj.solarRadiationDataType = weatherDataType::TextFileASCgrid;
+			}
+			else {
+				writeLog(fpnLog, "ERROR : Solar radiation data type is invalid.\n", 1, 1);
+				return -1;
+			}
+		}
+		else {
+			writeLog(fpnLog, "ERROR : Solar radiation data type is invalid.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find(fldName.SolarRadiationInterval_min) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.SolarRadiationInterval_min);
+		if (vString != "") {
+			prj.solarRadiationInterval_min = stoi(vString);
+		}
+		else if (prj.simType == simulationType::Normal) {
+			writeLog(fpnLog, "ERROR : Solar radiation data time interval was not set.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find(fldName.SolarRadiationDataFile) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.SolarRadiationDataFile);
+		prj.fpnTemperatureMax = "";
+		if (vString != "" && _access(vString.c_str(), 0) == 0) {
+			prj.fpnSolarRadiationData = vString;
+		}
+		else if (prj.simType == simulationType::Normal) {
+			writeLog(fpnLog, "ERROR : Solar radiation data file [" + vString + "] was not set.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	//continuous =================================
 
 	if (aline.find(fldName.MaxDegreeOfParallelism) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.MaxDegreeOfParallelism);
@@ -1202,17 +1403,17 @@ int readXmlRowProjectSettings(string aline)
 		}
 		return 1;
 	}
-	if (aline.find(fldName.SimulateEvTr) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.SimulateEvTr);
-		prj.simEvTr = -1;
+	if (aline.find(fldName.SimulateEvaportranspiration) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.SimulateEvaportranspiration);
+		prj.simEvaportranspiration = -1;
 		if (lower(vString) == "true") {
-			prj.simEvTr = 1;
+			prj.simEvaportranspiration = 1;
 		}
 		else if (lower(vString) == "false") {
-			prj.simEvTr = -1;
+			prj.simEvaportranspiration = -1;
 		}
 		else {
-			writeLog(fpnLog, "ERROR : SimulateEvTr option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : SimulateEvaportranspiration option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1228,6 +1429,21 @@ int readXmlRowProjectSettings(string aline)
 		}
 		else {
 			writeLog(fpnLog, "ERROR : SimulateSnowMelt option is invalid. Set 'True' or 'False'.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find(fldName.SimulateInterception) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.SimulateInterception);
+		prj.simInterception = -1;
+		if (lower(vString) == "true") {
+			prj.simInterception = 1;
+		}
+		else if (lower(vString) == "false") {
+			prj.simInterception = -1;
+		}
+		else {
+			writeLog(fpnLog, "ERROR : SimulateInterception option is invalid. Set 'True' or 'False'.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1688,149 +1904,152 @@ int readXmlRowWatchPoint(string aline, wpLocationRC* wpl)
 	return 1;
 }
 
-// 이건 continuous 용 =======================================================
-int readXmlPETnSnowMelt(string aline, PETnSMinfo* petsmi) {
-	string vString = "";
-	projectFileFieldName fldName;
-	if (aline.find("<" + fldName.ID_PETSM + ">") != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.ID_PETSM);
-		if (vString != "" && stoi(vString) > 0) {
-			petsmi->wsid = stoi(vString);
-		}
-		else {
-			writeLog(fpnLog, "ERROR : ID in PET and snow melt data is invalid.\n", 1, 1);
-			return -1;
-		}
-		return 1;
-	}
-	if (aline.find(fldName.PETMethod) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.PETMethod);
-		PETmethod etm = PETmethod::notSet; // 이것으로 설정되면, 애러로 처리
-		if (vString != "") {
-			string vStringL = lower(vString);
-			if (vStringL == lower(ENUM_TO_STR(UserData))) {
-				etm = PETmethod::UserData;// constant로 하고 그 값을 0으로 하면 증발산 없음.
-			}
-			else if (vStringL == lower(ENUM_TO_STR(PenmanMonteith))) {
-				etm = PETmethod::PenmanMonteith;
-			}
-			else if (vStringL == lower(ENUM_TO_STR(PriestleyTaylor))) {
-				etm = PETmethod::PriestleyTaylor;
-			}
-			else if (vStringL == lower(ENUM_TO_STR(Hargreaves))) {
-				etm = PETmethod::Hargreaves;
-			}
-			else if (vStringL == lower(ENUM_TO_STR(JensenHaise))) {
-				etm = PETmethod::JensenHaise;
-			}
-			else if (vStringL == lower(ENUM_TO_STR(BlaneyCriddle))) {
-				etm = PETmethod::BlaneyCriddle;
-			}
-			else if (vStringL == lower(ENUM_TO_STR(Hamon))) {
-				etm = PETmethod::Hamon;
-			}
-			else if (vStringL == lower(ENUM_TO_STR(Turc))) {
-				etm = PETmethod::Turc;
-			}
-			else if (vStringL == lower(ENUM_TO_STR(None))) {
-				etm = PETmethod::None;
-			}
-			else {
-				writeLog(fpnLog, "ERROR : Evaportranspiration method in the watershed ["
-					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-				return -1;
-			}
-		}
-		else {
-			writeLog(fpnLog, "ERROR : Evaportranspiration method in the watershed ["
-				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-			return -1;
-		}
-		petsmi->petMethod = etm;
-		return 1;
-	}
-	if (aline.find(fldName.PETDataFile) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.PETDataFile);
-		if (vString != "" && _access(vString.c_str(), 0) == 0) {
-			petsmi->fpnPET = vString;
-		}
-		else  if (vString != ""){
-			writeLog(fpnLog, "ERROR : PET data file in the watershed ["
-				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-			return -1;
-		}
-		return 1;
-	}
-	if (aline.find(fldName.PETcoeffPlant) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.PETcoeffPlant);
-		if (vString != "" ){
-			if (stod(vString) >= 0.0) {
-				petsmi->PETcoeffPlant = stod(vString);
-			}
-			else {
-				writeLog(fpnLog, "ERROR : PET coefficient for plant in the area ["
-					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-				return -1;
-			}
-		}
-		return 1;
-	}
-	if (aline.find(fldName.PETcoeffSoil) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.PETcoeffSoil);
-		if (vString != "") {
-			if (stod(vString) >= 0.0) {
-				petsmi->PETcoeffSoil = stod(vString);
-			}
-			else {
-				writeLog(fpnLog, "ERROR : PET coefficient for soil in the area ["
-					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-				return -1;
-			}
-		}
-		return 1;
-	}
-	if (aline.find(fldName.SnowMeltMethod) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.SnowMeltMethod);
-		snowMeltMethod smm = snowMeltMethod::notSet; // 이것으로 설정되면, 애러로 처리 
-		if (vString != "") {
-			string vStringL = lower(vString);
-			if (vStringL == lower(ENUM_TO_STR(UserData))) {
-				smm = snowMeltMethod::UserData; // constant로 하고 그 값을 0으로 하면 융설 없음.
-			}
-			else if (vStringL == lower(ENUM_TO_STR(Amethod))) {
-				smm = snowMeltMethod::Amethod;
-			}
-			else if (vStringL == lower(ENUM_TO_STR(None))) {
-				smm = snowMeltMethod::None;
-			}
-			else {
-				writeLog(fpnLog, "ERROR : Snow melt method in the watershed ["
-					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-				return -1;
-			}
-		}
-		else {
-			writeLog(fpnLog, "ERROR : Snow melt method in the watershed ["
-				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-			return -1;
-		}
-		petsmi->smMethod = smm;
-		return 1;
-	}
-	if (aline.find(fldName.SnowMeltDataFile) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.SnowMeltDataFile);
-	    if (vString != "" && _access(vString.c_str(), 0) == 0) {
-			petsmi->fpnSnowMelt = vString;
-		}
-		else  if (vString != ""){
-			writeLog(fpnLog, "ERROR : Snow melt data file in the watershed ["
-				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-			return -1;
-		}
-		return 1;
-	}
-	return 1;
-}
+//// 이건 continuous 용 =======ProjectSettings와 subwatershedSetting으로 구분 분할 필요.. 2022.03.17================================================
+//int readXmlPETnSnowMelt(string aline, PETnSMinfo* petsmi) {
+//	string vString = "";
+
+//	projectFileFieldName fldName;
+//	if (aline.find("<" + fldName.ID_PETSM + ">") != string::npos) {
+//		vString = getValueStringFromXmlLine(aline, fldName.ID_PETSM);
+//		if (vString != "" && stoi(vString) > 0) {
+//			petsmi->wsid = stoi(vString);
+//		}
+//		else {
+//			writeLog(fpnLog, "ERROR : ID in PET and snow melt data is invalid.\n", 1, 1);
+//			return -1;
+//		}
+//		return 1;
+//	}
+	//if (aline.find(fldName.PETDataFile) != string::npos) {
+	//	vString = getValueStringFromXmlLine(aline, fldName.PETDataFile);
+	//	if (vString != "" && _access(vString.c_str(), 0) == 0) {
+	//		petsmi->fpnPET = vString;
+	//	}
+	//	else  if (vString != "") {
+	//		writeLog(fpnLog, "ERROR : PET data file in the watershed ["
+	//			+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
+	//		return -1;
+	//	}
+	//	return 1;
+	//}
+
+//	if (aline.find(fldName.PETMethod) != string::npos) {
+//		vString = getValueStringFromXmlLine(aline, fldName.PETMethod);
+//		PETmethod etm = PETmethod::notSet; // 이것으로 설정되면, 애러로 처리
+//		if (vString != "") {
+//			string vStringL = lower(vString);
+//			if (vStringL == lower(ENUM_TO_STR(UserData))) {
+//				etm = PETmethod::UserData;// constant로 하고 그 값을 0으로 하면 증발산 없음.
+//			}
+//			else if (vStringL == lower(ENUM_TO_STR(PenmanMonteith))) {
+//				etm = PETmethod::PenmanMonteith;
+//			}
+//			else if (vStringL == lower(ENUM_TO_STR(PriestleyTaylor))) {
+//				etm = PETmethod::PriestleyTaylor;
+//			}
+//			else if (vStringL == lower(ENUM_TO_STR(Hargreaves))) {
+//				etm = PETmethod::Hargreaves;
+//			}
+//			else if (vStringL == lower(ENUM_TO_STR(JensenHaise))) {
+//				etm = PETmethod::JensenHaise;
+//			}
+//			else if (vStringL == lower(ENUM_TO_STR(BlaneyCriddle))) {
+//				etm = PETmethod::BlaneyCriddle;
+//			}
+//			else if (vStringL == lower(ENUM_TO_STR(Hamon))) {
+//				etm = PETmethod::Hamon;
+//			}
+//			else if (vStringL == lower(ENUM_TO_STR(Turc))) {
+//				etm = PETmethod::Turc;
+//			}
+//			else if (vStringL == lower(ENUM_TO_STR(None))) {
+//				etm = PETmethod::None;
+//			}
+//			else {
+//				writeLog(fpnLog, "ERROR : Evaportranspiration method in the watershed ["
+//					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
+//				return -1;
+//			}
+//		}
+//		else {
+//			writeLog(fpnLog, "ERROR : Evaportranspiration method in the watershed ["
+//				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
+//			return -1;
+//		}
+//		petsmi->petMethod = etm;
+//		return 1;
+//	}
+//
+//	if (aline.find(fldName.PETcoeffPlant) != string::npos) {
+//		vString = getValueStringFromXmlLine(aline, fldName.PETcoeffPlant);
+//		if (vString != "" ){
+//			if (stod(vString) >= 0.0) {
+//				petsmi->PETcoeffPlant = stod(vString);
+//			}
+//			else {
+//				writeLog(fpnLog, "ERROR : PET coefficient for plant in the area ["
+//					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
+//				return -1;
+//			}
+//		}
+//		return 1;
+//	}
+//	if (aline.find(fldName.PETcoeffSoil) != string::npos) {
+//		vString = getValueStringFromXmlLine(aline, fldName.PETcoeffSoil);
+//		if (vString != "") {
+//			if (stod(vString) >= 0.0) {
+//				petsmi->PETcoeffSoil = stod(vString);
+//			}
+//			else {
+//				writeLog(fpnLog, "ERROR : PET coefficient for soil in the area ["
+//					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
+//				return -1;
+//			}
+//		}
+//		return 1;
+//	}
+//	if (aline.find(fldName.SnowMeltMethod) != string::npos) {
+//		vString = getValueStringFromXmlLine(aline, fldName.SnowMeltMethod);
+//		snowMeltMethod smm = snowMeltMethod::notSet; // 이것으로 설정되면, 애러로 처리 
+//		if (vString != "") {
+//			string vStringL = lower(vString);
+//			if (vStringL == lower(ENUM_TO_STR(UserData))) {
+//				smm = snowMeltMethod::UserData; // constant로 하고 그 값을 0으로 하면 융설 없음.
+//			}
+//			else if (vStringL == lower(ENUM_TO_STR(Amethod))) {
+//				smm = snowMeltMethod::Amethod;
+//			}
+//			else if (vStringL == lower(ENUM_TO_STR(None))) {
+//				smm = snowMeltMethod::None;
+//			}
+//			else {
+//				writeLog(fpnLog, "ERROR : Snow melt method in the watershed ["
+//					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
+//				return -1;
+//			}
+//		}
+//		else {
+//			writeLog(fpnLog, "ERROR : Snow melt method in the watershed ["
+//				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
+//			return -1;
+//		}
+//		petsmi->smMethod = smm;
+//		return 1;
+//	}
+//	if (aline.find(fldName.SnowMeltDataFile) != string::npos) {
+//		vString = getValueStringFromXmlLine(aline, fldName.SnowMeltDataFile);
+//	    if (vString != "" && _access(vString.c_str(), 0) == 0) {
+//			petsmi->fpnSnowMelt = vString;
+//		}
+//		else  if (vString != ""){
+//			writeLog(fpnLog, "ERROR : Snow melt data file in the watershed ["
+//				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
+//			return -1;
+//		}
+//		return 1;
+//	}
+//	return 1;
+//}
 
 int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 	string vString = "";
@@ -2485,6 +2704,7 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		}
 		return 1;
 	}
+
 	if (aline.find(fldName.UserSet) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.UserSet);
 		if (lower(vString) == "true") {
@@ -2582,20 +2802,20 @@ int isNormalSwsParameter(swsParameters *ssp)
 	return 1;
 }
 
-// 이건 continuous 용 =====================
-int isNormalPETnSnowMelt(PETnSMinfo* petsmi)
-{
-	PETnSMinfo petsmi_ini; //여기서 생성된 초기값과 서로 비교
-	if (petsmi->petMethod == petsmi_ini.petMethod) { return -1; }
-	if (petsmi->petMethod == PETmethod::UserData) {
-		if (petsmi->fpnPET == petsmi_ini.fpnPET) { return -1; }
-	}
-	if (petsmi->smMethod == petsmi_ini.smMethod) { return -1; }
-	if (petsmi->smMethod == snowMeltMethod::UserData) {
-		if (petsmi->fpnSnowMelt == petsmi_ini.fpnSnowMelt) { return -1; }
-	}
-	return 1;
-}
+//// 이건 continuous 용 =====================
+//int isNormalPETnSnowMelt(PETnSMinfo* petsmi)
+//{
+//	PETnSMinfo petsmi_ini; //여기서 생성된 초기값과 서로 비교
+//	if (petsmi->petMethod == petsmi_ini.petMethod) { return -1; }
+//	if (petsmi->petMethod == PETmethod::UserData) {
+//		if (petsmi->fpnPET == petsmi_ini.fpnPET) { return -1; }
+//	}
+//	if (petsmi->smMethod == petsmi_ini.smMethod) { return -1; }
+//	if (petsmi->smMethod == snowMeltMethod::UserData) {
+//		if (petsmi->fpnSnowMelt == petsmi_ini.fpnSnowMelt) { return -1; }
+//	}
+//	return 1;
+//}
 
 int isNormalWatchPointInfo(wpLocationRC * wpL)
 {
