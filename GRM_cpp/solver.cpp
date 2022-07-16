@@ -46,7 +46,7 @@ void updatetCVbyRFandSoil(int i)
     calEffectiveRainfall(i, dtrf_sec, dt_sec);
     switch (cvs[i].flowType) {
     case cellFlowType::OverlandFlow: {
-        cvs[i].hOF_ori = cvs[i].hOF + cvs[i].rfEff_dt_m + ofDepthAddedByRFlow_m2;
+		cvs[i].hOF_ori = cvs[i].hOF + cvs[i].rfEff_dt_m + ofDepthAddedByRFlow_m2;
         cvs[i].hOF = cvs[i].hOF_ori;
         cvs[i].csaOF = cvs[i].hOF_ori * dY_m;
         cvs[i].storageAddedForDTbyRF_m3 = cvs[i].rfEff_dt_m * dY_m * CVdx_m;
@@ -69,7 +69,7 @@ void updatetCVbyRFandSoil(int i)
     case cellFlowType::ChannelNOverlandFlow: {
         double chCSAAddedByOFInChCell_m2;
         double ChWidth = cvs[i].stream.chBaseWidth;
-        cvs[i].hOF_ori = cvs[i].hOF + cvs[i].rfEff_dt_m + ofDepthAddedByRFlow_m2;
+		cvs[i].hOF_ori = cvs[i].hOF + cvs[i].rfEff_dt_m + ofDepthAddedByRFlow_m2;
         cvs[i].hOF = cvs[i].hOF_ori;
         cvs[i].csaOF = cvs[i].hOF_ori * effOFdYinCHnOFcell;
         if (cvs[i].hOF > 0) {

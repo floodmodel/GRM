@@ -745,22 +745,22 @@ typedef struct _projectFile
 	string fpnSD = "";
 	string fpnSDVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
 	double cnstSoilDepth = 0.0;
-	weatherDataType rfDataType = weatherDataType::NoneData;
+	weatherDataType rfDataType = weatherDataType::None;
 	string fpnRainfallData = "";
 	int rfinterval_min = -1;
 	flowDirectionType fdType = flowDirectionType::None;
 
 	// continuous =====================
-	weatherDataType temperatureMaxDataType = weatherDataType::NoneData;
+	weatherDataType temperatureMaxDataType = weatherDataType::None;
 	string fpnTemperatureMax = "";
 	int temperatureMaxInterval_min = -1;
-	weatherDataType temperatureMinDataType = weatherDataType::NoneData;
+	weatherDataType temperatureMinDataType = weatherDataType::None;
 	string fpnTemperatureMin = "";
 	int temperatureMinInterval_min = -1;
-	weatherDataType durationOfSunshineDataType = weatherDataType::NoneData;
+	weatherDataType durationOfSunshineDataType = weatherDataType::None;
 	string fpnDurationOfSunshineData = "";
 	int durationOfSunshineInterval_min = -1;
-	weatherDataType solarRadiationDataType = weatherDataType::NoneData;
+	weatherDataType solarRadiationDataType = weatherDataType::None;
 	string fpnSolarRadiationData = "";
 	int solarRadiationInterval_min = -1;
 	// =====================

@@ -30,3 +30,4 @@ The model indroduction and the download guidelines are wiki page at https://gith
 2021.10. A minor bug fix in counting gmp files progress percentage when using '/f' option.  
 2021.11. A minor bug fix in using '/a' option for the gmp file that includes 'Inlet'. 
 2022.02. Add some error messages.
+2022.07. Revision in reading ASC raster file.  

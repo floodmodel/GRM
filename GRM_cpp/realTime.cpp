@@ -350,10 +350,10 @@ void updateRFdataGRMRT(string t_yyyymmddHHMM)
     //string fpn_map = "";
     switch (prj.rfDataType)
     {
-    case weatherDataType::TextFileASCgrid_mmPhr:
+    case weatherDataType::ASCraster_mmPhr:
         writeLog(fpnLog, "[TextFileASCgrid_mmPhr] rainfall data  type is not supported yet.\n", 1, 1);
         return;
-    case weatherDataType::TextFileMEAN: {
+    case weatherDataType::MEAN: {
         // map는 지정된 폴더(RTRFfolderName)의 yyyymm.txt 파일에서 실시간 강우자료를 받는다.
         // RTRFfolderName\\yyyymm.txt
         // 데이터는 csv 형식이고, DataTime(yyyymmddHHMM), Value 순서이다.
@@ -388,7 +388,7 @@ void updateRFdataGRMRT(string t_yyyymmddHHMM)
         }
         break;
     }
-    case weatherDataType::TextFileASCgrid: {
+    case weatherDataType::ASCraster: {
         string rfFileName;    // 2018년 8.8 현재 산출 naming
         string ascFPN;        // 2018년 8.8 현재 산출 naming
         if (tsrt.g_strModel == "") {

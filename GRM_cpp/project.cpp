@@ -1018,13 +1018,13 @@ int readXmlRowProjectSettings(string aline)
 		if (vString != "") {
 			string vStringL = lower(vString);
 			if (vStringL == lower(ENUM_TO_STR(TextFileMAP))) {
-				prj.rfDataType = weatherDataType::TextFileMEAN;
+				prj.rfDataType = weatherDataType::MEAN;
 			}
 			else if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
-				prj.rfDataType = weatherDataType::TextFileMEAN;
+				prj.rfDataType = weatherDataType::MEAN;
 			}
 			else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
-				prj.rfDataType = weatherDataType::TextFileASCgrid;
+				prj.rfDataType = weatherDataType::ASCraster;
 			}
 			else {
 				writeLog(fpnLog, "ERROR : Rainfall data type is invalid.\n", 1, 1);
@@ -1079,10 +1079,10 @@ int readXmlRowProjectSettings(string aline)
 		if (vString != "") {
 			string vStringL = lower(vString);
 			if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
-				prj.temperatureMaxDataType = weatherDataType::TextFileMEAN;
+				prj.temperatureMaxDataType = weatherDataType::MEAN;
 			}
 			else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
-				prj.temperatureMaxDataType = weatherDataType::TextFileASCgrid;
+				prj.temperatureMaxDataType = weatherDataType::ASCraster;
 			}
 			else {
 				writeLog(fpnLog, "ERROR : Max temperature data type is invalid.\n", 1, 1);
@@ -1124,10 +1124,10 @@ int readXmlRowProjectSettings(string aline)
 		if (vString != "") {
 			string vStringL = lower(vString);
 			if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
-				prj.temperatureMinDataType = weatherDataType::TextFileMEAN;
+				prj.temperatureMinDataType = weatherDataType::MEAN;
 			}
 			else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
-				prj.temperatureMinDataType = weatherDataType::TextFileASCgrid;
+				prj.temperatureMinDataType = weatherDataType::ASCraster;
 			}
 			else {
 				writeLog(fpnLog, "ERROR : Min temperature data type is invalid.\n", 1, 1);
@@ -1169,10 +1169,10 @@ int readXmlRowProjectSettings(string aline)
 		if (vString != "") {
 			string vStringL = lower(vString);
 			if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
-				prj.durationOfSunshineDataType = weatherDataType::TextFileMEAN;
+				prj.durationOfSunshineDataType = weatherDataType::MEAN;
 			}
 			else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
-				prj.durationOfSunshineDataType = weatherDataType::TextFileASCgrid;
+				prj.durationOfSunshineDataType = weatherDataType::ASCraster;
 			}
 			else {
 				writeLog(fpnLog, "ERROR : Duration of sunshine data type is invalid.\n", 1, 1);
@@ -1218,10 +1218,10 @@ int readXmlRowProjectSettings(string aline)
 		if (vString != "") {
 			string vStringL = lower(vString);
 			if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
-				prj.solarRadiationDataType = weatherDataType::TextFileMEAN;
+				prj.solarRadiationDataType = weatherDataType::MEAN;
 			}
 			else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
-				prj.solarRadiationDataType = weatherDataType::TextFileASCgrid;
+				prj.solarRadiationDataType = weatherDataType::ASCraster;
 			}
 			else {
 				writeLog(fpnLog, "ERROR : Solar radiation data type is invalid.\n", 1, 1);

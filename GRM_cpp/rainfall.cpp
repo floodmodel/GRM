@@ -36,21 +36,21 @@ for (int n = 0; n < Lines.size(); n++) {
 	r.Order = n + 1;
 	switch (prj.rfDataType)
 	{
-	case weatherDataType::TextFileASCgrid: {
+	case weatherDataType::ASCraster: {
 		fs::path fpn_rf = fs::path(Lines[n].c_str());
 		r.Rainfall = fpn_rf.filename().string();
 		r.FileName = fpn_rf.filename().string();
 		r.FilePath = fpn_rf.parent_path().string();
 		break;
 	}
-	case weatherDataType::TextFileASCgrid_mmPhr: {
+	case weatherDataType::ASCraster_mmPhr: {
 		fs::path fpn_rf = fs::path(Lines[n].c_str());
 		r.Rainfall = fpn_rf.filename().string();
 		r.FileName = fpn_rf.filename().string();
 		r.FilePath = fpn_rf.parent_path().string();
 		break;
 	}
-	case weatherDataType::TextFileMEAN:
+	case weatherDataType::MEAN:
 		string value = Lines[n];
 		if (isNumeric(value) == true) {
 			r.Rainfall = value;
@@ -90,8 +90,8 @@ int setCVRF(int order)
 	for (int idx : wpis.wpCVidxes) {
 		wpis.rfiReadSumUpWS_mPs[idx] = 0;
 	}
-	if (prj.rfDataType == weatherDataType::TextFileASCgrid
-		|| prj.rfDataType == weatherDataType::TextFileASCgrid_mmPhr) {
+	if (prj.rfDataType == weatherDataType::ASCraster
+		|| prj.rfDataType == weatherDataType::ASCraster_mmPhr) {
 		fpnRF = rfs[order - 1].FilePath + "\\" + rfs[order - 1].FileName;
 
 		ascRasterFile rfasc = ascRasterFile(fpnRF);
@@ -113,7 +113,7 @@ int setCVRF(int order)
 				//if (cvs[i].toBeSimulated == -1) {
 				//    continue;  }
 				double inRF_mm = rfasc.valuesFromTL[cvps[i].xCol][cvps[i].yRow];
-				if (prj.rfDataType == weatherDataType::TextFileASCgrid_mmPhr) {
+				if (prj.rfDataType == weatherDataType::ASCraster_mmPhr) {
 					inRF_mm = inRF_mm / (60.0 / dtrf_min);
 				}
 				if (inRF_mm <= 0) {
@@ -167,7 +167,7 @@ int setCVRF(int order)
   //      }
 		returnv = 1;
     }
-    else if (prj.rfDataType == weatherDataType::TextFileMEAN) {
+    else if (prj.rfDataType == weatherDataType::MEAN) {
 		fpnRF = rfs[order - 1].FilePath + "\\" + rfs[order - 1].FileName;
         string value = rfs[order - 1].Rainfall;
         double inRF_mm = stod(value);
