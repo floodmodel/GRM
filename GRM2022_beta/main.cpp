@@ -7,7 +7,7 @@
 #pragma comment(lib,"version.lib")
 
 using namespace std;
-namespace fs = std::filesystem;
+namespace fs = std::filesystem;   
 
 projectfilePathInfo ppi;
 fs::path fpnLog;
