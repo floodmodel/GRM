@@ -51,7 +51,7 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2022,11,14,0
+ FILEVERSION 2022,11,23,0
  PRODUCTVERSION 2021,4,30,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
@@ -68,8 +68,8 @@ BEGIN
         BLOCK "041204b0"
         BEGIN
             VALUE "CompanyName", "KICT"
-            VALUE "FileDescription", "GRM model"
-            VALUE "FileVersion", "2022.11.14.0"
+            VALUE "FileDescription", "GRM model v2021"
+            VALUE "FileVersion", "2022.11.23.0"
             VALUE "InternalName", "GRM.exe"
             VALUE "LegalCopyright", "Copyright (C) 2017"
             VALUE "OriginalFilename", "GRM_cpp.exe"
