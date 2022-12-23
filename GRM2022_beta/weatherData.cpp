@@ -727,35 +727,35 @@ int setCVRF(int order)
 	 return 1;
  }
  
- int setDurationOfSunshine()
+ int setDaytimeLength()
  {
 	 sunShineDur.clear();
 	 sunShineDur = readAndSetWeatherData(prj.fpnDurationOfSunData, prj.durationOfSunDataType,
-		 prj.durationOfSunInterval_min, "Duration of sunshine");
+		 prj.durationOfSunInterval_min, "Daytime length");
 	 if (sunShineDur.size() == 0) {
-		 writeLog(fpnLog, "ERROR : Reading duration of sunshine data file was failed\n", 1, 1);
+		 writeLog(fpnLog, "ERROR : Reading daytime length data file was failed\n", 1, 1);
 		 return -1;
 	 }
 	 return 1;
  }
    
- int setDurationOfSunshineRatio()
+ int setDaytimeHoursRatio()
  {
 	 if (prj.fpnDurationOfSunRatioData != "" && _access(prj.fpnDurationOfSunRatioData.c_str(), 0) != 0) {
-		 writeLog(fpnLog, "The ratio of sunshine duration data file is invalid.\n", 1, 1);
+		 writeLog(fpnLog, "The ratio of daytime hours data file is invalid.\n", 1, 1);
 		 return -1;
 	 }
 	 memset(sunDurRatio, 0, 12 * sizeof(sunDurRatio[0])); // 12 개의 자료가 있으므로,,
 	 vector<double> Lines;
 	 Lines = readTextFileToDoubleVector(prj.fpnDurationOfSunRatioData);
 	 if (Lines.size() == 0) { 
-		 string err = "ERROR : The ratio of sunshine duration data file has no value.\n";		 
+		 string err = "ERROR : The ratio of  daytime hours data file has no value.\n";		 
 		 writeLog(fpnLog, err, 1, 1);
 		 return -1; 
 	 }
 	 if (Lines.size() > 12) {
-		 string err = "ERROR : The ratio of sunshine duration data file is too long.\n";
-		 err = err + "The ratio of sunshine duration data needs only 12 values of monthly data.\n";
+		 string err = "ERROR : The ratio of  daytime hours data file is too long.\n";
+		 err = err + "The ratio of  daytime hours data needs only 12 values of monthly data.\n";
 		 writeLog(fpnLog, err, 1, 1);
 		 return -1;
 	 }

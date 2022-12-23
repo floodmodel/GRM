@@ -299,10 +299,10 @@ typedef struct _projectFileFieldName
 	const string TemperatureMinDataFile = "TemperatureMinDataFile";
 
 	//const string DurationOfSunshineDataType = "DurationOfSunshineDataType";
-	const string DurationOfSunshineInterval_min = "DurationOfSunshineInterval_min";
-	const string DurationOfSunshineDataFile = "DurationOfSunshineDataFile";
+	const string DaytimeLengthInterval_min = "DaytimeLengthInterval_min";
+	const string DaytimeLengthDataFile = "DaytimeLengthDataFile";
 
-	const string DurationOfSunshineRatioDataFile = "DurationOfSunshineRatioDataFile";
+	const string DaytimeHoursRatioDataFile = "DaytimeHoursRatioDataFile";
 	const string BlaneyCriddleCoefDataFile = "BlaneyCriddleCoefDataFile";
 	
 	//const string SolarRadiationDataType = "SolarRadiationDataType";
@@ -835,6 +835,7 @@ typedef struct _cvAtt
 
 	PETmethod petMethod;
 	double aet_mPdt = 0.0; //실제 증발산량
+	double aet_LS_mPdt = 0.0; // 2022.11.30. 지면에서의 실제 증발산량. aet에서 aet_canopy를 제외한 값. 지표면 수심과 토양 수분의 손실 계산에 이용됨.
 	double pet_mPdt = 0.0; //잠재 증발산량
 	double etCoef = 0.0;
 
@@ -1182,8 +1183,8 @@ int setRasterOutputArray();
 void setSVPGradient();
 int setTemperatureMax();
 int setTemperatureMin();
-int setDurationOfSunshine();
-int setDurationOfSunshineRatio();
+int setDaytimeLength();
+int setDaytimeHoursRatio();
 int setSnowPackTemp();
 int setSolarRadiation();
 

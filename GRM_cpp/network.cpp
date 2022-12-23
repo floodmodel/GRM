@@ -33,8 +33,8 @@ int setFlowNetwork()
     halfDXperp_m = di.cellSize / 2.0;
     for (int i = 0; i < di.cellNnotNull; ++i) {
         double dxe = 0.0;
-        int tCx; // 하류방향 대상 셀의 x array index
-        int tRy; // 하류방향 대상 셀의 y array index
+		int tCx = -1; // 하류방향 대상 셀의 x array index
+		int tRy = -1; // 하류방향 대상 셀의 y array index
         // 좌상단이 0,0 이다... 즉, 북쪽이면, row-1, 동쪽이면 col +1
         int cx = cvps[i].xCol;
         int ry = cvps[i].yRow;

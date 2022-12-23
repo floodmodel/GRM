@@ -385,11 +385,11 @@ void setCVStartingCondition(double iniflow)
         if (cvs[i].flowType == cellFlowType::ChannelFlow
             || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
             int iniStreamFlowWasSet = -1;
-            if (prj.swps[wsid].iniFlow > 0) {//Apply ini. flow of current sws
-                iniQAtwsOutlet = prj.swps[wsid].iniFlow;
-                faAtBaseCV = cvs[di.wsn.wsOutletidxs[wsid]].fac;
-                iniStreamFlowWasSet = 1;
-            }
+			if (prj.swps[wsid].userSet == 1 && prj.swps[wsid].iniFlow >= 0) {//Apply ini. flow of current sws
+				iniQAtwsOutlet = prj.swps[wsid].iniFlow;
+				faAtBaseCV = cvs[di.wsn.wsOutletidxs[wsid]].fac;
+				iniStreamFlowWasSet = 1;
+			}
 			else {
 				int baseWSid = wsid;
 				for (int id = 0; id < di.wsn.wsidsAllDown[wsid].size(); id++) {

@@ -289,6 +289,7 @@ void setCVStartingCondition(double iniflow)
         cvs[i].QOF_m3Ps = 0;
         cvs[i].hUAQfromChannelBed_m = 0;
         cvs[i].csaOF = 0;
+
         if (cvs[i].flowType == cellFlowType::ChannelFlow
             || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
             int iniStreamFlowWasSet = -1;

@@ -661,8 +661,8 @@ int openProjectFile(int forceRealTime)
 			if (setTemperatureMax() == -1) { return -1; }
 			if (setTemperatureMin() == -1) { return -1; }
 			//if (calMeanTemperature() == -1) { return -1; }
-			if (setDurationOfSunshine() == -1) { return -1; }
-			if (setDurationOfSunshineRatio() == -1) { return -1; }
+			if (setDaytimeLength() == -1) { return -1; }
+			if (setDaytimeHoursRatio() == -1) { return -1; }
 			if (prj.fpnBlaneyCriddleK != "" && _access(prj.fpnBlaneyCriddleK.c_str(), 0) == 0) {
 				if (setBlaneyCriddleK() == -1) { return -1; }
 			}			
@@ -1310,8 +1310,8 @@ int readXmlRowProjectSettings(string aline)
 	//	}
 	//	return 1;
 	//}
-	if (aline.find(fldName.DurationOfSunshineDataFile) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.DurationOfSunshineDataFile);
+	if (aline.find(fldName.DaytimeLengthDataFile) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.DaytimeLengthDataFile);
 		prj.fpnDurationOfSunData = "";
 		prj.durationOfSunDataType = weatherDataType::None;
 		if (vString != "" && _access(vString.c_str(), 0) == 0) {
@@ -1328,8 +1328,8 @@ int readXmlRowProjectSettings(string aline)
 		}
 		return 1;
 	}
-	if (aline.find(fldName.DurationOfSunshineInterval_min) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.DurationOfSunshineInterval_min);
+	if (aline.find(fldName.DaytimeLengthInterval_min) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.DaytimeLengthInterval_min);
 		if (vString != "") {
 			int t_min = stoi(vString);
 			if (t_min != 1440) {
@@ -1347,8 +1347,8 @@ int readXmlRowProjectSettings(string aline)
 		return 1;
 	}
 
-	if (aline.find(fldName.DurationOfSunshineRatioDataFile) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.DurationOfSunshineRatioDataFile);
+	if (aline.find(fldName.DaytimeHoursRatioDataFile) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.DaytimeHoursRatioDataFile);
 		prj.fpnDurationOfSunRatioData = "";
 		if (vString != "" && _access(vString.c_str(), 0) == 0) {
 			prj.fpnDurationOfSunRatioData = vString;

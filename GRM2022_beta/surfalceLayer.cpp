@@ -57,19 +57,23 @@ void calET(int i) {
 	}
 	// 여기서 토지피복별로 증발산을 손실처리 한다.
 	double aet_canopy = 0.0;
+	double aet_canopy_residual = 0.0;
 	double aet_soil = 0.0;
 	double aet_water = 0.0;
 	if (cvs[i].intcpAcc_m == 0) {// 차단된 강수가 없으면
 		aet_canopy = 0.0;
+		aet_canopy_residual = cvs[i].pet_mPdt * cvs[i].etCoef; // 2022.11.30. 모든 잠재증발산은 증산으로 간주하고, 토양에서의 손실로 처리
 	}
 	else {//차단된 강수가 있으면. 여기서 증발산에 의해 차단량 감소, canopy 에서 최대 차단 가능량이 있기때문에.. 여기서 반영해줘야 함.
 		aet_canopy = cvs[i].pet_mPdt * cvs[i].etCoef;
-		if (cvs[i].intcpAcc_m < aet_canopy) {  //차단량이 모두 증발되면, 증산량을 반영할 필요 있음.
+		if (cvs[i].intcpAcc_m < aet_canopy) {  //차단량이 모두 증발되면, 증발산량을 반영할 필요 있음.
+			aet_canopy_residual = aet_canopy - cvs[i].intcpAcc_m; // 이부분은 토양 수분에서 손실로 처리.
 			aet_canopy = cvs[i].intcpAcc_m;
 			cvs[i].intcpAcc_m = 0.0;
 		}
 		else {
 			cvs[i].intcpAcc_m = cvs[i].intcpAcc_m - aet_canopy;
+			aet_canopy_residual = 0.0;
 		}
 	}
 
@@ -89,11 +93,13 @@ void calET(int i) {
 	}
 
 	// 캐노피에서의 증발산과 그 외 부분(물, 토양)에서의 증발산 
-	cvs[i].aet_mPdt = aet_canopy * cvs[i].canopyR
+	cvs[i].aet_mPdt = (aet_canopy + aet_canopy_residual) * cvs[i].canopyR
 		+ aet_water * (1 - cvs[i].canopyR) + aet_soil * (1 - cvs[i].canopyR);
+	cvs[i].aet_LS_mPdt = aet_canopy_residual* cvs[i].canopyR 
+		+ aet_water * (1 - cvs[i].canopyR)	+ aet_soil * (1 - cvs[i].canopyR); // 2.22.11.30. 물, 지표면, 토양에서의 손실 계산에 이용. aet_canopy는 식생에서만 발생
 
 	// canopy에서의 증발산에 의한 물수지는 위에서 계산됨
-	// 여기서는 증발산에 의한 지표면, 수면에서의 손실 계산 필요
+	// 여기서는 증발산에 의한 지표면, 수면에서의 손실 계산 필요. 2022.11.30. cvs[i].aet_LS_mPdt 이용
 	switch (cvs[i].flowType) {
 	case cellFlowType::OverlandFlow: {
 		cal_h_SWC_OFbyAET(i);
@@ -114,19 +120,19 @@ void calET(int i) {
 void cal_h_SWC_OFbyAET(int i) {
 	double aet_residual = 0.0;
 	if (cvs[i].hOF > 0) {
-		if (cvs[i].hOF > cvs[i].aet_mPdt) { // 이경우는 지표면 수면에서 손실 처리
-			cvs[i].hOF = cvs[i].hOF - cvs[i].aet_mPdt;
+		if (cvs[i].hOF > cvs[i].aet_LS_mPdt) { // 이경우는 지표면 수면에서 손실 처리
+			cvs[i].hOF = cvs[i].hOF - cvs[i].aet_LS_mPdt;
 			if (cvs[i].hOF < WETDRY_CRITERIA && cvs[i].hOF>0.0) {
 				cvs[i].hOF = WETDRY_CRITERIA;
 			}
 		}
 		else {
-			aet_residual = cvs[i].aet_mPdt - cvs[i].hOF;
+			aet_residual = cvs[i].aet_LS_mPdt - cvs[i].hOF;
 			cvs[i].hOF = 0;
 		}
 	}
 	else {
-		aet_residual = cvs[i].aet_mPdt;
+		aet_residual = cvs[i].aet_LS_mPdt;
 	}
 	if (cvs[i].hOF == 0) {
 if (cvs[i].soilWaterC_m > aet_residual) { // 여기서는 토양에서 손실처리
@@ -143,19 +149,19 @@ else {
 
 void cal_h_CHbyAET(int i) {
 	if (cvs[i].stream.hCH > 0) {
-		if (cvs[i].stream.hCH > cvs[i].aet_mPdt) { // 이경우는 지표면 수면에서 손실 처리
-			cvs[i].stream.hCH = cvs[i].stream.hCH - cvs[i].aet_mPdt;
+		if (cvs[i].stream.hCH > cvs[i].aet_LS_mPdt) { // 이경우는 지표면 수면에서 손실 처리
+			cvs[i].stream.hCH = cvs[i].stream.hCH - cvs[i].aet_LS_mPdt;
 			if (cvs[i].stream.hCH < WETDRY_CRITERIA && cvs[i].stream.hCH>0.0) {
 				cvs[i].stream.hCH = 0.0;
 			}
 		}
 		else {
-			cvs[i].aet_mPdt = cvs[i].stream.hCH; // 이만큼만 증발산된다. 
+			cvs[i].aet_LS_mPdt = cvs[i].stream.hCH; // 이만큼만 증발산된다. 
 			cvs[i].stream.hCH = 0; // 모두 증발 되었으므로 0.
 		}
 	}
 	else if (cvs[i].stream.hCH == 0) {// 하천만 있는 셀에서는 토양은 항상 포화된 것으로 처리. 즉 토양 증발산 고려하지 않음.
-		cvs[i].aet_mPdt = 0;
+		cvs[i].aet_LS_mPdt = 0;
 	}
 }
 
