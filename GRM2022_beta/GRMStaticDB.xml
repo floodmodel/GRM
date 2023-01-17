@@ -1,5 +1,68 @@
 ﻿<?xml version="1.0" standalone="yes"?>
 <GRMStaticDB xmlns="http://tempuri.org/DataSet1.xsd">
+  <LandCoverParameter>
+    <LandCoverE>Agricultural Area</LandCoverE>
+    <LandCoverK>농업지역</LandCoverK>
+    <GRMCode>AGRL</GRMCode>
+    <RoughnessCoefficient>0.035</RoughnessCoefficient>
+    <ImperviousRatio>0.391</ImperviousRatio>
+    <CanopyRatio>0.4</CanopyRatio>
+    <InterceptionMaxWaterCanopy_mm>0.3</InterceptionMaxWaterCanopy_mm>	
+  </LandCoverParameter>
+  <LandCoverParameter>
+    <LandCoverE>Bare</LandCoverE>
+    <LandCoverK>나지</LandCoverK>
+    <GRMCode>BARE</GRMCode>
+    <RoughnessCoefficient>0.02</RoughnessCoefficient>
+    <ImperviousRatio>0.442</ImperviousRatio>
+    <CanopyRatio>0.2</CanopyRatio>
+    <InterceptionMaxWaterCanopy_mm>0.3</InterceptionMaxWaterCanopy_mm>	
+  </LandCoverParameter>
+  <LandCoverParameter>
+    <LandCoverE>Forest</LandCoverE>
+    <LandCoverK>산림지역</LandCoverK>
+    <GRMCode>FRST</GRMCode>
+    <RoughnessCoefficient>0.1</RoughnessCoefficient>
+    <ImperviousRatio>0.05</ImperviousRatio>
+    <CanopyRatio>0.8</CanopyRatio>
+    <InterceptionMaxWaterCanopy_mm>0.4</InterceptionMaxWaterCanopy_mm>	
+  </LandCoverParameter>
+  <LandCoverParameter>
+    <LandCoverE>Grass</LandCoverE>
+    <LandCoverK>초지</LandCoverK>
+    <GRMCode>GRSS</GRMCode>
+    <RoughnessCoefficient>0.15</RoughnessCoefficient>
+    <ImperviousRatio>0.44</ImperviousRatio>
+    <CanopyRatio>0.5</CanopyRatio>
+    <InterceptionMaxWaterCanopy_mm>0.3</InterceptionMaxWaterCanopy_mm>	
+  </LandCoverParameter>
+  <LandCoverParameter>
+    <LandCoverE>Urban</LandCoverE>
+    <LandCoverK>시가화/건조지역</LandCoverK>
+    <GRMCode>URBN</GRMCode>
+    <RoughnessCoefficient>0.015</RoughnessCoefficient>
+    <ImperviousRatio>0.853</ImperviousRatio>
+    <CanopyRatio>0.2</CanopyRatio>
+    <InterceptionMaxWaterCanopy_mm>0.3</InterceptionMaxWaterCanopy_mm>	
+  </LandCoverParameter>
+  <LandCoverParameter>
+    <LandCoverE>Water</LandCoverE>
+    <LandCoverK>수역</LandCoverK>
+    <GRMCode>WATR</GRMCode>
+    <RoughnessCoefficient>0.03</RoughnessCoefficient>
+    <ImperviousRatio>1</ImperviousRatio>
+    <CanopyRatio>0.1</CanopyRatio>
+    <InterceptionMaxWaterCanopy_mm>0.1</InterceptionMaxWaterCanopy_mm>	
+  </LandCoverParameter>
+  <LandCoverParameter>
+    <LandCoverE>Wetland</LandCoverE>
+    <LandCoverK>습지</LandCoverK>
+    <GRMCode>WTLD</GRMCode>
+    <RoughnessCoefficient>0.07</RoughnessCoefficient>
+    <ImperviousRatio>1</ImperviousRatio>
+    <CanopyRatio>0.4</CanopyRatio>
+    <InterceptionMaxWaterCanopy_mm>0.3</InterceptionMaxWaterCanopy_mm>	
+  </LandCoverParameter>
   <GreenAmptSoilParameter>
     <SoilTextureE>Clay</SoilTextureE>
     <SoilTextureK>식토</SoilTextureK>
@@ -216,69 +279,6 @@
     <SoilDepthMax>20</SoilDepthMax>
     <SoilDepthDefault>10</SoilDepthDefault>
   </SoilDepthParameter>
-  <LandCoverParameter>
-    <LandCoverE>Agricultural Area</LandCoverE>
-    <LandCoverK>농업지역</LandCoverK>
-    <GRMCode>AGRL</GRMCode>
-    <RoughnessCoefficient>0.035</RoughnessCoefficient>
-    <ImperviousRatio>0.391</ImperviousRatio>
-    <CanopyRatio>0.5</CanopyRatio>
-    <InterceptionMaxWaterCanopy_mm>0.5</InterceptionMaxWaterCanopy_mm>		
-  </LandCoverParameter>
-  <LandCoverParameter>
-    <LandCoverE>Bare</LandCoverE>
-    <LandCoverK>나지</LandCoverK>
-    <GRMCode>BARE</GRMCode>
-    <RoughnessCoefficient>0.02</RoughnessCoefficient>
-    <ImperviousRatio>0.442</ImperviousRatio>
-    <CanopyRatio>0.3</CanopyRatio>
-    <InterceptionMaxWaterCanopy_mm>0.5</InterceptionMaxWaterCanopy_mm>		
-  </LandCoverParameter>
-  <LandCoverParameter>
-    <LandCoverE>Forest</LandCoverE>
-    <LandCoverK>산림지역</LandCoverK>
-    <GRMCode>FRST</GRMCode>
-    <RoughnessCoefficient>0.1</RoughnessCoefficient>
-    <ImperviousRatio>0.05</ImperviousRatio>
-    <CanopyRatio>0.9</CanopyRatio>
-    <InterceptionMaxWaterCanopy_mm>0.5</InterceptionMaxWaterCanopy_mm>	
-  </LandCoverParameter>
-  <LandCoverParameter>
-    <LandCoverE>Grass</LandCoverE>
-    <LandCoverK>초지</LandCoverK>
-    <GRMCode>GRSS</GRMCode>
-    <RoughnessCoefficient>0.15</RoughnessCoefficient>
-    <ImperviousRatio>0.44</ImperviousRatio>
-    <CanopyRatio>0.9</CanopyRatio>
-    <InterceptionMaxWaterCanopy_mm>0.5</InterceptionMaxWaterCanopy_mm>		
-  </LandCoverParameter>
-  <LandCoverParameter>
-    <LandCoverE>Urban</LandCoverE>
-    <LandCoverK>시가화/건조지역</LandCoverK>
-    <GRMCode>URBN</GRMCode>
-    <RoughnessCoefficient>0.015</RoughnessCoefficient>
-    <ImperviousRatio>0.853</ImperviousRatio>
-    <CanopyRatio>0.3</CanopyRatio>
-    <InterceptionMaxWaterCanopy_mm>0.5</InterceptionMaxWaterCanopy_mm>		
-  </LandCoverParameter>
-  <LandCoverParameter>
-    <LandCoverE>Water</LandCoverE>
-    <LandCoverK>수역</LandCoverK>
-    <GRMCode>WATR</GRMCode>
-    <RoughnessCoefficient>0.03</RoughnessCoefficient>
-    <ImperviousRatio>1</ImperviousRatio>
-    <CanopyRatio>0.1</CanopyRatio>
-    <InterceptionMaxWaterCanopy_mm>0.5</InterceptionMaxWaterCanopy_mm>		
-  </LandCoverParameter>
-  <LandCoverParameter>
-    <LandCoverE>Wetland</LandCoverE>
-    <LandCoverK>습지</LandCoverK>
-    <GRMCode>WTLD</GRMCode>
-    <RoughnessCoefficient>0.07</RoughnessCoefficient>
-    <ImperviousRatio>1</ImperviousRatio>
-    <CanopyRatio>0.5</CanopyRatio>
-    <InterceptionMaxWaterCanopy_mm>0.5</InterceptionMaxWaterCanopy_mm>		
-  </LandCoverParameter>
   <ParametersRange>
     <ParName>BankSideSlope</ParName>
     <MinValue>0</MinValue>

@@ -204,21 +204,7 @@ int openProjectFile(int forceRealTime)
 			}
 			continue;
 		}
-		//if (sbPETnSowMelt == 1 && pt.sPETnSowMeltSettings == 0) {
-		//	sbPETnSowMelt = 0;
-		//	if (apetsm->wsid > 0 && isNormalPETnSnowMelt(apetsm) == 1) {
-		//		prj.petsms[apetsm->wsid] = *apetsm;
-		//		apetsm = new PETnSMinfo;
-		//	}
-		//	continue;
-		//}
-		//if (sbPETnSowMelt == 1 && pt.sPETnSowMeltSettings != 0) {
-		//	sbPETnSowMelt = 1;
-		//	if (readXmlPETnSnowMelt(aline, apetsm) == -1) {
-		//		return -1;
-		//	}
-		//	continue;
-		//}
+
 		if (sbWatchPoints == 1 && pt.sWatchPoints == 0) {
 			sbWatchPoints = 0;
 			if (awp->wpName != "" && isNormalWatchPointInfo(awp) == 1) {
@@ -469,11 +455,17 @@ int openProjectFile(int forceRealTime)
 		}
 
 		//int nSWS = prj.swps.size();
-		for (const auto& mpair : prj.swps){
 		//for (int n = 0; n < nSWS; ++n) {
+		for (const auto& mpair : prj.swps){
+			if (prj.swps[mpair.first].potentialETMethod == PETmethod::None) {
+				writeLog(fpnLog, "ERROR : The potential ET method was not set [watershed id = "
+					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
+				return -1;
+			}
 			if (prj.swps[mpair.first].potentialETMethod == PETmethod::BlaneyCriddle
 				&& prj.fpnBlaneyCriddleK == "") {
-				writeLog(fpnLog, "ERROR : The file of K ceofficient data in Blaney-Criddle method  was not set.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : The file of crop ceofficient data in Blaney-Criddle method  was not set [watershed id = "
+					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
 				return -1;
 			}
 			if (prj.swps[mpair.first].etCoeff == -1.0) {
@@ -491,12 +483,12 @@ int openProjectFile(int forceRealTime)
 					+ to_string(prj.lcs[n].lcGridValue) + "] of the land cover data is greater than 1 or wrong vaule.\n", 1, 1);
 				return -1;
 			}
-			if (prj.lcs[n].ImperviousRatio < 0
-				|| prj.lcs[n].ImperviousRatio >1) {
-				writeLog(fpnLog, "ERROR : Land cover impervious ratio of the raster value ["
-					+ to_string(prj.lcs[n].lcGridValue) + "] of the land cover data is greater than 1 or wrong vaule.\n", 1, 1);
-				return -1;
-			}
+			//if (prj.lcs[n].ImperviousRatio < 0
+			//	|| prj.lcs[n].ImperviousRatio >1) {
+			//	writeLog(fpnLog, "ERROR : Land cover impervious ratio of the raster value ["
+			//		+ to_string(prj.lcs[n].lcGridValue) + "] of the land cover data is greater than 1 or wrong vaule.\n", 1, 1);
+			//	return -1;
+			//}
 		}
 	}
 
@@ -519,6 +511,13 @@ int openProjectFile(int forceRealTime)
 				return -1;
 			}
 		}
+		for (const auto& mpair : prj.swps) {
+			if (prj.swps[mpair.first].interceptMethod == InterceptionMethod::None) {
+				writeLog(fpnLog, "ERROR : The interception method was not set [watershed id = "
+					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
+				return -1;
+			}
+		}
 	}
 
 	if (prj.simSnowMelt == 1) {
@@ -538,10 +537,38 @@ int openProjectFile(int forceRealTime)
 			writeLog(fpnLog, "ERROR : Max temperature data file is invalie.\n", 1, 1);
 			return -1;
 		}
-	}
+		for (const auto& mpair : prj.swps) {
+			if (prj.swps[mpair.first].snowMeltMethod == SnowMeltMethod::None) {
+				writeLog(fpnLog, "ERROR : The snow melt method was not set [watershed id = "
+					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
+				return -1;
+			}
+			if (prj.swps[mpair.first].smeltTSR < -9000 || prj.swps[mpair.first].smeltTSR >20 ) { // 최대값을 20도로 가정한다.
+				writeLog(fpnLog, "ERROR : The value of the threshold temperature dividing snowfall and rainfall (SnowmeltTSR) is invalid [watershed id = "
+					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
+				return -1;
+			}
+			if (prj.swps[mpair.first].smeltingTemp < -9000 || prj.swps[mpair.first].smeltingTemp>20) { // 최대값을 20도로 가정한다.
+				writeLog(fpnLog, "ERROR : The value of snow melting temperature (SnowmeltingTemp) is invalid [watershed id = "
+					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
+				return -1;
+			}
+			if (prj.swps[mpair.first].snowCovRatio<0 || prj.swps[mpair.first].snowCovRatio>1) {
+				writeLog(fpnLog, "ERROR : The value of snowpack coverage is invalid [watershed id = "
+					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
+				return -1;
+			}
+			if (prj.swps[mpair.first].smeltCoef < 0 ) {
+				writeLog(fpnLog, "ERROR : The value of snow melt coefficient is invalid [watershed id = "
+					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
+				return -1;
+			}
+		}
 
+	}
 	// continuous =====================
 
+	// land cover ===============
 	if (prj.lcDataType == fileOrConstant::File) {
 		if (prj.fpnLC == "") {
 			writeLog(fpnLog, "ERROR : Land cover file is invalid.\n", 1, 1);
@@ -551,9 +578,25 @@ int openProjectFile(int forceRealTime)
 			writeLog(fpnLog, "ERROR : Land cover VAT file is invalid.\n", 1, 1);
 			return -1;
 		}
-		if (prj.lcs.size() == 0) {
+		int nlc = prj.lcs.size();
+		if (nlc == 0) {
 			writeLog(fpnLog, "ERROR : Land cover attributes from the files are invalid.\n", 1, 1);
 			return -1;
+		}
+		else {
+			for (int n = 0; n < nlc; ++n) {
+				if (prj.lcs[n].ImperviousRatio < 0
+					|| prj.lcs[n].ImperviousRatio >1) {
+					writeLog(fpnLog, "ERROR : Land cover impervious ratio of the raster value ["
+						+ to_string(prj.lcs[n].lcGridValue) + "] of the land cover data is greater than 1 or wrong vaule.\n", 1, 1);
+					return -1;
+				}
+				if (prj.lcs[n].RoughnessCoefficient < 0) {
+					writeLog(fpnLog, "ERROR : Land cover impervious ratio of the raster value ["
+						+ to_string(prj.lcs[n].lcGridValue) + "] of the land cover data is greater than 1 or wrong vaule.\n", 1, 1);
+					return -1;
+				}
+			}
 		}
 	}
 	else if (prj.lcDataType == fileOrConstant::Constant) {
@@ -566,6 +609,8 @@ int openProjectFile(int forceRealTime)
 			return -1;
 		}
 	}
+	// ============== land cover
+
 	if (prj.stDataType == fileOrConstant::File) {
 		if (prj.fpnSD == "") {
 			writeLog(fpnLog, "ERROR : Soil texture file is invalid.\n", 1, 1);
@@ -1101,34 +1146,6 @@ int readXmlRowProjectSettings(string aline)
 		return 1;
 	}
 
-	//if (aline.find(fldName.PrecipitationDataType_01) != string::npos
-	//	|| aline.find(fldName.PrecipitationDataType_02) != string::npos) {
-	//	vString = getValueStringFromXmlLine(aline, fldName.PrecipitationDataType_01);
-	//	if (vString == "") {
-	//		vString = getValueStringFromXmlLine(aline, fldName.PrecipitationDataType_02);
-	//	}
-	//	if (vString != "") {
-	//		string vStringL = lower(vString);
-	//		if (vStringL == lower(ENUM_TO_STR(TextFileMAP))) {
-	//			prj.rfDataType = weatherDataType::MEAN;
-	//		}
-	//		else if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
-	//			prj.rfDataType = weatherDataType::MEAN;
-	//		}
-	//		else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
-	//			prj.rfDataType = weatherDataType::ASCraster;
-	//		}
-	//		else {
-	//			writeLog(fpnLog, "ERROR : Rainfall data type is invalid.\n", 1, 1);
-	//			return -1;
-	//		}
-	//	}
-	//	else {
-	//		writeLog(fpnLog, "ERROR : Rainfall data data type is invalid.\n", 1, 1);
-	//		return -1;
-	//	}
-	//	return 1;
-	//}
 	if (aline.find(fldName.PrecipitationDataFile_01) != string::npos
 		|| aline.find(fldName.PrecipitationDataFile_02) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.PrecipitationDataFile_01);
@@ -1141,12 +1158,12 @@ int readXmlRowProjectSettings(string aline)
 			prj.fpnRainfallData = vString;
 			prj.rfDataType = getWeatherDataTypeByDataFile(vString);
 			if (prj.rfDataType == weatherDataType::None) {
-				writeLog(fpnLog, "ERROR : Rainfall data file [" + vString + "] is invalid.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : Precipitation data file [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Rainfall data file [" + vString + "] was not set.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Precipitation data file [" + vString + "] was not set.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1172,27 +1189,6 @@ int readXmlRowProjectSettings(string aline)
 	}
 
 	// continuous================
-	//if (aline.find(fldName.TemperatureMaxDataType) != string::npos) {
-	//	vString = getValueStringFromXmlLine(aline, fldName.TemperatureMaxDataType);
-	//	if (vString != "") {
-	//		string vStringL = lower(vString);
-	//		if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
-	//			prj.tempMaxDataType = weatherDataType::MEAN;
-	//		}
-	//		else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
-	//			prj.tempMaxDataType = weatherDataType::ASCraster;
-	//		}
-	//		else {
-	//			writeLog(fpnLog, "ERROR : Max temperature data type is invalid.\n", 1, 1);
-	//			return -1;
-	//		}
-	//	}
-	//	else {
-	//		writeLog(fpnLog, "ERROR : Max temperature data type is invalid.\n", 1, 1);
-	//		return -1;
-	//	}
-	//	return 1;
-	//}
 	if (aline.find(fldName.TemperatureMaxDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMaxDataFile);
 		prj.fpnTempMaxData = "";
@@ -1205,9 +1201,8 @@ int readXmlRowProjectSettings(string aline)
 				return -1;
 			}
 		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Max temperature data file [" + vString + "] was not set.\n", 1, 1);
-			return -1;
+		else if (prj.simType == simulationType::Normal) { //옵션이므로 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : Max temperature data file [" + vString + "] was not set.\n", 1, 1);
 		}
 		return 1;
 	}
@@ -1223,34 +1218,11 @@ int readXmlRowProjectSettings(string aline)
 			}
 			prj.tempMaxInterval_min = t_min;
 		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Max temperature data time interval was not set.\n", 1, 1);
-			return -1;
+		else if (prj.simType == simulationType::Normal) { //옵션이므로 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : Max temperature data time interval was not set.\n", 1, 1);
 		}
 		return 1;
 	}
-
-	//if (aline.find(fldName.TemperatureMinDataType) != string::npos) {
-	//	vString = getValueStringFromXmlLine(aline, fldName.TemperatureMinDataType);
-	//	if (vString != "") {
-	//		string vStringL = lower(vString);
-	//		if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
-	//			prj.tempMinDataType = weatherDataType::MEAN;
-	//		}
-	//		else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
-	//			prj.tempMinDataType = weatherDataType::ASCraster;
-	//		}
-	//		else {
-	//			writeLog(fpnLog, "ERROR : Min temperature data type is invalid.\n", 1, 1);
-	//			return -1;
-	//		}
-	//	}
-	//	else {
-	//		writeLog(fpnLog, "ERROR : Min temperature data type is invalid.\n", 1, 1);
-	//		return -1;
-	//	}
-	//	return 1;
-	//}
 
 	if (aline.find(fldName.TemperatureMinDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMinDataFile);
@@ -1264,9 +1236,8 @@ int readXmlRowProjectSettings(string aline)
 				return -1;
 			}
 		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Min temperature data file [" + vString + "] was not set.\n", 1, 1);
-			return -1;
+		else if (prj.simType == simulationType::Normal) {//옵션이므로 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : Min temperature data file [" + vString + "] was not set.\n", 1, 1);
 		}
 		return 1;
 	}
@@ -1282,34 +1253,12 @@ int readXmlRowProjectSettings(string aline)
 			}
 			prj.tempMinInterval_min = t_min;
 		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Min temperature data time interval was not set.\n", 1, 1);
-			return -1;
+		else if (prj.simType == simulationType::Normal) {//옵션이므로 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : Min temperature data time interval was not set.\n", 1, 1);
 		}
 		return 1;
 	}
 
-	//if (aline.find(fldName.DurationOfSunshineDataType) != string::npos) {
-	//	vString = getValueStringFromXmlLine(aline, fldName.DurationOfSunshineDataType);
-	//	if (vString != "") {
-	//		string vStringL = lower(vString);
-	//		if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
-	//			prj.durationOfSunDataType = weatherDataType::MEAN;
-	//		}
-	//		else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
-	//			prj.durationOfSunDataType = weatherDataType::ASCraster;
-	//		}
-	//		else {
-	//			writeLog(fpnLog, "ERROR : Duration of sunshine data type is invalid.\n", 1, 1);
-	//			return -1;
-	//		}
-	//	}
-	//	else {
-	//		writeLog(fpnLog, "ERROR : Duration of sunshine data type is invalid.\n", 1, 1);
-	//		return -1;
-	//	}
-	//	return 1;
-	//}
 	if (aline.find(fldName.DaytimeLengthDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.DaytimeLengthDataFile);
 		prj.fpnDurationOfSunData = "";
@@ -1322,9 +1271,8 @@ int readXmlRowProjectSettings(string aline)
 				return -1;
 			}
 		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Duration of sunshine data file [" + vString + "] was not set.\n", 1, 1);
-			return -1;
+		else if (prj.simType == simulationType::Normal) {//옵션이므로 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : Duration of sunshine data file [" + vString + "] was not set.\n", 1, 1);
 		}
 		return 1;
 	}
@@ -1340,9 +1288,8 @@ int readXmlRowProjectSettings(string aline)
 			}
 			prj.durationOfSunInterval_min = t_min;
 		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Duration of sunshine data time interval was not set.\n", 1, 1);
-			return -1;
+		else if (prj.simType == simulationType::Normal) {//옵션이므로 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : Duration of sunshine data time interval was not set.\n", 1, 1);
 		}
 		return 1;
 	}
@@ -1353,9 +1300,8 @@ int readXmlRowProjectSettings(string aline)
 		if (vString != "" && _access(vString.c_str(), 0) == 0) {
 			prj.fpnDurationOfSunRatioData = vString;
 		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : The ratio of sunshine duration data file [" + vString + "] was not set.\n", 1, 1);
-			return -1;
+		else if (prj.simType == simulationType::Normal) {//옵션이므로 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : The ratio of sunshine duration data file [" + vString + "] was not set.\n", 1, 1);
 		}
 		return 1;
 	}
@@ -1366,34 +1312,12 @@ int readXmlRowProjectSettings(string aline)
 		if (vString != "" && _access(vString.c_str(), 0) == 0) {
 			prj.fpnBlaneyCriddleK = vString;
 		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : The file of K ceofficient data in Blaney-Criddle method  [" + vString + "] was not set.\n", 1, 1);
-			return -1;
+		else if (prj.simType == simulationType::Normal) {//옵션이므로 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : The file of K ceofficient data in Blaney-Criddle method  [" + vString + "] was not set.\n", 1, 1);
 		}
 		return 1;
 	}
 
-	//if (aline.find(fldName.SolarRadiationDataType) != string::npos) {
-	//	vString = getValueStringFromXmlLine(aline, fldName.SolarRadiationDataType);
-	//	if (vString != "") {
-	//		string vStringL = lower(vString);
-	//		if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
-	//			prj.solarRadDataType = weatherDataType::MEAN;
-	//		}
-	//		else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
-	//			prj.solarRadDataType = weatherDataType::ASCraster;
-	//		}
-	//		else {
-	//			writeLog(fpnLog, "ERROR : Solar radiation data type is invalid.\n", 1, 1);
-	//			return -1;
-	//		}
-	//	}
-	//	else {
-	//		writeLog(fpnLog, "ERROR : Solar radiation data type is invalid.\n", 1, 1);
-	//		return -1;
-	//	}
-	//	return 1;
-	//}
 	if (aline.find(fldName.SolarRadiationDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SolarRadiationDataFile);
 		prj.fpnSolarRadData = "";
@@ -1406,9 +1330,8 @@ int readXmlRowProjectSettings(string aline)
 				return -1;
 			}
 		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Solar radiation data file [" + vString + "] was not set.\n", 1, 1);
-			return -1;
+		else if (prj.simType == simulationType::Normal) {//옵션이므로 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : Solar radiation data file [" + vString + "] was not set.\n", 1, 1);
 		}
 		return 1;
 	}
@@ -1424,34 +1347,12 @@ int readXmlRowProjectSettings(string aline)
 			}
 			prj.solarRadInterval_min = t_min;
 		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Solar radiation data time interval was not set.\n", 1, 1);
-			return -1;
+		else if (prj.simType == simulationType::Normal) {//옵션이므로 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : Solar radiation data time interval was not set.\n", 1, 1);
 		}
 		return 1;
 	}
 
-	//if (aline.find(fldName.SnowPackTemperatureDataType) != string::npos) {
-	//	vString = getValueStringFromXmlLine(aline, fldName.SnowPackTemperatureDataType);
-	//	if (vString != "") {
-	//		string vStringL = lower(vString);
-	//		if (vStringL == lower(ENUM_TO_STR(TextFileMEAN))) {
-	//			prj.snowpackTempDataType = weatherDataType::MEAN;
-	//		}
-	//		else if (vStringL == lower(ENUM_TO_STR(TextFileASCgrid))) {
-	//			prj.snowpackTempDataType = weatherDataType::ASCraster;
-	//		}
-	//		else {
-	//			writeLog(fpnLog, "ERROR : Snowpack temperature data type is invalid.\n", 1, 1);
-	//			return -1;
-	//		}
-	//	}
-	//	else {
-	//		writeLog(fpnLog, "ERROR : Snowpack temperature data type is invalid.\n", 1, 1);
-	//		return -1;
-	//	}
-	//	return 1;
-	//}
 	if (aline.find(fldName.SnowPackTemperatureDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SnowPackTemperatureDataFile);
 		prj.fpnSnowpackTempData = "";
@@ -1464,9 +1365,8 @@ int readXmlRowProjectSettings(string aline)
 				return -1;
 			}
 		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Snowpack temperature data file [" + vString + "] was not set.\n", 1, 1);
-			return -1;
+		else if (prj.simType == simulationType::Normal) {//옵션이므로 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : Snowpack temperature data file [" + vString + "] was not set.\n", 1, 1);
 		}
 		return 1;
 	}
@@ -1482,9 +1382,8 @@ int readXmlRowProjectSettings(string aline)
 			}
 			prj.snowpackTempInterval_min = t_min;
 		}
-		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Snowpack temperature data time interval was not set.\n", 1, 1);
-			return -1;
+		else if (prj.simType == simulationType::Normal) {//옵션이므로 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : Snowpack temperature data time interval was not set.\n", 1, 1);
 		}
 		return 1;
 	}
@@ -1503,8 +1402,12 @@ int readXmlRowProjectSettings(string aline)
 		return 1;
 	}
 
-	if (aline.find(fldName.SimulStartingTime) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.SimulStartingTime);
+	if (aline.find(fldName.SimulationStartingTime_01) != string::npos
+		|| aline.find(fldName.SimulationStartingTime_02) != string::npos) {		
+		vString = getValueStringFromXmlLine(aline, fldName.SimulationStartingTime_01);
+		if (vString == "") {
+			vString = getValueStringFromXmlLine(aline, fldName.SimulationStartingTime_02);
+		}
 		if (vString != "") {
 			prj.simStartTime = vString;
 			if (isNumeric(vString) == true) {
@@ -2166,153 +2069,6 @@ int readXmlRowWatchPoint(string aline, wpLocationRC* wpl)
 	}
 	return 1;
 }
-
-//// 이건 continuous 용 =======ProjectSettings와 subwatershedSetting으로 구분 분할 필요.. 2022.03.17================================================
-//int readXmlPETnSnowMelt(string aline, PETnSMinfo* petsmi) {
-//	string vString = "";
-
-//	projectFileFieldName fldName;
-//	if (aline.find("<" + fldName.ID_PETSM + ">") != string::npos) {
-//		vString = getValueStringFromXmlLine(aline, fldName.ID_PETSM);
-//		if (vString != "" && stoi(vString) > 0) {
-//			petsmi->wsid = stoi(vString);
-//		}
-//		else {
-//			writeLog(fpnLog, "ERROR : ID in PET and snow melt data is invalid.\n", 1, 1);
-//			return -1;
-//		}
-//		return 1;
-//	}
-	//if (aline.find(fldName.PETDataFile) != string::npos) {
-	//	vString = getValueStringFromXmlLine(aline, fldName.PETDataFile);
-	//	if (vString != "" && _access(vString.c_str(), 0) == 0) {
-	//		petsmi->fpnPET = vString;
-	//	}
-	//	else  if (vString != "") {
-	//		writeLog(fpnLog, "ERROR : PET data file in the watershed ["
-	//			+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-	//		return -1;
-	//	}
-	//	return 1;
-	//}
-
-//	if (aline.find(fldName.PETMethod) != string::npos) {
-//		vString = getValueStringFromXmlLine(aline, fldName.PETMethod);
-//		PETmethod etm = PETmethod::notSet; // 이것으로 설정되면, 애러로 처리
-//		if (vString != "") {
-//			string vStringL = lower(vString);
-//			if (vStringL == lower(ENUM_TO_STR(UserData))) {
-//				etm = PETmethod::UserData;// constant로 하고 그 값을 0으로 하면 증발산 없음.
-//			}
-//			else if (vStringL == lower(ENUM_TO_STR(PenmanMonteith))) {
-//				etm = PETmethod::PenmanMonteith;
-//			}
-//			else if (vStringL == lower(ENUM_TO_STR(PriestleyTaylor))) {
-//				etm = PETmethod::PriestleyTaylor;
-//			}
-//			else if (vStringL == lower(ENUM_TO_STR(Hargreaves))) {
-//				etm = PETmethod::Hargreaves;
-//			}
-//			else if (vStringL == lower(ENUM_TO_STR(JensenHaise))) {
-//				etm = PETmethod::JensenHaise;
-//			}
-//			else if (vStringL == lower(ENUM_TO_STR(BlaneyCriddle))) {
-//				etm = PETmethod::BlaneyCriddle;
-//			}
-//			else if (vStringL == lower(ENUM_TO_STR(Hamon))) {
-//				etm = PETmethod::Hamon;
-//			}
-//			else if (vStringL == lower(ENUM_TO_STR(Turc))) {
-//				etm = PETmethod::Turc;
-//			}
-//			else if (vStringL == lower(ENUM_TO_STR(None))) {
-//				etm = PETmethod::None;
-//			}
-//			else {
-//				writeLog(fpnLog, "ERROR : Evaportranspiration method in the watershed ["
-//					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-//				return -1;
-//			}
-//		}
-//		else {
-//			writeLog(fpnLog, "ERROR : Evaportranspiration method in the watershed ["
-//				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-//			return -1;
-//		}
-//		petsmi->petMethod = etm;
-//		return 1;
-//	}
-//
-//	if (aline.find(fldName.PETcoeffPlant) != string::npos) {
-//		vString = getValueStringFromXmlLine(aline, fldName.PETcoeffPlant);
-//		if (vString != "" ){
-//			if (stod(vString) >= 0.0) {
-//				petsmi->PETcoeffPlant = stod(vString);
-//			}
-//			else {
-//				writeLog(fpnLog, "ERROR : PET coefficient for plant in the area ["
-//					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-//				return -1;
-//			}
-//		}
-//		return 1;
-//	}
-//	if (aline.find(fldName.PETcoeffSoil) != string::npos) {
-//		vString = getValueStringFromXmlLine(aline, fldName.PETcoeffSoil);
-//		if (vString != "") {
-//			if (stod(vString) >= 0.0) {
-//				petsmi->PETcoeffSoil = stod(vString);
-//			}
-//			else {
-//				writeLog(fpnLog, "ERROR : PET coefficient for soil in the area ["
-//					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-//				return -1;
-//			}
-//		}
-//		return 1;
-//	}
-//	if (aline.find(fldName.SnowMeltMethod) != string::npos) {
-//		vString = getValueStringFromXmlLine(aline, fldName.SnowMeltMethod);
-//		snowMeltMethod smm = snowMeltMethod::notSet; // 이것으로 설정되면, 애러로 처리 
-//		if (vString != "") {
-//			string vStringL = lower(vString);
-//			if (vStringL == lower(ENUM_TO_STR(UserData))) {
-//				smm = snowMeltMethod::UserData; // constant로 하고 그 값을 0으로 하면 융설 없음.
-//			}
-//			else if (vStringL == lower(ENUM_TO_STR(Amethod))) {
-//				smm = snowMeltMethod::Amethod;
-//			}
-//			else if (vStringL == lower(ENUM_TO_STR(None))) {
-//				smm = snowMeltMethod::None;
-//			}
-//			else {
-//				writeLog(fpnLog, "ERROR : Snow melt method in the watershed ["
-//					+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-//				return -1;
-//			}
-//		}
-//		else {
-//			writeLog(fpnLog, "ERROR : Snow melt method in the watershed ["
-//				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-//			return -1;
-//		}
-//		petsmi->smMethod = smm;
-//		return 1;
-//	}
-//	if (aline.find(fldName.SnowMeltDataFile) != string::npos) {
-//		vString = getValueStringFromXmlLine(aline, fldName.SnowMeltDataFile);
-//	    if (vString != "" && _access(vString.c_str(), 0) == 0) {
-//			petsmi->fpnSnowMelt = vString;
-//		}
-//		else  if (vString != ""){
-//			writeLog(fpnLog, "ERROR : Snow melt data file in the watershed ["
-//				+ to_string(petsmi->wsid) + "] is invalid.\n", 1, 1);
-//			return -1;
-//		}
-//		return 1;
-//	}
-//	return 1;
-//}
 
 int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 	string vString = "";
@@ -2994,10 +2750,9 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			else if (vStringL == lower(ENUM_TO_STR(UserData))) {
 				interceptM = InterceptionMethod::UserData;
 			}
-			else {
-				writeLog(fpnLog, "ERROR : Interception method in the watershed ["
-					+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
-				return -1;
+			else { // 차단은 옵션이므로, 애러처리 안한다.
+				//writeLog(fpnLog, "WARNNING : Interception method in the watershed ["
+				//	+ to_string(ssp->wsid) + "] was not set.\n", 1, -1);
 			}
 		}
 		ssp->interceptMethod = interceptM;
@@ -3035,10 +2790,9 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			else if (vStringL == lower(ENUM_TO_STR(UserData))) {
 				petM = PETmethod::UserData;
 			}
-			else {
-				writeLog(fpnLog, "ERROR : PET method in the watershed ["
-					+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
-				return -1;
+			else { // 증발산 옵션이므로, 애러처리 안한다.
+				//writeLog(fpnLog, "WARNNING : PET method in the watershed ["
+				//	+ to_string(ssp->wsid) + "] was not set.\n", 1, -1);
 			}
 		}
 		ssp->potentialETMethod = petM;
@@ -3050,6 +2804,10 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		ssp->etCoeff = -1.0;
 		if (vString != "" && stod(vString) > 0) {
 			ssp->etCoeff = stod(vString);
+		}
+		else {// 증발산 옵션이므로, 애러처리 안한다.
+			//writeLog(fpnLog, "WARNNING : ET coefficient of the watershed ["
+			//	+ to_string(ssp->wsid) + "] is invalid.\n", 1, -1);
 		}
 		return 1;
 	}
@@ -3068,10 +2826,9 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			else if (vStringL == lower(ENUM_TO_STR(UserData))) {
 				snowMM = SnowMeltMethod::UserData;
 			}
-			else {
-				writeLog(fpnLog, "ERROR : Snow melt method in the watershed ["
-					+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
-				return -1;
+			else {// 융설은 옵션이므로, 애러처리 안한다.
+				//writeLog(fpnLog, "WARNNING : Snow melt method in the watershed ["
+				//	+ to_string(ssp->wsid) + "] was not set.\n", 1, -1);
 			}
 		}
 		ssp->snowMeltMethod = snowMM;
@@ -3082,10 +2839,10 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		if (vString != "" && isNumeric(vString) == true) {
 			ssp->smeltTSR = stod(vString);
 		}
-		else {
-			writeLog(fpnLog, "ERROR : Snow melt TSR value in the watershed ["
-				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
-			return -1;
+		else { // 융설은 옵션이므로, 애러처리 안한다.
+			ssp->smeltTSR = -9999;
+			//writeLog(fpnLog, "WARNNING : Snow melt TSR value in the watershed ["
+			//	+ to_string(ssp->wsid) + "] is invalid.\n", 1, -1);
 		}
 		return 1;
 	}
@@ -3094,10 +2851,10 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		if (vString != "" && stod(vString) >= 0) {
 			ssp->smeltingTemp = stod(vString);
 		}
-		else {
-			writeLog(fpnLog, "ERROR : Snowmelting temperature value in the watershed ["
-				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
-			return -1;
+		else {// 융설은 옵션이므로, 애러처리 안한다.
+			ssp->smeltingTemp = -9999;
+			//writeLog(fpnLog, "WARNNING : Snowmelting temperature value in the watershed ["
+			//	+ to_string(ssp->wsid) + "] is invalid.\n", 1, -1);
 		}
 		return 1;
 	}
@@ -3106,10 +2863,10 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		if (vString != "" && stod(vString) >= 0) {
 			ssp->snowCovRatio = stod(vString);
 		}
-		else {
-			writeLog(fpnLog, "ERROR : Snow coverage ratio value in the watershed ["
-				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
-			return -1;
+		else {// 융설은 옵션이므로, 애러처리 안한다.
+			ssp->snowCovRatio = -1;
+			//writeLog(fpnLog, "WARNNING : Snowpack coverage ratio value in the watershed ["
+			//	+ to_string(ssp->wsid) + "] is invalid.\n", 1, -1);
 		}
 		return 1;
 	}
@@ -3118,10 +2875,10 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		if (vString != "" && stod(vString) >= 0) {
 			ssp->smeltCoef = stod(vString);
 		}
-		else {
-			writeLog(fpnLog, "ERROR : Snowmelt coefficient value in the watershed ["
-				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
-			return -1;
+		else {// 융설은 옵션이므로, 애러처리 안한다.
+			ssp->smeltCoef = -1;
+			//writeLog(fpnLog, "WARNNING : Snowmelt coefficient value in the watershed ["
+			//	+ to_string(ssp->wsid) + "] is invalid.\n", 1, -1);
 		}
 		return 1;
 	}

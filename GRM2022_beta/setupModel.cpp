@@ -82,6 +82,16 @@ int initWPinfos()
 	for (int i = 0; i < prj.wps.size(); ++i) {
 		int cx = prj.wps[i].wpColX;
 		int ry = prj.wps[i].wpRowY;
+		if (cx<0 || cx>di.nCols - 1) {
+			writeLog(fpnLog, "ERROR : The column index of the watch point ["
+				+ prj.wps[i].wpName +"] is out of range.\n", 1, 1);
+			return -1;
+		}
+		if (ry<0 || ry>di.nRows - 1) {
+			writeLog(fpnLog, "ERROR : The row index of the watch point [" 
+				+ prj.wps[i].wpName + "] is out of range.\n", 1, 1);
+			return -1;
+		}
 		int idx = cvais[cx][ry];
 		wpSimValue.wpCVidxes.push_back(idx);
 		wpSimValue.wpNames[idx] = prj.wps[i].wpName;

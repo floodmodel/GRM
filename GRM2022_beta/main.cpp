@@ -364,24 +364,24 @@ int setupAndStartSimulation()
 
 int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 {	
-	cout << "Checking input files... ";
-	writeLog(fpnLog, "Checking the input files... \n", 1, -1);
+	//cout << "Checking input files... ";
+	writeLog(fpnLog, "Checking the input files... \n", 1, 1);
 	if (openProjectFile(forceRealTime) < 0)	{
 		writeLog(fpnLog, "ERROR : Open "+ ppi.fpn_prj+" was failed.\n", 1, 1);
 		if (prj.forSimulation == 1) {// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 			return -1;
 		}
 	}
-	cout << "completed. \n";
-	writeLog(fpnLog, "Checking input files completed.\n", 1, -1);
+	//cout << "completed. \n";
+	writeLog(fpnLog, "Checking input files completed.\n", 1, 1);
 	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, 1);
-	cout << "Setting up input data... ";
-	writeLog(fpnLog, "Setting up input data...\n", 1, -1);
+	//cout << "Setting up input data... ";
+	writeLog(fpnLog, "Setting up input data...\n", 1, 1);
 	if (setupModelAfterOpenProjectFile() == -1) {		
 		if (prj.forSimulation == 1) { return -1; }// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	}
-	cout << "completed. \n";
-	writeLog(fpnLog, "Setting up input data completed.\n", 1, -1);
+	//cout << "completed. \n";
+	writeLog(fpnLog, "Setting up input data completed.\n", 1, 1);
 	string isparallel = "true";
 	omp_set_num_threads(prj.mdp);
 
@@ -413,7 +413,7 @@ void grmHelp() // /r, /a 설명 추가
 	printf("\n");
 	printf(" Usage : GRM [Current project file full path and name to simulate]\n");
 	printf("\n");
-	printf("** 사용법 (in Korean)\n");
+	printf("** 사용법 (How to use in Korean)\n");
 	printf("  1. GRM 모형의 project 파일(.gmp)과 입력자료(지형공간자료, 강우, flow control 시계열 자료)를 준비한다. \n");
 	printf("  2. 모델링할 프로젝트 이름을 스위치(argument)로 넣고 실행한다.\n");
 	printf("      - Console에서 grm.exe [argument] 로 실행한다.\n");
@@ -449,7 +449,7 @@ void grmHelp() // /r, /a 설명 추가
 	printf("         -- 예문 : D:/GRMrun>grm /a D:/GRMTest/TestProject/test.gmp\n");
 	printf("         -- 예문 : D:/GRMrun>grm /r /a D:/GRMTest/TestProject/test.ref\n");
 	printf("\n");
-	printf("** Usage (in English)\n");
+	printf("** Usage\n");
 	printf("  1. Make a gmp file by using a text editor or the QGIS-GRM.\n");
 	printf("  2. In the console window, the gmp file is entered as the argument to run GRM.exe.\n");
 	printf("      - In Console : grm.exe [argument]\n");

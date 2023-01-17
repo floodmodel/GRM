@@ -315,7 +315,9 @@ typedef struct _projectFileFieldName
 
 	//==========================
 	const string MaxDegreeOfParallelism = "MaxDegreeOfParallelism";
-	const string SimulStartingTime = "SimulStartingTime"; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
+	const string SimulationStartingTime_01 = "SimulStartingTime"; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
+	const string SimulationStartingTime_02 = "SimulationStartingTime"; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
+
 	const string SimulationDuration_hr_01 = "SimulationDuration";
 	const string SimulationDuration_hr_02 = "SimulationDuration_hr";
 	const string ComputationalTimeStep_min_01 = "ComputationalTimeStep";
