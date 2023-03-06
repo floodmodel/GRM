@@ -35,7 +35,7 @@ The model indroduction and the download guidelines are wiki page at https://gith
 2022.11. Bug fix in setting initial stream flow.   
 2022.11. GRM v2022 beta was uploaded.        
 2023.03. GRM v2022 was uploaded as stable version.   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interception, evapotranspiration, and snow melt module were added for continuous simulation.  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interception, evapotranspiration, and snow melt modules were added for continuous simulation.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Input and output data were revised.  
   
        
