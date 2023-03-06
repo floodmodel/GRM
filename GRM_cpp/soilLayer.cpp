@@ -6,7 +6,7 @@ extern cvAtt* cvs;
 extern cvpos* cvps;
 extern domaininfo di;
 
-void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
+void calEffectiveRFbyInfiltration(int i, int dtrf_sec, int dtsec)
 {
     if (prj.simInfiltration == -1) {
         setNoInfiltrationParameters(i);
@@ -39,7 +39,7 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
         cvs[i].isAfterSaturated = 1;
         cvs[i].ifF_mPdt = 0;
         cvs[i].ifRatef_mPsec = 0;
-        cvs[i].rfEff_dt_m = cvs[i].rfApp_dt_m;
+        cvs[i].rfEff_dt_m = cvs[i].rfApp_mPdt;
         cvs[i].soilWaterC_m = cvs[i].soilWaterC_tm1_m;
     }
     else
@@ -60,7 +60,7 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
         bool beingPonding = false;
         if (cvs[i].ifRatef_tm1_mPsec >= cvs[i].rfiRead_tm1_mPsec) {
             // 이전 시간에서의 침투률이 이전 시간에서의 강우강도보다 컸다면, 모든 강우는 침투됨
-            infiltrationF_mPdt_max = cvs[i].rfApp_dt_m;// 0 이상이 보장됨
+            infiltrationF_mPdt_max = cvs[i].rfApp_mPdt;// 0 이상이 보장됨
         }
         else {
             // 이전 시간에서의 침투률이 이전 시간에서의 강우강도보다 같거나 작았다면 ponding이 발생한 경우
@@ -98,12 +98,12 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
         // 이경우에는 침투는 있지만.. 강우는 모두 직접 유출.. 침투는 지표면 저류 상태에서 발생
         if (cvs[i].isAfterSaturated == 1 
             && (beingPonding == true || cvs[i].ssr > 0.99)) {
-            cvs[i].rfEff_dt_m = cvs[i].rfApp_dt_m;
+            cvs[i].rfEff_dt_m = cvs[i].rfApp_mPdt;
         }
         else {
-            double effRF_dt_m = cvs[i].rfApp_dt_m - cvs[i].ifF_mPdt;
-            if (effRF_dt_m > cvs[i].rfApp_dt_m) {
-                effRF_dt_m = cvs[i].rfApp_dt_m;
+            double effRF_dt_m = cvs[i].rfApp_mPdt - cvs[i].ifF_mPdt;
+            if (effRF_dt_m > cvs[i].rfApp_mPdt) {
+                effRF_dt_m = cvs[i].rfApp_mPdt;
             }
             if (effRF_dt_m < 0) {
                 effRF_dt_m = 0;
@@ -111,9 +111,9 @@ void calEffectiveRainfall(int i, int dtrf_sec, int dtsec)
             cvs[i].rfEff_dt_m = effRF_dt_m;
             if (cvs[i].imperviousR < 1) {
                 cvs[i].rfEff_dt_m = cvs[i].rfEff_dt_m * (1 - cvs[i].imperviousR) 
-                    + cvs[i].rfApp_dt_m * cvs[i].imperviousR;
-                if (cvs[i].rfEff_dt_m > cvs[i].rfApp_dt_m) {
-                    cvs[i].rfEff_dt_m = cvs[i].rfApp_dt_m;
+                    + cvs[i].rfApp_mPdt * cvs[i].imperviousR;
+                if (cvs[i].rfEff_dt_m > cvs[i].rfApp_mPdt) {
+                    cvs[i].rfEff_dt_m = cvs[i].rfApp_mPdt;
                 }
             }
         }
@@ -177,22 +177,22 @@ double calRFlowAndSSFlow(int i,
     double SSFfromCVw;
     double SSFAddedToMeFromCVw_m;
     double RflowBySSFfromCVw_m2; // 이건 return flow
-    SSFfromCVw = totalSSFfromCVwOFcell_m3Ps(i) * dtsec / (dy_m * dx_m);
+    SSFfromCVw = totalSSFfromCVwOFcell_m3Ps(i) * dtsec / (dy_m * dx_m); // 유입된 총량 계산 후 수심계산
     // 상류의 지표하 유출에 의한 현재 셀의 Rflow 기여분 계산
     double ssr = soilSSRbyCumulF(cvs[i].soilWaterC_tm1_m,
-        cvs[i].sdEffAsWaterDepth_m, cvs[i].flowType);
-    if (ssr >= 0.99) {
+                     cvs[i].sdEffAsWaterDepth_m, cvs[i].flowType);
+    if (ssr > 0.99) {
         RflowBySSFfromCVw_m2 = SSFfromCVw * dy_m;
         SSFAddedToMeFromCVw_m = 0;
     }
     else {
-        RflowBySSFfromCVw_m2 = SSFfromCVw * cvs[i].ssr * dy_m;
+        RflowBySSFfromCVw_m2 = SSFfromCVw * cvs[i].ssr * dy_m; //수심*폭
         SSFAddedToMeFromCVw_m = SSFfromCVw * (1 - cvs[i].ssr);
     }
     // 상류에서 유입된 지표하 유출 깊이 더하고..
     cvs[i].soilWaterC_tm1_m = cvs[i].soilWaterC_tm1_m
         + SSFAddedToMeFromCVw_m;
-    // 현재의 침투 깊이를 이용해서 rf 계산하고..
+    // 현재의 침투 깊이를 이용해서 return flow 계산하고..
     if (cvs[i].soilWaterC_tm1_m > cvs[i].sdEffAsWaterDepth_m) {
         // 하류로 이송된 지표하 유출량이 현재 셀의 포화가능 깊이를 초과하면, 초과분은 returnflow
         RflowBySSFfromCVw_m2 = (cvs[i].soilWaterC_tm1_m
@@ -347,29 +347,29 @@ double Kunsaturated(cvAtt cv)
         ssr = 0;
     }
     double Ks = cv.hc_K_mPsec;
-    unSaturatedKType uKType = cv.ukType;
-    double CoefUnsaturatedK = cv.coefUK;
-    if (CoefUnsaturatedK <= 0) {
+    //unSaturatedKType uKType = cv.ukType;
+    //double CoefUnsaturatedK = cv.coefUK;
+    if (cv.coefUK <= 0) {
         return Ks * 0.1;
     }
     if (ssr > 0.99) {
         return Ks;
     }
     else {
-        switch (uKType) {
+        switch (cv.ukType) {
         case unSaturatedKType::Linear: {
-            return Ks * ssr * CoefUnsaturatedK;
+            return Ks * ssr * cv.coefUK;
         }
         case unSaturatedKType::Exponential: {
-            return Ks * pow(ssr, CoefUnsaturatedK);
+            return Ks * pow(ssr, cv.coefUK);
         }
         case unSaturatedKType::Constant: {
 			// constant를 선택하고, 계수로 1을 입력하면
 			// (default 투수계수) * (투수계수보정계수)의 값이 그대로 적용된다.
-            return Ks * CoefUnsaturatedK; 
+            return Ks * cv.coefUK;
         }
         default: {
-            return Ks * ssr * CoefUnsaturatedK;
+            return Ks * ssr * cv.coefUK;
         }
         }
     }
@@ -440,7 +440,7 @@ inline void setNoInfiltrationParameters(int i)
     cvs[i].ssr = 0;
     cvs[i].soilWaterC_m = 0;
     cvs[i].soilWaterC_tm1_m = 0;
-    cvs[i].rfEff_dt_m = cvs[i].rfApp_dt_m;
+    cvs[i].rfEff_dt_m = cvs[i].rfApp_mPdt;
 }
 
 inline void setWaterAreaInfiltrationPars(int i)
@@ -448,6 +448,6 @@ inline void setWaterAreaInfiltrationPars(int i)
     cvs[i].ifF_mPdt = 0;
     cvs[i].ifRatef_mPsec = 0;
     cvs[i].ssr = 1;
-    cvs[i].rfEff_dt_m = cvs[i].rfApp_dt_m;
+    cvs[i].rfEff_dt_m = cvs[i].rfApp_mPdt;
 }
 

@@ -15,16 +15,17 @@ extern cvpos* cvps;
 extern map<int, int*> cvaisToFA; //fa별 cv array idex 목록
 extern vector<int> fas;
 extern map<int, int> faCount;
-extern vector<rainfallData> rfs;
+extern vector<weatherData> rfs;
 extern flowControlCellAndData fccds;
-extern wpinfo wpis;
+extern wpSimData wpSimValue;
 extern cvAtt* cvsb;
 
 extern thisSimulationRT tsrt;
 extern realTimeEnvFile rtef;
 
+/// 현재는 강우-유출 사상만 실시간 모의가 가능하다. 연속형 모의는 실시간 자료 처리 적용 안되어 있음. 2023.03.06
 int startSimulationRT()
-{
+{ 
     initThisSimulation();
     setCVStartingCondition(0);
     int dtRF_sec = prj.rfinterval_min * 60;
@@ -36,16 +37,15 @@ int startSimulationRT()
     int endingT_sec = ts.simEnding_sec + ts.dtsec + 1;
     int rfOrder = 0;
     while (nowTsec < endingT_sec) {
-        //dtsec = ts.dtsec;        
         // dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
-        if (rfOrder == 0 || nowTsec > dtRF_sec * ts.rfDataCountTotal) {
+        if (rfOrder == 0 || nowTsec > dtRF_sec * ts.dataNumTotal_rf) {
             string targetRFTime;
             int rft_sec = rfOrder * dtRF_sec;
             targetRFTime = timeElaspedToDateTimeFormat(prj.simStartTime, rft_sec,
                 timeUnitToShow::toM, dateTimeFormat::yyyymmddHHMMSS);
             while (ts.stopSim == -1) {
                 updateRFdataGRMRT(targetRFTime);
-                if (rfOrder < ts.rfDataCountTotal) { break; }
+                if (rfOrder < ts.dataNumTotal_rf) { break; }
                 Sleep(2000);// 2초 지연 적절함
             }
             if (ts.stopSim == 1) {
@@ -101,9 +101,17 @@ int startSimulationRT()
             }
         }
         nowTmin = nowTsec / 60.0;
+		if (prj.isDateTimeFormat == 1) {
+			string tElapsedStr = timeElaspedToDateTimeFormat2(prj.simStartTime,
+				nowTsec, timeUnitToShow::toM,
+				dateTimeFormat::yyyymmddHHMMSS);
+			tm tCurDate = stringToDateTime(tElapsedStr);
+			ts.tCurMonth = tCurDate.tm_mon;
+			ts.tCurDay = tCurDate.tm_mday;
+		}
         if (simulateRunoff(nowTmin) == -1) { return -1; }
-        calWPCumulRFduringDTP(ts.dtsec);
-        outputManager(nowTsec, rfOrder);
+        calValuesDuringPT(ts.dtsec);
+		outputManager(nowTsec);
         if (nowTsec + ts.dtsec > endingT_sec) {
             ts.dtsec = nowTsec + ts.dtsec - endingT_sec;
             nowTsec = endingT_sec;
@@ -128,9 +136,9 @@ int startSimulationRT()
         COleDateTime  timeNow = COleDateTime::GetCurrentTime();
         COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
         writeLog(fpnLog, "Simulation was completed. Run time: "
-            + to_string(tsTotalSim.GetHours()) + "hrs "
-            + to_string(tsTotalSim.GetMinutes()) + "min "
-            + to_string(tsTotalSim.GetSeconds()) + "sec.\n", 1, 1);
+            + to_string(tsTotalSim.GetHours()) + " h "
+            + to_string(tsTotalSim.GetMinutes()) + " m "
+            + to_string(tsTotalSim.GetSeconds()) + " s.\n", 1, 1);
         return 1;
     }
     return 1;

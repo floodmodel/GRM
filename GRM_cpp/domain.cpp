@@ -40,8 +40,6 @@ int readDomainFaFileAndSetupCV()
     di.dmids.clear();
     di.facMax = -1;
     di.facMin = INT_MAX;
-	//writeLog(fpnLog, "Qdebug Header string all : " + dmFile.headerStringAll + "\n", 1, -1);
-	//writeLog(fpnLog, "Qdebug Header cell size : " + to_string(dmFile.header.cellsize) + "\n", 1, -1);
     //====================================
     cvais = new int* [di.nCols];
     for (int i = 0; i < di.nCols; ++i) {
@@ -288,6 +286,8 @@ int readLandCoverFileAndSetCVbyVAT()
                 cvs[i].lcCellValue = v;
                 cvs[i].rcOFori = lc.RoughnessCoefficient;
                 cvs[i].imperviousR = lc.ImperviousRatio;
+				cvs[i].canopyR = lc.CanopyRatio;
+				cvs[i].intcpMaxWaterCanopy_m = lc.InterceptionMaxWaterCanopy_mm / 1000.0;
                 cvs[i].lcCode = lc.lcCode;
             }
             else {

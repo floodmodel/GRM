@@ -136,7 +136,7 @@ int grmRTLauncher(int argc, char** args, int isPrediction)
         grmRealTime oGRM = grmRealTime(fpnRef, strGUID, startCommandTime,
             rtStartDataTime, nameLensModel);
         // 여기서 부터는 fpnLog 사용할 수 있다.
-        writeNewLog(fpnLog, "GRM RT was started.\n", 1, 1);
+        writeLog(fpnLog, "GRM RT was started.\n", 1, 1);
         oGRM.setUpAndStartGRMRT();
         writeLog(fpnLog, "GRM RT was ended.\n", 1, 1);
         //Console.ReadLine();    // 필수

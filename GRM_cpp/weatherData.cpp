@@ -39,89 +39,6 @@ int setRainfallData()
 	}
 	return 1;
 }
-//int setRainfallData()
-//{
-//	if (prj.fpnRainfallData != "" && _access(prj.fpnRainfallData.c_str(), 0) != 0) {
-//		writeLog(fpnLog, "Rainfall data file is invalid.\n", 1, 1);
-//		return -1;
-//	}
-//	rfs.clear();
-//	fs::path fpn_in = fs::path(prj.fpnRainfallData);
-//	string fp_in = fpn_in.parent_path().string();
-//	string fn_in = fpn_in.filename().string();
-//	vector<string> Lines;
-//	vector<int> wsids;
-//	Lines = readTextFileToStringVector(prj.fpnRainfallData);
-//	for (int n = 0; n < Lines.size(); n++) {
-//		if (trim(Lines[n]) == "") { break; }
-//		weatherData r;
-//		switch (prj.rfDataType)
-//		{
-//		case weatherDataType::ASCraster: {
-//			r.Order = n + 1;
-//			fs::path fpn = fs::path(Lines[n].c_str());
-//			r.value = fpn.filename().string();
-//			r.FileName = fpn.filename().string();
-//			r.FilePath = fpn.parent_path().string();
-//			break;
-//		}
-//		case weatherDataType::MEAN: {
-//			r.Order = n + 1;
-//			string value = Lines[n];
-//			if (isNumeric(value) == true) {
-//				r.value = value;
-//			}
-//			else {
-//				string err = "ERROR : Can not read rainfall value.\nOrder = "
-//					+ to_string(n + 1) + "\n";
-//				writeLog(fpnLog, err, 1, 1);
-//				r.value = "0";
-//				return -1;
-//			}
-//			r.FileName = fn_in;
-//			r.FilePath = fp_in;
-//			break;
-//		}
-//		case weatherDataType::MEAN_DividedArea: {
-//			if (n == 0) {
-//				wsids = setWSIDsInWeatherDataFile(Lines[n]);		
-//				if (wsids.size() == 0) {
-//					return -1;
-//				}
-//			}
-//			else {
-//				r.Order = n;
-//				vector<double> values = splitToDoubleVector(Lines[n], ',');
-//				int nv = values.size();
-//				if (wsids.size() != nv) {
-//					string err = "ERROR : Precipitation data is not match to watershed id.\n File name : "
-//						+ prj.fpnRainfallData+
-//						+"\n Line number = "+ to_string(n + 1) + "\n";
-//					writeLog(fpnLog, err, 1, 1);
-//					return -1;
-//				}
-//				for (int i = 0; i < nv; ++i) {
-//					r.valueForWS[wsids[i]] = values[i]; // wsid 순서대로 값을 저장	
-//				}				
-//				r.FileName = fn_in;
-//				r.FilePath = fp_in;
-//			}
-//			break;
-//		}
-//		}
-//		if (prj.isDateTimeFormat == 1) {
-//			r.DataTime = timeElaspedToDateTimeFormat2(prj.simStartTime,
-//				prj.rfinterval_min * 60 * n, timeUnitToShow::toM,
-//				dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
-//		}
-//		else {
-//			r.DataTime = to_string(prj.rfinterval_min * n);
-//		}
-//		rfs.push_back(r);
-//	}
-//	return 1;
-//}
-
 
 int setCVRF(int order)
 {
@@ -132,7 +49,7 @@ int setCVRF(int order)
 	ts.rfiSumAllCellsInCurRFData_mPs = 0;
 	int returnv = -1;
 	for (int idx : wpSimValue.wpCVidxes) {
-		wpSimValue.rfiReadSumUpWS_mPs[idx] = 0;
+		wpSimValue.prcpiReadSumUpWS_mPs[idx] = 0;
 	}
 	if (prj.rfDataType == weatherDataType::Raster_ASC
 		|| prj.rfDataType == weatherDataType::Mean_DividedArea)
@@ -192,39 +109,11 @@ int setCVRF(int order)
 		// reduction
 		for (int nth = 0; nth < prj.mdp; ++nth) {
 			for (int idx : wpSimValue.wpCVidxes) {
-				wpSimValue.rfiReadSumUpWS_mPs[idx] += rfiReadSumUpWS_mPs_L[nth][idx];
+				wpSimValue.prcpiReadSumUpWS_mPs[idx] += rfiReadSumUpWS_mPs_L[nth][idx];
 			}
 			ts.rfiSumAllCellsInCurRFData_mPs += rfiSumAllCellsInCurRFData_mPs_L[nth];
 		}
 
-		//      ascRasterFile rfasc = ascRasterFile(fpnRF);
-		//      //#pragma omp parallel for// schedule(guided)
-			  ////omp_set_num_threads(ps.mdp);
-		//      for (int i = 0; i < di.cellNnotNull; ++i) {
-		//          // 유역의 전체 강우량은 inlet 등으로 toBeSimulated == -1 여도 계산에 포함한다.
-			  //	// 강우는 상류에 내린 강우도 포함하는 것이 타당.
-		//          // 상류 cv 개수에 이 조건 추가하려면 주석 해제.
-		//          //if (cvs[i].toBeSimulated == -1) {
-		//          //    continue;  }
-		//          double inRF_mm = rfasc.valuesFromTL[cvps[i].xCol][cvps[i].yRow];
-		//          if (prj.rfDataType == rainfallDataType::TextFileASCgrid_mmPhr) {
-		//              inRF_mm = inRF_mm / (60.0 / dtrf_min);
-		//          }
-		//          if (inRF_mm <= 0) {
-		//              cvs[i].rfiRead_mPsec = 0;
-		//          }
-		//          else {
-		//              cvs[i].rfiRead_mPsec = rfintensity_mPsec(inRF_mm, dtrf_sec);
-		//          }
-
-		//          for (int idx : cvs[i].downWPCVidx) {
-		//              wpis.rfiReadSumUpWS_mPs[idx] = wpis.rfiReadSumUpWS_mPs[idx]
-		//                  + cvs[i].rfiRead_mPsec;
-		//          }
-		//          ts.rfiSumAllCellsInCurRFData_mPs =
-		//              ts.rfiSumAllCellsInCurRFData_mPs
-		//              + cvs[i].rfiRead_mPsec;
-		//      }
 		if (prj.rfDataType == weatherDataType::Raster_ASC
 			|| prj.rfDataType == weatherDataType::Mean_DividedArea) {
 			if (rfasc != NULL) {
@@ -235,10 +124,6 @@ int setCVRF(int order)
 			}
 			if (rfiReadSumUpWS_mPs_L != NULL) {
 				rfiReadSumUpWS_mPs_L->clear();
-				//for (int nthread = 0; nthread < prj.mdp; ++nthread) {
-				//	rfiReadSumUpWS_mPs_L[nthread].clear();
-				//}
-				//delete rfiReadSumUpWS_mPs_L;
 			}
 		}
 		returnv = 1;
@@ -265,7 +150,7 @@ int setCVRF(int order)
 		}
 		ts.rfiSumAllCellsInCurRFData_mPs = inRF_mPs * di.cellNtobeSimulated;
 		for (int idx : wpSimValue.wpCVidxes) {
-			wpSimValue.rfiReadSumUpWS_mPs[idx] = inRF_mPs * wpSimValue.cvCountAllup[idx];
+			wpSimValue.prcpiReadSumUpWS_mPs[idx] = inRF_mPs * wpSimValue.cvCountAllup[idx];
 		}
 		returnv = 1;
 	}
@@ -294,10 +179,10 @@ int setCVRF(int order)
     }
 
     for(int wpcvid : wpSimValue.wpCVidxes)    {
-        wpSimValue.rfWPGridForPT_mm[wpcvid] = 0;
-        wpSimValue.rfUpWSAveForDt_mm[wpcvid] = 0;
-        wpSimValue.rfiReadSumUpWS_mPs[wpcvid] = 0;
-        wpSimValue.rfUpWSAveForPT_mm[wpcvid] = 0;
+        wpSimValue.prcpWPGridForPT_mm[wpcvid] = 0;
+        wpSimValue.prcpUpWSAveForDt_mm[wpcvid] = 0;
+        wpSimValue.prcpiReadSumUpWS_mPs[wpcvid] = 0;
+        wpSimValue.prcpUpWSAveForPT_mm[wpcvid] = 0;
     }
 }
 
@@ -313,10 +198,10 @@ int setCVRF(int order)
 	 ts.rfAveSumAllCells_PT_m = 0;
 	 ts.rfiSumAllCellsInCurRFData_mPs = 0;
 	 for (int wpcvid : wpSimValue.wpCVidxes) {
-		 wpSimValue.rfWPGridForPT_mm[wpcvid] = 0;
-		 wpSimValue.rfUpWSAveForDt_mm[wpcvid] = 0;
-		 wpSimValue.rfiReadSumUpWS_mPs[wpcvid] = 0;
-		 wpSimValue.rfUpWSAveForPT_mm[wpcvid] = 0;
+		 wpSimValue.prcpWPGridForPT_mm[wpcvid] = 0;
+		 wpSimValue.prcpUpWSAveForDt_mm[wpcvid] = 0;
+		 wpSimValue.prcpiReadSumUpWS_mPs[wpcvid] = 0;
+		 wpSimValue.prcpUpWSAveForPT_mm[wpcvid] = 0;
 	 }
  }
  

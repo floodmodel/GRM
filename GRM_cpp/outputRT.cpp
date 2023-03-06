@@ -8,7 +8,7 @@ extern projectfilePathInfo ppi;
 extern projectFile prj;
 extern fs::path fpnLog;
 extern cvAtt* cvs;
-extern wpinfo wpis;
+extern wpSimData wpSimValue;
 extern grmOutFiles ofs;
 extern flowControlCellAndData fccds;
 extern thisSimulation ts;
@@ -16,24 +16,15 @@ extern thisSimulationRT tsrt;
 
 extern cvAtt* cvsb;
 
-void writeRealTimeSimResults(int nowTmin, double cinterp)
+void writeRealTimeSimResults(string tStrToPrint, double cinterp, double tsFromStarting_sec)
 {
-    COleDateTime timeNow;
-    double tsFromStarting_sec;
-    string tStrToPrint;
-    timeNow = COleDateTime::GetCurrentTime();
-    COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
-    tsFromStarting_sec = tsTotalSim.GetTotalSeconds();
-    tStrToPrint = timeElaspedToDateTimeFormat(prj.simStartTime,
-        nowTmin * 60, timeUnitToShow::toM,
-        dateTimeFormat::yyyymmddHHMMSS);
     string strWPName;
     string strFNP;
     string vToP = "";
     double Qobs_cms;
     string strSQL_Server = "";       // SQL DB 에도 추가적으로 기입
     // real time은 wp 별 출력만 한다. discharge.out은 출력하지 않는다.
-    for (int i : wpis.wpCVidxes) {
+    for (int i : wpSimValue.wpCVidxes) {
         if (cinterp == 1) {
             if (cvs[i].flowType == cellFlowType::OverlandFlow) {
                 vToP = dtos(cvs[i].QOF_m3Ps, 2);
@@ -54,15 +45,15 @@ void writeRealTimeSimResults(int nowTmin, double cinterp)
         }
         // 여기서 관측자료 받는다.. 직접 받을 수 있는 경우를 대비해서, 자리만 만들어줌..
         Qobs_cms = 0;
-        strWPName = wpis.wpNames[i];
+        strWPName = wpSimValue.wpNames[i];
         if (CONST_bWriteTextFileOutput_FOR_RealTimeSystem == true) {
-            string strOutPutLine;
+            string printLine;
             // 출력 순서는 시간, 모의유량, 관측유량, 강우, 시간
-            strOutPutLine = tStrToPrint
+            printLine = tStrToPrint
                 + "\t" + vToP + "\t" + dtos(Qobs_cms, 2)
-                + "\t" + dtos(wpis.rfUpWSAveForDtP_mm[i], 2)
-                + "\t" + dtos(tsFromStarting_sec / 60.0, 2) + "\n";
-            appendTextToTextFile(ofs.ofpnWPs[i], strOutPutLine);
+                + "\t" + dtos(wpSimValue.prcpUpWSAveForPT_mm[i], 2) + "\n";
+                //+ "\t" + dtos(tsFromStarting_sec / 60.0, 2) + "\n";
+            appendTextToTextFile(ofs.ofpnWPs[i], printLine);
         }
 
         // 사용하지 않으면 삭제 필요. 원이사님 검토 필요. 2020.04.29. 최. 
@@ -102,14 +93,14 @@ int changeOutputFileDisk(char targetDisk)
     int isnormal = -1;
     ofs.ofpnDischarge = IO_Path_ChangeDrive(targetDisk, ofs.ofpnDischarge);
     ofs.ofpnDepth = IO_Path_ChangeDrive(targetDisk, ofs.ofpnDepth);
-    ofs.ofpnRFGrid = IO_Path_ChangeDrive(targetDisk, ofs.ofpnRFGrid);
-    ofs.ofpnRFMean = IO_Path_ChangeDrive(targetDisk, ofs.ofpnRFMean);
+    ofs.ofpnPRCPGrid = IO_Path_ChangeDrive(targetDisk, ofs.ofpnPRCPGrid);
+    ofs.ofpnPRCPMean = IO_Path_ChangeDrive(targetDisk, ofs.ofpnPRCPMean);
     //ofs.OFNPSwsPars = IO_Path_ChangeDrive(targetDisk, ofs.OFNPSwsPars);
-    ofs.ofpnFCData = IO_Path_ChangeDrive(targetDisk, ofs.ofpnFCData);
+    //ofs.ofpnFCData = IO_Path_ChangeDrive(targetDisk, ofs.ofpnFCData);
     ofs.ofpnFCStorage = IO_Path_ChangeDrive(targetDisk, ofs.ofpnFCStorage);
     ofs.ofpSSRDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpSSRDistribution);
-    ofs.ofpRFDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpRFDistribution);
-    ofs.ofpRFAccDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpRFAccDistribution);
+    ofs.ofpPRCPDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpPRCPDistribution);
+    ofs.ofpPRCPAccDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpPRCPAccDistribution);
     ofs.ofpFlowDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpFlowDistribution);
     isnormal = 1;
     return isnormal;

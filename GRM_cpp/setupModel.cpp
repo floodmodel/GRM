@@ -16,7 +16,7 @@ extern cvpos* cvps;
 extern map<int, int*> cvaisToFA; //fa별 cv array idex 목록
 extern vector<int> fas;
 extern map<int, int> faCount;
-extern wpinfo wpis;
+extern wpSimData wpSimValue;
 extern flowControlCellAndData fccds;
 
 int setupModelAfterOpenProjectFile()
@@ -61,29 +61,40 @@ int setDomainAndCVBasicinfo()
 int initWPinfos()
 {
 	int isnormal = -1;
-	wpis.rfiReadSumUpWS_mPs.clear();
-	wpis.rfUpWSAveForDt_mm.clear();
-	wpis.rfUpWSAveForDtP_mm.clear();
-	wpis.rfUpWSAveTotal_mm.clear();
-	wpis.rfWPGridForDtP_mm.clear();
-	wpis.rfWPGridTotal_mm.clear();
-	wpis.totalFlow_cms.clear();
-	wpis.totalDepth_m.clear();
-	wpis.maxFlow_cms.clear();
-	wpis.maxDepth_m.clear();
-	wpis.maxFlowTime.clear();
-	wpis.maxDepthTime.clear();
-	wpis.qFromFCData_cms.clear();
-	wpis.qprint_cms.clear();
-	//wpis.fpnWpOut.clear();
-	wpis.wpCVidxes.clear();
+	wpSimValue.prcpiReadSumUpWS_mPs.clear();
+	wpSimValue.prcpUpWSAveForDt_mm.clear();
+	wpSimValue.prcpUpWSAveForPT_mm.clear();
+	wpSimValue.prcpUpWSAveTotal_mm.clear();
+	wpSimValue.prcpWPGridForPT_mm.clear();
+	wpSimValue.prcpWPGridTotal_mm.clear();
+	wpSimValue.Q_sumPT_m3.clear();
+
+	//wpSimValue.totalFlow_cms.clear();
+	//wpSimValue.totalDepth_m.clear();
+	//wpSimValue.maxFlow_cms.clear();
+	//wpSimValue.maxDepth_m.clear();
+	//wpSimValue.maxFlowTime.clear();
+	//wpSimValue.maxDepthTime.clear();
+	//wpSimValue.qFromFCData_cms.clear();
+	wpSimValue.q_cms_print.clear();
+	wpSimValue.wpCVidxes.clear();
 
 	for (int i = 0; i < prj.wps.size(); ++i) {
 		int cx = prj.wps[i].wpColX;
 		int ry = prj.wps[i].wpRowY;
+		if (cx<0 || cx>di.nCols - 1) {
+			writeLog(fpnLog, "ERROR : The column index of the watch point ["
+				+ prj.wps[i].wpName +"] is out of range.\n", 1, 1);
+			return -1;
+		}
+		if (ry<0 || ry>di.nRows - 1) {
+			writeLog(fpnLog, "ERROR : The row index of the watch point [" 
+				+ prj.wps[i].wpName + "] is out of range.\n", 1, 1);
+			return -1;
+		}
 		int idx = cvais[cx][ry];
-		wpis.wpCVidxes.push_back(idx);
-        wpis.wpNames[idx] = prj.wps[i].wpName;
+		wpSimValue.wpCVidxes.push_back(idx);
+		wpSimValue.wpNames[idx] = prj.wps[i].wpName;
 	}
 	isnormal = 1;
 	return isnormal;
@@ -141,7 +152,7 @@ int setupByFAandNetwork()
         for (int i : ks) {
             if (getVectorIndex(di.wsn.mdWSIDs, i) == -1) {
                 //저장된 css 키가 최하류 wsid 리스트에 없다면,
-                string outstr = "ERROR : [" + to_string(i) + "] is not most downstream watershed ID (it has the downstream watershedID "
+                string outstr = "ERROR : [" + to_string(i) + "] is not the most downstream watershed ID (it has the downstream watershedID "
 					+ to_string(di.wsn.wsidNearbyDown[i])+").\n";
                 writeLog(fpnLog, outstr, 1, 1);
                 return -1;
@@ -152,7 +163,7 @@ int setupByFAandNetwork()
     // 셀별 하류 wp idx 정보 업데이트
     vector<int> idxesBase;
     vector<int> idxesNew;
-    for (int curidx : wpis.wpCVidxes) {
+    for (int curidx : wpSimValue.wpCVidxes) {
         idxesBase.push_back(curidx);
         //현재 셀을 출발점으로 한다.
         int aidx = curidx ;
@@ -285,7 +296,9 @@ int updateCVbyUserSettings()
             || cvs[i].lcCode == landCoverCode::WTLD) {
             cvs[i].ssr = 1.0;
         }
-        else { cvs[i].ssr = cvs[i].iniSSR; }
+        else { 
+			cvs[i].ssr = cvs[i].iniSSR; 
+		}
 
         cvs[i].ukType = unSaturatedKType::Linear;
         if (ups.unSatKType == unSaturatedKType::Linear) {
@@ -315,6 +328,20 @@ int updateCVbyUserSettings()
         if (cvs[i].lcCode == landCoverCode::FRST) {
             cvs[i].sdToBedrock_m = CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN;
         }
+		
+		// 차단
+		cvs[i].intcpMethod= ups.interceptMethod;
+
+		// 증발산
+		cvs[i].petMethod = ups.potentialETMethod;
+		cvs[i].etCoef = ups.etCoeff;
+		
+		// 융설
+		cvs[i].smMethod = ups.snowMeltMethod;
+		cvs[i].smeltTSR =ups.smeltTSR;
+		cvs[i].smeltingT =ups.smeltingTemp;
+		cvs[i].snowCovR = ups.snowCovRatio;
+		cvs[i].smeltCoef = ups.smeltCoef;
     }
 
     // Flow control
@@ -372,15 +399,15 @@ int updateCVbyUserSettings()
 
     // wp 별로, 상류에 있는 cv 개수 설정
 	di.cellNtobeSimulated = 0;
-	for (int idx : wpis.wpCVidxes) {
-		wpis.cvCountAllup[idx] =0;
+	for (int idx : wpSimValue.wpCVidxes) {
+		wpSimValue.cvCountAllup[idx] =0;
 	}
     for (int i = 0; i < di.cellNnotNull; i++) {
         // 상류 cv 개수에 이 조건 추가하려면 주석 해제.
         //if (cvs[i].toBeSimulated == -1) { continue; }
         di.cellNtobeSimulated++;
         for (int idx : cvs[i].downWPCVidx) {
-            wpis.cvCountAllup[idx] ++;
+            wpSimValue.cvCountAllup[idx] ++;
         }
     }
     return 1;

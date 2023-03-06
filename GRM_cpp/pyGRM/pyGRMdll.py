@@ -8,6 +8,7 @@ from ctypes import *
 gdl_path = ctypes.util.find_library("D:/Github/GRM/GRM_cpp/x64/Release/GRM.dll") 
 #gdl_path = ctypes.util.find_library("D:/Github/GRM\GRM_cpp/x64/Debug/GRM.dll") # this line is for combined debugging with GRM c++ code.
 
+
 if not gdl_path:
     print("Unable to find the specified library.")
     sys.exit() 
@@ -22,6 +23,30 @@ class unSaturatedKType(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
 	Linear=1
 	Exponential=2
 	usKNone=3
+
+class PETmethod(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
+	PenmanMonteith = 1
+	BlaneyCriddle = 2
+	Hamon = 3
+	PriestleyTaylor = 4
+	Hargreaves = 5
+	JensenHaise = 6	
+	Turc = 7
+	Constant = 8
+	UserData = 9
+	petNone = 10
+
+class SnowMeltMethod(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
+	Anderson = 1
+	Constant = 8
+	UserData = 9
+	smNone = 10
+
+class InterceptionMethod(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
+	LAIRatio = 1
+	Constant = 8
+	UserData = 9
+	icNone = 10
 
 class swsParameters(Structure):  #grm 코드에 있는 구조체와 내용 맞춘다. 순서도 맞게 해야 한다.
 	_fields_ = [("wsid", ctypes.c_int),
@@ -39,6 +64,14 @@ class swsParameters(Structure):  #grm 코드에 있는 구조체와 내용 맞�
         ("ccWFSuctionHead", ctypes.c_double),
         ("ccHydraulicK", ctypes.c_double),
         ("ccSoilDepth", ctypes.c_double),
+        ("interceptMethod", ctypes.c_int),
+        ("potentialETMethod", ctypes.c_int),
+        ("etCoeff", ctypes.c_double),
+        ("snowMeltMethod", ctypes.c_int),
+        ("smeltTSR", ctypes.c_double),
+        ("smeltingTemp", ctypes.c_double),
+        ("snowCovRatio", ctypes.c_double),
+        ("smeltCoef", ctypes.c_double),
         ("userSet", ctypes.c_int)]
 
 
@@ -125,14 +158,26 @@ class grmWSinfo(object):
 			ctypes.c_double, ctypes.c_double, ctypes.c_double,
 			ctypes.c_int, ctypes.c_double,
 			ctypes.c_double, ctypes.c_double, ctypes.c_double,
-			ctypes.c_double, ctypes.c_double]
-     #     grmWSinfo* f, 
-			#int wsid, double iniSat,
-			#double minSlopeLandSurface, int unSKType, double coefUnsK,
-			#double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
-			#int dryStreamOrder, double ccLCRoughness,
-			#double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
-			#double ccSoilHydraulicCond, double iniFlow = 0)
+			ctypes.c_double,
+            ctypes.c_int,
+            ctypes.c_int, ctypes.c_double,
+            ctypes.c_int, ctypes.c_double, ctypes.c_double,
+            ctypes.c_double, ctypes.c_double,
+            ctypes.c_double]
+     #     grmWSinfo* f
+     #      // grm.h 에서 명시된 인터페이스는 아래와 같다. 
+     #    bool setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
+	 #    double minSlopeLandSurface, unSaturatedKType unSKType, double coefUnsK,
+     #    double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
+     #    int dryStreamOrder, double ccLCRoughness,
+     #    double ccPorosity, double ccWFSuctionHead, double ccSoilHydraulicCond,
+     #    double ccSoilDepth,
+     #    InterceptionMethod interceptMethod,
+     #    PETmethod potentialETMethod, double etCoeff,
+     #    SnowMeltMethod snowMeltMethod, double smeltTSR, double smeltingTemp,
+     #    double snowCovRatio, double smeltCoef,
+     #    double iniFlow = 0);
+
         gdl.setOneSWSParsAndUpdateAllSWSUsingNetwork.restype = ctypes.c_bool
 
         gdl.updateAllSubWatershedParametersUsingNetwork.argtypes =[ctypes.c_void_p]
@@ -168,6 +213,9 @@ class grmWSinfo(object):
         gdl.cellSize.argtypes= [ctypes.c_void_p]
         gdl.cellSize.restype = ctypes.c_double
 
+        gdl.FDtype.argtypes= [ctypes.c_void_p]
+        gdl.FDtype.restype = ctypes.c_char_p  # string
+
         bfpnGmpORfdirType = fpnGMP_OR_fdirType.encode('utf-8')
         if fpnDomain=="":
             self.obj = gdl.grmWSinfo_new_gmpFile(bfpnGmpORfdirType)
@@ -196,6 +244,7 @@ class grmWSinfo(object):
         self.mostDownStreamWSCount = gdl.mostDownStreamWSCount(self.obj) 
         self.cellCountInWatershed=gdl.cellCountInWatershed(self.obj)
         self.cellSize=gdl.cellSize(self.obj)
+        self.fdType_fromGMP = gdl.FDtype(self.obj)
 
     def isInWatershedArea(self, colXAryidx, rowYAryidx):
         return gdl.isInWatershedArea(self.obj, colXAryidx, rowYAryidx)
@@ -249,14 +298,26 @@ class grmWSinfo(object):
 		minSlopeLandSurface, unSKType, coefUnsK,
 		minSlopeChannel, minChannelBaseWidth, roughnessChannel,
 		dryStreamOrder, ccLCRoughness,
-		ccSoilDepth, ccPorosity, ccWFSuctionHead,
-		ccSoilHydraulicCond, iniFlow=0.0):
+		ccPorosity, ccWFSuctionHead, ccSoilHydraulicCond, 
+        ccSoilDepth, # 이 변수 위치 변경됨. 여기로 이동. 2023.03.02
+        #==========추가됨. 2023.03.02===
+        interceptMethod,
+		potentialETMethod, etCoeff,
+		snowMeltMethod, smeltTSR, smeltingTemp, snowCovRatio, smeltCoef,
+        #=========================
+        iniFlow=0.0):
         return gdl.setOneSWSParsAndUpdateAllSWSUsingNetwork(self.obj, wsid, iniSat,
 		minSlopeLandSurface, unSKType, coefUnsK,
 		minSlopeChannel, minChannelBaseWidth, roughnessChannel,
 		dryStreamOrder, ccLCRoughness,
-		ccSoilDepth, ccPorosity, ccWFSuctionHead,
-		ccSoilHydraulicCond, iniFlow)
+		ccPorosity, ccWFSuctionHead,	ccSoilHydraulicCond, 
+        ccSoilDepth, # 이 변수 위치 변경됨. 여기로 이동. 2023.03.02
+        #==========추가됨. 2023.03.02===
+        interceptMethod,
+		potentialETMethod, etCoeff,
+		snowMeltMethod, smeltTSR, smeltingTemp, snowCovRatio, smeltCoef,
+        #=========================
+        iniFlow)
 
     def updateAllSubWatershedParametersUsingNetwork(self):
         return gdl.updateAllSubWatershedParametersUsingNetwork(self.obj)
@@ -270,12 +331,19 @@ class grmWSinfo(object):
 
 # sample code to use grmWSinfo class
 
+###================================================================
 ### gmp 파일로 grmWSinfo class 를 인스턴싱 할 경우 ==============================
 ### gmp 파일에서 ProjectSetting 테이블까지만 채워져 있어도 사용할 수 있다. 
-fpn_gmp = "D:\GRM_ex\Han\20220208_aju\Hanriver_GRM_calib_Run_pre.gmp" #"C:\GRM\SampleGHG\GHG500.gmp"
+#fpn_gmp = "D:\GRM_ex\Han\20220208_aju\Hanriver_GRM_calib_Run_pre.gmp" #"C:\GRM\SampleGHG\GHG500.gmp"
+fpn_gmp  = "D:\Github\zTestSetPyGRM\Prj_v2022_cont_CJDsmall_pyTest\CJD_Prj_cont_10year_small_pyTest.gmp"
+#fpn_gmp  = "D:\Github\zTestSetPyGRM\SampleWC\SampleWiCheon.gmp"
+
 wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
 ###================================================================
+###================================================================
 
+
+##================================================================
 ## gmp 에 저장된 GRM 입력 파일로 grmWSinfo class 를 인스턴싱 할 경우 ============================
 #fdType = "StartsFromE_TauDEM"
 ##fpn_domain = "C:\GRM\SampleGHG\watershed/GHG_Watershed.asc"
@@ -319,59 +387,67 @@ wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_
 #    fpn_st,
 #    fpn_sd, fpn_ssi, fpn_iniCF, fpn_CW)
 ##================================================================
+##================================================================
 
 # 여기서는 정보를 얻고자 하는 셀위치 혹은 유역 번호를 지정 =========================
-xCol = 21 # 정보를 얻고자 하는 셀 위치
-yRow = 49 # 정보를 얻고자 하는 셀 위치
-wsid = 1019   # 정보를 얻고자 하는 유역 번호
+xCol = 32  # 정보를 얻고자 하는 셀 위치
+yRow = 86 # 정보를 얻고자 하는 셀 위치
+wsid = 100109  # 정보를 얻고자 하는 유역 번호
+#=================================================================
+
+print(" ")
+print("From here, pyGRM.dll writes the values.")
 
 a = wsi.isInWatershedArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_bool
-print("isInWatershedArea :", a)
+print("Is the cell [", xCol, ", ", yRow, "] in the watershed area ? :", a)
 
 a = wsi.upStreamWSCount(wsid) # current ws id / [ctypes.c_int] -> ctypes.c_int
-print("upStreamWSCount :", a)
-
-a = wsi.upStreamWSIDs(wsid) # current ws id / [ctypes.c_int] -> ctypes.POINTER(ctypes.c_int)
-for i in range(wsi.upStreamWSCount(wsid)): # Because 'a' is pointer, it have to be iterated by using wsi.upStreamWSCount(wsid)
-    print("  upStreamWSIDs :", a[i]) # if -1, there is no upstream watershed.
+print("The upstream WS count of WSID = ", wsid, " : ", a)
+if a > 0 :
+    a = wsi.upStreamWSIDs(wsid) # current ws id / [ctypes.c_int] -> ctypes.POINTER(ctypes.c_int)
+    for i in range(wsi.upStreamWSCount(wsid)): # Because 'a' is pointer, it have to be iterated by using wsi.upStreamWSCount(wsid)
+        print("  upStreamWSIDs :", a[i]) # if -1, there is no upstream watershed.
 
 a = wsi.downStreamWSCount(wsid) # current ws id / [ctypes.c_int] -> ctypes.c_int
-print("downStreamWSCount :", a)
-
-a = wsi.downStreamWSIDs(wsid) # current ws id / [ctypes.c_int] -> types.POINTER(ctypes.c_int) 
-for i in range(wsi.downStreamWSCount(wsid)):  # Because 'a' is pointer, it have to be iterated by using wsi.downStreamWSCount(wsid)
-    print("  downStreamWSIDs :", a[i]) # if -1, there is no downstream watershed.
+print("The downstream WS count of WSID = ", wsid, " : ", a)
+if a > 0 :
+    a = wsi.downStreamWSIDs(wsid) # current ws id / [ctypes.c_int] -> types.POINTER(ctypes.c_int) 
+    for i in range(wsi.downStreamWSCount(wsid)):  # Because 'a' is pointer, it have to be iterated by using wsi.downStreamWSCount(wsid)
+        print("  downStreamWSIDs : ", a[i]) # if -1, there is no downstream watershed.
 
 a = wsi.watershedID(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
-print("watershedID :", a)   # if -1, the cell is out of the simulation domain bound
+print("WatershedID of current cell [", xCol, ", ", yRow, "] : ", a)   # if -1, the cell is out of the simulation domain bound
 
 a = wsi.flowDirection(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_char_p
-print("flowDirection :", a.decode('utf-8')) #if 'OFWB', the cell is out of the simulation domain bound
+
+## GRM.dll을 release 모드로 빌드 된 것을 참조하면 애러 없다. debug로 빌드된 dll 참조하면 애러 발생한다.
+print("FlowDirection of current cell [", xCol, ", ", yRow, "] : ", a.decode('utf-8')) #if 'OFWB', the cell is out of the simulation domain bound
 #enum class flowDirection8 of GRM.dll : E8 = 1, SE8 = 2, S8 = 3, SW8 = 4, W8 = 5, NW8 = 6, N8 = 7, NE8 = 8, None8 = 0
 
 a = wsi.flowAccumulation(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
-print("flowAccumulation :", a)  # if -1, the cell is out of the simulation domain bound
+print("FlowAccumulation of current cell [", xCol, ", ", yRow, "] : ", a)  # if -1, the cell is out of the simulation domain bound
 
 a = wsi.slope(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_double
-print("slope :", a)  # if -1, the cell is out of the simulation domain bound
+print("The slope of current cell [", xCol, ", ", yRow, "] : ", a)  # if -1, the cell is out of the simulation domain bound
 
 a = wsi.streamValue(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
-print("streamValue :", a) # if -1, the cell is out of the simulation domain bound
+print("The stream value of current cell [", xCol, ", ", yRow, "] : ", a) # if -1, the cell is out of the simulation domain bound
 
+## GRM.dll을 release 모드로 빌드 된 것을 참조하면 애러 없다. debug로 빌드된 dll 참조하면 애러 발생한다.
 a = wsi.cellFlowTypeACell(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_char_p
-print("cellFlowTypeACell :", a.decode('utf-8')) #if 'OFWB', the cell is out of the simulation domain bound
+print("The cellFlowTypeACell of current cell [", xCol, ", ", yRow, "] : ", a.decode('utf-8')) #if 'OFWB', the cell is out of the simulation domain bound
 
 a = wsi.landCoverValue(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
-print("landCoverValue :", a)  # if -1, the cell is out of the simulation domain bound
+print("landCoverValue of current cell [", xCol, ", ", yRow, "] : ", a)  # if -1, the cell is out of the simulation domain bound
 
 a = wsi.soilTextureValue(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
-print("soilTextureValue :", a)  # if -1, the cell is out of the simulation domain bound
+print("soilTextureValue of current cell [", xCol, ", ", yRow, "] : ", a)  # if -1, the cell is out of the simulation domain bound
 
 a = wsi.soilDepthValue(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
-print("soilDepthValue :", a)  # if -1, the cell is out of the simulation domain bound
+print("soilDepthValue of current cell [", xCol, ", ", yRow, "] : ", a)  # if -1, the cell is out of the simulation domain bound
 
 a = wsi.cellCountInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
-print("cellCountInUpstreamArea :", a)  
+print("cellCountInUpstreamArea of current cell [", xCol, ", ", yRow, "] : ", a)  
 
 a= wsi.allCellsInUpstreamArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.POINTER(ctypes.c_char_p)
 for i in range(wsi.cellCountInUpstreamArea(xCol, yRow)):  # Because 'a' is pointer, it have to be iterated by using wsi.cellCountInUpstreamArea(xCol, yRow)
@@ -396,6 +472,19 @@ print("subwatershedPars. ccPorosity :", swp.ccPorosity)
 print("subwatershedPars. ccWFSuctionHead :", swp.ccWFSuctionHead)
 print("subwatershedPars. ccHydraulicK :", swp.ccHydraulicK)
 print("subwatershedPars. ccSoilDepth :", swp.ccSoilDepth)
+#==========추가됨. 2023.03.02===
+print("subwatershedPars. interceptMethod :", swp.interceptMethod, "  Name :", InterceptionMethod(swp.interceptMethod).name)  
+    # LAIRatio = 1, Constant = 8, UserData = 9, icNone = 10
+print("subwatershedPars. potentialETMethod :", swp.potentialETMethod, "  Name :", PETmethod(swp.potentialETMethod).name) 
+    # PenmanMonteith = 1, BlaneyCriddle = 2, Hamon = 3, PriestleyTaylor = 4, Hargreaves = 5, JensenHaise = 6, Turc = 7, Constant = 8, UserData = 9, petNone = 10
+print("subwatershedPars. etCoeff :", swp.etCoeff)
+print("subwatershedPars. snowMeltMethod :", swp.snowMeltMethod, "  Name :", SnowMeltMethod(swp.snowMeltMethod).name)  
+    # Anderson = 1, Constant = 8, UserData = 9, smNone = 10
+print("subwatershedPars. smeltTSR :", swp.smeltTSR)
+print("subwatershedPars. smeltingTemp :", swp.smeltingTemp)
+print("subwatershedPars. snowCovRatio :", swp.snowCovRatio)
+print("subwatershedPars. smeltCoef :", swp.smeltCoef)
+#=========================
 print("subwatershedPars. userSet :", swp.userSet)    # 1 : true, 0: false
 
 # ========================================================
@@ -429,7 +518,7 @@ print("subwatershedPars. userSet :", swp.userSet)    # 1 : true, 0: false
 # ========================================================
 
 # 업데이트 된 매개변수 조회하기
-wsid = 1 # setOneSWSParsAndUpdateAllSWSUsingNetwork()에서 업데이트 된 매개변수 조회할 유역 id 지정
+wsid = 1 # 1번은 샘플. setOneSWSParsAndUpdateAllSWSUsingNetwork()에서 업데이트 된 매개변수 조회할 유역 id 지정한다. 
 swp = wsi.subwatershedPars(wsid) # current ws id / [ctypes.c_int] -> swsParameters
 print("subwatershedPars. wsid :", swp.wsid)
 print("subwatershedPars. iniSaturation :", swp.iniSaturation)
@@ -446,6 +535,20 @@ print("subwatershedPars. ccPorosity :", swp.ccPorosity)
 print("subwatershedPars. ccWFSuctionHead :", swp.ccWFSuctionHead)
 print("subwatershedPars. ccHydraulicK :", swp.ccHydraulicK)
 print("subwatershedPars. ccSoilDepth :", swp.ccSoilDepth)
+#==========추가됨. 2023.03.02===
+print("subwatershedPars. interceptMethod :", swp.interceptMethod, "  Name :", InterceptionMethod(swp.interceptMethod).name)  
+    # LAIRatio = 1, Constant = 8, UserData = 9, icNone = 10
+print("subwatershedPars. potentialETMethod :", swp.potentialETMethod, "  Name :", PETmethod(swp.potentialETMethod).name) 
+    # PenmanMonteith = 1, BlaneyCriddle = 2, Hamon = 3, PriestleyTaylor = 4, Hargreaves = 5, JensenHaise = 6, Turc = 7, Constant = 8, UserData = 9, petNone = 10
+print("subwatershedPars. etCoeff :", swp.etCoeff)
+print("subwatershedPars. snowMeltMethod :", swp.snowMeltMethod)
+print("subwatershedPars. snowMeltMethod :", swp.snowMeltMethod, "  Name :", SnowMeltMethod(swp.snowMeltMethod).name)  
+    # Anderson = 1, Constant = 8, UserData = 9, smNone = 10
+print("subwatershedPars. smeltTSR :", swp.smeltTSR)
+print("subwatershedPars. smeltingTemp :", swp.smeltingTemp)
+print("subwatershedPars. snowCovRatio :", swp.snowCovRatio)
+print("subwatershedPars. smeltCoef :", swp.smeltCoef)
+#=========================
 print("subwatershedPars. userSet :", swp.userSet)   # 1 : true, 0: false
 
 print("setOneSWSParsAndUpdateAllSWSUsingNetwork :", a)

@@ -33,9 +33,6 @@
     <ClCompile Include="output.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="rainfall.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="domain.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -78,10 +75,13 @@
     <ClCompile Include="simulatorRT.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="landCover.cpp">
+    <ClCompile Include="stdafx.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp">
+    <ClCompile Include="weatherData.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="surfalceLayer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>

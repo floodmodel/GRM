@@ -23,7 +23,7 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     string fpnIniSoilSaturationRatio, string pfnIniChannelFlow,
     string fpnChannelWidth)
 {
-    prj.writeConsole = -1;
+    //prj.writeConsole = -1;
     prj.forSimulation = -1; // exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	fs::path fpn_domain = fs::path(fpnDomain.c_str());
 	string fp_domain = fpn_domain.parent_path().string();
@@ -31,23 +31,23 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     writeNewLog(fpnLog, "GRM.dll : grmWSinfo with input files was started.\n", 1, -1);
 
     if (_access(fpnDomain.c_str(), 0) != 0) {
-        cout << "[" + fpnDomain + "] file is invalid" << endl;
+        cout << "ERROR. GRM.dll : [" + fpnDomain + "] file is invalid" << endl;
         return;
     }
     if (_access(fpnSlope.c_str(), 0) != 0) {
-        cout << "[" + fpnSlope + "] file is invalid" << endl;
+        cout << "ERROR. GRM.dll : [" + fpnSlope + "] file is invalid" << endl;
         return;
     }
     if (_access(fpnFdir.c_str(), 0) != 0) {
-        cout << "[" + fpnFdir + "] file is invalid" << endl;
+        cout << "ERROR. GRM.dll : [" + fpnFdir + "] file is invalid" << endl;
         return;
     }
     if (_access(fpnFac.c_str(), 0) != 0) {
-        cout << "[" + fpnFac + "] file is invalid" << endl;
+        cout << "ERROR. GRM.dll : [" + fpnFac + "] file is invalid" << endl;
         return;
     }
     if (trim(fdirType) == "") {
-        cout << "Flow direction argument is invalid" << endl;
+        cout << "ERROR. GRM.dll : Flow direction argument is invalid" << endl;
         return;
     }
     fs::path fpn_dm = fs::path(fpnDomain.c_str());
@@ -77,7 +77,7 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
         prj.fdType = flowDirectionType::StartsFromE_TauDEM;
     }
     else {
-        cout << "Flow direction type is invalid." << endl;
+        cout << "ERROR. GRM.dll : Flow direction type is invalid." << endl;
         return;
     }
     if (prj.fpnStream != "" &&
@@ -143,14 +143,14 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
 
 grmWSinfo::grmWSinfo(string gmpFPN)
 {
-    prj.writeConsole = -1;
+    //prj.writeConsole = -1;
     prj.forSimulation = -1;  // exe로 진입하는 것은 1, dll로 진입하는 것은 -1
     ppi=getProjectFileInfo(gmpFPN);
     fpnLog = "GRMdll.log";
     //cout << fpnLog << endl;
     writeNewLog(fpnLog, "GRM.dll : grmWSinfo with gmp file was started.\n", 1, -1);
     if (openPrjAndSetupModel(-1) == -1) {
-        writeLog(fpnLog, "GRM.dll : Model setup failed !!!\n", 1, 1);
+        writeLog(fpnLog, "ERROR. GRM.dll : Model setup failed !!!\n", 1, 1);
         return;
     }
     byGMPfile = true;
@@ -190,7 +190,21 @@ void grmWSinfo::setPublicVariables()
     mostDownStreamWSCount = di.wsn.mdWSIDs.size();
     cellCountInWatershed = di.cellNnotNull;
     cellSize = di.cellSize;    
-    writeLog(fpnLog, "GRM.dll : setPublicVariables was ended.\n", 1, -1);
+	FDtype = "NONE";
+	if (prj.fdType == flowDirectionType::StartsFromNE) {
+		FDtype = "StartsFromNE";
+	}
+	else if (prj.fdType == flowDirectionType::StartsFromN) {
+		FDtype = "StartsFromN";
+	}
+	else if (prj.fdType == flowDirectionType::StartsFromE) {
+		FDtype = "StartsFromE";
+	}
+	else if (prj.fdType == flowDirectionType::StartsFromE_TauDEM) {
+		FDtype = "StartsFromE_TauDEM";
+	}
+
+	writeLog(fpnLog, "GRM.dll : setPublicVariables was ended.\n", 1, -1);
     writeLog(fpnLog, "GRM.dll : facMaxCellxCol : "+to_string(facMaxCellxCol)+"\n", 1, -1);
 	writeLog(fpnLog, "GRM.dll : WScount : " + to_string(WScount) + "\n", 1, -1);
 	writeLog(fpnLog, "GRM.dll : di.cellSize : " + to_string(di.cellSize) + "\n", 1, -1);
@@ -215,7 +229,13 @@ vector<int> grmWSinfo::upStreamWSIDs(int currentWSID)
 
 int grmWSinfo::upStreamWSCount(int currentWSID)
 {
-    return  di.wsn.wsidsAllUp[currentWSID].size();
+	int nws = 0;
+	for (int id = 0; id < di.wsn.wsidsAllUp[currentWSID].size(); ++id) {
+		if (di.wsn.wsidsAllUp[currentWSID][id] > 0) {
+			nws++;
+		}
+	}
+	return nws;
 }
 
 vector<int> grmWSinfo::downStreamWSIDs(int currentWSID)
@@ -225,7 +245,13 @@ vector<int> grmWSinfo::downStreamWSIDs(int currentWSID)
 
 int grmWSinfo::downStreamWSCount(int currentWSID)
 {
-    return di.wsn.wsidsAllDown[currentWSID].size();
+	int nws = 0;
+	for (int id = 0; id < di.wsn.wsidsAllDown[currentWSID].size(); ++id) {
+		if (di.wsn.wsidsAllDown[currentWSID][id] > 0) {
+			nws++;
+		}
+	}
+	return nws;
 }
 
 int grmWSinfo::watershedID(int colXAryidx, int rowYAryidx)
@@ -401,11 +427,16 @@ int grmWSinfo::cellCountInUpstreamArea(int colXAryidx,
 
 // If this class was instanced by using gmp file --"grmWS(string gmpFPN)".		
 bool grmWSinfo::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
-    double minSlopeLandSurface, unSaturatedKType unSKType, double coefUnsK,
-    double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
-    int dryStreamOrder, double ccLCRoughness,
-    double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
-    double ccSoilHydraulicCond, double iniFlow)
+		double minSlopeLandSurface, unSaturatedKType unSKType, double coefUnsK,
+		double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
+		int dryStreamOrder, double ccLCRoughness,
+		double ccPorosity, double ccWFSuctionHead, double ccSoilHydraulicCond,
+		double ccSoilDepth,
+		InterceptionMethod interceptMethod,
+		PETmethod potentialETMethod, double etCoeff,
+		SnowMeltMethod snowMeltMethod, double smeltTSR, double smeltingTemp,
+		double snowCovRatio, double smeltCoef,
+		double iniFlow)
 {
 	prj.swps[wsid].wsid = wsid;
     prj.swps[wsid].iniSaturation = iniSat;
@@ -417,10 +448,18 @@ bool grmWSinfo::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat
     prj.swps[wsid].chRoughness = roughnessChannel;
     prj.swps[wsid].dryStreamOrder = dryStreamOrder;
     prj.swps[wsid].ccLCRoughness = ccLCRoughness;
-    prj.swps[wsid].ccSoilDepth = ccSoilDepth;
     prj.swps[wsid].ccPorosity = ccPorosity;
     prj.swps[wsid].ccWFSuctionHead = ccWFSuctionHead;
     prj.swps[wsid].ccHydraulicK = ccSoilHydraulicCond;
+	prj.swps[wsid].ccSoilDepth = ccSoilDepth;
+	prj.swps[wsid].interceptMethod = interceptMethod;
+	prj.swps[wsid].potentialETMethod = potentialETMethod;
+	prj.swps[wsid].etCoeff = etCoeff;
+	prj.swps[wsid].snowMeltMethod = snowMeltMethod;
+	prj.swps[wsid].smeltTSR = smeltTSR;
+	prj.swps[wsid].smeltingTemp = smeltingTemp;
+	prj.swps[wsid].snowCovRatio = snowCovRatio;
+	prj.swps[wsid].smeltCoef = smeltCoef;
     prj.swps[wsid].iniFlow = iniFlow;
     prj.swps[wsid].userSet = 1;
     updateAllSWSParsUsingNetwork();

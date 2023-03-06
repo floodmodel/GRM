@@ -15,9 +15,10 @@ int updateFCCellinfoAndData()
 {
     fccds.cvidxsinlet.clear();
     fccds.cvidxsFCcell.clear();
-    fccds.fcDataAppliedNowT_m3Ps.clear();
+    //fccds.fcDataAppliedNowT_m3Ps.clear(); // 2022.10.17 주석처리
     fccds.inputFlowData_m3Ps.clear();
     fccds.curDorder.clear();
+	fccds.inflowSumPT_m3.clear();
     map<int, flowControlinfo>::iterator iter;
     map<int, flowControlinfo> fcs_tmp;
     fcs_tmp = prj.fcs;
@@ -30,7 +31,10 @@ int updateFCCellinfoAndData()
         fccds.curDorder[aidx] = 0;
         if (afc.fcType == flowControlType::Inlet) {
             fccds.cvidxsinlet.push_back(aidx);
-        }
+		}
+		else {
+			fccds.inflowSumPT_m3[aidx] = 0.0; // inlet 이 아닌 모든 fc 셀에 대해서 유입량 합 0으로 초기화.
+		}
         if (afc.fcType != flowControlType::ReservoirOperation) {
             if (afc.fpnFCData != "" && _access(afc.fpnFCData.c_str(), 0) != 0) {
                 string outstr = "ERROR : Flow control data file (" + afc.fpnFCData 
@@ -82,7 +86,7 @@ void calFCReservoirOutFlow(int i, double nowTmin)
 			// 아래 조건 주석처리하면, 마지막 자료가 끝까지 사용된다..
 			if (ts.enforceFCautoROM == -1) {
 				setNoFluxCVCH(i);
-				fccds.fcDataAppliedNowT_m3Ps[i] = 0;
+				//fccds.fcDataAppliedNowT_m3Ps[i] = 0; // 2022.10.17 주석처리
 			}
 			else if (ts.enforceFCautoROM == 1) {	
 				double t_currentFC = dtfc * fccds.curDorder[i];
@@ -101,7 +105,7 @@ void calFCReservoirOutFlow(int i, double nowTmin)
 			cvs[i].stream.csaCH, cvs[i].stream.isCompoundCS, cvs[i].stream.chURBaseWidth_m,
 			cvs[i].stream.chLRArea_m2, cvs[i].stream.chLRHeight, cvs[i].stream.bankCoeff);
 		cvs[i].stream.uCH = cvs[i].stream.QCH_m3Ps / cvs[i].stream.csaCH;
-		fccds.fcDataAppliedNowT_m3Ps[i] = cvs[i].stream.QCH_m3Ps;
+		//fccds.fcDataAppliedNowT_m3Ps[i] = cvs[i].stream.QCH_m3Ps; // 2022.10.17 주석처리
 	}
 
     //아래에서  cvs[i].QsumCVw_dt_m3는 t-dt 에서의 값이 저장되어 있다.
@@ -116,7 +120,7 @@ void calFCReservoirOutFlow(int i, double nowTmin)
 		}
 		cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
 			+ cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
-			- fccds.fcDataAppliedNowT_m3Ps[i] * ts.dtsec;
+			- cvs[i].stream.QCH_m3Ps * ts.dtsec;
 		if (cvs[i].storageCumulative_m3 < 0) {
 			cvs[i].storageCumulative_m3 = 0;
 		}
@@ -137,7 +141,7 @@ void calSinkOrSourceFlow(int i, double nowTmin)
 			// 아래 조건 주석처리하면, 마지막 자료가 끝까지 사용된다..
 			if (ts.enforceFCautoROM == -1) {
 				setNoFluxCVCH(i);
-				fccds.fcDataAppliedNowT_m3Ps[i] = 0.0;
+				//fccds.fcDataAppliedNowT_m3Ps[i] = 0.0; cvs[i].stream.QCH_m3Ps  // 2022.10.17 주석처리
 			}
 			else if (ts.enforceFCautoROM == 1) {
 				convertFCtypeToAutoROM(dtos(t_currentFC, 2) + " min", i);
@@ -188,17 +192,17 @@ void calSinkOrSourceFlow(int i, double nowTmin)
             cvs[i].stream.chLRHeight, cvs[i].stream.bankCoeff);
         cvs[i].stream.uCH = cvs[i].stream.QCH_m3Ps / cvs[i].stream.csaCH;
     }
-    fccds.fcDataAppliedNowT_m3Ps[i] = QtoApp;   
+    //fccds.fcDataAppliedNowT_m3Ps[i] = QtoApp;   // 2022.10.17 주석처리
 	int dtsec = ts.dtsec;
 	if (cvs[i].fcType == flowControlType::SinkFlow) {
 		cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
 			+ cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
-			- fccds.fcDataAppliedNowT_m3Ps[i] * dtsec;
+			- QtoApp * dtsec;
 	}
 	else if (cvs[i].fcType == flowControlType::SourceFlow) {//이전에 source flow 가 계산되었으면..
 		cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
 			+ cvs[i].storageAddedForDTbyRF_m3 + cvs[i].QsumCVw_dt_m3
-			+ fccds.fcDataAppliedNowT_m3Ps[i] * dtsec;
+			+ QtoApp * dtsec;
 	}
 	if (cvs[i].storageCumulative_m3 < 0) {
 		cvs[i].storageCumulative_m3 = 0;
@@ -230,10 +234,10 @@ void calReservoirOperation(int i, double nowTmin)
 	maxStorageApp = afci.NormalHighStorage_m3;
 	if (prj.isDateTimeFormat == 1) { // RestrictedStorage_m3>0 인 경우에만 적용
 		if (afci.RestrictedStorage_m3 > 0) {
-			if (ts.tElapsed_DateTime_Month >= afci.restricedP_SM
-				&& ts.tElapsed_DateTime_Day >= afci.restricedP_SD) {
-				if (ts.tElapsed_DateTime_Month <= afci.restricedP_EM
-					&& ts.tElapsed_DateTime_Day <= afci.restricedP_ED) {
+			if (ts.tCurMonth >= afci.restricedP_SM
+				&& ts.tCurDay >= afci.restricedP_SD) {
+				if (ts.tCurMonth <= afci.restricedP_EM
+					&& ts.tCurDay <= afci.restricedP_ED) {
 					maxStorageApp = afci.RestrictedStorage_m3;
 				}
 			}
@@ -247,7 +251,6 @@ void calReservoirOperation(int i, double nowTmin)
 			}
 		}
 	}
-    //double maxStorageApp = afci.maxStorage_m3 * afci.maxStorageR;
     switch (afci.roType) {
     case reservoirOperationType::AutoROM: {
         if (cvs[i].storageCumulative_m3 >= maxStorageApp) {
@@ -315,7 +318,7 @@ void calReservoirOutFlowInReservoirOperation(int i,
         if (cvs[i].flowType == cellFlowType::OverlandFlow) {
             cvs[i].QOF_m3Ps = Qout_cms;
             cvs[i].hOF = cvs[i].rcOF * cvs[i].QOF_m3Ps / dy_m
-                / pow(sqrt(cvs[i].slopeOF), 0.6);  // 0.5 = 3/5
+                / pow(sqrt(cvs[i].slopeOF), 0.6);  // 0.6 = 3/5
             cvs[i].stream.QCH_m3Ps = 0;
             cvs[i].stream.uCH = 0;
             cvs[i].stream.csaCH = 0;

@@ -33,7 +33,11 @@ The model indroduction and the download guidelines are wiki page at https://gith
 2022.07. Revision in reading ASC raster file.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bug fix in reduction process of OpenMP.        
 2022.11. Bug fix in setting initial stream flow.   
-2022.11. GRM v2022 beta was uploaded.   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GRM v2022 beta is in test for continuous simulation. GRM v2021 ('GRM_cpp' and 'DownloadStableVersion' folder) is stable version.        
+2022.11. GRM v2022 beta was uploaded.        
+2023.03. GRM v2022 was uploaded as stable version.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interception, evapotranspiration, and snow melt module were added for continuous simulation.  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Input and output data were revised.  
+  
+       
 
    

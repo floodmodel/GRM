@@ -7,7 +7,7 @@
 #pragma comment(lib,"version.lib")
 
 using namespace std;
-namespace fs = std::filesystem;
+namespace fs = std::filesystem;   
 
 projectfilePathInfo ppi;
 fs::path fpnLog;
@@ -17,15 +17,23 @@ grmOutFiles ofs;
 domaininfo di;
 int** cvais; // 각셀(x,y)의 cv array idex 
 cvpos* cvps;//각 cv의 x, y 위치, ws 위치
-cvAtt* cvs;
-cvAtt* cvsb;
-vector<rainfallData> rfs;
+cvAtt* cvs; // control volumes
+cvAtt* cvsb; // t - dt 시간에 저장된 cvs 에서의 다양한 정보 백업
+vector<weatherData> rfs; // 강우량 파일에서 읽은 자료
+vector<weatherData> tempMax; // 최대기온 파일에서 읽은 자료
+vector<weatherData> tempMin; // 최소기온 파일에서 읽은 자료
+vector<weatherData> sunShineDur; // 일조시간 파일에서 읽은 자료
+vector<weatherData> snowpackTemp;// snow pack 온도 파일에서 읽은 자료
+double sunDurRatio[12]; // 월별 일조시간 비율 파일에서 읽은 자료
+vector<weatherData> solarRad; // 일사량 파일에서 읽은 자료
+map<int, double[12]> laiRatio; // <LCvalue, 월별 laiRatio 12개>
+double blaneyCriddleKData[12]; // Blaney Criddle K 파일에서 읽은 자료
 map<int, int*> cvaisToFA; //fa별 cv array idex 목록
-vector<int> fas;
-map<int, int> faCount;
-wpinfo wpis;
-flowControlCellAndData fccds;
-thisSimulation ts;
+vector<int> fas; // 흐름누적수 종류별 하나씩 저장 (0,1,2,4,6,100 등), fa 값은 일련번호가 아니므로..
+map<int, int> faCount; // 흐름누적수(int)별 셀 개수(int)
+wpSimData wpSimValue; // wp별로 저장할 다양한 정보.  prj.wps 파일에서 읽은 순서대로 2차 정보 저장
+flowControlCellAndData fccds; // gmp 파일에서 읽은 fc 정보를 이용해서 2차 정보 저장
+thisSimulation ts; // 이번 simulation 프로세스에 과련된 다양한 변수
 
 extern double** ssrAry;
 extern double** rfAry;
@@ -52,13 +60,13 @@ int main(int argc, char** args)
 	outString = outString + prj.cpusi.infoString;
 	ts.runByAnalyzer = -1;
 	if (argc == 1) {
-		printf("GRM project file was not entered or invalid arguments.\n");
+		printf("ERROR : GRM project file was not entered or invalid arguments.\n");
 		grmHelp();
 		return 1;
 	}
 	prj.deleteAllFilesExceptDischargeOut = -1;
 	setlocale(LC_ALL, "korean");
-	prj.writeConsole = 1; // exe로 진입하는 것은 1
+	//prj.writeConsole = 1; // exe로 진입하는 것은 1
 	prj.forSimulation = 1;// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	if (argc == 2) {
 		string arg1(args[1]);
@@ -93,6 +101,11 @@ int main(int argc, char** args)
 			if (arg1 == "/a" || arg2 == "/a") {
 				isForceAutoROM = 1;
 			}
+
+			/// 현재는 강우-유출 사상만 실시간 모의가 가능하다. 연속형 모의는 실시간 자료 처리 적용 안되어 있음. 2023.03.06
+			printf("WARNNING : The continuous simulation is not available for the real time simulation.\n");
+			printf("WARNNING : In real time simulation, just the rainfall-runoff event simulation is possible.\n");
+
 			if (grmRTLauncher(argc, args, isForceAutoROM) == -1) {
 				return 1;
 			}
@@ -113,7 +126,7 @@ int main(int argc, char** args)
 					vector<string> gmpFiles;
 					gmpFiles = getFileListInNaturalOrder(arg2, ".gmp");
 					if (gmpFiles.size() == 0) {
-						printf("There is no GRM project file in this directory.\n");
+						printf("ERROR : There is no GRM project file in this directory.\n");
 						waitEnterKey();
 						return -1;
 					}
@@ -125,7 +138,7 @@ int main(int argc, char** args)
 					return 1;
 				}
 				else {
-					printf("Project folder is invalid!!\n");
+					printf("ERROR : Project folder is invalid!!\n");
 					waitEnterKey();
 					return -1;
 				}
@@ -153,7 +166,7 @@ int main(int argc, char** args)
 				vector<string> gmpFiles;
 				gmpFiles = getFileListInNaturalOrder(arg3, ".gmp");
 				if (gmpFiles.size() == 0) {
-					printf("There is no GRM project file in this directory.\n");
+					printf("ERROR : There is no GRM project file in this directory.\n");
 					waitEnterKey();
 					return -1;
 				}
@@ -161,7 +174,7 @@ int main(int argc, char** args)
 				return 1;
 			}
 			else {
-				printf("Project folder is invalid!!\n");
+				printf("ERROR : Project folder is invalid!!\n");
 				waitEnterKey();
 				return -1;
 			}
@@ -184,7 +197,7 @@ int startSingleRun(string fpnGMP, int enforceAutoROM, string outString)
 	int nResult = _access(fpnGMP.c_str(), 0);
 	if (nResult == -1
 		|| lower(in_arg.extension().string()) != ".gmp") {
-		cout<<"GRM project file["+
+		cout<<"ERROR : GRM project file["+
 			fpnGMP+"] is invalid.\n";
 		waitEnterKey();
 		return -1;
@@ -192,7 +205,8 @@ int startSingleRun(string fpnGMP, int enforceAutoROM, string outString)
 	else if (nResult == 0) {
 		ppi = getProjectFileInfo(fpnGMP);
 		ts.enforceFCautoROM = enforceAutoROM;
-		writeNewLog(fpnLog, outString, 1, -1);
+		// 프로젝트 파일 여부 검증 후, fpnLog 파일 설정 후 writeNewLog 사용할 수 있다. 
+		writeNewLog(fpnLog, outString, 1, -1); 
 		if (setupAndStartSimulation() == -1) {
 			waitEnterKey();
 			return -1;
@@ -208,6 +222,7 @@ int startGMPsRun(vector<string> gmpFiles, int enforceAutoROM, string outString)
 	ts.enforceFCautoROM = enforceAutoROM;
 	for (int n = 0; n < nFiles; n++) {// /f 혹은 /fd 인 경우 여기서 실행
 		ppi = getProjectFileInfo(gmpFiles[n]);
+		// 프로젝트 파일 여부 검증 후, fpnLog 파일 설정 후 writeNewLog 사용할 수 있다. 
 		writeNewLog(fpnLog, outString, 1, -1);
 		string progF = to_string(n + 1) + '/' + to_string(gmpFiles.size());
 		string progR = dtos(((n + 1) / double(nFiles) * 100.0), 2);
@@ -226,9 +241,9 @@ int startGMPsRun(vector<string> gmpFiles, int enforceAutoROM, string outString)
 		long elapseT_sec = (long)(finishT - startT) / CLOCKS_PER_SEC;
 		tm ts_total = secToHHMMSS(elapseT_sec);
 		string endingStr = "Total simulation was completed. Run time : "
-			+ to_string(ts_total.tm_hour) + "hrs "
-			+ to_string(ts_total.tm_min) + "min "
-			+ to_string(ts_total.tm_sec) + "sec.\n";
+			+ to_string(ts_total.tm_hour) + "h "
+			+ to_string(ts_total.tm_min) + "m "
+			+ to_string(ts_total.tm_sec) + "s.\n";
 		writeLog(fpnLog, endingStr, 1, 1);
 	}
 	return 1;
@@ -293,9 +308,16 @@ void disposeDynamicVars()
 int setupAndStartSimulation()
 {
 	//===== 여기서 grmWSinfo class  test ===============
-	////string fpn = "C://GRM//SampleGHG//GHG500.gmp";
+	
+	//============ 이 부분은 gmp 파일로 인스턴싱 ====================
+	//string fpn = "C://GRM//SampleGHG//GHG500.gmp";
 	//string fpn = "D://Github//zTestSet_GRM_SampleWC_cpp//SampleProject.gmp";
+	//string fpn = "D://Github//zTestSetPyGRM//Prj_v2022_cont_CJDsmall_pyTest//CJD_Prj_cont_10year_small_pyTest.gmp";
+	//string fpn = "D://Github//zTestSetPyGRM//SampleWC//SampleWiCheon.gmp";
 	//grmWSinfo gws = grmWSinfo(fpn);
+	//============ 여기까지 gmp 파일로 인스턴싱 ====================
+
+	//============ 이 부분은 입력 파일 개별 설정 인스턴싱 ====================
 	//string fdType = "StartsFromE_TauDEM";
 	//string fpn_domain = "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_Watershed_c.asc";
 	//string fpn_slope = "D:/Github/zTestSet_GRM_SampleGHG_cpp/watershed/GHG_Slope_ST.asc";
@@ -327,25 +349,29 @@ int setupAndStartSimulation()
 
 	//grmWSinfo	gws = grmWSinfo(fdType, fpn_domain,	fpn_slope, fpn_fd,
 	//	fpn_fa, fpn_stream, fpn_lc, fpn_st, fpn_sd);
+	//============ 여기까지 입력 파일 개별 설정 인스턴싱 ====================
+
+	//============= grmWSinfo에서 정보 얻기..
 	//vector <int> mdwsidsv = gws.mostDownStreamWSIDs;
 	//swsParameters swsp = gws.subwatershedPars(1);
+	//int upWSCount = gws.upStreamWSCount(1);
 	//===================================================
 
 	
 	if (openPrjAndSetupModel(-1) == -1) {
-		writeLog(fpnLog, "Model setup failed !!!\n", 1, prj.writeConsole);
+		writeLog(fpnLog, "ERROR : Model setup failed !!!\n", 1, 1);
 		if (prj.forSimulation == 1) {// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 			return -1;
 		}
 	}
 	writeLog(fpnLog, "Simulation was started.\n", 1, 1);
 	if (startSimulation() == -1) {
-		writeNewLog(fpnLog, "An error was occurred while simulation...\n", 1, 1);
+		writeNewLog(fpnLog, "ERROR : An error was occurred while simulation...\n", 1, 1);
 		return -1;
 	}
 	if (prj.deleteAllFilesExceptDischargeOut == 1) {
 		if (deleteAllFilesExceptDischarge() == -1) {
-			writeNewLog(fpnLog, "An error was occurred while deleting all files except discharge.out.\n", 1, 1);
+			writeNewLog(fpnLog, "ERROR : An error was occurred while deleting all files except discharge.out.\n", 1, 1);
 			return -1;
 		}
 	}
@@ -354,16 +380,23 @@ int setupAndStartSimulation()
 
 int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 {	
+	writeLog(fpnLog, "Checking the input files... \n", 1, 1);
 	if (openProjectFile(forceRealTime) < 0)	{
-		writeLog(fpnLog, "Open "+ ppi.fpn_prj+" was failed.\n", 1, prj.writeConsole);
+		writeLog(fpnLog, "ERROR : Open "+ ppi.fpn_prj+" was failed.\n", 1, 1);
 		if (prj.forSimulation == 1) {// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 			return -1;
 		}
 	}
-	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, prj.writeConsole);
+	//cout << "completed. \n";
+	writeLog(fpnLog, "Checking input files completed.\n", 1, 1);
+	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, 1);
+	//cout << "Setting up input data... ";
+	writeLog(fpnLog, "Setting up input data...\n", 1, 1);
 	if (setupModelAfterOpenProjectFile() == -1) {		
 		if (prj.forSimulation == 1) { return -1; }// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	}
+	//cout << "completed. \n";
+	writeLog(fpnLog, "Setting up input data completed.\n", 1, 1);
 	string isparallel = "true";
 	omp_set_num_threads(prj.mdp);
 
@@ -377,15 +410,15 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 	//}
 	if (prj.forSimulation == 1) {// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 		if (initOutputFiles() == -1) {
-			writeLog(fpnLog, "Initializing output files was failed.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Initializing output files was failed.\n", 1, 1);
 			return -1;
 		}
 	}
-	writeLog(fpnLog, ppi.fpn_prj+" -> Model setup was completed.\n", 1, prj.writeConsole);
-	writeLog(fpnLog, "The number of effecitve cells : " + to_string(di.cellNnotNull) + "\n", 1, prj.writeConsole);
+	writeLog(fpnLog, ppi.fpn_prj+" -> Model setup was completed.\n", 1, 1);
+	writeLog(fpnLog, "The number of effecitve cells : " + to_string(di.cellNnotNull) + "\n", 1, 1);
 	if (prj.mdp == 1) { isparallel = "false"; }
 	writeLog(fpnLog, "Parallel : " + isparallel + ". Max. degree of parallelism : "
-		+ to_string(prj.mdp) + ".\n", 1, prj.writeConsole);
+		+ to_string(prj.mdp) + ".\n", 1,1);
 	return 1;
 }
 
@@ -395,7 +428,7 @@ void grmHelp() // /r, /a 설명 추가
 	printf("\n");
 	printf(" Usage : GRM [Current project file full path and name to simulate]\n");
 	printf("\n");
-	printf("** 사용법 (in Korean)\n");
+	printf("** 사용법 (How to use in Korean)\n");
 	printf("  1. GRM 모형의 project 파일(.gmp)과 입력자료(지형공간자료, 강우, flow control 시계열 자료)를 준비한다. \n");
 	printf("  2. 모델링할 프로젝트 이름을 스위치(argument)로 넣고 실행한다.\n");
 	printf("      - Console에서 grm.exe [argument] 로 실행한다.\n");
@@ -431,7 +464,7 @@ void grmHelp() // /r, /a 설명 추가
 	printf("         -- 예문 : D:/GRMrun>grm /a D:/GRMTest/TestProject/test.gmp\n");
 	printf("         -- 예문 : D:/GRMrun>grm /r /a D:/GRMTest/TestProject/test.ref\n");
 	printf("\n");
-	printf("** Usage (in English)\n");
+	printf("** Usage\n");
 	printf("  1. Make a gmp file by using a text editor or the QGIS-GRM.\n");
 	printf("  2. In the console window, the gmp file is entered as the argument to run GRM.exe.\n");
 	printf("      - In Console : grm.exe [argument]\n");

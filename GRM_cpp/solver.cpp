@@ -8,102 +8,114 @@ extern cvAtt* cvs;
 
 extern thisSimulation ts;
 
-void updatetCVbyRFandSoil(int i)
+void updateCVbyHydroComps(int i)
 {
-    int dtrf_sec = prj.rfinterval_min * 60;
-    double dY_m = di.cellSize;
-    double effOFdYinCHnOFcell = 0;
-    int dt_sec = ts.dtsec;
-    double CVdx_m = cvs[i].cvdx_m;
-    double chCSAaddedByBFlow_m2 = 0;
-    double ofDepthAddedByRFlow_m2 = 0;
-    double chCSAaddedBySSFlow_m2 = 0;
-    cvs[i].rfApp_dt_m = cvs[i].rfiRead_mPsec * dt_sec * (di.cellSize / cvs[i].cvdx_m);
-    if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
-        effOFdYinCHnOFcell = dY_m - cvs[i].stream.chBaseWidth;
-    }
-    if (prj.simBaseFlow == 1) {
-        chCSAaddedByBFlow_m2 = calBFlowAndGetCSAaddedByBFlow(i, dt_sec, dY_m);
-    }
-    if (prj.simSubsurfaceFlow == 1) {
-        switch (cvs[i].flowType) {
-        case cellFlowType::OverlandFlow: {
-            ofDepthAddedByRFlow_m2 = calRFlowAndSSFlow(i, dt_sec, dY_m);
-            break;
-        }
-        case cellFlowType::ChannelFlow: {
-            chCSAaddedBySSFlow_m2 = getChCSAaddedBySSFlow(i);
-            break;
-        }
-        case cellFlowType::ChannelNOverlandFlow: {
-            ofDepthAddedByRFlow_m2 = calRFlowAndSSFlow(i,
-                dt_sec, effOFdYinCHnOFcell);
-            chCSAaddedBySSFlow_m2 = getChCSAaddedBySSFlow(i);
-            break;
-        }
-        }
-    }
-    calEffectiveRainfall(i, dtrf_sec, dt_sec);
-    switch (cvs[i].flowType) {
-    case cellFlowType::OverlandFlow: {
-		cvs[i].hOF_ori = cvs[i].hOF + cvs[i].rfEff_dt_m + ofDepthAddedByRFlow_m2;
-        cvs[i].hOF = cvs[i].hOF_ori;
-        cvs[i].csaOF = cvs[i].hOF_ori * dY_m;
-        cvs[i].storageAddedForDTbyRF_m3 = cvs[i].rfEff_dt_m * dY_m * CVdx_m;
-        break;
-    }
-    case cellFlowType::ChannelFlow: {
-        double ChWidth = cvs[i].stream.chBaseWidth;
-        cvs[i].stream.hCH_ori = cvs[i].stream.hCH + cvs[i].rfApp_dt_m
-            + chCSAaddedBySSFlow_m2 / ChWidth
-            + chCSAaddedByBFlow_m2 / ChWidth;
-        cvs[i].stream.csaCH_ori = getChCSAbyFlowDepth(ChWidth,
-            cvs[i].stream.bankCoeff, cvs[i].stream.hCH_ori,
-            cvs[i].stream.isCompoundCS, cvs[i].stream.chLRHeight,
-            cvs[i].stream.chLRArea_m2, cvs[i].stream.chURBaseWidth_m);
-        cvs[i].stream.hCH = cvs[i].stream.hCH_ori;
-        cvs[i].stream.csaCH = cvs[i].stream.csaCH_ori;
-        cvs[i].storageAddedForDTbyRF_m3 = cvs[i].rfApp_dt_m * dY_m * CVdx_m;
-        break;
-    }
-    case cellFlowType::ChannelNOverlandFlow: {
-        double chCSAAddedByOFInChCell_m2;
-        double ChWidth = cvs[i].stream.chBaseWidth;
-		cvs[i].hOF_ori = cvs[i].hOF + cvs[i].rfEff_dt_m + ofDepthAddedByRFlow_m2;
-        cvs[i].hOF = cvs[i].hOF_ori;
-        cvs[i].csaOF = cvs[i].hOF_ori * effOFdYinCHnOFcell;
-        if (cvs[i].hOF > 0) {
-            calOverlandFlow(i, 0, effOFdYinCHnOFcell);
-        }
-        else {
-            cvs[i].hOF = 0;
-            cvs[i].uOF = 0;
-            cvs[i].csaOF = 0;
-            cvs[i].QOF_m3Ps = 0;
-        }
-        if (cvs[i].QOF_m3Ps > 0) {
-            chCSAAddedByOFInChCell_m2 = cvs[i].csaOF;
-        }
-        else {
-            chCSAAddedByOFInChCell_m2 = 0;
-        }
-        cvs[i].stream.csaChAddedByOFinCHnOFcell = chCSAAddedByOFInChCell_m2;
-        cvs[i].stream.hCH_ori = cvs[i].stream.hCH + cvs[i].rfApp_dt_m
-            + chCSAaddedBySSFlow_m2 / ChWidth
-            + chCSAaddedByBFlow_m2 / ChWidth;
-        if (cvs[i].stream.hCH_ori < 0) { cvs[i].stream.hCH_ori = 0; }
-        cvs[i].stream.csaCH_ori = getChCSAbyFlowDepth(ChWidth,
-            cvs[i].stream.bankCoeff, cvs[i].stream.hCH_ori,
-            cvs[i].stream.isCompoundCS, cvs[i].stream.chLRHeight,
-            cvs[i].stream.chLRArea_m2, cvs[i].stream.chURBaseWidth_m);
-        cvs[i].stream.hCH = cvs[i].stream.hCH_ori;
-        cvs[i].stream.csaCH = cvs[i].stream.csaCH_ori;
-        cvs[i].storageAddedForDTbyRF_m3 = cvs[i].rfApp_dt_m * ChWidth * CVdx_m
-            + cvs[i].rfEff_dt_m * effOFdYinCHnOFcell * CVdx_m;
-        break;
-    }
-    }
-    //cvs[i].QsumCVw_dt_m3 = 0; 
+	int dtrf_sec = prj.rfinterval_min * 60;
+	double dY_m = di.cellSize;
+	double effOFdYinCHnOFcell = 0;
+	int dt_sec = ts.dtsec;
+	double CVdx_m = cvs[i].cvdx_m;
+	double chCSAaddedByBFlow_m2 = 0;
+	double ofDepthAddedByRFlow_m2 = 0;// 단위폭당 수심
+	double chCSAaddedBySSFlow_m2 = 0;
+	double massConsR = di.cellSize / cvs[i].cvdx_m;
+	cvs[i].rfApp_mPdt = cvs[i].rfiRead_mPsec * ts.dtsec * massConsR;
+
+	if (prj.simInterception == 1) { calinterception(i); } // 차단	
+	if (prj.simEvaportranspiration == 1) { calET(i); } // 증발산
+	if (prj.simSnowMelt == 1) { calSnowMelt(i);	} //여기서 snowpack, snowmelt, 차단, 증발산과 관련 없이 유출에 직접 관여하는 것으로 모의
+
+	if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
+		effOFdYinCHnOFcell = dY_m - cvs[i].stream.chBaseWidth;
+	}
+	if (prj.simBaseFlow == 1) {
+		chCSAaddedByBFlow_m2 = calBFlowAndGetCSAaddedByBFlow(i, dt_sec, dY_m);
+	}
+	if (prj.simSubsurfaceFlow == 1) {
+		switch (cvs[i].flowType) {
+		case cellFlowType::OverlandFlow: {
+			ofDepthAddedByRFlow_m2 = calRFlowAndSSFlow(i, dt_sec, dY_m); // dy가 다르기 때문에 면적으로 받는다
+			break;
+		}
+		case cellFlowType::ChannelFlow: {
+			chCSAaddedBySSFlow_m2 = getChCSAaddedBySSFlow(i);
+			break;
+		}
+		case cellFlowType::ChannelNOverlandFlow: {
+			ofDepthAddedByRFlow_m2 = calRFlowAndSSFlow(i,
+				dt_sec, effOFdYinCHnOFcell);
+			chCSAaddedBySSFlow_m2 = getChCSAaddedBySSFlow(i);
+			break;
+		}
+		}
+	}
+	calEffectiveRFbyInfiltration(i, dtrf_sec, dt_sec);
+	switch (cvs[i].flowType) {
+	case cellFlowType::OverlandFlow: {
+		// 2022.06.15 여기서 / dY_m 계산에 의한 수심 대신 ofDepthAddedByRFlow_m2을 적용하는 이유는
+		//	여기서는  t 시간에서의 계산전으로 횡방향 유입량이 아직 셀 전체에서 수렴 되지 않은 상황을 가정하기 때문
+		//	t 시간 계산 후에는 홍수추적에 의해서 최종 수심 계산됨
+		cvs[i].hOF = cvs[i].hOF + cvs[i].rfEff_dt_m + ofDepthAddedByRFlow_m2; // / dY_m;
+		cvs[i].csaOF = cvs[i].hOF * dY_m;
+		cvs[i].storageAddedForDTbyRF_m3 = cvs[i].rfEff_dt_m * dY_m * CVdx_m; 
+		break;
+	}
+	case cellFlowType::ChannelFlow: {
+		double ChWidth = cvs[i].stream.chBaseWidth;
+		cvs[i].stream.hCH_ori = cvs[i].stream.hCH + cvs[i].rfApp_mPdt
+			+ chCSAaddedBySSFlow_m2 / ChWidth
+			+ chCSAaddedByBFlow_m2 / ChWidth;
+		cvs[i].stream.csaCH_ori = getChCSAbyFlowDepth(ChWidth,
+			cvs[i].stream.bankCoeff, cvs[i].stream.hCH_ori,
+			cvs[i].stream.isCompoundCS, cvs[i].stream.chLRHeight,
+			cvs[i].stream.chLRArea_m2, cvs[i].stream.chURBaseWidth_m);
+		cvs[i].stream.hCH = cvs[i].stream.hCH_ori;
+		cvs[i].stream.csaCH = cvs[i].stream.csaCH_ori;
+		cvs[i].storageAddedForDTbyRF_m3 = cvs[i].rfApp_mPdt * dY_m * CVdx_m; // 하폭이 아닌 dy로 강우량 기여분 계산 -> 질량보존
+		break;
+	}
+	case cellFlowType::ChannelNOverlandFlow: {
+		double chCSAAddedByOFInChCell_m2;
+		double ChWidth = cvs[i].stream.chBaseWidth;
+		// 2020.06.15 여기서 / dY_m 계산에 의한 수심 대신 ofDepthAddedByRFlow_m2을 적용하는 이유는
+		//	여기서는  t 시간에서의 계산전으로 횡방향 유입량이 아직 셀 전체에서 수렴 되지 않은 상황을 가정하기 때문
+		//	t 시간 계산 후에는 홍수추적에 의해서 최종 수심 계산됨
+		cvs[i].hOF = cvs[i].hOF + cvs[i].rfEff_dt_m + ofDepthAddedByRFlow_m2; // / dY_m;
+		cvs[i].csaOF = cvs[i].hOF * effOFdYinCHnOFcell;
+		if (cvs[i].hOF > 0) {
+			calOverlandFlow(i, 0, effOFdYinCHnOFcell);
+		}
+		else {
+			cvs[i].hOF = 0;
+			cvs[i].uOF = 0;
+			cvs[i].csaOF = 0;
+			cvs[i].QOF_m3Ps = 0;
+		}
+		if (cvs[i].QOF_m3Ps > 0) {
+			chCSAAddedByOFInChCell_m2 = cvs[i].csaOF;
+		}
+		else {
+			chCSAAddedByOFInChCell_m2 = 0;
+		}
+		// '2015.03.17  여기서 더해지는 수심을 변수로 저장
+		// 현재 수심에 더해서 현재 step의 초기 조건(cvs[i].stream.hCH_ori)을 증가시키지 않고, 나중에 현재 셀 하도의 w 로 입력해서, 홍수추적 계산에 반영.. OK
+		cvs[i].stream.csaChAddedByOFinCHnOFcell = chCSAAddedByOFInChCell_m2; 
+		cvs[i].stream.hCH_ori = cvs[i].stream.hCH + cvs[i].rfApp_mPdt
+			+ chCSAaddedBySSFlow_m2 / ChWidth
+			+ chCSAaddedByBFlow_m2 / ChWidth;
+		if (cvs[i].stream.hCH_ori < 0) { cvs[i].stream.hCH_ori = 0; }
+		cvs[i].stream.csaCH_ori = getChCSAbyFlowDepth(ChWidth,
+			cvs[i].stream.bankCoeff, cvs[i].stream.hCH_ori,
+			cvs[i].stream.isCompoundCS, cvs[i].stream.chLRHeight,
+			cvs[i].stream.chLRArea_m2, cvs[i].stream.chURBaseWidth_m);
+		cvs[i].stream.hCH = cvs[i].stream.hCH_ori;
+		cvs[i].stream.csaCH = cvs[i].stream.csaCH_ori;
+		cvs[i].storageAddedForDTbyRF_m3 = cvs[i].rfApp_mPdt * ChWidth * CVdx_m
+			+ cvs[i].rfEff_dt_m * effOFdYinCHnOFcell * CVdx_m;
+		break;
+	}
+	}
+	//cvs[i].QsumCVw_dt_m3 = 0; 
 	//cvs[i].QsumCVw_m3Ps = 0;
 }
 

@@ -16,9 +16,9 @@ const string g_strDBMSCnn =
 typedef struct _realTimeEnvFileFieldName
 {
     const string ProjectFPN = "ProjectFPN";
-    const string RTRFfolderName = "RTRFfolderName";
-    const string RFfileTextBeforeTString = "RFfileText_BeforeTString";
-    const string RFfileText_AfterTStringWithExt = "RFfileText_AfterTStringWithExt"; 
+    const string RTPRCPfolderName = "RTPRCPfolderName";
+    const string PRCPfileText_BeforeTString = "PRCPfileText_BeforeTString";
+    const string PRCPfileText_AfterTStringWithExt = "PRCPfileText_AfterTStringWithExt"; 
     const string IsFC = "IsFC";
     const string RTFCdataFPN = "RTFCdataFPN";
     const string IsDWSExist = "IsDWSExist";
@@ -26,7 +26,7 @@ typedef struct _realTimeEnvFileFieldName
     const string CWCellRowYToConnectDW = "CWCellRowYToConnectDW";
     const string DWCellColXToConnectCW = "DWCellColXToConnectCW";
     const string DWCellRowYToConnectCW = "DWCellRowYToConnectCW";
-    const string RFInterval_min = "RFInterval_min";
+    const string PRCPInterval_min = "PRCPInterval_min";
     const string OutputInterval_min = "OutputInterval_min";
     const string RTstartingTime = "RTstartingTime";
 } realTimeEnvFileFieldName;
@@ -76,7 +76,7 @@ private:
     string mFPN_RTEnv;
 
 public:    
-    vector<rainfallData> rfsForRT;
+    vector<weatherData> rfsForRT;
    map <int, int> mbFCDataOrder; // idx 로 구분
    bool mbSimulationRTisOngoing = false;
 
@@ -114,7 +114,8 @@ int startSimulationRT();
 void updateFcDataStatusForEachFCcellGRMRT(string t_yyyymmddHHMM,
     int cvidx); // added=1 이면 새로운 데이터 입력된 것
 void updateRFdataGRMRT(string t_yyyymmddHHMM);
-void writeRealTimeSimResults(int nowTmin, double cinterp);
+void writeRealTimeSimResults(string tStrToPrint, double cinterp,
+	double tsFromStarting_sec);
 
 // 여기는 realTime_DBMS.cpp 에 있는 함수들
 void add_Log_toDBMS(string strBasin, string strItem);

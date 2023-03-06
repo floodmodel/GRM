@@ -148,15 +148,24 @@ extern "C" // for python //grmWSinfo의 내용을  재정의 한다.
 		double minSlopeLandSurface, unSaturatedKType unSKType, double coefUnsK,
 		double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
 		int dryStreamOrder, double ccLCRoughness,
-		double ccSoilDepth, double ccPorosity, double ccWFSuctionHead,
-		double ccSoilHydraulicCond, double iniFlow = 0)
+		double ccPorosity, double ccWFSuctionHead,	double ccSoilHydraulicCond, 
+		double ccSoilDepth,
+		InterceptionMethod interceptMethod,
+		PETmethod potentialETMethod, double etCoeff,
+		SnowMeltMethod snowMeltMethod, double smeltTSR, double smeltingTemp,
+		double snowCovRatio, double smeltCoef,
+		double iniFlow = 0)
 	{
 		return f->setOneSWSParsAndUpdateAllSWSUsingNetwork(wsid, iniSat,
 			minSlopeLandSurface, unSKType, coefUnsK,
 			minSlopeChannel, minChannelBaseWidth, roughnessChannel,
 			dryStreamOrder, ccLCRoughness,
-			ccSoilDepth, ccPorosity, ccWFSuctionHead,
-			ccSoilHydraulicCond, iniFlow);
+			ccPorosity, ccWFSuctionHead,	ccSoilHydraulicCond, 
+			ccSoilDepth,
+			interceptMethod,
+			potentialETMethod, etCoeff, 
+			snowMeltMethod, smeltTSR, smeltingTemp, snowCovRatio, smeltCoef,
+			iniFlow);
 	}
 
 	GRMDLL_API void updateAllSubWatershedParametersUsingNetwork(grmWSinfo* f)
@@ -219,6 +228,12 @@ extern "C" // for python //grmWSinfo의 내용을  재정의 한다.
 	GRMDLL_API double cellSize(grmWSinfo* f)
 	{
 		return f->cellSize;
+	}
+
+	GRMDLL_API char* FDtype(grmWSinfo* f)
+	{
+		string r = f->FDtype;
+		return stringToCharP(r);
 	}
 // 여기까지 grmWSinfo 클래스 관련=============================================
 }

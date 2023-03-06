@@ -51,8 +51,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2022,11,23,0
- PRODUCTVERSION 2021,4,30,0
+ FILEVERSION 2023,3,6,0
+ PRODUCTVERSION 2022,11,30,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -68,13 +68,13 @@ BEGIN
         BLOCK "041204b0"
         BEGIN
             VALUE "CompanyName", "KICT"
-            VALUE "FileDescription", "GRM model v2021"
-            VALUE "FileVersion", "2022.11.23.0"
+            VALUE "FileDescription", "GRM model v2022"
+            VALUE "FileVersion", "2023.3.6.0"
             VALUE "InternalName", "GRM.exe"
             VALUE "LegalCopyright", "Copyright (C) 2017"
-            VALUE "OriginalFilename", "GRM_cpp.exe"
-            VALUE "ProductName", "Grid based Rainfall-runoff Model"
-            VALUE "ProductVersion", "2021.4.30.0"
+            VALUE "OriginalFilename", "GRM.exe"
+            VALUE "ProductName", "Grid based rainfall-Runoff Model (v2022)"
+            VALUE "ProductVersion", "2022.11.30.0"
         END
     END
     BLOCK "VarFileInfo"

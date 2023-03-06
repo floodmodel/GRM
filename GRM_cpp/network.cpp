@@ -33,8 +33,8 @@ int setFlowNetwork()
     halfDXperp_m = di.cellSize / 2.0;
     for (int i = 0; i < di.cellNnotNull; ++i) {
         double dxe = 0.0;
-		int tCx = -1; // 하류방향 대상 셀의 x array index
-		int tRy = -1; // 하류방향 대상 셀의 y array index
+        int tCx; // 하류방향 대상 셀의 x array index
+        int tRy; // 하류방향 대상 셀의 y array index
         // 좌상단이 0,0 이다... 즉, 북쪽이면, row-1, 동쪽이면 col +1
         int cx = cvps[i].xCol;
         int ry = cvps[i].yRow;
@@ -134,7 +134,7 @@ int setFlowNetwork()
             if (di.wsn.wsOutletidxs.find(wsidKey) == di.wsn.wsOutletidxs.end() ||
                 cvs[i].fac > cvs[di.wsn.wsOutletidxs[wsidKey]].fac) {
                 // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
-                //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
+                // 이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
                 di.wsn.wsOutletidxs[wsidKey] = i;
 				//di.wsn.wsidNearbyDown[cvps[i].wsid] = -1;
             }
