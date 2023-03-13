@@ -405,6 +405,7 @@ typedef struct _projectFileFieldName
 	const string RestrictedStorage = "RestrictedStorage";
 	const string RestrictedPeriod_Start = "RestrictedPeriod_Start";
 	const string RestrictedPeriod_End = "RestrictedPeriod_End";
+	const string AutoROM_MaxOutFlow_CMS = "AutoROM_MaxOutFlow_CMS";
 	const string ROType = "ROType";
 	const string ROConstQ = "ROConstQ";
 	const string ROConstQDuration = "ROConstQDuration";
@@ -571,6 +572,7 @@ typedef struct _flowControlinfo
 	int restricedP_SD = -1;
 	int restricedP_EM = -1;
 	int restricedP_ED = -1;
+	double autoROMmaxOutflow_cms = -1.0;
 
 	reservoirOperationType roType= reservoirOperationType::None;
 	double roConstQ_cms = -1.0;

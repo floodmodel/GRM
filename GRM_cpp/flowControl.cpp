@@ -255,8 +255,16 @@ void calReservoirOperation(int i, double nowTmin)
     case reservoirOperationType::AutoROM: {
         if (cvs[i].storageCumulative_m3 >= maxStorageApp) {
             Qout_cms = (cvs[i].storageCumulative_m3
-                - maxStorageApp) / ts.dtsec; // 차이만큼 모두 유출
-            cvs[i].storageCumulative_m3 = maxStorageApp; // 최대저류량 유지
+                - maxStorageApp) / ts.dtsec; // 차이 있을 때 유출
+			if (afci.autoROMmaxOutflow_cms > 0 &&
+				Qout_cms > afci.autoROMmaxOutflow_cms) { // 2023.03.13 이거보다 작게 유출되게 한다.
+				Qout_cms = afci.autoROMmaxOutflow_cms;
+			}
+			cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3 - Qout_cms * ts.dtsec;
+			if (cvs[i].storageCumulative_m3 < 0) { 
+				cvs[i].storageCumulative_m3 = 0; 
+			}
+            //cvs[i].storageCumulative_m3 = maxStorageApp; // 최대저류량 유지. 2023.03.13. 위의 식으로 수정.
         }
         if (Qout_cms < 0) { Qout_cms = 0; }
         calReservoirOutFlowInReservoirOperation(i, Qout_cms, dy_m);

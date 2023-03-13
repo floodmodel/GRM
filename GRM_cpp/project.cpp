@@ -304,7 +304,7 @@ int openProjectFile(int forceRealTime)
 			//if (afci.roType != reservoirOperationType::None){
 			if (afci.fcType != flowControlType::Inlet) {
 				if (afci.iniStorage_m3 < 0) {
-					writeLog(fpnLog, "WARNNING : [" + afci.fcName + "] Ini. storage of reservoir is smaller than '0'. '0' is applied.\n", 1, 1);
+					writeLog(fpnLog, "WARNNING : [" + afci.fcName + "] Ini. storage of the reservoir is smaller than '0'. '0' is applied.\n", 1, 1);
 					prj.fcs[idx].iniStorage_m3 = 0.0;
 				}
 				if (afci.maxStorage_m3 < 0 || afci.NormalHighStorage_m3 < 0
@@ -374,6 +374,10 @@ int openProjectFile(int forceRealTime)
 						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
 						return -1;
 					}
+				}
+				if (afci.roType == reservoirOperationType::AutoROM && afci.autoROMmaxOutflow_cms < 0) {
+					writeLog(fpnLog, "WARNNING : [" + afci.fcName + "] AutoROM max outflow of the reservoir is smaller than '0'. '0' is applied.\n", 1, 1);
+					prj.fcs[idx].autoROMmaxOutflow_cms = 0.0;
 				}
 			}
 			else if (ts.enforceFCautoROM == 1) {// inlet인경우, AutoROM으로 자동 전환 못하게 한다.
@@ -2240,6 +2244,13 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			vString = getValueStringFromXmlLine(aline, fldName.RestrictedPeriod_End);
 			if (vString != "") {
 				fci->RestrictedPeriod_End = vString;
+			}
+			return 1;
+		}
+		if (aline.find("<" + fldName.AutoROM_MaxOutFlow_CMS + ">") != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fldName.AutoROM_MaxOutFlow_CMS);
+			if (vString != "") {
+				fci->autoROMmaxOutflow_cms = stod_c(vString);
 			}
 			return 1;
 		}
