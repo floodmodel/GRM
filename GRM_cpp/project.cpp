@@ -180,6 +180,9 @@ int openProjectFile(int forceRealTime)
 		}
 		if (sbFlowControlGrid == 1 && pt.sFlowControlGrid == 0) {
 			sbFlowControlGrid = 0;
+			if (afc->fcName == "YIS_WP3") {
+				int a = 1;
+			}
 			if (afc->fcName != "" && isNormalFlowControlinfo(afc) == 1) {
 				int n = prj.fcs.size();
 				prj.fcs[n] = *afc;// 우선 idx를 키로 사용. updateFCCellinfoAndData()에서 cvid를 키로 업데이트				afc = new flowControlinfo;
@@ -600,11 +603,11 @@ int openProjectFile(int forceRealTime)
 	// ============== land cover
 
 	if (prj.stDataType == fileOrConstant::File) {
-		if (prj.fpnSD == "") {
+		if (prj.fpnST == "") {
 			writeLog(fpnLog, "ERROR : Soil texture file is invalid.\n", 1, 1);
 			return -1;
 		}
-		if (prj.fpnSDVat == "") {
+		if (prj.fpnSTVat == "") {
 			writeLog(fpnLog, "ERROR : Soil texture VAT file is invalid.\n", 1, 1);
 			return -1;
 		}
