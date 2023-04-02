@@ -630,14 +630,6 @@ int  writeBySimType(int nowTP_min,
 		writeLog(fpnLog, logStr, 1, -1);
 	}
 
-	////int printAveValueNow = 0;
-	//if (writeAVE == 1) {
-	//	//if ((nowTP_min >= prj.dtPrintAveValue_sec) && (nowTP_min % prj.dtPrintAveValue_min) == 0) {
-	//	////if ((nowTP_min % prj.dtPrintAveValue_min) == 0) {
-	//		//printAveValueNow = 1;
-	//		ts.avePrintOrder++;
-	//	//}
-	//}
 	simulationType simType = prj.simType;
 	switch (simType) {
 	case simulationType::Normal: {
