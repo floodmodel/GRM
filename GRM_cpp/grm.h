@@ -344,6 +344,7 @@ typedef struct _projectFileFieldName
 	const string MakeFlowDistFile = "MakeFlowDistFile";
 	const string PrintOption = "PrintOption";
 	const string PrintAveValue = "PrintAveValue";
+	const string AveValueTimeInterval_min = "AveValueTimeInterval_min";
 	const string WriteLog = "WriteLog";
 	// SubWatershedSettings table
 	const string ID_SWP = "ID";
@@ -894,6 +895,8 @@ typedef struct _projectFile
 	int makeFlowDistFile = 0;// true : 1, false : -1
 	GRMPrintType printOption = GRMPrintType::None;
 	int printAveValue = 0;// true : 1, false : -1 // 출력기간 평균 값 출력 여부
+	int dtPrintAveValue_min = 0;
+	int dtPrintAveValue_sec = 0;
 
 	//int writeConsole = 0;// true : 1, false : -1
 	int forSimulation = 0;
@@ -946,9 +949,13 @@ typedef struct _thisSimulation
 	int zeroTimePrinted = 0;
 	int simEnding_sec = -1;
 	int simDuration_min = 0;
+	
+	//int avePrintOrder = 0;
 
 	int tsec_tm1 = 0;
 	int targetTtoP_sec = 0;
+	int targetTtoP_AVE_sec = 0;
+	int TtoP_ave_check_sec = 0;
 	//int iscvsb = -1; // 이전시간에서의 cvs가 백업되어 있는지 여부
 	int cvsbT_sec = 0;
 	int isbak = 0;
@@ -1044,7 +1051,7 @@ int initOutputFiles();
 void initRasterOutput();
 void initThisSimulation();
 void initRFvars();
-void initValuesAfterPrinting(); //출력할 때 마다 초기화 되어야 하는 변수들 처리
+void initValuesAfterPrinting(int nowTP_min, int printAveValueNow); //출력할 때 마다 초기화 되어야 하는 변수들 처리
 int initWatershedNetwork();
 int initWPinfos();
 int isNormalChannelSettingInfo(channelSettingInfo *csi);
@@ -1159,7 +1166,7 @@ bool updateOneSWSParsWithOtherSWSParsSet(int TargetWSid,
 	int ReferenceWSid);
 
 int writeBySimType(int nowTP_min,
-	double cinterp);
+	double cinterp, int writeAVE, int timeToP_AVE_min);
 void writeDischargeFile(string tStrToPrint, 
 	double cinterp); 
 void writeDischargeAveFile(string tStrToPrint,

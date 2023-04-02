@@ -50,8 +50,7 @@ int startSimulation()
 
 	int nowTsec = ts.dtsec;
 	double nowTmin = 0.0;;
-	ts.dtsecUsed_tm1 = ts.dtsec;
-	ts.targetTtoP_sec = (int)prj.dtPrint_min * 60;
+
 	int simEndingT_sec = ts.simEnding_sec;
 	int loopEndingT_sec = ts.simEnding_sec + 1;// ts.dtsec + 1; 여기서 +1을 하는 것은 while 문에서 부등호를 사용하기 위함
 	while (nowTsec < loopEndingT_sec) {
@@ -325,6 +324,7 @@ void initThisSimulation()
 	// 강우자료(양으로 표시되는 기상자료)는 이전시간까지의 누적, 유량자료는 현재 시간에서의 계측값
 	ts.simDuration_min = (int)prj.simDuration_hr * 60;//        +prj.dtPrint_min;
     ts.simEnding_sec = ts.simDuration_min * 60;
+	//ts.avePrintOrder = 0;
     //ts.setupGRMisNormal = 1;
     ts.grmStarted = 1;
     ts.stopSim = -1;
@@ -355,6 +355,10 @@ void initThisSimulation()
         prj.dtsec = ts.dtMaxLimit_sec;
     }
     ts.dtsec = prj.dtsec;
+	ts.dtsecUsed_tm1 = ts.dtsec;
+	ts.targetTtoP_sec = (int)prj.dtPrint_min * 60;
+	ts.targetTtoP_AVE_sec = (int)prj.dtPrintAveValue_min * 60;
+	ts.TtoP_ave_check_sec = ts.targetTtoP_AVE_sec + prj.dtPrintAveValue_sec;
 
     time_t now = time(0);
     ts.time_thisSimStarted = COleDateTime::GetCurrentTime();
@@ -495,6 +499,8 @@ int outputManager(int nowTsec)//, int rfOrder)
     //double dtmin = ts.dtsec / 60.0;
 	int dtP_SEC = dtP_min * 60;
     int timeToP_min = 0;// = nowTsec / 60;
+	int timeToP_AVE_min = 0;
+	int printAveValueNow = 0;
   //  if (rfOrder == 1
   //      && dtP_min > dtrf_min
   //      && ((nowTsec + ts.dtsec) > dtrf_sec)) {
@@ -510,18 +516,21 @@ int outputManager(int nowTsec)//, int rfOrder)
   //  }
   //  else if (nowTsec % dtP_SEC == 0) {
 	if (nowTsec % dtP_SEC == 0) { // 여기서 출력
-        //if (ts.zeroTimePrinted == -1) {
-        //    timeToP_min = ts.targetTtoP_sec / 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
-        //}
-        //else {
-        //    timeToP_min = ts.targetTtoP_sec / 60;
-        //}
-
 		timeToP_min = ts.targetTtoP_sec / 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
-		if (writeBySimType(timeToP_min, 1) == -1) {
+		if (prj.printAveValue == 1) {
+			if (nowTsec % prj.dtPrintAveValue_sec == 0) { // 여기서 출력
+				timeToP_AVE_min = ts.targetTtoP_AVE_sec / 60 - prj.dtPrintAveValue_min;
+				printAveValueNow = 1;
+			}
+		}
+
+		if (writeBySimType(timeToP_min, 1, printAveValueNow, timeToP_AVE_min) == -1) {
 			return -1;
 		}
         ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
+		if (printAveValueNow == 1) {
+			ts.targetTtoP_AVE_sec = ts.targetTtoP_AVE_sec + prj.dtPrintAveValue_sec;
+		}
         ts.isbak = -1;
         return 1;
     }
@@ -548,10 +557,24 @@ int outputManager(int nowTsec)//, int rfOrder)
             double citerp;
             citerp = (ts.targetTtoP_sec - ts.cvsbT_sec) / (double)(nowTsec - ts.cvsbT_sec);
             timeToP_min = (int)(ts.targetTtoP_sec / 60) - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
-			if (writeBySimType(timeToP_min, citerp) == -1) {
+			
+			if (prj.printAveValue == 1) {
+				if (nowTsec > ts.targetTtoP_AVE_sec && nowTsec <= ts.TtoP_ave_check_sec) {
+					timeToP_AVE_min = (int)(ts.targetTtoP_AVE_sec / 60) - prj.dtPrintAveValue_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
+					printAveValueNow = 1;
+				}
+			}
+
+			if (writeBySimType(timeToP_min, citerp, printAveValueNow, timeToP_AVE_min) == -1) {
 				return -1;
 			}
             ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
+
+			if (printAveValueNow == 1) {
+				ts.targetTtoP_AVE_sec = ts.targetTtoP_AVE_sec + prj.dtPrintAveValue_sec;
+				ts.TtoP_ave_check_sec = ts.targetTtoP_AVE_sec + prj.dtPrint_min * 60;
+			}
+
             ts.isbak = -1;
             return 1;
         }
@@ -559,11 +582,12 @@ int outputManager(int nowTsec)//, int rfOrder)
 }
 
 int  writeBySimType(int nowTP_min,
-	double cinterp) {
+	double cinterp, int writeAVE, int timeToP_AVE_min) {
 	COleDateTime timeNow;
 	double TS_FromStarting_sec = 0.0;
 	double TS_FromStarting_min = 0.0;
 	string tStrToPrint;
+	string tStrToPrintAve;
 	timeNow = COleDateTime::GetCurrentTime();
 	COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
 	TS_FromStarting_sec = tsTotalSim.GetTotalSeconds();
@@ -574,15 +598,26 @@ int  writeBySimType(int nowTP_min,
 			tStrToPrint = timeElaspedToDateTimeFormat2(prj.simStartTime,
 				nowTP_min * 60, timeUnitToShow::toM,
 				dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
+			if (writeAVE == 1) {
+				tStrToPrintAve = timeElaspedToDateTimeFormat2(prj.simStartTime,
+					timeToP_AVE_min * 60, timeUnitToShow::toM,
+					dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
+			}
 		}
 		else {// real time 인 경우
 			tStrToPrint = timeElaspedToDateTimeFormat(prj.simStartTime,
 				nowTP_min * 60, timeUnitToShow::toM,
 				dateTimeFormat::yyyymmddHHMMSS);
+			if (writeAVE == 1) {
+				tStrToPrintAve = timeElaspedToDateTimeFormat(prj.simStartTime,
+					timeToP_AVE_min * 60, timeUnitToShow::toM,
+					dateTimeFormat::yyyymmddHHMMSS);
+			}
 		}
 	}
 	else {
 		tStrToPrint = dtos(nowTP_min / 60.0, 2);
+		tStrToPrintAve = dtos(timeToP_AVE_min / 60.0, 2);
 		unitToP = " (hr)";
 	}
 
@@ -595,65 +630,73 @@ int  writeBySimType(int nowTP_min,
 		writeLog(fpnLog, logStr, 1, -1);
 	}
 
+	////int printAveValueNow = 0;
+	//if (writeAVE == 1) {
+	//	//if ((nowTP_min >= prj.dtPrintAveValue_sec) && (nowTP_min % prj.dtPrintAveValue_min) == 0) {
+	//	////if ((nowTP_min % prj.dtPrintAveValue_min) == 0) {
+	//		//printAveValueNow = 1;
+	//		ts.avePrintOrder++;
+	//	//}
+	//}
 	simulationType simType = prj.simType;
 	switch (simType) {
 	case simulationType::Normal: {
 		writeSimProgress(nowTP_min);
 		if (prj.printOption == GRMPrintType::All) {
 			writeDischargeFile(tStrToPrint, cinterp);
-			if (prj.printAveValue == 1) {
-				writeDischargeAveFile(tStrToPrint, cinterp);
+			if (writeAVE ==1) {
+				writeDischargeAveFile(tStrToPrintAve, cinterp);
 			}
 			writeWPoutputFile(tStrToPrint, cinterp);
 			if (prj.simFlowControl == 1) {
 				writeFCOutputFile(tStrToPrint, cinterp);
-				if (prj.printAveValue == 1) {
-					writeFCAveOutputFile(tStrToPrint, cinterp);
+				if (writeAVE == 1) {
+					writeFCAveOutputFile(tStrToPrintAve, cinterp);
 				}
 			}
 			writeRainfallOutputFile(tStrToPrint, cinterp);
 		}
 		else if (prj.printOption == GRMPrintType::DischargeAndFcFile) {
 			writeDischargeFile(tStrToPrint, cinterp);
-			if (prj.printAveValue == 1) {
-				writeDischargeAveFile(tStrToPrint, cinterp);
+			if (writeAVE == 1) {
+				writeDischargeAveFile(tStrToPrintAve, cinterp);
 			}
 			if (prj.simFlowControl == 1) {
 				writeFCOutputFile(tStrToPrint, cinterp);
-				if (prj.printAveValue == 1) {
-					writeFCAveOutputFile(tStrToPrint, cinterp);
+				if (writeAVE == 1)  {
+					writeFCAveOutputFile(tStrToPrintAve, cinterp);
 				}
 			}
 		}
 		else if (prj.printOption == GRMPrintType::DischargeFile) {
 			writeDischargeFile(tStrToPrint, cinterp);
-			if (prj.printAveValue == 1) {
-				writeDischargeAveFile(tStrToPrint, cinterp);
+			if (writeAVE == 1) {
+				writeDischargeAveFile(tStrToPrintAve, cinterp);
 			}
 		} 
-		else if (prj.printOption == GRMPrintType::AverageFile && prj.printAveValue == 1) {
-			writeDischargeAveFile(tStrToPrint, cinterp);
-			if (prj.simFlowControl == 1) {
-				writeFCAveOutputFile(tStrToPrint, cinterp);
+		else if (prj.printOption == GRMPrintType::AverageFile && writeAVE == 1) {
+				writeDischargeAveFile(tStrToPrintAve, cinterp);
+				if (prj.simFlowControl == 1) {
+					writeFCAveOutputFile(tStrToPrintAve, cinterp);
 			}
 		}
 		// 아래는 Q 만 출력 =======================
 		else if (prj.printOption == GRMPrintType::AllQ) {
 			writeDischargeFile("", cinterp);
-			if (prj.printAveValue == 1) {
+			if (writeAVE == 1) {
 				writeDischargeAveFile("", cinterp);
 			}
 			writeWPoutputFile("", cinterp);
 			if (prj.simFlowControl == 1) {
 				writeFCOutputFile("", cinterp);
-				if (prj.printAveValue == 1) {
+				if (writeAVE == 1) {
 					writeFCAveOutputFile("", cinterp);
 				}
 			}
 		}
 		else if (prj.printOption == GRMPrintType::DischargeFileQ) {
 			writeDischargeFile("", cinterp);
-			if (prj.printAveValue == 1) {
+			if (writeAVE == 1) {
 				writeDischargeAveFile("", cinterp);
 			}
 		}
@@ -681,23 +724,25 @@ int  writeBySimType(int nowTP_min,
 			return -1;
 		}
 	}
-	initValuesAfterPrinting();
+	initValuesAfterPrinting(nowTP_min, writeAVE);
 	return 1;
 }
 
 // 여기서 출력할 때 마다 초기화 되어야 하는 변수들 처리
-void initValuesAfterPrinting() {
+void initValuesAfterPrinting(int nowTP_min, int printAveValueNow) {
 	ts.rfAveSumAllCells_PT_m = 0.0;
 	for (int idx : wpSimValue.wpCVidxes) {
 		wpSimValue.prcpUpWSAveForPT_mm[idx] = 0.0;
 		wpSimValue.prcpWPGridForPT_mm[idx] = 0.0;
-		wpSimValue.Q_sumPT_m3[idx] = 0.0;
 		wpSimValue.pet_sumPT_mm[idx] = 0.0;
 		wpSimValue.aet_sumPT_mm[idx] = 0.0;
 		wpSimValue.snowM_sumPT_mm[idx] = 0.0;
+		if (printAveValueNow == 1 ) {
+			wpSimValue.Q_sumPT_m3[idx] = 0.0;
+		}
 	}
 	//fcDataAppliedBak.clear(); // 2022.10.17 주석처리
-	if (prj.printAveValue == 1) {
+	if (printAveValueNow == 1 ) {
 		for (int idx : fccds.cvidxsFCcell) {
 			if (prj.fcs[idx].fcType != flowControlType::Inlet) {
 				fccds.inflowSumPT_m3[idx] = 0.0;

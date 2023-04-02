@@ -93,16 +93,15 @@ void writeDischargeFile(string tStrToPrint, double cinterp)
 
 void writeDischargeAveFile(string tStrToPrint, double cinterp)
 {
-	double ptSec = prj.dtPrint_min * 60.0;
 	double vToP_ave = 0.0;
 	string lineToPave = tStrToPrint;
 	for (int i : wpSimValue.wpCVidxes) {
 		if (cinterp == 1.0) {
-			vToP_ave = wpSimValue.Q_sumPT_m3[i] / ptSec; // cms 합에서 총 pt 시간으로 나눈다.
+			vToP_ave = wpSimValue.Q_sumPT_m3[i] / prj.dtPrintAveValue_sec; // cms 합에서 총 pt 시간으로 나눈다.
 		}
 		else if (ts.isbak == 1) {
 			vToP_ave = getinterpolatedVLinear(wpSimValueB.Q_sumPT_m3[i],
-				wpSimValue.Q_sumPT_m3[i], cinterp) / ptSec;
+				wpSimValue.Q_sumPT_m3[i], cinterp) / prj.dtPrintAveValue_sec;
 		}
 		else {
 			vToP_ave = 0.0;
@@ -146,9 +145,9 @@ void writeWPoutputFile(string tStrToPrint, double cinterp)
 		}
 		if (cinterp == 1.0) {
 			oStr.append(dtos(wpSimValue.q_cms_print[i], 2) + "\t"); // 이 값은 writeDischargeFile에서 계산되어 있다. 
-			if (prj.printAveValue == 1) {
-				oStr.append(dtos(wpSimValue.Q_sumPT_m3_print[i], 2) + "\t"); // 이 값은 writeDischargeFile에서 계산되어 있다. 
-			}
+			//if (prj.printAveValue == 1) { // 출력시간 간격과 ave 시간간격을 다르게 설정하게 하기 위해 wp별로는 출력하지 않는다. 2023.03.28
+			//	oStr.append(dtos(wpSimValue.Q_sumPT_m3_print[i], 2) + "\t"); // 이 값은 writeDischargeFile에서 계산되어 있다. 
+			//}
 			oStr.append(dtos(cvs[i].hUAQfromChannelBed_m, 4) + "\t");
 			oStr.append(dtos(cvs[i].soilWaterC_m, 4) + "\t");
 			oStr.append(dtos(cvs[i].ssr, 4) + "\t");
@@ -174,9 +173,9 @@ void writeWPoutputFile(string tStrToPrint, double cinterp)
 		}
 		else if (ts.isbak == 1) {
 			oStr.append(dtos(wpSimValue.q_cms_print[i], 2) + "\t"); // 이 값은 writeDischargeFile에서 계산되어 있다. 
-			if (prj.printAveValue == 1) {
-				oStr.append(dtos(wpSimValue.Q_sumPT_m3_print[i], 2) + "\t"); // 이 값은 writeDischargeFile에서 계산되어 있다. 
-			}
+			//if (prj.printAveValue == 1) { // 출력시간 간격과 ave 시간간격을 다르게 설정하게 하기 위해 wp별로는 출력하지 않는다. 2023.03.28
+			//	oStr.append(dtos(wpSimValue.Q_sumPT_m3_print[i], 2) + "\t"); // 이 값은 writeDischargeFile에서 계산되어 있다. 
+			//}
 			oStr.append(dtos(getinterpolatedVLinear(cvsb[i].hUAQfromChannelBed_m,
 				cvs[i].hUAQfromChannelBed_m, cinterp), 4) + "\t");
 			oStr.append(dtos(getinterpolatedVLinear(cvsb[i].soilWaterC_m,
@@ -287,17 +286,16 @@ void writeFCOutputFile(string tStrToPrint, double cinterp)
 }
 
 void writeFCAveOutputFile(string tStrToPrint, double cinterp) {
-	double ptSec = prj.dtPrint_min * 60.0;
 	string fc_inflow_Ave = "";
 	fc_inflow_Ave = tStrToPrint;
 	if (cinterp == 1.0) {
 		for (int idx : fccds.cvidxsFCcell) {
 				if (fc_inflow_Ave == "") {
-					fc_inflow_Ave = dtos(fccds.inflowSumPT_m3[idx] / ptSec, 2);
+					fc_inflow_Ave = dtos(fccds.inflowSumPT_m3[idx] / prj.dtPrintAveValue_sec, 2);
 				}
 				else {
 					fc_inflow_Ave += "\t"
-						+ dtos(fccds.inflowSumPT_m3[idx] / ptSec, 2);
+						+ dtos(fccds.inflowSumPT_m3[idx] / prj.dtPrintAveValue_sec, 2);
 				}
 		}
 	}
@@ -305,12 +303,12 @@ void writeFCAveOutputFile(string tStrToPrint, double cinterp) {
 		for (int idx : fccds.cvidxsFCcell) {
 				if (fc_inflow_Ave == "") {
 					fc_inflow_Ave = dtos(getinterpolatedVLinear(fcInflowSumPT_m3_Bak[idx],
-						fccds.inflowSumPT_m3[idx], cinterp) / ptSec, 2);
+						fccds.inflowSumPT_m3[idx], cinterp) / prj.dtPrintAveValue_sec, 2);
 				}
 				else {
 					fc_inflow_Ave += "\t"
 						+ dtos(getinterpolatedVLinear(fcInflowSumPT_m3_Bak[idx],
-							fccds.inflowSumPT_m3[idx], cinterp) / ptSec, 2);
+							fccds.inflowSumPT_m3[idx], cinterp) / prj.dtPrintAveValue_sec, 2);
 				}
 		}
 	}
@@ -489,18 +487,18 @@ int makeNewOutputFiles()
 					if (prj.simType == simulationType::RealTime) {
 						heads = heads + CONST_OUTPUT_TABLE_TIME_FIELD_NAME + "\t"
 							+ "Flow_sim[CMS]" + "\t";
-						if (prj.printAveValue == 1) {
-							heads = heads + "Flow_sim_AVE[CMS]" + "\t";
-						}
+						//if (prj.printAveValue == 1) {
+						//	heads = heads + "Flow_sim_AVE[CMS]" + "\t";
+						//}
 						heads = heads + "Flow_obs[m]" + "\t"
 							+ "PRCP_UpMean[mm]" + "\n";
 					}
 					else {
 						heads = heads + CONST_OUTPUT_TABLE_TIME_FIELD_NAME + "\t"
 							+ "Discharge[CMS]" + "\t";
-						if (prj.printAveValue == 1) { // WP 별 출력에서는 순간 cms 옆에 Ave cms 기록한다.
-							heads = heads + "Discharge_AVE[CMS]" + "\t";
-						}
+						//if (prj.printAveValue == 1) { // WP 별 출력에서는 순간 cms 옆에 Ave cms 기록한다.
+						//	heads = heads + "Discharge_AVE[CMS]" + "\t";
+						//}
 						heads = heads + "BaseFlowDepth[m]" + "\t"
 							+ "SoilWaterContent[m]" + "\t"
 							+ "SoilSatR" + "\t"

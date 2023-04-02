@@ -658,9 +658,27 @@ int openProjectFile(int forceRealTime)
 	if (prj.printOption == GRMPrintType::AverageFile ||
 		prj.printOption == GRMPrintType::AverageFileQ) {
 		if (prj.printAveValue != 1) {
-			writeLog(fpnLog, "ERROR : Set [printAveValue as 1] to print average values.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Set [printAveValue as 'true'] to print average values.\n", 1, 1);
 			return -1;
 		}
+	}
+
+	if (prj.printAveValue == 1) {
+		if (prj.dtPrintAveValue_min == 0 || prj.dtPrintAveValue_min<prj.dtPrint_min) {
+			string outString = "WARNNING : The average value calculation time step (AveValueTimeInterval_min) is invalid.\n";
+			outString = outString + "WARNNING : The average value calculation time step was set to the same value of 'OutputTimeStep_min'("
+				+ to_string(prj.dtPrint_min) + "min).\n";
+			writeLog(fpnLog, outString, 1, 1);
+			prj.dtPrintAveValue_min = prj.dtPrint_min;
+		}
+		if (prj.dtPrintAveValue_min % prj.dtPrint_min) { // 나머지가 있으면
+			writeLog(fpnLog, "WARNNING : AveValueTimeInterval_min have to be the multiple value of OutputTimeStep_min.\n", 1, 1);
+			int share_print = prj.dtPrintAveValue_min / prj.dtPrint_min;
+			int dtPrintAveValue_new = share_print * prj.dtPrint_min;
+			writeLog(fpnLog, "WARNNING : AveValueTimeInterval_min was set to "+to_string(dtPrintAveValue_new)+".\n", 1, 1);
+			prj.dtPrintAveValue_min = dtPrintAveValue_new;
+		}
+		prj.dtPrintAveValue_sec = prj.dtPrintAveValue_min * 60;
 	}
 
 	if (prj.dtsec == 0) {
@@ -682,7 +700,7 @@ int openProjectFile(int forceRealTime)
 		else {
 			prj.mdp = 12;  //omp_get_max_threads()를 사용하면 최대 cpu를 적용하므로 grm에서는 과도한 경우가 많다..
 			string outString = "The number of CPUs could not be encountered. Max. degree of parallelism was set to 12.\n";
-			outString = "Change the value of <MaxDegreeOfParallelism> in the gmp file to change Max. degree of parallelism.\n";
+			outString = outString+"Change the value of <MaxDegreeOfParallelism> in the gmp file to change Max. degree of parallelism.\n";
 			writeLog(fpnLog, outString, 1, 1);
 		}
 	}
@@ -1737,6 +1755,17 @@ int readXmlRowProjectSettings(string aline)
 		}
 		return 1;
 	}
+
+	if (aline.find(fldName.AveValueTimeInterval_min) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.AveValueTimeInterval_min);
+		prj.dtPrintAveValue_min = 0;
+		if (vString != "") {
+			prj.dtPrintAveValue_min = stoi(vString);
+		}
+		return 1;
+	}
+
+
 	if (aline.find(fldName.WriteLog) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.WriteLog);
 		prj.writeLog = -1;
