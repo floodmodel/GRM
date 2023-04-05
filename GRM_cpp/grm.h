@@ -515,8 +515,8 @@ typedef struct _wpSimData {
 	map<int, double> prcpWPGridForPT_mm; // Watchpoint 격자에 대한 출력시간 간격 동안의 누적강우량. 원시자료를 이용해서 계산된값.[mm]
 	map<int, double> prcpWPGridTotal_mm; // Watchpoint 격자에 대한 누적강우량[mm]
 	map<int, double> q_cms_print;  // 이 값은 writeDischargefile에서 계산되고, writeWPoutputFile에서 사용된다.
-	map<int, double> Q_sumPT_m3; // Watchpoint 격자에 대한 전체유량[m3]. 출력시간 간격동안의 누적값. 출력 간격 평균값(cms) 계산할때 사용됨
-	map<int, double> Q_sumPT_m3_print; // 이 값은 writeDischargefile에서 계산되고, writeWPoutputFile에서 사용된다.
+	map<int, double> Q_sumPTforAVE_m3; // Watchpoint 격자에 대한 전체유량[m3]. 출력시간 간격동안의 누적값. 출력 간격 평균값(cms) 계산할때 사용됨
+	map<int, double> Q_sumPTforAVE_m3_print; // 이 값은 writeDischargefile에서 계산되고, writeWPoutputFile에서 사용된다.
 	//map<int, double> inflowSumPT_m3; // 출력 기간동안 누적 유입량 m3, 출력기간동안의 평균 유입량[cms] 계산시 사용
 
 	map<int, double> pet_sumPT_mm; // 출력 기간 동안의 누적 값. 2022.10.26
@@ -933,7 +933,9 @@ typedef struct _thisSimulation
 	int dataNumTotal_rf = 0;
 	double rfAveForDT_m = 0;
 	double rfAveSumAllCells_PT_m = 0; // 출력기간 동안에서의 도메인 내에 있는 모든 셀 값의 합
+	double rfAveSumAllCells_PTave_m = 0; // 출력기간 동안에서의 도메인 내에 있는 모든 셀 값의 합
 	double rfAveSumAllCells_PT_m_bak = 0; // 출력기간 동안에서의 도메인 내에 있는 모든 셀 값의 합 백업
+	double rfAveSumAllCells_PTave_m_bak = 0; // 출력기간 동안에서의 도메인 내에 있는 모든 셀 값의 합 백업
 	double rfiSumAllCellsInCurRFData_mPs; //rfi : rf intensity
 
 	int dataNumTotal_tempMax = 0;
@@ -1043,6 +1045,7 @@ flowDirection8 getFlowDirection(int fdirV,
 	flowDirectionType fdType);
 double getOverlandFlowDepthCVw(int i);
 double getMeanRFValueToPrintForAllCells(double cinterp); // 도메인 내에 있는 모든 셀의 평균 값 출력을 위한 인터폴레이션 값
+double getMeanRFValueToPrintAveForAllCells(double cinterp);
 weatherDataType getWeatherDataTypeByDataFile(string fpn_wdata);
 void grmHelp();
 

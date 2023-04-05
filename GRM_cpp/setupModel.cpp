@@ -67,7 +67,7 @@ int initWPinfos()
 	wpSimValue.prcpUpWSAveTotal_mm.clear();
 	wpSimValue.prcpWPGridForPT_mm.clear();
 	wpSimValue.prcpWPGridTotal_mm.clear();
-	wpSimValue.Q_sumPT_m3.clear();
+	wpSimValue.Q_sumPTforAVE_m3.clear();
 
 	//wpSimValue.totalFlow_cms.clear();
 	//wpSimValue.totalDepth_m.clear();

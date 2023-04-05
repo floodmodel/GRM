@@ -97,11 +97,11 @@ void writeDischargeAveFile(string tStrToPrint, double cinterp)
 	string lineToPave = tStrToPrint;
 	for (int i : wpSimValue.wpCVidxes) {
 		if (cinterp == 1.0) {
-			vToP_ave = wpSimValue.Q_sumPT_m3[i] / prj.dtPrintAveValue_sec; // cms 합에서 총 pt 시간으로 나눈다.
+			vToP_ave = wpSimValue.Q_sumPTforAVE_m3[i] / prj.dtPrintAveValue_sec; // cms 합에서 총 pt 시간으로 나눈다.
 		}
 		else if (ts.isbak == 1) {
-			vToP_ave = getinterpolatedVLinear(wpSimValueB.Q_sumPT_m3[i],
-				wpSimValue.Q_sumPT_m3[i], cinterp) / prj.dtPrintAveValue_sec;
+			vToP_ave = getinterpolatedVLinear(wpSimValueB.Q_sumPTforAVE_m3[i],
+				wpSimValue.Q_sumPTforAVE_m3[i], cinterp) / prj.dtPrintAveValue_sec;
 		}
 		else {
 			vToP_ave = 0.0;
@@ -112,10 +112,10 @@ void writeDischargeAveFile(string tStrToPrint, double cinterp)
 		else {
 			lineToPave += dtos(vToP_ave, 2);
 		}
-		wpSimValue.Q_sumPT_m3_print[i] = vToP_ave; // 이 값은 wp file 출력에 사용됨
+		wpSimValue.Q_sumPTforAVE_m3_print[i] = vToP_ave; // 이 값은 wp file 출력에 사용됨
 	}
 	if (tStrToPrint.size() > 0) { // 이경우는 유량 + 다른 정보도 출력
-		double rfSumForPT_mm = getMeanRFValueToPrintForAllCells(cinterp);
+		double rfSumForPT_mm = getMeanRFValueToPrintAveForAllCells(cinterp);
 		lineToPave += "\t" + dtos(rfSumForPT_mm, 2) + "\n";
 	}
 	else {
@@ -132,6 +132,18 @@ double getMeanRFValueToPrintForAllCells(double cinterp) {
 	else {
 		rfSumForPT_mm = getinterpolatedVLinear(ts.rfAveSumAllCells_PT_m_bak,
 			ts.rfAveSumAllCells_PT_m, cinterp) * 1000.0;
+	}
+	return rfSumForPT_mm;
+}
+
+double getMeanRFValueToPrintAveForAllCells(double cinterp) {
+	double rfSumForPT_mm = 0.0;
+	if (cinterp == 1.0) {
+		rfSumForPT_mm = ts.rfAveSumAllCells_PTave_m * 1000.0;
+	}
+	else {
+		rfSumForPT_mm = getinterpolatedVLinear(ts.rfAveSumAllCells_PTave_m_bak,
+			ts.rfAveSumAllCells_PTave_m, cinterp) * 1000.0;
 	}
 	return rfSumForPT_mm;
 }

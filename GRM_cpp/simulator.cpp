@@ -478,7 +478,7 @@ void setCVStartingCondition(double iniflow)
     for (int wpcvid : wpSimValue.wpCVidxes) {
         wpSimValue.prcpWPGridTotal_mm[wpcvid] = 0;
         wpSimValue.prcpUpWSAveTotal_mm[wpcvid] = 0;
-		wpSimValue.Q_sumPT_m3[wpcvid] = 0.0;
+		wpSimValue.Q_sumPTforAVE_m3[wpcvid] = 0.0;
 
         //wpSimValue.totalDepth_m[wpcvid] = 0;
         //wpSimValue.totalFlow_cms[wpcvid] = 0;
@@ -538,10 +538,12 @@ int outputManager(int nowTsec)//, int rfOrder)
 		// 여기서 백업
         if (nowTsec <  ts.targetTtoP_sec
             && (nowTsec + ts.dtsec) >ts.targetTtoP_sec) {
+
             // 만일 현재의 dtsec으로 한번더 전진해서 이 조건을 만족하면
             std::copy(cvs, cvs + di.cellNnotNull, cvsb);
             wpSimValueB = wpSimValue; // 포인터가 아니므로..
 			ts.rfAveSumAllCells_PT_m_bak = ts.rfAveSumAllCells_PT_m;
+			ts.rfAveSumAllCells_PTave_m_bak = ts.rfAveSumAllCells_PTave_m;
 
             if (prj.simFlowControl == 1) {
                 //fcDataAppliedBak = fccds.fcDataAppliedNowT_m3Ps; // 2022.10.17 주석처리
@@ -723,6 +725,9 @@ int  writeBySimType(int nowTP_min,
 // 여기서 출력할 때 마다 초기화 되어야 하는 변수들 처리
 void initValuesAfterPrinting(int nowTP_min, int printAveValueNow) {
 	ts.rfAveSumAllCells_PT_m = 0.0;
+	if (printAveValueNow == 1) {
+		ts.rfAveSumAllCells_PTave_m = 0.0;
+	}
 	for (int idx : wpSimValue.wpCVidxes) {
 		wpSimValue.prcpUpWSAveForPT_mm[idx] = 0.0;
 		wpSimValue.prcpWPGridForPT_mm[idx] = 0.0;
@@ -730,7 +735,7 @@ void initValuesAfterPrinting(int nowTP_min, int printAveValueNow) {
 		wpSimValue.aet_sumPT_mm[idx] = 0.0;
 		wpSimValue.snowM_sumPT_mm[idx] = 0.0;
 		if (printAveValueNow == 1 ) {
-			wpSimValue.Q_sumPT_m3[idx] = 0.0;
+			wpSimValue.Q_sumPTforAVE_m3[idx] = 0.0;
 		}
 	}
 	//fcDataAppliedBak.clear(); // 2022.10.17 주석처리
@@ -750,6 +755,11 @@ void calValuesDuringPT(int dtsec)
 		/ di.cellNtobeSimulated;
 	ts.rfAveSumAllCells_PT_m = ts.rfAveSumAllCells_PT_m
 		+ ts.rfAveForDT_m;
+	if (prj.printAveValue == 1) {
+		ts.rfAveSumAllCells_PTave_m = ts.rfAveSumAllCells_PTave_m
+			+ ts.rfAveForDT_m;
+	}
+
 	for (int idx : wpSimValue.wpCVidxes) {
 		wpSimValue.prcpUpWSAveForDt_mm[idx] = wpSimValue.prcpiReadSumUpWS_mPs[idx]
 			* dtsec * 1000.0 / (double)wpSimValue.cvCountAllup[idx]; //(double)(cvs[idx].fac + 1);
@@ -763,10 +773,10 @@ void calValuesDuringPT(int dtsec)
 
 		if (prj.printAveValue == 1) {
 			if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
-				wpSimValue.Q_sumPT_m3[idx] += cvs[idx].QOF_m3Ps * dtsec;
+				wpSimValue.Q_sumPTforAVE_m3[idx] += cvs[idx].QOF_m3Ps * dtsec;
 			}
 			else {
-				wpSimValue.Q_sumPT_m3[idx] += cvs[idx].stream.QCH_m3Ps * dtsec;
+				wpSimValue.Q_sumPTforAVE_m3[idx] += cvs[idx].stream.QCH_m3Ps * dtsec;
 			}
 		}
 	}

@@ -171,6 +171,7 @@ int setCVRF(int order)
 	 writeLog(fpnLog, "WARNNING : If the time step of precipitation data is equal or smaller than printing time step, add more data. Or decrease simulation duration.\n", 1, -1);
 	 ts.rfAveForDT_m = 0;
 	 ts.rfAveSumAllCells_PT_m = 0;
+	 ts.rfAveSumAllCells_PTave_m = 0;
      ts.rfiSumAllCellsInCurRFData_mPs = 0;
 #pragma omp parallel for
      for (int i = 0; i < di.cellNnotNull; ++i)    {
@@ -196,6 +197,7 @@ int setCVRF(int order)
  {
 	 ts.rfAveForDT_m = 0;
 	 ts.rfAveSumAllCells_PT_m = 0;
+	 ts.rfAveSumAllCells_PTave_m = 0;
 	 ts.rfiSumAllCellsInCurRFData_mPs = 0;
 	 for (int wpcvid : wpSimValue.wpCVidxes) {
 		 wpSimValue.prcpWPGridForPT_mm[wpcvid] = 0;
