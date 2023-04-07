@@ -494,9 +494,6 @@ void setCVStartingCondition(double iniflow)
 int outputManager(int nowTsec)//, int rfOrder)
 {
     int dtP_min = prj.dtPrint_min;
-    //int dtrf_min = (int)prj.rfinterval_min;
-    //int dtrf_sec = dtrf_min * 60;
-    //double dtmin = ts.dtsec / 60.0;
 	int dtP_SEC = dtP_min * 60;
     int timeToP_min = 0;// = nowTsec / 60;
 	int timeToP_AVE_min = 0;
@@ -530,7 +527,9 @@ int outputManager(int nowTsec)//, int rfOrder)
         ts.targetTtoP_sec = ts.targetTtoP_sec + dtP_SEC;
 		if (printAveValueNow == 1) {
 			ts.targetTtoP_AVE_sec = ts.targetTtoP_AVE_sec + prj.dtPrintAveValue_sec;
+			ts.TtoP_ave_check_sec = ts.targetTtoP_AVE_sec + prj.dtPrint_min * 60;
 		}
+
         ts.isbak = -1;
         return 1;
     }
@@ -556,12 +555,12 @@ int outputManager(int nowTsec)//, int rfOrder)
 		// 여기서 출력
         if (nowTsec > ts.targetTtoP_sec
             && (nowTsec - ts.dtsecUsed_tm1) <= ts.targetTtoP_sec) {
-            double citerp;
+            double citerp=0.0;
             citerp = (ts.targetTtoP_sec - ts.cvsbT_sec) / (double)(nowTsec - ts.cvsbT_sec);
             timeToP_min = (int)(ts.targetTtoP_sec / 60) - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
 			
 			if (prj.printAveValue == 1) {
-				if (nowTsec > ts.targetTtoP_AVE_sec && nowTsec <= ts.TtoP_ave_check_sec) {
+				if (nowTsec >= ts.targetTtoP_AVE_sec && nowTsec <= ts.TtoP_ave_check_sec) {
 					timeToP_AVE_min = (int)(ts.targetTtoP_AVE_sec / 60) - prj.dtPrintAveValue_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
 					printAveValueNow = 1;
 				}
@@ -576,7 +575,6 @@ int outputManager(int nowTsec)//, int rfOrder)
 				ts.targetTtoP_AVE_sec = ts.targetTtoP_AVE_sec + prj.dtPrintAveValue_sec;
 				ts.TtoP_ave_check_sec = ts.targetTtoP_AVE_sec + prj.dtPrint_min * 60;
 			}
-
             ts.isbak = -1;
             return 1;
         }
