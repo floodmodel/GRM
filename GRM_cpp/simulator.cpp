@@ -560,9 +560,10 @@ int outputManager(int nowTsec)//, int rfOrder)
             timeToP_min = (int)(ts.targetTtoP_sec / 60) - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
 			
 			if (prj.printAveValue == 1) {
-				if (nowTsec >= ts.targetTtoP_AVE_sec && nowTsec <= ts.TtoP_ave_check_sec) {
+				if (nowTsec >= ts.targetTtoP_AVE_sec && nowTsec <= ts.TtoP_ave_check_sec) { // ==인 경우는 없을 것으로 예상. 출력 시간각격 마다 체크하므로, 시간 부하는 크지 않을 듯. 
 					timeToP_AVE_min = (int)(ts.targetTtoP_AVE_sec / 60) - prj.dtPrintAveValue_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
 					printAveValueNow = 1;
+
 				}
 			}
 

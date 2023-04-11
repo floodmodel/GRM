@@ -68,7 +68,7 @@ class swsParameters(Structure):  #grm 코드에 있는 구조체와 내용 맞�
         ("potentialETMethod", ctypes.c_int),
         ("etCoeff", ctypes.c_double),
         ("snowMeltMethod", ctypes.c_int),
-        ("smeltTSR", ctypes.c_double),
+        ("tempSnowRain", ctypes.c_double),
         ("smeltingTemp", ctypes.c_double),
         ("snowCovRatio", ctypes.c_double),
         ("smeltCoef", ctypes.c_double),
@@ -174,7 +174,7 @@ class grmWSinfo(object):
      #    double ccSoilDepth,
      #    InterceptionMethod interceptMethod,
      #    PETmethod potentialETMethod, double etCoeff,
-     #    SnowMeltMethod snowMeltMethod, double smeltTSR, double smeltingTemp,
+     #    SnowMeltMethod snowMeltMethod, double tempSnowRain, double smeltingTemp,
      #    double snowCovRatio, double smeltCoef,
      #    double iniFlow = 0);
 
@@ -303,7 +303,7 @@ class grmWSinfo(object):
         #==========추가됨. 2023.03.02===
         interceptMethod,
 		potentialETMethod, etCoeff,
-		snowMeltMethod, smeltTSR, smeltingTemp, snowCovRatio, smeltCoef,
+		snowMeltMethod, tempSnowRain, smeltingTemp, snowCovRatio, smeltCoef,
         #=========================
         iniFlow=0.0):
         return gdl.setOneSWSParsAndUpdateAllSWSUsingNetwork(self.obj, wsid, iniSat,
@@ -315,7 +315,7 @@ class grmWSinfo(object):
         #==========추가됨. 2023.03.02===
         interceptMethod,
 		potentialETMethod, etCoeff,
-		snowMeltMethod, smeltTSR, smeltingTemp, snowCovRatio, smeltCoef,
+		snowMeltMethod, tempSnowRain, smeltingTemp, snowCovRatio, smeltCoef,
         #=========================
         iniFlow)
 
@@ -480,7 +480,7 @@ print("subwatershedPars. potentialETMethod :", swp.potentialETMethod, "  Name :"
 print("subwatershedPars. etCoeff :", swp.etCoeff)
 print("subwatershedPars. snowMeltMethod :", swp.snowMeltMethod, "  Name :", SnowMeltMethod(swp.snowMeltMethod).name)  
     # Anderson = 1, Constant = 8, UserData = 9, smNone = 10
-print("subwatershedPars. smeltTSR :", swp.smeltTSR)
+print("subwatershedPars. tempSnowRain :", swp.tempSnowRain)
 print("subwatershedPars. smeltingTemp :", swp.smeltingTemp)
 print("subwatershedPars. snowCovRatio :", swp.snowCovRatio)
 print("subwatershedPars. smeltCoef :", swp.smeltCoef)
@@ -544,7 +544,7 @@ print("subwatershedPars. etCoeff :", swp.etCoeff)
 print("subwatershedPars. snowMeltMethod :", swp.snowMeltMethod)
 print("subwatershedPars. snowMeltMethod :", swp.snowMeltMethod, "  Name :", SnowMeltMethod(swp.snowMeltMethod).name)  
     # Anderson = 1, Constant = 8, UserData = 9, smNone = 10
-print("subwatershedPars. smeltTSR :", swp.smeltTSR)
+print("subwatershedPars. tempSnowRain :", swp.tempSnowRain)
 print("subwatershedPars. smeltingTemp :", swp.smeltingTemp)
 print("subwatershedPars. snowCovRatio :", swp.snowCovRatio)
 print("subwatershedPars. smeltCoef :", swp.smeltCoef)

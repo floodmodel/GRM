@@ -338,7 +338,7 @@ int updateCVbyUserSettings()
 		
 		// À¶¼³
 		cvs[i].smMethod = ups.snowMeltMethod;
-		cvs[i].smeltTSR =ups.smeltTSR;
+		cvs[i].smeltTSR =ups.tempSnowRain;
 		cvs[i].smeltingT =ups.smeltingTemp;
 		cvs[i].snowCovR = ups.snowCovRatio;
 		cvs[i].smeltCoef = ups.smeltCoef;

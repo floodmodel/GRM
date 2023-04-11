@@ -534,7 +534,7 @@ int openProjectFile(int forceRealTime)
 					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
 				return -1;
 			}
-			if (prj.swps[mpair.first].smeltTSR < -9000 || prj.swps[mpair.first].smeltTSR >20 ) { // 최대값을 20도로 가정한다.
+			if (prj.swps[mpair.first].tempSnowRain < -9000 || prj.swps[mpair.first].tempSnowRain >20 ) { // 최대값을 20도로 가정한다.
 				writeLog(fpnLog, "ERROR : The value of the threshold temperature dividing snowfall and rainfall (SnowmeltTSR) is invalid [watershed id = "
 					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
 				return -1;
@@ -2852,13 +2852,13 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		ssp->snowMeltMethod = snowMM;
 		return 1;
 	}
-	if (aline.find(fldName.SnowmeltTSR) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.SnowmeltTSR);
+	if (aline.find(fldName.TempSnowRain) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.TempSnowRain);
 		if (vString != "" && isNumeric(vString) == true) {
-			ssp->smeltTSR = stod(vString);
+			ssp->tempSnowRain = stod(vString);
 		}
 		else { // 융설은 옵션이므로, 애러처리 안한다.
-			ssp->smeltTSR = -9999;
+			ssp->tempSnowRain = -9999;
 			//writeLog(fpnLog, "WARNNING : Snow melt TSR value in the watershed ["
 			//	+ to_string(ssp->wsid) + "] is invalid.\n", 1, -1);
 		}
@@ -3100,7 +3100,7 @@ bool updateOneSWSParsWithOtherSWSParsSet(int targetWSid, int referenceWSid)
 	prj.swps[targetWSid].potentialETMethod = spars.potentialETMethod;
 	prj.swps[targetWSid].etCoeff = spars.etCoeff;
 	prj.swps[targetWSid].snowMeltMethod = spars.snowMeltMethod;
-	prj.swps[targetWSid].smeltTSR = spars.smeltTSR;
+	prj.swps[targetWSid].tempSnowRain = spars.tempSnowRain;
 	prj.swps[targetWSid].smeltingTemp = spars.smeltingTemp;
 	prj.swps[targetWSid].snowCovRatio = spars.snowCovRatio;
 	prj.swps[targetWSid].smeltCoef = spars.smeltCoef;

@@ -369,7 +369,7 @@ typedef struct _projectFileFieldName
 	const string PETMethod = "PETMethod";
 	const string ETCoef = "ETCoef";
 	const string SnowmeltMethod = "SnowmeltMethod";
-	const string SnowmeltTSR = "SnowmeltTSR";
+	const string TempSnowRain = "TempSnowRain";
 	const string SnowmeltingTemp = "SnowmeltingTemp";
 	const string SnowCovRatio = "SnowCovRatio";	
 	const string SnowmeltCoef = "SnowmeltCoef";
@@ -476,7 +476,7 @@ typedef struct _swsParameters  //pyGRMdll.py 에 있는 구조체와 내용 맞춘다. 순서�
 	PETmethod potentialETMethod = PETmethod::None;
 	double etCoeff = -1.0;
 	SnowMeltMethod snowMeltMethod = SnowMeltMethod::None;
-	double smeltTSR = 0.0; // 강수가 강설로 되는 온도
+	double tempSnowRain = 0.0; // 강수가 강설로 되는 온도
 	double smeltingTemp = 0.0; // snow pack에서 일 승화량
 	double snowCovRatio = 0.0; // 눈으로 덮힌 부분의 면적비
 	double smeltCoef = 0.0;

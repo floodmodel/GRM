@@ -456,7 +456,7 @@ bool grmWSinfo::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat
 	prj.swps[wsid].potentialETMethod = potentialETMethod;
 	prj.swps[wsid].etCoeff = etCoeff;
 	prj.swps[wsid].snowMeltMethod = snowMeltMethod;
-	prj.swps[wsid].smeltTSR = smeltTSR;
+	prj.swps[wsid].tempSnowRain = smeltTSR;
 	prj.swps[wsid].smeltingTemp = smeltingTemp;
 	prj.swps[wsid].snowCovRatio = snowCovRatio;
 	prj.swps[wsid].smeltCoef = smeltCoef;
