@@ -324,8 +324,6 @@ void initThisSimulation()
 	// 강우자료(양으로 표시되는 기상자료)는 이전시간까지의 누적, 유량자료는 현재 시간에서의 계측값
 	ts.simDuration_min = (int)prj.simDuration_hr * 60;//        +prj.dtPrint_min;
     ts.simEnding_sec = ts.simDuration_min * 60;
-	//ts.avePrintOrder = 0;
-    //ts.setupGRMisNormal = 1;
     ts.grmStarted = 1;
     ts.stopSim = -1;
     ts.vMaxInThisStep = DBL_MIN;
@@ -383,58 +381,70 @@ void setCVStartingCondition(double iniflow)
         cvs[i].csaOF = 0;
         if (cvs[i].flowType == cellFlowType::ChannelFlow
             || cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
-            int iniStreamFlowWasSet = -1;
-			if (prj.swps[wsid].userSet == 1 && prj.swps[wsid].iniFlow >= 0) {//Apply ini. flow of current sws
-				iniQAtwsOutlet = prj.swps[wsid].iniFlow;
-				faAtBaseCV = cvs[di.wsn.wsOutletidxs[wsid]].fac;
-				iniStreamFlowWasSet = 1;
-			}
-			else {
-				int baseWSid = wsid;
-				for (int id = 0; id < di.wsn.wsidsAllDown[wsid].size(); id++) {
-					int downWSid = di.wsn.wsidNearbyDown[baseWSid];
-					if (downWSid > 0 && prj.swps[downWSid].iniFlow > 0) {// If this condition is satisfied, apply ini. flow of downstream ws.
-						iniQAtwsOutlet = prj.swps[downWSid].iniFlow;
-						faAtBaseCV = cvs[di.wsn.wsOutletidxs[downWSid]].fac;
-						iniStreamFlowWasSet = 1;
-						break;
-					}
-					else {// Search next downstream ws
-						baseWSid = downWSid;
+
+			if (cvs[i].stream.cellValue > prj.swps[wsid].dryStreamOrder) {// 건천이 아니면,
+
+				int iniStreamFlowWasSet = -1;
+				if (prj.swps[wsid].userSet == 1 && prj.swps[wsid].iniFlow >= 0) {//Apply ini. flow of current sws
+					iniQAtwsOutlet = prj.swps[wsid].iniFlow;
+					faAtBaseCV = cvs[di.wsn.wsOutletidxs[wsid]].fac;
+					iniStreamFlowWasSet = 1;
+				}
+				else {
+					int baseWSid = wsid;
+					for (int id = 0; id < di.wsn.wsidsAllDown[wsid].size(); id++) {
+						int downWSid = di.wsn.wsidNearbyDown[baseWSid];
+						if (downWSid > 0 && prj.swps[downWSid].iniFlow > 0) {// If this condition is satisfied, apply ini. flow of downstream ws.
+							iniQAtwsOutlet = prj.swps[downWSid].iniFlow;
+							faAtBaseCV = cvs[di.wsn.wsOutletidxs[downWSid]].fac;
+							iniStreamFlowWasSet = 1;
+							break;
+						}
+						else {// Search next downstream ws
+							baseWSid = downWSid;
+						}
 					}
 				}
+				chCSAini = 0;
+				hChCVini = 0;
+				qChCVini = 0;
+				uChCVini = 0;
+				if (iniStreamFlowWasSet == 1) {
+					if (prj.icfFileApplied != 1) {
+						qChCVini = iniQAtwsOutlet * (cvs[i].fac - di.facMostUpChannelCell)
+							/ (double)(faAtBaseCV - di.facMostUpChannelCell);
+					}
+					else {
+						qChCVini = cvs[i].stream.iniQCH_m3Ps;
+					}
+					if (qChCVini > 0) {
+						double sngCAS_ini = qChCVini / (double)cvs[i].cvdx_m; // 초기값 설정
+						chCSAini = getChCSAusingQbyiteration(cvs[i], sngCAS_ini, qChCVini);
+						hChCVini = getChDepthUsingCSA(cvs[i].stream.chBaseWidth, chCSAini,
+							cvs[i].stream.isCompoundCS, cvs[i].stream.chURBaseWidth_m,
+							cvs[i].stream.chLRArea_m2, cvs[i].stream.chLRHeight,
+							cvs[i].stream.bankCoeff);
+						double csPeri = cvs[i].stream.chBaseWidth + hChCVini * 2;
+						double HRch = chCSAini / csPeri; // 초기값은 윤변으로 하폭과 수심을 이용한다.
+						uChCVini = vByManningEq(HRch, cvs[i].stream.slopeCH, cvs[i].stream.chRC);
+					}
+				}
+				cvs[i].stream.hCH = hChCVini;
+				cvs[i].stream.csaCH = chCSAini;
+				cvs[i].stream.hCH_ori = hChCVini;
+				cvs[i].stream.csaCH_ori = chCSAini;
+				cvs[i].stream.QCH_m3Ps = qChCVini;
+				cvs[i].stream.uCH = uChCVini;
 			}
-            chCSAini = 0;
-            hChCVini = 0;
-            qChCVini = 0;
-            uChCVini = 0;
-            if (iniStreamFlowWasSet == 1) {
-                if (prj.simType == simulationType::Normal_PE_SSR) {
-                    qChCVini = iniflow * (cvs[i].fac - di.facMostUpChannelCell)
-                        / (double)(faAtBaseCV - di.facMostUpChannelCell);
-                }
-                else if (prj.icfFileApplied != 1) {
-                    qChCVini = iniQAtwsOutlet * (cvs[i].fac - di.facMostUpChannelCell)
-                        / (double)(faAtBaseCV - di.facMostUpChannelCell);
-                }
-                else {
-                    qChCVini = cvs[i].stream.iniQCH_m3Ps;
-                }
-                if (qChCVini > 0) {
-                    double sngCAS_ini = qChCVini / (double)cvs[i].cvdx_m; // 초기값 설정
-                    chCSAini = getChCSAusingQbyiteration(cvs[i], sngCAS_ini, qChCVini);
-                    hChCVini = getChDepthUsingCSA(cvs[i].stream.chBaseWidth, chCSAini,
-                        cvs[i].stream.isCompoundCS, cvs[i].stream.chURBaseWidth_m,
-                        cvs[i].stream.chLRArea_m2, cvs[i].stream.chLRHeight,
-                        cvs[i].stream.bankCoeff);
-                }
-            }
-            cvs[i].stream.hCH = hChCVini;
-            cvs[i].stream.csaCH = chCSAini;
-            cvs[i].stream.hCH_ori = hChCVini;
-            cvs[i].stream.csaCH_ori = chCSAini;
-            cvs[i].stream.QCH_m3Ps = qChCVini;
-            cvs[i].stream.uCH = uChCVini;
+			else { // 건천이면 2023.04.12
+				cvs[i].stream.hCH = 0.0;
+				cvs[i].stream.csaCH = 0.0;
+				cvs[i].stream.hCH_ori = 0.0;
+				cvs[i].stream.csaCH_ori = 0.0;
+				cvs[i].stream.QCH_m3Ps = 0.0;
+				cvs[i].stream.uCH = 0.0;
+			}
+
             if (prj.simBaseFlow == 1) {
                 cvs[i].hUAQfromChannelBed_m = hChCVini; // 하도의 초기 수심을 비피압대수층의 초기 수심으로 설정 
             }
@@ -479,14 +489,6 @@ void setCVStartingCondition(double iniflow)
         wpSimValue.prcpWPGridTotal_mm[wpcvid] = 0;
         wpSimValue.prcpUpWSAveTotal_mm[wpcvid] = 0;
 		wpSimValue.Q_sumPTforAVE_m3[wpcvid] = 0.0;
-
-        //wpSimValue.totalDepth_m[wpcvid] = 0;
-        //wpSimValue.totalFlow_cms[wpcvid] = 0;
-		//wpSimValue.maxDepth_m[wpcvid] = 0;
-		//wpSimValue.maxDepthTime[wpcvid] = "";
-		//wpSimValue.maxFlow_cms[wpcvid] = 0;
-		//wpSimValue.maxFlowTime[wpcvid] = "";
-
     }
 }
 

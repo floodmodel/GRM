@@ -123,41 +123,50 @@ void cal_h_SWC_OFbyAET(int i) {
 			}
 		}
 		else {
-			aet_residual = cvs[i].aet_LS_mPdt - cvs[i].hOF;
-			cvs[i].hOF = 0;
+			aet_residual = cvs[i].aet_LS_mPdt - cvs[i].hOF; // 지면의 수분이 모두 증발하고 남은 증발 가능량
+			cvs[i].hOF = 0;// 모두 증발 되었으므로 0.
 		}
 	}
 	else {
 		aet_residual = cvs[i].aet_LS_mPdt;
 	}
 	if (cvs[i].hOF == 0) {
-if (cvs[i].soilWaterC_m > aet_residual) { // 여기서는 토양에서 손실처리
-	cvs[i].soilWaterC_m = cvs[i].soilWaterC_m - aet_residual;
-	if (cvs[i].soilWaterC_m < 0) {
-		cvs[i].soilWaterC_m = 0.0;
-	}
-}
-else {
-	cvs[i].soilWaterC_m = 0.0;
-}
+		if (cvs[i].soilWaterC_tm1_m > aet_residual) { // 여기서는 토양에서 손실처리
+			cvs[i].soilWaterC_tm1_m = cvs[i].soilWaterC_tm1_m - aet_residual;
+			if (cvs[i].soilWaterC_tm1_m < 0) {
+				cvs[i].soilWaterC_tm1_m = 0.0;
+			}
+		}
+		else {
+			cvs[i].soilWaterC_tm1_m = 0.0;
+		}
 	}
 }
 
 void cal_h_CHbyAET(int i) {
+	double aet_residual = 0.0;
 	if (cvs[i].stream.hCH > 0) {
 		if (cvs[i].stream.hCH > cvs[i].aet_LS_mPdt) { // 이경우는 지표면 수면에서 손실 처리
 			cvs[i].stream.hCH = cvs[i].stream.hCH - cvs[i].aet_LS_mPdt;
 			if (cvs[i].stream.hCH < WETDRY_CRITERIA && cvs[i].stream.hCH>0.0) {
-				cvs[i].stream.hCH = 0.0;
+				cvs[i].stream.hCH = WETDRY_CRITERIA;
 			}
 		}
 		else {
-			cvs[i].aet_LS_mPdt = cvs[i].stream.hCH; // 이만큼만 증발산된다. 
+			aet_residual = cvs[i].aet_LS_mPdt - cvs[i].stream.hCH;// 지면의 수분이 모두 증발하고 남은 증발 가능량
 			cvs[i].stream.hCH = 0; // 모두 증발 되었으므로 0.
 		}
 	}
-	else if (cvs[i].stream.hCH == 0) {// 하천만 있는 셀에서는 토양은 항상 포화된 것으로 처리. 즉 토양 증발산 고려하지 않음.
-		cvs[i].aet_LS_mPdt = 0;
+	else {
+		aet_residual = cvs[i].aet_LS_mPdt; // cvs[i].stream.hCH;
+	}
+	if (cvs[i].stream.hCH == 0) {
+		if (cvs[i].soilWaterC_tm1_m > aet_residual) { // 여기서는 토양에서 손실처리
+			cvs[i].soilWaterC_tm1_m = cvs[i].soilWaterC_tm1_m - aet_residual;
+		}
+		else {
+			cvs[i].soilWaterC_tm1_m = 0.0;
+		}
 	}
 }
 
@@ -247,27 +256,27 @@ void calSnowMelt(int i) {
 		switch (cvs[i].flowType) {
 		case cellFlowType::OverlandFlow: {
 			cvs[i].hOF = cvs[i].hOF + cvs[i].smelt_mPdt;
+			//if (cvs[i].hOF < WETDRY_CRITERIA && cvs[i].hOF>0.0) {	cvs[i].hOF = WETDRY_CRITERIA;}
+			if (cvs[i].hOF < WETDRY_CRITERIA ) { cvs[i].hOF = 0.0; }
 			break;
 		}
 		case cellFlowType::ChannelFlow: {
 			cvs[i].stream.hCH = cvs[i].stream.hCH + cvs[i].smelt_mPdt;
-			if (cvs[i].stream.hCH < WETDRY_CRITERIA && cvs[i].stream.hCH>0.0) {
-				cvs[i].stream.hCH = WETDRY_CRITERIA;
-			}
+			//if (cvs[i].stream.hCH < WETDRY_CRITERIA && cvs[i].stream.hCH>0.0) { cvs[i].stream.hCH = WETDRY_CRITERIA; }
+			if (cvs[i].stream.hCH < WETDRY_CRITERIA) { cvs[i].stream.hCH = 0.0; }
 			break;
 		}
 		case cellFlowType::ChannelNOverlandFlow: {
 			cvs[i].hOF = cvs[i].hOF + cvs[i].smelt_mPdt;
-			if (cvs[i].hOF < WETDRY_CRITERIA && cvs[i].hOF>0.0) {
-				cvs[i].hOF = WETDRY_CRITERIA;
-			}
+			//if (cvs[i].hOF < WETDRY_CRITERIA && cvs[i].hOF>0.0) { cvs[i].hOF = WETDRY_CRITERIA; }
+			if (cvs[i].hOF < WETDRY_CRITERIA) { cvs[i].hOF = 0.0; }
 			cvs[i].stream.hCH = cvs[i].stream.hCH + cvs[i].smelt_mPdt;
-			if (cvs[i].stream.hCH < WETDRY_CRITERIA && cvs[i].stream.hCH>0.0) {
-				cvs[i].stream.hCH = WETDRY_CRITERIA;
-			}
+			//if (cvs[i].stream.hCH < WETDRY_CRITERIA && cvs[i].stream.hCH>0.0) { cvs[i].stream.hCH = WETDRY_CRITERIA; }
+			if (cvs[i].stream.hCH < WETDRY_CRITERIA) { cvs[i].stream.hCH = 0.0; }
 			break;
 		}
 		}
 	}
 }
+
 

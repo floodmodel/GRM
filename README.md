@@ -38,6 +38,7 @@ The model indroduction and the download guidelines are wiki page at https://gith
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Interception, evapotranspiration, and snow melt modules were added for continuous simulation.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Input and output data were revised.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In AutoROM, the maximum limitation of the reservoir outflow can be applied.  
+2023.04. The flow in soil layers within the stream control volume was improved.   
   
        
 

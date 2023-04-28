@@ -28,9 +28,11 @@ void updateCVbyHydroComps(int i)
 	if (cvs[i].flowType == cellFlowType::ChannelNOverlandFlow) {
 		effOFdYinCHnOFcell = dY_m - cvs[i].stream.chBaseWidth;
 	}
+
 	if (prj.simBaseFlow == 1) {
 		chCSAaddedByBFlow_m2 = calBFlowAndGetCSAaddedByBFlow(i, dt_sec, dY_m);
 	}
+
 	if (prj.simSubsurfaceFlow == 1) {
 		switch (cvs[i].flowType) {
 		case cellFlowType::OverlandFlow: {
@@ -49,7 +51,11 @@ void updateCVbyHydroComps(int i)
 		}
 		}
 	}
-	calEffectiveRFbyInfiltration(i, dtrf_sec, dt_sec);
+
+	if (prj.simInfiltration == 1) {
+		calEffectiveRFbyInfiltration(i, dtrf_sec, dt_sec);
+	}
+	
 	switch (cvs[i].flowType) {
 	case cellFlowType::OverlandFlow: {
 		// 2022.06.15 여기서 / dY_m 계산에 의한 수심 대신 ofDepthAddedByRFlow_m2을 적용하는 이유는

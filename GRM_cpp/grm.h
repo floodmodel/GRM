@@ -9,6 +9,16 @@ namespace fs = std::filesystem;
 #define TOLERANCE  0.001
 #define WETDRY_CRITERIA 0.000001
 #define ITER_NR 20000
+#define SOIL_SATURATION_RATIO_CRITERIA 0.99
+#define PONDING_DEPTH_CRITERIA_M 0.001
+
+const double CONST_MIN_SLOPE = 0.000001;
+const double CONST_EXPONENTIAL_NUMBER_UNSATURATED_K = 6.4;
+
+const double CONST_DEPTH_TO_BEDROCK = 20;// 암반까지의 깊이[m]
+const double CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN = 10;// 산악지역에서의 암반까지의 깊이[m]
+const double CONST_DEPTH_TO_UNCONFINED_GROUNDWATERTABEL = 10;// 비피압대수층까지의 깊이[m]
+const double CONST_UAQ_HEIGHT_FROM_BEDROCK = 5;// 암반으로부터 포화된 비피압대수층 상단까지의 높이[m]
 
 //const string CONST_GMP_FILE_EXTENSION = ".gmp";
 // 지정셀들 전체 출력 텍스트파일
@@ -51,13 +61,6 @@ const string CONST_DIST_SNOWMELT_FILE_HEAD = "sm_";
 const string CONST_OUTPUT_TABLE_TIME_FIELD_NAME = "DataTime";
 const string CONST_OUTPUT_TABLE_MEAN_PRCP_FIELD_NAME = "PRCP_Mean";
 
-const double CONST_MIN_SLOPE = 0.000001;
-const double CONST_EXPONENTIAL_NUMBER_UNSATURATED_K = 6.4;
-
-const double CONST_DEPTH_TO_BEDROCK = 20;// 암반까지의 깊이[m]
-const double CONST_DEPTH_TO_BEDROCK_FOR_MOUNTAIN = 10;// 산악지역에서의 암반까지의 깊이[m]
-const double CONST_DEPTH_TO_UNCONFINED_GROUNDWATERTABEL = 10;// 비피압대수층까지의 깊이[m]
-const double CONST_UAQ_HEIGHT_FROM_BEDROCK = 5;//   암반에서 비피압대수층 상단까지의 높이[m]
 
 enum class channelWidthType
 {
@@ -126,7 +129,7 @@ enum class GRMPrintType
 enum class simulationType
 {
 	Normal, //2021.01.19. SingleEvent를 Normal로 수정
-	Normal_PE_SSR,
+	//Normal_PE_SSR,
 	RealTime,
 	None
 };
@@ -715,7 +718,7 @@ typedef struct _cvAtt
 	//int wsid = -1; //유역 ID, 해당 raster cell의 값
 	cellFlowType flowType;//셀의 종류, 지표면흐름, 하도흐름, 지표면+하도
 	double slopeOF = 0.0; //지표면 해석에 적용되는 overland flow 셀의 경사(m/m)
-	double slope = 0.0; //셀의 경사(m/m)
+	double slope = 0.0; //셀의 경사(m/m). 경사 파일에서 읽은 값.
 	flowDirection8 fdir;//흐름방향
 	int fac = -1;//흐름누적수, 자신의 셀을 제외하고, 상류에 있는 격자 개수. 최소값은 0 최대값은 유효셀 개수 -1
 	double dxDownHalf_m = 0.0;//격자 중심으로부터 하류방향 격자면까지의 거리
