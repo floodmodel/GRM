@@ -396,7 +396,7 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 		if (prj.forSimulation == 1) { return -1; }// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	}
 	//cout << "completed. \n";
-	writeLog(fpnLog, "Setting up input data completed.\n", 1, 1);
+	writeLog(fpnLog, "Input data setup was completed.\n", 1, 1);
 	string isparallel = "true";
 	omp_set_num_threads(prj.mdp);
 
