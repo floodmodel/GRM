@@ -28,12 +28,12 @@ int readDomainFaFileAndSetupCV()
     }
 
     //여기서 di 일반사항 초기화, 설정===============
-	writeLog(fpnLog, "Reading domain file... \n", 1, 1);
+	writeLog(fpnLog, "Reading domain file... \n", 1, -1);
     ascRasterFile dmFile = ascRasterFile(prj.fpnDomain);
-	writeLog(fpnLog, "Reading domain file... completed.\n", 1, 1);
-	writeLog(fpnLog, "Reading flow accumulation file... \n", 1, 1);
+	writeLog(fpnLog, "Reading domain file... completed.\n", 1, -1);
+	writeLog(fpnLog, "Reading flow accumulation file... \n", 1, -1);
     ascRasterFile facFile = ascRasterFile(prj.fpnFA);
-	writeLog(fpnLog, "Reading flow accumulation file... completed.\n", 1, 1);
+	writeLog(fpnLog, "Reading flow accumulation file... completed.\n", 1, -1);
     di.nRows = dmFile.header.nRows;
     di.nCols = dmFile.header.nCols;
     di.cellSize = dmFile.header.cellsize;
@@ -141,44 +141,44 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
         prj.issrFileApplied = -1;
     }
 
-	writeLog(fpnLog, "Reading slope file... \n", 1, 1);
+	writeLog(fpnLog, "Reading slope file... \n", 1, -1);
 	ascRasterFile slopeFile = ascRasterFile(prj.fpnSlope);
-	writeLog(fpnLog, "Reading slope file... completed.\n", 1, 1);
-	writeLog(fpnLog, "Reading flow direction file... \n", 1, 1);
+	writeLog(fpnLog, "Reading slope file... completed.\n", 1, -1);
+	writeLog(fpnLog, "Reading flow direction file... \n", 1, -1);
     ascRasterFile fdirFile = ascRasterFile(prj.fpnFD);
-	writeLog(fpnLog, "Reading flow direction file... completed.\n", 1, 1);
+	writeLog(fpnLog, "Reading flow direction file... completed.\n", 1, -1);
     ascRasterFile* streamFile;
     ascRasterFile* cwFile;
     ascRasterFile* cfFile;
     ascRasterFile* ssrFile;
     if (prj.streamFileApplied == 1) {
-		writeLog(fpnLog, "Reading stream file... \n", 1, 1);
+		writeLog(fpnLog, "Reading stream file... \n", 1, -1);
         streamFile = new ascRasterFile(prj.fpnStream);
-		writeLog(fpnLog, "Reading stream file... completed.\n", 1, 1);
+		writeLog(fpnLog, "Reading stream file... completed.\n", 1, -1);
     }
     else {
         streamFile = NULL;
     }
     if (prj.cwFileApplied == 1) {
-		writeLog(fpnLog, "Reading channel width file... \n", 1, 1);
+		writeLog(fpnLog, "Reading channel width file... \n", 1, -1);
         cwFile = new ascRasterFile(prj.fpnChannelWidth);
-		writeLog(fpnLog, "Reading channel width file... completed.\n", 1, 1);
+		writeLog(fpnLog, "Reading channel width file... completed.\n", 1, -1);
     }
     else {
         cwFile = NULL;
     }
     if (prj.icfFileApplied == 1) {
-		writeLog(fpnLog, "Reading initial stream flow file... \n", 1, 1);
+		writeLog(fpnLog, "Reading initial stream flow file... \n", 1, -1);
         cfFile = new ascRasterFile(prj.fpniniChFlow);
-		writeLog(fpnLog, "Reading initial stream flow file... completed. \n", 1, 1);
+		writeLog(fpnLog, "Reading initial stream flow file... completed. \n", 1, -1);
     }
     else {
         cfFile = NULL;
     }
     if (prj.issrFileApplied == 1) {
-		writeLog(fpnLog, "Reading initial soil saturation ratio file... \n", 1, 1);
+		writeLog(fpnLog, "Reading initial soil saturation ratio file... \n", 1, -1);
         ssrFile = new ascRasterFile(prj.fpniniSSR);
-		writeLog(fpnLog, "Reading initial soil saturation ratio file... completed. \n", 1, 1);
+		writeLog(fpnLog, "Reading initial soil saturation ratio file... completed. \n", 1, -1);
     }
     else {
         ssrFile = NULL;
@@ -279,9 +279,9 @@ int readLandCoverFileAndSetCVbyVAT()
         string outstr = "ERROR : Land cover VAT file (" + prj.fpnLCVat + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
     }
-	writeLog(fpnLog, "Reading land cover file... \n", 1, 1);
+	writeLog(fpnLog, "Reading land cover file... \n", 1, -1);
     ascRasterFile lcFile = ascRasterFile(prj.fpnLC);
-	writeLog(fpnLog, "Reading land cover file... completed.\n", 1, 1);
+	writeLog(fpnLog, "Reading land cover file... completed.\n", 1, -1);
     int nRy = di.nRows;
     int nCx = di.nCols;
     map<int, landCoverInfo> lcvat;
@@ -388,9 +388,9 @@ int readSoilTextureFileAndSetCVbyVAT()
         string outstr = "WARNNING : Soil texture VAT file (" + prj.fpnSTVat + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
     }
-	writeLog(fpnLog, "Reading soil texture file... \n", 1, 1);
+	writeLog(fpnLog, "Reading soil texture file... \n", 1, -1);
     ascRasterFile stFile = ascRasterFile(prj.fpnST);
-	writeLog(fpnLog, "Reading soil texture file... completed. \n", 1, 1);
+	writeLog(fpnLog, "Reading soil texture file... completed. \n", 1, -1);
     int nRy = di.nRows;
     int nCx = di.nCols;
     map<int, soilTextureInfo> stvat;
@@ -512,9 +512,9 @@ int readSoilDepthFileAndSetCVbyVAT()
         string outstr = "WARNNING : Soil depth VAT file (" + prj.fpnSDVat + ") is invalid.\n";
         writeLog(fpnLog, outstr, 1, 1);
     }
-	writeLog(fpnLog, "Reading soil depth file... \n", 1, 1);
+	writeLog(fpnLog, "Reading soil depth file... \n", 1, -1);
     ascRasterFile sdFile = ascRasterFile(prj.fpnSD);
-	writeLog(fpnLog, "Reading soil depth file... completed.\n", 1, 1);
+	writeLog(fpnLog, "Reading soil depth file... completed.\n", 1, -1);
     int nRy = di.nRows;
     int nCx = di.nCols;
     map<int, soilDepthInfo> sdvat;
