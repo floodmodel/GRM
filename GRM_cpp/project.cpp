@@ -1561,8 +1561,8 @@ int readXmlRowProjectSettings(string aline)
 		}
 		return 1;
 	}
-	if (aline.find(fldName.SimulateEvaportranspiration) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.SimulateEvaportranspiration);
+	if (aline.find(fldName.SimulateEvapotranspiration) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.SimulateEvapotranspiration);
 		prj.simEvaportranspiration = -1;
 		if (lower(vString) == "true") {
 			prj.simEvaportranspiration = 1;

@@ -333,7 +333,7 @@ typedef struct _projectFileFieldName
 	const string SimulateBaseFlow = "SimulateBaseFlow";
 
 	// continuous================
-	const string SimulateEvaportranspiration = "SimulateEvaportranspiration";
+	const string SimulateEvapotranspiration = "SimulateEvapotranspiration";
 	const string SimulateSnowMelt = "SimulateSnowMelt";
 	const string SimulateInterception = "SimulateInterception";
 	//==========================
