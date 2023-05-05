@@ -19,7 +19,7 @@ extern thisSimulation ts;
 extern vector<weatherData> rfs;
 extern vector<weatherData> tempMax;
 extern vector<weatherData> tempMin;
-extern vector<weatherData> sunShineDur;
+extern vector<weatherData> dayTimeLength;
 extern vector<weatherData> snowpackTemp;
 
 extern double sunDurRatio[12];
@@ -461,9 +461,9 @@ int setCVRF(int order)
  {
 	 string fpnData = "";
 	 int returnv = -1;
-	 if (prj.durationOfSunDataType == weatherDataType::Raster_ASC
-		 || prj.durationOfSunDataType == weatherDataType::Mean_DividedArea) {
-		 fpnData = sunShineDur[order - 1].FilePath + "\\" + sunShineDur[order - 1].FileName;
+	 if (prj.daytimeLengthDataType == weatherDataType::Raster_ASC
+		 || prj.daytimeLengthDataType == weatherDataType::Mean_DividedArea) {
+		 fpnData = dayTimeLength[order - 1].FilePath + "\\" + dayTimeLength[order - 1].FileName;
 		 ascRasterFile* SDAsc;
 		 map<int, double> idNv;
 		 if (prj.tempMaxDataType == weatherDataType::Raster_ASC) {
@@ -471,35 +471,35 @@ int setCVRF(int order)
 			 idNv.clear();
 		 }
 		 else {
-			 idNv = sunShineDur[order - 1].vForEachRegion;
+			 idNv = dayTimeLength[order - 1].vForEachRegion;
 			 SDAsc = NULL;
 		 }
 		 omp_set_num_threads(prj.mdp);
 #pragma omp parallel for
 		 for (int i = 0; i < di.cellNnotNull; ++i) {			
-			 if (prj.durationOfSunDataType == weatherDataType::Raster_ASC) {
-				 cvs[i].sunDur_hrs = SDAsc->valuesFromTL[cvps[i].xCol][cvps[i].yRow];  // 입력자료 단위 mm/day 가 그대로 방정식에 이용된다.
+			 if (prj.daytimeLengthDataType == weatherDataType::Raster_ASC) {
+				 cvs[i].daytimeLength_hrs = SDAsc->valuesFromTL[cvps[i].xCol][cvps[i].yRow];  // 입력자료 단위 mm/day 가 그대로 방정식에 이용된다.
 			 }
 			 else {
-				 cvs[i].sunDur_hrs = idNv[cvps[i].wsid];  // 입력자료 단위 mm/day 가 그대로 방정식에 이용된다.
+				 cvs[i].daytimeLength_hrs = idNv[cvps[i].wsid];  // 입력자료 단위 mm/day 가 그대로 방정식에 이용된다.
 			 }
 		 }
-		 if (prj.durationOfSunDataType == weatherDataType::Raster_ASC
+		 if (prj.daytimeLengthDataType == weatherDataType::Raster_ASC
 			 && SDAsc != NULL) {
 			 delete SDAsc;
 		 }
 		 returnv = 1;
 	 }
-	 else if (prj.durationOfSunDataType == weatherDataType::Mean) {
-		 fpnData = sunShineDur[order - 1].FilePath + "\\" + sunShineDur[order - 1].FileName;
-		 string value = sunShineDur[order - 1].value;
+	 else if (prj.daytimeLengthDataType == weatherDataType::Mean) {
+		 fpnData = dayTimeLength[order - 1].FilePath + "\\" + dayTimeLength[order - 1].FileName;
+		 string value = dayTimeLength[order - 1].value;
 		 double inSD = stod(value);
 #pragma omp parallel for schedule(guided)
 		 for (int i = 0; i < di.cellNnotNull; ++i) {
 			 // 유역의 전체 강우량은 inlet 등으로 toBeSimulated == -1 여도 계산에 포함한다.
 			 // 상류 cv 개수에 이 조건 추가하려면 주석 해제.
 			 //if (cvs[i].toBeSimulated == -1) { continue; }
-			 cvs[i].sunDur_hrs = inSD;
+			 cvs[i].daytimeLength_hrs = inSD;
 		 }
 		 returnv = 1;
 	 }
@@ -515,11 +515,11 @@ int setCVRF(int order)
  }
 
  void setCVSunDurZero() {
-	 writeLog(fpnLog, "WARNNING : The dunration of sunshine data ended before the simulation was over. Dunration of sunshine data was set as 0.\n", 1, -1);
-	 writeLog(fpnLog, "WARNNING : If the time step of dunration of sunshine data is equal or smaller than printing time step, add more data. Or decrease simulation duration.\n", 1, -1);
+	 writeLog(fpnLog, "WARNNING : The daytime length data ended before the simulation was over. Daytime length data was set as 0.\n", 1, -1);
+	 writeLog(fpnLog, "WARNNING : If the time step of daytime length data is equal or smaller than printing time step, add more data. Or decrease simulation duration.\n", 1, -1);
 #pragma omp parallel for schedule(guided)
 	 for (int i = 0; i < di.cellNnotNull; ++i) {
-		 cvs[i].sunDur_hrs = 0.0;
+		 cvs[i].daytimeLength_hrs = 0.0;
 	 }
  }
 
@@ -616,10 +616,10 @@ int setCVRF(int order)
  
  int setDaytimeLength()
  {
-	 sunShineDur.clear();
-	 sunShineDur = readAndSetWeatherData(prj.fpnDurationOfSunData, prj.durationOfSunDataType,
-		 prj.durationOfSunInterval_min, "Daytime length");
-	 if (sunShineDur.size() == 0) {
+	 dayTimeLength.clear();
+	 dayTimeLength = readAndSetWeatherData(prj.fpnDaytimeLengthData, prj.daytimeLengthDataType,
+		 prj.daytimeLengthDataInterval_min, "Daytime length");
+	 if (dayTimeLength.size() == 0) {
 		 writeLog(fpnLog, "ERROR : Reading daytime length data file was failed\n", 1, 1);
 		 return -1;
 	 }
@@ -628,13 +628,13 @@ int setCVRF(int order)
    
  int setDaytimeHoursRatio()
  {
-	 if (prj.fpnDurationOfSunRatioData != "" && _access(prj.fpnDurationOfSunRatioData.c_str(), 0) != 0) {
+	 if (prj.fpnDaytimeLengthRatioData != "" && _access(prj.fpnDaytimeLengthRatioData.c_str(), 0) != 0) {
 		 writeLog(fpnLog, "The ratio of daytime hours data file is invalid.\n", 1, 1);
 		 return -1;
 	 }
 	 memset(sunDurRatio, 0, 12 * sizeof(sunDurRatio[0])); // 12 개의 자료가 있으므로,,
 	 vector<double> Lines;
-	 Lines = readTextFileToDoubleVector(prj.fpnDurationOfSunRatioData);
+	 Lines = readTextFileToDoubleVector(prj.fpnDaytimeLengthRatioData);
 	 if (Lines.size() == 0) { 
 		 string err = "ERROR : The ratio of  daytime hours data file has no value.\n";		 
 		 writeLog(fpnLog, err, 1, 1);

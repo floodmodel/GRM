@@ -11,6 +11,7 @@ namespace fs = std::filesystem;
 #define ITER_NR 20000
 #define SOIL_SATURATION_RATIO_CRITERIA 0.99
 #define PONDING_DEPTH_CRITERIA_M 0.001
+#define GRAVITY_ACC 9.8 
 
 const double CONST_MIN_SLOPE = 0.000001;
 const double CONST_EXPONENTIAL_NUMBER_UNSATURATED_K = 6.4;
@@ -793,7 +794,7 @@ typedef struct _cvAtt
 	double tempMaxPday = -9999.0;
 	double tempMinPday = -9999.0;
 	double solarRad_mm = -1.0;
-	double sunDur_hrs = -1.0;
+	double daytimeLength_hrs = -1.0;
 
 	PETmethod petMethod;
 	double aet_mPdt = 0.0; //실제 증발산량
@@ -857,16 +858,16 @@ typedef struct _projectFile
 	string fpnTempMinData = "";
 	int tempMinInterval_min = -1;
 	
-	weatherDataType durationOfSunDataType = weatherDataType::None;
-	string fpnDurationOfSunData = "";
-	int durationOfSunInterval_min = -1;
+	weatherDataType daytimeLengthDataType = weatherDataType::None;
+	string fpnDaytimeLengthData = "";
+	int daytimeLengthDataInterval_min = -1;
 
 	weatherDataType solarRadDataType = weatherDataType::None;
 	string fpnSolarRadData = "";
 	int solarRadInterval_min = -1;
 
 	//weatherDataType durationOfSunRatioDataType = weatherDataType::None;
-	string fpnDurationOfSunRatioData = "";
+	string fpnDaytimeLengthRatioData = "";
 	//int durationOfSunRatioInterval_min = -1;
 	string fpnBlaneyCriddleK = "";
 

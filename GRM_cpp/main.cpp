@@ -22,7 +22,7 @@ cvAtt* cvsb; // t - dt 시간에 저장된 cvs 에서의 다양한 정보 백업
 vector<weatherData> rfs; // 강우량 파일에서 읽은 자료
 vector<weatherData> tempMax; // 최대기온 파일에서 읽은 자료
 vector<weatherData> tempMin; // 최소기온 파일에서 읽은 자료
-vector<weatherData> sunShineDur; // 일조시간 파일에서 읽은 자료
+vector<weatherData> dayTimeLength; // 일조시간 파일에서 읽은 자료
 vector<weatherData> snowpackTemp;// snow pack 온도 파일에서 읽은 자료
 double sunDurRatio[12]; // 월별 일조시간 비율 파일에서 읽은 자료
 vector<weatherData> solarRad; // 일사량 파일에서 읽은 자료

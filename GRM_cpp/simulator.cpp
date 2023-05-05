@@ -19,7 +19,7 @@ extern vector<weatherData> rfs;
 extern vector<weatherData> tempMax;
 extern vector<weatherData> tempMin;
 extern vector<weatherData> solarRad;
-extern vector<weatherData> sunShineDur;
+extern vector<weatherData> dayTimeLength;
 extern vector<weatherData> snowpackTemp;
 extern flowControlCellAndData fccds;
 extern wpSimData wpSimValue;
@@ -43,7 +43,7 @@ int startSimulation()
 	int orderTempMin = 0;
 	int dtSolarRMin_sec = prj.solarRadInterval_min * 60;
 	int orderSolarR = 0;
-	int dtSunDur_sec = prj.durationOfSunInterval_min * 60;
+	int dtSunDur_sec = prj.daytimeLengthDataInterval_min * 60;
 	int orderSunDur = 0;
 	int dtSnowPackTemp = prj.snowpackTempInterval_min * 60;
 	int orderSnowPackTemp = 0;
@@ -169,7 +169,7 @@ int startSimulation()
 
 int simulateRunoff(double nowTmin)
 {
-    ts.vMaxInThisStep = DBL_MIN;
+    ts.vMaxInThisStep = 0.0;
 
 	// 여기부터 parallel =============================
     int numth = prj.mdp;
@@ -206,11 +206,15 @@ int simulateRunoff(double nowTmin)
             ts.vMaxInThisStep = uMax[i];
         }
     }
+
+	if (ts.vMaxInThisStep > GRAVITY_ACC) {
+		ts.vMaxInThisStep = GRAVITY_ACC;
+	}
     delete[] uMax;
 	// parallel =============================
 
 	//// 여기부터 serial===========
-	//double uMax_s = DBL_MIN;
+	//double uMax_s = 0.0;
 	//for (int fac : fas) {
 	//	int iterLimit = faCount[fac];
 	//	for (int e = 0; e < iterLimit; ++e) {
@@ -230,6 +234,7 @@ int simulateRunoff(double nowTmin)
 	//		}
 	//	}
 	//}
+	//if (uMax_s > GRAVITY_ACC) { uMax_s = GRAVITY_ACC; }
 	//ts.vMaxInThisStep = uMax_s;
 	//// serial===========
 
@@ -306,7 +311,7 @@ void initThisSimulation()
 		ts.dataNumTotal_tempMax = (int)tempMax.size();
 		ts.dataNumTotal_tempMin = (int)tempMin.size();
 		ts.dataNumTotal_solarR = (int)solarRad.size();
-		ts.dataNumTotal_sunDur = (int)sunShineDur.size();
+		ts.dataNumTotal_sunDur = (int)dayTimeLength.size();
 		ts.dataNumTotal_snowPackTemp = (int)snowpackTemp.size();
     }
 	else {
@@ -326,7 +331,7 @@ void initThisSimulation()
     ts.simEnding_sec = ts.simDuration_min * 60;
     ts.grmStarted = 1;
     ts.stopSim = -1;
-    ts.vMaxInThisStep = DBL_MIN;
+    ts.vMaxInThisStep = 0.0;
     //ts.iscvsb = -1;
     ts.cvsbT_sec = 0;
     ts.dtMinLimit_sec = 1;

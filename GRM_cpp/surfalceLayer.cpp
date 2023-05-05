@@ -181,7 +181,7 @@ void calPET_BlaneyCriddle(int i)
 
 void calPET_Hamon(int i) {
 	double tave = (cvs[i].tempMaxPday + cvs[i].tempMinPday) / 2.0;
-	double sdTerm = cvs[i].sunDur_hrs / 12.0;   // 입력자료 단위 hrs / day 가 그대로 방정식에 이용된다.
+	double sdTerm = cvs[i].daytimeLength_hrs / 12.0;   // 입력자료 단위 hrs / day 가 그대로 방정식에 이용된다.
 	double es = 6.108 * exp(17.26939 * tave / (tave + 273.3));
 	double svd = 216.7 * es / (tave + 273.3);
 	double pet_mmPday = 0.55 * 25.4 * sdTerm * sdTerm * svd / 12.0;

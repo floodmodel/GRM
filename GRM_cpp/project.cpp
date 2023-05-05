@@ -427,16 +427,16 @@ int openProjectFile(int forceRealTime)
 			return -1;
 		}
 
-		if (prj.durationOfSunDataType == weatherDataType::None) {
-			writeLog(fpnLog, "ERROR : Duration of sunshine data type is invalie.\n", 1, 1);
+		if (prj.daytimeLengthDataType == weatherDataType::None) {
+			writeLog(fpnLog, "ERROR : Daytime length data type is invalie.\n", 1, 1);
 			return -1;
 		}
-		if (prj.durationOfSunInterval_min <= 0) {
-			writeLog(fpnLog, "ERROR : Duration of sunshine data interval is invalie.\n", 1, 1);
+		if (prj.daytimeLengthDataInterval_min <= 0) {
+			writeLog(fpnLog, "ERROR : Daytime length data interval is invalie.\n", 1, 1);
 			return -1;
 		}
-		if (prj.fpnDurationOfSunData == "") {
-			writeLog(fpnLog, "ERROR : Duration of sunshine data file is invalie.\n", 1, 1);
+		if (prj.fpnDaytimeLengthData == "") {
+			writeLog(fpnLog, "ERROR : Daytime length data file is invalie.\n", 1, 1);
 			return -1;
 		}
 
@@ -1271,19 +1271,19 @@ int readXmlRowProjectSettings(string aline)
 
 	if (aline.find(fldName.DaytimeLengthDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.DaytimeLengthDataFile);
-		prj.fpnDurationOfSunData = "";
-		prj.durationOfSunDataType = weatherDataType::None;
+		prj.fpnDaytimeLengthData = "";
+		prj.daytimeLengthDataType = weatherDataType::None;
 		if (vString != "" && _access(vString.c_str(), 0) == 0) {
-			prj.fpnDurationOfSunData = vString;
-			prj.durationOfSunDataType = getWeatherDataTypeByDataFile(vString);
-			if (prj.durationOfSunDataType == weatherDataType::None) {
-				writeLog(fpnLog, "ERROR : Duration of sunshine data file [" + vString + "] is invalid.\n", 1, 1);
+			prj.fpnDaytimeLengthData = vString;
+			prj.daytimeLengthDataType = getWeatherDataTypeByDataFile(vString);
+			if (prj.daytimeLengthDataType == weatherDataType::None) {
+				writeLog(fpnLog, "ERROR : Daytime length data file [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else if (prj.simType == simulationType::Normal) {
 			if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
-				writeLog(fpnLog, "ERROR : Duration of sunshine data file [" + vString + "] is invalid.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : Daytime length data file [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
@@ -1294,24 +1294,24 @@ int readXmlRowProjectSettings(string aline)
 		if (vString != "") {
 			int t_min = stoi(vString);
 			if (t_min != 1440) {
-				string err = "ERROR : Duration of sunshine data time interval is invalid.\n";
-				err = err + "           Duration of sunshine data time interval have to be 1440 minutes.\n";
+				string err = "ERROR : Daytime length data time interval is invalid.\n";
+				err = err + "           Daytime length data time interval have to be 1440 minutes.\n";
 				writeLog(fpnLog, err, 1, 1);
 				return -1;
 			}
-			prj.durationOfSunInterval_min = t_min;
+			prj.daytimeLengthDataInterval_min = t_min;
 		}
 		else if (prj.simType == simulationType::Normal) {//옵션이므로 여기서 애러처리 안한다.
-			//writeLog(fpnLog, "WARNNING : Duration of sunshine data time interval was not set.\n", 1, 1);
+			//writeLog(fpnLog, "WARNNING : Daytime length data time interval was not set.\n", 1, 1);
 		}
 		return 1;
 	}
 
 	if (aline.find(fldName.DaytimeHoursRatioDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.DaytimeHoursRatioDataFile);
-		prj.fpnDurationOfSunRatioData = "";
+		prj.fpnDaytimeLengthRatioData = "";
 		if (vString != "" && _access(vString.c_str(), 0) == 0) {
-			prj.fpnDurationOfSunRatioData = vString;
+			prj.fpnDaytimeLengthRatioData = vString;
 		}
 		else if (prj.simType == simulationType::Normal) {
 			if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
