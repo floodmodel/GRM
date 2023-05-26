@@ -34,7 +34,7 @@ void writeSimProgress(int elapsedT_min)
     //nowStep = elapsedT_min / (double)ts.simDuration_min * 100.0;
     nowStep = elapsedT_min / simDur_min * 100.0;
 	if (nowStep > 100) { nowStep = 100; }
-	if (msgFileProcess == "") {
+	if (ts.showFileProgress  !=1) {
 		printf("\rCurrent progress: %.2f%%... ", nowStep);
 	}
 	else {

@@ -12,7 +12,7 @@ extern fs::path fpnLog;
 thisSimulationRT tsrt;
 
 // 실시간 수신자료 이용은 옵션은 /r 
-int grmRTLauncher(int argc, char** args, int isPrediction)
+int grmRTLauncher(int argc, char** args, int isEnforceAutoROM)
 {
     // 이부분 모르겠다.  원이사님 검토 필요. 2020.04.23.최
     string delaySec = "1"; //  GRMLauncher2018.Properties.Settings.Default.DelaySecond_for_remote_debug.ToString(); 
@@ -28,10 +28,10 @@ int grmRTLauncher(int argc, char** args, int isPrediction)
     // 포맷으로 사용하려면 dateTimeFormat:: 에서 바꿔 준다.
     startCommandTime = timeToString(tnow, false, dateTimeFormat::yyyymmddHHMMSS);
 
-    tsrt.isPrediction = isPrediction; // isPrediction==1 인경우에는 /r, /p 옵션이 모두 적용된 경우이다.
+    tsrt.enforceAutoROM = isEnforceAutoROM; // isPrediction==1 인경우에는 /r, /a 옵션이 모두 적용된 경우이다.
     string fpnRef;
 
-    if (tsrt.isPrediction == 1) {
+    if (tsrt.enforceAutoROM == 1) {
         fpnRef = string(args[3]);
     }
     else {
@@ -47,8 +47,8 @@ int grmRTLauncher(int argc, char** args, int isPrediction)
         return -1;
     }
     try {
-        if (tsrt.isPrediction == 1) {// 이경우는 argc 최대 8개
-        // args[0] : grm.exe,               args[1] : /r 혹은 /p,   args[2] : /r 혹은 /p,          
+        if (tsrt.enforceAutoROM == 1) {// 이경우는 argc 최대 8개
+        // args[0] : grm.exe,               args[1] : /r 혹은 /a,   args[2] : /r 혹은 /a,          
         // args[3] : fpnRef,                 args[4] : strGUID,       args[5] : startCommandTime,
         // args[6] : rtStartDataTime, agrs[7] : strMODEL        
             if (argc == 7) {   //2017.6.20 원 : monitor exe 에서 call 한 경우

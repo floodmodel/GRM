@@ -83,7 +83,7 @@ void grmRealTime::setUpAndStartGRMRT()
     rfs.clear();// 사용할 강우자료 초기화
 
     ts.simDuration_min = tsrt.simDurationrRT_h * 60;
-    ts.enforceFCautoROM = tsrt.isPrediction;
+    ts.enforceFCautoROM = tsrt.enforceAutoROM;
     ts.dataNumTotal_rf = 0;
 
     picWidth = CONST_PIC_WIDTH;
@@ -210,7 +210,7 @@ void grmRealTime::runGRMRT()
     //    }
     //}
     writeLog(fpnLog, "Real time simulation was started. Predicion = "
-        + to_string(tsrt.isPrediction)+"\n", 1, 1);
+        + to_string(tsrt.enforceAutoROM)+"\n", 1, 1);
     if (startSimulationRT() == -1) {
         writeLog(fpnLog, "Real time simulation error.\n", 1, 1);
     }

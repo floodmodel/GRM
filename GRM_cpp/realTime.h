@@ -61,7 +61,7 @@ typedef struct _thisSimulationRT // real time 전용
     char Output_File_Target_DISK='?'; // png 등의 모의 결과를 c ,.d  어디에 기입할지. 구분 
     
     int simDurationrRT_h = 0;
-    int  isPrediction = -1;//2019.10.01. 최. prediction 관련
+    int  enforceAutoROM = -1;//2019.10.01. 최. prediction 관련
     int newRFAddedRT = -1; //1: true, -1 : false
     map<int, int> newFcDataAddedRT;   // idx 로 구분, //1: true, -1 : false
     //int rfDataCountToApply_RT = -1;

@@ -180,9 +180,6 @@ int openProjectFile(int forceRealTime)
 		}
 		if (sbFlowControlGrid == 1 && pt.sFlowControlGrid == 0) {
 			sbFlowControlGrid = 0;
-			if (afc->fcName == "YIS_WP3") {
-				int a = 1;
-			}
 			if (afc->fcName != "" && isNormalFlowControlinfo(afc) == 1) {
 				int n = prj.fcs.size();
 				prj.fcs[n] = *afc;// 우선 idx를 키로 사용. updateFCCellinfoAndData()에서 cvid를 키로 업데이트				afc = new flowControlinfo;
@@ -2157,6 +2154,9 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			else if (vStringL == lower(ENUM_TO_STR(SourceFlow))) {
 				afct = flowControlType::SourceFlow;
 			}
+			else if (vStringL == lower(ENUM_TO_STR(DetensionPond))) {
+				afct = flowControlType::DetensionPond;
+			}
 			else {
 				writeLog(fpnLog, "ERROR : Flow control type of ["
 					+ fci->fcName + "] is invalid.\n", 1, 1);
@@ -2180,13 +2180,16 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		if (vString != "" && stoi(vString) >= 0) {
 			fci->fcDT_min = stoi(vString);
 		}
-		else {
+		else if (fci->fcType == flowControlType::Inlet 
+			|| fci->fcType == flowControlType::ReservoirOutflow)
+		{
 			writeLog(fpnLog, "ERROR : Flow control data time interval of ["
 				+ fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
 	}
+
 	if (aline.find(fldName.FlowDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.FlowDataFile);
 		if (vString != "" && _access(vString.c_str(), 0) == 0) {
@@ -2198,6 +2201,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			//return -1; // 이거 주석 맞는가? 2022.02.09 최
 		}
 	}
+
 	if (fci->fcType != flowControlType::Inlet) {
 		if (aline.find(fldName.IniStorage) != string::npos) {
 			vString = getValueStringFromXmlLine(aline, fldName.IniStorage);
@@ -2345,6 +2349,81 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			}
 		}
 	}
+
+	//저류지 관련
+	if (aline.find("<" + fldName.DP_QT_StoD_CMS + ">") != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.DP_QT_StoD_CMS);
+		if (vString != "" && stod_c(vString) >= 0) {
+			fci->dp_QT_StoD_CMS = stod_c(vString);
+		}
+		else if (fci->fcType == flowControlType::DetensionPond) {
+			writeLog(fpnLog, "ERROR : The value of "+ fldName.DP_QT_StoD_CMS+" in ["
+				+ fci->fcName + "] is invalid.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find("<" + fldName.DP_Qi_max_CMS + ">") != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.DP_Qi_max_CMS);
+		if (vString != "" && stod_c(vString) >= 0) {
+			fci->dp_Qi_max_CMS = stod_c(vString);
+		}
+		else if (fci->fcType == flowControlType::DetensionPond) {
+			writeLog(fpnLog, "ERROR : The value of " + fldName.DP_Qi_max_CMS + " in ["
+				+ fci->fcName + "] is invalid.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find("<" + fldName.DP_Qo_max_CMS + ">") != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.DP_Qo_max_CMS);
+		if (vString != "" && stod_c(vString) >= 0) {
+			fci->dp_Qo_max_CMS = stod_c(vString);
+		}
+		else if (fci->fcType == flowControlType::DetensionPond) {
+			writeLog(fpnLog, "ERROR : The value of " + fldName.DP_Qo_max_CMS + " in ["
+				+ fci->fcName + "] is invalid.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find("<" + fldName.DP_Wdi_m + ">") != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.DP_Wdi_m);
+		if (vString != "" && stod_c(vString) >= 0) {
+			fci->dp_Wdi_m = stod_c(vString);
+		}
+		else if (fci->fcType == flowControlType::DetensionPond) {
+			writeLog(fpnLog, "ERROR : The value of " + fldName.DP_Wdi_m + " in ["
+				+ fci->fcName + "] is invalid.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find("<" + fldName.DP_Ws_m + ">") != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.DP_Ws_m);
+		if (vString != "" && stod_c(vString) >= 0) {
+			fci->dp_Ws_m = stod_c(vString);
+		}
+		else if (fci->fcType == flowControlType::DetensionPond) {
+			writeLog(fpnLog, "ERROR : The value of " + fldName.DP_Ws_m + " in ["
+				+ fci->fcName + "] is invalid.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+	if (aline.find("<" + fldName.DP_Cr_StoD + ">") != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.DP_Cr_StoD);
+		if (vString != "" && stod_c(vString) >= 0) {
+			fci->dp_Cr_StoD = stod_c(vString);
+		}
+		else if (fci->fcType == flowControlType::DetensionPond) {
+			writeLog(fpnLog, "ERROR : The value of " + fldName.DP_Cr_StoD + " in ["
+				+ fci->fcName + "] is invalid.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+
 	return 1;
 }
 
@@ -2954,25 +3033,30 @@ int isNormalFlowControlinfo(flowControlinfo* fci)
 	if (fci->fcColX == afc_ini.fcColX) { return -1; }
 	if (fci->fcRowY == afc_ini.fcRowY) { return -1; }
 	if (fci->fcType == afc_ini.fcType) { return -1; }
-	if (fci->fcDT_min == afc_ini.fcDT_min) { return -1; }
-	if (fci->fcType == flowControlType::ReservoirOperation) {
+	if (fci->fcType == flowControlType::ReservoirOperation
+		|| fci->fcType == flowControlType::DetensionPond) {
 		if (fci->iniStorage_m3 == afc_ini.iniStorage_m3) { return -1; }
 		if (fci->maxStorage_m3 == afc_ini.maxStorage_m3) { return -1; }
-		if (fci->NormalHighStorage_m3 == afc_ini.NormalHighStorage_m3) { return -1; }
-		if (fci->RestrictedStorage_m3 == afc_ini.RestrictedStorage_m3) { return -1; }
-		if (fci->RestrictedPeriod_Start == afc_ini.RestrictedPeriod_Start) { return -1; }
-		if (fci->RestrictedPeriod_End == afc_ini.RestrictedPeriod_End) { return -1; }
-		if (prj.isDateTimeFormat == -1) {
-			if (fci->RestrictedPeriod_Start_min == afc_ini.RestrictedPeriod_Start_min) { return -1; }
-			if (fci->RestrictedPeriod_End_min == afc_ini.RestrictedPeriod_End_min) { return -1; }
-		}
-		if (fci->roType == afc_ini.roType) { return -1; }
-		if (fci->roType == reservoirOperationType::ConstantQ) {
-			if (fci->roConstQ_cms == afc_ini.roConstQ_cms) { return -1; }
-			if (fci->roConstQDuration_hr == afc_ini.roConstQDuration_hr) { return -1; }
+		if (fci->fcType == flowControlType::ReservoirOperation) {
+			if (fci->NormalHighStorage_m3 == afc_ini.NormalHighStorage_m3) { return -1; }
+			if (fci->RestrictedStorage_m3 == afc_ini.RestrictedStorage_m3) { return -1; }
+			if (fci->RestrictedPeriod_Start == afc_ini.RestrictedPeriod_Start) { return -1; }
+			if (fci->RestrictedPeriod_End == afc_ini.RestrictedPeriod_End) { return -1; }
+			if (prj.isDateTimeFormat == -1) {
+				if (fci->RestrictedPeriod_Start_min == afc_ini.RestrictedPeriod_Start_min) { return -1; }
+				if (fci->RestrictedPeriod_End_min == afc_ini.RestrictedPeriod_End_min) { return -1; }
+			}
+			if (fci->roType == afc_ini.roType) { return -1; }
+			if (fci->roType == reservoirOperationType::ConstantQ) {
+				if (fci->roConstQ_cms == afc_ini.roConstQ_cms) { return -1; }
+				if (fci->roConstQDuration_hr == afc_ini.roConstQDuration_hr) { return -1; }
+			}
 		}
 	}
-	else if (fci->fpnFCData == afc_ini.fpnFCData) { return -1; }
+	else {
+		if (fci->fcDT_min == afc_ini.fcDT_min) { return -1; }
+		if (fci->fpnFCData == afc_ini.fpnFCData) { return -1; }
+	}
 	return 1;
 }
 

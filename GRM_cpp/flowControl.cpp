@@ -377,7 +377,7 @@ void convertFCtypeToAutoROM(string strDate, int cvidx)
 	cvs[cvidx].fcType = flowControlType::ReservoirOperation;
     string fcname = prj.fcs[cvidx].fcName;
 	if (rot_bak != reservoirOperationType::AutoROM) {
-		string msg = "  Reservoir operation type was converted to AutoROM (FC Name:"
+		string msg = "WARNNING : Reservoir operation type was converted to AutoROM (FC Name:"
 			+ fcname + ", (ColX, RowY):(" + to_string(prj.fcs[cvidx].fcColX)
 			+", "+ to_string(prj.fcs[cvidx].fcRowY) + "), Time:" + strDate
 			+ ").\n";

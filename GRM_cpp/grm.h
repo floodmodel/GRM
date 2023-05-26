@@ -94,6 +94,7 @@ enum class flowControlType
 	SourceFlow, // 상류모의, 입력된 source flow data 고려함. 저수지 고려안함.
 	ReservoirOperation, // 상류모의, 저수지 고려, 방류량은 operation rule에 의해서 결정됨. 사용자 입력 인터페이스 구현하지 않음.
 	// 저류량-방류량, 유입량-방류량 관계식을 이용해서 소스코드에 반영 가능
+	DetensionPond,
 	None
 };
 
@@ -307,7 +308,7 @@ typedef struct _projectFileFieldName
 
 	const string DaytimeHoursRatioDataFile = "DaytimeHoursRatioDataFile";
 	const string BlaneyCriddleCoefDataFile = "BlaneyCriddleCoefDataFile";
-	
+
 	//const string SolarRadiationDataType = "SolarRadiationDataType";
 	const string SolarRadiationInterval_min = "SolarRadiationInterval_min";
 	const string SolarRadiationDataFile = "SolarRadiationDataFile";
@@ -375,7 +376,7 @@ typedef struct _projectFileFieldName
 	const string SnowmeltMethod = "SnowmeltMethod";
 	const string TempSnowRain = "TempSnowRain";
 	const string SnowmeltingTemp = "SnowmeltingTemp";
-	const string SnowCovRatio = "SnowCovRatio";	
+	const string SnowCovRatio = "SnowCovRatio";
 	const string SnowmeltCoef = "SnowmeltCoef";
 	// continuous================
 
@@ -414,6 +415,13 @@ typedef struct _projectFileFieldName
 	const string ROType = "ROType";
 	const string ROConstQ = "ROConstQ";
 	const string ROConstQDuration = "ROConstQDuration";
+	// 저류지관련
+	const string DP_QT_StoD_CMS = "DP_QT_StoD_CMS";
+	const string DP_Qi_max_CMS = "DP_Qi_max_CMS";
+	const string DP_Qo_max_CMS = "DP_Qo_max_CMS";
+	const string DP_Wdi_m = "DP_Wdi_m";
+	const string DP_Ws_m = "DP_Ws_m";
+	const string DP_Cr_StoD = "DP_Cr_StoD";
 
 	// WatchPoint table
 	const string Name_WP = "Name";
@@ -431,7 +439,7 @@ typedef struct _projectFileFieldName
 	const string GRMCode_SD = "GRMCode";
 	const string SoilDepthValue_01 = "SoilDepth";
 	const string SoilDepthValue_02 = "SoilDepth_cm";
-	
+
 	// LandCover table
 	const string GridValue_LC = "GridValue";
 	const string GRMCode_LC = "GRMCode";
@@ -563,12 +571,12 @@ typedef struct _flowControlinfo
 	int fcColX = -1;
 	int fcRowY = -1;
 	flowControlType fcType = flowControlType::None;
-	int fcDT_min = 0;
+	int fcDT_min = -1;
 	string fpnFCData = "";
 	double iniStorage_m3 = -1.0;
 	double maxStorage_m3 = -1.0;
 	double NormalHighStorage_m3 = -1.0;
-	double RestrictedStorage_m3=-1.0;
+	double RestrictedStorage_m3 = -1.0;
 	string RestrictedPeriod_Start = ""; // mmMddD 포맷 혹은 시간단위 숫자 e.g. 12M06D or 56
 	string RestrictedPeriod_End = "";// mmMddD 포맷 혹은 시간단위 숫자
 	int RestrictedPeriod_Start_min = -1;
@@ -579,9 +587,17 @@ typedef struct _flowControlinfo
 	int restricedP_ED = -1;
 	double autoROMmaxOutflow_cms = -1.0;
 
-	reservoirOperationType roType= reservoirOperationType::None;
+	reservoirOperationType roType = reservoirOperationType::None;
 	double roConstQ_cms = -1.0;
 	double roConstQDuration_hr = -1.0;
+
+	//저류지 관련
+	double dp_QT_StoD_CMS = -1;
+	double dp_Qi_max_CMS = -1;
+	double dp_Qo_max_CMS = -1;
+	double dp_Wdi_m = -1;
+	double dp_Ws_m = -1;
+	double dp_Cr_StoD = -1;
 } flowControlinfo;
 
 typedef struct _flowControlCellAndData
@@ -974,6 +990,8 @@ typedef struct _thisSimulation
 	int tCurMonth = 0;
 	int tCurDay = 0;
 	double laiRatioCurDay = 0.0;
+
+	int showFileProgress = 0; // true : 1, false : -1
 } thisSimulation;
 
 typedef struct _globalVinner // 계산 루프로 전달하기 위한 최소한의 전역 변수. gpu 고려
