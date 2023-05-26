@@ -172,72 +172,72 @@ int simulateRunoff(double nowTmin)
 {
     ts.vMaxInThisStep = 0.0;
 
-//	// 여기부터 parallel =============================
-//    int numth = prj.mdp;
-//    double* uMax = new double[numth]();// 이렇게 하면 0 으로 초기화 된다.
-//    for (int fac : fas) {
-//        int nCVs = faCount[fac];
-//#pragma omp parallel
-//        {
-//            // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
-//            // 배열 사용하는 것이 critical 보다 빠르다..
-//            int nth = omp_get_thread_num();
-//            //uMax[nth] = DBL_MIN;
-//#pragma omp for //  guided 안쓰는게 더 빠르다..
-//            for (int e = 0; e < nCVs; ++e) {
-//                int i = cvaisToFA[fac][e];
-//                if (cvs[i].toBeSimulated == 1) {
-//                    simulateRunoffCore(i, nowTmin);
-//                    if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-//                        if (uMax[nth] < cvs[i].uOF) {
-//                            uMax[nth] = cvs[i].uOF;
-//                        }
-//                    }
-//                    else {
-//                        if (uMax[nth] < cvs[i].stream.uCH) {
-//                            uMax[nth] = cvs[i].stream.uCH;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//    for (int i = 0; i < prj.mdp; ++i) {
-//        if (ts.vMaxInThisStep < uMax[i]) {
-//            ts.vMaxInThisStep = uMax[i];
-//        }
-//    }
-//
-//	if (ts.vMaxInThisStep > GRAVITY_ACC) {
-//		ts.vMaxInThisStep = GRAVITY_ACC;
-//	}
-//    delete[] uMax;
-//	// parallel =============================
+	// 여기부터 parallel =============================
+    int numth = prj.mdp;
+    double* uMax = new double[numth]();// 이렇게 하면 0 으로 초기화 된다.
+    for (int fac : fas) {
+        int nCVs = faCount[fac];
+#pragma omp parallel
+        {
+            // reduction으로 max, min 찾는 것은 openMP 3.1 이상부터 가능, 
+            // 배열 사용하는 것이 critical 보다 빠르다..
+            int nth = omp_get_thread_num();
+            //uMax[nth] = DBL_MIN;
+#pragma omp for //  guided 안쓰는게 더 빠르다..
+            for (int e = 0; e < nCVs; ++e) {
+                int i = cvaisToFA[fac][e];
+                if (cvs[i].toBeSimulated == 1) {
+                    simulateRunoffCore(i, nowTmin);
+                    if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+                        if (uMax[nth] < cvs[i].uOF) {
+                            uMax[nth] = cvs[i].uOF;
+                        }
+                    }
+                    else {
+                        if (uMax[nth] < cvs[i].stream.uCH) {
+                            uMax[nth] = cvs[i].stream.uCH;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    for (int i = 0; i < prj.mdp; ++i) {
+        if (ts.vMaxInThisStep < uMax[i]) {
+            ts.vMaxInThisStep = uMax[i];
+        }
+    }
 
-	// 여기부터 serial===========
-	double uMax_s = 0.0;
-	for (int fac : fas) {
-		int iterLimit = faCount[fac];
-		for (int e = 0; e < iterLimit; ++e) {
-			int i = cvaisToFA[fac][e];
-			if (cvs[i].toBeSimulated == 1) {
-				simulateRunoffCore(i, nowTmin);
-				if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-					if (uMax_s < cvs[i].uOF) {
-						uMax_s = cvs[i].uOF;
-					}
-				}
-				else {
-					if (uMax_s < cvs[i].stream.uCH) {
-						uMax_s = cvs[i].stream.uCH;
-					}
-				}
-			}
-		}
+	if (ts.vMaxInThisStep > GRAVITY_ACC) {
+		ts.vMaxInThisStep = GRAVITY_ACC;
 	}
-	if (uMax_s > GRAVITY_ACC) { uMax_s = GRAVITY_ACC; }
-	ts.vMaxInThisStep = uMax_s;
-	// serial===========
+    delete[] uMax;
+	// parallel =============================
+
+	//// 여기부터 serial===========
+	//double uMax_s = 0.0;
+	//for (int fac : fas) {
+	//	int iterLimit = faCount[fac];
+	//	for (int e = 0; e < iterLimit; ++e) {
+	//		int i = cvaisToFA[fac][e];
+	//		if (cvs[i].toBeSimulated == 1) {
+	//			simulateRunoffCore(i, nowTmin);
+	//			if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+	//				if (uMax_s < cvs[i].uOF) {
+	//					uMax_s = cvs[i].uOF;
+	//				}
+	//			}
+	//			else {
+	//				if (uMax_s < cvs[i].stream.uCH) {
+	//					uMax_s = cvs[i].stream.uCH;
+	//				}
+	//			}
+	//		}
+	//	}
+	//}
+	//if (uMax_s > GRAVITY_ACC) { uMax_s = GRAVITY_ACC; }
+	//ts.vMaxInThisStep = uMax_s;
+	//// serial===========
 
     return 1;
 }
