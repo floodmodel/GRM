@@ -153,9 +153,9 @@ int main(int argc, char** args)
 			arg1 = lower(trim(arg1));
 			arg2 = lower(trim(arg2));
 			arg3 = trim(arg3);
-			int isP = -1;
+			int using_A_switch = -1;
 			if (arg1 == "/a" || arg2 == "/a") {
-				isP = 1;
+				using_A_switch = 1;
 			}
 			prj.deleteAllFilesExceptDischargeOut = -1;
 			if (arg1 == "/fd" || arg2 == "/fd") {
@@ -170,7 +170,7 @@ int main(int argc, char** args)
 					waitEnterKey();
 					return -1;
 				}
-				startGMPsRun(gmpFiles, isP, outString);
+				startGMPsRun(gmpFiles, using_A_switch, outString);
 				return 1;
 			}
 			else {

@@ -39,6 +39,7 @@ The model indroduction and the download guidelines are wiki page at https://gith
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Input and output data were revised.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; In AutoROM, the maximum limitation of the reservoir outflow can be applied.  
 2023.04. The flow in soil layers within the stream control volume was improved.   
+2023.05. Bug fix for multiple flow control types in a control volume.   
   
        
 

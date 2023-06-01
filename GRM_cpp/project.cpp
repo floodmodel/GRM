@@ -5,6 +5,7 @@
 
 using namespace std;
 
+vector<flowControlinfo> fcinfos;
 extern projectFile prj;
 extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
@@ -29,7 +30,7 @@ projectfilePathInfo getProjectFileInfo(string fpn_prj)
 int openProjectFile(int forceRealTime)
 {
 	if (_access(ppi.fpn_prj.c_str(), 0) != 0) {
-		 return -1; 
+		return -1;
 	}
 	projectFileFieldName fn;
 	swsParameters* aswp;
@@ -144,8 +145,8 @@ int openProjectFile(int forceRealTime)
 				aswp = new swsParameters;
 			}
 			else {
-				writeLog(fpnLog, "ERROR : SubWatershedSettings data in ["+to_string(aswp->wsid)
-					+"] is invalid.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : SubWatershedSettings data in [" + to_string(aswp->wsid)
+					+ "] is invalid.\n", 1, 1);
 				return -1;
 			}
 			continue;
@@ -181,8 +182,10 @@ int openProjectFile(int forceRealTime)
 		if (sbFlowControlGrid == 1 && pt.sFlowControlGrid == 0) {
 			sbFlowControlGrid = 0;
 			if (afc->fcName != "" && isNormalFlowControlinfo(afc) == 1) {
-				int n = prj.fcs.size();
-				prj.fcs[n] = *afc;// 우선 idx를 키로 사용. updateFCCellinfoAndData()에서 cvid를 키로 업데이트				afc = new flowControlinfo;
+				//int n = prj.fcs.size();
+				//prj.fcs[n] = *afc;// 우선 idx를 키로 사용. updateFCCellinfoAndData()에서 cvid를 키로 업데이트
+				int n = fcinfos.size();
+				fcinfos.push_back(*afc);// 우선 idx를 키로 사용. updateFCCellinfoAndData()에서 cvid를 키로 업데이트
 			}
 			else {
 				writeLog(fpnLog, "ERROR : FlowControlGrid data in [" + afc->fcName
@@ -292,99 +295,121 @@ int openProjectFile(int forceRealTime)
 
 	// 여기서 부터 검증
 	// flow control 관련
-	if (prj.simFlowControl == 1 && prj.fcs.size() > 0) {
-		map<int, flowControlinfo>::iterator iter;
-		for (iter = prj.fcs.begin(); iter != prj.fcs.end(); ++iter) {
-			int idx = iter->first;
+	if (prj.simFlowControl == 1 && fcinfos.size() > 0) {
+		//vector<flowControlinfo>::iterator iter;
+		for (int i = 0;i<fcinfos.size(); ++i) {
+			//int idx = iter->first;
 			flowControlinfo afci;
-			afci = prj.fcs[idx];
-			// 2021.11.17 ReservoirOutflow, SinkFlow, SourceFlow, ReservoirOperation 모든 경우에서 AutoROM으로 전환 될 수 있어야 하므로
-			// 옵션에 상관없이 모두 저수지 제원을 입력하는 것으로 수정
-			// inlet에서는 저수지 제원 입력 하지 않는다. AutoROM으로 자동으로 전환도 못하게 한다. 
-			//if (afci.roType != reservoirOperationType::None){
-			if (afci.fcType != flowControlType::Inlet) {
-				if (afci.iniStorage_m3 < 0) {
-					writeLog(fpnLog, "WARNNING : [" + afci.fcName + "] Ini. storage of the reservoir is smaller than '0'. '0' is applied.\n", 1, 1);
-					prj.fcs[idx].iniStorage_m3 = 0.0;
-				}
-				if (afci.maxStorage_m3 < 0 || afci.NormalHighStorage_m3 < 0
-					|| afci.RestrictedStorage_m3 < 0) {
-					writeLog(fpnLog, "ERROR : ["+afci.fcName + "] MaxStorage, NormalHighStorage, and  RestrictedStorage must not be negative value.\n", 1, 1);
-					return -1;
-				}
-				if (prj.isDateTimeFormat == 1) {
-					if (isNumeric(afci.RestrictedPeriod_Start) == true) {
-						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedPeriod_Start value must have 'mmMddD' format.\n", 1, 1);
-						return -1;
-					}
-					else {
-						prj.fcs[idx].restricedP_SM = stoi(afci.RestrictedPeriod_Start.substr(0, 2));
-						prj.fcs[idx].restricedP_SD = stoi(afci.RestrictedPeriod_Start.substr(3, 2));
-					}
-					if (isNumeric(afci.RestrictedPeriod_End) == true) {
-						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedPeriod_End value must have 'mmMddD' format.\n", 1, 1);
-						return -1;
-					}
-					else {
-						prj.fcs[idx].restricedP_EM = stoi(afci.RestrictedPeriod_End.substr(0, 2));
-						prj.fcs[idx].restricedP_ED = stoi(afci.RestrictedPeriod_End.substr(3, 2));
-					}
-					if (prj.fcs[idx].restricedP_SM > prj.fcs[idx].restricedP_EM) {
-						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
-						return -1;
-					}
-					if (prj.fcs[idx].restricedP_SM == prj.fcs[idx].restricedP_EM) {
-						if (prj.fcs[idx].restricedP_SD > prj.fcs[idx].restricedP_ED) {
-							writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
+			afci = fcinfos[i];
+			for (int n = 0; n < fcinfos.size(); ++n) {
+				if (n != i) {
+					if (afci.fcColX == fcinfos[n].fcColX
+						&& afci.fcRowY == fcinfos[n].fcRowY) {
+						if (afci.fcType == fcinfos[n].fcType) {
+							writeLog(fpnLog, "ERROR : The same flow control type was assigned in (colX: "
+								+ to_string(afci.fcColX) + ", rowY: " + to_string(afci.fcRowY) + ").\n", 1, 1);
 							return -1;
 						}
 					}
 				}
+			}
+
+			// 2021.11.17 ReservoirOutflow, SinkFlow, SourceFlow, ReservoirOperation 모든 경우에서 AutoROM으로 전환 될 수 있어야 하므로
+			// 옵션에 상관없이 모두 저수지 제원을 입력하는 것으로 수정
+			// inlet에서는 저수지 제원 입력 하지 않는다. AutoROM으로 자동으로 전환도 못하게 한다. 
+			//if (afci.roType != reservoirOperationType::None){
+			if ((afci.fcType == flowControlType::ReservoirOutflow && ts.enforceFCautoROM == 1)
+				|| afci.fcType == flowControlType::ReservoirOperation
+				|| afci.fcType == flowControlType::DetensionPond) {
+
+				if (afci.iniStorage_m3 < 0) {
+					writeLog(fpnLog, "WARNNING : [" + afci.fcName + "] Ini. storage of the reservoir is smaller than '0'. '0' is applied.\n", 1, 1);
+					fcinfos[i].iniStorage_m3 = 0.0;
+				}
+
+				if (afci.fcType == flowControlType::ReservoirOperation
+					|| (afci.fcType == flowControlType::ReservoirOutflow && ts.enforceFCautoROM == 1)) {
+					if (afci.maxStorage_m3 < 0 || afci.NormalHighStorage_m3 < 0
+						|| afci.RestrictedStorage_m3 < 0) {
+						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] MaxStorage, NormalHighStorage, and  RestrictedStorage must not be negative value.\n", 1, 1);
+						return -1;
+					}
+					if (prj.isDateTimeFormat == 1) {
+						if (isNumeric(afci.RestrictedPeriod_Start) == true) {
+							writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedPeriod_Start value must have 'mmMddD' format.\n", 1, 1);
+							return -1;
+						}
+						else {
+							fcinfos[i].restricedP_SM = stoi(afci.RestrictedPeriod_Start.substr(0, 2));
+							fcinfos[i].restricedP_SD = stoi(afci.RestrictedPeriod_Start.substr(3, 2));
+						}
+						if (isNumeric(afci.RestrictedPeriod_End) == true) {
+							writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedPeriod_End value must have 'mmMddD' format.\n", 1, 1);
+							return -1;
+						}
+						else {
+							fcinfos[i].restricedP_EM = stoi(afci.RestrictedPeriod_End.substr(0, 2));
+							fcinfos[i].restricedP_ED = stoi(afci.RestrictedPeriod_End.substr(3, 2));
+						}
+						if (afci.restricedP_SM > afci.restricedP_EM) {
+							writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
+							return -1;
+						}
+						if (afci.restricedP_SM == afci.restricedP_EM) {
+							if (afci.restricedP_SD > afci.restricedP_ED) {
+								writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
+								return -1;
+							}
+						}
+					}
+					if (afci.NormalHighStorage_m3 > afci.maxStorage_m3) {
+						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] NormalHighStorage storage(" + dtos(afci.NormalHighStorage_m3, 0)
+							+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
+						return -1;
+					}
+					if (afci.RestrictedStorage_m3 > afci.maxStorage_m3) {
+						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedStorage storage(" + dtos(afci.RestrictedStorage_m3, 0)
+							+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
+						return -1;
+					}
+
+					if (prj.isDateTimeFormat == -1) {
+						if (isNumeric(afci.RestrictedPeriod_Start) == false) {
+							writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedPeriod_Start has to be numeric value.\n", 1, 1);
+							return -1;
+						}
+						else {
+							fcinfos[i].RestrictedPeriod_Start_min = stoi(afci.RestrictedPeriod_Start) * 60;
+						}
+						if (isNumeric(afci.RestrictedPeriod_End) == false) {
+							writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedPeriod_End has to be numeric value.\n", 1, 1);
+							return -1;
+						}
+						else {
+							fcinfos[i].RestrictedPeriod_End_min = stoi(afci.RestrictedPeriod_End) * 60;
+						}
+						if (afci.RestrictedPeriod_Start_min > afci.RestrictedPeriod_End_min) {
+							writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
+							return -1;
+						}
+					}
+					if (afci.roType == reservoirOperationType::AutoROM && afci.autoROMmaxOutflow_cms < 0) {
+						writeLog(fpnLog, "WARNNING : [" + afci.fcName + "] AutoROM max outflow of the reservoir is smaller than '0'. '0' is applied.\n", 1, 1);
+						fcinfos[i].autoROMmaxOutflow_cms = 0.0;
+					}
+				}
+
 				if (afci.iniStorage_m3 > afci.maxStorage_m3) {
 					writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Initial storage(" + dtos(afci.iniStorage_m3, 0)
 						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
 					return -1;
-				}
-				if (afci.NormalHighStorage_m3 > afci.maxStorage_m3) {
-					writeLog(fpnLog, "ERROR : [" + afci.fcName + "] NormalHighStorage storage(" + dtos(afci.NormalHighStorage_m3, 0)
-						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
-					return -1;
-				}
-				if (afci.RestrictedStorage_m3 > afci.maxStorage_m3) {
-					writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedStorage storage(" + dtos(afci.RestrictedStorage_m3, 0)
-						+ "m^3) is greater than MaxStorage storage(" + dtos(afci.maxStorage_m3, 0) + "m^3). \n", 1, 1);
-					return -1;
-				}
-				if (prj.isDateTimeFormat == -1) {
-					if (isNumeric(afci.RestrictedPeriod_Start) == false) {
-						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedPeriod_Start has to be numeric value.\n", 1, 1);
-						return -1;
-					}
-					else {
-						prj.fcs[idx].RestrictedPeriod_Start_min = stoi(afci.RestrictedPeriod_Start) * 60;
-					}
-					if (isNumeric(afci.RestrictedPeriod_End) == false) {
-						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] RestrictedPeriod_End has to be numeric value.\n", 1, 1);
-						return -1;
-					}
-					else {
-						prj.fcs[idx].RestrictedPeriod_End_min = stoi(afci.RestrictedPeriod_End) * 60;
-					}
-					if (prj.fcs[idx].RestrictedPeriod_Start_min > prj.fcs[idx].RestrictedPeriod_End_min) {
-						writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Restriced storage period values are invalid.\n", 1, 1);
-						return -1;
-					}
-				}
-				if (afci.roType == reservoirOperationType::AutoROM && afci.autoROMmaxOutflow_cms < 0) {
-					writeLog(fpnLog, "WARNNING : [" + afci.fcName + "] AutoROM max outflow of the reservoir is smaller than '0'. '0' is applied.\n", 1, 1);
-					prj.fcs[idx].autoROMmaxOutflow_cms = 0.0;
 				}
 			}
 			else if (ts.enforceFCautoROM == 1) {// inlet인경우, AutoROM으로 자동 전환 못하게 한다.
 				writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Inlet cannot be converted to AutoROM. '/a' option cannot be applied.\n", 1, 1);
 				return -1;
 			}
-			
+
 		}
 	}
 	else {
@@ -450,7 +475,7 @@ int openProjectFile(int forceRealTime)
 			return -1;
 		}
 
-		for (const auto& mpair : prj.swps){
+		for (const auto& mpair : prj.swps) {
 			if (prj.swps[mpair.first].potentialETMethod == PETmethod::None) {
 				writeLog(fpnLog, "ERROR : The potential ET method was not set [watershed id = "
 					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
@@ -531,7 +556,7 @@ int openProjectFile(int forceRealTime)
 					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
 				return -1;
 			}
-			if (prj.swps[mpair.first].tempSnowRain < -9000 || prj.swps[mpair.first].tempSnowRain >20 ) { // 최대값을 20도로 가정한다.
+			if (prj.swps[mpair.first].tempSnowRain < -9000 || prj.swps[mpair.first].tempSnowRain >20) { // 최대값을 20도로 가정한다.
 				writeLog(fpnLog, "ERROR : The value of the threshold temperature dividing snowfall and rainfall (SnowmeltTSR) is invalid [watershed id = "
 					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
 				return -1;
@@ -541,12 +566,12 @@ int openProjectFile(int forceRealTime)
 					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
 				return -1;
 			}
-			if (prj.swps[mpair.first].snowCovRatio<0 || prj.swps[mpair.first].snowCovRatio>1) {
+			if (prj.swps[mpair.first].snowCovRatio < 0 || prj.swps[mpair.first].snowCovRatio>1) {
 				writeLog(fpnLog, "ERROR : The value of snowpack coverage is invalid [watershed id = "
 					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
 				return -1;
 			}
-			if (prj.swps[mpair.first].smeltCoef < 0 ) {
+			if (prj.swps[mpair.first].smeltCoef < 0) {
 				writeLog(fpnLog, "ERROR : The value of snow melt coefficient is invalid [watershed id = "
 					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
 				return -1;
@@ -661,7 +686,7 @@ int openProjectFile(int forceRealTime)
 	}
 
 	if (prj.printAveValue == 1) {
-		if (prj.dtPrintAveValue_min == 0 || prj.dtPrintAveValue_min<prj.dtPrint_min) {
+		if (prj.dtPrintAveValue_min == 0 || prj.dtPrintAveValue_min < prj.dtPrint_min) {
 			string outString = "WARNNING : The average value calculation time step (AveValueTimeInterval_min) is invalid.\n";
 			outString = outString + "WARNNING : The average value calculation time step was set to the same value of 'OutputTimeStep_min'("
 				+ to_string(prj.dtPrint_min) + "min).\n";
@@ -672,7 +697,7 @@ int openProjectFile(int forceRealTime)
 			writeLog(fpnLog, "WARNNING : AveValueTimeInterval_min have to be the multiple value of OutputTimeStep_min.\n", 1, 1);
 			int share_print = prj.dtPrintAveValue_min / prj.dtPrint_min;
 			int dtPrintAveValue_new = share_print * prj.dtPrint_min;
-			writeLog(fpnLog, "WARNNING : AveValueTimeInterval_min was set to "+to_string(dtPrintAveValue_new)+".\n", 1, 1);
+			writeLog(fpnLog, "WARNNING : AveValueTimeInterval_min was set to " + to_string(dtPrintAveValue_new) + ".\n", 1, 1);
 			prj.dtPrintAveValue_min = dtPrintAveValue_new;
 		}
 		prj.dtPrintAveValue_sec = prj.dtPrintAveValue_min * 60;
@@ -697,7 +722,7 @@ int openProjectFile(int forceRealTime)
 		else {
 			prj.mdp = 12;  //omp_get_max_threads()를 사용하면 최대 cpu를 적용하므로 grm에서는 과도한 경우가 많다..
 			string outString = "The number of CPUs could not be encountered. Max. degree of parallelism was set to 12.\n";
-			outString = outString+"Change the value of <MaxDegreeOfParallelism> in the gmp file to change Max. degree of parallelism.\n";
+			outString = outString + "Change the value of <MaxDegreeOfParallelism> in the gmp file to change Max. degree of parallelism.\n";
 			writeLog(fpnLog, outString, 1, 1);
 		}
 	}
@@ -715,7 +740,7 @@ int openProjectFile(int forceRealTime)
 			if (setDaytimeHoursRatio() == -1) { return -1; }
 			if (prj.fpnBlaneyCriddleK != "" && _access(prj.fpnBlaneyCriddleK.c_str(), 0) == 0) {
 				if (setBlaneyCriddleK() == -1) { return -1; }
-			}			
+			}
 			if (setSolarRadiation() == -1) { return -1; }
 		}
 		if (prj.simSnowMelt == 1) {
@@ -1159,12 +1184,12 @@ int readXmlRowProjectSettings(string aline)
 			prj.fpnRainfallData = vString;
 			prj.rfDataType = getWeatherDataTypeByDataFile(vString);
 			if (prj.rfDataType == weatherDataType::None) {
-				writeLog(fpnLog, "ERROR : Precipitation data file [" + vString + "] is invalid.\n", 1, 1);
+				writeLog(fpnLog, "ERROR : The precipitation data in the file [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
 		}
 		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Precipitation data file [" + vString + "] was not set.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Precipitation data file [" + vString + "] was not set or invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -3033,10 +3058,12 @@ int isNormalFlowControlinfo(flowControlinfo* fci)
 	if (fci->fcColX == afc_ini.fcColX) { return -1; }
 	if (fci->fcRowY == afc_ini.fcRowY) { return -1; }
 	if (fci->fcType == afc_ini.fcType) { return -1; }
+
 	if (fci->fcType == flowControlType::ReservoirOperation
 		|| fci->fcType == flowControlType::DetensionPond) {
 		if (fci->iniStorage_m3 == afc_ini.iniStorage_m3) { return -1; }
 		if (fci->maxStorage_m3 == afc_ini.maxStorage_m3) { return -1; }
+
 		if (fci->fcType == flowControlType::ReservoirOperation) {
 			if (fci->NormalHighStorage_m3 == afc_ini.NormalHighStorage_m3) { return -1; }
 			if (fci->RestrictedStorage_m3 == afc_ini.RestrictedStorage_m3) { return -1; }
@@ -3051,6 +3078,15 @@ int isNormalFlowControlinfo(flowControlinfo* fci)
 				if (fci->roConstQ_cms == afc_ini.roConstQ_cms) { return -1; }
 				if (fci->roConstQDuration_hr == afc_ini.roConstQDuration_hr) { return -1; }
 			}
+		}
+
+		if (fci->fcType == flowControlType::DetensionPond) {
+			if (fci->dp_QT_StoD_CMS == afc_ini.dp_QT_StoD_CMS) { return -1; }
+			if (fci->dp_Qi_max_CMS == afc_ini.dp_Qi_max_CMS) { return -1; }
+			if (fci->dp_Qo_max_CMS == afc_ini.dp_Qo_max_CMS) { return -1; }
+			if (fci->dp_Wdi_m == afc_ini.dp_Wdi_m) { return -1; }
+			if (fci->dp_Ws_m == afc_ini.dp_Ws_m) { return -1; }
+			if (fci->dp_Cr_StoD == afc_ini.dp_Cr_StoD) { return -1; }
 		}
 	}
 	else {

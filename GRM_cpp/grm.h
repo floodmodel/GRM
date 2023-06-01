@@ -605,7 +605,9 @@ typedef struct _flowControlCellAndData
 	//map <int, double> fcDataAppliedNowT_m3Ps;// <idx, value>현재의 모델링 시간(t)에 적용된 flow control data 값 // 2022.10.17 주석처리
 	vector<int> cvidxsinlet;
 	vector<int> cvidxsFCcell;
-	map<int, vector<timeSeries>> inputFlowData_m3Ps; //<idx, data>, 분단위
+	map<int, vector<timeSeries>> inputFlowDataFCType1_m3Ps; //<idx, data>, 분단위 FCType1에 대한 자료
+	map<int, vector<timeSeries>> inputFlowDataFCType2_m3Ps; //<idx, data>, 분단위 FCType2에 대한 자료, Sink or Source flow 만 입력
+	map<int, vector<timeSeries>> inputFlowDataFCType3_m3Ps; //<idx, data>, 분단위 FCType3에 대한 자료, Sink or Source flow 만 입력
 	map<int, int> curDorder;// <idx, order>현재 적용될 데이터의 순서
 	map<int, double> inflowSumPT_m3; // 출력 기간동안 누적 유입량 m3, 출력기간동안의 평균 유입량[cms] 계산시 사용
 } flowControlCellAndData;
@@ -800,7 +802,9 @@ typedef struct _cvAtt
 	double imperviousR = 0.0;//현재 CV 토지피복의 불투수율. 무차원, 0~1.
 	double rcOF = 0.0;//현재 CV 토지피복의 모델링 적용 지표면 조도계수
 	double rcOFori = 0.0;//현재 CV 토지피복의 grm default 지표면 조도계수
-	flowControlType fcType=flowControlType::None;//현재 CV에 부여된 Flow control 종류
+	flowControlType fcType1=flowControlType::None;//현재 CV에 부여된 Flow control 종류
+	flowControlType fcType2 = flowControlType::None;//Sink와 Source만 설정. 다른 속성과 중복설정하기 위한 것
+	flowControlType fcType3 = flowControlType::None;//Sink와 Source만 설정. 다른 속성과 중복설정하기 위한 것
 
 	InterceptionMethod intcpMethod;
 	double canopyR = 0.0;
@@ -923,7 +927,7 @@ typedef struct _projectFile
 
 	map <int, swsParameters> swps; // <wsid, paras>
 	map <int, channelSettingInfo> css; //<wsid. paras>
-	map <int, flowControlinfo> fcs; // <idx, paras>
+	map <int, vector<flowControlinfo>> fcs; // <idx, paras>
 	vector <wpLocationRC> wps; // 
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;
@@ -1001,11 +1005,12 @@ typedef struct _globalVinner // 계산 루프로 전달하기 위한 최소한의 전역 변수. gp
 
 double calBFlowAndGetCSAaddedByBFlow(int i, 
 	int dtsec, 	double cellSize_m);//i는 cv array index
-double calRFlowAndSSFlow(int i,
-	int dtsec, double dy_m); // 현재 cv의 Return flow는 상류에서 유입되는 ssflwo로 계산하고, 현재 cv에서의 ssf는 현재 셀의 수분함량으로 계산한다.
 void calBFLateralMovement(int i,
 	int facMin, double dY_m, double dtsec);
+
+void calChannelAUH(int i); // 하도 흐름에서 유속, 수심, 단면적 계산
 void calChannelFlow(int i, double chCSACVw_tp1);
+void calDetensionPond(int i, double nowTmin);
 void calEffectiveRFbyInfiltration(int i, int dtrf_sec, int dtsec);
 void calFCReservoirOutFlow(int i, double nowTmin); //i는 cv array index
 
@@ -1023,13 +1028,14 @@ void calPET_Hamon(int i);
 void calPET_PriestleyTaylor(int i);
 void calPET_Hargreaves(int i);
 
-
 void calReservoirOperation(int i, double nowTmin);
 void calReservoirOutFlowInReservoirOperation(int i,
 	double Qout_cms, double dy_m);
-void calSinkOrSourceFlow(int i, double nowTmin);
+double calRFlowAndSSFlow(int i,
+	int dtsec, double dy_m); // 현재 cv의 Return flow는 상류에서 유입되는 ssflwo로 계산하고, 현재 cv에서의 ssf는 현재 셀의 수분함량으로 계산한다.
+void calSinkOrSourceFlow(int i, double nowTmin, flowControlType fcType, int fcTypeOrder);
 void calValuesDuringPT(int dtsec);
-void convertFCtypeToAutoROM(string strDate, int cvid);
+void convertFCtypeToAutoROM(string strDate, int cvid, int ifc); // 시간, cvid, flow control index
 
 void disposeDynamicVars();
 int deleteAllOutputFiles();
@@ -1216,8 +1222,18 @@ inline void setNoInfiltrationParameters(int i);
 inline void setWaterAreaInfiltrationPars(int i);
 inline double soilSSRbyCumulF(double cumulinfiltration,
 	double effSoilDepth, cellFlowType flowType);
-inline  double vByManningEq(double hydraulicRaidus,
-	double slope, double nCoeff);
+
+inline double vByManningEq(double hydraulicRaidus,
+	double slope, double nCoeff)
+{
+	return pow(hydraulicRaidus, 0.66667)* sqrt(slope) / nCoeff;
+}
+
+inline double hByManningEqForOF(double Q_cms,
+	double nCoeff, double slope, double dy_m)
+{
+	return nCoeff * Q_cms / dy_m / pow(sqrt(slope), 0.6);  // 0.6 = 3/5;
+}
 
 
 // for extern "C"

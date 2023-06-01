@@ -595,7 +595,7 @@ int makeNewOutputFiles()
 				roConstQduration = "Constant Q duration :";
 				string fcDataField = CONST_OUTPUT_TABLE_TIME_FIELD_NAME;
 				for (int n : fccds.cvidxsFCcell) {
-					flowControlinfo afc = prj.fcs[n];
+					flowControlinfo afc = prj.fcs[n][0];
 					fcDataField = fcDataField + "\t" + afc.fcName;
 					fcNameApp = fcNameApp + "\t" + afc.fcName;
 					string fct = ENUM_TO_STR(None);

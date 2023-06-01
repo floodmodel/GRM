@@ -245,64 +245,79 @@ int simulateRunoff(double nowTmin)
 
 void simulateRunoffCore(int i, double nowTmin)
 {
-    int fac = cvs[i].fac;
-    int dtsec = ts.dtsec;
-    double cellsize = di.cellSize;
-    if (prj.makeRFraster == 1){
-        cvs[i].rf_dtPrint_m = cvs[i].rf_dtPrint_m
-            + cvs[i].rfiRead_mPsec * dtsec;
-        cvs[i].rfAcc_fromStart_m = cvs[i].rfAcc_fromStart_m
-            + cvs[i].rfiRead_mPsec * dtsec;
-    }
-    if (prj.simFlowControl == 1 &&
-        (cvs[i].fcType == flowControlType::ReservoirOutflow ||
-            cvs[i].fcType == flowControlType::Inlet)) {
+	int fac = cvs[i].fac;
+	int dtsec = ts.dtsec;
+	double cellsize = di.cellSize;
+	if (prj.makeRFraster == 1) {
+		cvs[i].rf_dtPrint_m = cvs[i].rf_dtPrint_m
+			+ cvs[i].rfiRead_mPsec * dtsec;
+		cvs[i].rfAcc_fromStart_m = cvs[i].rfAcc_fromStart_m
+			+ cvs[i].rfiRead_mPsec * dtsec;
+	}
+	if (prj.simFlowControl == 1 &&
+		(cvs[i].fcType1 == flowControlType::ReservoirOutflow ||
+			cvs[i].fcType1 == flowControlType::Inlet)) {
 		updateCVbyHydroComps(i);
-        //fccds.fcDataAppliedNowT_m3Ps[i] = 0;  // 2022.10.17 주석처리
-        calFCReservoirOutFlow(i, nowTmin);
-    }
-    else {
-        updateCVbyHydroComps(i);
-        if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-            double hCVw_tp1 = 0;
-            if (fac > 0) {
-                hCVw_tp1 = getOverlandFlowDepthCVw(i);
-            }
-            if (hCVw_tp1 > 0 || cvs[i].hOF > 0) {
-                calOverlandFlow(i, hCVw_tp1, cellsize);
-            }
-            else {
-                setNoFluxCVOF(i);
-            }
-        }
-        else { 
-            double CSAchCVw_i_jP1 = 0;
-            if (fac > 0) {
-                CSAchCVw_i_jP1 = getChCSAatCVW(i);
-            }
-            if (CSAchCVw_i_jP1 > 0 || cvs[i].stream.hCH > 0) {
-                calChannelFlow(i, CSAchCVw_i_jP1);
-            }
-            else {
-                setNoFluxCVCH(i);
-            }
-        }
-    }
-    if (prj.simFlowControl == 1) {
-      if (cvs[i].fcType== flowControlType::SinkFlow
-          || cvs[i].fcType == flowControlType::SourceFlow
-          || cvs[i].fcType == flowControlType::ReservoirOperation) {
-          //fccds.fcDataAppliedNowT_m3Ps[i] = 0;  // 2022.10.17 주석처리
-          if (cvs[i].fcType == flowControlType::SinkFlow
-              || cvs[i].fcType == flowControlType::SourceFlow) {
-              calSinkOrSourceFlow(i, nowTmin);
-          }
-          if (prj.fcs[i].roType != reservoirOperationType::None) {
-              // rotype이 있으면, ro로 넘어간다.
-              calReservoirOperation(i, nowTmin);
-          }
-      }
-    }
+		//fccds.fcDataAppliedNowT_m3Ps[i] = 0;  // 2022.10.17 주석처리
+		calFCReservoirOutFlow(i, nowTmin);
+	}
+	else {
+		updateCVbyHydroComps(i);
+		if (cvs[i].flowType == cellFlowType::OverlandFlow) {
+			double hCVw_tp1 = 0;
+			if (fac > 0) {
+				hCVw_tp1 = getOverlandFlowDepthCVw(i);
+			}
+			if (hCVw_tp1 > 0 || cvs[i].hOF > 0) {
+				calOverlandFlow(i, hCVw_tp1, cellsize);
+			}
+			else {
+				setNoFluxCVOF(i);
+			}
+		}
+		else {
+			double CSAchCVw_i_jP1 = 0;
+			if (fac > 0) {
+				CSAchCVw_i_jP1 = getChCSAatCVW(i);
+			}
+			if (CSAchCVw_i_jP1 > 0 || cvs[i].stream.hCH > 0) {
+				calChannelFlow(i, CSAchCVw_i_jP1);
+			}
+			else {
+				setNoFluxCVCH(i);
+			}
+		}		
+	}
+	if (prj.simFlowControl == 1) {
+		// 아래 중 하나
+		// cvs[i].fcType == flowControlType::SinkFlow
+		// cvs[i].fcType == flowControlType::SourceFlow
+		//	cvs[i].fcType == flowControlType::ReservoirOperation
+		//	cvs[i].fcType == flowControlType::DetensionPond
+		// 2023.05.31 아래와 같이 수정. Sink, source 중복설정된 CV 모의 가능
+		if (cvs[i].fcType1 == flowControlType::DetensionPond) {
+			calDetensionPond(i, nowTmin);
+		}
+		if (cvs[i].fcType1 == flowControlType::SinkFlow
+			|| cvs[i].fcType1 == flowControlType::SourceFlow) {
+			calSinkOrSourceFlow(i, nowTmin, cvs[i].fcType1, 1);
+		}
+		if (cvs[i].fcType2 == flowControlType::SinkFlow
+			|| cvs[i].fcType2 == flowControlType::SourceFlow) {
+			calSinkOrSourceFlow(i, nowTmin, cvs[i].fcType2, 2);
+		}
+		if (cvs[i].fcType3 == flowControlType::SinkFlow
+			|| cvs[i].fcType3 == flowControlType::SourceFlow) {
+			calSinkOrSourceFlow(i, nowTmin, cvs[i].fcType3, 3);
+		}
+		if (cvs[i].fcType1 == flowControlType::ReservoirOperation
+			&& prj.fcs[i][0].roType != reservoirOperationType::None) {
+			// rotype이 있으면, ro로 넘어간다.  
+			// sink, source는 AutoROM과 같이 설정될 수 있으므로, sinkflow, sourceflow에서도 여기 들어간다.
+			calReservoirOperation(i, nowTmin);
+		}
+
+	}
 }
 
 void initThisSimulation()
@@ -344,8 +359,8 @@ void initThisSimulation()
     if (prj.simFlowControl == 1) {
         int mindtFC = INT_MAX;
         for (int i :fccds.cvidxsFCcell) {
-            if (mindtFC > prj.fcs[i].fcDT_min) {
-                mindtFC = int(prj.fcs[i].fcDT_min *60 / 2);
+            if (prj.fcs[i][0].fcDT_min>0 && mindtFC > prj.fcs[i][0].fcDT_min) {
+                mindtFC = int(prj.fcs[i][0].fcDT_min *60 / 2);
             }
         }
         if (ts.dtMaxLimit_sec > mindtFC) {
@@ -484,7 +499,7 @@ void setCVStartingCondition(double iniflow)
         cvs[i].storageCumulative_m3 = 0;
         if (prj.simFlowControl == 1) {
             if (prj.fcs.size() > 0 && getVectorIndex(fccds.cvidxsFCcell, i) != -1) {
-                double iniS = prj.fcs[i].iniStorage_m3;
+                double iniS = prj.fcs[i][0].iniStorage_m3;
                 if (iniS > 0) {
                     cvs[i].storageCumulative_m3 = iniS;
                 }
@@ -752,7 +767,7 @@ void initValuesAfterPrinting(int nowTP_min, int printAveValueNow) {
 	//fcDataAppliedBak.clear(); // 2022.10.17 주석처리
 	if (printAveValueNow == 1 ) {
 		for (int idx : fccds.cvidxsFCcell) {
-			if (prj.fcs[idx].fcType != flowControlType::Inlet) {
+			if (prj.fcs[idx][0].fcType != flowControlType::Inlet) {
 				fccds.inflowSumPT_m3[idx] = 0.0;
 			}
 		}
@@ -794,7 +809,7 @@ void calValuesDuringPT(int dtsec)
 
 	if (prj.printAveValue == 1) {
 		for (int idx : fccds.cvidxsFCcell) {
-			if (prj.fcs[idx].fcType != flowControlType::Inlet) {
+			if (prj.fcs[idx][0].fcType != flowControlType::Inlet) {
 				fccds.inflowSumPT_m3[idx] += cvs[idx].QsumCVw_m3Ps * dtsec; // inlet 이 아닌 모든 fc 셀에 대해서 	출력기간에서의  inflowSumPT_m3 계산
 			}
 		}

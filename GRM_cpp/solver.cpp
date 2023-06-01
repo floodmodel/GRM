@@ -461,11 +461,17 @@ double getChCrossSectionPerimeter(double LRegionBaseWidth,
     return dtsec;
 }
 
- inline  double vByManningEq(double hydraulicRaidus,
-     double slope, double nCoeff)
- {
-     return pow(hydraulicRaidus, 0.66667) * sqrt(slope) / nCoeff;
- }
+ //inline double vByManningEq(double hydraulicRaidus,
+ //    double slope, double nCoeff)
+ //{
+ //    return pow(hydraulicRaidus, 0.66667) * sqrt(slope) / nCoeff;
+ //}
+
+ //inline double hByManningEqForOF(double Q_cms,
+	// double nCoeff, double slope, double dy_m)
+ //{
+	// return nCoeff * Q_cms / dy_m / pow(sqrt(slope), 0.6);  // 0.6 = 3/5;
+ //}
 
 inline void setNoFluxCVCH(int i)
  {

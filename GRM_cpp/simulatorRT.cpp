@@ -58,8 +58,8 @@ int startSimulationRT()
         if (prj.simFlowControl == 1) {// 신규 fc 자료 검색 조건
             //string targetDataTime_Previous = "";
             for (int idx : fccds.cvidxsFCcell) {
-                flowControlinfo afc = prj.fcs[idx];
-                if (afc.fcType != flowControlType::ReservoirOperation) {
+                flowControlinfo afc = prj.fcs[idx][0];
+                if (afc.fcType == flowControlType::ReservoirOutflow) {
                     int dt_min = afc.fcDT_min;
                     if (nowTsec > dt_min * 60 * fccds.curDorder[idx]
                         || fccds.curDorder[idx] == 0) {
@@ -86,7 +86,7 @@ int startSimulationRT()
                             {// 2019.10.01. 최. prediction 관련. 한번 여기 지나가면, 
                             // 데이터로 모델링 하던 것은 모두 ReservoirOperation,  AutoROM으로 변경됨
                              // fc 데이터가 있는 것 까지는 데이터 이용, 없으면, autoROM
-                                convertFCtypeToAutoROM(targetDataTime, idx);
+                                convertFCtypeToAutoROM(targetDataTime, idx,0);
                                 break;
                             }
                             Sleep(2000);

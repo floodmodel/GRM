@@ -347,29 +347,55 @@ int updateCVbyUserSettings()
     // Flow control
     if (prj.simFlowControl == 1 && prj.fcs.size() > 0) {
         for (int idx : fccds.cvidxsFCcell) {
-            flowControlinfo afc = prj.fcs[idx];
-            switch (afc.fcType) {
-            case flowControlType::Inlet: {
-                cvs[idx].fcType = flowControlType::Inlet;
-                break;
-            }
-            case flowControlType::ReservoirOperation: {
-                cvs[idx].fcType = flowControlType::ReservoirOperation;
-                break;
-            }
-            case flowControlType::ReservoirOutflow: {
-                cvs[idx].fcType = flowControlType::ReservoirOutflow;
-                break;
-            }
-            case flowControlType::SinkFlow: {
-                cvs[idx].fcType = flowControlType::SinkFlow;
-                break;
-            }
-            case flowControlType::SourceFlow: {
-                cvs[idx].fcType = flowControlType::SourceFlow;
-                break;
-            }
-            }
+			for (int i = 0; i<prj.fcs[idx].size(); ++i) {
+				flowControlinfo afc = prj.fcs[idx][i];
+				switch (afc.fcType) {
+				case flowControlType::Inlet: {
+					cvs[idx].fcType1 = flowControlType::Inlet;
+					break;
+				}
+				case flowControlType::ReservoirOperation: {
+					cvs[idx].fcType1 = flowControlType::ReservoirOperation;
+					break;
+				}
+				case flowControlType::ReservoirOutflow: {
+						cvs[idx].fcType1 = flowControlType::ReservoirOutflow;
+						break;
+				}
+				case flowControlType::DetensionPond: {
+					cvs[idx].fcType1 = flowControlType::DetensionPond;
+					break;
+				}
+				case flowControlType::SinkFlow: {// Opne project에서 같은 속성은 없는게 보장된다. 
+					if (cvs[idx].fcType1 == flowControlType::None) {
+						cvs[idx].fcType1 = flowControlType::SinkFlow;
+						break;
+					}
+					else if (cvs[idx].fcType2 == flowControlType::None) { 
+						cvs[idx].fcType2 = flowControlType::SinkFlow;
+						break;
+					}
+					if (cvs[idx].fcType3 == flowControlType::None) {
+						cvs[idx].fcType3 = flowControlType::SinkFlow;
+					}
+					break;
+				}
+				case flowControlType::SourceFlow: {// Opne project에서 같은 속성은 없는게 보장된다. 
+					if (cvs[idx].fcType1 == flowControlType::None) {
+						cvs[idx].fcType1 = flowControlType::SourceFlow;
+						break;
+					}
+					else if (cvs[idx].fcType2 == flowControlType::None) {
+						cvs[idx].fcType2 = flowControlType::SourceFlow;
+						break;
+					}
+					if (cvs[idx].fcType3 == flowControlType::None) {
+						cvs[idx].fcType3 = flowControlType::SourceFlow;
+					}
+					break;
+				}
+				}
+			}
         }
     }
 
