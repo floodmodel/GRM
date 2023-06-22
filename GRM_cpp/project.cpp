@@ -32,6 +32,7 @@ int openProjectFile(int forceRealTime)
 	if (_access(ppi.fpn_prj.c_str(), 0) != 0) {
 		return -1;
 	}
+	
 	projectFileFieldName fn;
 	swsParameters* aswp;
 	aswp = new swsParameters;

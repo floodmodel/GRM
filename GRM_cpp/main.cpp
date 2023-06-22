@@ -35,6 +35,7 @@ wpSimData wpSimValue; // wp별로 저장할 다양한 정보.  prj.wps 파일에서 읽은 순서�
 flowControlCellAndData fccds; // gmp 파일에서 읽은 fc 정보를 이용해서 2차 정보 저장
 thisSimulation ts; // 이번 simulation 프로세스에 과련된 다양한 변수
 
+extern vector<flowControlinfo> fcinfos;
 extern double** ssrAry;
 extern double** rfAry;
 extern double** rfaccAry;
@@ -303,6 +304,16 @@ void disposeDynamicVars()
 	prj.sds.clear();
 	prj.lcs.clear();
 
+	fcinfos.clear();
+	rfs.clear();
+	tempMax.clear();
+	tempMin.clear();
+	dayTimeLength.clear();
+	snowpackTemp.clear();
+	solarRad.clear();
+	laiRatio.clear();
+	fas.clear();
+	faCount.clear();
 }
 
 int setupAndStartSimulation()
