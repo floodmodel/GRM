@@ -1035,6 +1035,7 @@ double calRFlowAndSSFlow(int i,
 	int dtsec, double dy_m); // 현재 cv의 Return flow는 상류에서 유입되는 ssflwo로 계산하고, 현재 cv에서의 ssf는 현재 셀의 수분함량으로 계산한다.
 void calSinkOrSourceFlow(int i, double nowTmin, flowControlType fcType, int fcTypeOrder);
 void calValuesDuringPT(int dtsec);
+int checkWPpositions();
 void convertFCtypeToAutoROM(string strDate, int cvid, int ifc); // 시간, cvid, flow control index
 
 void disposeDynamicVars();

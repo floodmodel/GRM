@@ -35,6 +35,7 @@ int setupModelAfterOpenProjectFile()
 int setDomainAndCVBasicinfo()
 {
 	if (readDomainFaFileAndSetupCV() == -1) { return -1; }
+	if (checkWPpositions() == -1) { return -1; }
 	if (readSlopeFdirStreamCwCfSsrFileAndSetCV() == -1) { return -1; }
 	if (prj.lcDataType == fileOrConstant::File) {
 		if (readLandCoverFileAndSetCVbyVAT() == -1) { return -1; }
@@ -58,9 +59,30 @@ int setDomainAndCVBasicinfo()
 	return 1;
 }
 
+int checkWPpositions() {
+	for (int i = 0; i < prj.wps.size(); ++i) {
+		int cx = prj.wps[i].wpColX;
+		int ry = prj.wps[i].wpRowY;
+		if (cx<0 || cx>di.nCols - 1) {
+			writeLog(fpnLog, "ERROR : The column index of the watch point ["
+				+ prj.wps[i].wpName + "] is out of range.\n", 1, 1);
+			return -1;
+		}
+		if (ry<0 || ry>di.nRows - 1) {
+			writeLog(fpnLog, "ERROR : The row index of the watch point ["
+				+ prj.wps[i].wpName + "] is out of range.\n", 1, 1);
+			return -1;
+		}
+		if (cvais[cx][ry] == -1) {
+			writeLog(fpnLog, "ERROR : The watch point ["
+				+ prj.wps[i].wpName + "] is out of valid simulation region.\n", 1, 1);
+			return -1;
+		}
+	}
+}
+
 int initWPinfos()
 {
-	int isnormal = -1;
 	wpSimValue.prcpiReadSumUpWS_mPs.clear();
 	wpSimValue.prcpUpWSAveForDt_mm.clear();
 	wpSimValue.prcpUpWSAveForPT_mm.clear();
@@ -82,22 +104,11 @@ int initWPinfos()
 	for (int i = 0; i < prj.wps.size(); ++i) {
 		int cx = prj.wps[i].wpColX;
 		int ry = prj.wps[i].wpRowY;
-		if (cx<0 || cx>di.nCols - 1) {
-			writeLog(fpnLog, "ERROR : The column index of the watch point ["
-				+ prj.wps[i].wpName +"] is out of range.\n", 1, 1);
-			return -1;
-		}
-		if (ry<0 || ry>di.nRows - 1) {
-			writeLog(fpnLog, "ERROR : The row index of the watch point [" 
-				+ prj.wps[i].wpName + "] is out of range.\n", 1, 1);
-			return -1;
-		}
 		int idx = cvais[cx][ry];
 		wpSimValue.wpCVidxes.push_back(idx);
 		wpSimValue.wpNames[idx] = prj.wps[i].wpName;
 	}
-	isnormal = 1;
-	return isnormal;
+	return 1;
 }
 
 int setupByFAandNetwork()
