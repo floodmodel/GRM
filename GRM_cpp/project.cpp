@@ -751,6 +751,18 @@ int openProjectFile(int forceRealTime)
 		// continuous =================
 	}
 
+	//기타 검증
+	if (prj.dtPrint_min == 0) {
+		writeLog(fpnLog, "ERROR : Print out time step ["
+			+ to_string(prj.dtPrint_min) + "] is invalid.\n", 1, 1);
+		return -1;
+	}
+	if (prj.simDuration_hr == 0) {
+		writeLog(fpnLog, "ERROR : Simulation duration ["
+			+ to_string(prj.simDuration_hr) + "] is invalid.\n", 1, 1);
+		return -1;
+	}
+
 	if (forceRealTime == 1) {
 		prj.simType = simulationType::RealTime;
 	}

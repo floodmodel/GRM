@@ -314,7 +314,7 @@ typedef struct _projectFileFieldName
 	const string SolarRadiationDataFile = "SolarRadiationDataFile";
 
 	//const string SnowPackTemperatureDataType = "SnowPackTemperatureDataType";
-	const string SnowPackTemperatureInInterval_min = "SnowPackTemperatureInInterval_min";
+	const string SnowPackTemperatureInInterval_min = "SnowPackTemperatureInterval_min";
 	const string SnowPackTemperatureDataFile = "SnowPackTemperatureDataFile";
 
 	//==========================
