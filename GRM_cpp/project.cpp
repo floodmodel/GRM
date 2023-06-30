@@ -1418,8 +1418,8 @@ int readXmlRowProjectSettings(string aline)
 		}
 		return 1;
 	}
-	if (aline.find(fldName.SnowPackTemperatureInInterval_min) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.SnowPackTemperatureInInterval_min);
+	if (aline.find(fldName.SnowPackTemperatureInterval_min) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.SnowPackTemperatureInterval_min);
 		if (vString != "") {
 			int t_min = stoi(vString);
 			if (t_min != 1440) {
