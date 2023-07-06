@@ -50,7 +50,7 @@
     <LandCoverK>수역</LandCoverK>
     <GRMCode>WATR</GRMCode>
     <RoughnessCoefficient>0.03</RoughnessCoefficient>
-    <ImperviousRatio>1</ImperviousRatio>
+    <ImperviousRatio>0.1</ImperviousRatio>
     <CanopyRatio>0.1</CanopyRatio>
     <InterceptionMaxWaterCanopy_mm>0.1</InterceptionMaxWaterCanopy_mm>	
   </LandCoverParameter>
@@ -59,7 +59,7 @@
     <LandCoverK>습지</LandCoverK>
     <GRMCode>WTLD</GRMCode>
     <RoughnessCoefficient>0.07</RoughnessCoefficient>
-    <ImperviousRatio>1</ImperviousRatio>
+    <ImperviousRatio>0.1</ImperviousRatio>
     <CanopyRatio>0.4</CanopyRatio>
     <InterceptionMaxWaterCanopy_mm>0.3</InterceptionMaxWaterCanopy_mm>	
   </LandCoverParameter>
