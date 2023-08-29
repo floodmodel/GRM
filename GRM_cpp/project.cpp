@@ -425,54 +425,54 @@ int openProjectFile(int forceRealTime)
 			return -1;
 		}
 		if (prj.tempMaxDataType == weatherDataType::None) {
-			writeLog(fpnLog, "ERROR : Max temperature data type is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Max temperature data type is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.tempMaxInterval_min <= 0) {
-			writeLog(fpnLog, "ERROR : Max temperature data interval is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Max temperature data interval is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.fpnTempMaxData == "") {
-			writeLog(fpnLog, "ERROR : Max temperature data file is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Max temperature data file is invalid.\n", 1, 1);
 			return -1;
 		}
 
 		if (prj.tempMinDataType == weatherDataType::None) {
-			writeLog(fpnLog, "ERROR : Min temperature data type is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Min temperature data type is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.tempMinInterval_min <= 0) {
-			writeLog(fpnLog, "ERROR : Min temperature data interval is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Min temperature data interval is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.fpnTempMinData == "") {
-			writeLog(fpnLog, "ERROR : Min temperature data file is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Min temperature data file is invalid.\n", 1, 1);
 			return -1;
 		}
 
 		if (prj.daytimeLengthDataType == weatherDataType::None) {
-			writeLog(fpnLog, "ERROR : Daytime length data type is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Daytime length data type is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.daytimeLengthDataInterval_min <= 0) {
-			writeLog(fpnLog, "ERROR : Daytime length data interval is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Daytime length data interval is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.fpnDaytimeLengthData == "") {
-			writeLog(fpnLog, "ERROR : Daytime length data file is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Daytime length data file is invalid.\n", 1, 1);
 			return -1;
 		}
 
 		if (prj.solarRadDataType == weatherDataType::None) {
-			writeLog(fpnLog, "ERROR : Solar radiation data type is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Solar radiation data type is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.solarRadInterval_min <= 0) {
-			writeLog(fpnLog, "ERROR : Solar radiation data interval is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Solar radiation data interval is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.fpnSolarRadData == "") {
-			writeLog(fpnLog, "ERROR : Solar radiation data file is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Solar radiation data file is invalid.\n", 1, 1);
 			return -1;
 		}
 
@@ -482,11 +482,16 @@ int openProjectFile(int forceRealTime)
 					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
 				return -1;
 			}
-			if (prj.swps[mpair.first].potentialETMethod == PETmethod::BlaneyCriddle
-				&& prj.fpnBlaneyCriddleK == "") {
-				writeLog(fpnLog, "ERROR : The file of crop ceofficient data in Blaney-Criddle method  was not set [watershed id = "
-					+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
-				return -1;
+			if (prj.swps[mpair.first].potentialETMethod == PETmethod::BlaneyCriddle){
+				if (prj.fpnBlaneyCriddleK == "") {
+					writeLog(fpnLog, "ERROR : The file of crop ceofficient data in Blaney-Criddle method  was not set [watershed id = "
+						+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
+					return -1;
+				}
+				if (prj.fpnDaytimeLengthRatioData == "") {
+					writeLog(fpnLog, "ERROR : Daytime length ratio data file is invalid.\n", 1, 1);
+					return -1;
+				}
 			}
 			if (prj.swps[mpair.first].etCoeff == -1.0) {
 				writeLog(fpnLog, "ERROR : The evaportranspiration coefficient of the watershed ["
@@ -511,6 +516,11 @@ int openProjectFile(int forceRealTime)
 			writeLog(fpnLog, "ERROR : The type of simulation time must be [date and time format] for calculating rainfall interception.\n", 1, 1);
 			return -1;
 		}
+		if (prj.fpnLAI == "") {
+			writeLog(fpnLog, "ERROR : The LAI file is invalid.\n", 1, 1);
+			return -1;
+		}
+
 		int nlc = prj.lcs.size();
 		for (int n = 0; n < nlc; ++n) {
 			if (prj.lcs[n].CanopyRatio < 0
@@ -540,15 +550,19 @@ int openProjectFile(int forceRealTime)
 			return -1;
 		}
 		if (prj.tempMaxDataType == weatherDataType::None) {
-			writeLog(fpnLog, "ERROR : Max temperature data type is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Max temperature data type is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.tempMaxInterval_min <= 0) {
-			writeLog(fpnLog, "ERROR : Max temperature data interval is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Max temperature data interval is invalid.\n", 1, 1);
 			return -1;
 		}
 		if (prj.fpnTempMaxData == "") {
-			writeLog(fpnLog, "ERROR : Max temperature data file is invalie.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Max temperature data file is invalid.\n", 1, 1);
+			return -1;
+		}
+		if (prj.fpnSnowpackTempData == "") {
+			writeLog(fpnLog, "ERROR : Snowpack temperature data file is invalid.\n", 1, 1);
 			return -1;
 		}
 		for (const auto& mpair : prj.swps) {
