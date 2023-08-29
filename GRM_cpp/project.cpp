@@ -484,8 +484,7 @@ int openProjectFile(int forceRealTime)
 			}
 			if (prj.swps[mpair.first].potentialETMethod == PETmethod::BlaneyCriddle){
 				if (prj.fpnBlaneyCriddleK == "") {
-					writeLog(fpnLog, "ERROR : The file of crop ceofficient data in Blaney-Criddle method  was not set [watershed id = "
-						+ to_string(prj.swps[mpair.first].wsid) + "].\n", 1, 1);
+					writeLog(fpnLog, "ERROR : The file of crop ceofficient data in Blaney-Criddle method is invalid.\n", 1, 1);
 					return -1;
 				}
 				if (prj.fpnDaytimeLengthRatioData == "") {
@@ -563,6 +562,10 @@ int openProjectFile(int forceRealTime)
 		}
 		if (prj.fpnSnowpackTempData == "") {
 			writeLog(fpnLog, "ERROR : Snowpack temperature data file is invalid.\n", 1, 1);
+			return -1;
+		}
+		if (prj.snowpackTempInterval_min <= 0) {
+			writeLog(fpnLog, "ERROR : Snowpack temperature data interval is invalid.\n", 1, 1);
 			return -1;
 		}
 		for (const auto& mpair : prj.swps) {
@@ -1231,11 +1234,11 @@ int readXmlRowProjectSettings(string aline)
 		if (vString == "") {
 			vString = getValueStringFromXmlLine(aline, fldName.PrecipitationInterval_min_03);
 		}
-		if (vString != "") {
+		if (vString != "" && stoi(vString)>0) {
 			prj.rfinterval_min = stoi(vString);
 		}
 		else if (prj.simType == simulationType::Normal) {
-			writeLog(fpnLog, "ERROR : Rainfall data time interval was not set.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Precipitation data time interval is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
