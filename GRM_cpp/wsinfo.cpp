@@ -440,6 +440,8 @@ bool grmWSinfo::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat
 {
 	prj.swps[wsid].wsid = wsid;
     prj.swps[wsid].iniSaturation = iniSat;
+	//prj.swps[wsid].iniLossPRCP_mm = iniSat;
+	
     prj.swps[wsid].minSlopeOF = minSlopeLandSurface;
     prj.swps[wsid].unSatKType = unSKType;
     prj.swps[wsid].coefUnsaturatedK = coefUnsK;

@@ -287,7 +287,7 @@ int makeRasterOutput(int nowTmin)
 			}
 		}
 	}
-    //joinOutputThreads();
+    joinOutputThreads(); // 이과정 있어야, raster 파일 모두 쓰고난 후 프로그램 종료된다.
 }
 
 
@@ -305,7 +305,7 @@ int setRasterOutputArray()
                     rfAry[cx][ry] = cvs[i].rf_dtPrint_m * 1000;
                 }
                 if (brfacc == 1) {
-                    rfaccAry[cx][ry] = cvs[i].rfAcc_fromStart_m * 1000;
+                    rfaccAry[cx][ry] = cvs[i].rfAccRead_fromStart_m * 1000;
                 }
                 if (bQ == 1) {
                     double v;

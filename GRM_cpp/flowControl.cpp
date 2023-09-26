@@ -263,6 +263,8 @@ void calSinkOrSourceFlow(int i, double nowTmin, flowControlType fcType, int fcTy
 }
 
 void calDetensionPond(int i, double nowTmin) {
+	// 저류지는 댐과 다르게 하천 셀 옆에 있으므로, 유입량, 유출량, 저류량 변수를 별도로 배정한다.
+	// DP_storageCumulative_m3, DP_inflow_m3Ps, DP_outflow_m3Ps
 	int dtsec = ts.dtsec;
 	double dy_m = di.cellSize;
 	flowControlinfo afci;
@@ -274,21 +276,29 @@ void calDetensionPond(int i, double nowTmin) {
 	else {
 		Qflow = cvs[i].stream.QCH_m3Ps;
 	}
+	cvs[i].DP_inflow_m3Ps = 0.0;
+	cvs[i].DP_outflow_m3Ps = 0.0;
 	// inflow to DP
 	if (Qflow > afci.dp_QT_StoD_CMS) { // 기준 유량보다 하천 유량이 큰 경우
-		if (cvs[i].storageCumulative_m3 < afci.maxStorage_m3) {
+		if (cvs[i].DP_storageCumulative_m3 < afci.maxStorage_m3) {
 			double rStD = 0.0;
 			double Qi = 0.0;
+			double Qdiff_max = 0.0;
 			rStD = afci.dp_Wdi_m / (afci.dp_Wdi_m + afci.dp_Ws_m) * afci.dp_Cr_StoD;
-			Qi = (Qflow - afci.dp_QT_StoD_CMS) * rStD;
+			Qdiff_max = Qflow - afci.dp_QT_StoD_CMS;
+			Qi = Qdiff_max * rStD;
 			if (Qi > afci.dp_Qi_max_CMS) {
 				Qi = afci.dp_Qi_max_CMS;
 			}
-			double rd2 = 0.0;
-			rd2 = cvs[i].storageCumulative_m3 + Qi * ts.dtsec;
-			if (rd2 > afci.maxStorage_m3) {
-				Qi = (afci.maxStorage_m3 - cvs[i].storageCumulative_m3) / ts.dtsec;
+			if (Qi > Qdiff_max) { // DP 유입 기준 유량을 초과하는 하천 최대 유량을 초과해서 유입되지 않게 한다.
+				Qi = Qdiff_max;
 			}
+			double rd2 = 0.0;
+			rd2 = cvs[i].DP_storageCumulative_m3 + Qi * ts.dtsec;
+			if (rd2 > afci.maxStorage_m3) {
+				Qi = (afci.maxStorage_m3 - cvs[i].DP_storageCumulative_m3) / ts.dtsec;
+			}
+			cvs[i].DP_inflow_m3Ps = Qi;
 			Qflow = Qflow - Qi;
 			if (cvs[i].flowType == cellFlowType::OverlandFlow) {
 				cvs[i].QOF_m3Ps = Qflow;
@@ -297,25 +307,27 @@ void calDetensionPond(int i, double nowTmin) {
 			else {
 				cvs[i].stream.QCH_m3Ps = Qflow;
 				calChannelAUH(i);
-			}			
-			cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3 + Qi * ts.dtsec;
+			}
+			cvs[i].DP_storageCumulative_m3 = cvs[i].DP_storageCumulative_m3 + Qi * ts.dtsec;
 		}
-	} else if(cvs[i].storageCumulative_m3 > 0) {
+	}
+	else if (cvs[i].DP_storageCumulative_m3 > 0) {
 		double rd2 = 0.0; //DP storage
 		double QdpO = 0.0; // DP outflow
-		rd2 = cvs[i].storageCumulative_m3 - afci.dp_Qo_max_CMS * ts.dtsec;
+		rd2 = cvs[i].DP_storageCumulative_m3 - afci.dp_Qo_max_CMS * ts.dtsec;
 		if (rd2 > 0.0) {
 			QdpO = afci.dp_Qo_max_CMS;
 		}
 		else {
-			QdpO = cvs[i].storageCumulative_m3 / ts.dtsec;
+			QdpO = cvs[i].DP_storageCumulative_m3 / ts.dtsec;
 		}
 
 		double Qflow2 = 0.0;
 		Qflow2 = Qflow + QdpO;
-		if (Qflow2 > afci.dp_QT_StoD_CMS) {
+		if (Qflow2 > afci.dp_QT_StoD_CMS) { // QdpO==0 이면 이 조건에 들어오진 안는다.
 			QdpO = afci.dp_QT_StoD_CMS - Qflow;
 		}
+		cvs[i].DP_outflow_m3Ps = QdpO;
 		if (cvs[i].flowType == cellFlowType::OverlandFlow) {
 			cvs[i].QOF_m3Ps += QdpO;
 			cvs[i].hOF = hByManningEqForOF(cvs[i].QOF_m3Ps, cvs[i].rcOF, cvs[i].slopeOF, dy_m);
@@ -324,8 +336,8 @@ void calDetensionPond(int i, double nowTmin) {
 			cvs[i].stream.QCH_m3Ps += QdpO;
 			calChannelAUH(i);
 		}
-		cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3 - QdpO * ts.dtsec;
-		if (cvs[i].storageCumulative_m3 < 0.0) { cvs[i].storageCumulative_m3 = 0.0; }		
+		cvs[i].DP_storageCumulative_m3 = cvs[i].DP_storageCumulative_m3 - QdpO * ts.dtsec;
+		if (cvs[i].DP_storageCumulative_m3 < 0.0) { cvs[i].DP_storageCumulative_m3 = 0.0; }
 	}
 }
 

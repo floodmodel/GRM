@@ -44,6 +44,7 @@ int setCVRF(int order)
 {
 	int dtrf_sec = prj.rfinterval_min * 60;
 	int dtrf_min = prj.rfinterval_min;
+	int dt_sec = ts.dtsec;
 	string fpnRF = "";
 	double cellSize = di.cellSize;
 	ts.rfiSumAllCellsInCurRFData_mPs = 0;
@@ -83,6 +84,8 @@ int setCVRF(int order)
 				// 상류 cv 개수에 이 조건 추가하려면 주석 해제.
 				//if (cvs[i].toBeSimulated == -1) {
 				//    continue;  }
+				int wid = cvps[i].wsid;
+				double iniLoss_PRCP_m = 0.0;// prj.swps[wid].iniLossPRCP_mm / 1000.0;
 				double inRF_mm = 0.0;
 				if (prj.rfDataType == weatherDataType::Raster_ASC) {
 					inRF_mm = rfasc->valuesFromTL[cvps[i].xCol][cvps[i].yRow];
@@ -90,15 +93,25 @@ int setCVRF(int order)
 				else {
 					inRF_mm = idNv[cvps[i].wsid];
 				}
-				//if (prj.rfDataType == weatherDataType::ASCraster_mmPhr) {
-				//	inRF_mm = inRF_mm / (60.0 / dtrf_min);
-				//}
+
+				double inRFi_mPs = 0.0;
 				if (inRF_mm <= 0) {
-					cvs[i].rfiRead_mPsec = 0;
+					inRFi_mPs = 0;
 				}
 				else {
-					cvs[i].rfiRead_mPsec = rfintensity_mPsec(inRF_mm, dtrf_sec);
+					inRFi_mPs = rfintensity_mPsec(inRF_mm, dtrf_sec);
 				}
+				cvs[i].rfiRead_mPsec = inRFi_mPs;
+
+				cvs[i].rfAccRead_fromStart_m = cvs[i].rfAccRead_fromStart_m
+					+ inRFi_mPs * dt_sec;
+				
+				// 여기서 강우 초기 손실 적용
+				if (cvs[i].rfAccRead_fromStart_m < iniLoss_PRCP_m) {
+					inRFi_mPs = 0.0;
+				}
+				cvs[i].rfiRead_After_iniLoss_mPsec = inRFi_mPs;
+
 				for (int idx : cvs[i].downWPCVidx) {
 					rfiReadSumUpWS_mPs_L[nth][idx] += cvs[i].rfiRead_mPsec;
 				}
@@ -133,24 +146,38 @@ int setCVRF(int order)
 		fpnRF = rfs[order - 1].FilePath + "\\" + rfs[order - 1].FileName;
 		string value = rfs[order - 1].value;
 		double inRF_mm = stod(value);
-		double inRF_mPs;
+		double inRFi_mPs;
 		if (inRF_mm < 0) {
 			inRF_mm = 0;
-			inRF_mPs = 0;
+			inRFi_mPs = 0;
 		}
 		else {
-			inRF_mPs = rfintensity_mPsec(inRF_mm, dtrf_sec);
+			inRFi_mPs = rfintensity_mPsec(inRF_mm, dtrf_sec);
 		}
+
 #pragma omp parallel for schedule(guided)
 		for (int i = 0; i < di.cellNnotNull; ++i) {
 			// 유역의 전체 강우량은 inlet 등으로 toBeSimulated == -1 여도 계산에 포함한다.
 			// 상류 cv 개수에 이 조건 추가하려면 주석 해제.
 			//if (cvs[i].toBeSimulated == -1) { continue; }
-			cvs[i].rfiRead_mPsec = inRF_mPs;
+			cvs[i].rfiRead_mPsec = inRFi_mPs;
+			cvs[i].rfAccRead_fromStart_m = cvs[i].rfAccRead_fromStart_m
+				+ inRFi_mPs * dt_sec;
+			// 여기서 강우 초기 손실 적용
+			int wid = cvps[i].wsid;
+			double iniLoss_PRCP_m = 0.0;// prj.swps[wid].iniLossPRCP_mm / 1000.0;
+			if (cvs[i].rfAccRead_fromStart_m < iniLoss_PRCP_m) {
+				cvs[i].rfiRead_After_iniLoss_mPsec = 0.0;
+			}
+			else {
+				cvs[i].rfiRead_After_iniLoss_mPsec = inRFi_mPs;
+			}
+
 		}
-		ts.rfiSumAllCellsInCurRFData_mPs = inRF_mPs * di.cellNtobeSimulated;
+
+		ts.rfiSumAllCellsInCurRFData_mPs = inRFi_mPs * di.cellNtobeSimulated;
 		for (int idx : wpSimValue.wpCVidxes) {
-			wpSimValue.prcpiReadSumUpWS_mPs[idx] = inRF_mPs * wpSimValue.cvCountAllup[idx];
+			wpSimValue.prcpiReadSumUpWS_mPs[idx] = inRFi_mPs * wpSimValue.cvCountAllup[idx];
 		}
 		returnv = 1;
 	}
@@ -175,7 +202,8 @@ int setCVRF(int order)
      ts.rfiSumAllCellsInCurRFData_mPs = 0;
 #pragma omp parallel for
      for (int i = 0; i < di.cellNnotNull; ++i)    {
-        cvs[i].rfiRead_mPsec = 0;
+		 cvs[i].rfiRead_mPsec = 0;
+		 cvs[i].rfiRead_After_iniLoss_mPsec = 0;
         cvs[i].rfApp_mPdt = 0;
     }
 

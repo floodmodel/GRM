@@ -256,37 +256,41 @@ void writeFCOutputFile(string tStrToPrint, double cinterp)
 	fc_storage = tStrToPrint;
 	if (cinterp == 1.0) {
 		for (int idx : fccds.cvidxsFCcell) {
-			if (fc_storage.size() > 0) {
-				fc_storage += "\t" + dtos(cvs[idx].storageCumulative_m3 / 1000.0, 3);
+			if (fc_storage.size() > 0) { fc_storage += "\t"; } // 앞에 뭔가 있으면, tab으로 구분
+			if (cvs[idx].fcType1 == flowControlType::DetensionPond) { // 저류지에서는 별도의 변수
+				fc_storage += dtos(cvs[idx].DP_storageCumulative_m3 / 1000.0, 3);
 			}
 			else {
-				fc_storage = dtos(cvs[idx].storageCumulative_m3 / 1000.0, 3);
+				fc_storage += dtos(cvs[idx].storageCumulative_m3 / 1000.0, 3);
 			}
-			if (fc_inflow.size() > 0) {
-				fc_inflow += "\t" + dtos(cvs[idx].QsumCVw_m3Ps, 2);
+
+			if (fc_inflow.size() > 0) { fc_inflow += "\t"; }
+			if (cvs[idx].fcType1 == flowControlType::DetensionPond) { // 저류지에서는 별도의 변수
+				fc_inflow += dtos(cvs[idx].DP_inflow_m3Ps, 2);
 			}
 			else {
-				fc_inflow = dtos(cvs[idx].QsumCVw_m3Ps, 2);
-			}
+				fc_inflow += dtos(cvs[idx].QsumCVw_m3Ps, 2);
+			}			
 		}
 	}
 	else if (ts.isbak == 1) {
 		for (int idx : fccds.cvidxsFCcell) {
-			if (fc_storage == "") {
-				fc_storage = dtos(getinterpolatedVLinear(cvsb[idx].storageCumulative_m3,
-						cvs[idx].storageCumulative_m3, cinterp) / 1000.0, 3);
+			if (fc_storage.size() > 0) { fc_storage += "\t"; } // 앞에 뭔가 있으면, tab으로 구분
+			if (cvs[idx].fcType1 == flowControlType::DetensionPond) { // 저류지에서는 별도의 변수
+				fc_storage += dtos(getinterpolatedVLinear(cvsb[idx].DP_storageCumulative_m3,
+					cvs[idx].DP_storageCumulative_m3, cinterp) / 1000.0, 3);
 			}
 			else {
-				fc_storage += "\t"
-					+ dtos(getinterpolatedVLinear(cvsb[idx].storageCumulative_m3,
+				fc_storage += dtos(getinterpolatedVLinear(cvsb[idx].storageCumulative_m3,
 						cvs[idx].storageCumulative_m3, cinterp) / 1000.0, 3);
 			}
-			if (fc_inflow.size()> 0) {
-				fc_inflow += "\t" + dtos(getinterpolatedVLinear(cvsb[idx].QsumCVw_m3Ps,
-					cvs[idx].QsumCVw_m3Ps, cinterp), 2); 
+			if (fc_inflow.size() > 0) { fc_inflow += "\t"; }
+			if (cvs[idx].fcType1 == flowControlType::DetensionPond) { // 저류지에서는 별도의 변수
+				fc_inflow += dtos(getinterpolatedVLinear(cvsb[idx].DP_inflow_m3Ps,
+					cvs[idx].DP_inflow_m3Ps, cinterp), 2);
 			}
 			else {
-				fc_inflow = dtos(getinterpolatedVLinear(cvsb[idx].QsumCVw_m3Ps,
+				fc_inflow += dtos(getinterpolatedVLinear(cvsb[idx].QsumCVw_m3Ps,
 					cvs[idx].QsumCVw_m3Ps, cinterp), 2);
 			}
 		}
@@ -614,6 +618,9 @@ int makeNewOutputFiles()
 						break;
 					case flowControlType::SourceFlow:
 						fct = ENUM_TO_STR(SourceFlow);
+						break;
+					case flowControlType::DetensionPond:
+						fct = ENUM_TO_STR(DetensionPond);
 						break;
 					case flowControlType::None:
 						fct = ENUM_TO_STR(None);

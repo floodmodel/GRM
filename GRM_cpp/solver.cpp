@@ -19,8 +19,14 @@ void updateCVbyHydroComps(int i)
 	double ofDepthAddedByRFlow_m2 = 0;// 단위폭당 수심
 	double chCSAaddedBySSFlow_m2 = 0;
 	double massConsR = di.cellSize / cvs[i].cvdx_m;
-	cvs[i].rfApp_mPdt = cvs[i].rfiRead_mPsec * ts.dtsec * massConsR;
-
+	cvs[i].rfApp_mPdt = cvs[i].rfiRead_After_iniLoss_mPsec * ts.dtsec * massConsR;
+	if (prj.makeRFraster == 1) {
+		cvs[i].rf_dtPrint_m = cvs[i].rf_dtPrint_m
+			+ cvs[i].rfiRead_mPsec * dt_sec;
+		// 강우자료 읽는 곳으로 이동. 강우 손실을 고려하기 위해서.. 2023.09.07
+		//cvs[i].rfAcc_fromStart_m = cvs[i].rfAcc_fromStart_m
+		//	+ cvs[i].rfiRead_mPsec * dtsec;
+	}
 	if (prj.simInterception == 1) { calinterception(i); } // 차단	
 	if (prj.simEvaportranspiration == 1) { calET(i); } // 증발산
 	if (prj.simSnowMelt == 1) { calSnowMelt(i);	} //여기서 snowpack, snowmelt, 차단, 증발산과 관련 없이 유출에 직접 관여하는 것으로 모의

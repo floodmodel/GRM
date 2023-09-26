@@ -248,12 +248,6 @@ void simulateRunoffCore(int i, double nowTmin)
 	int fac = cvs[i].fac;
 	int dtsec = ts.dtsec;
 	double cellsize = di.cellSize;
-	if (prj.makeRFraster == 1) {
-		cvs[i].rf_dtPrint_m = cvs[i].rf_dtPrint_m
-			+ cvs[i].rfiRead_mPsec * dtsec;
-		cvs[i].rfAcc_fromStart_m = cvs[i].rfAcc_fromStart_m
-			+ cvs[i].rfiRead_mPsec * dtsec;
-	}
 	if (prj.simFlowControl == 1 &&
 		(cvs[i].fcType1 == flowControlType::ReservoirOutflow ||
 			cvs[i].fcType1 == flowControlType::Inlet)) {
@@ -478,11 +472,12 @@ void setCVStartingCondition(double iniflow)
             }
         }
         cvs[i].rfiRead_tm1_mPsec = 0;
-        cvs[i].rfiRead_mPsec = 0;
+		cvs[i].rfiRead_mPsec = 0;
+        cvs[i].rfiRead_After_iniLoss_mPsec = 0;
         cvs[i].rfEff_dt_m = 0;
         cvs[i].rfApp_mPdt = 0;
         cvs[i].rf_dtPrint_m = 0;
-        cvs[i].rfAcc_fromStart_m = 0;
+        cvs[i].rfAccRead_fromStart_m = 0;
         cvs[i].soilMoistureChange_DTheta = 0;
         cvs[i].ifF_mPdt = 0;
         cvs[i].ifRatef_mPsec = 0;
@@ -497,14 +492,22 @@ void setCVStartingCondition(double iniflow)
         cvs[i].bfQ_m3Ps = 0;
         cvs[i].hUAQfromBedrock_m = CONST_UAQ_HEIGHT_FROM_BEDROCK;
         cvs[i].storageCumulative_m3 = 0;
+		cvs[i].DP_storageCumulative_m3 = 0.0;
+		cvs[i].DP_inflow_m3Ps = 0.0;
+		cvs[i].DP_outflow_m3Ps = 0.0;
+
         if (prj.simFlowControl == 1) {
             if (prj.fcs.size() > 0 && getVectorIndex(fccds.cvidxsFCcell, i) != -1) {
-                double iniS = prj.fcs[i][0].iniStorage_m3;
+				//  하나의 셀에 sink, source가 중복 설정될 수 있으며, 이때 sink, source는 후순위 즉, [i][1]이다. 
+				double iniS = prj.fcs[i][0].iniStorage_m3; 
                 if (iniS > 0) {
-                    cvs[i].storageCumulative_m3 = iniS;
-                }
-                else {
-                    cvs[i].storageCumulative_m3 = 0;
+					if (prj.fcs[i][0].fcType == flowControlType::DetensionPond) {
+						cvs[i].DP_storageCumulative_m3 = iniS;
+					}
+					else {
+						cvs[i].storageCumulative_m3 = iniS;
+					}
+
                 }
             }
         }

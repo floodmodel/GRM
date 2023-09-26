@@ -2703,7 +2703,14 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		}
 		return 1;
 	}
-
+	//if (aline.find(fldName.iniLossPrecipitation_mm) != string::npos) {
+	//	vString = getValueStringFromXmlLine(aline, fldName.iniLossPrecipitation_mm);
+	//	ssp->iniLossPRCP_mm = 0.0;
+	//	if (vString != "" && stod(vString) >= 0.0) {
+	//		ssp->iniLossPRCP_mm = stod(vString);
+	//	}
+	//	return 1;
+	//}
 	if (aline.find(fldName.MinSlopeOF) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.MinSlopeOF);
 		if (vString != "" && stod(vString) > 0) {
@@ -3234,6 +3241,7 @@ bool updateOneSWSParsWithOtherSWSParsSet(int targetWSid, int referenceWSid)
 {
 	swsParameters spars = prj.swps[referenceWSid];
 	prj.swps[targetWSid].iniSaturation = spars.iniSaturation;
+	//prj.swps[targetWSid].iniLossPRCP_mm = spars.iniLossPRCP_mm;
 	prj.swps[targetWSid].minSlopeOF = spars.minSlopeOF;
 	prj.swps[targetWSid].unSatKType = spars.unSatKType;
 	prj.swps[targetWSid].coefUnsaturatedK = spars.coefUnsaturatedK;

@@ -354,6 +354,7 @@ typedef struct _projectFileFieldName
 	// SubWatershedSettings table
 	const string ID_SWP = "ID";
 	const string IniSaturation = "IniSaturation";
+	const string iniLossPrecipitation_mm = "iniLossPrecipitation_mm";
 	const string UnsaturatedKType = "UnsaturatedKType";
 	const string CoefUnsaturatedK = "CoefUnsaturatedK";
 	const string MinSlopeOF = "MinSlopeOF";
@@ -469,6 +470,7 @@ typedef struct _swsParameters  //pyGRMdll.py 에 있는 구조체와 내용 맞춘다. 순서�
 {
 	int wsid = -1;
 	double iniSaturation =-1.0;
+	//double iniLossPRCP_mm = 0.0;
 	double minSlopeOF = 0.0;
 	unSaturatedKType unSatKType = unSaturatedKType::None;
 	double coefUnsaturatedK = 0.0;
@@ -761,11 +763,12 @@ typedef struct _cvAtt
 	double QsumCVw_dt_m3 = 0.0;//상류인접 CV에서 현재 CV로 유입되는 유량 단순합. 이건 CVi에서의 연속방정식, 고려하지 않은 단순 합.[m^3/dt]
 	double QsumCVw_m3Ps = 0.0;//상류인접 CV에서 현재 CV로 유입되는 유량 단순합. 이건 CVi에서의 연속방정식, 고려하지 않은 단순 합.[m^3/s]
 	double rfApp_mPdt = 0.0;//dt 시간 동안의 강우량
-	double rfiRead_mPsec = 0.0;//현재 강우입력자료에서 읽은 강우강도 m/s rfi.
+	double rfiRead_mPsec = 0.0;//현재 강우입력자료에서 읽은 강우강도 m/s rfi. 
+	double rfiRead_After_iniLoss_mPsec = 0.0;//현재 강우입력자료에서 읽은 강우강도 m/s rfi. 강우의 초기손실 적용 후.
 	double rfiRead_tm1_mPsec = 0.0;//이전 시간의 강우강도 m/s rfi.
 	double rfEff_dt_m = 0.0;//dt시간 동안의 유효강우량
 	double rf_dtPrint_m = 0.0;//출력 시간간격 동안의 누적 강우량[m]
-	double rfAcc_fromStart_m = 0.0;//전체 기간의 누적 강우량[m]
+	double rfAccRead_fromStart_m = 0.0;//전체 기간의 누적 강우량[m]
 	double soilWaterC_m = 0.0;//토양수분함량. t 시간까지의 누적 침투량[m], 토양깊이가 아니고, 수심이다.
 	double soilWaterC_tm1_m = 0.0;//토양수분함량. t-1 시간까지의 누적 침투량[m]. 수심
 	double ifRatef_mPsec = 0.0;//t 시간에서 계산된 침투률[m/s]
@@ -833,6 +836,10 @@ typedef struct _cvAtt
 
 	double storageCumulative_m3 = 0.0;//현재 CV에서 flow control 모의시 누적 저류량[m^3]
 	double storageAddedForDTbyRF_m3 = 0.0;//현재 CV에서 flow control 모의시 dt 시간동안의 강우에 의해서 추가되는 저류량[m^3/dt]
+
+	double DP_storageCumulative_m3 = 0.0;//현재 CV에서 설정된 detension pond 누적 저류량[m^3]
+	double DP_inflow_m3Ps = 0.0;//현재 CV에서 설정된 detension pond 유입량[m^3/s]
+	double DP_outflow_m3Ps = 0.0;//현재 CV에서 설정된 detension pond 유출량[m^3/s]
 } cvAtt;
 
 typedef struct _projectFile
@@ -864,11 +871,13 @@ typedef struct _projectFile
 	string fpnSD = "";
 	string fpnSDVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
 	double cnstSoilDepth = 0.0;
+	flowDirectionType fdType = flowDirectionType::None;
 
 	weatherDataType rfDataType = weatherDataType::None;
 	string fpnRainfallData = "";
 	int rfinterval_min = -1;
-	flowDirectionType fdType = flowDirectionType::None;
+	//double rf_iniLoss_mm = 0.0;
+
 
 	// continuous =====================
 	weatherDataType tempMaxDataType = weatherDataType::None;
@@ -927,7 +936,7 @@ typedef struct _projectFile
 
 	map <int, swsParameters> swps; // <wsid, paras>
 	map <int, channelSettingInfo> css; //<wsid. paras>
-	map <int, vector<flowControlinfo>> fcs; // <idx, paras>
+	map <int, vector<flowControlinfo>> fcs; // <idx, paras>  // 같은 셀에 여러개의 FC 설정을 위해서 두번째를  vector<flowControlinfo>로 한다.
 	vector <wpLocationRC> wps; // 
 	vector <soilTextureInfo> sts;
 	vector <soilDepthInfo> sds;

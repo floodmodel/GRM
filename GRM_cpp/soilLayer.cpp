@@ -123,7 +123,7 @@ void calEffectiveRFbyInfiltration(int i, int dtrf_sec, int dtsec)
     }
     cvs[i].soilWaterC_tm1_m = cvs[i].soilWaterC_m;
     cvs[i].ifRatef_tm1_mPsec = cvs[i].ifRatef_mPsec;
-    cvs[i].rfiRead_tm1_mPsec = cvs[i].rfiRead_mPsec;
+    cvs[i].rfiRead_tm1_mPsec = cvs[i].rfiRead_After_iniLoss_mPsec;
 }
 
 double getinfiltrationForDtAfterPonding(int i, int dtSEC,
