@@ -1472,7 +1472,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.mdp = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "Max. degree of parallelism was not set. Maximum value [-1] was assigned.\n", 1, 1);
+			writeLog(fpnLog, "WARNNING : Max. degree of parallelism was not set. Maximum value [-1] was assigned.\n", 1, 1);
 			prj.mdp = -1;
 		}
 		return 1;

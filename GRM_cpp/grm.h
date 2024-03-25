@@ -116,6 +116,13 @@ enum class flowDirectionType
 	None
 };
 
+enum class flowDirection8
+{
+	//N=1, NE=2, E=4, SE=8, S=16,  SW=32, W=64, NW=128, NONE=0
+	E8 = 1, NE8 = 2, N8 = 3, NW8 = 4, W8 = 5, SW8 = 6, S8 = 7, SE8 = 8, None8 = 0
+};
+
+
 enum class GRMPrintType
 {
 	All,
