@@ -39,10 +39,7 @@ double** ssrAry; // 토양포화도 2차원 배열
 double** rfAry;  // 강우 2차원 배열
 double** rfaccAry; // 누적강우 2차원배열
 double** QAry; // 순간 유량 2차원 배열
-//double** ssrAryL;
-//double** rfAryL;
-//double** rfaccAryL;
-//double** QAryL;
+
 int bssr =0;
 int brf = 0;
 int brfacc = 0;
@@ -287,7 +284,7 @@ int makeRasterOutput(int nowTmin)
 			}
 		}
 	}
-    joinOutputThreads(); // 이과정 있어야, raster 파일 모두 쓰고난 후 프로그램 종료된다.
+    joinOutputThreads(); // 이과정 거쳐야 래스터 파일 다 쓰고 나서 프로그램 종료한다.
 }
 
 
@@ -305,7 +302,7 @@ int setRasterOutputArray()
                     rfAry[cx][ry] = cvs[i].rf_dtPrint_m * 1000;
                 }
                 if (brfacc == 1) {
-                    rfaccAry[cx][ry] = cvs[i].rfAccRead_fromStart_m * 1000;
+                    rfaccAry[cx][ry] = cvs[i].rfAccRead_fromStart_mm;
                 }
                 if (bQ == 1) {
                     double v;

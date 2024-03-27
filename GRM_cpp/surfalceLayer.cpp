@@ -158,7 +158,7 @@ void cal_h_CHbyAET(int i) {
 		}
 	}
 	else {
-		aet_residual = cvs[i].aet_LS_mPdt; // cvs[i].stream.hCH;
+		aet_residual = cvs[i].aet_LS_mPdt; 
 	}
 	if (cvs[i].stream.hCH == 0) {
 		if (cvs[i].soilWaterC_tm1_m > aet_residual) { // 여기서는 토양에서 손실처리
@@ -256,22 +256,18 @@ void calSnowMelt(int i) {
 		switch (cvs[i].flowType) {
 		case cellFlowType::OverlandFlow: {
 			cvs[i].hOF = cvs[i].hOF + cvs[i].smelt_mPdt;
-			//if (cvs[i].hOF < WETDRY_CRITERIA && cvs[i].hOF>0.0) {	cvs[i].hOF = WETDRY_CRITERIA;}
 			if (cvs[i].hOF < WETDRY_CRITERIA ) { cvs[i].hOF = 0.0; }
 			break;
 		}
 		case cellFlowType::ChannelFlow: {
 			cvs[i].stream.hCH = cvs[i].stream.hCH + cvs[i].smelt_mPdt;
-			//if (cvs[i].stream.hCH < WETDRY_CRITERIA && cvs[i].stream.hCH>0.0) { cvs[i].stream.hCH = WETDRY_CRITERIA; }
 			if (cvs[i].stream.hCH < WETDRY_CRITERIA) { cvs[i].stream.hCH = 0.0; }
 			break;
 		}
 		case cellFlowType::ChannelNOverlandFlow: {
 			cvs[i].hOF = cvs[i].hOF + cvs[i].smelt_mPdt;
-			//if (cvs[i].hOF < WETDRY_CRITERIA && cvs[i].hOF>0.0) { cvs[i].hOF = WETDRY_CRITERIA; }
 			if (cvs[i].hOF < WETDRY_CRITERIA) { cvs[i].hOF = 0.0; }
 			cvs[i].stream.hCH = cvs[i].stream.hCH + cvs[i].smelt_mPdt;
-			//if (cvs[i].stream.hCH < WETDRY_CRITERIA && cvs[i].stream.hCH>0.0) { cvs[i].stream.hCH = WETDRY_CRITERIA; }
 			if (cvs[i].stream.hCH < WETDRY_CRITERIA) { cvs[i].stream.hCH = 0.0; }
 			break;
 		}

@@ -26,7 +26,6 @@ extern wpSimData wpSimValue;
 extern string msgFileProcess;
 
 extern cvAtt* cvsb; 
-//map<int, double> fcDataAppliedBak;// <idx, value> t-dt 시간에 적용된 flow control data 값
 map<int, double> fcInflowSumPT_m3_Bak;// <idx, value> t-dt 시간에 적용된 flow control inflow 합
 wpSimData wpSimValueB; // t-dt 시간에 저장된 wp별로 저장할 다양한 정보.  prj.wps 파일에서 읽은 순서대로 2차 정보 저장
 flowControlCellAndData fccdsb; // t-dt 에서 저장된 gmp 파일에서 읽은 fc 정보를 이용해서 2차 정보 저장
@@ -102,10 +101,10 @@ int startSimulation()
 			if (nowTsec > dtSunDur_sec * orderSunDur) {
 				if (orderSunDur < ts.dataNumTotal_sunDur) {
 					orderSunDur++; // 이렇게 하면 마지막 레이어 적용
-					if (setCVSunDur(orderSunDur) == -1) { return -1; }    //isEnded = -1;
+					if (setCVDayTimeLength(orderSunDur) == -1) { return -1; }    //isEnded = -1;
 				}
 				else {
-					setCVSunDurZero();
+					setCVDayTimeLengthZero();
 					orderSunDur = loopEndingT_sec / dtSunDur_sec + 100;
 				}
 			}
@@ -148,7 +147,6 @@ int startSimulation()
 					ts.dtMinLimit_sec);
 			}
 		}
-		//if (ts.stopSim == 1) { break; }
 	}
 
 	if (ts.stopSim == 1) {
@@ -248,15 +246,13 @@ void simulateRunoffCore(int i, double nowTmin)
 	int fac = cvs[i].fac;
 	int dtsec = ts.dtsec;
 	double cellsize = di.cellSize;
+	updateCVbyHydroComps(i);
 	if (prj.simFlowControl == 1 &&
 		(cvs[i].fcType1 == flowControlType::ReservoirOutflow ||
 			cvs[i].fcType1 == flowControlType::Inlet)) {
-		updateCVbyHydroComps(i);
-		//fccds.fcDataAppliedNowT_m3Ps[i] = 0;  // 2022.10.17 주석처리
 		calFCReservoirOutFlow(i, nowTmin);
 	}
 	else {
-		updateCVbyHydroComps(i);
 		if (cvs[i].flowType == cellFlowType::OverlandFlow) {
 			double hCVw_tp1 = 0;
 			if (fac > 0) {
@@ -283,11 +279,9 @@ void simulateRunoffCore(int i, double nowTmin)
 		}		
 	}
 	if (prj.simFlowControl == 1) {
-		// 아래 중 하나
-		// cvs[i].fcType == flowControlType::SinkFlow
-		// cvs[i].fcType == flowControlType::SourceFlow
-		//	cvs[i].fcType == flowControlType::ReservoirOperation
-		//	cvs[i].fcType == flowControlType::DetensionPond
+		// 다음 중 하나.  flowControlType::SinkFlow, flowControlType::SourceFlow, 
+		// flowControlType::ReservoirOperation, flowControlType::DetensionPond
+
 		// 2023.05.31 아래와 같이 수정. Sink, source 중복설정된 CV 모의 가능
 		if (cvs[i].fcType1 == flowControlType::DetensionPond) {
 			calDetensionPond(i, nowTmin);
@@ -310,7 +304,6 @@ void simulateRunoffCore(int i, double nowTmin)
 			// sink, source는 AutoROM과 같이 설정될 수 있으므로, sinkflow, sourceflow에서도 여기 들어간다.
 			calReservoirOperation(i, nowTmin);
 		}
-
 	}
 }
 
@@ -342,7 +335,6 @@ void initThisSimulation()
     ts.grmStarted = 1;
     ts.stopSim = -1;
     ts.vMaxInThisStep = 0.0;
-    //ts.iscvsb = -1;
     ts.cvsbT_sec = 0;
     ts.dtMinLimit_sec = 1;
     ts.zeroTimePrinted = -1;
@@ -477,7 +469,7 @@ void setCVStartingCondition(double iniflow)
         cvs[i].rfEff_dt_m = 0;
         cvs[i].rfApp_mPdt = 0;
         cvs[i].rf_dtPrint_m = 0;
-        cvs[i].rfAccRead_fromStart_m = 0;
+        cvs[i].rfAccRead_fromStart_mm = 0;
         cvs[i].soilMoistureChange_DTheta = 0;
         cvs[i].ifF_mPdt = 0;
         cvs[i].ifRatef_mPsec = 0;
@@ -521,27 +513,13 @@ void setCVStartingCondition(double iniflow)
 }
 
 
-int outputManager(int nowTsec)//, int rfOrder)
+int outputManager(int nowTsec)
 {
     int dtP_min = prj.dtPrint_min;
 	int dtP_SEC = dtP_min * 60;
     int timeToP_min = 0;// = nowTsec / 60;
 	int timeToP_AVE_min = 0;
 	int printAveValueNow = 0;
-  //  if (rfOrder == 1
-  //      && dtP_min > dtrf_min
-  //      && ((nowTsec + ts.dtsec) > dtrf_sec)) {
-  //      // 첫번째 출력전에 다음 스텝에서 강우레이어가 바뀌는 경우는 첫번째 강우레이어 모델링이 끝났다는 얘기이므로 한번 출력한다.
-  //      // 0 시간에서의 모델링 결과로 출력한다.
-  //      double RFmeanForFirstLayer = ts.rfAveForDT_m / dtmin * dtrf_min;
-		//if (writeBySimType(0, 1) == -1) {
-		//	return -1;
-		//}
-  //      ts.zeroTimePrinted = 1;
-  //      ts.isbak = -1;
-  //      return 1; // 이경우는 모의시작 전에 설정된  ts.targetTtoP_min = dtP_min 을 유지
-  //  }
-  //  else if (nowTsec % dtP_SEC == 0) {
 	if (nowTsec % dtP_SEC == 0) { // 여기서 출력
 		timeToP_min = ts.targetTtoP_sec / 60 - dtP_min; // 이렇게 해야 첫번째 모의 결과가 0시간에 출력된다.
 		if (prj.printAveValue == 1) {
@@ -575,7 +553,6 @@ int outputManager(int nowTsec)//, int rfOrder)
 			ts.rfAveSumAllCells_PTave_m_bak = ts.rfAveSumAllCells_PTave_m;
 
             if (prj.simFlowControl == 1) {
-                //fcDataAppliedBak = fccds.fcDataAppliedNowT_m3Ps; // 2022.10.17 주석처리
 				fcInflowSumPT_m3_Bak = fccds.inflowSumPT_m3;
             }
             ts.cvsbT_sec = nowTsec;
@@ -625,23 +602,28 @@ int  writeBySimType(int nowTP_min,
 	TS_FromStarting_min = TS_FromStarting_sec / 60.0;
 	string unitToP = "";
 	if (prj.isDateTimeFormat == 1) {
+		timeUnitToShow tUnit = timeUnitToShow::toM; // default는 분단위 까지
+		if (prj.dtPrint_min % 1440 == 0) {// 일단위로 출력할 경우
+			tUnit = timeUnitToShow::toDay;
+		}
 		if (prj.simType == simulationType::Normal) {
 			tStrToPrint = timeElaspedToDateTimeFormat2(prj.simStartTime,
-				nowTP_min * 60, timeUnitToShow::toM,
+				nowTP_min * 60, tUnit,
 				dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
+
 			if (writeAVE == 1) {
 				tStrToPrintAve = timeElaspedToDateTimeFormat2(prj.simStartTime,
-					timeToP_AVE_min * 60, timeUnitToShow::toM,
+					timeToP_AVE_min * 60, tUnit,
 					dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
 			}
 		}
 		else {// real time 인 경우
 			tStrToPrint = timeElaspedToDateTimeFormat(prj.simStartTime,
-				nowTP_min * 60, timeUnitToShow::toM,
+				nowTP_min * 60, tUnit,
 				dateTimeFormat::yyyymmddHHMMSS);
 			if (writeAVE == 1) {
 				tStrToPrintAve = timeElaspedToDateTimeFormat(prj.simStartTime,
-					timeToP_AVE_min * 60, timeUnitToShow::toM,
+					timeToP_AVE_min * 60, tUnit,
 					dateTimeFormat::yyyymmddHHMMSS);
 			}
 		}
@@ -657,7 +639,7 @@ int  writeBySimType(int nowTP_min,
 			+ "dt : " + to_string(ts.dtsec) + ", "
 			+ "vMax : " + to_string(ts.vMaxInThisStep) + ", "
 			+ "T from starting : " + dtos(TS_FromStarting_sec, 0) + "s ("
-			+ dtos(TS_FromStarting_min, 2) + "min) \n ";
+			+ dtos(TS_FromStarting_min, 2) + "min) \n";
 		writeLog(fpnLog, logStr, 1, -1);
 	}
 
@@ -767,7 +749,6 @@ void initValuesAfterPrinting(int nowTP_min, int printAveValueNow) {
 			wpSimValue.Q_sumPTforAVE_m3[idx] = 0.0;
 		}
 	}
-	//fcDataAppliedBak.clear(); // 2022.10.17 주석처리
 	if (printAveValueNow == 1 ) {
 		for (int idx : fccds.cvidxsFCcell) {
 			if (prj.fcs[idx][0].fcType != flowControlType::Inlet) {
@@ -791,7 +772,7 @@ void calValuesDuringPT(int dtsec)
 
 	for (int idx : wpSimValue.wpCVidxes) {
 		wpSimValue.prcpUpWSAveForDt_mm[idx] = wpSimValue.prcpiReadSumUpWS_mPs[idx]
-			* dtsec * 1000.0 / (double)wpSimValue.cvCountAllup[idx]; //(double)(cvs[idx].fac + 1);
+			* dtsec * 1000.0 / (double)wpSimValue.cvCountAllup[idx]; 
 		wpSimValue.prcpUpWSAveForPT_mm[idx] = wpSimValue.prcpUpWSAveForPT_mm[idx]
 			+ wpSimValue.prcpUpWSAveForDt_mm[idx];
 		wpSimValue.prcpWPGridForPT_mm[idx] = wpSimValue.prcpWPGridForPT_mm[idx]
@@ -813,7 +794,8 @@ void calValuesDuringPT(int dtsec)
 	if (prj.printAveValue == 1) {
 		for (int idx : fccds.cvidxsFCcell) {
 			if (prj.fcs[idx][0].fcType != flowControlType::Inlet) {
-				fccds.inflowSumPT_m3[idx] += cvs[idx].QsumCVw_m3Ps * dtsec; // inlet 이 아닌 모든 fc 셀에 대해서 	출력기간에서의  inflowSumPT_m3 계산
+				// inlet 이 아닌 모든 fc 셀에 대해서 	출력기간에서의  inflowSumPT_m3 계산
+				fccds.inflowSumPT_m3[idx] += cvs[idx].QsumCVw_m3Ps * dtsec; 
 			}
 		}
 	}

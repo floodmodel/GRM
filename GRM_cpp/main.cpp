@@ -67,7 +67,6 @@ int main(int argc, char** args)
 	}
 	prj.deleteAllFilesExceptDischargeOut = -1;
 	setlocale(LC_ALL, "korean");
-	//prj.writeConsole = 1; // exe로 진입하는 것은 1
 	prj.forSimulation = 1;// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	if (argc == 2) {
 		string arg1(args[1]);
@@ -103,7 +102,7 @@ int main(int argc, char** args)
 				isForceAutoROM = 1;
 			}
 
-			/// 현재는 강우-유출 사상만 실시간 모의가 가능하다. 연속형 모의는 실시간 자료 처리 적용 안되어 있음. 2023.03.06
+			// 현재는 강우-유출 사상만 실시간 모의가 가능하다. 연속형 모의는 실시간 자료 처리 적용 안되어 있음. 2023.03.06
 			printf("WARNNING : The continuous simulation is not available for the real time simulation.\n");
 			printf("WARNNING : In real time simulation, just the rainfall-runoff event simulation is possible.\n");
 
@@ -324,8 +323,9 @@ int setupAndStartSimulation()
 	//string fpn = "C://GRM//SampleGHG//GHG500.gmp";
 	//string fpn = "D://Github//zTestSet_GRM_SampleWC_cpp//SampleProject.gmp";
 	//string fpn = "D://Github//zTestSetPyGRM//Prj_v2022_cont_CJDsmall_pyTest//CJD_Prj_cont_10year_small_pyTest.gmp";
-	//string fpn = "D://Github//zTestSetPyGRM//SampleWC//SampleWiCheon.gmp";
+	//string fpn = "D://Github//zTestSet_GRM2023_SampleJeju//20231123_01_JJD_QGRMtest_v2023.gmp";
 	//grmWSinfo gws = grmWSinfo(fpn);
+
 	//============ 여기까지 gmp 파일로 인스턴싱 ====================
 
 	//============ 이 부분은 입력 파일 개별 설정 인스턴싱 ====================

@@ -23,7 +23,6 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     string fpnIniSoilSaturationRatio, string pfnIniChannelFlow,
     string fpnChannelWidth)
 {
-    //prj.writeConsole = -1;
     prj.forSimulation = -1; // exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	fs::path fpn_domain = fs::path(fpnDomain.c_str());
 	string fp_domain = fpn_domain.parent_path().string();
@@ -143,11 +142,9 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
 
 grmWSinfo::grmWSinfo(string gmpFPN)
 {
-    //prj.writeConsole = -1;
     prj.forSimulation = -1;  // exe로 진입하는 것은 1, dll로 진입하는 것은 -1
     ppi=getProjectFileInfo(gmpFPN);
     fpnLog = "GRMdll.log";
-    //cout << fpnLog << endl;
     writeNewLog(fpnLog, "GRM.dll : grmWSinfo with gmp file was started.\n", 1, -1);
     if (openPrjAndSetupModel(-1) == -1) {
         writeLog(fpnLog, "ERROR. GRM.dll : Model setup failed !!!\n", 1, 1);
@@ -175,7 +172,6 @@ grmWSinfo::~grmWSinfo()
             }
         }
     }
-    //delete[] WSIDsAll;
 }
 
 
@@ -426,7 +422,8 @@ int grmWSinfo::cellCountInUpstreamArea(int colXAryidx,
 }
 
 // If this class was instanced by using gmp file --"grmWS(string gmpFPN)".		
-bool grmWSinfo::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
+bool grmWSinfo::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, 
+	   double iniSat, double iniLossPRCP_mm, 
 		double minSlopeLandSurface, unSaturatedKType unSKType, double coefUnsK,
 		double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
 		int dryStreamOrder, double ccLCRoughness,
@@ -440,7 +437,7 @@ bool grmWSinfo::setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat
 {
 	prj.swps[wsid].wsid = wsid;
     prj.swps[wsid].iniSaturation = iniSat;
-	//prj.swps[wsid].iniLossPRCP_mm = iniSat;
+	prj.swps[wsid].iniLossPRCP_mm = iniLossPRCP_mm;
 	
     prj.swps[wsid].minSlopeOF = minSlopeLandSurface;
     prj.swps[wsid].unSatKType = unSKType;

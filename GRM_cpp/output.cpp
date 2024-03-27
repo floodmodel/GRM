@@ -31,7 +31,6 @@ void writeSimProgress(int elapsedT_min)
 {
     double nowStep;
     double simDur_min = prj.simDuration_hr * 60.0;
-    //nowStep = elapsedT_min / (double)ts.simDuration_min * 100.0;
     nowStep = elapsedT_min / simDur_min * 100.0;
 	if (nowStep > 100) { nowStep = 100; }
 	if (ts.showFileProgress  !=1) {
@@ -40,7 +39,6 @@ void writeSimProgress(int elapsedT_min)
 	else {
 		printf("\rCurrent progress: %.2f%%... %s", nowStep, msgFileProcess.c_str());
 	}
-
 }
 
 void writeDischargeFile(string tStrToPrint, double cinterp)
@@ -157,9 +155,6 @@ void writeWPoutputFile(string tStrToPrint, double cinterp)
 		}
 		if (cinterp == 1.0) {
 			oStr.append(dtos(wpSimValue.q_cms_print[i], 2) + "\t"); // 이 값은 writeDischargeFile에서 계산되어 있다. 
-			//if (prj.printAveValue == 1) { // 출력시간 간격과 ave 시간간격을 다르게 설정하게 하기 위해 wp별로는 출력하지 않는다. 2023.03.28
-			//	oStr.append(dtos(wpSimValue.Q_sumPT_m3_print[i], 2) + "\t"); // 이 값은 writeDischargeFile에서 계산되어 있다. 
-			//}
 			oStr.append(dtos(cvs[i].hUAQfromChannelBed_m, 4) + "\t");
 			oStr.append(dtos(cvs[i].soilWaterC_m, 4) + "\t");
 			oStr.append(dtos(cvs[i].ssr, 4) + "\t");
@@ -185,9 +180,6 @@ void writeWPoutputFile(string tStrToPrint, double cinterp)
 		}
 		else if (ts.isbak == 1) {
 			oStr.append(dtos(wpSimValue.q_cms_print[i], 2) + "\t"); // 이 값은 writeDischargeFile에서 계산되어 있다. 
-			//if (prj.printAveValue == 1) { // 출력시간 간격과 ave 시간간격을 다르게 설정하게 하기 위해 wp별로는 출력하지 않는다. 2023.03.28
-			//	oStr.append(dtos(wpSimValue.Q_sumPT_m3_print[i], 2) + "\t"); // 이 값은 writeDischargeFile에서 계산되어 있다. 
-			//}
 			oStr.append(dtos(getinterpolatedVLinear(cvsb[i].hUAQfromChannelBed_m,
 				cvs[i].hUAQfromChannelBed_m, cinterp), 4) + "\t");
 			oStr.append(dtos(getinterpolatedVLinear(cvsb[i].soilWaterC_m,
@@ -220,8 +212,6 @@ void writeWPoutputFile(string tStrToPrint, double cinterp)
 }
 
 
-
-
 void writeRainfallOutputFile(string tStrToPrint, double cinterp) {
 	string osRFUpMean;
 	string osRFGrid;
@@ -244,7 +234,6 @@ void writeRainfallOutputFile(string tStrToPrint, double cinterp) {
 	appendTextToTextFile(ofs.ofpnPRCPMean, osRFUpMean);
 	appendTextToTextFile(ofs.ofpnPRCPGrid, osRFGrid);
 }
-
 
 
 void writeFCOutputFile(string tStrToPrint, double cinterp)
@@ -340,8 +329,6 @@ int initOutputFiles()
 	ofs.ofpnDepth = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_DEPTH;
 	ofs.ofpnPRCPGrid = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_PRCP_GRID;
 	ofs.ofpnPRCPMean = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_PRCP_MEAN;
-	//ofs.OFNPSwsPars = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_SWSPARSTEXTFILE;
-	//ofs.ofpnFCData = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FC_DATA_APP;
 	ofs.ofpnFCStorage = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FC_STORAGE;
 	ofs.ofpnFCinflow = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FC_INFLOW;
 	ofs.ofpnFCinflowPTAve = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FC_INFLOW_PTAVE;
@@ -355,7 +342,6 @@ int initOutputFiles()
 	ofs.ofpETDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_DIST_ET_DIRECTORY_TAG;
 	ofs.ofpINTCPDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_DIST_INTERCEPTION_DIRECTORY_TAG;
 	ofs.ofpSnowMDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_DIST_SNOWMELT_DIRECTORY_TAG;
-
 
     string ensbModel = "";
     if (tsrt.g_strModel != "") {
@@ -388,7 +374,6 @@ int initOutputFiles()
 }
 
 
-
 int deleteAllOutputFiles()
 {
 	vector<string> fpns;
@@ -398,7 +383,6 @@ int deleteAllOutputFiles()
 	fpns.push_back(ofs.ofpnPRCPGrid);
 	fpns.push_back(ofs.ofpnPRCPMean);
 	fpns.push_back(ofs.ofpnFCStorage);
-	//fpns.push_back(ofs.ofpnFCData);
 	fpns.push_back(ofs.ofpnFCinflow);
 	fpns.push_back(ofs.ofpnFCinflowPTAve);
 	fpns.push_back(ofs.ofpSSRDistribution);
@@ -409,8 +393,6 @@ int deleteAllOutputFiles()
 		fpns.push_back(ofs.ofpnWPs[id]);
 	}
 	vector<string> fps;
-	//if (prj.printOption == GRMPrintType::All)    {
-		//if (prj.makeASCFile==1 || prj.makeIMGFile == 1)        {
 	if (prj.makeSoilSaturationDistFile == 1) {
 		fps.push_back(ofs.ofpSSRDistribution);
 	}
@@ -423,8 +405,7 @@ int deleteAllOutputFiles()
 	if (prj.makeFlowDistFile == 1) {
 		fps.push_back(ofs.ofpFlowDistribution);
 	}
-	//}
-//}
+
 	bool beenRun = false;
 	for (string fpn : fpns) {
 		if (fs::exists(fpn) == true) {
@@ -502,7 +483,7 @@ int makeNewOutputFiles()
 						+ awpName + "]" + "\n\n";
 					if (prj.simType == simulationType::RealTime) {
 						heads = heads + CONST_OUTPUT_TABLE_TIME_FIELD_NAME + "\t"
-							+ "Flow_sim[CMS]" + "\t";
+							+ "Flow_sim[m^3/s]" + "\t";
 						//if (prj.printAveValue == 1) {
 						//	heads = heads + "Flow_sim_AVE[CMS]" + "\t";
 						//}
@@ -511,7 +492,7 @@ int makeNewOutputFiles()
 					}
 					else {
 						heads = heads + CONST_OUTPUT_TABLE_TIME_FIELD_NAME + "\t"
-							+ "Discharge[CMS]" + "\t";
+							+ "Discharge[m^3/s]" + "\t";
 						//if (prj.printAveValue == 1) { // WP 별 출력에서는 순간 cms 옆에 Ave cms 기록한다.
 						//	heads = heads + "Discharge_AVE[CMS]" + "\t";
 						//}
@@ -550,7 +531,7 @@ int makeNewOutputFiles()
 				|| prj.printOption == GRMPrintType::DischargeAndFcFile) {
 				// 이건 유량 파일
 				heads = comHeader
-					+ "Output data : Discharge[CMS]\n\n"
+					+ "Output data : Discharge [m^3/s]\n\n"
 					+ time_wpNames + "\t" + CONST_OUTPUT_TABLE_MEAN_PRCP_FIELD_NAME + "\n";
 				appendTextToTextFile(ofs.ofpnDischarge, heads);
 			}
@@ -562,7 +543,8 @@ int makeNewOutputFiles()
 				if (prj.printAveValue == 1) {
 					// 이건 ave 유량 파일
 					heads = comHeader
-						+ "Output data : Average discharge [CMS] for printing period. \n\n"
+						+ "Output data : Average discharge [m^3/s] for time interval "
+						+ to_string(prj.dtPrintAveValue_min) + "[min].\n\n"						
 						+ time_wpNames + "\t" + CONST_OUTPUT_TABLE_MEAN_PRCP_FIELD_NAME + "\n";
 					appendTextToTextFile(ofs.ofpnDischargePTAve, heads);
 				}
@@ -643,10 +625,6 @@ int makeNewOutputFiles()
 							resOperation = resOperation + "\t" + "False";
 						}
 					}
-					/*if (afc.fcType == flowControlType::ReservoirOperation) {*/
-					//if (afc.fcType != flowControlType::Inlet) {
-						//if (afc.fcType == flowControlType::ReservoirOperation) {
-							//if (afc.roType != reservoirOperationType::None) {
 					string roTypeStr = "";
 					if (afc.roType == reservoirOperationType::AutoROM) {
 						roTypeStr = ENUM_TO_STR(AutoROM);
@@ -776,7 +754,8 @@ int makeNewOutputFiles()
 					// reservoir average inflow 
 					if (prj.printAveValue == 1) {
 						heads = comHeader
-							+ "Output data : Average reservoir inflow [m^3/s] for printing period.\n\n"
+							+ "Output data : Average reservoir inflow [m^3/s] for "
+							+ to_string(prj.dtPrintAveValue_min) + "[min].\n\n"
 							+ fcDataField + "\n";
 						appendTextToTextFile(ofs.ofpnFCinflowPTAve, heads);
 					}
@@ -808,9 +787,6 @@ int deleteAllFilesExceptDischarge()
     if (fs::exists(ofs.ofpnDepth)) {
         std::remove(ofs.ofpnDepth.c_str());
     }
-    //if (fs::exists(ofs.ofpnFCData)) {
-    //    std::remove(ofs.ofpnFCData.c_str());
-    //}
     if (fs::exists(ofs.ofpnFCStorage)) {
         std::remove(ofs.ofpnFCStorage.c_str());
     }

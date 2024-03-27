@@ -183,8 +183,6 @@ int openProjectFile(int forceRealTime)
 		if (sbFlowControlGrid == 1 && pt.sFlowControlGrid == 0) {
 			sbFlowControlGrid = 0;
 			if (afc->fcName != "" && isNormalFlowControlinfo(afc) == 1) {
-				//int n = prj.fcs.size();
-				//prj.fcs[n] = *afc;// 우선 idx를 키로 사용. updateFCCellinfoAndData()에서 cvid를 키로 업데이트
 				int n = fcinfos.size();
 				fcinfos.push_back(*afc);// 우선 idx를 키로 사용. updateFCCellinfoAndData()에서 cvid를 키로 업데이트
 			}
@@ -297,9 +295,7 @@ int openProjectFile(int forceRealTime)
 	// 여기서 부터 검증
 	// flow control 관련
 	if (prj.simFlowControl == 1 && fcinfos.size() > 0) {
-		//vector<flowControlinfo>::iterator iter;
 		for (int i = 0;i<fcinfos.size(); ++i) {
-			//int idx = iter->first;
 			flowControlinfo afci;
 			afci = fcinfos[i];
 			for (int n = 0; n < fcinfos.size(); ++n) {
@@ -315,10 +311,7 @@ int openProjectFile(int forceRealTime)
 				}
 			}
 
-			// 2021.11.17 ReservoirOutflow, SinkFlow, SourceFlow, ReservoirOperation 모든 경우에서 AutoROM으로 전환 될 수 있어야 하므로
-			// 옵션에 상관없이 모두 저수지 제원을 입력하는 것으로 수정
-			// inlet에서는 저수지 제원 입력 하지 않는다. AutoROM으로 자동으로 전환도 못하게 한다. 
-			//if (afci.roType != reservoirOperationType::None){
+			// 2023. 11.23. inlet, sinkflow, sourceflow 에서는 저수지 제원 입력 하지 않는다. AutoROM으로 자동으로 전환도 못하게 한다. 
 			if ((afci.fcType == flowControlType::ReservoirOutflow && ts.enforceFCautoROM == 1)
 				|| afci.fcType == flowControlType::ReservoirOperation
 				|| afci.fcType == flowControlType::DetensionPond) {
@@ -406,8 +399,8 @@ int openProjectFile(int forceRealTime)
 					return -1;
 				}
 			}
-			else if (ts.enforceFCautoROM == 1) {// inlet인경우, AutoROM으로 자동 전환 못하게 한다.
-				writeLog(fpnLog, "ERROR : [" + afci.fcName + "] Inlet cannot be converted to AutoROM. '/a' option cannot be applied.\n", 1, 1);
+			else if (ts.enforceFCautoROM == 1) {// inlet, sinkflow, sourceflow 인경우, AutoROM으로 자동 전환 못하게 한다.
+				writeLog(fpnLog, "ERROR : [" + afci.fcName + "]. Inlet, Sinkflow, or Sourceflow cannot be converted to AutoROM. '/a' option cannot be applied.\n", 1, 1);
 				return -1;
 			}
 
@@ -1472,7 +1465,7 @@ int readXmlRowProjectSettings(string aline)
 			prj.mdp = stoi(vString);
 		}
 		else {
-			writeLog(fpnLog, "WARNNING : Max. degree of parallelism was not set. Maximum value [-1] was assigned.\n", 1, 1);
+			writeLog(fpnLog, "Max. degree of parallelism was not set. Maximum value [-1] was assigned.\n", 1, 1);
 			prj.mdp = -1;
 		}
 		return 1;
@@ -2253,7 +2246,6 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		else if (vString != ""){
 			writeLog(fpnLog, "ERROR : Flow control data file of ["
 				+ fci->fcName + "]("+ vString+") is invalid.\n", 1, 1);
-			//return -1; // 이거 주석 맞는가? 2022.02.09 최
 		}
 	}
 
@@ -2673,7 +2665,6 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 		return 1;
 	}
 	return 1;
-
 }
 
 int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
@@ -2703,14 +2694,21 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		}
 		return 1;
 	}
-	//if (aline.find(fldName.iniLossPrecipitation_mm) != string::npos) {
-	//	vString = getValueStringFromXmlLine(aline, fldName.iniLossPrecipitation_mm);
-	//	ssp->iniLossPRCP_mm = 0.0;
-	//	if (vString != "" && stod(vString) >= 0.0) {
-	//		ssp->iniLossPRCP_mm = stod(vString);
-	//	}
-	//	return 1;
-	//}
+
+	if (aline.find(fldName.IniLossPRCP_mm) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.IniLossPRCP_mm);
+		ssp->iniLossPRCP_mm = 0.0;
+		if (vString != "" && stod(vString) >= 0.0) {
+			ssp->iniLossPRCP_mm = stod(vString);
+		}
+		else {
+			writeLog(fpnLog, "ERROR : Ini. loss of precipitation in the watershed ["
+				+ to_string(ssp->wsid) + "] is invalid.\n", 1, 1);
+			return -1;
+		}
+		return 1;
+	}
+
 	if (aline.find(fldName.MinSlopeOF) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.MinSlopeOF);
 		if (vString != "" && stod(vString) > 0) {
@@ -3139,6 +3137,7 @@ int isNormalSwsParameter(swsParameters *ssp)
 	swsParameters swsp_ini;//여기서 생성된 초기값과 서로 비교
 	if (ssp->wsid == swsp_ini.wsid) { return -1; }
 	if (ssp->iniSaturation == swsp_ini.iniSaturation) { return -1; }
+	if (ssp->iniLossPRCP_mm == swsp_ini.iniLossPRCP_mm) { return -1; }
 	if (ssp->unSatKType == swsp_ini.unSatKType) { return -1; }
 	if (ssp->coefUnsaturatedK == swsp_ini.coefUnsaturatedK) { return -1; }
 	if (ssp->minSlopeOF == swsp_ini.minSlopeOF) { return -1; }
@@ -3156,20 +3155,6 @@ int isNormalSwsParameter(swsParameters *ssp)
 	return 1;
 }
 
-//// 이건 continuous 용 =====================
-//int isNormalPETnSnowMelt(PETnSMinfo* petsmi)
-//{
-//	PETnSMinfo petsmi_ini; //여기서 생성된 초기값과 서로 비교
-//	if (petsmi->petMethod == petsmi_ini.petMethod) { return -1; }
-//	if (petsmi->petMethod == PETmethod::UserData) {
-//		if (petsmi->fpnPET == petsmi_ini.fpnPET) { return -1; }
-//	}
-//	if (petsmi->smMethod == petsmi_ini.smMethod) { return -1; }
-//	if (petsmi->smMethod == snowMeltMethod::UserData) {
-//		if (petsmi->fpnSnowMelt == petsmi_ini.fpnSnowMelt) { return -1; }
-//	}
-//	return 1;
-//}
 
 int isNormalWatchPointInfo(wpLocationRC * wpL)
 {
@@ -3241,7 +3226,7 @@ bool updateOneSWSParsWithOtherSWSParsSet(int targetWSid, int referenceWSid)
 {
 	swsParameters spars = prj.swps[referenceWSid];
 	prj.swps[targetWSid].iniSaturation = spars.iniSaturation;
-	//prj.swps[targetWSid].iniLossPRCP_mm = spars.iniLossPRCP_mm;
+	prj.swps[targetWSid].iniLossPRCP_mm = spars.iniLossPRCP_mm;
 	prj.swps[targetWSid].minSlopeOF = spars.minSlopeOF;
 	prj.swps[targetWSid].unSatKType = spars.unSatKType;
 	prj.swps[targetWSid].coefUnsaturatedK = spars.coefUnsaturatedK;
@@ -3269,8 +3254,4 @@ bool updateOneSWSParsWithOtherSWSParsSet(int targetWSid, int referenceWSid)
 	}
 	return true;
 }
-
-
-
-
 

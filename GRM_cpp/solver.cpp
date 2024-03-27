@@ -23,9 +23,6 @@ void updateCVbyHydroComps(int i)
 	if (prj.makeRFraster == 1) {
 		cvs[i].rf_dtPrint_m = cvs[i].rf_dtPrint_m
 			+ cvs[i].rfiRead_mPsec * dt_sec;
-		// 강우자료 읽는 곳으로 이동. 강우 손실을 고려하기 위해서.. 2023.09.07
-		//cvs[i].rfAcc_fromStart_m = cvs[i].rfAcc_fromStart_m
-		//	+ cvs[i].rfiRead_mPsec * dtsec;
 	}
 	if (prj.simInterception == 1) { calinterception(i); } // 차단	
 	if (prj.simEvaportranspiration == 1) { calET(i); } // 증발산
@@ -127,8 +124,6 @@ void updateCVbyHydroComps(int i)
 		break;
 	}
 	}
-	//cvs[i].QsumCVw_dt_m3 = 0; 
-	//cvs[i].QsumCVw_m3Ps = 0;
 }
 
 void calOverlandFlow(int i, double hCVw_tp1, double effDy_m)
@@ -466,18 +461,6 @@ double getChCrossSectionPerimeter(double LRegionBaseWidth,
     }
     return dtsec;
 }
-
- //inline double vByManningEq(double hydraulicRaidus,
- //    double slope, double nCoeff)
- //{
- //    return pow(hydraulicRaidus, 0.66667) * sqrt(slope) / nCoeff;
- //}
-
- //inline double hByManningEqForOF(double Q_cms,
-	// double nCoeff, double slope, double dy_m)
- //{
-	// return nCoeff * Q_cms / dy_m / pow(sqrt(slope), 0.6);  // 0.6 = 3/5;
- //}
 
 inline void setNoFluxCVCH(int i)
  {

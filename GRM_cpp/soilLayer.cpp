@@ -12,6 +12,11 @@ void calEffectiveRFbyInfiltration(int i, int dtrf_sec, int dtsec)
 		setNoInfiltrationParameters(i);
 		return;
 	}
+	//// 2024.02.08 주석처리. 불투수율이 1인 경우에도, 토양층 흐름으로 다른 셀에서 유입되는 토양 수분에 의해서 현재 셀의 토양수분, 포화도가 달라질 수 있다.
+	//if (cvs[i].imperviousR == 1) {
+	//	setNoInfiltrationParameters(i);
+	//	return;
+	//}
 
 	bool beenPonding = false; // 2023.04.12. 수심이 있는 경우, ponding으로 계산하기 위해서 추가
 	if (cvs[i].flowType == cellFlowType::ChannelFlow
@@ -22,15 +27,12 @@ void calEffectiveRFbyInfiltration(int i, int dtrf_sec, int dtsec)
 		beenPonding = true;
 
 	}
-	if (cvs[i].imperviousR == 1) {// 상기 조건을 거치지 않은 상황에서 이 조건일 경우..
-		setNoInfiltrationParameters(i);
-		return;
-	}
 
     double CONSTGreenAmpt = 0.0;
     double residuMC_ThetaR = 0.0;
+
     cvs[i].ssr = soilSSRbyCumulF(cvs[i].soilWaterC_tm1_m,
-        cvs[i].sdEffAsWaterDepth_m, cvs[i].flowType);
+        cvs[i].sdEffAsWaterDepth_m);
 	if (cvs[i].ssr > SOIL_SATURATION_RATIO_CRITERIA)	{
 		cvs[i].isAfterSaturated = 1;
 		cvs[i].ifF_mPdt = 0;
@@ -56,7 +58,6 @@ void calEffectiveRFbyInfiltration(int i, int dtrf_sec, int dtsec)
         double infiltrationF_mPdt_max=0.0;
         bool isPonding = false;
 		if (cvs[i].ifRatef_tm1_mPsec >= cvs[i].rfiRead_tm1_mPsec || beenPonding == false) {
-		//if (cvs[i].ifRatef_tm1_mPsec >= cvs[i].rfiRead_tm1_mPsec) {
 			// 이전 시간에서의 침투률이 이전 시간에서의 강우강도보다 컸다면, 그리고 ponding 상태가 아니라면, 모든 강우는 침투됨
 			infiltrationF_mPdt_max = cvs[i].rfApp_mPdt;// 0 이상이 보장됨
 		}
@@ -117,7 +118,7 @@ void calEffectiveRFbyInfiltration(int i, int dtrf_sec, int dtsec)
     }
     // 유효강우량의 계산이 끝났으므로, 현재까지 계산된 침투, 강우강도 등을 tM1 변수로 저장한다.    
     cvs[i].ssr = soilSSRbyCumulF(cvs[i].soilWaterC_m, 
-        cvs[i].sdEffAsWaterDepth_m, cvs[i].flowType);
+        cvs[i].sdEffAsWaterDepth_m);
     if (cvs[i].ssr > SOIL_SATURATION_RATIO_CRITERIA) {
         cvs[i].isAfterSaturated = 1;
     }
@@ -171,7 +172,7 @@ double calRFlowAndSSFlow(int i,
     double RflowBySSFfromCVw_m2=0.0; // 이건 return flow
     SSFfromCVw_m = totalSSFfromCVwOFcell_m3Ps(i) * dtsec / (dy_m * dx_m); // 유입된 총량 계산 후 수심계산
     double ssr = soilSSRbyCumulF(cvs[i].soilWaterC_tm1_m,
-                     cvs[i].sdEffAsWaterDepth_m, cvs[i].flowType);
+                     cvs[i].sdEffAsWaterDepth_m);
 	// 상류의 지표하 유출에 의한 현재 셀의 Rflow 기여분 계산
 	if (ssr > SOIL_SATURATION_RATIO_CRITERIA) { // 이경우는 상류에서 유입된 SSF 전체가 return flow
         RflowBySSFfromCVw_m2 = SSFfromCVw_m * dy_m;
@@ -228,7 +229,7 @@ double calBFlowAndGetCSAaddedByBFlow(int i, int dtsec, double cellSize_m)
 	int wsid = cvps[i].wsid;
 	int calLayerA = 1;
 	double ssr = soilSSRbyCumulF(cvs[i].soilWaterC_tm1_m,
-		cvs[i].sdEffAsWaterDepth_m, cvs[i].flowType);
+		cvs[i].sdEffAsWaterDepth_m);
 	if (ssr > 0.0) { // A 층이 포화되지 않아도 침누발생
 		soilDepthPercolated_m = Kunsaturated(cvs[i]) * dtsec * ssr; // 수분이 이동한 거리. 
 	}
@@ -319,13 +320,12 @@ double getChCSAaddedBySSFlow(int i)
             chCSA = SSFlow_cms / cvs[i].stream.uCH; // 이전 시간에 계산된 유속
             // 유속이 작을 경우.. 발산 가능성 있으므로.. 기존 단면적 보다 큰 단면적으로 유입될 경우.. 
             // 기존 단면적으로 유입되는 것으로 설정..
-            // 즉, 지표하 유출의 기여 단면적은 기존 하천단면적보다 클수 없음.
+            // 즉, 지표하 유출의 기여 단면적은 기존 하천단면적보다 클 수 없음.
             if (chCSA > cvs[i].stream.csaCH)
                 chCSA = cvs[i].stream.csaCH;
             return chCSA;
         }
     }
-
     // 이경우에는 하도에 기여되지 않는 것으로 가정
     // 즉 강우에 의한 하도의 유량 발생이 시작되지 않았는데(하도가 말라있을 경우).. 
     // 지표하 유출에 의해 기여가 있을 수 없음.
@@ -335,7 +335,6 @@ double getChCSAaddedBySSFlow(int i)
 
 double Kunsaturated(cvAtt cv)
 {
-    // double ca = 0.2 '0.24
     double ssr = cv.ssr;
     if (cv.flowType == cellFlowType::ChannelFlow) {
         ssr= 1;
@@ -421,7 +420,7 @@ double totalSSFfromCVwOFcell_m3Ps(int i)
 }
 
 inline double soilSSRbyCumulF(double cumulinfiltration,
-    double effSoilDepth, cellFlowType flowType)
+    double effSoilDepth)
 {
     if (effSoilDepth <= 0) { return 1; }
     if (cumulinfiltration <= 0) { return 0; }

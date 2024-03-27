@@ -32,7 +32,7 @@ int setRainfallData()
 {
 	rfs.clear();
 	rfs = readAndSetWeatherData(prj.fpnRainfallData, prj.rfDataType,
-		prj.rfinterval_min, "Rainfall");
+		prj.rfinterval_min, "Precipitation");
 	if (rfs.size() == 0) {
 		writeLog(fpnLog, "ERROR : Reading precipitation data file was failed\n", 1, 1);
 		return -1;
@@ -60,6 +60,9 @@ int setCVRF(int order)
 		map<int, double> idNv;
 		if (prj.rfDataType == weatherDataType::Raster_ASC) {
 			rfasc = new ascRasterFile(fpnRF);
+			if (compareASCwithDomain(fpnRF, "precipitation", rfasc->header, di.nCols, di.nRows, di.dx) == -1) {
+				return -1;
+			}
 			idNv.clear();
 		}
 		else {
@@ -85,13 +88,13 @@ int setCVRF(int order)
 				//if (cvs[i].toBeSimulated == -1) {
 				//    continue;  }
 				int wid = cvps[i].wsid;
-				double iniLoss_PRCP_m = 0.0;// prj.swps[wid].iniLossPRCP_mm / 1000.0;
+				double iniLoss_PRCP_mm = prj.swps[wid].iniLossPRCP_mm;
 				double inRF_mm = 0.0;
 				if (prj.rfDataType == weatherDataType::Raster_ASC) {
 					inRF_mm = rfasc->valuesFromTL[cvps[i].xCol][cvps[i].yRow];
 				}
 				else {
-					inRF_mm = idNv[cvps[i].wsid];
+					inRF_mm = idNv[cvps[i].wsid]; 
 				}
 
 				double inRFi_mPs = 0.0;
@@ -102,13 +105,20 @@ int setCVRF(int order)
 					inRFi_mPs = rfintensity_mPsec(inRF_mm, dtrf_sec);
 				}
 				cvs[i].rfiRead_mPsec = inRFi_mPs;
-
-				cvs[i].rfAccRead_fromStart_m = cvs[i].rfAccRead_fromStart_m
-					+ inRFi_mPs * dt_sec;
-				
-				// 여기서 강우 초기 손실 적용
-				if (cvs[i].rfAccRead_fromStart_m < iniLoss_PRCP_m) {
-					inRFi_mPs = 0.0;
+				cvs[i].rfAccRead_fromStart_mm = cvs[i].rfAccRead_fromStart_mm + inRF_mm; // 파일에서 읽은 강우량을 더한다.
+				if (iniLoss_PRCP_mm > 0.0) { 
+					if (cvs[i].rfAccRead_fromStart_mm < iniLoss_PRCP_mm) {
+						inRFi_mPs = 0.0;
+					}
+					else {
+						double diff_mm=0.0;
+						diff_mm = cvs[i].rfAccRead_fromStart_mm - iniLoss_PRCP_mm; // 처음 커지는 부분에서 강우량 차이 받는다.
+						if (diff_mm < 0) {
+							diff_mm = 0.0;
+						}
+						inRFi_mPs = rfintensity_mPsec(diff_mm, dtrf_sec);
+						prj.swps[wid].iniLossPRCP_mm = 0.0; // 누적 강수가 초기 손실량을 초과하면, 이제 초기 손실을 사용하지 않으므로, 0으로 설정
+					}
 				}
 				cvs[i].rfiRead_After_iniLoss_mPsec = inRFi_mPs;
 
@@ -160,19 +170,27 @@ int setCVRF(int order)
 			// 유역의 전체 강우량은 inlet 등으로 toBeSimulated == -1 여도 계산에 포함한다.
 			// 상류 cv 개수에 이 조건 추가하려면 주석 해제.
 			//if (cvs[i].toBeSimulated == -1) { continue; }
-			cvs[i].rfiRead_mPsec = inRFi_mPs;
-			cvs[i].rfAccRead_fromStart_m = cvs[i].rfAccRead_fromStart_m
-				+ inRFi_mPs * dt_sec;
-			// 여기서 강우 초기 손실 적용
-			int wid = cvps[i].wsid;
-			double iniLoss_PRCP_m = 0.0;// prj.swps[wid].iniLossPRCP_mm / 1000.0;
-			if (cvs[i].rfAccRead_fromStart_m < iniLoss_PRCP_m) {
-				cvs[i].rfiRead_After_iniLoss_mPsec = 0.0;
-			}
-			else {
-				cvs[i].rfiRead_After_iniLoss_mPsec = inRFi_mPs;
-			}
 
+
+			int wid = cvps[i].wsid;
+			double iniLoss_PRCP_mm = prj.swps[wid].iniLossPRCP_mm;
+			cvs[i].rfiRead_mPsec = inRFi_mPs;
+			cvs[i].rfAccRead_fromStart_mm = cvs[i].rfAccRead_fromStart_mm + inRF_mm;
+			if (iniLoss_PRCP_mm > 0.0) {
+				if (cvs[i].rfAccRead_fromStart_mm < iniLoss_PRCP_mm) {
+					inRFi_mPs = 0.0;
+				}
+				else {
+					double diff_mm = 0.0;
+					diff_mm = cvs[i].rfAccRead_fromStart_mm - iniLoss_PRCP_mm; // 처음 커지는 부분에서 강우량 차이 받는다.
+					if (diff_mm < 0) {
+						diff_mm = 0.0;
+					}
+					inRFi_mPs = rfintensity_mPsec(diff_mm, dtrf_sec);
+					prj.swps[wid].iniLossPRCP_mm = 0.0; // 누적 강수가 초기 손실량을 초과하면, 이제 초기 손실을 사용하지 않으므로, 0으로 설정
+				}
+			}
+			cvs[i].rfiRead_After_iniLoss_mPsec = inRFi_mPs;
 		}
 
 		ts.rfiSumAllCellsInCurRFData_mPs = inRFi_mPs * di.cellNtobeSimulated;
@@ -280,6 +298,9 @@ int setCVRF(int order)
 		 map<int, double> idNv;
 		 if (prj.tempMaxDataType == weatherDataType::Raster_ASC) {
 			 tMaxAsc = new ascRasterFile(fpnTmax);
+			 if (compareASCwithDomain(fpnTmax, "max. temperature", tMaxAsc->header, di.nCols, di.nRows, di.dx) == -1) {
+				 return -1;
+			 }
 			 idNv.clear();
 		 }
 		 else {
@@ -347,6 +368,9 @@ int setCVRF(int order)
 		 map<int, double> idNv;
 		 if (prj.tempMinDataType == weatherDataType::Raster_ASC) {
 			 tMinAsc = new ascRasterFile(fpnTmin);
+			 if (compareASCwithDomain(fpnTmin, "min. temperature", tMinAsc->header, di.nCols, di.nRows, di.dx) == -1) {
+				 return -1;
+			 }
 			 idNv.clear();
 		 }
 		 else {
@@ -430,6 +454,9 @@ int setCVRF(int order)
 		 map<int, double> idNv;
 		 if (prj.solarRadDataType == weatherDataType::Raster_ASC) {
 			 SRAsc = new ascRasterFile(fpnData);
+			 if (compareASCwithDomain(fpnData, "solar radiation", SRAsc->header, di.nCols, di.nRows, di.dx) == -1) {
+				 return -1;
+			 }
 			 idNv.clear();
 		 }
 		 else {
@@ -485,7 +512,7 @@ int setCVRF(int order)
 	 }
  }
 
- int setCVSunDur(int order)
+ int setCVDayTimeLength(int order)
  {
 	 string fpnData = "";
 	 int returnv = -1;
@@ -496,6 +523,9 @@ int setCVRF(int order)
 		 map<int, double> idNv;
 		 if (prj.tempMaxDataType == weatherDataType::Raster_ASC) {
 			 SDAsc = new ascRasterFile(fpnData);
+			 if (compareASCwithDomain(fpnData, "daytime length", SDAsc->header, di.nCols, di.nRows, di.dx) == -1) {
+				 return -1;
+			 }
 			 idNv.clear();
 		 }
 		 else {
@@ -542,7 +572,7 @@ int setCVRF(int order)
 	 return returnv;
  }
 
- void setCVSunDurZero() {
+ void setCVDayTimeLengthZero() {
 	 writeLog(fpnLog, "WARNNING : The daytime length data ended before the simulation was over. Daytime length data was set as 0.\n", 1, -1);
 	 writeLog(fpnLog, "WARNNING : If the time step of daytime length data is equal or smaller than printing time step, add more data. Or decrease simulation duration.\n", 1, -1);
 #pragma omp parallel for schedule(guided)
@@ -562,6 +592,9 @@ int setCVRF(int order)
 		 map<int, double> idNv;
 		 if (prj.snowpackTempDataType == weatherDataType::Raster_ASC) {
 			 sptASC = new ascRasterFile(fpnSD);
+			 if (compareASCwithDomain(fpnSD, "snowpack temperature", sptASC->header, di.nCols, di.nRows, di.dx) == -1) {
+				 return -1;
+			 }
 			 idNv.clear();
 		 }
 		 else {
@@ -807,7 +840,7 @@ int setCVRF(int order)
 	 }
 	 vector<weatherData> wdToReturn;
 	 wdToReturn.clear();
-	 fs::path fpn_in = fs::path(fpn_in);
+	 fs::path fpn_in = fs::path(fpn_in_wd);
 	 string fp_in = fpn_in.parent_path().string();
 	 string fn_in = fpn_in.filename().string();
 	 vector<string> Lines;
@@ -842,7 +875,8 @@ int setCVRF(int order)
 				 wd.value = value;
 			 }
 			 else {
-				 string err = "ERROR : Can not read " + lower(dataString) + " value.\nOrder = "
+				 string err = "ERROR : Can not read " + lower(dataString) 
+					 + " value.\nOrder = "
 					 + to_string(n + 1) + "\n";
 				 writeLog(fpnLog, err, 1, 1);
 				 return nullWD;
@@ -858,9 +892,10 @@ int setCVRF(int order)
 				 vector<double> values = splitToDoubleVector(Lines[n], ',');
 				 int nv = values.size();
 				 if (wsids.size() != nv) {
-					 string err = "ERROR :  " + dataString + " data is not match to watershed id.\n  File name : "
-						 + fpn_in_wd +
-						 +"\n  Line number = " + to_string(n + 1) + "\n";
+					 string err = "ERROR :  The number of " + dataString 
+						 + " data is not match to the number of watershed ids in the file below.\n"
+						 + " File name : " + fpn_in_wd + +"\n"
+						 + " Line number = " + to_string(n + 1) + "\n";
 					 writeLog(fpnLog, err, 1, 1);
 					 return nullWD;
 				 }

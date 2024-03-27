@@ -36,6 +36,7 @@ int setDomainAndCVBasicinfo()
 {
 	if (readDomainFaFileAndSetupCV() == -1) { return -1; }
 	if (checkWPpositions() == -1) { return -1; }
+	if (checkWeatherDataByDomain() == -1) { return -1; }
 	if (readSlopeFdirStreamCwCfSsrFileAndSetCV() == -1) { return -1; }
 	if (prj.lcDataType == fileOrConstant::File) {
 		if (readLandCoverFileAndSetCVbyVAT() == -1) { return -1; }
@@ -80,6 +81,69 @@ int checkWPpositions() {
 		}
 	}
 }
+int checkWeatherDataByDomain() {
+	if (compareWeatherDataWithDomain(prj.fpnRainfallData, prj.rfDataType, "Precipitation") == -1) {
+		return -1;
+	}
+	// continuous =================
+	if (prj.simEvaportranspiration == 1) {
+		if (compareWeatherDataWithDomain(prj.fpnTempMaxData, prj.tempMaxDataType, "Maximum temperature") == -1) {
+			return -1;
+		}
+		if (compareWeatherDataWithDomain(prj.fpnTempMinData, prj.tempMinDataType, "Minimum temperature") == -1) {
+			return -1;
+		}
+		if (compareWeatherDataWithDomain(prj.fpnDaytimeLengthData, prj.daytimeLengthDataType, "Daytime length") == -1) {
+			return -1;
+		}
+		if (compareWeatherDataWithDomain(prj.fpnSolarRadData, prj.solarRadDataType, "Solar radiation") == -1) {
+			return -1;
+		}
+	}
+	if (prj.simSnowMelt == 1) {
+		if (compareWeatherDataWithDomain(prj.fpnTempMaxData, prj.tempMaxDataType, "Maximum temperature") == -1) {
+			return -1;
+		}
+		if (compareWeatherDataWithDomain(prj.fpnSnowpackTempData, prj.snowpackTempDataType, "Snowpack temperature") == -1) {
+			return -1;
+		}
+	}
+	// continuous =================
+}
+
+
+int compareWeatherDataWithDomain(string fpn_in_wd, weatherDataType wdType,
+	string dataString) {
+
+	if (wdType == weatherDataType::Mean_DividedArea) {
+		vector<int> wsids;
+		ifstream txtFile(fpn_in_wd);
+		string aline;
+		getline(txtFile, aline); // 첫줄만 읽는다
+		aline = trim(aline);
+		wsids = setWSIDsInWeatherDataFile(aline);
+		int idCount = wsids.size();
+		if (di.dmids.size() != idCount) {// 여기서는 id 개수 확인
+			string err = "ERROR : The number of " + dataString
+				+ " data column is not equal to the number of sub-domain ids.\n"
+				+ "  "+ dataString +" data file name : " + fpn_in_wd + "\n";
+			writeLog(fpnLog, err, 1, 1);
+			return -1;
+		}
+
+		for (int i = 0; i < idCount; i++) { // 여기서는 id 있는지 확인
+			if (std::find(di.dmids.begin(), di.dmids.end(), wsids[i]) == di.dmids.end()) {
+				string err = "ERROR : Domain id [" + to_string(wsids[i])
+					+ "] from "+ dataString +" data file was not found in sub-domain ids.\n"
+					+ "  " + dataString + " data file name : " + fpn_in_wd + "\n";
+				writeLog(fpnLog, err, 1, 1);
+				return -1;
+			}
+		}		
+	}
+	return 1;
+}
+
 
 int initWPinfos()
 {
@@ -90,14 +154,6 @@ int initWPinfos()
 	wpSimValue.prcpWPGridForPT_mm.clear();
 	wpSimValue.prcpWPGridTotal_mm.clear();
 	wpSimValue.Q_sumPTforAVE_m3.clear();
-
-	//wpSimValue.totalFlow_cms.clear();
-	//wpSimValue.totalDepth_m.clear();
-	//wpSimValue.maxFlow_cms.clear();
-	//wpSimValue.maxDepth_m.clear();
-	//wpSimValue.maxFlowTime.clear();
-	//wpSimValue.maxDepthTime.clear();
-	//wpSimValue.qFromFCData_cms.clear();
 	wpSimValue.q_cms_print.clear();
 	wpSimValue.wpCVidxes.clear();
 
@@ -302,6 +358,7 @@ int updateCVbyUserSettings()
         if (prj.issrFileApplied == -1) {
             cvs[i].iniSSR = ups.iniSaturation;
         }
+
         if (cvs[i].flowType == cellFlowType::ChannelFlow
             || cvs[i].lcCode == landCoverCode::WATR
             || cvs[i].lcCode == landCoverCode::WTLD) {

@@ -34,6 +34,10 @@ int readDomainFaFileAndSetupCV()
 	writeLog(fpnLog, "Reading flow accumulation file... \n", 1, -1);
     ascRasterFile facFile = ascRasterFile(prj.fpnFA);
 	writeLog(fpnLog, "Reading flow accumulation file... completed.\n", 1, -1);
+	if (compareASCwithDomain(prj.fpnFA, "flow accumulation", 
+		facFile.header, dmFile.header.nCols, dmFile.header.nRows, dmFile.header.dx) == -1) {
+		return -1;
+	}
     di.nRows = dmFile.header.nRows;
     di.nCols = dmFile.header.nCols;
     di.cellSize = dmFile.header.cellsize;
@@ -58,8 +62,7 @@ int readDomainFaFileAndSetupCV()
             int wsid = (int)dmFile.valuesFromTL[cx][ry];
             if (wsid > 0) {
                 cvAtt cv;
-                cvpos cp;
-                //cv.idx = cvidx; // CVid를 CV 리스트의 인덱스 번호 값으로 입력. 즉. 1 부터 시작
+                cvpos cp;                
                 cv.flowType = cellFlowType::OverlandFlow; // 우선 overland flow로 설정
                 if (getVectorIndex(di.dmids, wsid) == -1) {//wsid가 vector에 없으면, 추가한다.
                     di.dmids.push_back(wsid);
@@ -79,7 +82,7 @@ int readDomainFaFileAndSetupCV()
                 cp.yRow = ry;
                 cvsv.push_back(cv); // 여기는 유효셀만
                 cvpv.push_back(cp);
-                cvais[cx][ry] = cvidx ;// 모든셀. 1차원 배열의 인덱스를 저장. 
+                cvais[cx][ry] = cvidx ;// 모든셀. 1차원 배열의 인덱스를 저장. CVid를 CV 리스트의 인덱스 번호 값으로 입력. 즉. 1 부터 시작
                 cvidx += 1;
             }
             else {
@@ -140,13 +143,21 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
         writeLog(fpnLog, outstr, 1, -1);
         prj.issrFileApplied = -1;
     }
-
 	writeLog(fpnLog, "Reading slope file... \n", 1, -1);
+
 	ascRasterFile slopeFile = ascRasterFile(prj.fpnSlope);
+	if (compareASCwithDomain(prj.fpnSlope, "slope", slopeFile.header, di.nCols, di.nRows, di.dx) == -1) {
+		return -1;
+	}
 	writeLog(fpnLog, "Reading slope file... completed.\n", 1, -1);
+
 	writeLog(fpnLog, "Reading flow direction file... \n", 1, -1);
     ascRasterFile fdirFile = ascRasterFile(prj.fpnFD);
+	if (compareASCwithDomain(prj.fpnFD, "flow direction", fdirFile.header, di.nCols, di.nRows, di.dx) == -1) {
+		return -1;
+	}
 	writeLog(fpnLog, "Reading flow direction file... completed.\n", 1, -1);
+
     ascRasterFile* streamFile;
     ascRasterFile* cwFile;
     ascRasterFile* cfFile;
@@ -154,6 +165,9 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
     if (prj.streamFileApplied == 1) {
 		writeLog(fpnLog, "Reading stream file... \n", 1, -1);
         streamFile = new ascRasterFile(prj.fpnStream);
+		if (compareASCwithDomain(prj.fpnStream, "stream", streamFile->header, di.nCols, di.nRows, di.dx) == -1) {
+			return -1;
+		}
 		writeLog(fpnLog, "Reading stream file... completed.\n", 1, -1);
     }
     else {
@@ -162,6 +176,9 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
     if (prj.cwFileApplied == 1) {
 		writeLog(fpnLog, "Reading channel width file... \n", 1, -1);
         cwFile = new ascRasterFile(prj.fpnChannelWidth);
+		if (compareASCwithDomain(prj.fpnChannelWidth, "channel width", cwFile->header, di.nCols, di.nRows, di.dx) == -1) {
+			return -1;
+		}
 		writeLog(fpnLog, "Reading channel width file... completed.\n", 1, -1);
     }
     else {
@@ -170,6 +187,9 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
     if (prj.icfFileApplied == 1) {
 		writeLog(fpnLog, "Reading initial stream flow file... \n", 1, -1);
         cfFile = new ascRasterFile(prj.fpniniChFlow);
+		if (compareASCwithDomain(prj.fpniniChFlow, "initial stream flow", cfFile->header, di.nCols, di.nRows, di.dx) == -1) {
+			return -1;
+		}
 		writeLog(fpnLog, "Reading initial stream flow file... completed. \n", 1, -1);
     }
     else {
@@ -178,6 +198,9 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
     if (prj.issrFileApplied == 1) {
 		writeLog(fpnLog, "Reading initial soil saturation ratio file... \n", 1, -1);
         ssrFile = new ascRasterFile(prj.fpniniSSR);
+		if (compareASCwithDomain(prj.fpniniSSR, "initial soil saturation ratio", ssrFile->header, di.nCols, di.nRows, di.dx) == -1) {
+			return -1;
+		}
 		writeLog(fpnLog, "Reading initial soil saturation ratio file... completed. \n", 1, -1);
     }
     else {
@@ -600,7 +623,19 @@ int readSoilDepthFile()
     return isnormal;
 }
 
-
+int compareASCwithDomain(string fpn_in, string dataString, 
+	ascRasterHeader inHeader,
+	int nCols, int nRows, double dx) {
+	if (inHeader.nCols != nCols ||
+		inHeader.nRows != nRows ||
+		inHeader.dx != dx) {
+		string err = "ERROR :  The header info. of the " + dataString
+			+ " ASC file is not equal to the domain file.\n" +
+			" File name : " + fpn_in + "\n";
+		writeLog(fpnLog, err, 1, 1);
+		return -1;
+	}
+}
 
 flowDirection8 getFlowDirection(int fdirV, flowDirectionType fdt)
 {

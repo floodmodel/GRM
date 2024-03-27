@@ -5,8 +5,8 @@ import enum
 from ctypes import *
 
 # here, grm dll file full path and name
-gdl_path = ctypes.util.find_library("D:/Github/GRM/GRM_cpp/x64/Release/GRM.dll") 
-#gdl_path = ctypes.util.find_library("D:/Github/GRM\GRM_cpp/x64/Debug/GRM.dll") # this line is for combined debugging with GRM c++ code.
+gdl_path = ctypes.util.find_library("D:/Github/GRMv2023/GRMv2023_cpp/x64/Release/GRM.dll") 
+#gdl_path = ctypes.util.find_library("D:/Github/GRMv2023/GRMv2023_cpp/x64/Debug/GRM.dll") # this line is for combined debugging with GRM c++ code.
 
 
 if not gdl_path:
@@ -34,23 +34,24 @@ class PETmethod(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
 	Turc = 7
 	Constant = 8
 	UserData = 9
-	petNone = 10
+	petNone = 0
 
 class SnowMeltMethod(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
 	Anderson = 1
 	Constant = 8
 	UserData = 9
-	smNone = 10
+	smNone = 0
 
 class InterceptionMethod(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
 	LAIRatio = 1
 	Constant = 8
 	UserData = 9
-	icNone = 10
+	icNone = 0
 
 class swsParameters(Structure):  #grm 코드에 있는 구조체와 내용 맞춘다. 순서도 맞게 해야 한다.
 	_fields_ = [("wsid", ctypes.c_int),
         ("iniSaturation", ctypes.c_double),
+        ("iniLossPRCP_mm", ctypes.c_double),
         ("minSlopeOF", ctypes.c_double),
         ("unSatKType", ctypes.c_int),  # unSaturatedKType,
         ("coefUnsaturatedK", ctypes.c_double),
@@ -153,7 +154,7 @@ class grmWSinfo(object):
         gdl.allCellsInUpstreamArea.restype = ctypes.POINTER(ctypes.c_char_p)
 
         gdl.setOneSWSParsAndUpdateAllSWSUsingNetwork.argtypes = [ctypes.c_void_p, 
-            ctypes.c_int, ctypes.c_double,
+            ctypes.c_int, ctypes.c_double, ctypes.c_double,
             ctypes.c_double,  ctypes.c_int, ctypes.c_double, 
 			ctypes.c_double, ctypes.c_double, ctypes.c_double,
 			ctypes.c_int, ctypes.c_double,
@@ -166,7 +167,7 @@ class grmWSinfo(object):
             ctypes.c_double]
      #     grmWSinfo* f
      #      // grm.h 에서 명시된 인터페이스는 아래와 같다. 
-     #    bool setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat,
+     #    bool setOneSWSParsAndUpdateAllSWSUsingNetwork(int wsid, double iniSat, double iniLossPRCP_mm,
 	 #    double minSlopeLandSurface, unSaturatedKType unSKType, double coefUnsK,
      #    double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
      #    int dryStreamOrder, double ccLCRoughness,
@@ -294,7 +295,7 @@ class grmWSinfo(object):
     def cellCountInUpstreamArea(self, colXAryidx, rowYAryidx): #    Select all cells in upstream area of a input cell position. Return string list of cell positions - "column, row".`
         return gdl.cellCountInUpstreamArea(self.obj, colXAryidx, rowYAryidx)
 
-    def setOneSWSParsAndUpdateAllSWSUsingNetwork(self, wsid, iniSat,
+    def setOneSWSParsAndUpdateAllSWSUsingNetwork(self, wsid, iniSat, iniLossPRCP_mm,
 		minSlopeLandSurface, unSKType, coefUnsK,
 		minSlopeChannel, minChannelBaseWidth, roughnessChannel,
 		dryStreamOrder, ccLCRoughness,
@@ -335,7 +336,7 @@ class grmWSinfo(object):
 ### gmp 파일로 grmWSinfo class 를 인스턴싱 할 경우 ==============================
 ### gmp 파일에서 ProjectSetting 테이블까지만 채워져 있어도 사용할 수 있다. 
 #fpn_gmp = "D:\GRM_ex\Han\20220208_aju\Hanriver_GRM_calib_Run_pre.gmp" #"C:\GRM\SampleGHG\GHG500.gmp"
-fpn_gmp  = "D:\Github\zTestSetPyGRM\Prj_v2022_cont_CJDsmall_pyTest\CJD_Prj_cont_10year_small_pyTest.gmp"
+fpn_gmp  = "D:/Github/zTestSet_GRM2023_SampleJeju/20231123_01_JJD_QGRMtest_v2023.gmp"
 #fpn_gmp  = "D:\Github\zTestSetPyGRM\SampleWC\SampleWiCheon.gmp"
 
 wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
@@ -390,9 +391,9 @@ wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_
 ##================================================================
 
 # 여기서는 정보를 얻고자 하는 셀위치 혹은 유역 번호를 지정 =========================
-xCol = 32  # 정보를 얻고자 하는 셀 위치
-yRow = 86 # 정보를 얻고자 하는 셀 위치
-wsid = 100109  # 정보를 얻고자 하는 유역 번호
+xCol = 222  # 정보를 얻고자 하는 셀 위치
+yRow = 153 # 정보를 얻고자 하는 셀 위치
+wsid = 100  # 정보를 얻고자 하는 유역 번호
 #=================================================================
 
 print(" ")
@@ -422,7 +423,7 @@ a = wsi.flowDirection(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.
 
 ## GRM.dll을 release 모드로 빌드 된 것을 참조하면 애러 없다. debug로 빌드된 dll 참조하면 애러 발생한다.
 print("FlowDirection of current cell [", xCol, ", ", yRow, "] : ", a.decode('utf-8')) #if 'OFWB', the cell is out of the simulation domain bound
-#enum class flowDirection8 of GRM.dll : E8 = 1, SE8 = 2, S8 = 3, SW8 = 4, W8 = 5, NW8 = 6, N8 = 7, NE8 = 8, None8 = 0
+#enum class flowDirection8 of GRM.dll : E8 = 1, NE8 = 2, N8 = 3, NW8 = 4, W8 = 5, SW8 = 6, S8 = 7, SE8 = 8, None8 = 0
 
 a = wsi.flowAccumulation(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_int
 print("FlowAccumulation of current cell [", xCol, ", ", yRow, "] : ", a)  # if -1, the cell is out of the simulation domain bound
@@ -459,6 +460,7 @@ swp=swsParameters()
 swp = wsi.subwatershedPars(wsid) # current ws id / [ctypes.c_int] -> swsParameters
 print("subwatershedPars. wsid :", swp.wsid)
 print("subwatershedPars. iniSaturation :", swp.iniSaturation)
+print("subwatershedPars. iniLossPRCP_mm :", swp.iniLossPRCP_mm)
 print("subwatershedPars. minSlopeOF :", swp.minSlopeOF)
 print("subwatershedPars. unSatKType :", swp.unSatKType, "  Name :", unSaturatedKType(swp.unSatKType).name)  # 	Constant=0, Linear=1, Exponential=2, usKNone=3
 print("subwatershedPars. coefUnsaturatedK :", swp.coefUnsaturatedK)
@@ -494,7 +496,7 @@ print("subwatershedPars. userSet :", swp.userSet)    # 1 : true, 0: false
 # To get the updated paramters in memory for a subwatershed, you can use subwatershedPars() function.
 
 #swp에 저장된 매개변수(gmp 파일로 인스턴싱 할경우 등)를 이용해서 전체 유역 매개변수 업데이트 하는 경우,  
-#a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(swp.wsid,  swp.iniSaturation #  setOneSWSParsAndUpdateAllSWSUsingNetwork -> ctypes.c_bool
+#a = wsi.setOneSWSParsAndUpdateAllSWSUsingNetwork(swp.wsid,  swp.iniSaturation, swp.iniLossPRCP_mm   #  setOneSWSParsAndUpdateAllSWSUsingNetwork -> ctypes.c_bool
 #                           , swp.minSlopeOF, swp.unSatKType, swp.coefUnsaturatedK
 #                           , swp.minSlopeChBed, swp.minChBaseWidth, swp.chRoughness
 #                           , swp.dryStreamOrder, swp.ccLCRoughness
@@ -518,10 +520,11 @@ print("subwatershedPars. userSet :", swp.userSet)    # 1 : true, 0: false
 # ========================================================
 
 # 업데이트 된 매개변수 조회하기
-wsid = 1 # 1번은 샘플. setOneSWSParsAndUpdateAllSWSUsingNetwork()에서 업데이트 된 매개변수 조회할 유역 id 지정한다. 
+wsid = 100 # 1번은 샘플. setOneSWSParsAndUpdateAllSWSUsingNetwork()에서 업데이트 된 매개변수 조회할 유역 id 지정한다. 
 swp = wsi.subwatershedPars(wsid) # current ws id / [ctypes.c_int] -> swsParameters
 print("subwatershedPars. wsid :", swp.wsid)
 print("subwatershedPars. iniSaturation :", swp.iniSaturation)
+print("subwatershedPars. iniLossPRCP_mm :", swp.iniLossPRCP_mm)
 print("subwatershedPars. minSlopeOF :", swp.minSlopeOF)
 print("subwatershedPars. unSatKType :", swp.unSatKType, "  Name :", unSaturatedKType(swp.unSatKType).name)  # 	Constant=0, Linear=1, Exponential=2, usKNone=3
 print("subwatershedPars. coefUnsaturatedK :", swp.coefUnsaturatedK)

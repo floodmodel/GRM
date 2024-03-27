@@ -144,7 +144,7 @@ extern "C" // for python //grmWSinfo의 내용을  재정의 한다.
 
 	// If this class was instanced by using gmp file --"grmWS(string gmpFPN)".		
 	GRMDLL_API bool setOneSWSParsAndUpdateAllSWSUsingNetwork(grmWSinfo* f,
-		int wsid, double iniSat,
+		int wsid, double iniSat, double iniLossPRCP_mm,
 		double minSlopeLandSurface, unSaturatedKType unSKType, double coefUnsK,
 		double minSlopeChannel, double minChannelBaseWidth, double roughnessChannel,
 		int dryStreamOrder, double ccLCRoughness,
@@ -156,7 +156,7 @@ extern "C" // for python //grmWSinfo의 내용을  재정의 한다.
 		double snowCovRatio, double smeltCoef,
 		double iniFlow = 0)
 	{
-		return f->setOneSWSParsAndUpdateAllSWSUsingNetwork(wsid, iniSat,
+		return f->setOneSWSParsAndUpdateAllSWSUsingNetwork(wsid, iniSat, iniLossPRCP_mm,
 			minSlopeLandSurface, unSKType, coefUnsK,
 			minSlopeChannel, minChannelBaseWidth, roughnessChannel,
 			dryStreamOrder, ccLCRoughness,

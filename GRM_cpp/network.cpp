@@ -98,14 +98,12 @@ int setFlowNetwork()
             //하류 셀이 전체 raster 영역 내부이면,
             if (cvais[tCx][tRy] == -1) {// 하류 셀이 effect 셀 영역 외부에 있으면,
                 int wsidKey = cvps[i].wsid; // 이건 현재셀이 포함된 ws의 id
-                //di.wsn.wsOutletCVids 는 readDomainFileAndSetupCV() 에서 초기화 되어 있다.
 				di.wsn.wsidNearbyDown[cvps[i].wsid] = -1;// 하류 셀이 eff 영역 외부이면, tidx가 cvs의 영역을 벗어난다..
                 if (di.wsn.wsOutletidxs.find(wsidKey) == di.wsn.wsOutletidxs.end() ||
                     cvs[i].fac > cvs[di.wsn.wsOutletidxs[wsidKey]].fac) {
                     // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
                     //이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
                     di.wsn.wsOutletidxs[wsidKey] = i;
-                    //di.wsn.wsidNearbyDown[cvps[i].wsid] = -1;// 하류 셀이 eff 영역 외부이면, tidx가 cvs의 영역을 벗어난다..
                 }
             }
             else {
@@ -136,7 +134,6 @@ int setFlowNetwork()
                 // 현재 ws에 대한 outlet셀이 지정되지 않았거나, 
                 // 이미 지정되어 있는 셀의 fac 보다 현재 셀의 fac가 크면
                 di.wsn.wsOutletidxs[wsidKey] = i;
-				//di.wsn.wsidNearbyDown[cvps[i].wsid] = -1;
             }
         }
     }
@@ -145,7 +142,6 @@ int setFlowNetwork()
     }
     return 1;
 }
-
 
 
 int initWatershedNetwork()
@@ -159,8 +155,6 @@ int initWatershedNetwork()
     di.wsn.mdWSIDofCurrentWS.clear();
     return 1;
 }
-
-
 
 
 int updateWatershedNetwork()
@@ -247,9 +241,8 @@ int updateWatershedNetwork()
 vector<int> getAllUpstreamCells(int startingBaseidx)
 {
     bool bAllisEnded = false;
-    vector<int> cvidxsOfAllUpstreamCells;// = new List<int>();
+    vector<int> cvidxsOfAllUpstreamCells;
     vector<int> baseidxs;
-    //vector<int> currentUpstreamCells;
     cvidxsOfAllUpstreamCells.push_back(startingBaseidx);
     baseidxs.push_back(startingBaseidx);
     while (!bAllisEnded == true)    {
@@ -263,8 +256,6 @@ vector<int> getAllUpstreamCells(int startingBaseidx)
                 bAllisEnded = false;
                 for (int i : cvs[curCVidx].neighborCVidxFlowintoMe) {
                     int upArrayNum = i;
-                    //int colX = cvps[i].xCol;
-                    //int rowY = cvps[i].yRow;
                     currentUpstreamCells.push_back(i); 
                     cvidxsOfAllUpstreamCells.push_back(i);
                 }

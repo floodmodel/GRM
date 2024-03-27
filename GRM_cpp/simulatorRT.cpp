@@ -86,7 +86,7 @@ int startSimulationRT()
                             {// 2019.10.01. 최. prediction 관련. 한번 여기 지나가면, 
                             // 데이터로 모델링 하던 것은 모두 ReservoirOperation,  AutoROM으로 변경됨
                              // fc 데이터가 있는 것 까지는 데이터 이용, 없으면, autoROM
-                                convertFCtypeToAutoROM(targetDataTime, idx,0);
+                                convertFCtoAutoROM(targetDataTime, idx,0);
                                 break;
                             }
                             Sleep(2000);

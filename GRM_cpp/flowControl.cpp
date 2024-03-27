@@ -16,7 +16,6 @@ int updateFCCellinfoAndData()
 {
     fccds.cvidxsinlet.clear();
     fccds.cvidxsFCcell.clear();
-    //fccds.fcDataAppliedNowT_m3Ps.clear(); // 2022.10.17 주석처리
     fccds.inputFlowDataFCType1_m3Ps.clear();
 	fccds.inputFlowDataFCType2_m3Ps.clear();
 	fccds.inputFlowDataFCType3_m3Ps.clear();
@@ -123,11 +122,10 @@ void calFCReservoirOutFlow(int i, double nowTmin)
 			// 아래 조건 주석처리하면, 마지막 자료가 끝까지 사용된다..
 			if (ts.enforceFCautoROM == -1) {
 				setNoFluxCVCH(i);
-				//fccds.fcDataAppliedNowT_m3Ps[i] = 0; // 2022.10.17 주석처리
 			}
 			else if (ts.enforceFCautoROM == 1) {	
 				double t_currentFC = dtfc * fccds.curDorder[i];
-				convertFCtypeToAutoROM(dtos(t_currentFC, 2) +" min", i,0); // Reservoir 의 fc idx는 0
+				convertFCtoAutoROM(dtos(t_currentFC, 2) +" min", i,0); // Reservoir 의 fc idx는 0
 			}
 			calStreamFlow = 0;
 		}
@@ -142,7 +140,6 @@ void calFCReservoirOutFlow(int i, double nowTmin)
 			cvs[i].stream.csaCH, cvs[i].stream.isCompoundCS, cvs[i].stream.chURBaseWidth_m,
 			cvs[i].stream.chLRArea_m2, cvs[i].stream.chLRHeight, cvs[i].stream.bankCoeff);
 		cvs[i].stream.uCH = cvs[i].stream.QCH_m3Ps / cvs[i].stream.csaCH;
-		//fccds.fcDataAppliedNowT_m3Ps[i] = cvs[i].stream.QCH_m3Ps; // 2022.10.17 주석처리
 	}
 
     //아래에서  cvs[i].QsumCVw_dt_m3는 t-dt 에서의 값이 저장되어 있다.
@@ -175,14 +172,13 @@ void calSinkOrSourceFlow(int i, double nowTmin, flowControlType fcType, int fcTy
 			fccds.curDorder[i]++;
 		}
 		else {
-			// 아래 조건 주석처리하면, 마지막 자료가 끝까지 사용된다..
-			if (ts.enforceFCautoROM == -1) {
-				setNoFluxCVCH(i);
-				//fccds.fcDataAppliedNowT_m3Ps[i] = 0.0; cvs[i].stream.QCH_m3Ps  // 2022.10.17 주석처리
-			}
-			else if (ts.enforceFCautoROM == 1) {
-				convertFCtypeToAutoROM(dtos(t_currentFC, 2) + " min", i,0); // 첫번째 fc idx를 전환한다.
-			}
+			// 2023.11.23. Sinkflow, sourceflow에서는 저수지 제원 입력하지 않는다. 그러므로 AutoROM으로 강제 전환하는 기능 없다.
+			//if (ts.enforceFCautoROM == -1) {
+			//	setNoFluxCVCH(i);
+			//}
+			//else if (ts.enforceFCautoROM == 1) {
+			//	convertFCtoAutoROM(dtos(t_currentFC, 2) + " min", i,0); // 첫번째 fc idx를 전환한다.
+			//}
 			return; //sink, source flow 모의하지 않는다
 		}
 	}
@@ -245,7 +241,6 @@ void calSinkOrSourceFlow(int i, double nowTmin, flowControlType fcType, int fcTy
             cvs[i].stream.chLRHeight, cvs[i].stream.bankCoeff);
         cvs[i].stream.uCH = cvs[i].stream.QCH_m3Ps / cvs[i].stream.csaCH;
     }
-    //fccds.fcDataAppliedNowT_m3Ps[i] = QtoApp;   // 2022.10.17 주석처리
 	int dtsec = ts.dtsec;
 	if (fcType == flowControlType::SinkFlow) {
 		cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
@@ -262,6 +257,7 @@ void calSinkOrSourceFlow(int i, double nowTmin, flowControlType fcType, int fcTy
 	}
 }
 
+
 void calDetensionPond(int i, double nowTmin) {
 	// 저류지는 댐과 다르게 하천 셀 옆에 있으므로, 유입량, 유출량, 저류량 변수를 별도로 배정한다.
 	// DP_storageCumulative_m3, DP_inflow_m3Ps, DP_outflow_m3Ps
@@ -269,77 +265,81 @@ void calDetensionPond(int i, double nowTmin) {
 	double dy_m = di.cellSize;
 	flowControlinfo afci;
 	afci = prj.fcs[i][0];
-	double Qflow = 0.0;
-	if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-		Qflow = cvs[i].QOF_m3Ps;
-	}
-	else {
-		Qflow = cvs[i].stream.QCH_m3Ps;
-	}
 	cvs[i].DP_inflow_m3Ps = 0.0;
 	cvs[i].DP_outflow_m3Ps = 0.0;
-	// inflow to DP
-	if (Qflow > afci.dp_QT_StoD_CMS) { // 기준 유량보다 하천 유량이 큰 경우
+	double Qflow = 0.0;
+	if (cvs[i].flowType == cellFlowType::OverlandFlow) {
 		if (cvs[i].DP_storageCumulative_m3 < afci.maxStorage_m3) {
-			double rStD = 0.0;
 			double Qi = 0.0;
-			double Qdiff_max = 0.0;
-			rStD = afci.dp_Wdi_m / (afci.dp_Wdi_m + afci.dp_Ws_m) * afci.dp_Cr_StoD;
-			Qdiff_max = Qflow - afci.dp_QT_StoD_CMS;
-			Qi = Qdiff_max * rStD;
-			if (Qi > afci.dp_Qi_max_CMS) {
-				Qi = afci.dp_Qi_max_CMS;
-			}
-			if (Qi > Qdiff_max) { // DP 유입 기준 유량을 초과하는 하천 최대 유량을 초과해서 유입되지 않게 한다.
-				Qi = Qdiff_max;
-			}
 			double rd2 = 0.0;
+			Qflow = cvs[i].QOF_m3Ps;
+			Qi = Qflow;
 			rd2 = cvs[i].DP_storageCumulative_m3 + Qi * ts.dtsec;
 			if (rd2 > afci.maxStorage_m3) {
 				Qi = (afci.maxStorage_m3 - cvs[i].DP_storageCumulative_m3) / ts.dtsec;
 			}
-			cvs[i].DP_inflow_m3Ps = Qi;
 			Qflow = Qflow - Qi;
-			if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-				cvs[i].QOF_m3Ps = Qflow;
-				cvs[i].hOF = hByManningEqForOF(cvs[i].QOF_m3Ps, cvs[i].rcOF, cvs[i].slopeOF, dy_m);
-			}
-			else {
-				cvs[i].stream.QCH_m3Ps = Qflow;
-				calChannelAUH(i);
-			}
+			cvs[i].QOF_m3Ps = Qflow;
+			cvs[i].hOF = hByManningEqForOF(cvs[i].QOF_m3Ps, cvs[i].rcOF, cvs[i].slopeOF, dy_m);
+			cvs[i].DP_inflow_m3Ps = Qi;
 			cvs[i].DP_storageCumulative_m3 = cvs[i].DP_storageCumulative_m3 + Qi * ts.dtsec;
 		}
+		// Overland flow 셀에서는 저류지 유출을 고려하지 않는다.
 	}
-	else if (cvs[i].DP_storageCumulative_m3 > 0) {
-		double rd2 = 0.0; //DP storage
-		double QdpO = 0.0; // DP outflow
-		rd2 = cvs[i].DP_storageCumulative_m3 - afci.dp_Qo_max_CMS * ts.dtsec;
-		if (rd2 > 0.0) {
-			QdpO = afci.dp_Qo_max_CMS;
+	else {
+		Qflow = cvs[i].stream.QCH_m3Ps;
+		// inflow to DP
+		if (Qflow > afci.dp_QT_StoD_CMS) { // 기준 유량보다 하천 유량이 큰 경우
+			if (cvs[i].DP_storageCumulative_m3 < afci.maxStorage_m3) {
+				double rStD = 0.0;
+				double Qi = 0.0;
+				double Qdiff_max = 0.0;
+				rStD = afci.dp_Wdi_m / (afci.dp_Wdi_m + afci.dp_Ws_m) * afci.dp_Cr_StoD;
+				Qdiff_max = Qflow - afci.dp_QT_StoD_CMS;
+				Qi = Qdiff_max * rStD;
+				if (Qi > afci.dp_Qi_max_CMS) {
+					Qi = afci.dp_Qi_max_CMS;
+				}
+				if (Qi > Qdiff_max) { // DP 유입 기준 유량을 초과하는 하천 최대 유량을 초과해서 유입되지 않게 한다.
+					Qi = Qdiff_max;
+				}
+				double rd2 = 0.0;
+				rd2 = cvs[i].DP_storageCumulative_m3 + Qi * ts.dtsec;
+				if (rd2 > afci.maxStorage_m3) {
+					Qi = (afci.maxStorage_m3 - cvs[i].DP_storageCumulative_m3) / ts.dtsec;
+				}
+				cvs[i].DP_inflow_m3Ps = Qi;
+				Qflow = Qflow - Qi;
+				cvs[i].stream.QCH_m3Ps = Qflow;
+				calChannelAUH(i);
+				cvs[i].DP_storageCumulative_m3 = cvs[i].DP_storageCumulative_m3 + Qi * ts.dtsec;
+			}
 		}
-		else {
-			QdpO = cvs[i].DP_storageCumulative_m3 / ts.dtsec;
-		}
-
-		double Qflow2 = 0.0;
-		Qflow2 = Qflow + QdpO;
-		if (Qflow2 > afci.dp_QT_StoD_CMS) { // QdpO==0 이면 이 조건에 들어오진 안는다.
-			QdpO = afci.dp_QT_StoD_CMS - Qflow;
-		}
-		cvs[i].DP_outflow_m3Ps = QdpO;
-		if (cvs[i].flowType == cellFlowType::OverlandFlow) {
-			cvs[i].QOF_m3Ps += QdpO;
-			cvs[i].hOF = hByManningEqForOF(cvs[i].QOF_m3Ps, cvs[i].rcOF, cvs[i].slopeOF, dy_m);
-		}
-		else {
+		else if (cvs[i].DP_storageCumulative_m3 > 0) { // 이때 저류량이 있으면, 저류지 유출이 발생한다.
+			double rd2 = 0.0; //DP storage
+			double QdpO = 0.0; // DP outflow
+			rd2 = cvs[i].DP_storageCumulative_m3 - afci.dp_Qo_max_CMS * ts.dtsec;
+			if (rd2 > 0.0) {
+				QdpO = afci.dp_Qo_max_CMS;
+			}
+			else {
+				QdpO = cvs[i].DP_storageCumulative_m3 / ts.dtsec;
+			}
+			double Qflow2 = 0.0;
+			Qflow2 = Qflow + QdpO;
+			if (Qflow2 > afci.dp_QT_StoD_CMS) { // QdpO==0 이면 이 조건에 들어오진 안는다.
+				QdpO = afci.dp_QT_StoD_CMS - Qflow;
+			}
+			cvs[i].DP_outflow_m3Ps = QdpO;
 			cvs[i].stream.QCH_m3Ps += QdpO;
 			calChannelAUH(i);
+
+			cvs[i].DP_storageCumulative_m3 = cvs[i].DP_storageCumulative_m3 - QdpO * ts.dtsec;
+			if (cvs[i].DP_storageCumulative_m3 < 0.0) { cvs[i].DP_storageCumulative_m3 = 0.0; }
 		}
-		cvs[i].DP_storageCumulative_m3 = cvs[i].DP_storageCumulative_m3 - QdpO * ts.dtsec;
-		if (cvs[i].DP_storageCumulative_m3 < 0.0) { cvs[i].DP_storageCumulative_m3 = 0.0; }
 	}
 }
+
 
 void calChannelAUH(int i) {
 	cvs[i].stream.csaCH = getChCSAusingQbyiteration(cvs[i],
@@ -355,7 +355,6 @@ void calChannelAUH(int i) {
 void calReservoirOperation(int i, double nowTmin)
 {
     int dtsec = ts.dtsec;
-    //int i = i + 1;
 	flowControlinfo afci;
 	afci = prj.fcs[i][0];
     double QforDTbySinkOrSourceFlow = 0;
@@ -407,7 +406,6 @@ void calReservoirOperation(int i, double nowTmin)
 			if (cvs[i].storageCumulative_m3 < 0) { 
 				cvs[i].storageCumulative_m3 = 0; 
 			}
-            //cvs[i].storageCumulative_m3 = maxStorageApp; // 최대저류량 유지. 2023.03.13. 위의 식으로 수정.
         }
         if (Qout_cms < 0) { Qout_cms = 0; }
         calReservoirOutFlowInReservoirOperation(i, Qout_cms, dy_m);
@@ -506,7 +504,7 @@ int getCVidxByFcName(string fcName)
     return -1;
 }
 
-void convertFCtypeToAutoROM(string strDate, int cvidx, int ifc)
+void convertFCtoAutoROM(string strDate, int cvidx, int ifc)
 {
 	reservoirOperationType rot_bak;
 	rot_bak = prj.fcs[cvidx][ifc].roType;
