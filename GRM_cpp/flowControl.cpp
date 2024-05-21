@@ -412,20 +412,24 @@ void calReservoirOperation(int i, double nowTmin)
         break;
     }
     case reservoirOperationType::RigidROM: {
-        if (cvs[i].storageCumulative_m3 >= maxStorageApp) {
-            Qout_cms = (cvs[i].storageCumulative_m3
-                - maxStorageApp) / ts.dtsec; // 차이만큼 모두 유출
-            cvs[i].storageCumulative_m3 = maxStorageApp;
-        }
-        else  if (cvs[i].storageCumulative_m3 < afci.roConstQ_cms * ts.dtsec) {
-            // 현재 저류량이 dtsec 유출량 보다 작은 경우, 저류된 모든 양이 유출
-            Qout_cms = cvs[i].storageCumulative_m3 / ts.dtsec;
-            cvs[i].storageCumulative_m3 = 0;
-        }
+		if (cvs[i].storageCumulative_m3 >= maxStorageApp) { // 현재 저류량이 최대 저류량보다 클때
+			Qout_cms = (cvs[i].storageCumulative_m3
+				- maxStorageApp) / ts.dtsec; // 차이만큼 모두 유출
+			cvs[i].storageCumulative_m3 = maxStorageApp;
+		}
+		else  if (cvs[i].QsumCVw_m3Ps < afci.roConstQ_cms) {
+			// 현재 유입량이 지정된 방류량보다 작은경우로 수정. 2024.05.21 <-- RigidROM에서 유입수문곡선의 첨두값을 미리 알수 없으므로, 지정된 유량을 기준으로 일정율을 적용한다.
+			Qout_cms = cvs[i].QsumCVw_m3Ps * afci.roConstR;
+		}
+		//else  if (cvs[i].storageCumulative_m3 < afci.roConstQ_cms * ts.dtsec) {
+		//    // 현재 저류량이 dtsec 유출량 보다 작은 경우, 저류된 모든 양이 유출
+		//    Qout_cms = cvs[i].storageCumulative_m3 / ts.dtsec;
+		//    cvs[i].storageCumulative_m3 = 0;
+		//}
         else {
             Qout_cms = afci.roConstQ_cms;
             cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3
-                - afci.roConstQ_cms;
+                - afci.roConstQ_cms * ts.dtsec;
             if (cvs[i].storageCumulative_m3 < 0) {
                 cvs[i].storageCumulative_m3 = 0;
             }

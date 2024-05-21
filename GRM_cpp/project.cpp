@@ -388,7 +388,7 @@ int openProjectFile(int forceRealTime)
 						}
 					}
 					if (afci.roType == reservoirOperationType::AutoROM && afci.autoROMmaxOutflow_cms < 0) {
-						writeLog(fpnLog, "WARNNING : [" + afci.fcName + "] AutoROM max outflow of the reservoir is smaller than '0'. '0' is applied.\n", 1, 1);
+						writeLog(fpnLog, "WARNNING : [" + afci.fcName + "] AutoROM max outflow of the reservoir is smaller than '0'. '0' is applied and the outflow is not limited.\n", 1, 1);
 						fcinfos[i].autoROMmaxOutflow_cms = 0.0;
 					}
 				}
@@ -2369,9 +2369,22 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			fci->roType = arot;
 			return 1;
 		}
-		if (fci->roType == reservoirOperationType::ConstantQ) {
-			if (aline.find(fldName.ROConstQ) != string::npos) {
-				vString = getValueStringFromXmlLine(aline, fldName.ROConstQ);
+		if (fci->roType == reservoirOperationType::RigidROM) {
+			if (aline.find(fldName.ROConstRatio) != string::npos) {
+				vString = getValueStringFromXmlLine(aline, fldName.ROConstRatio);
+				if (vString != "" && stod_c(vString) >= 0 && stod_c(vString) <= 1.0) {
+					fci->roConstR = stod_c(vString);
+				}
+				else {
+					writeLog(fpnLog, "ERROR : Constant outlfow ratio of reservoir ["
+						+ fci->fcName + "] is invalid.\n", 1, 1);
+					return -1;
+				}
+				return 1;
+			}
+			if (aline.find(fldName.ROConstDischarge) != string::npos
+				&& aline.find(fldName.ROConstDischargeDuration_hr) == string::npos) {
+				vString = getValueStringFromXmlLine(aline, fldName.ROConstDischarge);
 				if (vString != "" && stod_c(vString) >= 0) {
 					fci->roConstQ_cms = stod_c(vString);
 				}
@@ -2382,8 +2395,23 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 				}
 				return 1;
 			}
-			if (aline.find(fldName.ROConstQDuration) != string::npos) {
-				vString = getValueStringFromXmlLine(aline, fldName.ROConstQDuration);
+		}
+		if (fci->roType == reservoirOperationType::ConstantQ) {
+			if (aline.find(fldName.ROConstDischarge) != string::npos
+				&& aline.find(fldName.ROConstDischargeDuration_hr) == string::npos) {
+				vString = getValueStringFromXmlLine(aline, fldName.ROConstDischarge);
+				if (vString != "" && stod_c(vString) >= 0) {
+					fci->roConstQ_cms = stod_c(vString);
+				}
+				else {
+					writeLog(fpnLog, "ERROR : Constant outlfow of reservoir ["
+						+ fci->fcName + "] is invalid.\n", 1, 1);
+					return -1;
+				}
+				return 1;
+			}
+			if (aline.find(fldName.ROConstDischargeDuration_hr) != string::npos) {
+				vString = getValueStringFromXmlLine(aline, fldName.ROConstDischargeDuration_hr);
 				if (vString != "" && stod_c(vString) >= 0) {
 					fci->roConstQDuration_hr = stod_c(vString);
 				}

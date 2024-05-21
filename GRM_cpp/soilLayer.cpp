@@ -32,7 +32,7 @@ void calEffectiveRFbyInfiltration(int i, int dtrf_sec, int dtsec)
     double residuMC_ThetaR = 0.0;
 
     cvs[i].ssr = soilSSRbyCumulF(cvs[i].soilWaterC_tm1_m,
-        cvs[i].sdEffAsWaterDepth_m);
+        cvs[i].sdEffAsWaterDepth_m); // 현재의 투수면적에서의 포화도로 하는것이 맞다.
 	if (cvs[i].ssr > SOIL_SATURATION_RATIO_CRITERIA)	{
 		cvs[i].isAfterSaturated = 1;
 		cvs[i].ifF_mPdt = 0;
@@ -118,7 +118,7 @@ void calEffectiveRFbyInfiltration(int i, int dtrf_sec, int dtsec)
     }
     // 유효강우량의 계산이 끝났으므로, 현재까지 계산된 침투, 강우강도 등을 tM1 변수로 저장한다.    
     cvs[i].ssr = soilSSRbyCumulF(cvs[i].soilWaterC_m, 
-        cvs[i].sdEffAsWaterDepth_m);
+        cvs[i].sdEffAsWaterDepth_m); // 현재의 투수면적에서의 포화도로 하는것이 맞다.
     if (cvs[i].ssr > SOIL_SATURATION_RATIO_CRITERIA) {
         cvs[i].isAfterSaturated = 1;
     }
