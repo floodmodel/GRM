@@ -413,9 +413,8 @@ typedef struct _projectFileFieldName
 	const string RestrictedPeriod_End = "RestrictedPeriod_End";
 	const string AutoROM_MaxOutFlow_CMS = "AutoROM_MaxOutFlow_CMS";
 	const string ROType = "ROType";
-	const string ROConstDischarge = "ROConstDischarge"; // 일정방류량
-	const string ROConstRatio = "ROConstRatio"; // 일정방류율
-	const string ROConstDischargeDuration_hr = "ROConstDischargeDuration_hr";
+	const string ROConstQ = "ROConstQ";
+	const string ROConstQDuration = "ROConstQDuration";
 	// 저류지관련
 	const string DP_QT_StoD_CMS = "DP_QT_StoD_CMS";
 	const string DP_Qi_max_CMS = "DP_Qi_max_CMS";
@@ -580,7 +579,6 @@ typedef struct _flowControlinfo
 
 	reservoirOperationType roType = reservoirOperationType::None;
 	double roConstQ_cms = -1.0;
-	double roConstR = 0.0;
 	double roConstQDuration_hr = -1.0;
 
 	//저류지 관련
