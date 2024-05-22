@@ -234,6 +234,7 @@ enum class landCoverCode
 	None
 };
 
+
 typedef struct _projectFileTable
 {
 	const string nProjectSettings = "ProjectSettings";
@@ -340,15 +341,17 @@ typedef struct _projectFileFieldName
 	//==========================
 
 	const string SimulateFlowControl = "SimulateFlowControl";
+
+	const string PrintOption = "PrintOption";
+	const string PrintAveValue = "PrintAveValue";
+	const string AveValueTimeInterval_min = "AveValueTimeInterval_min";
+	const string ValueSeparator = "ValueSeparator";
 	const string MakeIMGFile = "MakeIMGFile";
 	const string MakeASCFile = "MakeASCFile";
 	const string MakeSoilSaturationDistFile = "MakeSoilSaturationDistFile";
 	const string MakeRfDistFile = "MakeRfDistFile";
 	const string MakeRFaccDistFile = "MakeRFaccDistFile";
 	const string MakeFlowDistFile = "MakeFlowDistFile";
-	const string PrintOption = "PrintOption";
-	const string PrintAveValue = "PrintAveValue";
-	const string AveValueTimeInterval_min = "AveValueTimeInterval_min";
 	const string WriteLog = "WriteLog";
 	// SubWatershedSettings table
 	const string ID_SWP = "ID";
@@ -911,6 +914,7 @@ typedef struct _projectFile
 	int printAveValue = 0;// true : 1, false : -1 // 출력기간 평균 값 출력 여부
 	int dtPrintAveValue_min = 0;
 	int dtPrintAveValue_sec = 0;
+	string vSeparator = "\t";
 
 	int forSimulation = 0;
 

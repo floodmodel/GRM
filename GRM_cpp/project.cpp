@@ -1666,6 +1666,7 @@ int readXmlRowProjectSettings(string aline)
 		}
 		return 1;
 	}
+	// prj.printOption에 상관없이 IMG 파일 출력 가능
 	if (aline.find(fldName.MakeIMGFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.MakeIMGFile);
 		prj.makeIMGFile = -1;
@@ -1681,6 +1682,7 @@ int readXmlRowProjectSettings(string aline)
 		}
 		return 1;
 	}
+	// prj.printOption에 상관없이 ASCII 파일 출력 가능
 	if (aline.find(fldName.MakeASCFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.MakeASCFile);
 		prj.makeASCFile = -1;
@@ -1763,7 +1765,8 @@ int readXmlRowProjectSettings(string aline)
 			string vStringL = lower(vString);
 			if (vStringL == "all") {
 				prj.printOption = GRMPrintType::All;
-			}else if (vStringL == "dischargefile") {
+			}
+			else if (vStringL == "dischargefile") {
 				prj.printOption = GRMPrintType::DischargeFile;
 			}
 			else if (vStringL == "dischargeandfcfile") {
@@ -1810,6 +1813,26 @@ int readXmlRowProjectSettings(string aline)
 		return 1;
 	}
 
+	if (aline.find(fldName.ValueSeparator) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.ValueSeparator);
+		prj.vSeparator = "\t";
+		if (vString != "") {
+			string vStringL = lower(vString);
+			if (vStringL == "space") {
+				prj.vSeparator = " ";
+			}
+			else if (vStringL == "comma") {
+				prj.vSeparator = ",";
+			}
+			else if (vStringL == "tab") {
+				prj.vSeparator = "\t";
+			}
+			else {
+				prj.vSeparator = "\t";
+			}
+		}
+		return 1;
+	}
 
 	if (aline.find(fldName.WriteLog) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.WriteLog);

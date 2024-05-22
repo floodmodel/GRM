@@ -18,7 +18,8 @@ extern cvAtt* cvsb;
 
 void writeRealTimeSimResults(string tStrToPrint, double cinterp, double tsFromStarting_sec)
 {
-    string strWPName;
+	string vs = prj.vSeparator;
+	string strWPName;
     string strFNP;
     string vToP = "";
     double Qobs_cms;
@@ -50,9 +51,9 @@ void writeRealTimeSimResults(string tStrToPrint, double cinterp, double tsFromSt
             string printLine;
             // 출력 순서는 시간, 모의유량, 관측유량, 강우, 시간
             printLine = tStrToPrint
-                + "\t" + vToP + "\t" + dtos(Qobs_cms, 2)
-                + "\t" + dtos(wpSimValue.prcpUpWSAveForPT_mm[i], 2) + "\n";
-                //+ "\t" + dtos(tsFromStarting_sec / 60.0, 2) + "\n";
+                + vs + vToP + vs + dtos(Qobs_cms, 2)
+                + vs + dtos(wpSimValue.prcpUpWSAveForPT_mm[i], 2) + "\n";
+                //+ vs + dtos(tsFromStarting_sec / 60.0, 2) + "\n";
             appendTextToTextFile(ofs.ofpnWPs[i], printLine);
         }
 
