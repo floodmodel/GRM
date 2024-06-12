@@ -785,7 +785,7 @@ typedef struct _cvAtt
 	unSaturatedKType ukType;
 	double coefUK = 0.0;
 	double hUAQfromChannelBed_m = 0.0;  //하도셀에서 비피압대수층의 수심(하도바닥에서의 높이)[m].
-	double hUAQfromBedrock_m = 0.0;///암반으로부터 비피압대수층의 상단부까지의 깊이[m]. 토양깊이.
+	double hUAQfromBedrock_m = 0.0; //암반으로부터 비피압대수층의 상단부까지의 깊이[m]. 토양깊이.
 	double sdToBedrock_m = 0.0;//현재 CV 토양의 암반까지의 깊이[m]. 지표면에서 암반까지의 깊이임.
 	double bfQ_m3Ps = 0.0;//현재 CV의 기저유출량 [m^3/s]
 	landCoverCode lcCode;

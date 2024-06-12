@@ -77,6 +77,8 @@ int setCVRF(int order)
 			}
 		}
 		double* rfiSumAllCellsInCurRFData_mPs_L = new double[prj.mdp](); //0으로 초기화
+
+ //parallel================================================
 #pragma omp parallel
 		{
 			int nth = omp_get_thread_num();
@@ -128,14 +130,76 @@ int setCVRF(int order)
 				rfiSumAllCellsInCurRFData_mPs_L[nth] += cvs[i].rfiRead_mPsec;
 			}
 		}
-
-		// reduction
+				// reduction
 		for (int nth = 0; nth < prj.mdp; ++nth) {
 			for (int idx : wpSimValue.wpCVidxes) {
 				wpSimValue.prcpiReadSumUpWS_mPs[idx] += rfiReadSumUpWS_mPs_L[nth][idx];
 			}
 			ts.rfiSumAllCellsInCurRFData_mPs += rfiSumAllCellsInCurRFData_mPs_L[nth];
 		}
+ //parallel ===================================================
+
+
+//// serial==================================================
+//		map<int, double> rfiReadSumUpWS_mPs_serial;
+//		double rfiSumAllCellsInCurRFData_mPs_serial=0.0; //0으로 초기화
+//			for (int i = 0; i < di.cellNnotNull; ++i) {
+//				// 유역의 전체 강우량은 inlet 등으로 toBeSimulated == -1 여도 계산에 포함한다.
+//				// 강우는 상류에 내린 강우도 포함하는 것이 타당.
+//				// 상류 cv 개수에 이 조건 추가하려면 주석 해제.
+//				//if (cvs[i].toBeSimulated == -1) {
+//				//    continue;  }
+//				int wid = cvps[i].wsid;
+//				double iniLoss_PRCP_mm = prj.swps[wid].iniLossPRCP_mm;
+//				double inRF_mm = 0.0;
+//				if (prj.rfDataType == weatherDataType::Raster_ASC) {
+//					inRF_mm = rfasc->valuesFromTL[cvps[i].xCol][cvps[i].yRow];
+//				}
+//				else {
+//					inRF_mm = idNv[cvps[i].wsid]; 
+//				}
+//
+//				double inRFi_mPs = 0.0;
+//				if (inRF_mm <= 0) {
+//					inRFi_mPs = 0;
+//				}
+//				else {
+//					inRFi_mPs = rfintensity_mPsec(inRF_mm, dtrf_sec);
+//				}
+//				cvs[i].rfiRead_mPsec = inRFi_mPs;
+//				cvs[i].rfAccRead_fromStart_mm = cvs[i].rfAccRead_fromStart_mm + inRF_mm; // 파일에서 읽은 강우량을 더한다.
+//				if (iniLoss_PRCP_mm > 0.0) { 
+//					if (cvs[i].rfAccRead_fromStart_mm < iniLoss_PRCP_mm) {
+//						inRFi_mPs = 0.0;
+//					}
+//					else {
+//
+//						if (wid == 203 || wid == 203600) {
+//							int a = 1;
+//						}
+//
+//						double diff_mm=0.0;
+//						diff_mm = cvs[i].rfAccRead_fromStart_mm - iniLoss_PRCP_mm; // 처음 커지는 부분에서 강우량 차이 받는다.
+//						if (diff_mm < 0) {
+//							diff_mm = 0.0;
+//						}
+//						inRFi_mPs = rfintensity_mPsec(diff_mm, dtrf_sec);
+//						prj.swps[wid].iniLossPRCP_mm = 0.0; // 누적 강수가 초기 손실량을 초과하면, 이제 초기 손실을 사용하지 않으므로, 0으로 설정
+//					}
+//				}
+//				cvs[i].rfiRead_After_iniLoss_mPsec = inRFi_mPs;
+//
+//				for (int idx : cvs[i].downWPCVidx) {
+//					rfiReadSumUpWS_mPs_serial[idx] += cvs[i].rfiRead_mPsec;
+//				}
+//				rfiSumAllCellsInCurRFData_mPs_serial += cvs[i].rfiRead_mPsec;
+//			}
+//			// reduction
+//				for (int idx : wpSimValue.wpCVidxes) {
+//					wpSimValue.prcpiReadSumUpWS_mPs[idx] = rfiReadSumUpWS_mPs_serial[idx];
+//				}
+//				ts.rfiSumAllCellsInCurRFData_mPs += rfiSumAllCellsInCurRFData_mPs_serial;
+//// serial ==========================================
 
 		if (prj.rfDataType == weatherDataType::Raster_ASC
 			|| prj.rfDataType == weatherDataType::Mean_DividedArea) {
