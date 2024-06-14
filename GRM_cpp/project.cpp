@@ -1227,8 +1227,8 @@ int readXmlRowProjectSettings(string aline)
 		if (vString == "") {
 			vString = getValueStringFromXmlLine(aline, fldName.PrecipitationInterval_min_03);
 		}
-		if (vString != "" && stoi(vString)>0) {
-			prj.rfinterval_min = stoi(vString);
+		if (vString != "" && stoi_c(vString)>0) {
+			prj.rfinterval_min = stoi_c(vString);
 		}
 		else if (prj.simType == simulationType::Normal) {
 			writeLog(fpnLog, "ERROR : Precipitation data time interval is invalid.\n", 1, 1);
@@ -1261,7 +1261,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.TemperatureMaxInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMaxInterval_min);
 		if (vString != "") {
-			int t_min = stoi(vString);
+			int t_min = stoi_c(vString);
 			if (t_min != 1440) {
 				string err = "ERROR : Max temperature data time interval is invalid.\n";
 				err = err + "           Max temperature data time interval have to be 1440 minutes.\n";
@@ -1299,7 +1299,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.TemperatureMinInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMinInterval_min);
 		if (vString != "") {
-			int t_min = stoi(vString);
+			int t_min = stoi_c(vString);
 			if (t_min != 1440) {
 				string err = "ERROR : Min temperature data time interval is invalid.\n";
 				err = err + "           Min temperature data time interval have to be 1440 minutes.\n";
@@ -1337,7 +1337,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.DaytimeLengthInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.DaytimeLengthInterval_min);
 		if (vString != "") {
-			int t_min = stoi(vString);
+			int t_min = stoi_c(vString);
 			if (t_min != 1440) {
 				string err = "ERROR : Daytime length data time interval is invalid.\n";
 				err = err + "           Daytime length data time interval have to be 1440 minutes.\n";
@@ -1405,7 +1405,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.SolarRadiationInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SolarRadiationInterval_min);
 		if (vString != "") {
-			int t_min = stoi(vString);
+			int t_min = stoi_c(vString);
 			if (t_min != 1440) {
 				string err = "ERROR : Solar radiation data time interval is invalid.\n";
 				err = err + "           Solar radiation data time interval have to be 1440 minutes.\n";
@@ -1443,7 +1443,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.SnowPackTemperatureInInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SnowPackTemperatureInInterval_min);
 		if (vString != "") {
-			int t_min = stoi(vString);
+			int t_min = stoi_c(vString);
 			if (t_min != 1440) {
 				string err = "ERROR : Snowpack temperature data time interval is invalid.\n";
 				err = err + "           Snowpack temperature data time interval have to be 1440 minutes.\n";
@@ -1461,8 +1461,8 @@ int readXmlRowProjectSettings(string aline)
 
 	if (aline.find(fldName.MaxDegreeOfParallelism) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.MaxDegreeOfParallelism);
-		if (vString != "" && stoi(vString) != 0 && stoi(vString) >= -1) {
-			prj.mdp = stoi(vString);
+		if (vString != "" && stoi_c(vString) != 0 && stoi_c(vString) >= -1) {
+			prj.mdp = stoi_c(vString);
 		}
 		else {
 			writeLog(fpnLog, "Max. degree of parallelism was not set. Maximum value [-1] was assigned.\n", 1, 1);
@@ -1506,8 +1506,8 @@ int readXmlRowProjectSettings(string aline)
 		if (vString == "") {
 			vString = getValueStringFromXmlLine(aline, fldName.SimulationDuration_hr_02);
 		}
-		if (vString != "" && stod(vString) >= 0) {
-			prj.simDuration_hr = stod(vString);
+		if (vString != "" && stod_c(vString) >= 0) {
+			prj.simDuration_hr = stod_c(vString);
 		}
 		else {
 			writeLog(fpnLog, "ERROR : Simulation duration is invalid.\n", 1, 1);
@@ -1522,8 +1522,8 @@ int readXmlRowProjectSettings(string aline)
 		if (vString == "") {
 			vString = getValueStringFromXmlLine(aline, fldName.ComputationalTimeStep_min_02);
 		}
-		if (vString != "" && stod(vString) > 0) {
-			prj.dtsec = stoi(vString) * 60;
+		if (vString != "" && stod_c(vString) > 0) {
+			prj.dtsec = stoi_c(vString) * 60;
 		}
 		return 1;
 	}
@@ -1551,7 +1551,7 @@ int readXmlRowProjectSettings(string aline)
 			vString = getValueStringFromXmlLine(aline, fldName.OutputTimeStep_min_02);
 		}
 		if (vString != "") {
-			prj.dtPrint_min = stoi(vString);
+			prj.dtPrint_min = stoi_c(vString);
 		}
 		else {
 			writeLog(fpnLog, "ERROR : Print out time step is invalid.\n", 1, 1);
@@ -1808,7 +1808,7 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.AveValueTimeInterval_min);
 		prj.dtPrintAveValue_min = 0;
 		if (vString != "") {
-			prj.dtPrintAveValue_min = stoi(vString);
+			prj.dtPrintAveValue_min = stoi_c(vString);
 		}
 		return 1;
 	}
@@ -2531,8 +2531,8 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 	projectFileFieldName fldName;
 	if (aline.find("<"+fldName.WSID_CH+">") != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.WSID_CH);
-		if (vString != "" && stoi(vString) > 0) {
-			csi->mdWsid = stoi(vString);
+		if (vString != "" && stoi_c(vString) > 0) {
+			csi->mdWsid = stoi_c(vString);
 		}
 		else {
 			writeLog(fpnLog, "ERROR : Most downstream watershed ID for channel setting is invalid.\n", 1, 1);
@@ -2592,8 +2592,8 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 	}
 	if (aline.find(fldName.ChannelWidthEQc) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.ChannelWidthEQc);
-		if (vString != "" && stod(vString) > 0) {
-			csi->cwEQc = stod(vString);
+		if (vString != "" && stod_c(vString) > 0) {
+			csi->cwEQc = stod_c(vString);
 		}
 		else if (csi->csWidthType == channelWidthType::CWEquation) {
 			writeLog(fpnLog, "ERROR : EQc parameter for channel width eq. in the watershed ["
@@ -2604,8 +2604,8 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 	}
 	if (aline.find(fldName.ChannelWidthEQd) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.ChannelWidthEQd);
-		if (vString != "" && stod(vString) > 0) {
-			csi->cwEQd = stod(vString);
+		if (vString != "" && stod_c(vString) > 0) {
+			csi->cwEQd = stod_c(vString);
 		}
 		else if (csi->csWidthType == channelWidthType::CWEquation) {
 			writeLog(fpnLog, "ERROR : EQd parameter for channel width eq. in the watershed ["
@@ -2616,8 +2616,8 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 	}
 	if (aline.find(fldName.ChannelWidthEQe) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.ChannelWidthEQe);
-		if (vString != "" && stod(vString) > 0) {
-			csi->cwEQe = stod(vString);
+		if (vString != "" && stod_c(vString) > 0) {
+			csi->cwEQe = stod_c(vString);
 		}
 		else if (csi->csWidthType == channelWidthType::CWEquation) {
 			writeLog(fpnLog, "ERROR : EQe parameter for channel width eq. in the watershed ["
@@ -2632,9 +2632,8 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 		if (vString == "") {
 			vString = getValueStringFromXmlLine(aline, fldName.ChannelWidthMostDownStream_m_02);
 		}
-		vString = replaceText(vString, ",", "");
-		if (vString != "" && stod(vString) > 0) {
-			csi->cwMostDownStream = stod(vString);
+		if (vString != "" && stod_c(vString) > 0) {
+			csi->cwMostDownStream = stod_c(vString);
 		}
 		else if (csi->csWidthType == channelWidthType::CWGeneration) {
 			writeLog(fpnLog, "ERROR : The channel width at the most down stream in the watershed ["
@@ -2645,8 +2644,8 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 	}
 	if (aline.find(fldName.LowerRegionHeight) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.LowerRegionHeight);
-		if (vString != "" && stod(vString) > 0) {
-			csi->lowRHeight = stod(vString);
+		if (vString != "" && stod_c(vString) > 0) {
+			csi->lowRHeight = stod_c(vString);
 		}
 		else if (csi->csType == crossSectionType::CSCompound) {
 			writeLog(fpnLog, "ERROR : Lower region height parameter in the watershed ["
@@ -2657,8 +2656,8 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 	}
 	if (aline.find(fldName.LowerRegionBaseWidth) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.LowerRegionBaseWidth);
-		if (vString != "" && stod(vString) > 0) {
-			csi->lowRBaseWidth = stod(vString);
+		if (vString != "" && stod_c(vString) > 0) {
+			csi->lowRBaseWidth = stod_c(vString);
 		}
 		else if (csi->csType == crossSectionType::CSCompound) {
 			writeLog(fpnLog, "ERROR : Lower region base width parameter in the watershed ["
@@ -2669,8 +2668,8 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 	}
 	if (aline.find(fldName.UpperRegionBaseWidth) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.UpperRegionBaseWidth);
-		if (vString != "" && stod(vString) > 0) {
-			csi->highRBaseWidth = stod(vString);
+		if (vString != "" && stod_c(vString) > 0) {
+			csi->highRBaseWidth = stod_c(vString);
 		}
 		else if (csi->csType == crossSectionType::CSCompound) {
 			writeLog(fpnLog, "ERROR : Upper region base width parameter in the watershed ["
@@ -2681,8 +2680,8 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 	}
 	if (aline.find(fldName.CompoundCSChannelWidthLimit) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.CompoundCSChannelWidthLimit);
-		if (vString != "" && stod(vString) > 0) {
-			csi->compoundCSChannelWidthLimit = stod(vString);
+		if (vString != "" && stod_c(vString) > 0) {
+			csi->compoundCSChannelWidthLimit = stod_c(vString);
 		}
 		else if (csi->csType == crossSectionType::CSCompound) {
 			writeLog(fpnLog, "ERROR : Compound cross section width limit parameter in the watershed ["
@@ -2693,8 +2692,8 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 	}
 	if (aline.find(fldName.BankSideSlopeRight) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.BankSideSlopeRight);
-		if (vString != "" && stod(vString) > 0) {
-			csi->bankSlopeRight = stod(vString);
+		if (vString != "" && stod_c(vString) > 0) {
+			csi->bankSlopeRight = stod_c(vString);
 		}
 		else {
 			writeLog(fpnLog, "ERROR : Right bank side slope parameter in the watershed ["
@@ -2705,8 +2704,8 @@ int readXmlRowChannelSettings(string aline, channelSettingInfo *csi)
 	}
 	if (aline.find(fldName.BankSideSlopeLeft) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.BankSideSlopeLeft);
-		if (vString != "" && stod(vString) > 0) {
-			csi->bankSlopeLeft = stod(vString);
+		if (vString != "" && stod_c(vString) > 0) {
+			csi->bankSlopeLeft = stod_c(vString);
 		}
 		else {
 			writeLog(fpnLog, "ERROR : Left bank side slope parameter in the watershed ["
@@ -2830,8 +2829,8 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 		if (vString == "") {
 			vString = getValueStringFromXmlLine(aline, fldName.MinChBaseWidth_m_02);
 		}
-		if (vString != "" && stod(vString) > 0) {
-			ssp->minChBaseWidth = stod(vString);
+		if (vString != "" && stod_c(vString) > 0) {
+			ssp->minChBaseWidth = stod_c(vString);
 		}
 		else {
 			writeLog(fpnLog, "ERROR : Minimum value of channel width in the watershed ["
