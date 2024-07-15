@@ -935,7 +935,7 @@ typedef struct _projectFile
 	int makeASCorIMGfile = 0;
 	int makeRFraster = 0;
 
-	CPUsInfo cpusi;
+	cpu_gpu_info cpusi; //MP ¼öÁ¤
 	int deleteAllFilesExceptDischargeOut = -1;
 	int writeLog = -1;
 	

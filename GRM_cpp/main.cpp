@@ -55,7 +55,7 @@ int main(int argc, char** args)
 		+ to_string(grmVersion.fminor) + "."
 		+ to_string(grmVersion.fbuild) + ".\n";
 	    //+"Modified in " + grmVersion.LastWrittenTime + ".\n";
-	prj.cpusi = getCPUinfo();
+	prj.cpusi = getCPUnGPU_infoInner("CPU");  //MP ¼öÁ¤
 	cout << outString;
 	cout << prj.cpusi.infoString;
 	outString = outString + prj.cpusi.infoString;

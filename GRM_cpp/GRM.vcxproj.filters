@@ -21,12 +21,6 @@
     <ClCompile Include="..\..\gentle\cpp\gentle.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\gentle\cpp\systemcommand.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\gentle\cpp\systeminfo.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
     <ClCompile Include="project.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -92,22 +86,7 @@
     <ClInclude Include="..\..\gentle\cpp\bitmap_image.hpp">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\gentle\cpp\cpuinfo.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gentle\cpp\cpuinfodelegate.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\gentle\cpp\gentle.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gentle\cpp\gpuinfo.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gentle\cpp\gpuinfodelegate.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\gentle\cpp\systemcommand.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">

@@ -20,8 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\gentle\cpp\gentle.cpp" />
-    <ClCompile Include="..\..\gentle\cpp\systemcommand.cpp" />
-    <ClCompile Include="..\..\gentle\cpp\systeminfo.cpp" />
     <ClCompile Include="surfalceLayer.cpp" />
     <ClCompile Include="network.cpp" />
     <ClCompile Include="realTimeLauncher.cpp" />
@@ -50,12 +48,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\gentle\cpp\bitmap_image.hpp" />
-    <ClInclude Include="..\..\gentle\cpp\cpuinfo.h" />
-    <ClInclude Include="..\..\gentle\cpp\cpuinfodelegate.h" />
     <ClInclude Include="..\..\gentle\cpp\gentle.h" />
-    <ClInclude Include="..\..\gentle\cpp\gpuinfo.h" />
-    <ClInclude Include="..\..\gentle\cpp\gpuinfodelegate.h" />
-    <ClInclude Include="..\..\gentle\cpp\systemcommand.h" />
     <ClInclude Include="grm.h" />
     <ClInclude Include="grmapi.h" />
     <ClInclude Include="realTime.h" />
@@ -93,7 +86,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>

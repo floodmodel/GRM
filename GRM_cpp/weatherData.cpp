@@ -90,7 +90,7 @@ int setCVRF(int order)
 				//if (cvs[i].toBeSimulated == -1) {
 				//    continue;  }
 				int wid = cvps[i].wsid;
-				double iniLoss_PRCP_mm = prj.swps[wid].iniLossPRCP_mm;
+				double iniL_PRCP_mm = prj.swps[wid].iniLossPRCP_mm;
 				double inRF_mm = 0.0;
 				if (prj.rfDataType == weatherDataType::Raster_ASC) {
 					inRF_mm = rfasc->valuesFromTL[cvps[i].xCol][cvps[i].yRow];
@@ -108,13 +108,13 @@ int setCVRF(int order)
 				}
 				cvs[i].rfiRead_mPsec = inRFi_mPs;
 				cvs[i].rfAccRead_fromStart_mm = cvs[i].rfAccRead_fromStart_mm + inRF_mm; // 파일에서 읽은 강우량을 더한다.
-				if (iniLoss_PRCP_mm > 0.0) { 
-					if (cvs[i].rfAccRead_fromStart_mm < iniLoss_PRCP_mm) {
+				if (iniL_PRCP_mm > 0.0) { 
+					if (cvs[i].rfAccRead_fromStart_mm < iniL_PRCP_mm) {
 						inRFi_mPs = 0.0;
 					}
 					else {
 						double diff_mm=0.0;
-						diff_mm = cvs[i].rfAccRead_fromStart_mm - iniLoss_PRCP_mm; // 처음 커지는 부분에서 강우량 차이 받는다.
+						diff_mm = cvs[i].rfAccRead_fromStart_mm - iniL_PRCP_mm; // 처음 커지는 부분에서 강우량 차이 받는다.
 						if (diff_mm < 0) {
 							diff_mm = 0.0;
 						}
