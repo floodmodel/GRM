@@ -73,7 +73,7 @@ BEGIN
             VALUE "InternalName", "GRM.exe"
             VALUE "LegalCopyright", "Copyright (C) 2017"
             VALUE "OriginalFilename", "GRM.exe"
-            VALUE "ProductName", "Grid based rainfall-Runoff Model (v2023)"
+            VALUE "ProductName", "Grid based rainfall-Runoff Model (v2024)"
             VALUE "ProductVersion", "2024.5.22.0"
         END
     END
