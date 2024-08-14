@@ -46,6 +46,8 @@ The model indroduction and the download guidelines are wiki page at https://gith
 2024.05. Constant ratio option was applied to the RigidROM.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Output value separator option was added.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bug fix for numeric value includes comma.   
+2024.08. Revision in FC module for maximum storage during flood season.  
+
 
 
   
