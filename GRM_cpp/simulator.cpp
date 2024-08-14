@@ -343,15 +343,21 @@ void initThisSimulation()
     int dtFromR = (int)(prj.rfinterval_min * 60 / 2);
     ts.dtMaxLimit_sec = min(dtFromP, dtFromR);
     if (prj.simFlowControl == 1) {
-        int mindtFC = INT_MAX;
+		bool appFCdt = false;
+		int mindtFC = INT_MAX;
         for (int i :fccds.cvidxsFCcell) {
             if (prj.fcs[i][0].fcDT_min>0 && mindtFC > prj.fcs[i][0].fcDT_min) {
-                mindtFC = int(prj.fcs[i][0].fcDT_min *60 / 2);
+				mindtFC = int(prj.fcs[i][0].fcDT_min); //  *60 / 2); // 우선 최소 시간간격을 받는 것으로 수정. 2024.08.07
+				appFCdt = true;
             }
         }
-        if (ts.dtMaxLimit_sec > mindtFC) {
-            ts.dtMaxLimit_sec = mindtFC;
-        }
+
+		if (appFCdt == true) {
+			mindtFC = (int)(mindtFC * 60 / 2); // FC 최소 시간간격의 1/2 은 여기서 계산. 2024.08.07
+			if (ts.dtMaxLimit_sec > mindtFC) {
+				ts.dtMaxLimit_sec = mindtFC;
+			}
+		}
     }
     if (ts.dtMaxLimit_sec < ts.dtMinLimit_sec) {
         ts.dtMaxLimit_sec = ts.dtMinLimit_sec;

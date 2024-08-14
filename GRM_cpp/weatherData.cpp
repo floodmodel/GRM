@@ -173,11 +173,6 @@ int setCVRF(int order)
 //						inRFi_mPs = 0.0;
 //					}
 //					else {
-//
-//						if (wid == 203 || wid == 203600) {
-//							int a = 1;
-//						}
-//
 //						double diff_mm=0.0;
 //						diff_mm = cvs[i].rfAccRead_fromStart_mm - iniLoss_PRCP_mm; // 처음 커지는 부분에서 강우량 차이 받는다.
 //						if (diff_mm < 0) {
