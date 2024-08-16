@@ -865,7 +865,7 @@ int readXmlRowProjectSettings(string aline)
 			}
 		}
 		else {
-			writeLog(fpnLog, "ERROR : DEM file [" + vString + "] is invalid.\n", 1, 1);
+			writeLog(fpnLog, "ERROR : Domain file [" + vString + "] is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
