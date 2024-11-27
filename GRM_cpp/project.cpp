@@ -744,7 +744,7 @@ int openProjectFile(int forceRealTime)
 		// continuous =================
 		if (prj.simEvaportranspiration == 1) {
 			if (setLAIRatio() == -1) { return -1; }
-			setSVPGradient();
+			//setSVPGradient();
 			if (setTemperatureMax() == -1) { return -1; }
 			if (setTemperatureMin() == -1) { return -1; }
 			if (setDaytimeLength() == -1) { return -1; }

@@ -6,7 +6,7 @@
 using namespace std;
 namespace fs = std::filesystem;
 
-double svpGradient[100];
+//double svpGradient[100];
 extern projectFile prj;
 extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
@@ -526,10 +526,10 @@ int setCVRF(int order)
 #pragma omp parallel for
 		 for (int i = 0; i < di.cellNnotNull; ++i) {			 
 			 if (prj.solarRadDataType == weatherDataType::Raster_ASC) {
-				 cvs[i].solarRad_mm = SRAsc->valuesFromTL[cvps[i].xCol][cvps[i].yRow]; // 입력자료 단위 mm/day 가 그대로 방정식에 이용된다.
+				 cvs[i].solarRad_MJperM2 = SRAsc->valuesFromTL[cvps[i].xCol][cvps[i].yRow]; // 입력자료 단위 mm/day 가 그대로 방정식에 이용된다.
 			 }
 			 else {
-				 cvs[i].solarRad_mm = idNv[cvps[i].wsid];  // 입력자료 단위 mm/day 가 그대로 방정식에 이용된다.
+				 cvs[i].solarRad_MJperM2 = idNv[cvps[i].wsid];  // 입력자료 단위 mm/day 가 그대로 방정식에 이용된다.
 			 }
 		 }
 		 if (prj.solarRadDataType == weatherDataType::Raster_ASC
@@ -547,7 +547,7 @@ int setCVRF(int order)
 			 // 유역의 전체 강우량은 inlet 등으로 toBeSimulated == -1 여도 계산에 포함한다.
 			 // 상류 cv 개수에 이 조건 추가하려면 주석 해제.
 			 //if (cvs[i].toBeSimulated == -1) { continue; }
-			 cvs[i].solarRad_mm = inSR;
+			 cvs[i].solarRad_MJperM2 = inSR;
 		 }
 		 returnv = 1;
 	 }
@@ -567,7 +567,7 @@ int setCVRF(int order)
 	 writeLog(fpnLog, "WARNNING : If the time step of solar radiation data is equal or smaller than printing time step, add more data. Or decrease simulation duration.\n", 1, -1);
 #pragma omp parallel for schedule(guided)
 	 for (int i = 0; i < di.cellNnotNull; ++i) {
-		 cvs[i].solarRad_mm = 0.0;
+		 cvs[i].solarRad_MJperM2 = 0.0;
 	 }
  }
 
@@ -818,35 +818,35 @@ int setCVRF(int order)
 	 return 1;
  }
 
- // 기온별 포화증기압의 기울기를 미리 저장해 둔다
- // 기울기는 포화증기압 표에서 직접 계산
- void setSVPGradient() {
-	 svpGradient[0] = 0.347; svpGradient[1] = 0.347; svpGradient[2] = 0.368; svpGradient[3] = 0.391;
-	 svpGradient[4] = 0.416; svpGradient[5] = 0.444; svpGradient[6] = 0.468; svpGradient[7] = 0.500;
-	 svpGradient[8] = 0.532; svpGradient[9] = 0.564; svpGradient[10] = 0.600; svpGradient[11] = 0.635;
-	 svpGradient[12] = 0.674; svpGradient[13] = 0.713; svpGradient[14] = 0.756; svpGradient[15] = 0.801;
-	 svpGradient[16] = 0.846; svpGradient[17] = 0.896; svpGradient[18] = 0.947; svpGradient[19] = 1.000;
-	 svpGradient[20] = 1.058; svpGradient[21] = 1.115; svpGradient[22] = 1.177; svpGradient[23] = 1.241;
-	 svpGradient[24] = 1.309; svpGradient[25] = 1.379; svpGradient[26] = 1.453; svpGradient[27] = 1.530;
-	 svpGradient[28] = 1.610; svpGradient[29] = 1.694; svpGradient[30] = 1.781; svpGradient[31] = 1.871;
-	 svpGradient[32] = 1.968; svpGradient[33] = 2.066; svpGradient[34] = 2.169; svpGradient[35] = 2.277;
-	 svpGradient[36] = 2.388; svpGradient[37] = 2.504; svpGradient[38] = 2.625; svpGradient[39] = 2.750;
-	 svpGradient[40] = 2.882; svpGradient[41] = 3.016; svpGradient[42] = 3.160; svpGradient[43] = 3.300;
-	 svpGradient[44] = 3.460; svpGradient[45] = 3.620; svpGradient[46] = 3.770; svpGradient[47] = 3.950;
-	 svpGradient[48] = 4.110; svpGradient[49] = 4.310; svpGradient[50] = 4.490; svpGradient[51] = 4.690;
-	 svpGradient[52] = 4.890; svpGradient[53] = 5.110; svpGradient[54] = 5.310; svpGradient[55] = 5.530;
-	 svpGradient[56] = 5.760; svpGradient[57] = 6.020; svpGradient[58] = 6.210; svpGradient[59] = 6.570;
-	 svpGradient[60] = 6.780; svpGradient[61] = 7.050; svpGradient[62] = 7.340; svpGradient[63] = 7.610;
-	 svpGradient[64] = 7.930; svpGradient[65] = 8.230; svpGradient[66] = 8.550; svpGradient[67] = 8.870;
-	 svpGradient[68] = 9.210; svpGradient[69] = 9.560; svpGradient[70] = 9.970; svpGradient[71] = 10.200;
-	 svpGradient[72] = 10.700; svpGradient[73] = 11.100; svpGradient[74] = 11.500; svpGradient[75] = 11.900;
-	 svpGradient[76] = 12.300; svpGradient[77] = 12.700; svpGradient[78] = 13.200; svpGradient[79] = 13.700;
-	 svpGradient[80] = 14.100; svpGradient[81] = 14.600; svpGradient[82] = 15.200; svpGradient[83] = 15.700;
-	 svpGradient[84] = 16.200; svpGradient[85] = 16.800; svpGradient[86] = 17.300; svpGradient[87] = 17.800;
-	 svpGradient[88] = 18.400; svpGradient[89] = 19.000; svpGradient[90] = 19.660; svpGradient[91] = 20.290;
-	 svpGradient[92] = 20.940; svpGradient[93] = 21.610; svpGradient[94] = 22.300; svpGradient[95] = 23.000;
-	 svpGradient[96] = 23.720; svpGradient[97] = 24.450; svpGradient[98] = 25.200; svpGradient[99] = 25.970;
- }
+ //// 기온별 포화증기압의 기울기를 미리 저장해 둔다
+ //// 기울기는 포화증기압 표에서 직접 계산
+ //void setSVPGradient() {
+	// svpGradient[0] = 0.347; svpGradient[1] = 0.347; svpGradient[2] = 0.368; svpGradient[3] = 0.391;
+	// svpGradient[4] = 0.416; svpGradient[5] = 0.444; svpGradient[6] = 0.468; svpGradient[7] = 0.500;
+	// svpGradient[8] = 0.532; svpGradient[9] = 0.564; svpGradient[10] = 0.600; svpGradient[11] = 0.635;
+	// svpGradient[12] = 0.674; svpGradient[13] = 0.713; svpGradient[14] = 0.756; svpGradient[15] = 0.801;
+	// svpGradient[16] = 0.846; svpGradient[17] = 0.896; svpGradient[18] = 0.947; svpGradient[19] = 1.000;
+	// svpGradient[20] = 1.058; svpGradient[21] = 1.115; svpGradient[22] = 1.177; svpGradient[23] = 1.241;
+	// svpGradient[24] = 1.309; svpGradient[25] = 1.379; svpGradient[26] = 1.453; svpGradient[27] = 1.530;
+	// svpGradient[28] = 1.610; svpGradient[29] = 1.694; svpGradient[30] = 1.781; svpGradient[31] = 1.871;
+	// svpGradient[32] = 1.968; svpGradient[33] = 2.066; svpGradient[34] = 2.169; svpGradient[35] = 2.277;
+	// svpGradient[36] = 2.388; svpGradient[37] = 2.504; svpGradient[38] = 2.625; svpGradient[39] = 2.750;
+	// svpGradient[40] = 2.882; svpGradient[41] = 3.016; svpGradient[42] = 3.160; svpGradient[43] = 3.300;
+	// svpGradient[44] = 3.460; svpGradient[45] = 3.620; svpGradient[46] = 3.770; svpGradient[47] = 3.950;
+	// svpGradient[48] = 4.110; svpGradient[49] = 4.310; svpGradient[50] = 4.490; svpGradient[51] = 4.690;
+	// svpGradient[52] = 4.890; svpGradient[53] = 5.110; svpGradient[54] = 5.310; svpGradient[55] = 5.530;
+	// svpGradient[56] = 5.760; svpGradient[57] = 6.020; svpGradient[58] = 6.210; svpGradient[59] = 6.570;
+	// svpGradient[60] = 6.780; svpGradient[61] = 7.050; svpGradient[62] = 7.340; svpGradient[63] = 7.610;
+	// svpGradient[64] = 7.930; svpGradient[65] = 8.230; svpGradient[66] = 8.550; svpGradient[67] = 8.870;
+	// svpGradient[68] = 9.210; svpGradient[69] = 9.560; svpGradient[70] = 9.970; svpGradient[71] = 10.200;
+	// svpGradient[72] = 10.700; svpGradient[73] = 11.100; svpGradient[74] = 11.500; svpGradient[75] = 11.900;
+	// svpGradient[76] = 12.300; svpGradient[77] = 12.700; svpGradient[78] = 13.200; svpGradient[79] = 13.700;
+	// svpGradient[80] = 14.100; svpGradient[81] = 14.600; svpGradient[82] = 15.200; svpGradient[83] = 15.700;
+	// svpGradient[84] = 16.200; svpGradient[85] = 16.800; svpGradient[86] = 17.300; svpGradient[87] = 17.800;
+	// svpGradient[88] = 18.400; svpGradient[89] = 19.000; svpGradient[90] = 19.660; svpGradient[91] = 20.290;
+	// svpGradient[92] = 20.940; svpGradient[93] = 21.610; svpGradient[94] = 22.300; svpGradient[95] = 23.000;
+	// svpGradient[96] = 23.720; svpGradient[97] = 24.450; svpGradient[98] = 25.200; svpGradient[99] = 25.970;
+ //}
 
  weatherDataType getWeatherDataTypeByDataFile(string fpn_wdata) {
 	 ifstream rfFile(fpn_wdata);

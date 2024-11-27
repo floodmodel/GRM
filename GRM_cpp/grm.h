@@ -804,7 +804,7 @@ typedef struct _cvAtt
 
 	double tempMaxPday = -9999.0;
 	double tempMinPday = -9999.0;
-	double solarRad_mm = -1.0;
+	double solarRad_MJperM2 = -1.0;  // 기상청 일사량 단위는 MJ/m^2 이다. 2024.11.25
 	double daytimeLength_hrs = -1.0;
 
 	PETmethod petMethod;
@@ -1165,7 +1165,7 @@ int setRainfallData();
 int setRasterOutputArray();
 
 // 포화증기압곡선의 기울기
-void setSVPGradient();
+//void setSVPGradient();
 int setTemperatureMax();
 int setTemperatureMin();
 int setDaytimeLength();

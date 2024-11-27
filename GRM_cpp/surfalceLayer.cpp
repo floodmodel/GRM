@@ -194,28 +194,40 @@ void calPET_Hargreaves(int i) {
 	if (t_diff < 0) {
 		t_diff = 0.0;
 	}
-	double pet_mmPday = 0.0023 * cvs[i].solarRad_mm * pow(t_diff, 0.5) * (tave + 17.8);  // 입력자료 단위 mm/day 가 그대로 방정식에 이용된다.
-	cvs[i].pet_mPdt = ts.dtsec * pet_mmPday / 86400000.0; // 총 일 증발량을 dt 시간으로 나누어서 사용한다.
+	// 2024.11.25. 기상청 일사량 자료 단위 MJ/m^2을 그대로 적용하는 것으로 수정
+	//double lv = 2.45; // 증발잠열 FAO 권장값. MJ/kg
+	// 0.000939 = 0.0023 / 2.45
+	double pet_mmPday = 0.000939 * cvs[i].solarRad_MJperM2 * pow(t_diff, 0.5) * (tave + 17.8);  // 입력자료 단위 MJ/m^2을 그대로 적용
+	cvs[i].pet_mPdt = ts.dtsec * pet_mmPday / 86400000.0; // 총 일 증발량을 초 단위로 나누어서 사용한다.
 }
 
+//void calPET_PriestleyTaylor(int i) {
+//	double tave = (cvs[i].tempMaxPday + cvs[i].tempMinPday) / 2.0;
+//	double lv = -0.56 * tave + 597.3; // 증발잠열 cal/g
+//	double rhow = 1.0; // 물의 밀도
+//	double er = cvs[i].solarRad_MJperM2 / lv / rhow;   //입력자료 단위 mm/day 가 그대로 방정식에 이용된다.
+//	double gamma = 0.0006 * tave + 0.655;//건습계 상수 mb/degreeC
+//	int t = int(tave); //온도를 정수로 변환. 소수점 이하는 버림
+//	double svpGrad = 0.0;
+//	if (t >= -1 && t < 100) {
+		//svpGrad = svpGradient[t];//포화증기압 기울기
+//	}
+//	else {
+//		svpGrad = 0.347;//0도에서의 포화증기압을 이용
+//	}
+//	double pet_cmPday = 1.28 * er * svpGrad / (svpGrad + gamma);
+//	cvs[i].pet_mPdt = ts.dtsec * pet_cmPday / 8640000.0; // cmPday => mPdt   // 총 일 증발량을 dt 시간으로 나누어서 사용한다.
+//}
 void calPET_PriestleyTaylor(int i) {
 	double tave = (cvs[i].tempMaxPday + cvs[i].tempMinPday) / 2.0;
-	double lv = -0.56 * tave + 597.3; // 증발잠열
-	double rhow = 1.0; // 물의 밀도
-	double er = cvs[i].solarRad_mm / lv / rhow; //증발율  // 입력자료 단위 mm/day 가 그대로 방정식에 이용된다.
-	double gamma = 0.0006 * tave + 0.655;//건습계 상수
-	int t = int(tave); //온도를 정수로 변환. 소수점 이하는 버림
-	double svpGrad = 0.0;
-	if (t >= -1 && t < 100) {
-		svpGrad = svpGradient[t];//포화증기압 기울기
-	}
-	else {
-		svpGrad = 0.347;//0도에서의 포화증기압을 이용
-	}
-	double pet_cmPday = 1.28 * er * svpGrad / (svpGrad + gamma);
-	cvs[i].pet_mPdt = ts.dtsec * pet_cmPday / 8640000.0; // cmPday => mPdt   // 총 일 증발량을 dt 시간으로 나누어서 사용한다.
+	double lv = 2.45; // 증발잠열 FAO 권장값. MJ/kg
+    //double airP = 101.3 * pow((293 - 0.0065 * 셀고도) / 293, 5.26); //기압 kPa/degreeC ==> 약 1기압 = 101.3kPa == 1013mb
+	double gamma = 0.000665 * 101.3;//건습계 상수 ==> 1기압에서 약 0.0674 kPa/degreeC
+	double coeffTave = 17.27 * tave / (tave + 237.3);
+	double svpGrad = 4098 * 0.6108 * exp(coeffTave) / (tave + 237.3) / (tave + 237.3);  // kPa/degreeC
+	double pet_mmPday = 1.28 * svpGrad / (svpGrad + gamma) * cvs[i].solarRad_MJperM2 / lv;
+	cvs[i].pet_mPdt = ts.dtsec * pet_mmPday / 86400000.0; // mmPday => mPdt   // 총 일 증발량을 초단위로 나누어서 사용한다.
 }
-
 
 void calSnowMelt(int i) {
 	double tave = (cvs[i].tempMaxPday + cvs[i].tempMinPday) / 2.0;
