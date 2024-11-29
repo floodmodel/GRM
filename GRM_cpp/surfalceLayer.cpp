@@ -182,9 +182,10 @@ void calPET_BlaneyCriddle(int i)
 void calPET_Hamon(int i) {
 	double tave = (cvs[i].tempMaxPday + cvs[i].tempMinPday) / 2.0;
 	double sdTerm = cvs[i].daytimeLength_hrs / 12.0;   // 입력자료 단위 hrs / day 가 그대로 방정식에 이용된다.
-	double es = 6.108 * exp(17.26939 * tave / (tave + 273.3));
-	double svd = 216.7 * es / (tave + 273.3);
-	double pet_mmPday = 0.55 * 25.4 * sdTerm * sdTerm * svd / 12.0;
+	double es = 0.6108 * exp(17.27 * tave / (tave + 237.3)); // es : kPa
+	double svd = 216.7 * es / (tave + 273.3);  //svd : gr/m^3==> 이 단위 그대로 적용되게 한다.
+	// 0.0055*25.4 = 0.1397 : inch -> mm로 변환하기 위해서 25.4를 곱해준다.
+	double pet_mmPday = 0.1397 * sdTerm * sdTerm * svd;
 	cvs[i].pet_mPdt = ts.dtsec * pet_mmPday / 86400000.0;// 총 일 증발량을 dt 시간으로 나누어서 사용한다.
 }
 
@@ -201,30 +202,16 @@ void calPET_Hargreaves(int i) {
 	cvs[i].pet_mPdt = ts.dtsec * pet_mmPday / 86400000.0; // 총 일 증발량을 초 단위로 나누어서 사용한다.
 }
 
-//void calPET_PriestleyTaylor(int i) {
-//	double tave = (cvs[i].tempMaxPday + cvs[i].tempMinPday) / 2.0;
-//	double lv = -0.56 * tave + 597.3; // 증발잠열 cal/g
-//	double rhow = 1.0; // 물의 밀도
-//	double er = cvs[i].solarRad_MJperM2 / lv / rhow;   //입력자료 단위 mm/day 가 그대로 방정식에 이용된다.
-//	double gamma = 0.0006 * tave + 0.655;//건습계 상수 mb/degreeC
-//	int t = int(tave); //온도를 정수로 변환. 소수점 이하는 버림
-//	double svpGrad = 0.0;
-//	if (t >= -1 && t < 100) {
-		//svpGrad = svpGradient[t];//포화증기압 기울기
-//	}
-//	else {
-//		svpGrad = 0.347;//0도에서의 포화증기압을 이용
-//	}
-//	double pet_cmPday = 1.28 * er * svpGrad / (svpGrad + gamma);
-//	cvs[i].pet_mPdt = ts.dtsec * pet_cmPday / 8640000.0; // cmPday => mPdt   // 총 일 증발량을 dt 시간으로 나누어서 사용한다.
-//}
+
 void calPET_PriestleyTaylor(int i) {
 	double tave = (cvs[i].tempMaxPday + cvs[i].tempMinPday) / 2.0;
 	double lv = 2.45; // 증발잠열 FAO 권장값. MJ/kg
     //double airP = 101.3 * pow((293 - 0.0065 * 셀고도) / 293, 5.26); //기압 kPa/degreeC ==> 약 1기압 = 101.3kPa == 1013mb
-	double gamma = 0.000665 * 101.3;//건습계 상수 ==> 1기압에서 약 0.0674 kPa/degreeC
+	double gamma = 0.0674; // 0.000665 * 101.3;//건습계 상수 ==> 1기압에서 약 0.0674 kPa/degreeC
 	double coeffTave = 17.27 * tave / (tave + 237.3);
-	double svpGrad = 4098 * 0.6108 * exp(coeffTave) / (tave + 237.3) / (tave + 237.3);  // kPa/degreeC
+	double coeffSVD = tave + 237.3;
+	// 2503.06 = 4098 * 0.6108
+	double svpGrad = 2503.06 * exp(coeffTave) / coeffSVD / coeffSVD;  // kPa/degreeC
 	double pet_mmPday = 1.28 * svpGrad / (svpGrad + gamma) * cvs[i].solarRad_MJperM2 / lv;
 	cvs[i].pet_mPdt = ts.dtsec * pet_mmPday / 86400000.0; // mmPday => mPdt   // 총 일 증발량을 초단위로 나누어서 사용한다.
 }
