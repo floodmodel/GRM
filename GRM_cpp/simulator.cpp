@@ -280,11 +280,11 @@ void simulateRunoffCore(int i, double nowTmin)
 	}
 	if (prj.simFlowControl == 1) {
 		// 다음 중 하나.  flowControlType::SinkFlow, flowControlType::SourceFlow, 
-		// flowControlType::ReservoirOperation, flowControlType::DetensionPond
+		// flowControlType::ReservoirOperation, flowControlType::DetentionPond
 
 		// 2023.05.31 아래와 같이 수정. Sink, source 중복설정된 CV 모의 가능
-		if (cvs[i].fcType1 == flowControlType::DetensionPond) {
-			calDetensionPond(i, nowTmin);
+		if (cvs[i].fcType1 == flowControlType::DetentionPond) {
+			calDetentionPond(i, nowTmin);
 		}
 		if (cvs[i].fcType1 == flowControlType::SinkFlow
 			|| cvs[i].fcType1 == flowControlType::SourceFlow) {
@@ -499,7 +499,7 @@ void setCVStartingCondition(double iniflow)
 				//  하나의 셀에 sink, source가 중복 설정될 수 있으며, 이때 sink, source는 후순위 즉, [i][1]이다. 
 				double iniS = prj.fcs[i][0].iniStorage_m3; 
                 if (iniS > 0) {
-					if (prj.fcs[i][0].fcType == flowControlType::DetensionPond) {
+					if (prj.fcs[i][0].fcType == flowControlType::DetentionPond) {
 						cvs[i].DP_storageCumulative_m3 = iniS;
 					}
 					else {

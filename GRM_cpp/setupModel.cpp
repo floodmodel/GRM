@@ -430,8 +430,8 @@ int updateCVbyUserSettings()
 						cvs[idx].fcType1 = flowControlType::ReservoirOutflow;
 						break;
 				}
-				case flowControlType::DetensionPond: {
-					cvs[idx].fcType1 = flowControlType::DetensionPond;
+				case flowControlType::DetentionPond: {
+					cvs[idx].fcType1 = flowControlType::DetentionPond;
 					break;
 				}
 				case flowControlType::SinkFlow: {// Opne project에서 같은 속성은 없는게 보장된다. 

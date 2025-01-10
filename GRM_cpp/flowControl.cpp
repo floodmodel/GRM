@@ -258,7 +258,7 @@ void calSinkOrSourceFlow(int i, double nowTmin, flowControlType fcType, int fcTy
 }
 
 
-void calDetensionPond(int i, double nowTmin) {
+void calDetentionPond(int i, double nowTmin) {
 	// 저류지는 댐과 다르게 하천 셀 옆에 있으므로, 유입량, 유출량, 저류량 변수를 별도로 배정한다.
 	// DP_storageCumulative_m3, DP_inflow_m3Ps, DP_outflow_m3Ps
 	int dtsec = ts.dtsec;

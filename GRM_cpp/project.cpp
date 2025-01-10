@@ -314,7 +314,7 @@ int openProjectFile(int forceRealTime)
 			// 2023. 11.23. inlet, sinkflow, sourceflow 에서는 저수지 제원 입력 하지 않는다. AutoROM으로 자동으로 전환도 못하게 한다. 
 			if ((afci.fcType == flowControlType::ReservoirOutflow && ts.enforceFCautoROM == 1)
 				|| afci.fcType == flowControlType::ReservoirOperation
-				|| afci.fcType == flowControlType::DetensionPond) {
+				|| afci.fcType == flowControlType::DetentionPond) {
 
 				if (afci.iniStorage_m3 < 0) {
 					writeLog(fpnLog, "WARNNING : [" + afci.fcName + "] Ini. storage of the reservoir is smaller than '0'. '0' is applied.\n", 1, 1);
@@ -2225,8 +2225,8 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			else if (vStringL == lower(ENUM_TO_STR(SourceFlow))) {
 				afct = flowControlType::SourceFlow;
 			}
-			else if (vStringL == lower(ENUM_TO_STR(DetensionPond))) {
-				afct = flowControlType::DetensionPond;
+			else if (vStringL == lower(ENUM_TO_STR(DetentionPond))) {
+				afct = flowControlType::DetentionPond;
 			}
 			else {
 				writeLog(fpnLog, "ERROR : Flow control type of ["
@@ -2454,7 +2454,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		if (vString != "" && stod_c(vString) >= 0) {
 			fci->dp_QT_StoD_CMS = stod_c(vString);
 		}
-		else if (fci->fcType == flowControlType::DetensionPond) {
+		else if (fci->fcType == flowControlType::DetentionPond) {
 			writeLog(fpnLog, "ERROR : The value of "+ fldName.DP_QT_StoD_CMS+" in ["
 				+ fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
@@ -2466,7 +2466,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		if (vString != "" && stod_c(vString) >= 0) {
 			fci->dp_Qi_max_CMS = stod_c(vString);
 		}
-		else if (fci->fcType == flowControlType::DetensionPond) {
+		else if (fci->fcType == flowControlType::DetentionPond) {
 			writeLog(fpnLog, "ERROR : The value of " + fldName.DP_Qi_max_CMS + " in ["
 				+ fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
@@ -2478,7 +2478,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		if (vString != "" && stod_c(vString) >= 0) {
 			fci->dp_Qo_max_CMS = stod_c(vString);
 		}
-		else if (fci->fcType == flowControlType::DetensionPond) {
+		else if (fci->fcType == flowControlType::DetentionPond) {
 			writeLog(fpnLog, "ERROR : The value of " + fldName.DP_Qo_max_CMS + " in ["
 				+ fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
@@ -2490,7 +2490,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		if (vString != "" && stod_c(vString) >= 0) {
 			fci->dp_Wdi_m = stod_c(vString);
 		}
-		else if (fci->fcType == flowControlType::DetensionPond) {
+		else if (fci->fcType == flowControlType::DetentionPond) {
 			writeLog(fpnLog, "ERROR : The value of " + fldName.DP_Wdi_m + " in ["
 				+ fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
@@ -2502,7 +2502,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		if (vString != "" && stod_c(vString) >= 0) {
 			fci->dp_Ws_m = stod_c(vString);
 		}
-		else if (fci->fcType == flowControlType::DetensionPond) {
+		else if (fci->fcType == flowControlType::DetentionPond) {
 			writeLog(fpnLog, "ERROR : The value of " + fldName.DP_Ws_m + " in ["
 				+ fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
@@ -2514,7 +2514,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 		if (vString != "" && stod_c(vString) >= 0) {
 			fci->dp_Cr_StoD = stod_c(vString);
 		}
-		else if (fci->fcType == flowControlType::DetensionPond) {
+		else if (fci->fcType == flowControlType::DetentionPond) {
 			writeLog(fpnLog, "ERROR : The value of " + fldName.DP_Cr_StoD + " in ["
 				+ fci->fcName + "] is invalid.\n", 1, 1);
 			return -1;
@@ -3145,7 +3145,7 @@ int isNormalFlowControlinfo(flowControlinfo* fci)
 	if (fci->fcType == afc_ini.fcType) { return -1; }
 
 	if (fci->fcType == flowControlType::ReservoirOperation
-		|| fci->fcType == flowControlType::DetensionPond) {
+		|| fci->fcType == flowControlType::DetentionPond) {
 		if (fci->iniStorage_m3 == afc_ini.iniStorage_m3) { return -1; }
 		if (fci->maxStorage_m3 == afc_ini.maxStorage_m3) { return -1; }
 
@@ -3165,7 +3165,7 @@ int isNormalFlowControlinfo(flowControlinfo* fci)
 			}
 		}
 
-		if (fci->fcType == flowControlType::DetensionPond) {
+		if (fci->fcType == flowControlType::DetentionPond) {
 			if (fci->dp_QT_StoD_CMS == afc_ini.dp_QT_StoD_CMS) { return -1; }
 			if (fci->dp_Qi_max_CMS == afc_ini.dp_Qi_max_CMS) { return -1; }
 			if (fci->dp_Qo_max_CMS == afc_ini.dp_Qo_max_CMS) { return -1; }

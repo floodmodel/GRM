@@ -93,7 +93,7 @@ enum class flowControlType
 	SourceFlow, // 상류모의, 입력된 source flow data 고려함. 저수지 고려안함.
 	ReservoirOperation, // 상류모의, 저수지 고려, 방류량은 operation rule에 의해서 결정됨. 사용자 입력 인터페이스 구현하지 않음.
 	// 저류량-방류량, 유입량-방류량 관계식을 이용해서 소스코드에 반영 가능
-	DetensionPond,
+	DetentionPond,
 	None
 };
 
@@ -825,9 +825,9 @@ typedef struct _cvAtt
 	double storageCumulative_m3 = 0.0;//현재 CV에서 flow control 모의시 누적 저류량[m^3]
 	double storageAddedForDTbyRF_m3 = 0.0;//현재 CV에서 flow control 모의시 dt 시간동안의 강우에 의해서 추가되는 저류량[m^3/dt]
 
-	double DP_storageCumulative_m3 = 0.0;//현재 CV에서 설정된 detension pond 누적 저류량[m^3]
-	double DP_inflow_m3Ps = 0.0;//현재 CV에서 설정된 detension pond 유입량[m^3/s]
-	double DP_outflow_m3Ps = 0.0;//현재 CV에서 설정된 detension pond 유출량[m^3/s]
+	double DP_storageCumulative_m3 = 0.0;//현재 CV에서 설정된 detention pond 누적 저류량[m^3]
+	double DP_inflow_m3Ps = 0.0;//현재 CV에서 설정된 detention pond 유입량[m^3/s]
+	double DP_outflow_m3Ps = 0.0;//현재 CV에서 설정된 detention pond 유출량[m^3/s]
 } cvAtt;
 
 typedef struct _projectFile
@@ -999,7 +999,7 @@ void calBFLateralMovement(int i,
 
 void calChannelAUH(int i); // 하도 흐름에서 유속, 수심, 단면적 계산
 void calChannelFlow(int i, double chCSACVw_tp1);
-void calDetensionPond(int i, double nowTmin);
+void calDetentionPond(int i, double nowTmin);
 void calEffectiveRFbyInfiltration(int i, int dtrf_sec, int dtsec);
 void calFCReservoirOutFlow(int i, double nowTmin); //i는 cv array index
 

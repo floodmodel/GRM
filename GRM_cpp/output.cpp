@@ -251,7 +251,7 @@ void writeFCOutputFile(string tStrToPrint, double cinterp)
 	if (cinterp == 1.0) {
 		for (int idx : fccds.cvidxsFCcell) {
 			if (fc_storage.size() > 0) { fc_storage += vs; } // 앞에 뭔가 있으면, tab으로 구분
-			if (cvs[idx].fcType1 == flowControlType::DetensionPond) { // 저류지에서는 별도의 변수
+			if (cvs[idx].fcType1 == flowControlType::DetentionPond) { // 저류지에서는 별도의 변수
 				fc_storage += dtos(cvs[idx].DP_storageCumulative_m3 / 1000.0, 3);
 			}
 			else {
@@ -259,7 +259,7 @@ void writeFCOutputFile(string tStrToPrint, double cinterp)
 			}
 
 			if (fc_inflow.size() > 0) { fc_inflow += vs; }
-			if (cvs[idx].fcType1 == flowControlType::DetensionPond) { // 저류지에서는 별도의 변수
+			if (cvs[idx].fcType1 == flowControlType::DetentionPond) { // 저류지에서는 별도의 변수
 				fc_inflow += dtos(cvs[idx].DP_inflow_m3Ps, 2);
 			}
 			else {
@@ -270,7 +270,7 @@ void writeFCOutputFile(string tStrToPrint, double cinterp)
 	else if (ts.isbak == 1) {
 		for (int idx : fccds.cvidxsFCcell) {
 			if (fc_storage.size() > 0) { fc_storage += vs; } // 앞에 뭔가 있으면, tab으로 구분
-			if (cvs[idx].fcType1 == flowControlType::DetensionPond) { // 저류지에서는 별도의 변수
+			if (cvs[idx].fcType1 == flowControlType::DetentionPond) { // 저류지에서는 별도의 변수
 				fc_storage += dtos(getinterpolatedVLinear(cvsb[idx].DP_storageCumulative_m3,
 					cvs[idx].DP_storageCumulative_m3, cinterp) / 1000.0, 3);
 			}
@@ -279,7 +279,7 @@ void writeFCOutputFile(string tStrToPrint, double cinterp)
 						cvs[idx].storageCumulative_m3, cinterp) / 1000.0, 3);
 			}
 			if (fc_inflow.size() > 0) { fc_inflow += vs; }
-			if (cvs[idx].fcType1 == flowControlType::DetensionPond) { // 저류지에서는 별도의 변수
+			if (cvs[idx].fcType1 == flowControlType::DetentionPond) { // 저류지에서는 별도의 변수
 				fc_inflow += dtos(getinterpolatedVLinear(cvsb[idx].DP_inflow_m3Ps,
 					cvs[idx].DP_inflow_m3Ps, cinterp), 2);
 			}
@@ -608,8 +608,8 @@ int makeNewOutputFiles()
 					case flowControlType::SourceFlow:
 						fct = ENUM_TO_STR(SourceFlow);
 						break;
-					case flowControlType::DetensionPond:
-						fct = ENUM_TO_STR(DetensionPond);
+					case flowControlType::DetentionPond:
+						fct = ENUM_TO_STR(DetentionPond);
 						break;
 					case flowControlType::None:
 						fct = ENUM_TO_STR(None);
