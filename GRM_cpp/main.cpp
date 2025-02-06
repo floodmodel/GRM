@@ -74,7 +74,7 @@ int main(int argc, char* argvs[])
 
 #ifdef _WIN32
 	prj.cpusi = getCPUnGPU_infoInner("CPU");  //MP 수정
-#else // MP 추가
+#else 
 	prj.cpusi = getCPUinfoLinux();  //MP 수정
 #endif	
 
@@ -220,9 +220,7 @@ int startSingleRun(string fpnGMP_in, int enforceAutoROM, string outString)
 		fpnGMP_in = fp_exe + "/" + fpnGMP_in;
 	}
 
-	fs::path fpnGMP = fs::path(fpnGMP_in.c_str()); // MP 추가
-	//int nResult = _access(fpnGMP.c_str(), 0); // MP 주석
-	//if (nResult == -1   // MP 주석
+	fs::path fpnGMP = fs::path(fpnGMP_in.c_str());
 	if (fs::exists(lower(fpnGMP.string())) == false
 		|| lower(in_arg.extension().string()) != ".gmp") {
 		cout << "ERROR : GRM project file[" +
@@ -230,7 +228,6 @@ int startSingleRun(string fpnGMP_in, int enforceAutoROM, string outString)
 		waitEnterKey();
 		return -1;
 	}
-	//else if (nResult == 0) { // MP 주석
 	else if (fs::exists(lower(fpnGMP.string())) == true) {
 		ppi = getProjectFileInfo(fpnGMP_in);
 		ts.enforceFCautoROM = enforceAutoROM;
@@ -287,14 +284,12 @@ void disposeDynamicVars()
 		delete[] cvais;
 	}
 	if (cvele != NULL) { delete[] cvele; }
-	//if (cvlat_degreeC != NULL) { delete[] cvlat_degreeC; }
 	if (cvps != NULL) { delete[] cvps; }
 	if (cvs != NULL) { delete[] cvs; }
 	if (cvsb != NULL) { delete[] cvsb; }
 
 	if (cvaisToFA.size() > 0) {
 		map<int, int*>::iterator iter;
-		//map<int, int*> cvansTofa; //fa별 cvan 목록
 		for (iter = cvaisToFA.begin(); iter != cvaisToFA.end(); ++iter) {
 			if (cvaisToFA[iter->first] != NULL) {
 				delete[] cvaisToFA[iter->first];
@@ -348,16 +343,6 @@ void disposeDynamicVars()
 
 	fcinfos.clear();
 	
-	//rfs.clear();
-	//tempMax.clear();
-	//tempMin.clear();
-	//dayTimeLength.clear();
-	//solarRad.clear();
-	//dewPointTemp.clear();
-	//windSpeed.clear();
-	//userPET.clear();
-	//snowpackTemp.clear();
-
 	if (rfs != NULL) { delete[] rfs; }
 	if (tempMax != NULL) { delete[] tempMax; }
 	if (tempMin != NULL) { delete[] tempMin; }

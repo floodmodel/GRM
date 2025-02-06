@@ -15,15 +15,6 @@ extern cvpos* cvps;
 extern map<int, int*> cvaisToFA; //fa별 cv array idex 목록
 extern vector<int> fas;
 extern map<int, int> faCount;
-//extern vector<weatherData> rfs;
-//extern vector<weatherData> tempMax;
-//extern vector<weatherData> tempMin;
-//extern vector<weatherData> solarRad;
-//extern vector<weatherData> dayTimeLength;
-//extern vector<weatherData> dewPointTemp;// 이슬점 온도 파일에서 읽은 자료
-//extern vector<weatherData> windSpeed;// 풍속 파일에서 읽은 자료
-//extern vector<weatherData> userPET;// 사용자 입력 잠재증발산량
-//extern vector<weatherData> snowpackTemp;
 
 extern weatherData* rfs;
 extern weatherData* tempMax;
@@ -219,7 +210,7 @@ int startSimulation()
 		return 1;
 	}
 	else {
-		tm tnow = getCurrentTimeAsLocal_tm(); //MP 수정
+		tm tnow = getCurrentTimeAsLocal_tm(); 
 		std::tm tsTotalSim = timeDifferecceTM_DHMS(ts.time_thisSimStarted, tnow);
 
 		printf("\rCurrent progress: 100.00%%... ");
@@ -272,9 +263,6 @@ int simulateRunoff(double nowTmin)
         }
     }
 
-	//if (ts.vMaxInThisStep > GRAVITY_ACC) {
-	//	ts.vMaxInThisStep = GRAVITY_ACC;
-	//}
     delete[] uMax;
 	// parallel =============================
 
@@ -375,29 +363,6 @@ void simulateRunoffCore(int i, double nowTmin)
 
 void initThisSimulation()
 {
-	//if (prj.simType != simulationType::RealTime) {
-	//	ts.dataNumTotal_rf = (int)rfs.size();
-	//	ts.dnTotal_tempMax = (int)tempMax.size();
-	//	ts.dnTotal_tempMin = (int)tempMin.size();
-	//	ts.dnTotal_solarR = (int)solarRad.size();
-	//	ts.dnTotal_DTL = (int)dayTimeLength.size();
-	//	ts.dnTotal_snowPackTemp = (int)snowpackTemp.size();
-	//	ts.dnTotal_dewPointTemp = (int)dewPointTemp.size();
-	//	ts.dnTotal_windSpeed = (int)windSpeed.size();
-	//	ts.dnTotal_userPET = (int)userPET.size();
-	//}
-	//else {
-	//	ts.dataNumTotal_rf = 0;
-	//	ts.dnTotal_tempMax = 0;
-	//	ts.dnTotal_tempMin = 0;
-	//	ts.dnTotal_solarR = 0;
-	//	ts.dnTotal_DTL = 0;
-	//	ts.dnTotal_snowPackTemp = 0;
-	//	ts.dnTotal_dewPointTemp = 0;
-	//	ts.dnTotal_windSpeed = 0;
-	//	ts.dnTotal_userPET = 0;
-	//}
-
 	initRFvars();
 
     // 이렇게 해야 모의기간에 맞게 실행된다. 
@@ -444,7 +409,7 @@ void initThisSimulation()
 	ts.targetTtoP_AVE_sec = (int)prj.dtPrintAveValue_min * 60;
 	ts.TtoP_ave_check_sec = ts.targetTtoP_AVE_sec + prj.dtPrintAveValue_sec;
 
-    ts.time_thisSimStarted = getCurrentTimeAsLocal_tm(); //MP 수정
+    ts.time_thisSimStarted = getCurrentTimeAsLocal_tm(); 
 
 	ts.showFileProgress = -1;
 	if (msgFileProcess != "") {
@@ -677,7 +642,7 @@ int  writeBySimType(int nowTP_min,
 	double TS_FromStarting_min = 0.0;
 	string tStrToPrint;
 	string tStrToPrintAve;
-	tm tnow = getCurrentTimeAsLocal_tm(); //MP 수정
+	tm tnow = getCurrentTimeAsLocal_tm(); 
 	TS_FromStarting_sec = timeDifferecceSEC(ts.time_thisSimStarted, tnow);
 	TS_FromStarting_min = TS_FromStarting_sec / 60.0;
 	string unitToP = "";

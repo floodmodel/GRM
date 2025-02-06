@@ -133,7 +133,7 @@ int startSimulationRT()
         return 1;
     }
     else {
-        tm tnow = getCurrentTimeAsLocal_tm(); //MP ¼öÁ¤
+        tm tnow = getCurrentTimeAsLocal_tm(); 
         std::tm tsTotalSim = timeDifferecceTM_DHMS(ts.time_thisSimStarted, tnow);
         writeLogString(fpnLog, "Simulation was completed. Run time: "
             + to_string(tsTotalSim.tm_hour) + "h "

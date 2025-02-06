@@ -23,7 +23,7 @@ int grmRTLauncher(int argc, char** args, int isEnforceAutoROM)
     string rtStartDataTime = ""; // 이게 모의 시작 데이터 시간
     string nameLensModel = "";
     //COleDateTime tnow = COleDateTime::GetCurrentTime();
-    tm tnow = getCurrentTimeAsLocal_tm(); //MP 수정
+    tm tnow = getCurrentTimeAsLocal_tm(); 
     // 2020.04.23. 최
     // 여기서 argument로 들어오는 시간 포맷은 yyyymmddHHMMSS 을 가정한다.
     // 포맷으로 사용하려면 dateTimeFormat:: 에서 바꿔 준다.

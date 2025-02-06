@@ -13,8 +13,6 @@ extern cvAtt* cvs;
 extern int** cvais;
 extern domaininfo di;
 
-//const int CONST_imgH = 370;
-//const int CONST_imgW = 370;
 thread* th_makeASC_ssr;
 thread* th_makeASC_rf;
 thread* th_makeASC_rfacc;
@@ -71,7 +69,6 @@ string fpn_rfacc_asc = "";
 string fpn_Q_asc = "";
 string fpn_petPDT_asc = "";
 string fpn_aetPDT_asc = "";
-//string fpn_aet_asc = "";
 
 string fpn_intcp_asc = "";
 string fpn_sm_asc = "";
@@ -384,7 +381,6 @@ int setRasterOutputArray()
     return 1;
 }
 
-//#ifdef _WIN32// MP 추가
 void makeIMG_ssr()
 {
     makeBMPFileUsingArrayGTzero_InParallel( fpn_ssr_img, ssrAry,
@@ -419,7 +415,6 @@ void makeIMG_aet()
     makeBMPFileUsingArrayGTzero_InParallel(fpn_aetPDT_img, aetPDTAry,
         di.nCols, di.nRows, rendererType::Depth, 10.0, di.nodata_value);
 }
-//#endif// MP 추가
 
 
 void makeASC_ssr()

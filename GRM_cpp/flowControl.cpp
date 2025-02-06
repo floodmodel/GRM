@@ -58,7 +58,7 @@ int updateFCCellinfoAndData()
 				|| afc.fcType == flowControlType::ReservoirOutflow
 				|| afc.fcType == flowControlType::SinkFlow
 				|| afc.fcType == flowControlType::SourceFlow) {
-				if (afc.fpnFCData == "" || fs::exists(lower(afc.fpnFCData)) != true) {//MP 수정 _access 대신 fs::exists 사용
+				if (afc.fpnFCData == "" || fs::exists(lower(afc.fpnFCData)) != true) {
 					string outstr = "ERROR : Flow control data file (" + afc.fpnFCData
 						+ ") is invalid.\n";
 					writeLogString(fpnLog, outstr, 1, 1);
@@ -375,25 +375,19 @@ void calReservoirOperation(int i, double nowTmin)
 	double maxStorageApp=0;
 	maxStorageApp = afci.NormalHighStorage_m3;
 	if (prj.isDateTimeFormat == 1) { // RestrictedStorage_m3>0 인 경우에만 적용
-		//if (afci.RestrictedStorage_m3 > 0) { // 주석처리. 2024.08.14
 		if (ts.tCurMonth >= afci.restricedP_SM
 			&& ts.tCurDay >= afci.restricedP_SD) {
 			if (ts.tCurMonth <= afci.restricedP_EM
 				&& ts.tCurDay <= afci.restricedP_ED) {
-				//maxStorageApp = afci.RestrictedStorage_m3; // 주석처리. 2024.08.14
 				maxStorageApp = afci.maxStorage_m3; // 홍수기에서는 계획홍수위 저수량을 최대 저류량으로 설정. 2024.08.14
 			}
 		}
-		//}
 	}
 	else {
-		//if (afci.RestrictedStorage_m3 > 0) {// 주석처리. 2024.08.14
 		if (afci.RestrictedPeriod_Start_min >= nowTmin
 			&& afci.RestrictedPeriod_End_min <= nowTmin) {
-			//maxStorageApp = afci.RestrictedStorage_m3;
 			maxStorageApp = afci.maxStorage_m3; // 홍수기에서는 계획홍수위 저수량을 최대 저류량으로 설정. 2024.08.14
 		}
-		//}
 	}
     switch (afci.roType) {
     case reservoirOperationType::AutoROM: {
@@ -423,11 +417,6 @@ void calReservoirOperation(int i, double nowTmin)
 			// 현재 유입량이 지정된 방류량보다 작은경우로 수정. 2024.05.21 <-- RigidROM에서 유입수문곡선의 첨두값을 미리 알수 없으므로, 지정된 유량을 기준으로 일정율을 적용한다.
 			Qout_cms = cvs[i].QsumCVw_m3Ps * afci.roConstR;
 		}
-		//else  if (cvs[i].storageCumulative_m3 < afci.roConstQ_cms * ts.dtsec) {
-		//    // 현재 저류량이 dtsec 유출량 보다 작은 경우, 저류된 모든 양이 유출
-		//    Qout_cms = cvs[i].storageCumulative_m3 / ts.dtsec;
-		//    cvs[i].storageCumulative_m3 = 0;
-		//}
         else {
             Qout_cms = afci.roConstQ_cms;
             cvs[i].storageCumulative_m3 = cvs[i].storageCumulative_m3

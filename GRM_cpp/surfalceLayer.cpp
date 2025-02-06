@@ -11,7 +11,6 @@ extern double* cvele;// 각셀의 해발고도. DEM에서 읽은 값. 배열 인덱스가, cv 인덱
 extern map<int, double[12]> laiRatio;
 extern double sunDurRatioForAday[65][13];
 extern double blaneyCriddleKData[12];
-//extern double svpGradient[100];
 
 extern thisSimulation ts;
 
@@ -287,8 +286,6 @@ void calPET_Hargreaves(int i) {
 	// 2024.11.25. 기상청 일사량 자료 단위 MJ/m^2을 그대로 적용하는 것으로 수정
 	//double lv = 2.45; // 증발잠열 FAO 권장값. MJ/kg
 	// 0.000939 = 0.0023 / 2.45
-	//double pet_mmPday = 0.000939 * cvs[i].solarRad_MJpM2 * pow(t_diff, 0.5) * (tave + 17.8);  // 입력자료 단위 MJ/m^2을 그대로 적용
-	//double Ra = getRa(cvs[i].lat_rad);
 	double Ra = getRa(cvps[i].lat_rad);
 	double pet_mmPday = 0.000939 * Ra * pow(t_diff, 0.5) * (tave + 17.8);  // 입력자료 단위 MJ/m^2을 그대로 적용
 	cvs[i].pet_mPdt = ts.dtsec * pet_mmPday / 86400000.0; // 1/86400000 = 1/1000/24/60/60.  총 일 증발량을 초 단위로 나누어서 사용한다.
@@ -301,7 +298,6 @@ void calPET_PriestleyTaylor(int i) {
 	double parTMP = tave + 237.3;
 	double es = 0.6108 * exp(17.27 * tave / parTMP); // es : kPa
 	double svpGrad = 4098 * es / parTMP / parTMP;  // kPa/degreeC  // 2503.06 = 4098 * 0.6108
-	//double pet_mmPday = 1.28 * svpGrad / (svpGrad + gamma) * cvs[i].solarRad_MJpM2 / lv;
 	double ea = getActualVP_Ea(i);
 	double Rn = getRn(i, ea); // net radiation
 	double pet_mmPday = 0.52245 * Rn * svpGrad / (svpGrad + gamma); // 0.52245 = 1.28 / 2.45,   lv = 2.45; // 증발잠열 FAO 권장값. MJ/kg
@@ -316,7 +312,6 @@ void calPET_FPM(int i) { // FAO Penman-Monteith
 	double es = 0.6108 * exp(17.27 * tave / parTMP); // es : kPa	
 	double svpGrad = 4098 *es/ parTMP / parTMP;  // kPa/degreeC  // 2503.06 = 4098 * 0.6108	
 	double ea = getActualVP_Ea(i);
-	//double term1 = 0.408 * svpGrad * cvs[i].solarRad_MJpM2;
 	double Rn = getRn(i, ea); // net radiation
 	double term1 = 0.408 * svpGrad * Rn;
 	double term2 = gamma * 900 * cvs[i].windSpeed_mps * (es - ea) / (tave + 273);

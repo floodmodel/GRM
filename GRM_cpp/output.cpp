@@ -473,7 +473,7 @@ int makeNewOutputFiles()
 		|| prj.printOption == GRMPrintType::AverageFile) {
 		string outPutLine;
 		string comHeader;
-		tm tnow = getCurrentTimeAsLocal_tm(); //MP 수정
+		tm tnow = getCurrentTimeAsLocal_tm(); 
 		string nowT = timeToString(tnow, timeUnitToShow::toM, 
 			dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS );
 		version grmV = getCurrentFileVersion();
@@ -513,18 +513,12 @@ int makeNewOutputFiles()
 					if (prj.simType == simulationType::RealTime) {
 						heads = heads + CONST_OUTPUT_TABLE_TIME_FIELD_NAME + vs
 							+ "Flow_sim[m^3/s]" + vs;
-						//if (prj.printAveValue == 1) {
-						//	heads = heads + "Flow_sim_AVE[CMS]" + vs;
-						//}
 						heads = heads + "Flow_obs[m]" + vs
 							+ "PRCP_UpMean[mm]" + "\n";
 					}
 					else {
 						heads = heads + CONST_OUTPUT_TABLE_TIME_FIELD_NAME + vs
 							+ "Discharge[m^3/s]" + vs;
-						//if (prj.printAveValue == 1) { // WP 별 출력에서는 순간 cms 옆에 Ave cms 기록한다.
-						//	heads = heads + "Discharge_AVE[CMS]" + vs;
-						//}
 						heads = heads + "BaseFlowDepth[m]" + vs
 							+ "SoilWaterContent[m]" + vs
 							+ "SoilSatR" + vs

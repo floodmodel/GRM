@@ -30,10 +30,6 @@ projectfilePathInfo getProjectFileInfo(string fpn_prj)
 
 int openProjectFile(int forceRealTime)
 {
-	//if (_access(ppi.fpn_prj.c_str(), 0) != 0) { //MP 주석
-	//	return -1;
-	//}
-
 	projectFileFieldName fn;
 	swsParameters* aswp;
 	aswp = new swsParameters;
@@ -464,11 +460,6 @@ int openProjectFile(int forceRealTime)
 				}
 				ts.isUsed_BlaneyCriddleK_File = 1;
 
-				//if (prj.fpnDaytimeLengthRatioData == "") {
-				//	writeLogString(fpnLog, "ERROR : Daytime length ratio data file is invalid.\n", 1, 1);
-				//	return -1;
-				//}
-				//ts.wdUsed_dayTimeHoursR = 1;
 				if (prj.latitudeTOP_degree == -9999.0) {
 					writeLogString(fpnLog, "ERROR : Latitude of the top of the domain is invalid.\n", 1, 1);
 					return -1;
@@ -501,11 +492,6 @@ int openProjectFile(int forceRealTime)
 					writeLogString(fpnLog, "ERROR : Solar radiation data interval is invalid.\n", 1, 1);
 					return -1;
 				}
-				//if (prj.fpnSolarRadData == "") { // 일사량 사용안된다. Ra가 사용된다.
-				//	writeLogString(fpnLog, "ERROR : Solar radiation data file is invalid.\n", 1, 1);
-				//	return -1;
-				//}
-				//ts.wdUsed_solarR = 1;
 				//DEM
 				if (prj.latitudeTOP_degree ==-9999.0) {
 					writeLogString(fpnLog, "ERROR : Latitude of the top of the domain is invalid.\n", 1, 1);
@@ -626,19 +612,13 @@ int openProjectFile(int forceRealTime)
 					isPET = false;
 				}
 				if (prj.fpnUserPET == "") {
-					//writeLogString(fpnLog, "ERROR : User potential evapotranspiration data file is invalid.\n", 1, 1);
-					//return -1;
 					isPET = false;
 				}
 
 				if (prj.userAETDataType == weatherDataType::None) {
-					//writeLogString(fpnLog, "ERROR : User potential evapotranspiration data type is invalid.\n", 1, 1);
-					//return -1;
 					isAET = false;
 				}
 				if (prj.fpnUserAET == "") {
-					//writeLogString(fpnLog, "ERROR : User potential evapotranspiration data file is invalid.\n", 1, 1);
-					//return -1;
 					isAET = false;
 				}
 
@@ -983,11 +963,7 @@ int openProjectFile(int forceRealTime)
 			if (ts.wdUsed_DTL == 1) {
 				if (setDaytimeLength() == -1) { return -1; }
 			}
-			//if (ts.wdUsed_dayTimeHoursR == 1) {
-			//	if (setSunDurationRatioData() == -1) { return -1; }
-			//}
-
-			if (ts.isUsed_BlaneyCriddleK_File == 1) {//MP 수정 _access 대신 fs::exists 사용
+			if (ts.isUsed_BlaneyCriddleK_File == 1) { 
 				if (setBlaneyCriddleK() == -1) { return -1; }
 			}
 			if (ts.wdUsed_solarR == 1) {
@@ -1028,16 +1004,9 @@ int openProjectFile(int forceRealTime)
 
 	if (prj.makeASCFile == 1 || prj.makeIMGFile == 1) {
 		prj.makeASCorIMGfile = 1;
-		//if (prj.makeRfDistFile == 1 || prj.makeRFaccDistFile == 1) {
-		//	prj.makeRFraster = 1;
-		//}
-		//else {
-		//	prj.makeRFraster = -1;
-		//}
 	}
 	else {
 		prj.makeASCorIMGfile = -1;
-		//prj.makeRFraster = -1;
 	}
 
 	if (aswp != NULL) {
@@ -1102,8 +1071,7 @@ int readXmlRowProjectSettings(string aline)
 		}
 		prj.fpnDomain = "";
 		// wsl에서는 드라이브 문자는 소문자로 표시한다. D: 드라이브는 d로 표시
-		//if (vString != "" && fs::exists(fs::path(lower(vString).c_str())) == true) {//MP 수정 _access 대신 fs::exists 사용. 
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnDomain = vString;
 
 			fs::path fpnProjection;
@@ -1125,7 +1093,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.SlopeFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SlopeFile);
 		prj.fpnSlope = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnSlope = vString;
 		}
 		else {
@@ -1138,7 +1106,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.FlowDirectionFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.FlowDirectionFile);
 		prj.fpnFD = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnFD = vString;
 		}
 		else {
@@ -1179,7 +1147,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.FlowAccumFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.FlowAccumFile);
 		prj.fpnFA = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnFA = vString;
 		}
 		else {
@@ -1193,7 +1161,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.DEMFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.DEMFile);
 		prj.fpnDEM = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnDEM = vString;
 		}
 		else {
@@ -1208,7 +1176,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.StreamFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.StreamFile);
 		prj.fpnStream = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnStream = vString;
 			prj.streamFileApplied = 1;
 		}
@@ -1227,7 +1195,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.ChannelWidthFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.ChannelWidthFile);
 		prj.fpnChannelWidth = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnChannelWidth = vString;
 			prj.cwFileApplied = 1;
 		}
@@ -1247,7 +1215,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.InitialSoilSaturationRatioFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.InitialSoilSaturationRatioFile);
 		prj.fpniniSSR = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpniniSSR = vString;
 			prj.issrFileApplied = 1;
 		}
@@ -1267,7 +1235,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.InitialChannelFlowFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.InitialChannelFlowFile);
 		prj.fpniniChFlow = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpniniChFlow = vString;
 			prj.icfFileApplied = 1;
 		}
@@ -1308,7 +1276,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.LandCoverFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.LandCoverFile);
 		prj.fpnLC = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnLC = vString;
 		}
 		return 1;
@@ -1317,7 +1285,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.LandCoverVATFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.LandCoverVATFile);
 		prj.fpnLCVat = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnLCVat = vString;
 		}
 		return 1;
@@ -1326,7 +1294,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.LAIFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.LAIFile);
 		prj.fpnLAI = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnLAI = vString;
 		}
 		return 1;
@@ -1373,7 +1341,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.SoilTextureFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SoilTextureFile);
 		prj.fpnST = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnST = vString;
 		}
 		return 1;
@@ -1382,7 +1350,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.SoilTextureVATFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SoilTextureVATFile);
 		prj.fpnSTVat = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnSTVat = vString;
 		}
 		return 1;
@@ -1441,7 +1409,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.SoilDepthFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SoilDepthFile);
 		prj.fpnSD = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnSD = vString;
 		}
 		return 1;
@@ -1449,7 +1417,7 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.SoilDepthVATFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SoilDepthVATFile);
 		prj.fpnSDVat = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnSDVat = vString;
 		}
 		return 1;
@@ -1470,7 +1438,7 @@ int readXmlRowProjectSettings(string aline)
 		}
 		prj.fpnRainfallData = "";
 		prj.rfDataType = weatherDataType::None;
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnRainfallData = vString;
 			prj.rfDataType = getWeatherDataTypeByDataFile(vString);
 			if (prj.rfDataType == weatherDataType::None) {
@@ -1509,7 +1477,7 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMaxDataFile);
 		prj.fpnTempMaxData = "";
 		prj.tempMaxDataType = weatherDataType::None;
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnTempMaxData = vString;
 			prj.tempMaxDataType = getWeatherDataTypeByDataFile(vString);
 			if (prj.tempMaxDataType == weatherDataType::None) {
@@ -1547,7 +1515,7 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMinDataFile);
 		prj.fpnTempMinData = "";
 		prj.tempMinDataType = weatherDataType::None;
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnTempMinData = vString;
 			prj.tempMinDataType = getWeatherDataTypeByDataFile(vString);
 			if (prj.tempMinDataType == weatherDataType::None) {
@@ -1586,7 +1554,7 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.DaytimeLengthDataFile);
 		prj.fpnDTLData = "";
 		prj.DTLDataType = weatherDataType::None;
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnDTLData = vString;
 			prj.DTLDataType = getWeatherDataTypeByDataFile(vString);
 			if (prj.DTLDataType == weatherDataType::None) {
@@ -1621,25 +1589,10 @@ int readXmlRowProjectSettings(string aline)
 		return 1;
 	}
 
-	//if (aline.find(fldName.DaytimeHoursRatioDataFile) != string::npos) {
-	//	vString = getValueStringFromXmlLine(aline, fldName.DaytimeHoursRatioDataFile);
-	//	prj.fpnDaytimeLengthRatioData = "";
-	//	if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
-	//		prj.fpnDaytimeLengthRatioData = vString;
-	//	}
-	//	else if (prj.simType == simulationType::Normal) {
-	//		if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
-	//			writeLogString(fpnLog, "ERROR : The ratio of daytime hours data file [" + vString + "] is invalid.\n", 1, 1);
-	//			return -1;
-	//		}
-	//	}
-	//	return 1;
-	//}
-
 	if (aline.find(fldName.BlaneyCriddleCoefDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.BlaneyCriddleCoefDataFile);
 		prj.fpnBlaneyCriddleK = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnBlaneyCriddleK = vString;
 		}
 		else if (prj.simType == simulationType::Normal) {
@@ -1655,7 +1608,7 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.SolarRadiationDataFile);
 		prj.fpnSolarRadData = "";
 		prj.solarRadDataType = weatherDataType::None;
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnSolarRadData = vString;
 			prj.solarRadDataType = getWeatherDataTypeByDataFile(vString);
 			if (prj.solarRadDataType == weatherDataType::None) {
@@ -1833,7 +1786,7 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.SnowPackTemperatureDataFile);
 		prj.fpnSnowpackTempData = "";
 		prj.snowpackTempDataType = weatherDataType::None;
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			prj.fpnSnowpackTempData = vString;
 			prj.snowpackTempDataType = getWeatherDataTypeByDataFile(vString);
 			if (prj.snowpackTempDataType == weatherDataType::None) {
@@ -1908,7 +1861,7 @@ int readXmlRowProjectSettings(string aline)
 			else {
 				prj.isDateTimeFormat = 1;
 				tm t;
-				t= stringToDateTime2(vString, true); //MP 수정
+				t= stringToDateTime2(vString, true); 
 				if (t.tm_year == 0 || t.tm_mon == 0
 					|| t.tm_mday == 0) {
 					writeLogString(fpnLog, "ERROR : Simulation starting time is invalid. Check the input format. \n", 1, 1);
@@ -2716,7 +2669,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 
 	if (aline.find(fldName.FlowDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.FlowDataFile);
-		if (vString != "" && fs::exists(lower(vString)) == true) {//MP 수정 _access 대신 fs::exists 사용
+		if (vString != "" && fs::exists(lower(vString)) == true) {
 			fci->fpnFCData = vString;
 		}
 		else if (vString != ""){

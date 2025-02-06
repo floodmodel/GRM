@@ -12,11 +12,6 @@ void calEffectiveRFbyInfiltration(int i, int dtrf_sec, int dtsec)
 		setNoInfiltrationParameters(i);
 		return;
 	}
-	//// 2024.02.08 주석처리. 불투수율이 1인 경우에도, 토양층 흐름으로 다른 셀에서 유입되는 토양 수분에 의해서 현재 셀의 토양수분, 포화도가 달라질 수 있다.
-	//if (cvs[i].imperviousR == 1) {
-	//	setNoInfiltrationParameters(i);
-	//	return;
-	//}
 
 	bool beenPonding = false; // 2023.04.12. 수심이 있는 경우, ponding으로 계산하기 위해서 추가
 	if (cvs[i].flowType == cellFlowType::ChannelFlow

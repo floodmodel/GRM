@@ -682,7 +682,6 @@ typedef struct _grmOutFiles
 	string ofpnDepth;
 	string ofpnPRCPGrid;
 	string ofpnPRCPMean;
-	//string ofpnFCData; // 2022.10.17 주석처리
 	string ofpnFCStorage;
 	string ofpnFCinflow;
 	string ofpnFCinflowPTAve;
@@ -844,7 +843,6 @@ typedef struct _cvAtt
 	double intcpAcc_m = 0.0; // 누적 차단량
 
 	PETmethod petMethod;
-	//double lat_rad = -100.0;  // 위도 radian. 남반구에서는 - 값
 	double pet_mPdt = 0.0; //잠재 증발산량
 	double pet_PDT_m = 0.0; // 출력 시간 간격 동안이 누적 잠재증발산량.
 	double aet_mPdt = 0.0; //실제 증발산량
@@ -921,7 +919,6 @@ typedef struct _projectFile
 	string fpnSolarRadData = "";
 	int solarRadInterval_min = -1;
 
-	//string fpnDaytimeLengthRatioData = "";
 	string fpnBlaneyCriddleK = "";
 
 	// v2025 ===================================
@@ -994,7 +991,6 @@ typedef struct _projectFile
 	int icfFileApplied = 0;
 	int issrFileApplied = 0;
 	int makeASCorIMGfile = 0;
-	//int makeRFraster = 0;
 
 	cpu_gpu_info cpusi; //MP 수정
 	int deleteAllFilesExceptDischargeOut = -1;
@@ -1024,9 +1020,7 @@ typedef struct _thisSimulation
 	int wdUsed_dewPointTemp = -1;// true : 1, false : -1
 	int wdUsed_windSpeed = -1;// true : 1, false : -1
 	int wdUsed_userET = -1;// true : 1 이면 PET, 2이면 AET ; false : -1 
-	//int wdUsed_userAET = -1;// true : 1, false : -1
 	int wdUsed_snowPackTemp = -1;// true : 1, false : -1
-	//int wdUsed_dayTimeHoursR = -1;
 	int isUsed_BlaneyCriddleK_File = -1;
 	int isUsed_DEM = -1;// true : 1, false : -1
 	int isUsed_Latitude = -1;// true : 1, false : -1
@@ -1048,7 +1042,7 @@ typedef struct _thisSimulation
 
 	int runByAnalyzer = 0;
 
-	std::tm time_thisSimStarted; //MP 수정
+	std::tm time_thisSimStarted; 
 	double vMaxInThisStep=-9999.0; // m/s
 
 	//int tCurYear = 0;
@@ -1232,15 +1226,6 @@ void setCVRFintensityAndDTrf_Zero();
 int assignWDtoCV(int cvidx, whatWeatherData wwd, double wdValue);
 int setCVweatherData(int order, string dataString, weatherDataType wdType,
 	weatherData* vectWd, whatWeatherData wwd);
-
-//int setCVtempMax(int order);
-//int setCVtempMin(int order);
-//int setCVdaytimeLength(int order);
-//int setCVsolarRad(int order);
-//int setCVdewPointTemp(int order);
-//int setCVwindSpeed(int order);
-//int setCVuserPET(int order);
-//int setCVsnowPackTemp(int order);
 
 void setCVStartingCondition(double iniflow);
 int setDomainAndCVBasicinfo();

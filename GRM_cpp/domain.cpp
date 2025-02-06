@@ -11,7 +11,6 @@ extern projectFile prj;
 extern domaininfo di;
 extern int** cvais;
 extern double* cvele;// 각셀의 해발고도. DEM에서 읽은 값. 배열 인덱스가, cv 인덱스와 같게 한다.
-//extern double* cvlat_degreeC; // 각셀의 위도. 배열 인덱스가, cv 인덱스와 같게 한다. 남반구는 - 값
 extern cvAtt* cvs;
 extern cvpos* cvps;
 extern cvAtt* cvsb;
@@ -19,12 +18,12 @@ extern thisSimulation ts;
 
 int readDomainFaFileAndSetupCV()
 {
-    if (prj.fpnDomain == "" || fs::exists(lower(prj.fpnDomain)) != true) {//MP 수정 _access 대신 fs::exists 사용
+    if (prj.fpnDomain == "" || fs::exists(lower(prj.fpnDomain)) != true) {
         string outstr = "ERROR : Domain file (" + prj.fpnDomain + ") is invalid.\n";
         writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
-    if (prj.fpnFA == "" || fs::exists(lower(prj.fpnFA)) != true) {//MP 수정
+    if (prj.fpnFA == "" || fs::exists(lower(prj.fpnFA)) != true) {
         string outstr = "ERROR : Flow accumulation file (" + prj.fpnFA + ") is invalid.\n";
         writeLogString(fpnLog, outstr, 1, 1);
         return -1;
@@ -115,12 +114,12 @@ int readDomainFaFileAndSetupCV()
 
 int readDomainAddtionalRasterDataAndSetCV()
 { 
-    if (prj.fpnSlope == "" || fs::exists(lower(prj.fpnSlope)) != true) { //MP 수정
+    if (prj.fpnSlope == "" || fs::exists(lower(prj.fpnSlope)) != true) { 
         string outstr = "ERROR : Slope file (" + prj.fpnSlope + ") is invalid.\n";
         writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
-    if (prj.fpnFD == "" || fs::exists(lower(prj.fpnFD)) != true) { //MP 수정
+    if (prj.fpnFD == "" || fs::exists(lower(prj.fpnFD)) != true) { 
         string outstr = "ERROR : Flow direction file (" + prj.fpnFD + ") is invalid.\n";
         writeLogString(fpnLog, outstr, 1, 1);
         return -1;
@@ -136,28 +135,28 @@ int readDomainAddtionalRasterDataAndSetCV()
 
     if (prj.streamFileApplied == 1
         && (prj.fpnStream == ""
-            || fs::exists(lower(prj.fpnStream)) != true)) { //MP 수정
+            || fs::exists(lower(prj.fpnStream)) != true)) { 
         writeLogString(fpnLog, "WARNNING : Stream file is invalid. Simulation continues.\n", 1, -1);
         prj.streamFileApplied = -1;
     }
 
     if (prj.cwFileApplied == 1
         && (prj.fpnChannelWidth == ""
-            || fs::exists(lower(prj.fpnChannelWidth)) != true)) { //MP 수정
+            || fs::exists(lower(prj.fpnChannelWidth)) != true)) { 
         writeLogString(fpnLog, "WARNNING : Channel width file is invalid. Simulation continues.\n", 1, -1);
         prj.cwFileApplied = -1;
     }
 
     if (prj.icfFileApplied == 1
         && (prj.fpniniChFlow == ""
-            || fs::exists(lower(prj.fpniniChFlow)) != true)) { //MP 수정
+            || fs::exists(lower(prj.fpniniChFlow)) != true)) { 
         writeLogString(fpnLog, "WARNNING : Initial stream flow file is invalid. Simulation continues.\n", 1, -1);
         prj.icfFileApplied = -1;
     }
 
     if (prj.issrFileApplied==1
         &&(prj.fpniniSSR == "" 
-            || fs::exists(lower(prj.fpniniSSR)) != true)) { //MP 수정
+            || fs::exists(lower(prj.fpniniSSR)) != true)) { 
         writeLogString(fpnLog, "WARNNING : Initial soil saturation ratio file is invalid. Simulation continues.\n", 1, -1);
         prj.issrFileApplied = -1;
     }
@@ -333,13 +332,13 @@ int readDomainAddtionalRasterDataAndSetCV()
 int readLandCoverFileAndSetCVbyVAT()
 {
     if (prj.fpnLC == "" 
-        || fs::exists(lower(prj.fpnLC)) != true) { //MP 수정
+        || fs::exists(lower(prj.fpnLC)) != true) { 
         string outstr = "ERROR : Land cover file (" + prj.fpnLC + ") is invalid.\n";
         writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.fpnLCVat == "" 
-        || fs::exists(lower(prj.fpnLCVat)) != true) { //MP 수정  //속성 대응 참고를 위해 이파일 있는지 본다.
+        || fs::exists(lower(prj.fpnLCVat)) != true) {   //속성 대응 참고를 위해 이파일 있는지 본다.
         string outstr = "ERROR : Land cover VAT file (" + prj.fpnLCVat + ") is invalid.\n";
         writeLogString(fpnLog, outstr, 1, 1);
     }
@@ -418,7 +417,7 @@ int setCVbyLCConstant()
 int readLandCoverFile()
 {
     if (prj.fpnLC == "" 
-        || fs::exists(lower(prj.fpnLC)) != true) { //MP 수정 
+        || fs::exists(lower(prj.fpnLC)) != true) {  
         string outstr = "ERROR : Land cover file (" + prj.fpnLC + ") is invalid.\n";
         writeLogString(fpnLog, outstr, -1, 1);
         return -1;
@@ -443,13 +442,13 @@ int readLandCoverFile()
 int readSoilTextureFileAndSetCVbyVAT()
 {
     if (prj.fpnST == "" 
-        || fs::exists(lower(prj.fpnST)) != true) { //MP 수정  
+        || fs::exists(lower(prj.fpnST)) != true) {   
         string outstr = "ERROR : Soil texture file (" + prj.fpnST + ") is invalid.\n";
         writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.fpnSTVat == "" 
-        || fs::exists(lower(prj.fpnSTVat)) != true) { //MP 수정  //속성 대응 참고를 위해 이파일 있는지 본다.
+        || fs::exists(lower(prj.fpnSTVat)) != true) {   //속성 대응 참고를 위해 이파일 있는지 본다.
         string outstr = "WARNNING : Soil texture VAT file (" + prj.fpnSTVat + ") is invalid.\n";
         writeLogString(fpnLog, outstr, 1, 1);
     }
@@ -540,7 +539,7 @@ int setCVbySTConstant()
 int readSoilTextureFile()
 {
     if (prj.fpnST == "" 
-        || fs::exists(lower(prj.fpnST)) != true) { //MP 수정 
+        || fs::exists(lower(prj.fpnST)) != true) {  
         string outstr = "ERROR : Soil texture file (" + prj.fpnST + ") is invalid.\n";
         writeLogString(fpnLog, outstr, -1, 1);
         return -1;
@@ -566,13 +565,13 @@ int readSoilTextureFile()
 int readSoilDepthFileAndSetCVbyVAT()
 {
     if (prj.fpnSD == "" 
-        || fs::exists(lower(prj.fpnSD)) != true) { //MP 수정 
+        || fs::exists(lower(prj.fpnSD)) != true) {  
         string outstr = "ERROR : Soil depth file (" + prj.fpnSD + ") is invalid.\n";
         writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.fpnSDVat == "" 
-        || fs::exists(lower(prj.fpnSDVat)) != true) { //MP 수정   //속성 대응 참고를 위해 이파일 있는지 본다.
+        || fs::exists(lower(prj.fpnSDVat)) != true) {    //속성 대응 참고를 위해 이파일 있는지 본다.
         string outstr = "WARNNING : Soil depth VAT file (" + prj.fpnSDVat + ") is invalid.\n";
         writeLogString(fpnLog, outstr, 1, 1);
     }
@@ -642,7 +641,7 @@ int setCVbySDConstant()
 int readSoilDepthFile()
 {
     if (prj.fpnSD == "" 
-        || fs::exists(lower(prj.fpnSD)) != true) { //MP 수정 
+        || fs::exists(lower(prj.fpnSD)) != true) {  
         string outstr = "ERROR : Soil depth file (" + prj.fpnSD + ") is invalid.\n";
         writeLogString(fpnLog, outstr, -1, 1);
         return -1;

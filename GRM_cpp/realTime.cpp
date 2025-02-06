@@ -336,7 +336,7 @@ void updateFcDataStatusForEachFCcellGRMRT(string t_yyyymmddHHMM, int idx)
 
 void updateRFdataGRMRT(string t_yyyymmddHHMM)
 {
-    tm tnow = getCurrentTimeAsLocal_tm(); //MP 수정
+    tm tnow = getCurrentTimeAsLocal_tm(); 
     double ts_FromStarting_sec = 0.0;
     double ts_FromStarting_min = 0.0;
     ts_FromStarting_sec = timeDifferecceSEC(ts.time_thisSimStarted, tnow);
@@ -350,12 +350,8 @@ void updateRFdataGRMRT(string t_yyyymmddHHMM)
             + tFromStart + "분 경과 \n", 1, 1);
         tsrt.newRFAddedRT = -1;
     }
-    //string fpn_map = "";
     switch (prj.rfDataType)
     {
-    //case weatherDataType::ASCraster_mmPhr:
-    //    writeLog(fpnLog, "[TextFileASCgrid_mmPhr] rainfall data  type is not supported yet.\n", 1, 1);
-    //    return;
     case weatherDataType::Mean: {
         // map는 지정된 폴더(RTRFfolderName)의 yyyymm.txt 파일에서 실시간 강우자료를 받는다.
         // RTRFfolderName\\yyyymm.txt
