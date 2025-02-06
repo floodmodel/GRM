@@ -22,11 +22,12 @@ int grmRTLauncher(int argc, char** args, int isEnforceAutoROM)
     string startCommandTime = ""; //이건 모의 시작 버튼을 누른 시간
     string rtStartDataTime = ""; // 이게 모의 시작 데이터 시간
     string nameLensModel = "";
-    COleDateTime tnow = COleDateTime::GetCurrentTime();
+    //COleDateTime tnow = COleDateTime::GetCurrentTime();
+    tm tnow = getCurrentTimeAsLocal_tm(); //MP 수정
     // 2020.04.23. 최
     // 여기서 argument로 들어오는 시간 포맷은 yyyymmddHHMMSS 을 가정한다.
     // 포맷으로 사용하려면 dateTimeFormat:: 에서 바꿔 준다.
-    startCommandTime = timeToString(tnow, false, dateTimeFormat::yyyymmddHHMMSS);
+    startCommandTime = timeToString(tnow, timeUnitToShow::toM, dateTimeFormat::yyyymmddHHMMSS);
 
     tsrt.enforceAutoROM = isEnforceAutoROM; // isPrediction==1 인경우에는 /r, /a 옵션이 모두 적용된 경우이다.
     string fpnRef;
@@ -136,9 +137,9 @@ int grmRTLauncher(int argc, char** args, int isEnforceAutoROM)
         grmRealTime oGRM = grmRealTime(fpnRef, strGUID, startCommandTime,
             rtStartDataTime, nameLensModel);
         // 여기서 부터는 fpnLog 사용할 수 있다.
-        writeLog(fpnLog, "GRM RT was started.\n", 1, 1);
+        writeLogString(fpnLog, "GRM RT was started.\n", 1, 1);
         oGRM.setUpAndStartGRMRT();
-        writeLog(fpnLog, "GRM RT was ended.\n", 1, 1);
+        writeLogString(fpnLog, "GRM RT was ended.\n", 1, 1);
         //Console.ReadLine();    // 필수
         //string s;
         //getline(cin, s);

@@ -15,12 +15,27 @@ extern cvpos* cvps;
 extern map<int, int*> cvaisToFA; //fa별 cv array idex 목록
 extern vector<int> fas;
 extern map<int, int> faCount;
-extern vector<weatherData> rfs;
-extern vector<weatherData> tempMax;
-extern vector<weatherData> tempMin;
-extern vector<weatherData> solarRad;
-extern vector<weatherData> dayTimeLength;
-extern vector<weatherData> snowpackTemp;
+//extern vector<weatherData> rfs;
+//extern vector<weatherData> tempMax;
+//extern vector<weatherData> tempMin;
+//extern vector<weatherData> solarRad;
+//extern vector<weatherData> dayTimeLength;
+//extern vector<weatherData> dewPointTemp;// 이슬점 온도 파일에서 읽은 자료
+//extern vector<weatherData> windSpeed;// 풍속 파일에서 읽은 자료
+//extern vector<weatherData> userPET;// 사용자 입력 잠재증발산량
+//extern vector<weatherData> snowpackTemp;
+
+extern weatherData* rfs;
+extern weatherData* tempMax;
+extern weatherData* tempMin; // 최대기온 파일에서 읽은 자료
+extern weatherData* dayTimeLength; // 최대기온 파일에서 읽은 자료
+extern weatherData* solarRad; // 최대기온 파일에서 읽은 자료
+extern weatherData* dewPointTemp; // 최대기온 파일에서 읽은 자료
+extern weatherData* windSpeed; // 최대기온 파일에서 읽은 자료
+extern weatherData* userET; // 최대기온 파일에서 읽은 자료
+extern weatherData* snowpackTemp; // 최대기온 파일에서 읽은 자료
+
+
 extern flowControlCellAndData fccds;
 extern wpSimData wpSimValue;
 extern string msgFileProcess;
@@ -35,99 +50,148 @@ int startSimulation()
 	initThisSimulation();
 	setCVStartingCondition(0);
 	int dtRF_sec = prj.rfinterval_min * 60;
-	int orderRF = 0;
+	int iRF = 0;
 
 	int dtTempMax_sec = prj.tempMaxInterval_min * 60;
-	int orderTempMax = 0;
+	int iTempMax = 0;
 	int dtTempMin_sec = prj.tempMinInterval_min * 60;
-	int orderTempMin = 0;
+	int iTempMin = 0;
+	int dtDTL_sec = prj.DTLDataInterval_min * 60; // daytime length
+	int iDTL = 0; // daytime length
 	int dtSolarRMin_sec = prj.solarRadInterval_min * 60;
-	int orderSolarR = 0;
-	int dtSunDur_sec = prj.daytimeLengthDataInterval_min * 60;
-	int orderSunDur = 0;
+	int iSolarR = 0;
+
+	int dtDewPointTemp_sec = prj.dewPointTempInterval_min * 60;
+	int iDewPointT = 0;
+	int dtWindSpeed_sec = prj.windSpeedInterval_min * 60;
+	int iWindSpeed = 0;
+	int dtUserET_sec = prj.userETInterval_min * 60;
+	int iUserET = 0;
+	weatherDataType userWdType_apply;
+	if (ts.wdUsed_userET == 1) {
+		userWdType_apply = prj.userPETDataType;
+	}
+	else if (ts.wdUsed_userET == 2) {
+		userWdType_apply = prj.userAETDataType;
+	}
+
 	int dtSnowPackTemp = prj.snowpackTempInterval_min * 60;
-	int orderSnowPackTemp = 0;
+	int iSnowPackT = 0;
 
 	int nowTsec = ts.dtsec;
 	double nowTmin = 0.0;;
 
 	int simEndingT_sec = ts.simEnding_sec;
 	int loopEndingT_sec = ts.simEnding_sec + 1;// ts.dtsec + 1; 여기서 +1을 하는 것은 while 문에서 부등호를 사용하기 위함
+	int nowTday = 1;
+	int nowTday_bak = 0;
 	while (nowTsec < loopEndingT_sec) {
 		// dtsec부터 시작해서, 첫번째 강우레이어를 이용한 모의결과를 0시간에 출력한다.
-		if (nowTsec > dtRF_sec * orderRF) {
-			if (orderRF < ts.dataNumTotal_rf) {
-				orderRF++; // 이렇게 하면 마지막 레이어 적용
-				if (setCVRF(orderRF) == -1) { return -1; }    //isRFended = -1;
+		nowTmin = nowTsec / 60.0;
+		if (nowTmin > 1440 * nowTday) {
+			nowTday++;
+		}
+
+		if (nowTsec > dtRF_sec * iRF) {
+			if (iRF < ts.dataNumTotal_rf) {
+				iRF++; // 이렇게 하면 마지막 레이어 적용
+				if (setCVRF(iRF) == -1) { return -1; }    //isRFended = -1;
 			}
 			else {
+				// 강수량 자료는 없으면, 강수량 0으로 하고, 
+				// 다른 기상자료는 0으로 할 수 없으므로, 모의기간 전체에 대해서 자료가 있어야 한다.
+				//  ==> 기상자료는 미리 개수 검증을 하고 모의 시작하자
 				setCVRFintensityAndDTrf_Zero();
-				orderRF = loopEndingT_sec / dtRF_sec +100;// 충분히 큰값 설정.   // INT_MAX 사용하면  dtRF_sec * orderRF 에서 최대값 초과해서 - 값으로 설정된다.
+				iRF = loopEndingT_sec / dtRF_sec + 100;// 충분히 큰값 설정.   // INT_MAX 사용하면  dtRF_sec * orderRF 에서 최대값 초과해서 - 값으로 설정된다.
 			}
 		}
 
-		if (prj.simEvaportranspiration == 1 || prj.simSnowMelt == 1 
-			|| prj.simInterception==1) {// 이경우 기상자료 설정한다.
-			if (nowTsec > dtTempMax_sec * orderTempMax) {
-				if (orderTempMax < ts.dataNumTotal_tempMax) {
-					orderTempMax++; // 이렇게 하면 마지막 레이어 적용
-					if (setCVTempMax(orderTempMax) == -1) { return -1; }    //isEnded = -1;
-				}
-				else {
-					setCVTempMaxZero();		
-					orderTempMax = loopEndingT_sec / dtTempMax_sec + 100;
-				}
-			}
-			if (nowTsec > dtTempMin_sec * orderTempMin) {
-				if (orderTempMin < ts.dataNumTotal_tempMin) {
-					orderTempMin++; // 이렇게 하면 마지막 레이어 적용
-					if (setCVTempMin(orderTempMin) == -1) { return -1; }    //isEnded = -1;
-				}
-				else {
-					setCVTempMinZero();			
-					orderTempMin = loopEndingT_sec / dtTempMin_sec + 100;
+		if (prj.simEvaportranspiration == 1 || prj.simSnowMelt == 1) { //|| prj.simInterception == 1) {
+			// 기상자료는 전체 개수 검증을 openProjectFile()에서 이미 완료했으므로, 여기서는 순서대로 읽기만 한다. 
+			if (ts.wdUsed_tempMax == 1) {
+				if (nowTsec > dtTempMax_sec * iTempMax) {
+					iTempMax++; // 이렇게 하면 마지막 레이어 적용
+					if (setCVweatherData(iTempMax, "max. temperature",
+						prj.tempMaxDataType, tempMax, whatWeatherData::TempMax) == -1) {
+					return -1;
+					}
 				}
 			}
-			if (nowTsec > dtSolarRMin_sec * orderSolarR) {
-				if (orderSolarR < ts.dataNumTotal_solarR) {
-					orderSolarR++; // 이렇게 하면 마지막 레이어 적용
-					if (setCVSolarRad(orderSolarR) == -1) { return -1; }    //isEnded = -1;
-				}
-				else {
-					setCVSolarRZero();		
-					orderSolarR = loopEndingT_sec / dtSolarRMin_sec + 100;
-				}
-			}
-			if (nowTsec > dtSunDur_sec * orderSunDur) {
-				if (orderSunDur < ts.dataNumTotal_sunDur) {
-					orderSunDur++; // 이렇게 하면 마지막 레이어 적용
-					if (setCVDayTimeLength(orderSunDur) == -1) { return -1; }    //isEnded = -1;
-				}
-				else {
-					setCVDayTimeLengthZero();
-					orderSunDur = loopEndingT_sec / dtSunDur_sec + 100;
+			if (ts.wdUsed_tempMin == 1) {
+				if (nowTsec > dtTempMin_sec * iTempMin) {
+					iTempMin++; // 이렇게 하면 마지막 레이어 적용
+					if (setCVweatherData(iTempMin, "min. temperature",
+						prj.tempMinDataType, tempMin, whatWeatherData::TempMin) == -1) {
+						return -1;
+					}
 				}
 			}
-			if (nowTsec > dtSnowPackTemp * orderSnowPackTemp) {
-				if (orderSnowPackTemp < ts.dataNumTotal_snowPackTemp) {
-					orderSnowPackTemp++; // 이렇게 하면 마지막 레이어 적용
-					if (setCVSnowpackTemp(orderSnowPackTemp) == -1) { return -1; }    //isEnded = -1;
-				}
-				else {
-					setCVSnowpackTempZero();
-					orderSnowPackTemp = loopEndingT_sec / dtSnowPackTemp + 100;
+			if (ts.wdUsed_DTL == 1) {
+				if (nowTsec > dtDTL_sec * iDTL) {//일조시간
+					iDTL++; // 이렇게 하면 마지막 레이어 적용
+					if (setCVweatherData(iDTL, "daytime length",
+						prj.DTLDataType, dayTimeLength, whatWeatherData::DaytimeLength) == -1) {
+						return -1;
+					}
 				}
 			}
-			if (prj.isDateTimeFormat == 1) {
+			if (ts.wdUsed_solarR == 1) {
+				if (nowTsec > dtSolarRMin_sec * iSolarR) {//일사량
+					iSolarR++; // 이렇게 하면 마지막 레이어 적용
+					if (setCVweatherData(iSolarR, "solar radiation",
+						prj.solarRadDataType, solarRad, whatWeatherData::SolarRad) == -1) {
+						return -1;
+					}
+				}
+			}
+			if (ts.wdUsed_dewPointTemp == 1) {
+				if (nowTsec > dtDewPointTemp_sec * iDewPointT) {//일사량
+					iDewPointT++; // 이렇게 하면 마지막 레이어 적용
+					if (setCVweatherData(iDewPointT, "dew point temperature",
+						prj.dewPointTempDataType, dewPointTemp, whatWeatherData::DewPointTemp) == -1) {
+					return -1;
+					}
+				}
+			}
+			if (ts.wdUsed_windSpeed == 1) {
+				if (nowTsec > dtWindSpeed_sec * iWindSpeed) {//일사량
+					iWindSpeed++; // 이렇게 하면 마지막 레이어 적용
+					if (setCVweatherData(iWindSpeed, "wind speed",
+						prj.windSpeedDataType, windSpeed, whatWeatherData::WindSpeed) == -1) {
+						return -1;
+					}
+				}
+			}
+			if (ts.wdUsed_userET >0) {
+				if (nowTsec > dtUserET_sec * iUserET) {//일사량
+					iUserET++; // 이렇게 하면 마지막 레이어 적용
+					if (setCVweatherData(iUserET, "user defined evapotranspiration",
+						userWdType_apply, userET, whatWeatherData::UserET) == -1) {
+					return -1;
+					}
+				}
+			}
+			if (ts.wdUsed_snowPackTemp == 1) {
+				if (nowTsec > dtSnowPackTemp * iSnowPackT) {
+					iSnowPackT++; // 이렇게 하면 마지막 레이어 적용
+					if (setCVweatherData(iSnowPackT, "snow pack temperature",
+						prj.snowpackTempDataType, snowpackTemp, whatWeatherData::SnowpackTemp) == -1) {
+					return -1;
+					}
+				}
+			}
+
+			if (nowTday_bak != nowTday) {
 				string tElapsedStr = timeElaspedToDateTimeFormat2(prj.simStartTime,
 					nowTsec, timeUnitToShow::toM,
 					dateTimeFormat::yyyymmddHHMMSS);
-				tm tCurDate = stringToDateTime(tElapsedStr);
+				tm tCurDate = stringToDateTime(tElapsedStr, true);
+				//ts.tCurYear = tCurDate.tm_year;
 				ts.tCurMonth = tCurDate.tm_mon;
 				ts.tCurDay = tCurDate.tm_mday;
+				ts.tDayOfYear = tCurDate.tm_yday;
 			}
 		}
-		nowTmin = nowTsec / 60.0;
 
 		if (simulateRunoff(nowTmin) == -1) { return -1; }
 		calValuesDuringPT(ts.dtsec);
@@ -147,20 +211,22 @@ int startSimulation()
 					ts.dtMinLimit_sec);
 			}
 		}
+		nowTday_bak = nowTday;
 	}
 
 	if (ts.stopSim == 1) {
-		writeLog(fpnLog, "Simulation was stopped.\n", 1, 1);
+		writeLogString(fpnLog, "Simulation was stopped.\n ", 1, 1);
 		return 1;
 	}
 	else {
-		COleDateTime  timeNow = COleDateTime::GetCurrentTime();
-		COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
+		tm tnow = getCurrentTimeAsLocal_tm(); //MP 수정
+		std::tm tsTotalSim = timeDifferecceTM_DHMS(ts.time_thisSimStarted, tnow);
+
 		printf("\rCurrent progress: 100.00%%... ");
-		writeLog(fpnLog, "Simulation was completed. Run time: "
-			+ to_string(tsTotalSim.GetHours()) + "h "
-			+ to_string(tsTotalSim.GetMinutes()) + "m "
-			+ to_string(tsTotalSim.GetSeconds()) + "s.\n", 1, 1);
+		writeLogString(fpnLog, "Simulation was completed. Run time: "
+			+ to_string(tsTotalSim.tm_hour) + "h "
+			+ to_string(tsTotalSim.tm_min) + "m "
+			+ to_string(tsTotalSim.tm_sec) + "s.\n", 1, 1);
 		return 1;
 	}
 	return 1;
@@ -206,9 +272,9 @@ int simulateRunoff(double nowTmin)
         }
     }
 
-	if (ts.vMaxInThisStep > GRAVITY_ACC) {
-		ts.vMaxInThisStep = GRAVITY_ACC;
-	}
+	//if (ts.vMaxInThisStep > GRAVITY_ACC) {
+	//	ts.vMaxInThisStep = GRAVITY_ACC;
+	//}
     delete[] uMax;
 	// parallel =============================
 
@@ -309,21 +375,28 @@ void simulateRunoffCore(int i, double nowTmin)
 
 void initThisSimulation()
 {
-    if (prj.simType != simulationType::RealTime) {
-        ts.dataNumTotal_rf = (int)rfs.size();
-		ts.dataNumTotal_tempMax = (int)tempMax.size();
-		ts.dataNumTotal_tempMin = (int)tempMin.size();
-		ts.dataNumTotal_solarR = (int)solarRad.size();
-		ts.dataNumTotal_sunDur = (int)dayTimeLength.size();
-		ts.dataNumTotal_snowPackTemp = (int)snowpackTemp.size();
-    }
-	else {
-		ts.dataNumTotal_rf = 0;
-		ts.dataNumTotal_tempMax = 0;
-		ts.dataNumTotal_tempMin = 0;
-		ts.dataNumTotal_solarR = 0;
-		ts.dataNumTotal_sunDur = 0;
-	}
+	//if (prj.simType != simulationType::RealTime) {
+	//	ts.dataNumTotal_rf = (int)rfs.size();
+	//	ts.dnTotal_tempMax = (int)tempMax.size();
+	//	ts.dnTotal_tempMin = (int)tempMin.size();
+	//	ts.dnTotal_solarR = (int)solarRad.size();
+	//	ts.dnTotal_DTL = (int)dayTimeLength.size();
+	//	ts.dnTotal_snowPackTemp = (int)snowpackTemp.size();
+	//	ts.dnTotal_dewPointTemp = (int)dewPointTemp.size();
+	//	ts.dnTotal_windSpeed = (int)windSpeed.size();
+	//	ts.dnTotal_userPET = (int)userPET.size();
+	//}
+	//else {
+	//	ts.dataNumTotal_rf = 0;
+	//	ts.dnTotal_tempMax = 0;
+	//	ts.dnTotal_tempMin = 0;
+	//	ts.dnTotal_solarR = 0;
+	//	ts.dnTotal_DTL = 0;
+	//	ts.dnTotal_snowPackTemp = 0;
+	//	ts.dnTotal_dewPointTemp = 0;
+	//	ts.dnTotal_windSpeed = 0;
+	//	ts.dnTotal_userPET = 0;
+	//}
 
 	initRFvars();
 
@@ -342,15 +415,15 @@ void initThisSimulation()
     int dtFromP = (int)(prj.dtPrint_min * 60 / 2);
     int dtFromR = (int)(prj.rfinterval_min * 60 / 2);
     ts.dtMaxLimit_sec = min(dtFromP, dtFromR);
-    if (prj.simFlowControl == 1) {
+	if (prj.simFlowControl == 1) {
 		bool appFCdt = false;
 		int mindtFC = INT_MAX;
-        for (int i :fccds.cvidxsFCcell) {
-            if (prj.fcs[i][0].fcDT_min>0 && mindtFC > prj.fcs[i][0].fcDT_min) {
+		for (int i : fccds.cvidxsFCcell) {
+			if (prj.fcs[i][0].fcDT_min > 0 && mindtFC > prj.fcs[i][0].fcDT_min) {
 				mindtFC = int(prj.fcs[i][0].fcDT_min); //  *60 / 2); // 우선 최소 시간간격을 받는 것으로 수정. 2024.08.07
 				appFCdt = true;
-            }
-        }
+			}
+		}
 
 		if (appFCdt == true) {
 			mindtFC = (int)(mindtFC * 60 / 2); // FC 최소 시간간격의 1/2 은 여기서 계산. 2024.08.07
@@ -358,7 +431,7 @@ void initThisSimulation()
 				ts.dtMaxLimit_sec = mindtFC;
 			}
 		}
-    }
+	}
     if (ts.dtMaxLimit_sec < ts.dtMinLimit_sec) {
         ts.dtMaxLimit_sec = ts.dtMinLimit_sec;
     }
@@ -371,9 +444,8 @@ void initThisSimulation()
 	ts.targetTtoP_AVE_sec = (int)prj.dtPrintAveValue_min * 60;
 	ts.TtoP_ave_check_sec = ts.targetTtoP_AVE_sec + prj.dtPrintAveValue_sec;
 
-    time_t now = time(0);
-    ts.time_thisSimStarted = COleDateTime::GetCurrentTime();
-    //tsrt.g_RT_tStart_from_MonitorEXE = COleDateTime::GetCurrentTime();
+    ts.time_thisSimStarted = getCurrentTimeAsLocal_tm(); //MP 수정
+
 	ts.showFileProgress = -1;
 	if (msgFileProcess != "") {
 		ts.showFileProgress = 1;
@@ -474,7 +546,7 @@ void setCVStartingCondition(double iniflow)
         cvs[i].rfiRead_After_iniLoss_mPsec = 0;
         cvs[i].rfEff_dt_m = 0;
         cvs[i].rfApp_mPdt = 0;
-        cvs[i].rf_dtPrint_m = 0;
+        cvs[i].rf_PDT_m = 0;
         cvs[i].rfAccRead_fromStart_mm = 0;
         cvs[i].soilMoistureChange_DTheta = 0;
         cvs[i].ifF_mPdt = 0;
@@ -493,6 +565,9 @@ void setCVStartingCondition(double iniflow)
 		cvs[i].DP_storageCumulative_m3 = 0.0;
 		cvs[i].DP_inflow_m3Ps = 0.0;
 		cvs[i].DP_outflow_m3Ps = 0.0;
+
+		cvs[i].pet_PDT_m = 0.0;
+		cvs[i].aet_PDT_m = 0.0;
 
         if (prj.simFlowControl == 1) {
             if (prj.fcs.size() > 0 && getVectorIndex(fccds.cvidxsFCcell, i) != -1) {
@@ -514,7 +589,7 @@ void setCVStartingCondition(double iniflow)
     for (int wpcvid : wpSimValue.wpCVidxes) {
         wpSimValue.prcpWPGridTotal_mm[wpcvid] = 0;
         wpSimValue.prcpUpWSAveTotal_mm[wpcvid] = 0;
-		wpSimValue.Q_sumPTforAVE_m3[wpcvid] = 0.0;
+		wpSimValue.Q_sumPdTforAVE_m3[wpcvid] = 0.0;
     }
 }
 
@@ -555,11 +630,11 @@ int outputManager(int nowTsec)
             // 만일 현재의 dtsec으로 한번더 전진해서 이 조건을 만족하면
             std::copy(cvs, cvs + di.cellNnotNull, cvsb);
             wpSimValueB = wpSimValue; // 포인터가 아니므로..
-			ts.rfAveSumAllCells_PT_m_bak = ts.rfAveSumAllCells_PT_m;
-			ts.rfAveSumAllCells_PTave_m_bak = ts.rfAveSumAllCells_PTave_m;
+			ts.rfAveSumAllCells_PT_m_bak = ts.rfAveSumAllCells_PdT_m;
+			ts.rfAveSumAllCells_PTave_m_bak = ts.rfAveSumAllCells_PdTave_m;
 
             if (prj.simFlowControl == 1) {
-				fcInflowSumPT_m3_Bak = fccds.inflowSumPT_m3;
+				fcInflowSumPT_m3_Bak = fccds.inflowSumPdT_m3;
             }
             ts.cvsbT_sec = nowTsec;
             ts.isbak = 1;
@@ -593,18 +668,17 @@ int outputManager(int nowTsec)
             return 1;
         }
     }
+	return 1;
 }
 
 int  writeBySimType(int nowTP_min,
 	double cinterp, int writeAVE, int timeToP_AVE_min) {
-	COleDateTime timeNow;
 	double TS_FromStarting_sec = 0.0;
 	double TS_FromStarting_min = 0.0;
 	string tStrToPrint;
 	string tStrToPrintAve;
-	timeNow = COleDateTime::GetCurrentTime();
-	COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
-	TS_FromStarting_sec = tsTotalSim.GetTotalSeconds();
+	tm tnow = getCurrentTimeAsLocal_tm(); //MP 수정
+	TS_FromStarting_sec = timeDifferecceSEC(ts.time_thisSimStarted, tnow);
 	TS_FromStarting_min = TS_FromStarting_sec / 60.0;
 	string unitToP = "";
 	if (prj.isDateTimeFormat == 1) {
@@ -646,7 +720,7 @@ int  writeBySimType(int nowTP_min,
 			+ "vMax : " + to_string(ts.vMaxInThisStep) + ", "
 			+ "T from starting : " + dtos(TS_FromStarting_sec, 0) + "s ("
 			+ dtos(TS_FromStarting_min, 2) + "min) \n";
-		writeLog(fpnLog, logStr, 1, -1);
+		writeLogString(fpnLog, logStr, 1, -1);
 	}
 
 	simulationType simType = prj.simType;
@@ -721,7 +795,11 @@ int  writeBySimType(int nowTP_min,
 		break;
 	}
 	case simulationType::RealTime: {
+#ifdef _WIN32
 		writeRealTimeSimResults(tStrToPrint, cinterp, TS_FromStarting_sec);
+#else
+		writeLogString(fpnLog, "ERROR : Real time simulation is not supported in the GRM model for Linux. \n", 1, 1);
+#endif
 		break;
 	}
 	}
@@ -741,58 +819,59 @@ int  writeBySimType(int nowTP_min,
 
 // 여기서 출력할 때 마다 초기화 되어야 하는 변수들 처리
 void initValuesAfterPrinting(int nowTP_min, int printAveValueNow) {
-	ts.rfAveSumAllCells_PT_m = 0.0;
+	ts.rfAveSumAllCells_PdT_m = 0.0;
 	if (printAveValueNow == 1) {
-		ts.rfAveSumAllCells_PTave_m = 0.0;
+		ts.rfAveSumAllCells_PdTave_m = 0.0;
 	}
 	for (int idx : wpSimValue.wpCVidxes) {
 		wpSimValue.prcpUpWSAveForPT_mm[idx] = 0.0;
-		wpSimValue.prcpWPGridForPT_mm[idx] = 0.0;
-		wpSimValue.pet_sumPT_mm[idx] = 0.0;
-		wpSimValue.aet_sumPT_mm[idx] = 0.0;
-		wpSimValue.snowM_sumPT_mm[idx] = 0.0;
+		wpSimValue.prcpWPGridForPdT_mm[idx] = 0.0;
+		wpSimValue.pet_grid_sumPdT_mm[idx] = 0.0;
+		wpSimValue.aet_grid_sumPdT_mm[idx] = 0.0;
+		wpSimValue.snowM_grid_sumPdT_mm[idx] = 0.0;
 		if (printAveValueNow == 1 ) {
-			wpSimValue.Q_sumPTforAVE_m3[idx] = 0.0;
+			wpSimValue.Q_sumPdTforAVE_m3[idx] = 0.0;
 		}
 	}
 	if (printAveValueNow == 1 ) {
 		for (int idx : fccds.cvidxsFCcell) {
 			if (prj.fcs[idx][0].fcType != flowControlType::Inlet) {
-				fccds.inflowSumPT_m3[idx] = 0.0;
+				fccds.inflowSumPdT_m3[idx] = 0.0;
 			}
 		}
 		fcInflowSumPT_m3_Bak.clear();
 	}
 }
 
+
 void calValuesDuringPT(int dtsec)
 {
 	ts.rfAveForDT_m = ts.rfiSumAllCellsInCurRFData_mPs * dtsec
 		/ di.cellNtobeSimulated;
-	ts.rfAveSumAllCells_PT_m = ts.rfAveSumAllCells_PT_m
+	ts.rfAveSumAllCells_PdT_m = ts.rfAveSumAllCells_PdT_m
 		+ ts.rfAveForDT_m;
 	if (prj.printAveValue == 1) {
-		ts.rfAveSumAllCells_PTave_m = ts.rfAveSumAllCells_PTave_m
+		ts.rfAveSumAllCells_PdTave_m = ts.rfAveSumAllCells_PdTave_m
 			+ ts.rfAveForDT_m;
 	}
 
 	for (int idx : wpSimValue.wpCVidxes) {
 		wpSimValue.prcpUpWSAveForDt_mm[idx] = wpSimValue.prcpiReadSumUpWS_mPs[idx]
-			* dtsec * 1000.0 / (double)wpSimValue.cvCountAllup[idx]; 
+			* dtsec * 1000.0 / (double)wpSimValue.cvCountAllup[idx];
 		wpSimValue.prcpUpWSAveForPT_mm[idx] = wpSimValue.prcpUpWSAveForPT_mm[idx]
 			+ wpSimValue.prcpUpWSAveForDt_mm[idx];
-		wpSimValue.prcpWPGridForPT_mm[idx] = wpSimValue.prcpWPGridForPT_mm[idx]
+		wpSimValue.prcpWPGridForPdT_mm[idx] = wpSimValue.prcpWPGridForPdT_mm[idx]
 			+ cvs[idx].rfiRead_mPsec * 1000.0 * dtsec;
-		wpSimValue.pet_sumPT_mm[idx] += cvs[idx].pet_mPdt * 1000.0 ;
-		wpSimValue.aet_sumPT_mm[idx] += cvs[idx].aet_mPdt * 1000.0 ;
-		wpSimValue.snowM_sumPT_mm[idx] += cvs[idx].smelt_mPdt * 1000.0;
+		wpSimValue.pet_grid_sumPdT_mm[idx] += cvs[idx].pet_mPdt * 1000.0;
+		wpSimValue.aet_grid_sumPdT_mm[idx] += cvs[idx].aet_mPdt * 1000.0;
+		wpSimValue.snowM_grid_sumPdT_mm[idx] += cvs[idx].smelt_mPdt * 1000.0;
 
 		if (prj.printAveValue == 1) {
 			if (cvs[idx].flowType == cellFlowType::OverlandFlow) {
-				wpSimValue.Q_sumPTforAVE_m3[idx] += cvs[idx].QOF_m3Ps * dtsec;
+				wpSimValue.Q_sumPdTforAVE_m3[idx] += cvs[idx].QOF_m3Ps * dtsec;
 			}
 			else {
-				wpSimValue.Q_sumPTforAVE_m3[idx] += cvs[idx].stream.QCH_m3Ps * dtsec;
+				wpSimValue.Q_sumPdTforAVE_m3[idx] += cvs[idx].stream.QCH_m3Ps * dtsec;
 			}
 		}
 	}
@@ -801,8 +880,9 @@ void calValuesDuringPT(int dtsec)
 		for (int idx : fccds.cvidxsFCcell) {
 			if (prj.fcs[idx][0].fcType != flowControlType::Inlet) {
 				// inlet 이 아닌 모든 fc 셀에 대해서 	출력기간에서의  inflowSumPT_m3 계산
-				fccds.inflowSumPT_m3[idx] += cvs[idx].QsumCVw_m3Ps * dtsec; 
+				fccds.inflowSumPdT_m3[idx] += cvs[idx].QsumCVw_m3Ps * dtsec;
 			}
 		}
 	}
 }
+

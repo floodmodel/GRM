@@ -19,13 +19,13 @@ except OSError:
     sys.exit()
 
 class unSaturatedKType(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
-	Constant=0
-	Linear=1
-	Exponential=2
-	usKNone=3
+	Constant=1
+	Linear=2
+	Exponential=3
+	usKNone=0
 
 class PETmethod(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
-	PenmanMonteith = 1
+	FPM = 1              # FAOPenmanMonteith
 	BlaneyCriddle = 2
 	Hamon = 3
 	PriestleyTaylor = 4
@@ -33,7 +33,7 @@ class PETmethod(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
 	JensenHaise = 6	
 	Turc = 7
 	Constant = 8
-	UserData = 9
+	UserET = 9
 	petNone = 0
 
 class SnowMeltMethod(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
@@ -75,12 +75,37 @@ class swsParameters(Structure):  #grm 코드에 있는 구조체와 내용 맞�
         ("smeltCoef", ctypes.c_double),
         ("userSet", ctypes.c_int)]
 
+class defaultWSPars:
+    IniSaturation = 0.9
+    IniLossPRCP_mm=0.0
+    MinSlopeOF = 0.0001
+    MinSlopeChBed = 0.0001
+    IniFlow = 0.0
+    ChRoughness = 0.045
+    DryStreamOrder = 0
+    CalCoefLCRoughness = 1.0
+    CalCoefSoilDepth = 1.0
+    CalCoefPorosity = 1.0
+    CalCoefWFSuctionHead = 1.0
+    CalCoefHydraulicK = 1.0
+    UnsturatedType = 2   #Linear
+    CoefUnsatruatedk = 0.2
+    InterceptMethod = 0  #None
+    PotentialETMethod = 0  #None
+    ETCoeff = 0.6
+    SnowMeltMethod = 0    #None
+    TempSnowRain = 0.0
+    SMeltingTemp = 4.0
+    SnowCovRatio = 0.7
+    SMeltCoef = 1.0
+        # =========================
 
 #  class grmWSinfo(object) start =========== 
 class grmWSinfo(object): 
     # fpnGMP_OR_fdirType 여기에 gmp 파일을 입력하든지, flowDirectionType을 입력하든지 선택
     #      flowDirectionType 을 입력할 경우에는 다른 파일들도 argument로 입력해야 한다. 
     def __init__(self, fpnGMP_OR_fdirType, 
+                fpnDEM="", # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
                 fpnDomain="", # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
                 fpnSlope="", # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
                 fpnFdir="",  # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
@@ -92,7 +117,8 @@ class grmWSinfo(object):
                 fpnIniSoilSaturationRatio = "", # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
                 pfnIniChannelFlow = "", # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
                 fpnChannelWidth = ""): # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
-        gdl.grmWSinfo_new_inputFiles.argtypes =[ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p,
+        gdl.grmWSinfo_new_inputFiles.argtypes =[ctypes.c_char_p, ctypes.c_char_p, 
+                ctypes.c_char_p, ctypes.c_char_p,
                 ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, 
                 ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p,
                 ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p] 
@@ -221,6 +247,7 @@ class grmWSinfo(object):
         if fpnDomain=="":
             self.obj = gdl.grmWSinfo_new_gmpFile(bfpnGmpORfdirType)
         else :
+            bfpnDEM =fpnDEM.encode('utf-8')
             bfpnDomain =fpnDomain.encode('utf-8')
             bfpnSlope =fpnSlope.encode('utf-8')
             bfpnFdir = fpnFdir.encode('utf-8')
@@ -232,7 +259,8 @@ class grmWSinfo(object):
             bfpnIniSoilSaturationRatio = fpnIniSoilSaturationRatio.encode('utf-8')
             bpfnIniChannelFlow = pfnIniChannelFlow.encode('utf-8')
             bfpnChannelWidth = fpnChannelWidth.encode('utf-8')
-            self.obj = gdl.grmWSinfo_new_inputFiles(bfpnGmpORfdirType, bfpnDomain, bfpnSlope, 
+            self.obj = gdl.grmWSinfo_new_inputFiles(bfpnGmpORfdirType, bfpnDEM, 
+                    bfpnDomain, bfpnSlope, 
                     bfpnFdir, bfpnFac, bfpnStream, 
                     bfpnLandCover, bfpnSoilTexture, bfpnSoilDepth, 
                     bfpnIniSoilSaturationRatio, bpfnIniChannelFlow, bfpnChannelWidth)

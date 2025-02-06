@@ -2,9 +2,17 @@
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"
-#include "grmapi.h"
+#include <omp.h>
 
-#pragma comment(lib,"version.lib")
+#ifdef _WIN32
+#include "grmapi.h"
+#pragma comment(lib,"version.lib") // 이 부분 없으면, WIN에서 File version 정보 관련 오류 발생한다. 
+#else
+
+
+#endif 
+
+
 
 using namespace std;
 namespace fs = std::filesystem;   
@@ -16,16 +24,25 @@ grmOutFiles ofs;
 
 domaininfo di;
 int** cvais; // 각셀(x,y)의 cv array idex 
+double * cvele;// 각셀의 해발고도. DEM에서 읽은 값. 배열 인덱스가, cv 인덱스와 같게 한다.
+//double* cvlat_degreeC;// 
 cvpos* cvps;//각 cv의 x, y 위치, ws 위치
 cvAtt* cvs; // control volumes
 cvAtt* cvsb; // t - dt 시간에 저장된 cvs 에서의 다양한 정보 백업
-vector<weatherData> rfs; // 강우량 파일에서 읽은 자료
-vector<weatherData> tempMax; // 최대기온 파일에서 읽은 자료
-vector<weatherData> tempMin; // 최소기온 파일에서 읽은 자료
-vector<weatherData> dayTimeLength; // 일조시간 파일에서 읽은 자료
-vector<weatherData> snowpackTemp;// snow pack 온도 파일에서 읽은 자료
-double sunDurRatio[12]; // 월별 일조시간 비율 파일에서 읽은 자료
-vector<weatherData> solarRad; // 일사량 파일에서 읽은 자료
+
+weatherData* rfs; // 강우량 파일에서 읽은 자료
+weatherData* tempMax; // 최대기온 파일에서 읽은 자료
+weatherData* tempMin;  // 최소기온 파일에서 읽은 자료
+weatherData* dayTimeLength; // 일조시간 파일에서 읽은 자료
+weatherData* solarRad; // 일사량 파일에서 읽은 자료
+weatherData* dewPointTemp; // 이슬점 온도 파일에서 읽은 자료
+weatherData* windSpeed; // 풍속 파일에서 읽은 자료
+weatherData* userET; // 사용자 입력 잠재증발산량
+weatherData* snowpackTemp; // snow pack 온도 파일에서 읽은 자료
+
+// 위도, 월. 월별 일조시간 비율을 일별로 배분한 자료, 64개 위도, 12개월, 
+// 배열 인덱스가 해당 "위도", "월" 을 의미한다. 바로 참조가능. 위도는 0에서 시작, 월은 0월을 dummy로 추가
+double sunDurRatioForAday[65][13]; 
 map<int, double[12]> laiRatio; // <LCvalue, 월별 laiRatio 12개>
 double blaneyCriddleKData[12]; // Blaney Criddle K 파일에서 읽은 자료
 map<int, int*> cvaisToFA; //fa별 cv array idex 목록
@@ -37,29 +54,35 @@ thisSimulation ts; // 이번 simulation 프로세스에 과련된 다양한 변수
 
 extern vector<flowControlinfo> fcinfos;
 extern double** ssrAry;
-extern double** rfAry;
+extern double** rfPDTAry;
 extern double** rfaccAry;
 extern double** QAry;
-
+extern double** petPDTAry; 
+extern double** aetPDTAry;
 string msgFileProcess;
 
-int main(int argc, char** args)
+int main(int argc, char* argvs[])
 {
-	string exeName = "GRM";
-	version grmVersion = getCurrentFileVersion();
 	string outString;
-	outString = "GRM v." + to_string(grmVersion.pmajor) + "."
-		+ to_string(grmVersion.pminor) + "."
-		+ to_string(grmVersion.pbuild) + ". File version : "
-		+ to_string(grmVersion.fmajor) + "."
-		+ to_string(grmVersion.fminor) + "."
-		+ to_string(grmVersion.fbuild) + ".\n";
-	    //+"Modified in " + grmVersion.LastWrittenTime + ".\n";
+	version grmV = getCurrentFileVersion();
+	outString = "GRM v." + to_string(grmV.pmajor) + "."
+		+ to_string(grmV.pminor) + "."
+		+ to_string(grmV.pbuild) + ". File version : "
+		+ to_string(grmV.fmajor) + "."
+		+ to_string(grmV.fminor) + "."
+		+ to_string(grmV.fbuild) + ".\n";
+
+#ifdef _WIN32
 	prj.cpusi = getCPUnGPU_infoInner("CPU");  //MP 수정
+#else // MP 추가
+	prj.cpusi = getCPUinfoLinux();  //MP 수정
+#endif	
+
 	cout << outString;
 	cout << prj.cpusi.infoString;
 	outString = outString + prj.cpusi.infoString;
 	ts.runByAnalyzer = -1;
+
 	if (argc == 1) {
 		printf("ERROR : GRM project file was not entered or invalid arguments.\n");
 		grmHelp();
@@ -69,7 +92,7 @@ int main(int argc, char** args)
 	setlocale(LC_ALL, "korean");
 	prj.forSimulation = 1;// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	if (argc == 2) {
-		string arg1(args[1]);
+		string arg1(argvs[1]);
 		string arg1L = lower(trim(arg1));
 		if (arg1L == "/?" || arg1L == "/help") {
 			grmHelp();
@@ -79,11 +102,12 @@ int main(int argc, char** args)
 		startSingleRun(arg1, -1, outString);
 	}
 	else {
-		string rtOption1(args[1]);
-		string rtOption2(args[2]);
+		string rtOption1(argvs[1]);
+		string rtOption2(argvs[2]);
 		rtOption1 = lower(trim(rtOption1));
 		rtOption2 = lower(trim(rtOption2));
 		int isRealTime = -1;
+#ifdef _WIN32
 		if (rtOption1 == "/r" || rtOption2 == "/r") {
 			// 실시간 수신자료 적용 옵션은 /r 
 			// 최대 옵션은 아래와 같다. 
@@ -91,8 +115,8 @@ int main(int argc, char** args)
 			// args[3] : fpnRef,                 args[4] : strGUID,       args[5] : startCommandTime, 
 			// args[6] : rtStartDataTime, agrs[7] : strMODEL
 			isRealTime = 1;
-			string arg1(args[1]); // /r 혹은 /a
-			string arg2(args[2]); // /r 혹은 /a
+			string arg1(argvs[1]); // /r 혹은 /a
+			string arg2(argvs[2]); // /r 혹은 /a
 			//string arg3(args[3]); // ref 파일 경로, 이름
 			arg1 = lower(trim(arg1));
 			arg2 = lower(trim(arg2));
@@ -101,20 +125,21 @@ int main(int argc, char** args)
 			if (arg1 == "/a" || arg2 == "/a") {
 				isForceAutoROM = 1;
 			}
-
 			// 현재는 강우-유출 사상만 실시간 모의가 가능하다. 연속형 모의는 실시간 자료 처리 적용 안되어 있음. 2023.03.06
 			printf("WARNNING : The continuous simulation is not available for the real time simulation.\n");
 			printf("WARNNING : In real time simulation, just the rainfall-runoff event simulation is possible.\n");
 
-			if (grmRTLauncher(argc, args, isForceAutoROM) == -1) {
+			if (grmRTLauncher(argc, argvs, isForceAutoROM) == -1) {
 				return 1;
 			}
 		}
-
+#else
+		cout << "Dynamic realtime simulation is only available for Windows system. " << endl;
+#endif 
 		if (isRealTime == -1 && argc == 3) {
 			// 이경우는 /a, /f, /fd 중 하나의 옵션이 사용된 경우 
-			string arg1(args[1]); // 이건 옵션
-			string arg2(args[2]); // 이건 gmp 파일, 혹은 gmps 폴더
+			string arg1(argvs[1]); // 이건 옵션
+			string arg2(argvs[2]); // 이건 gmp 파일, 혹은 gmps 폴더
 			arg1 = lower(trim(arg1));
 			arg2 = trim(arg2);
 			if (arg1 == "/a") {
@@ -147,9 +172,9 @@ int main(int argc, char** args)
 
 		if (isRealTime == -1 && argc == 4) {
 			// 이경우는 /a, /f 혹은 /a, /fd 옵션이 사용된 경우 
-			string arg1(args[1]); // /a, /f , /fd 옵션
-			string arg2(args[2]);// /a, /f , /fd 옵션
-			string arg3(args[3]);// gmps 폴더
+			string arg1(argvs[1]); // /a, /f , /fd 옵션
+			string arg2(argvs[2]);// /a, /f , /fd 옵션
+			string arg3(argvs[3]);// gmps 폴더
 			arg1 = lower(trim(arg1));
 			arg2 = lower(trim(arg2));
 			arg3 = trim(arg3);
@@ -184,29 +209,33 @@ int main(int argc, char** args)
 	return 1;
 }
 
-int startSingleRun(string fpnGMP, int enforceAutoROM, string outString)
+int startSingleRun(string fpnGMP_in, int enforceAutoROM, string outString)
 {
-	fs::path in_arg = fs::path(fpnGMP.c_str());
+	fs::path in_arg = fs::path(fpnGMP_in.c_str());
 	string fp = in_arg.parent_path().string();
 	if (trim(fp) == "") {
 		string fpn_exe = getCurrentExeFilePathName();
 		fs::path grmexef = fs::path(fpn_exe.c_str());
 		string fp_exe = grmexef.parent_path().string();
-		fpnGMP = fp_exe + "\\" + fpnGMP;
+		fpnGMP_in = fp_exe + "/" + fpnGMP_in;
 	}
-	int nResult = _access(fpnGMP.c_str(), 0);
-	if (nResult == -1
+
+	fs::path fpnGMP = fs::path(fpnGMP_in.c_str()); // MP 추가
+	//int nResult = _access(fpnGMP.c_str(), 0); // MP 주석
+	//if (nResult == -1   // MP 주석
+	if (fs::exists(lower(fpnGMP.string())) == false
 		|| lower(in_arg.extension().string()) != ".gmp") {
-		cout<<"ERROR : GRM project file["+
-			fpnGMP+"] is invalid.\n";
+		cout << "ERROR : GRM project file[" +
+			fpnGMP_in + "] is invalid.\n";
 		waitEnterKey();
 		return -1;
 	}
-	else if (nResult == 0) {
-		ppi = getProjectFileInfo(fpnGMP);
+	//else if (nResult == 0) { // MP 주석
+	else if (fs::exists(lower(fpnGMP.string())) == true) {
+		ppi = getProjectFileInfo(fpnGMP_in);
 		ts.enforceFCautoROM = enforceAutoROM;
 		// 프로젝트 파일 여부 검증 후, fpnLog 파일 설정 후 writeNewLog 사용할 수 있다. 
-		writeNewLog(fpnLog, outString, 1, -1); 
+		writeNewLogString(fpnLog, outString, 1, -1);
 		if (setupAndStartSimulation() == -1) {
 			waitEnterKey();
 			return -1;
@@ -223,7 +252,7 @@ int startGMPsRun(vector<string> gmpFiles, int enforceAutoROM, string outString)
 	for (int n = 0; n < nFiles; n++) {// /f 혹은 /fd 인 경우 여기서 실행
 		ppi = getProjectFileInfo(gmpFiles[n]);
 		// 프로젝트 파일 여부 검증 후, fpnLog 파일 설정 후 writeNewLog 사용할 수 있다. 
-		writeNewLog(fpnLog, outString, 1, -1);
+		writeNewLogString(fpnLog, outString, 1, -1);
 		string progF = to_string(n + 1) + '/' + to_string(gmpFiles.size());
 		string progR = dtos(((n + 1) / double(nFiles) * 100.0), 2);
 		msgFileProcess = "Total progress: " + progF + "(" + progR + "%). ";
@@ -244,7 +273,7 @@ int startGMPsRun(vector<string> gmpFiles, int enforceAutoROM, string outString)
 			+ to_string(ts_total.tm_hour) + "h "
 			+ to_string(ts_total.tm_min) + "m "
 			+ to_string(ts_total.tm_sec) + "s.\n";
-		writeLog(fpnLog, endingStr, 1, 1);
+		writeLogString(fpnLog, endingStr, 1, 1);
 	}
 	return 1;
 }
@@ -257,6 +286,8 @@ void disposeDynamicVars()
 		}
 		delete[] cvais;
 	}
+	if (cvele != NULL) { delete[] cvele; }
+	//if (cvlat_degreeC != NULL) { delete[] cvlat_degreeC; }
 	if (cvps != NULL) { delete[] cvps; }
 	if (cvs != NULL) { delete[] cvs; }
 	if (cvsb != NULL) { delete[] cvsb; }
@@ -277,11 +308,11 @@ void disposeDynamicVars()
 		}
 		delete[] ssrAry;
 	}
-	if (rfAry != NULL) {
+	if (rfPDTAry != NULL) {
 		for (int i = 0; i < di.nCols; ++i) {
-			if (rfAry[i] != NULL) { delete[] rfAry[i]; }
+			if (rfPDTAry[i] != NULL) { delete[] rfPDTAry[i]; }
 		}
-		delete[] rfAry;
+		delete[] rfPDTAry;
 	}
 	if (rfaccAry != NULL) {
 		for (int i = 0; i < di.nCols; ++i) {
@@ -295,6 +326,18 @@ void disposeDynamicVars()
 		}
 		delete[] QAry;
 	}
+	if (petPDTAry != NULL) {
+		for (int i = 0; i < di.nCols; ++i) {
+			if (petPDTAry[i] != NULL) { delete[] petPDTAry[i]; }
+		}
+		delete[] petPDTAry;
+	}
+	if (aetPDTAry != NULL) {
+		for (int i = 0; i < di.nCols; ++i) {
+			if (aetPDTAry[i] != NULL) { delete[] aetPDTAry[i]; }
+		}
+		delete[] aetPDTAry;
+	}
 	prj.swps.clear();
 	prj.css.clear();
 	prj.fcs.clear();
@@ -304,12 +347,27 @@ void disposeDynamicVars()
 	prj.lcs.clear();
 
 	fcinfos.clear();
-	rfs.clear();
-	tempMax.clear();
-	tempMin.clear();
-	dayTimeLength.clear();
-	snowpackTemp.clear();
-	solarRad.clear();
+	
+	//rfs.clear();
+	//tempMax.clear();
+	//tempMin.clear();
+	//dayTimeLength.clear();
+	//solarRad.clear();
+	//dewPointTemp.clear();
+	//windSpeed.clear();
+	//userPET.clear();
+	//snowpackTemp.clear();
+
+	if (rfs != NULL) { delete[] rfs; }
+	if (tempMax != NULL) { delete[] tempMax; }
+	if (tempMin != NULL) { delete[] tempMin; }
+	if (dayTimeLength != NULL) { delete[] dayTimeLength; }
+	if (solarRad != NULL) { delete[] solarRad; }
+	if (dewPointTemp != NULL) { delete[] dewPointTemp; }
+	if (windSpeed != NULL) { delete[] windSpeed; }
+	if (userET != NULL) { delete[] userET; }
+	if (snowpackTemp != NULL) { delete[] snowpackTemp; }
+
 	laiRatio.clear();
 	fas.clear();
 	faCount.clear();
@@ -370,19 +428,19 @@ int setupAndStartSimulation()
 
 	
 	if (openPrjAndSetupModel(-1) == -1) {
-		writeLog(fpnLog, "ERROR : Model setup failed !!!\n", 1, 1);
+		writeLogString(fpnLog, "ERROR : Model setup failed !!!\n", 1, 1);
 		if (prj.forSimulation == 1) {// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 			return -1;
 		}
 	}
-	writeLog(fpnLog, "Simulation was started.\n", 1, 1);
+	writeLogString(fpnLog, "Simulation was started.\n", 1, 1);
 	if (startSimulation() == -1) {
-		writeNewLog(fpnLog, "ERROR : An error was occurred while simulation...\n", 1, 1);
+		writeNewLogString(fpnLog, "ERROR : An error was occurred while simulation...\n", 1, 1);
 		return -1;
 	}
 	if (prj.deleteAllFilesExceptDischargeOut == 1) {
 		if (deleteAllFilesExceptDischarge() == -1) {
-			writeNewLog(fpnLog, "ERROR : An error was occurred while deleting all files except discharge.out.\n", 1, 1);
+			writeNewLogString(fpnLog, "ERROR : An error was occurred while deleting all files except discharge.out.\n", 1, 1);
 			return -1;
 		}
 	}
@@ -391,23 +449,20 @@ int setupAndStartSimulation()
 
 int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 {	
-	writeLog(fpnLog, "Checking the input files... \n", 1, 1);
+	writeLogString(fpnLog, "Checking the input files... \n", 1, 1);
 	if (openProjectFile(forceRealTime) < 0)	{
-		writeLog(fpnLog, "ERROR : Open "+ ppi.fpn_prj+" was failed.\n", 1, 1);
+		writeLogString(fpnLog, "ERROR : Open "+ ppi.fpn_prj+" was failed.\n", 1, 1);
 		if (prj.forSimulation == 1) {// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 			return -1;
 		}
 	}
-	//cout << "completed. \n";
-	writeLog(fpnLog, "Checking input files completed.\n", 1, 1);
-	writeLog(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, 1);
-	//cout << "Setting up input data... ";
-	writeLog(fpnLog, "Setting up input data...\n", 1, 1);
+	writeLogString(fpnLog, "Checking input files completed.\n", 1, 1);
+	writeLogString(fpnLog, ppi.fpn_prj+" project was opened.\n", 1, 1);
+	writeLogString(fpnLog, "Setting up input data...\n", 1, 1);
 	if (setupModelAfterOpenProjectFile() == -1) {		
 		if (prj.forSimulation == 1) { return -1; }// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	}
-	//cout << "completed. \n";
-	writeLog(fpnLog, "Input data setup was completed.\n", 1, 1);
+	writeLogString(fpnLog, "Input data setup was completed.\n", 1, 1);
 	string isparallel = "true";
 	omp_set_num_threads(prj.mdp);
 
@@ -421,14 +476,14 @@ int openPrjAndSetupModel(int forceRealTime) // 1:true, -1:false
 	//}
 	if (prj.forSimulation == 1) {// exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 		if (initOutputFiles() == -1) {
-			writeLog(fpnLog, "ERROR : Initializing output files was failed.\n", 1, 1);
+			writeLogString(fpnLog, "ERROR : Initializing output files was failed.\n", 1, 1);
 			return -1;
 		}
 	}
-	writeLog(fpnLog, ppi.fpn_prj+" -> Model setup was completed.\n", 1, 1);
-	writeLog(fpnLog, "The number of effecitve cells : " + to_string(di.cellNnotNull) + "\n", 1, 1);
+	writeLogString(fpnLog, ppi.fpn_prj+" -> Model setup was completed.\n", 1, 1);
+	writeLogString(fpnLog, "The number of effecitve cells : " + to_string(di.cellNnotNull) + "\n", 1, 1);
 	if (prj.mdp == 1) { isparallel = "false"; }
-	writeLog(fpnLog, "Parallel : " + isparallel + ". Max. degree of parallelism : "
+	writeLogString(fpnLog, "Parallel : " + isparallel + ". Max. degree of parallelism : "
 		+ to_string(prj.mdp) + ".\n", 1,1);
 	return 1;
 }

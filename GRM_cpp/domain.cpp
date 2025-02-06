@@ -10,30 +10,33 @@ extern projectFile prj;
 
 extern domaininfo di;
 extern int** cvais;
+extern double* cvele;// 각셀의 해발고도. DEM에서 읽은 값. 배열 인덱스가, cv 인덱스와 같게 한다.
+//extern double* cvlat_degreeC; // 각셀의 위도. 배열 인덱스가, cv 인덱스와 같게 한다. 남반구는 - 값
 extern cvAtt* cvs;
 extern cvpos* cvps;
 extern cvAtt* cvsb;
+extern thisSimulation ts;
 
 int readDomainFaFileAndSetupCV()
 {
-    if (prj.fpnDomain == "" || _access(prj.fpnDomain.c_str(), 0) != 0) {
+    if (prj.fpnDomain == "" || fs::exists(lower(prj.fpnDomain)) != true) {//MP 수정 _access 대신 fs::exists 사용
         string outstr = "ERROR : Domain file (" + prj.fpnDomain + ") is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
-    if (prj.fpnFA == "" || _access(prj.fpnFA.c_str(), 0) != 0) {
+    if (prj.fpnFA == "" || fs::exists(lower(prj.fpnFA)) != true) {//MP 수정
         string outstr = "ERROR : Flow accumulation file (" + prj.fpnFA + ") is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
 
     //여기서 di 일반사항 초기화, 설정===============
-	writeLog(fpnLog, "Reading domain file... \n", 1, -1);
+	writeLogString(fpnLog, "Reading domain file... \n", 1, -1);
     ascRasterFile dmFile = ascRasterFile(prj.fpnDomain);
-	writeLog(fpnLog, "Reading domain file... completed.\n", 1, -1);
-	writeLog(fpnLog, "Reading flow accumulation file... \n", 1, -1);
+    writeLogString(fpnLog, "Reading domain file... completed.\n", 1, -1);
+    writeLogString(fpnLog, "Reading flow accumulation file... \n", 1, -1);
     ascRasterFile facFile = ascRasterFile(prj.fpnFA);
-	writeLog(fpnLog, "Reading flow accumulation file... completed.\n", 1, -1);
+    writeLogString(fpnLog, "Reading flow accumulation file... completed.\n", 1, -1);
 	if (compareASCwithDomain(prj.fpnFA, "flow accumulation", 
 		facFile.header, dmFile.header.nCols, dmFile.header.nRows, dmFile.header.dx) == -1) {
 		return -1;
@@ -53,9 +56,13 @@ int readDomainFaFileAndSetupCV()
     for (int i = 0; i < di.nCols; ++i) {
         cvais[i] = new int[di.nRows];
     }
+    
     vector<cvAtt> cvsv;
     vector<cvpos> cvpv;
     int cvidx = 0;
+    double latTOP_degree = prj.latitudeTOP_degree;
+    double degreePerAcell = di.cellSize / 111312;// 111312= 30.92 * 3600, 1초를 30.92m로 계산
+
     // cvidx를 순차적으로 부여하기 위해서, 이 과정은 병렬로 하지 않는다..
     for (int ry = 0; ry < di.nRows; ry++) {
         for (int cx = 0; cx < di.nCols; cx++) {
@@ -80,6 +87,11 @@ int readDomainFaFileAndSetupCV()
                 cp.wsid = wsid;
                 cp.xCol = cx;
                 cp.yRow = ry;
+                if (ts.isUsed_Latitude == 1) {
+                    double lat_degree = latTOP_degree - degreePerAcell * ry; // 북쪽에서 남쪽으로 작게한다.
+                    cp.lat_rad = lat_degree * 3.141593 / 180.0;
+                    cp.intLat_degree = std::round(lat_degree);
+                }
                 cvsv.push_back(cv); // 여기는 유효셀만
                 cvpv.push_back(cp);
                 cvais[cx][ry] = cvidx ;// 모든셀. 1차원 배열의 인덱스를 저장. CVid를 CV 리스트의 인덱스 번호 값으로 입력. 즉. 1 부터 시작
@@ -95,113 +107,135 @@ int readDomainFaFileAndSetupCV()
     cvs = new cvAtt[cvsv.size()];
     cvps = new cvpos[cvsv.size()];
     cvsb = new cvAtt[cvsv.size()];
-    copy(cvsv.begin(), cvsv.end(), cvs);
-    copy(cvpv.begin(), cvpv.end(), cvps);
+    std::copy(cvsv.begin(), cvsv.end(), cvs);
+    std::copy(cvpv.begin(), cvpv.end(), cvps);
+
     return 1;
 }
 
-int readSlopeFdirStreamCwCfSsrFileAndSetCV()
-{
-    if (prj.fpnSlope == "" || _access(prj.fpnSlope.c_str(), 0) != 0) {
+int readDomainAddtionalRasterDataAndSetCV()
+{ 
+    if (prj.fpnSlope == "" || fs::exists(lower(prj.fpnSlope)) != true) { //MP 수정
         string outstr = "ERROR : Slope file (" + prj.fpnSlope + ") is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
-    if (prj.fpnFD == "" || _access(prj.fpnFD.c_str(), 0) != 0) {
+    if (prj.fpnFD == "" || fs::exists(lower(prj.fpnFD)) != true) { //MP 수정
         string outstr = "ERROR : Flow direction file (" + prj.fpnFD + ") is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
         return -1;
+    }
+
+
+    if (ts.isUsed_DEM == 1
+        && (prj.fpnDEM == "" || fs::exists(lower(prj.fpnDEM)) != true)) { 
+        writeLogString(fpnLog, "ERROR : DEM file is invalid. Simulation was stopped.\n", 1, -1);
+        return -1;
+
     }
 
     if (prj.streamFileApplied == 1
         && (prj.fpnStream == ""
-            || _access(prj.fpnStream.c_str(), 0) != 0)) {
-        string outstr = "WARNNING : Stream file is invalid. Simulation continues.\n";
-        writeLog(fpnLog, outstr, 1, -1);
+            || fs::exists(lower(prj.fpnStream)) != true)) { //MP 수정
+        writeLogString(fpnLog, "WARNNING : Stream file is invalid. Simulation continues.\n", 1, -1);
         prj.streamFileApplied = -1;
     }
 
     if (prj.cwFileApplied == 1
         && (prj.fpnChannelWidth == ""
-            || _access(prj.fpnChannelWidth.c_str(), 0) != 0)) {
-        string outstr = "WARNNING : Channel width file is invalid. Simulation continues.\n";
-        writeLog(fpnLog, outstr, 1, -1);
+            || fs::exists(lower(prj.fpnChannelWidth)) != true)) { //MP 수정
+        writeLogString(fpnLog, "WARNNING : Channel width file is invalid. Simulation continues.\n", 1, -1);
         prj.cwFileApplied = -1;
     }
 
     if (prj.icfFileApplied == 1
         && (prj.fpniniChFlow == ""
-            || _access(prj.fpniniChFlow.c_str(), 0) != 0)) {
-        string outstr = "WARNNING : Initial stream flow file is invalid. Simulation continues.\n";
-        writeLog(fpnLog, outstr, 1, -1);
+            || fs::exists(lower(prj.fpniniChFlow)) != true)) { //MP 수정
+        writeLogString(fpnLog, "WARNNING : Initial stream flow file is invalid. Simulation continues.\n", 1, -1);
         prj.icfFileApplied = -1;
     }
 
     if (prj.issrFileApplied==1
-        &&(prj.fpniniSSR == "" || _access(prj.fpniniSSR.c_str(), 0) != 0)) {
-        string outstr = "WARNNING : Initial soil saturation ratio file is invalid. Simulation continues.\n";
-        writeLog(fpnLog, outstr, 1, -1);
+        &&(prj.fpniniSSR == "" 
+            || fs::exists(lower(prj.fpniniSSR)) != true)) { //MP 수정
+        writeLogString(fpnLog, "WARNNING : Initial soil saturation ratio file is invalid. Simulation continues.\n", 1, -1);
         prj.issrFileApplied = -1;
     }
-	writeLog(fpnLog, "Reading slope file... \n", 1, -1);
 
+    writeLogString(fpnLog, "Reading slope file... \n", 1, -1);
 	ascRasterFile slopeFile = ascRasterFile(prj.fpnSlope);
 	if (compareASCwithDomain(prj.fpnSlope, "slope", slopeFile.header, di.nCols, di.nRows, di.dx) == -1) {
 		return -1;
 	}
-	writeLog(fpnLog, "Reading slope file... completed.\n", 1, -1);
+    writeLogString(fpnLog, "Reading slope file... completed.\n", 1, -1);
 
-	writeLog(fpnLog, "Reading flow direction file... \n", 1, -1);
+    writeLogString(fpnLog, "Reading flow direction file... \n", 1, -1);
     ascRasterFile fdirFile = ascRasterFile(prj.fpnFD);
 	if (compareASCwithDomain(prj.fpnFD, "flow direction", fdirFile.header, di.nCols, di.nRows, di.dx) == -1) {
 		return -1;
 	}
-	writeLog(fpnLog, "Reading flow direction file... completed.\n", 1, -1);
+    writeLogString(fpnLog, "Reading flow direction file... completed.\n", 1, -1);
 
+    ascRasterFile* demFile;
     ascRasterFile* streamFile;
     ascRasterFile* cwFile;
     ascRasterFile* cfFile;
     ascRasterFile* ssrFile;
+
+    if (ts.isUsed_DEM == 1) {
+        writeLogString(fpnLog, "Reading DEM file... \n", 1, -1);
+        demFile = new ascRasterFile(prj.fpnDEM);
+        writeLogString(fpnLog, "Reading DEM file... completed. \n", 1, -1);
+        cvele = new double[di.cellNnotNull];
+    }
+    else {
+        demFile = NULL;
+    }
+
+    //if (ts.isUsed_Latitude == 1) {
+    //    cvlat_degreeC = new double[di.cellNnotNull];
+    //}
+
     if (prj.streamFileApplied == 1) {
-		writeLog(fpnLog, "Reading stream file... \n", 1, -1);
+        writeLogString(fpnLog, "Reading stream file... \n", 1, -1);
         streamFile = new ascRasterFile(prj.fpnStream);
 		if (compareASCwithDomain(prj.fpnStream, "stream", streamFile->header, di.nCols, di.nRows, di.dx) == -1) {
 			return -1;
 		}
-		writeLog(fpnLog, "Reading stream file... completed.\n", 1, -1);
+        writeLogString(fpnLog, "Reading stream file... completed.\n", 1, -1);
     }
     else {
         streamFile = NULL;
     }
     if (prj.cwFileApplied == 1) {
-		writeLog(fpnLog, "Reading channel width file... \n", 1, -1);
+        writeLogString(fpnLog, "Reading channel width file... \n", 1, -1);
         cwFile = new ascRasterFile(prj.fpnChannelWidth);
 		if (compareASCwithDomain(prj.fpnChannelWidth, "channel width", cwFile->header, di.nCols, di.nRows, di.dx) == -1) {
 			return -1;
 		}
-		writeLog(fpnLog, "Reading channel width file... completed.\n", 1, -1);
+        writeLogString(fpnLog, "Reading channel width file... completed.\n", 1, -1);
     }
     else {
         cwFile = NULL;
     }
     if (prj.icfFileApplied == 1) {
-		writeLog(fpnLog, "Reading initial stream flow file... \n", 1, -1);
+        writeLogString(fpnLog, "Reading initial stream flow file... \n", 1, -1);
         cfFile = new ascRasterFile(prj.fpniniChFlow);
 		if (compareASCwithDomain(prj.fpniniChFlow, "initial stream flow", cfFile->header, di.nCols, di.nRows, di.dx) == -1) {
 			return -1;
 		}
-		writeLog(fpnLog, "Reading initial stream flow file... completed. \n", 1, -1);
+        writeLogString(fpnLog, "Reading initial stream flow file... completed. \n", 1, -1);
     }
     else {
         cfFile = NULL;
     }
     if (prj.issrFileApplied == 1) {
-		writeLog(fpnLog, "Reading initial soil saturation ratio file... \n", 1, -1);
+        writeLogString(fpnLog, "Reading initial soil saturation ratio file... \n", 1, -1);
         ssrFile = new ascRasterFile(prj.fpniniSSR);
 		if (compareASCwithDomain(prj.fpniniSSR, "initial soil saturation ratio", ssrFile->header, di.nCols, di.nRows, di.dx) == -1) {
 			return -1;
 		}
-		writeLog(fpnLog, "Reading initial soil saturation ratio file... completed. \n", 1, -1);
+        writeLogString(fpnLog, "Reading initial soil saturation ratio file... completed. \n", 1, -1);
     }
     else {
         ssrFile = NULL;
@@ -223,9 +257,13 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
 		if (cvs[idx].fdir == flowDirection8::None8) {
 			string outstr = "ERROR : Flow direction value is invalid (cell location : "
 				+ to_string(cvps[idx].xCol) + ", " + to_string(cvps[idx].yRow) + ").\n";
-			writeLog(fpnLog, outstr, 1, 1);
+            writeLogString(fpnLog, outstr, 1, 1);
 			isNormal= -1;
 		}
+
+        if (ts.isUsed_DEM == 1) {
+            cvele[idx] = demFile->valuesFromTL[cx][ry];
+        }
 
         if (prj.streamFileApplied == 1) {
             cvs[idx].stream.cellValue = (int)streamFile->valuesFromTL[cx][ry];
@@ -268,10 +306,11 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
                 cvs[idx].iniSSR = v;
             }
         }
-        //    }
-        //}
     }
 
+    if (ts.isUsed_DEM == 1 && demFile != NULL) {
+        delete demFile;
+    }
     if (prj.streamFileApplied == 1 && streamFile != NULL) {
         delete streamFile;
     }
@@ -293,18 +332,20 @@ int readSlopeFdirStreamCwCfSsrFileAndSetCV()
 
 int readLandCoverFileAndSetCVbyVAT()
 {
-    if (prj.fpnLC == "" || _access(prj.fpnLC.c_str(), 0) != 0) {
+    if (prj.fpnLC == "" 
+        || fs::exists(lower(prj.fpnLC)) != true) { //MP 수정
         string outstr = "ERROR : Land cover file (" + prj.fpnLC + ") is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
-    if (prj.fpnLCVat == "" || _access(prj.fpnLCVat.c_str(), 0) != 0) {//속성 대응 참고를 위해 이파일 있는지 본다.
+    if (prj.fpnLCVat == "" 
+        || fs::exists(lower(prj.fpnLCVat)) != true) { //MP 수정  //속성 대응 참고를 위해 이파일 있는지 본다.
         string outstr = "ERROR : Land cover VAT file (" + prj.fpnLCVat + ") is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
     }
-	writeLog(fpnLog, "Reading land cover file... \n", 1, -1);
+    writeLogString(fpnLog, "Reading land cover file... \n", 1, -1);
     ascRasterFile lcFile = ascRasterFile(prj.fpnLC);
-	writeLog(fpnLog, "Reading land cover file... completed.\n", 1, -1);
+    writeLogString(fpnLog, "Reading land cover file... completed.\n", 1, -1);
     int nRy = di.nRows;
     int nCx = di.nCols;
     map<int, landCoverInfo> lcvat;
@@ -336,7 +377,7 @@ int readLandCoverFileAndSetCVbyVAT()
                     + "] or current project file do not have the land cover value ("
                     + to_string(v) + ").\n"
                     + "Check the land cover file or land cover VAT file. \n";
-                writeLog(fpnLog, outstr, -1, 1);
+                writeLogString(fpnLog, outstr, -1, 1);
                 return -1;
             }
         }
@@ -355,13 +396,11 @@ int readLandCoverFileAndSetCVbyVAT()
 int setCVbyLCConstant()
 {
     if (prj.cnstImperviousR == -1) {
-        string outstr = "ERROR : Land cover constant impervious ratio is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, "ERROR : Land cover constant impervious ratio is invalid.\n", 1, 1);
         return -1;
     }
     if (prj.cnstRoughnessC == -1) {
-        string outstr = "ERROR : Land cover constant roughness coefficient is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, "ERROR : Land cover constant roughness coefficient is invalid.\n", 1, 1);
         return -1;
     }
     int nRy = di.nRows;
@@ -378,9 +417,10 @@ int setCVbyLCConstant()
 
 int readLandCoverFile()
 {
-    if (prj.fpnLC == "" || _access(prj.fpnLC.c_str(), 0) != 0) {
+    if (prj.fpnLC == "" 
+        || fs::exists(lower(prj.fpnLC)) != true) { //MP 수정 
         string outstr = "ERROR : Land cover file (" + prj.fpnLC + ") is invalid.\n";
-        writeLog(fpnLog, outstr, -1, 1);
+        writeLogString(fpnLog, outstr, -1, 1);
         return -1;
     }
     ascRasterFile lcFile = ascRasterFile(prj.fpnLC);
@@ -393,7 +433,7 @@ int readLandCoverFile()
         }
         else {
             string outstr = "WARNNING : Land cover file (" + prj.fpnLC + ") has invalid value.\n";
-            writeLog(fpnLog, outstr, -1, 1);
+            writeLogString(fpnLog, outstr, -1, 1);
             isnormal = -1;
         }
     }
@@ -402,18 +442,20 @@ int readLandCoverFile()
 
 int readSoilTextureFileAndSetCVbyVAT()
 {
-    if (prj.fpnST == "" || _access(prj.fpnST.c_str(), 0) != 0) {
+    if (prj.fpnST == "" 
+        || fs::exists(lower(prj.fpnST)) != true) { //MP 수정  
         string outstr = "ERROR : Soil texture file (" + prj.fpnST + ") is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
-    if (prj.fpnSTVat == "" || _access(prj.fpnSTVat.c_str(), 0) != 0) {//속성 대응 참고를 위해 이파일 있는지 본다.
+    if (prj.fpnSTVat == "" 
+        || fs::exists(lower(prj.fpnSTVat)) != true) { //MP 수정  //속성 대응 참고를 위해 이파일 있는지 본다.
         string outstr = "WARNNING : Soil texture VAT file (" + prj.fpnSTVat + ") is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
     }
-	writeLog(fpnLog, "Reading soil texture file... \n", 1, -1);
+    writeLogString(fpnLog, "Reading soil texture file... \n", 1, -1);
     ascRasterFile stFile = ascRasterFile(prj.fpnST);
-	writeLog(fpnLog, "Reading soil texture file... completed. \n", 1, -1);
+    writeLogString(fpnLog, "Reading soil texture file... completed. \n", 1, -1);
     int nRy = di.nRows;
     int nCx = di.nCols;
     map<int, soilTextureInfo> stvat;
@@ -444,7 +486,7 @@ int readSoilTextureFileAndSetCVbyVAT()
                 string outstr = "ERROR : Soil texture VAT file [" + prj.fpnSTVat
                     + "] or current project file do not have the soil texture value (" + to_string(v) + ").\n"
                     + "Check the soil texture file or soil texture VAT file. \n";
-                writeLog(fpnLog, outstr, -1, 1);
+                writeLogString(fpnLog, outstr, -1, 1);
                 return -1;
             }
         }
@@ -465,23 +507,19 @@ int readSoilTextureFileAndSetCVbyVAT()
 int setCVbySTConstant()
 {
     if (prj.cnstSoilEffPorosity == -1) {
-        string outstr = "ERROR : Soil texture constant effective porosity is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, "ERROR : Soil texture constant effective porosity is invalid.\n", 1, 1);
         return -1;
     }
     if (prj.cnstSoilHydraulicK == -1) {
-        string outstr = "ERROR : Soil texture constant hydraulic conductivity is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, "ERROR : Soil texture constant hydraulic conductivity is invalid.\n", 1, 1);
         return -1;
     }
     if (prj.cnstSoilPorosity == -1) {
-        string outstr = "ERROR : Soil texture constant porosity is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, "ERROR : Soil texture constant porosity is invalid.\n", 1, 1);
         return -1;
     }
     if (prj.cnstSoilWFSH == -1) {
-        string outstr = "ERROR : Soil texture constant wetting front suction head is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, "ERROR : Soil texture constant wetting front suction head is invalid.\n", 1, 1);
         return -1;
     }
 
@@ -501,9 +539,10 @@ int setCVbySTConstant()
 
 int readSoilTextureFile()
 {
-    if (prj.fpnST == "" || _access(prj.fpnST.c_str(), 0) != 0) {
+    if (prj.fpnST == "" 
+        || fs::exists(lower(prj.fpnST)) != true) { //MP 수정 
         string outstr = "ERROR : Soil texture file (" + prj.fpnST + ") is invalid.\n";
-        writeLog(fpnLog, outstr, -1, 1);
+        writeLogString(fpnLog, outstr, -1, 1);
         return -1;
     }
     ascRasterFile stFile = ascRasterFile(prj.fpnST);
@@ -516,7 +555,7 @@ int readSoilTextureFile()
         }
         else {
             string outstr = "WARNNING : Soil texture file (" + prj.fpnST + ") has invalid value.\n";
-            writeLog(fpnLog, outstr, -1, 1);
+            writeLogString(fpnLog, outstr, -1, 1);
             isnormal = -1;
         }
     }
@@ -526,18 +565,20 @@ int readSoilTextureFile()
 
 int readSoilDepthFileAndSetCVbyVAT()
 {
-    if (prj.fpnSD == "" || _access(prj.fpnSD.c_str(), 0) != 0) {
+    if (prj.fpnSD == "" 
+        || fs::exists(lower(prj.fpnSD)) != true) { //MP 수정 
         string outstr = "ERROR : Soil depth file (" + prj.fpnSD + ") is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
-    if (prj.fpnSDVat == "" || _access(prj.fpnSDVat.c_str(), 0) != 0) {//속성 대응 참고를 위해 이파일 있는지 본다.
+    if (prj.fpnSDVat == "" 
+        || fs::exists(lower(prj.fpnSDVat)) != true) { //MP 수정   //속성 대응 참고를 위해 이파일 있는지 본다.
         string outstr = "WARNNING : Soil depth VAT file (" + prj.fpnSDVat + ") is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
     }
-	writeLog(fpnLog, "Reading soil depth file... \n", 1, -1);
+    writeLogString(fpnLog, "Reading soil depth file... \n", 1, -1);
     ascRasterFile sdFile = ascRasterFile(prj.fpnSD);
-	writeLog(fpnLog, "Reading soil depth file... completed.\n", 1, -1);
+    writeLogString(fpnLog, "Reading soil depth file... completed.\n", 1, -1);
     int nRy = di.nRows;
     int nCx = di.nCols;
     map<int, soilDepthInfo> sdvat;
@@ -566,7 +607,7 @@ int readSoilDepthFileAndSetCVbyVAT()
                     + "] or current project file do not have the soil depth value ("
                     + to_string(v) + ").\n"
                     + "Check the soil depth file or soil depth VAT file. \n";
-                writeLog(fpnLog, outstr, -1, 1);
+                writeLogString(fpnLog, outstr, -1, 1);
                 return -1;
             }
         }
@@ -584,8 +625,7 @@ int readSoilDepthFileAndSetCVbyVAT()
 int setCVbySDConstant()
 {
     if (prj.cnstSoilDepth == -1) {
-        string outstr = "ERROR : Constant soil depth value is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, "ERROR : Constant soil depth value is invalid.\n", 1, 1);
         return -1;
     }
     int nRy = di.nRows;
@@ -601,9 +641,10 @@ int setCVbySDConstant()
 
 int readSoilDepthFile()
 {
-    if (prj.fpnSD == "" || _access(prj.fpnSD.c_str(), 0) != 0) {
+    if (prj.fpnSD == "" 
+        || fs::exists(lower(prj.fpnSD)) != true) { //MP 수정 
         string outstr = "ERROR : Soil depth file (" + prj.fpnSD + ") is invalid.\n";
-        writeLog(fpnLog, outstr, -1, 1);
+        writeLogString(fpnLog, outstr, -1, 1);
         return -1;
     }
     ascRasterFile sdFile = ascRasterFile(prj.fpnSD);
@@ -616,7 +657,7 @@ int readSoilDepthFile()
         }
         else {
             string outstr = "WARNNING : Soil depth file (" + prj.fpnSD + ") has invalid value.\n";
-            writeLog(fpnLog, outstr, -1, 1);
+            writeLogString(fpnLog, outstr, -1, 1);
             isnormal = -1;
         }
     }
@@ -632,9 +673,10 @@ int compareASCwithDomain(string fpn_in, string dataString,
 		string err = "ERROR :  The header info. of the " + dataString
 			+ " ASC file is not equal to the domain file.\n" +
 			" File name : " + fpn_in + "\n";
-		writeLog(fpnLog, err, 1, 1);
+        writeLogString(fpnLog, err, 1, 1);
 		return -1;
 	}
+    return 1;
 }
 
 flowDirection8 getFlowDirection(int fdirV, flowDirectionType fdt)

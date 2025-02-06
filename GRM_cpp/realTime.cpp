@@ -1,6 +1,6 @@
 // 이 문서의 코드는 최가 초안 작성, 실시간 시스템 구축시 보완. 특히 dbms 부분. 2020.04.23. 최
 #include "stdafx.h"
-#include<ATLComTime.h>
+//#include<ATLComTime.h> //MP 주석
 #include "gentle.h"
 #include "grm.h"
 #include "realTime.h"
@@ -13,7 +13,8 @@ extern projectfilePathInfo ppi;
 extern fs::path fpnLog;
 
 extern flowControlCellAndData fccds;
-extern vector<weatherData> rfs;
+//extern vector<weatherData> rfs;
+vector <weatherData> rfsV;
 
 extern thisSimulation ts;
 extern thisSimulationRT tsrt;
@@ -75,12 +76,12 @@ void grmRealTime::setUpAndStartGRMRT()
     // gmp 파일과 ref 파일이 다른 경우, ref 파일 값으로 매개변수 설정    
     prj.simType = simulationType::RealTime;
     //prj.rfDataType = rainfallDataType::TextFileASCgrid;
-    prj.isDateTimeFormat = true;
+    prj.isDateTimeFormat = 1;
     prj.dtPrint_min = rtef.outputInterval_min;
     prj.simStartTime = rtef.rtstartDataTime;
     prj.rfinterval_min = rtef.rfinterval_min;
 
-    rfs.clear();// 사용할 강우자료 초기화
+    rfsV.clear();// 사용할 강우자료 초기화
 
     ts.simDuration_min = tsrt.simDurationrRT_h * 60;
     ts.enforceFCautoROM = tsrt.enforceAutoROM;
@@ -96,14 +97,14 @@ void grmRealTime::setupGRMforRT() // fc 자료는 항상 db를 사용하는 것으로 수정, O
 {
 
     if (openPrjAndSetupModel(1) == -1) {
-        writeLog(fpnLog, "모형 설정 실패.\n", 1, 1);
+        writeLogString(fpnLog, "모형 설정 실패.\n", 1, 1);
         if (CONST_bUseDBMS_FOR_RealTimeSystem == true) {
             //여기 원이사님 확인 필요. 2020.04.23. 최
             add_Log_toDBMS(ppi.fn_prj, "Fail in Model Setting");
         }
         return;
     }
-    writeLog(fpnLog, "모형 설정 완료.\n", 1, 1);
+    writeLogString(fpnLog, "모형 설정 완료.\n", 1, 1);
     if (CONST_bUseDBMS_FOR_RealTimeSystem == true) {
         //여기 원이사님 확인 필요. 2020.04.23. 최
         add_Log_toDBMS(ppi.fn_prj, "Model Setting Completed.");
@@ -157,20 +158,20 @@ void grmRealTime::runGRMRT()
     if (CONST_bUseDBMS_FOR_RealTimeSystem) {
         if (false) {//'2018.8 부터 이제 과거 분석 기록은 보존됨..그래서 삭제 code는 미수행.
             clear_DBMS_Table_Qwatershed(ppi.fn_prj);
-            writeLog(fpnLog, "DBMS [Q_CAL] Table Cleared\n", 1, 1);
+            writeLogString(fpnLog, "DBMS [Q_CAL] Table Cleared\n", 1, 1);
             add_Log_toDBMS(ppi.fn_prj, "DBMS [Q_CAL] Table Cleared");
         }
     }
-    writeLog(fpnLog, "RealTime runoff simulation was started.\n", 1, 1);
+    writeLogString(fpnLog, "RealTime runoff simulation was started.\n", 1, 1);
     if (CONST_bUseDBMS_FOR_RealTimeSystem) {
         add_Log_toDBMS(ppi.fn_prj, "RealTime Rainall Runoff Start..");
     }
 
     string fpn_rfASC;
     if (tsrt.g_strModel == "") {
-        fpn_rfASC = rtef.fpRTRFfolder + "\\"
+        fpn_rfASC = rtef.fpRTRFfolder + "/"
             + getYYYYMMfromYYYYMMddHHmm(rtef.rtstartDataTime)
-            + "\\" + rtef.rtstartDataTime + ".asc";
+            + "/" + rtef.rtstartDataTime + ".asc";
     }
     else {
         fpn_rfASC= getLENSrfFPNusingTimeString(rtef.rtstartDataTime);
@@ -209,10 +210,10 @@ void grmRealTime::runGRMRT()
     //        }
     //    }
     //}
-    writeLog(fpnLog, "Real time simulation was started. Predicion = "
+    writeLogString(fpnLog, "Real time simulation was started. Predicion = "
         + to_string(tsrt.enforceAutoROM)+"\n", 1, 1);
     if (startSimulationRT() == -1) {
-        writeLog(fpnLog, "Real time simulation error.\n", 1, 1);
+        writeLogString(fpnLog, "Real time simulation error.\n", 1, 1);
     }
     return;    
 }
@@ -271,7 +272,7 @@ int readCSVandFillFCdataForRealTime(string fpnFCcvs, string targetDateTime)
     if (fpnFCcvs != "" && _access(fpnFCcvs.c_str(), 0) != 0) {
         string outstr = "Flow control data file [" + fpnFCcvs
             + "] is invalid.\n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
     vector<string> sv;
@@ -335,15 +336,17 @@ void updateFcDataStatusForEachFCcellGRMRT(string t_yyyymmddHHMM, int idx)
 
 void updateRFdataGRMRT(string t_yyyymmddHHMM)
 {
-    COleDateTime timeNow;
-    timeNow = COleDateTime::GetCurrentTime();
-    COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
+    tm tnow = getCurrentTimeAsLocal_tm(); //MP 수정
+    double ts_FromStarting_sec = 0.0;
+    double ts_FromStarting_min = 0.0;
+    ts_FromStarting_sec = timeDifferecceSEC(ts.time_thisSimStarted, tnow);
+    ts_FromStarting_min = ts_FromStarting_sec / 60.0;
     string tFromStart;
-    tFromStart = dtos(tsTotalSim.GetTotalMinutes(), 2);
+    tFromStart = dtos(ts_FromStarting_min, 2);
     if (tsrt.newRFAddedRT == 1 && ts.dataNumTotal_rf > 0) {
         weatherData arf;
-        arf = rfs[ts.dataNumTotal_rf-1];
-        writeLog(fpnLog, "  Rainfall data ("+arf.value + ") 분석완료. " 
+        arf = rfsV[ts.dataNumTotal_rf-1];
+        writeLogString(fpnLog, "  Rainfall data ("+arf.value + ") 분석완료. "
             + tFromStart + "분 경과 \n", 1, 1);
         tsrt.newRFAddedRT = -1;
     }
@@ -362,7 +365,7 @@ void updateRFdataGRMRT(string t_yyyymmddHHMM)
         rfFileName = rtef.headText_BeforeTString_RFN
             + getYYYYMMfromYYYYMMddHHmm(t_yyyymmddHHMM)
             + rtef.tailText_AfterTString_RFN_withExt;
-        fpn_map = rtef.fpRTRFfolder + "\\"+ rfFileName;
+        fpn_map = rtef.fpRTRFfolder + "/"+ rfFileName;
         if (_access(fpn_map.c_str(), 0) != 0) {
             break;
         }
@@ -379,8 +382,8 @@ void updateRFdataGRMRT(string t_yyyymmddHHMM)
                 nrf.DataTime = t_yyyymmddHHMM;
                 nrf.value = sv_aline[1]; // 
                 nrf.FileName = fpn_map;
-                rfs.push_back(nrf);
-                writeLog(fpnLog, "  Rainfall data 입력완료 ("+ nrf.value +
+                rfsV.push_back(nrf);
+                writeLogString(fpnLog, "  Rainfall data 입력완료 ("+ nrf.value +
                     " for "+ t_yyyymmddHHMM+" from "+ fpn_map + ").\n", 1, 1);
                 tsrt.newRFAddedRT = 1;
                 return;
@@ -395,9 +398,9 @@ void updateRFdataGRMRT(string t_yyyymmddHHMM)
             // 강우파일의 시간 스트링 앞뒤의 문자는 ref 파일에서 받는다.
             rfFileName =  rtef.headText_BeforeTString_RFN
                 + t_yyyymmddHHMM + rtef.tailText_AfterTString_RFN_withExt;
-            ascFPN = rtef.fpRTRFfolder + "\\"
+            ascFPN = rtef.fpRTRFfolder + "/"
                 + getYYYYMMfromYYYYMMddHHmm(t_yyyymmddHHMM)
-                + "\\" + rfFileName;
+                + "/" + rfFileName;
         }
         else {
             ascFPN = getLENSrfFPNusingTimeString(t_yyyymmddHHMM);
@@ -415,7 +418,7 @@ void updateRFdataGRMRT(string t_yyyymmddHHMM)
 
         //LENS 인 경우 yyyymm 폴더 구분 하지 않음
             if (tsrt.g_strModel == "") {
-                nrf.FilePath = rtef.fpRTRFfolder + "\\"
+                nrf.FilePath = rtef.fpRTRFfolder + "/"
                     + getYYYYMMfromYYYYMMddHHmm(t_yyyymmddHHMM);
             }
             else {
@@ -423,8 +426,8 @@ void updateRFdataGRMRT(string t_yyyymmddHHMM)
             }
 
             nrf.FileName = rfFileName;
-            rfs.push_back(nrf);
-            writeLog(fpnLog, "  Rainfall data 입력완료 ("+rfFileName + ").\n", 1, 1);
+            rfsV.push_back(nrf);
+            writeLogString(fpnLog, "  Rainfall data 입력완료 ("+rfFileName + ").\n", 1, 1);
             tsrt.newRFAddedRT = 1;
             return;
         }
@@ -436,27 +439,21 @@ void updateRFdataGRMRT(string t_yyyymmddHHMM)
 
 string getLENSrfFPNusingTimeString(string t_yyyymmddHHMM)
 {
-    tm tmTarget = stringToDateTime(t_yyyymmddHHMM);
-    tm tmB = stringToDateTime(tsrt.g_strTimeTagBase_KST);
-    COleDateTime oleTstart_KST;
-    COleDateTime oleTBase_KST;
-    oleTstart_KST.SetDateTime(tmTarget.tm_year, tmTarget.tm_mon, tmTarget.tm_mday,
-        tmTarget.tm_hour, tmTarget.tm_min, 0);
-    oleTBase_KST.SetDateTime(tmB.tm_year, tmB.tm_mon, tmB.tm_mday,
-        tmB.tm_hour, tmB.tm_min, 0);
-    COleDateTimeSpan tspan = oleTstart_KST - oleTBase_KST;
+    tm tmTarget = stringToDateTime(t_yyyymmddHHMM, false);
+    tm tmB = stringToDateTime(tsrt.g_strTimeTagBase_KST, false);
+    double tspan_hrs = timeDifferecceSEC(tmB, tmTarget) / 60 / 60;
     stringstream ss;
-    ss << setw(3) << std::setprecision(0) << tspan.GetTotalHours();
+    ss << setw(3) << std::setprecision(0) << tspan_hrs;
     string strDIFF = ss.str();
     if (strDIFF == "073") { 
-        writeLog(fpnLog, "LENS : completed",1,1); 
+        writeLogString(fpnLog, "LENS : completed",1,1);
         exit(0); 
     }
     // 가정.. ref의 시작 시간을.. l030_v070_m00_h004.2016100400.gb2_1_clip.asc,,  에 맞추고... h000만 조정...
     // 즉 KST로 시작 시간 지정은. 201610040900 + 4  즉 2016100413이 됨
     string strFileLEns = "l030_v070_" + tsrt.g_strModel +
         "_h" + strDIFF + "." + tsrt.g_strTimeTagBase_UCT + ".gb2_1_clip.asc";
-    string fpn_rfASC = rtef.fpRTRFfolder + "\\" + strFileLEns;
+    string fpn_rfASC = rtef.fpRTRFfolder + "/" + strFileLEns;
     return fpn_rfASC;
 }
 
@@ -479,7 +476,7 @@ int openRtEnvFile(string fpnref)
                 rtef.fpnPrj = vString;
             }
             else {
-                writeLog(fpnLog, "GRM project file [" + vString + "] is invalid.\n", 1, 1);
+                writeLogString(fpnLog, "GRM project file [" + vString + "] is invalid.\n", 1, 1);
                 return -1;
             }
             continue;
@@ -491,7 +488,7 @@ int openRtEnvFile(string fpnref)
                 rtef.fpRTRFfolder = vString;
             }
             else {
-                writeLog(fpnLog, "Real time rainfall data folder ["
+                writeLogString(fpnLog, "Real time rainfall data folder ["
                     + vString + "] is invalid.\n", 1, 1);
                 return -1;
             }
@@ -522,7 +519,7 @@ int openRtEnvFile(string fpnref)
                 rtef.fpnRTFCdata = vString;
             }
             else if(rtef.isFC==1){
-                writeLog(fpnLog, "Real time flow control data file ["
+                writeLogString(fpnLog, "Real time flow control data file ["
                     + vString + "] is invalid.\n", 1, 1);
                 return -1;
             }

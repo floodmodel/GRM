@@ -198,7 +198,8 @@ int updateWatershedNetwork()
 			if (uid != wsid_cur && uid>0) {
 				for (int did : downIDs) {
 					if (uid == did) {
-						writeLog(fpnLog, "ERROR : The flow directions of watershed IDs " + to_string(uid) + " and " + to_string(wsid_cur) + " are recursive.\n", 1, 1);
+						writeLogString(fpnLog, "ERROR : The flow directions of watershed IDs " 
+                            + to_string(uid) + " and " + to_string(wsid_cur) + " are recursive.\n", 1, 1);
 						return -1;
 					}
 				}
@@ -212,7 +213,8 @@ int updateWatershedNetwork()
 			if (did != wsid_cur && did > 0) {
 				for (int uid : upIDs) {
 					if (uid == did) {
-						writeLog(fpnLog, "ERROR : The flow directions of watershed IDs " + to_string(did) + " and " + to_string(wsid_cur) + " are recursive.\n", 1, 1);
+                        writeLogString(fpnLog, "ERROR : The flow directions of watershed IDs " 
+                            + to_string(did) + " and " + to_string(wsid_cur) + " are recursive.\n", 1, 1);
 						return -1;
 					}
 				}

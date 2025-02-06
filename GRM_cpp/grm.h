@@ -42,7 +42,7 @@ const string CONST_DIST_RFACC_DIRECTORY_TAG = "_PRCPAccD";
 const string CONST_DIST_FLOW_DIRECTORY_TAG = "_FlowD";
 
 const string CONST_DIST_PET_DIRECTORY_TAG = "_PETD";
-const string CONST_DIST_ET_DIRECTORY_TAG = "_ETD";
+const string CONST_DIST_AET_DIRECTORY_TAG = "_AETD";
 const string CONST_DIST_INTERCEPTION_DIRECTORY_TAG = "_INTCPD";
 const string CONST_DIST_SNOWMELT_DIRECTORY_TAG = "_SnowMD";
 
@@ -53,7 +53,7 @@ const string CONST_DIST_RFACC_FILE_HEAD = "prcpc_";
 const string CONST_DIST_FLOW_FILE_HEAD = "flow_";
 
 const string CONST_DIST_PET_FILE_HEAD = "pet_";
-const string CONST_DIST_ET_FILE_HEAD = "et_";
+const string CONST_DIST_AET_FILE_HEAD = "aet_";
 const string CONST_DIST_INTERCEPTION_FILE_HEAD = "intcp_";
 const string CONST_DIST_SNOWMELT_FILE_HEAD = "sm_";
 
@@ -144,23 +144,23 @@ enum class simulationType
 //불포화 투수계수 산정 방법
 enum class unSaturatedKType //pyGRMdll.py 에 있는 구조체와 내용 맞춘다. 순서도 맞게 해야 한다.
 {
-	Constant = 0,
-	Linear = 1,
-	Exponential = 2,
-	None = 3
+	Constant = 1,
+	Linear = 2,
+	Exponential = 3,
+	None = 0
 };
 
 enum class PETmethod  //pyGRMdll.py 에 있는 구조체와 내용 맞춘다. 순서도 맞게 해야 한다.
 {
-	PenmanMonteith = 1,
+	FPM = 1, //FAOPenmanMonteith
 	BlaneyCriddle = 2,
 	Hamon = 3,
 	PriestleyTaylor = 4,
 	Hargreaves = 5,
-	JensenHaise = 6,	
-	Turc = 7,
-	Constant = 8,
-	UserData = 9,
+	//JensenHaise = 6,	
+	//Turc = 7,
+	//Constant = 8,
+	UserET = 9, // PET 혹은 AET
 	None = 0
 };
 
@@ -188,6 +188,8 @@ enum class cellFlowType
     ChannelNOverlandFlow,
     None
 } ;
+
+
 
 enum class soilTextureCode
 {
@@ -234,6 +236,20 @@ enum class landCoverCode
 	None
 };
 
+enum class whatWeatherData
+{	
+	Precipitation,
+	TempMax,
+	TempMin,
+	DaytimeLength,
+	DewPointTemp,
+	SolarRad,
+	WindSpeed, 
+	UserET,
+	SnowpackTemp,
+	None
+};
+
 
 typedef struct _projectFileTable
 {
@@ -268,6 +284,7 @@ typedef struct _projectFileFieldName
 	const string FlowDirectionFile = "FlowDirectionFile";
 	const string FlowDirectionType = "FlowDirectionType";
 	const string FlowAccumFile = "FlowAccumFile";
+	const string DEMFile = "DEMFile"; // v2025
 	const string StreamFile = "StreamFile";
 	const string ChannelWidthFile = "ChannelWidthFile";
 	const string InitialSoilSaturationRatioFile = "InitialSoilSaturationRatioFile";
@@ -313,10 +330,22 @@ typedef struct _projectFileFieldName
 	const string SolarRadiationInterval_min = "SolarRadiationInterval_min";
 	const string SolarRadiationDataFile = "SolarRadiationDataFile";
 
-	//const string SnowPackTemperatureDataType = "SnowPackTemperatureDataType";
+	// v2025=====================================================
+	const string DewPointTemperatureDataFile = "DewPointTemperatureDataFile";
+	const string DewPointTemperatureInterval_min = "DewPointTemperatureInterval_min";
+
+	const string WindSpeedDataFile = "WindSpeedDataFile";
+	const string WindSpeedInterval_min = "WindSpeedInterval_min";
+
+	const string UserPETDataFile = "UserPETDataFile";
+	const string UserAETDataFile = "UserAETDataFile";
+	const string UserETDataInterval_min = "UserETDataInterval_min";
+
 	const string SnowPackTemperatureInInterval_min = "SnowPackTemperatureInterval_min";
 	const string SnowPackTemperatureDataFile = "SnowPackTemperatureDataFile";
-
+	const string LatitudeTOP_degree = "LatitudeTOP_degree";  //위도. 남반구에서는 - 값
+	// v2025===================================================
+	
 	//==========================
 	const string MaxDegreeOfParallelism = "MaxDegreeOfParallelism";
 	const string SimulationStartingTime_01 = "SimulStartingTime"; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용
@@ -352,6 +381,8 @@ typedef struct _projectFileFieldName
 	const string MakeRfDistFile = "MakeRfDistFile";
 	const string MakeRFaccDistFile = "MakeRFaccDistFile";
 	const string MakeFlowDistFile = "MakeFlowDistFile";
+	const string MakePETDistFile = "MakePETDistFile";
+	const string MakeAETDistFile = "MakeAETDistFile";
 	const string WriteLog = "WriteLog";
 	// SubWatershedSettings table
 	const string ID_SWP = "ID";
@@ -372,7 +403,6 @@ typedef struct _projectFileFieldName
 	const string CalCoefHydraulicK = "CalCoefHydraulicK";
 	const string CalCoefSoilDepth = "CalCoefSoilDepth";
 
-	// continuous================
 	const string InterceptionMethod = "InterceptionMethod";
 	const string PETMethod = "PETMethod";
 	const string ETCoef = "ETCoef";
@@ -490,6 +520,7 @@ typedef struct _swsParameters  //pyGRMdll.py 에 있는 구조체와 내용 맞춘다. 순서�
 	// continuous==============
 	InterceptionMethod interceptMethod = InterceptionMethod::None;
 	PETmethod potentialETMethod = PETmethod::None;
+	//double latidute_degreeC = -100.0;
 	double etCoeff = -1.0;
 	SnowMeltMethod snowMeltMethod = SnowMeltMethod::None;
 	double tempSnowRain = 0.0; // 강수가 강설로 되는 온도
@@ -528,15 +559,15 @@ typedef struct _wpSimData {
 	map<int, double> prcpUpWSAveForDt_mm; // 현재 wp 상류에 대해 dt(계산시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
 	map<int, double> prcpUpWSAveForPT_mm;// 현재 wp 상류에 대해 출력시간 간격) 동안의 평균강우량. 원시자료를 이용해서 계산된값.[mm]
 	map<int, double> prcpUpWSAveTotal_mm;//현재 watch point 상류의 평균강우량의 누적값[mm]
-	map<int, double> prcpWPGridForPT_mm; // Watchpoint 격자에 대한 출력시간 간격 동안의 누적강우량. 원시자료를 이용해서 계산된값.[mm]
+	map<int, double> prcpWPGridForPdT_mm; // Watchpoint 격자에 대한 출력시간 간격 동안의 누적강우량. 원시자료를 이용해서 계산된값.[mm]
 	map<int, double> prcpWPGridTotal_mm; // Watchpoint 격자에 대한 누적강우량[mm]
 	map<int, double> q_cms_print;  // 이 값은 writeDischargefile에서 계산되고, writeWPoutputFile에서 사용된다.
-	map<int, double> Q_sumPTforAVE_m3; // Watchpoint 격자에 대한 전체유량[m3]. 출력시간 간격동안의 누적값. 출력 간격 평균값(cms) 계산할때 사용됨
+	map<int, double> Q_sumPdTforAVE_m3; // Watchpoint 격자에 대한 전체유량[m3]. 출력시간 간격동안의 누적값. 출력 간격 평균값(cms) 계산할때 사용됨
 	map<int, double> Q_sumPTforAVE_m3_print; // 이 값은 writeDischargefile에서 계산되고, writeWPoutputFile에서 사용된다.
 
-	map<int, double> pet_sumPT_mm; // 출력 기간 동안의 누적 값. 2022.10.26
-	map<int, double> aet_sumPT_mm; // 출력 기간 동안의 누적 값. 2022.10.26
-	map<int, double> snowM_sumPT_mm; // 출력 기간 동안의 누적 값. 2022.10.26
+	map<int, double> pet_grid_sumPdT_mm; // 출력 기간 동안의 격자 누적 값. 2022.10.26
+	map<int, double> aet_grid_sumPdT_mm; // 출력 기간 동안의 격자 누적 값. 2022.10.26
+	map<int, double> snowM_grid_sumPdT_mm; // 출력 기간 동안의 격자 누적 값. 2022.10.26
 
 	map<int, int>cvCountAllup;
 } wpSimData;
@@ -603,7 +634,7 @@ typedef struct _flowControlCellAndData
 	map<int, vector<timeSeries>> inputFlowDataFCType2_m3Ps; //<idx, data>, 분단위 FCType2에 대한 자료, Sink or Source flow 만 입력
 	map<int, vector<timeSeries>> inputFlowDataFCType3_m3Ps; //<idx, data>, 분단위 FCType3에 대한 자료, Sink or Source flow 만 입력
 	map<int, int> curDorder;// <idx, order>현재 적용될 데이터의 순서
-	map<int, double> inflowSumPT_m3; // 출력 기간동안 누적 유입량 m3, 출력기간동안의 평균 유입량[cms] 계산시 사용
+	map<int, double> inflowSumPdT_m3; // 출력 기간동안 누적 유입량 m3, 출력기간동안의 평균 유입량[cms] 계산시 사용
 } flowControlCellAndData;
 
 typedef struct _soilTextureInfo
@@ -661,9 +692,9 @@ typedef struct _grmOutFiles
 	string ofpPRCPDistribution;
 	string ofpPRCPAccDistribution;
 	string ofpFlowDistribution;
-
 	string ofpPETDistribution;
-	string ofpETDistribution;
+	string ofpAETDistribution;
+
 	string ofpINTCPDistribution;
 	string ofpSnowMDistribution;
 
@@ -719,9 +750,11 @@ typedef struct _cvStreamAtt
 
 typedef struct _cvpos
 {
-	int xCol;
-	int yRow;
+	int xCol;  // 좌상단 0 부터 시작
+	int yRow; // 좌상단 0 부터 시작
 	int wsid = -1; //유역 ID, 해당 raster cell의 값
+	int intLat_degree = -9999; // 각셀의 위도.배열 인덱스가, cv 인덱스와 같게 한다.남반구는 - 값
+	double lat_rad = -9999;
 } cvpos;
 
 typedef struct _cvAtt
@@ -755,7 +788,7 @@ typedef struct _cvAtt
 	double rfiRead_After_iniLoss_mPsec = 0.0;//현재 강우입력자료에서 읽은 강우강도 m/s rfi. 강우의 초기손실 적용 후.
 	double rfiRead_tm1_mPsec = 0.0;//이전 시간의 강우강도 m/s rfi.
 	double rfEff_dt_m = 0.0;//dt시간 동안의 유효강우량
-	double rf_dtPrint_m = 0.0;//출력 시간간격 동안의 누적 강우량[m]
+	double rf_PDT_m = 0.0;//출력 시간간격 동안의 누적 강우량[m]
 	double rfAccRead_fromStart_mm = 0.0;//전체 기간의 누적 강우량[mm]
 	double soilWaterC_m = 0.0;//토양수분함량. t 시간까지의 누적 침투량[m], 토양깊이가 아니고, 수심이다.
 	double soilWaterC_tm1_m = 0.0;//토양수분함량. t-1 시간까지의 누적 침투량[m]. 수심
@@ -797,20 +830,26 @@ typedef struct _cvAtt
 	flowControlType fcType2 = flowControlType::None;//Sink와 Source만 설정. 다른 속성과 중복설정하기 위한 것
 	flowControlType fcType3 = flowControlType::None;//Sink와 Source만 설정. 다른 속성과 중복설정하기 위한 것
 
+	double tempMaxPday = -9999.0; // degreeC
+	double tempMinPday = -9999.0;// degreeC
+	double solarRad_MJpM2 = -1.0; // 기상청 일사량 단위는 MJ/m^2 이다. 2024.11.25
+	double daytimeLength_hrs = -1.0;
+	double dewPointTemp = -9999;// 이슬점 온도 degreeC
+	double windSpeed_mps = -1; // 풍속 m/s
+	double userET_mm = -9999;
+
 	InterceptionMethod intcpMethod;
 	double canopyR = 0.0;
 	double intcpMaxWaterCanopy_m = 0.0;//현재 CV 토지피복에서의 최대 차단량 [m].
 	double intcpAcc_m = 0.0; // 누적 차단량
 
-	double tempMaxPday = -9999.0;
-	double tempMinPday = -9999.0;
-	double solarRad_MJperM2 = -1.0;  // 기상청 일사량 단위는 MJ/m^2 이다. 2024.11.25
-	double daytimeLength_hrs = -1.0;
-
 	PETmethod petMethod;
+	//double lat_rad = -100.0;  // 위도 radian. 남반구에서는 - 값
+	double pet_mPdt = 0.0; //잠재 증발산량
+	double pet_PDT_m = 0.0; // 출력 시간 간격 동안이 누적 잠재증발산량.
 	double aet_mPdt = 0.0; //실제 증발산량
 	double aet_LS_mPdt = 0.0; // 2022.11.30. 지면에서의 실제 증발산량. aet에서 aet_canopy를 제외한 값. 지표면 수심과 토양 수분의 손실 계산에 이용됨.
-	double pet_mPdt = 0.0; //잠재 증발산량
+	double aet_PDT_m = 0.0; // 출력 시간 간격 동안이 누적 실제증발산량.
 	double etCoef = 0.0;
 
 	SnowMeltMethod smMethod;
@@ -838,6 +877,7 @@ typedef struct _projectFile
 	string fpnSlope = "";
 	string fpnFD = "";
 	string fpnFA = "";
+	string fpnDEM = "";
 	string fpnStream = "";
 	string fpnChannelWidth = "";
 	string fpniniSSR = "";
@@ -873,21 +913,38 @@ typedef struct _projectFile
 	string fpnTempMinData = "";
 	int tempMinInterval_min = -1;
 	
-	weatherDataType daytimeLengthDataType = weatherDataType::None;
-	string fpnDaytimeLengthData = "";
-	int daytimeLengthDataInterval_min = -1;
+	weatherDataType DTLDataType = weatherDataType::None;// day time length
+	string fpnDTLData = "";// day time length
+	int DTLDataInterval_min = -1; // day time length
 
 	weatherDataType solarRadDataType = weatherDataType::None;
 	string fpnSolarRadData = "";
 	int solarRadInterval_min = -1;
 
-	string fpnDaytimeLengthRatioData = "";
+	//string fpnDaytimeLengthRatioData = "";
 	string fpnBlaneyCriddleK = "";
+
+	// v2025 ===================================
+	weatherDataType dewPointTempDataType = weatherDataType::None;
+	string fpnDewPointTemp = "";
+	int dewPointTempInterval_min = -1;
+
+	weatherDataType windSpeedDataType = weatherDataType::None;
+	string fpnWindSpeed = "";
+	int windSpeedInterval_min = -1;
+
+	weatherDataType userPETDataType = weatherDataType::None;
+	string fpnUserPET = "";
+	weatherDataType userAETDataType = weatherDataType::None;
+	string fpnUserAET = "";
+	int userETInterval_min = -1;
+	// v2025 ===================================
 
 	weatherDataType snowpackTempDataType = weatherDataType::None;
 	string fpnSnowpackTempData = "";
 	int snowpackTempInterval_min = -1;
-	// =====================
+	double latitudeTOP_degree = -9999.0;  //위도. 남반구에서는 - 값
+	// continuous =====================
 
 	int mdp = 0;
 	string simStartTime = ""; // 년월일의 입력 포맷은  2017-11-28 23:10 으로 사용. 실시간에서는 yyyymmddHHMM 포맷
@@ -910,6 +967,9 @@ typedef struct _projectFile
 	int makeRfDistFile = 0;// true : 1, false : -1
 	int makeRFaccDistFile = 0;// true : 1, false : -1
 	int makeFlowDistFile = 0;// true : 1, false : -1
+	int makePETDistFile = 0;// true : 1, false : -1
+	int makeAETDistFile = 0;// true : 1, false : -1
+
 	GRMPrintType printOption = GRMPrintType::None;
 	int printAveValue = 0;// true : 1, false : -1 // 출력기간 평균 값 출력 여부
 	int dtPrintAveValue_min = 0;
@@ -928,12 +988,13 @@ typedef struct _projectFile
 
 	int isDateTimeFormat = 0;// true : 1, false : -1
 	int isinletExist = 0;// true : 1, false : -1
+	int demFileApplied = 0; // true : 1, false : -1
 	int streamFileApplied = 0;
 	int cwFileApplied = 0;
 	int icfFileApplied = 0;
 	int issrFileApplied = 0;
 	int makeASCorIMGfile = 0;
-	int makeRFraster = 0;
+	//int makeRFraster = 0;
 
 	cpu_gpu_info cpusi; //MP 수정
 	int deleteAllFilesExceptDischargeOut = -1;
@@ -947,18 +1008,28 @@ typedef struct _thisSimulation
 	int grmStarted = 0;
 	int stopSim = 0;
 	int dataNumTotal_rf = 0;
+	int num_FA = 0; //값이 서로 다른 흐름누적수 값의 개수
 	double rfAveForDT_m = 0;
-	double rfAveSumAllCells_PT_m = 0; // 출력기간 동안에서의 도메인 내에 있는 모든 셀 값의 합
-	double rfAveSumAllCells_PTave_m = 0; // 출력기간 동안에서의 도메인 내에 있는 모든 셀 값의 합
+	double rfAveSumAllCells_PdT_m = 0; // 출력기간 동안에서의 도메인 내에 있는 모든 셀 값의 합
+	double rfAveSumAllCells_PdTave_m = 0; // 출력기간 동안에서의 도메인 내에 있는 모든 셀 값의 합
 	double rfAveSumAllCells_PT_m_bak = 0; // 출력기간 동안에서의 도메인 내에 있는 모든 셀 값의 합 백업
 	double rfAveSumAllCells_PTave_m_bak = 0; // 출력기간 동안에서의 도메인 내에 있는 모든 셀 값의 합 백업
 	double rfiSumAllCellsInCurRFData_mPs; //rfi : rf intensity
 
-	int dataNumTotal_tempMax = 0;
-	int dataNumTotal_tempMin = 0;
-	int dataNumTotal_solarR = 0;
-	int dataNumTotal_sunDur = 0;
-	int dataNumTotal_snowPackTemp = 0;
+	// 증발산, 융설 계산에 사용되는 파일 자료
+	int wdUsed_tempMax = -1;// true : 1, false : -1
+	int wdUsed_tempMin = -1;// true : 1, false : -1
+	int wdUsed_DTL = -1;// true : 1, false : -1 // daytime length
+	int wdUsed_solarR = -1;// true : 1, false : -1
+	int wdUsed_dewPointTemp = -1;// true : 1, false : -1
+	int wdUsed_windSpeed = -1;// true : 1, false : -1
+	int wdUsed_userET = -1;// true : 1 이면 PET, 2이면 AET ; false : -1 
+	//int wdUsed_userAET = -1;// true : 1, false : -1
+	int wdUsed_snowPackTemp = -1;// true : 1, false : -1
+	//int wdUsed_dayTimeHoursR = -1;
+	int isUsed_BlaneyCriddleK_File = -1;
+	int isUsed_DEM = -1;// true : 1, false : -1
+	int isUsed_Latitude = -1;// true : 1, false : -1
 
 	int dtsec = 0;
 	int dtsecUsed_tm1 = 0;
@@ -977,11 +1048,13 @@ typedef struct _thisSimulation
 
 	int runByAnalyzer = 0;
 
-	COleDateTime time_thisSimStarted;
-	double vMaxInThisStep=-9999.0;
+	std::tm time_thisSimStarted; //MP 수정
+	double vMaxInThisStep=-9999.0; // m/s
 
+	//int tCurYear = 0;
 	int tCurMonth = 0;
 	int tCurDay = 0;
+	int tDayOfYear = 0;
 	double laiRatioCurDay = 0.0;
 
 	int showFileProgress = 0; // true : 1, false : -1
@@ -1014,8 +1087,10 @@ void calOverlandFlow(int i, double hCVw_tp1,
 	double effDy_m);
 void calPET_BlaneyCriddle(int i);
 void calPET_Hamon(int i);
+void calPET_FPM(int i);
 void calPET_PriestleyTaylor(int i);
 void calPET_Hargreaves(int i);
+void calPET_userET(int i, int dataInterval_min, int whatUserData);
 
 void calReservoirOperation(int i, double nowTmin);
 void calReservoirOutFlowInReservoirOperation(int i,
@@ -1040,7 +1115,7 @@ int deleteAllOutputFiles();
 
 // 프로젝트 파일과 로그파일도 지워진다. 주의 필요
 int deleteAllFilesExceptDischarge();
-
+double getActualVP_Ea(int i); // 실제 증기압
 vector<int> getAllUpstreamCells(int startingidx);
 double getChCSAatCVW(int i);
 double getChCSAbyFlowDepth(double LRBaseWidth, 
@@ -1066,12 +1141,15 @@ int getDTsec(double dx,
 	int dtMin_min);
 double getinfiltrationForDtAfterPonding(int i, int dtSEC,
 	double CONSTGreenAmpt, double Kapp);
-projectfilePathInfo getProjectFileInfo(string fpn_prj);
 flowDirection8 getFlowDirection(int fdirV, 
 	flowDirectionType fdType);
-double getOverlandFlowDepthCVw(int i);
 double getMeanRFValueToPrintForAllCells(double cinterp); // 도메인 내에 있는 모든 셀의 평균 값 출력을 위한 인터폴레이션 값
 double getMeanRFValueToPrintAveForAllCells(double cinterp);
+double getOverlandFlowDepthCVw(int i);
+projectfilePathInfo getProjectFileInfo(string fpn_prj);
+double getPsychroConst(int i); // psychrometric constant
+double getRa(double lat_rad); //extraterrestrial radiation MJ/m^2/day
+double getRn(int i, double ea); // net radiation MJ/m^2/day, ea : actual 증기압
 weatherDataType getWeatherDataTypeByDataFile(string fpn_wdata);
 void grmHelp();
 
@@ -1101,10 +1179,15 @@ void makeIMG_ssr();
 void makeIMG_rf();
 void makeIMG_rfacc();
 void makeIMG_flow();
+void makeIMG_pet();
+void makeIMG_aet();
+
 void makeASC_ssr();
 void makeASC_rf();
 void makeASC_rfacc();
 void makeASC_flow();
+void makeASC_pet();
+void makeASC_aet();
 
 int makeNewOutputFiles();
 int makeRasterOutput(int nowTmin);
@@ -1115,7 +1198,7 @@ int outputManager(int nowTsec); // , int nowRForder);
 vector<weatherData> readAndSetWeatherData(string fpn_in_wd, weatherDataType wdType,
 	int dataInterval_min, string dataString);
 int readDomainFaFileAndSetupCV();
-int readSlopeFdirStreamCwCfSsrFileAndSetCV();
+int readDomainAddtionalRasterDataAndSetCV();
 int readLandCoverFile();
 int readLandCoverFileAndSetCVbyVAT();
 int readSoilTextureFile();
@@ -1146,21 +1229,27 @@ int setCVbySDConstant();
 int setCVRF(int order);
 void setCVRFintensityAndDTrf_Zero();
 
-int setCVTempMax(int order);
-void setCVTempMaxZero();
-int setCVTempMin(int order);
-void setCVTempMinZero();
-int setCVSolarRad(int order);
-void setCVSolarRZero();
-int setCVDayTimeLength(int order);
-void setCVDayTimeLengthZero();
-int setCVSnowpackTemp(int order);
-void setCVSnowpackTempZero();
+int assignWDtoCV(int cvidx, whatWeatherData wwd, double wdValue);
+int setCVweatherData(int order, string dataString, weatherDataType wdType,
+	weatherData* vectWd, whatWeatherData wwd);
+
+//int setCVtempMax(int order);
+//int setCVtempMin(int order);
+//int setCVdaytimeLength(int order);
+//int setCVsolarRad(int order);
+//int setCVdewPointTemp(int order);
+//int setCVwindSpeed(int order);
+//int setCVuserPET(int order);
+//int setCVsnowPackTemp(int order);
 
 void setCVStartingCondition(double iniflow);
 int setDomainAndCVBasicinfo();
 int setFlowNetwork();
 int setLAIRatio();
+
+void setNoFluxCVCH(int i);
+void setNoFluxCVOF(int i);
+
 int setRainfallData();
 int setRasterOutputArray();
 
@@ -1169,9 +1258,13 @@ int setRasterOutputArray();
 int setTemperatureMax();
 int setTemperatureMin();
 int setDaytimeLength();
-int setDaytimeHoursRatio();
+int setSunDurationRatioData(); 
 int setSnowPackTemp();
 int setSolarRadiation();
+
+int setDewPointTemp();
+int setWindSpeed();
+int setUserET(int dataType); //dataType : PET (1), AET (2)
 
 int setupAndStartSimulation();
 int setupByFAandNetwork();
@@ -1214,12 +1307,13 @@ inline double  getinterpolatedVLinear(double firstV,
 	double nextV, double cinterp);
 inline double rfintensity_mPsec(double rf_mm, 
 	double dtrf_sec);
-inline void setNoFluxCVCH(int i);
-inline void setNoFluxCVOF(int i);
+
 inline void setNoInfiltrationParameters(int i);
 inline void setWaterAreaInfiltrationPars(int i);
 inline double soilSSRbyCumulF(double cumulinfiltration,
 	double effSoilDepth);
+
+
 
 inline double vByManningEq(double hydraulicRaidus,
 	double slope, double nCoeff)
@@ -1251,7 +1345,7 @@ public:
 	double cellSize = 0;
 	string FDtype = "";
 
-	grmWSinfo(string fdirType, string fpnDomain,
+	grmWSinfo(string fdirType, string fpnDEM, string fpnDomain,
 		string slopeFPN, string fpnFdir, string fpnFac,
 		string fpnStream = "", string fpnLandCover = "",
 		string fpnSoilTexture = "", string fpnSoilDepth = "",

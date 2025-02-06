@@ -48,12 +48,14 @@ The model indroduction and the download guidelines are wiki page at https://gith
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bug fix for numeric value includes comma.   
 2024.08. Revision in FC module for maximum storage during flood season.  
 2024.11. Bugs and errors in calculating evapotranspiration were revised.  
+2025.02. GRM v2025 was released.   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Potential evapotranspiration methods were revised (the units, parameter estimation methods, etc.).   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; FAO Penman Monteith method was added.   
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Potential and actual evapotranspiration raster outputs fuction were added.    
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Cumulative bug fixed.
 
 
 
 
-
-  
-       
 
    

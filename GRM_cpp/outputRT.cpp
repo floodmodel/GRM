@@ -103,6 +103,8 @@ int changeOutputFileDisk(char targetDisk)
     ofs.ofpPRCPDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpPRCPDistribution);
     ofs.ofpPRCPAccDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpPRCPAccDistribution);
     ofs.ofpFlowDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpFlowDistribution);
+    ofs.ofpPETDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpPETDistribution);
+    ofs.ofpAETDistribution = IO_Path_ChangeDrive(targetDisk, ofs.ofpAETDistribution);
     isnormal = 1;
     return isnormal;
 }

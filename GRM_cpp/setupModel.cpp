@@ -7,6 +7,7 @@ using namespace std;
 
 extern fs::path fpnLog;
 extern projectFile prj;
+extern thisSimulation ts;
 
 extern domaininfo di;
 extern int** cvais;
@@ -37,7 +38,7 @@ int setDomainAndCVBasicinfo()
 	if (readDomainFaFileAndSetupCV() == -1) { return -1; }
 	if (checkWPpositions() == -1) { return -1; }
 	if (checkWeatherDataByDomain() == -1) { return -1; }
-	if (readSlopeFdirStreamCwCfSsrFileAndSetCV() == -1) { return -1; }
+	if (readDomainAddtionalRasterDataAndSetCV() == -1) { return -1; }
 	if (prj.lcDataType == fileOrConstant::File) {
 		if (readLandCoverFileAndSetCVbyVAT() == -1) { return -1; }
 	}
@@ -65,21 +66,22 @@ int checkWPpositions() {
 		int cx = prj.wps[i].wpColX;
 		int ry = prj.wps[i].wpRowY;
 		if (cx<0 || cx>di.nCols - 1) {
-			writeLog(fpnLog, "ERROR : The column index of the watch point ["
+			writeLogString(fpnLog, "ERROR : The column index of the watch point ["
 				+ prj.wps[i].wpName + "] is out of range.\n", 1, 1);
 			return -1;
 		}
 		if (ry<0 || ry>di.nRows - 1) {
-			writeLog(fpnLog, "ERROR : The row index of the watch point ["
+			writeLogString(fpnLog, "ERROR : The row index of the watch point ["
 				+ prj.wps[i].wpName + "] is out of range.\n", 1, 1);
 			return -1;
 		}
 		if (cvais[cx][ry] == -1) {
-			writeLog(fpnLog, "ERROR : The watch point ["
+			writeLogString(fpnLog, "ERROR : The watch point ["
 				+ prj.wps[i].wpName + "] is out of valid simulation region.\n", 1, 1);
 			return -1;
 		}
 	}
+    return 1;
 }
 int checkWeatherDataByDomain() {
 	if (compareWeatherDataWithDomain(prj.fpnRainfallData, prj.rfDataType, "Precipitation") == -1) {
@@ -93,7 +95,7 @@ int checkWeatherDataByDomain() {
 		if (compareWeatherDataWithDomain(prj.fpnTempMinData, prj.tempMinDataType, "Minimum temperature") == -1) {
 			return -1;
 		}
-		if (compareWeatherDataWithDomain(prj.fpnDaytimeLengthData, prj.daytimeLengthDataType, "Daytime length") == -1) {
+		if (compareWeatherDataWithDomain(prj.fpnDTLData, prj.DTLDataType, "Daytime length") == -1) {
 			return -1;
 		}
 		if (compareWeatherDataWithDomain(prj.fpnSolarRadData, prj.solarRadDataType, "Solar radiation") == -1) {
@@ -109,6 +111,7 @@ int checkWeatherDataByDomain() {
 		}
 	}
 	// continuous =================
+    return 1;
 }
 
 
@@ -117,7 +120,7 @@ int compareWeatherDataWithDomain(string fpn_in_wd, weatherDataType wdType,
 
 	if (wdType == weatherDataType::Mean_DividedArea) {
 		vector<int> wsids;
-		ifstream txtFile(fpn_in_wd);
+		ifstream txtFile(lower(fpn_in_wd));
 		string aline;
 		getline(txtFile, aline); // 첫줄만 읽는다
 		aline = trim(aline);
@@ -127,7 +130,7 @@ int compareWeatherDataWithDomain(string fpn_in_wd, weatherDataType wdType,
 			string err = "ERROR : The number of " + dataString
 				+ " data column is not equal to the number of sub-domain ids.\n"
 				+ "  "+ dataString +" data file name : " + fpn_in_wd + "\n";
-			writeLog(fpnLog, err, 1, 1);
+			writeLogString(fpnLog, err, 1, 1);
 			return -1;
 		}
 
@@ -136,7 +139,7 @@ int compareWeatherDataWithDomain(string fpn_in_wd, weatherDataType wdType,
 				string err = "ERROR : Domain id [" + to_string(wsids[i])
 					+ "] from "+ dataString +" data file was not found in sub-domain ids.\n"
 					+ "  " + dataString + " data file name : " + fpn_in_wd + "\n";
-				writeLog(fpnLog, err, 1, 1);
+				writeLogString(fpnLog, err, 1, 1);
 				return -1;
 			}
 		}		
@@ -151,9 +154,9 @@ int initWPinfos()
 	wpSimValue.prcpUpWSAveForDt_mm.clear();
 	wpSimValue.prcpUpWSAveForPT_mm.clear();
 	wpSimValue.prcpUpWSAveTotal_mm.clear();
-	wpSimValue.prcpWPGridForPT_mm.clear();
+	wpSimValue.prcpWPGridForPdT_mm.clear();
 	wpSimValue.prcpWPGridTotal_mm.clear();
-	wpSimValue.Q_sumPTforAVE_m3.clear();
+	wpSimValue.Q_sumPdTforAVE_m3.clear();
 	wpSimValue.q_cms_print.clear();
 	wpSimValue.wpCVidxes.clear();
 
@@ -192,7 +195,7 @@ int setupByFAandNetwork()
         }
         // FA별 idx 저장
         aisFA[curfa].push_back(i);
-        if (getVectorIndex(fas, curfa) == -1) {
+        if (getVectorIndex(fas, curfa) == -1) { // 현재 fa 값이 저장되어 있지 않다면, 추가한다.
             fas.push_back(curfa);
         }
         //셀별 하류 wp 정보 초기화
@@ -206,6 +209,7 @@ int setupByFAandNetwork()
         copy(av.begin(), av.end(), cvaisToFA[curFA]);
         faCount[curFA] = av.size();
     }
+
 	
     // cross section 정보 wsid 오류 확인
     if (prj.css.size() > 0) {
@@ -221,7 +225,7 @@ int setupByFAandNetwork()
                 //저장된 css 키가 최하류 wsid 리스트에 없다면,
                 string outstr = "ERROR : [" + to_string(i) + "] is not the most downstream watershed ID (it has the downstream watershedID "
 					+ to_string(di.wsn.wsidNearbyDown[i])+").\n";
-                writeLog(fpnLog, outstr, 1, 1);
+                writeLogString(fpnLog, outstr, 1, 1);
                 return -1;
             }
         }
@@ -341,7 +345,7 @@ int updateCVbyUserSettings()
 				else {
 					cstype = "Unknown";
 				}
-                writeLog(fpnLog, "ERROR : Cross section type("+ cstype +") is invalid. Current watershed ID = "+ to_string(wid)
+                writeLogString(fpnLog, "ERROR : Cross section type("+ cstype +") is invalid. Current watershed ID = "+ to_string(wid)
 					+ ", most downstream ID = "+to_string(mdwsid)+" \n", 1, 1);
                 return -1;
             }

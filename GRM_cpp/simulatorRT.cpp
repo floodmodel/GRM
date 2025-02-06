@@ -49,7 +49,7 @@ int startSimulationRT()
                 Sleep(2000);// 2초 지연 적절함
             }
             if (ts.stopSim == 1) {
-                writeLog(fpnLog, "Real time simulation was stopped.\n", 1, 1);
+                writeLogString(fpnLog, "Real time simulation was stopped.\n", 1, 1);
                 return 1;
             }
             rfOrder = rfOrder + 1; // 이렇게 하면 마지막 레이어 적용
@@ -93,7 +93,7 @@ int startSimulationRT()
                         }
                         fccds.curDorder[idx] += 1;
                         if (ts.stopSim == 1) {
-                            writeLog(fpnLog, "Real time simulation was stopped.\n", 1, 1);
+                            writeLogString(fpnLog, "Real time simulation was stopped.\n", 1, 1);
                             return 1;
                         }
                     }
@@ -105,7 +105,7 @@ int startSimulationRT()
 			string tElapsedStr = timeElaspedToDateTimeFormat2(prj.simStartTime,
 				nowTsec, timeUnitToShow::toM,
 				dateTimeFormat::yyyymmddHHMMSS);
-			tm tCurDate = stringToDateTime(tElapsedStr);
+			tm tCurDate = stringToDateTime(tElapsedStr, true);
 			ts.tCurMonth = tCurDate.tm_mon;
 			ts.tCurDay = tCurDate.tm_mday;
 		}
@@ -129,16 +129,17 @@ int startSimulationRT()
         if (ts.stopSim == 1) { break; }
     }
     if (ts.stopSim == 1) {
-        writeLog(fpnLog, "Real time simulation was stopped.\n", 1, 1);
+        writeLogString(fpnLog, "Real time simulation was stopped.\n", 1, 1);
         return 1;
     }
     else {
-        COleDateTime  timeNow = COleDateTime::GetCurrentTime();
-        COleDateTimeSpan tsTotalSim = timeNow - ts.time_thisSimStarted;
-        writeLog(fpnLog, "Simulation was completed. Run time: "
-            + to_string(tsTotalSim.GetHours()) + " h "
-            + to_string(tsTotalSim.GetMinutes()) + " m "
-            + to_string(tsTotalSim.GetSeconds()) + " s.\n", 1, 1);
+        tm tnow = getCurrentTimeAsLocal_tm(); //MP 수정
+        std::tm tsTotalSim = timeDifferecceTM_DHMS(ts.time_thisSimStarted, tnow);
+        writeLogString(fpnLog, "Simulation was completed. Run time: "
+            + to_string(tsTotalSim.tm_hour) + "h "
+            + to_string(tsTotalSim.tm_min) + "m "
+            + to_string(tsTotalSim.tm_sec) + "s.\n", 1, 1);
+
         return 1;
     }
     return 1;

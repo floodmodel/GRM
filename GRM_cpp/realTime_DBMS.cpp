@@ -86,6 +86,6 @@ void clear_DBMS_Table_Qwatershed(string strName)
     // intAffectedRecords = oSQLCMD.ExecuteNonQuery();
     string strMsg = "[Q_CAL] Table에서 " + strName + " 유역 " 
         + to_string(intAffectedRecords) + ":건 Data 삭제됨. 초기화 완료.";
-    writeLog(fpnLog, strMsg, 1, 1);
+    writeLogString(fpnLog, strMsg, 1, 1);
     add_Log_toDBMS(strName, strMsg);
 }

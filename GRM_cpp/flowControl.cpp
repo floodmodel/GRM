@@ -20,7 +20,7 @@ int updateFCCellinfoAndData()
 	fccds.inputFlowDataFCType2_m3Ps.clear();
 	fccds.inputFlowDataFCType3_m3Ps.clear();
     fccds.curDorder.clear();
-	fccds.inflowSumPT_m3.clear();
+	fccds.inflowSumPdT_m3.clear();
     prj.fcs.clear();
 	
 	for (int i = 0; i < fcinfos.size(); ++i) {  // 여기fcinfos에서는 일련번호가 key
@@ -34,7 +34,7 @@ int updateFCCellinfoAndData()
 				fccds.cvidxsinlet.push_back(aidx);
 			}
 			else {
-				fccds.inflowSumPT_m3[aidx] = 0.0; // inlet 이 아닌 모든 fc 셀에 대해서 유입량 합 0으로 초기화.
+				fccds.inflowSumPdT_m3[aidx] = 0.0; // inlet 이 아닌 모든 fc 셀에 대해서 유입량 합 0으로 초기화.
 			}
 		}
 		else {
@@ -58,10 +58,10 @@ int updateFCCellinfoAndData()
 				|| afc.fcType == flowControlType::ReservoirOutflow
 				|| afc.fcType == flowControlType::SinkFlow
 				|| afc.fcType == flowControlType::SourceFlow) {
-				if (afc.fpnFCData == "" || _access(afc.fpnFCData.c_str(), 0) != 0) {
+				if (afc.fpnFCData == "" || fs::exists(lower(afc.fpnFCData)) != true) {//MP 수정 _access 대신 fs::exists 사용
 					string outstr = "ERROR : Flow control data file (" + afc.fpnFCData
 						+ ") is invalid.\n";
-					writeLog(fpnLog, outstr, 1, 1);
+					writeLogString(fpnLog, outstr, 1, 1);
 					return -1;
 				}
 				vector<double> vs;
@@ -69,7 +69,7 @@ int updateFCCellinfoAndData()
 				if (vs.size() == 0) {
 					string outstr = "WARNNING : Flow control data file (" + afc.fpnFCData
 						+ ") has no value.\n";
-					writeLog(fpnLog, outstr, 1, 1);
+					writeLogString(fpnLog, outstr, 1, 1);
 					if (ts.enforceFCautoROM == -1) {
 						return -1;
 					}
@@ -376,23 +376,23 @@ void calReservoirOperation(int i, double nowTmin)
 	maxStorageApp = afci.NormalHighStorage_m3;
 	if (prj.isDateTimeFormat == 1) { // RestrictedStorage_m3>0 인 경우에만 적용
 		//if (afci.RestrictedStorage_m3 > 0) { // 주석처리. 2024.08.14
-			if (ts.tCurMonth >= afci.restricedP_SM
-				&& ts.tCurDay >= afci.restricedP_SD) {
-				if (ts.tCurMonth <= afci.restricedP_EM
-					&& ts.tCurDay <= afci.restricedP_ED) {
-					//maxStorageApp = afci.RestrictedStorage_m3; // 주석처리. 2024.08.14
-					maxStorageApp = afci.maxStorage_m3; // 홍수기에서는 계획홍수위 저수량을 최대 저류량으로 설정. 2024.08.14
-				}
+		if (ts.tCurMonth >= afci.restricedP_SM
+			&& ts.tCurDay >= afci.restricedP_SD) {
+			if (ts.tCurMonth <= afci.restricedP_EM
+				&& ts.tCurDay <= afci.restricedP_ED) {
+				//maxStorageApp = afci.RestrictedStorage_m3; // 주석처리. 2024.08.14
+				maxStorageApp = afci.maxStorage_m3; // 홍수기에서는 계획홍수위 저수량을 최대 저류량으로 설정. 2024.08.14
 			}
+		}
 		//}
 	}
 	else {
 		//if (afci.RestrictedStorage_m3 > 0) {// 주석처리. 2024.08.14
-			if (afci.RestrictedPeriod_Start_min >= nowTmin
-				&& afci.RestrictedPeriod_End_min <= nowTmin) {
-				//maxStorageApp = afci.RestrictedStorage_m3;
-				maxStorageApp = afci.maxStorage_m3; // 홍수기에서는 계획홍수위 저수량을 최대 저류량으로 설정. 2024.08.14
-			}
+		if (afci.RestrictedPeriod_Start_min >= nowTmin
+			&& afci.RestrictedPeriod_End_min <= nowTmin) {
+			//maxStorageApp = afci.RestrictedStorage_m3;
+			maxStorageApp = afci.maxStorage_m3; // 홍수기에서는 계획홍수위 저수량을 최대 저류량으로 설정. 2024.08.14
+		}
 		//}
 	}
     switch (afci.roType) {
@@ -523,7 +523,7 @@ void convertFCtoAutoROM(string strDate, int cvidx, int ifc)
 			+ fcname + ", (ColX, RowY):(" + to_string(prj.fcs[cvidx][ifc].fcColX)
 			+", "+ to_string(prj.fcs[cvidx][ifc].fcRowY) + "), Time:" + strDate
 			+ ").\n";
-		writeLog(fpnLog, msg, 1, 1);
+		writeLogString(fpnLog, msg, 1, 1);
 	}
 	
 }

@@ -20,10 +20,19 @@ void updateCVbyHydroComps(int i)
 	double chCSAaddedBySSFlow_m2 = 0;
 	double massConsR = di.cellSize / cvs[i].cvdx_m;
 	cvs[i].rfApp_mPdt = cvs[i].rfiRead_After_iniLoss_mPsec * ts.dtsec * massConsR;
-	if (prj.makeRFraster == 1) {
-		cvs[i].rf_dtPrint_m = cvs[i].rf_dtPrint_m
-			+ cvs[i].rfiRead_mPsec * dt_sec;
+	
+    // 출력 기간동안의 격자별 누적값은 여기서 계산
+    if (prj.makeRfDistFile == 1) {
+		cvs[i].rf_PDT_m += cvs[i].rfiRead_mPsec * dt_sec;
 	}
+    if (prj.makePETDistFile == 1) {
+        cvs[i].pet_PDT_m += cvs[i].pet_mPdt;
+    }
+    if (prj.makeAETDistFile == 1) {
+        cvs[i].aet_PDT_m += cvs[i].aet_mPdt;
+    }
+    //
+
 	if (prj.simInterception == 1) { calinterception(i); } // 차단	
 	if (prj.simEvaportranspiration == 1) { calET(i); } // 증발산
 	if (prj.simSnowMelt == 1) { calSnowMelt(i);	} //여기서 snowpack, snowmelt, 차단, 증발산과 관련 없이 유출에 직접 관여하는 것으로 모의
@@ -462,7 +471,7 @@ double getChCrossSectionPerimeter(double LRegionBaseWidth,
     return dtsec;
 }
 
-inline void setNoFluxCVCH(int i)
+void setNoFluxCVCH(int i)
  {
     cvs[i].stream.hCH = 0;
     cvs[i].stream.uCH = 0;
@@ -470,7 +479,7 @@ inline void setNoFluxCVCH(int i)
     cvs[i].stream.QCH_m3Ps = 0;
  }
 
- inline void setNoFluxCVOF(int i)
+ void setNoFluxCVOF(int i)
  {
      cvs[i].hOF = 0;
      cvs[i].uOF = 0;

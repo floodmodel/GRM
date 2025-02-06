@@ -177,7 +177,7 @@ void grmRealTime::runGRMRT()
     
     string fpn_rfASC;
     if (tsrt.g_strModel == "") {
-        fpn_rfASC = rtef.rtRFfolderName + "\\" 
+        fpn_rfASC = rtef.rtRFfolderName + "/" 
             + getYYYYMMfromYYYYMMddHHmm(rtef. )  
             + ppi.fn_withoutExt_prj + CONST_TAG_DISCHARGE;
         //fpn_rfASC = mRfFilePathRT + @"\" + GetYearAndMonthFromyyyyMMddHHmm(mRFStartDateTimeRT) 

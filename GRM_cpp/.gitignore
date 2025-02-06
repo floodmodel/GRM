@@ -30,6 +30,7 @@ Debug/
 [Rr]eleases/
 /x64/
 /x86/
+/out/
 bld/
 /[Bb]in/
 /[Oo]bj/

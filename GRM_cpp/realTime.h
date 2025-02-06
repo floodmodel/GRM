@@ -51,7 +51,7 @@ typedef struct _realTimeEnvFile
 
 typedef struct _thisSimulationRT // real time 전용
 {
-    COleDateTime g_RT_tStart_from_MonitorEXE;
+    //COleDateTime g_RT_tStart_from_MonitorEXE;
     string g_performance_log_GUID="";         // 성능 측정 기록 용 
     string g_dtStart_from_MonitorEXE=""; // 성능 측정 기록 용 
     string g_strModel="";  //MODEL 구분용 2019.4.12   .LENS는 m00~m12

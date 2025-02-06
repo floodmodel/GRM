@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include<ATLComTime.h>
+//#include<ATLComTime.h>
 
 #include "grm.h"
 #include "realTime.h"
@@ -18,7 +18,12 @@ extern domaininfo di;
 extern wpSimData wpSimValue;
 extern flowControlCellAndData fccds;
 extern thisSimulation ts;
+
+#ifdef _WIN32
 extern thisSimulationRT tsrt;
+#else
+#endif
+
 
 extern cvAtt* cvsb;
 extern map<int, double> fcDataAppliedBak;
@@ -35,9 +40,11 @@ void writeSimProgress(int elapsedT_min)
 	if (nowStep > 100) { nowStep = 100; }
 	if (ts.showFileProgress  !=1) {
 		printf("\rCurrent progress: %.2f%%... ", nowStep);
+		fflush(stdout); // 이거있어야 linux에서 즉시 출력된다.
 	}
 	else {
 		printf("\rCurrent progress: %.2f%%... %s", nowStep, msgFileProcess.c_str());
+		fflush(stdout);
 	}
 }
 
@@ -97,11 +104,11 @@ void writeDischargeAveFile(string tStrToPrint, double cinterp)
 	string lineToPave = tStrToPrint;
 	for (int i : wpSimValue.wpCVidxes) {
 		if (cinterp == 1.0) {
-			vToP_ave = wpSimValue.Q_sumPTforAVE_m3[i] / prj.dtPrintAveValue_sec; // cms 합에서 총 pt 시간으로 나눈다.
+			vToP_ave = wpSimValue.Q_sumPdTforAVE_m3[i] / prj.dtPrintAveValue_sec; // cms 합에서 총 pt 시간으로 나눈다.
 		}
 		else if (ts.isbak == 1) {
-			vToP_ave = getinterpolatedVLinear(wpSimValueB.Q_sumPTforAVE_m3[i],
-				wpSimValue.Q_sumPTforAVE_m3[i], cinterp) / prj.dtPrintAveValue_sec;
+			vToP_ave = getinterpolatedVLinear(wpSimValueB.Q_sumPdTforAVE_m3[i],
+				wpSimValue.Q_sumPdTforAVE_m3[i], cinterp) / prj.dtPrintAveValue_sec;
 		}
 		else {
 			vToP_ave = 0.0;
@@ -127,11 +134,11 @@ void writeDischargeAveFile(string tStrToPrint, double cinterp)
 double getMeanRFValueToPrintForAllCells(double cinterp) {
 	double rfSumForPT_mm = 0.0;
 	if (cinterp == 1.0) {
-		rfSumForPT_mm = ts.rfAveSumAllCells_PT_m * 1000.0;
+		rfSumForPT_mm = ts.rfAveSumAllCells_PdT_m * 1000.0;
 	}
 	else {
 		rfSumForPT_mm = getinterpolatedVLinear(ts.rfAveSumAllCells_PT_m_bak,
-			ts.rfAveSumAllCells_PT_m, cinterp) * 1000.0;
+			ts.rfAveSumAllCells_PdT_m, cinterp) * 1000.0;
 	}
 	return rfSumForPT_mm;
 }
@@ -139,11 +146,11 @@ double getMeanRFValueToPrintForAllCells(double cinterp) {
 double getMeanRFValueToPrintAveForAllCells(double cinterp) {
 	double rfSumForPT_mm = 0.0;
 	if (cinterp == 1.0) {
-		rfSumForPT_mm = ts.rfAveSumAllCells_PTave_m * 1000.0;
+		rfSumForPT_mm = ts.rfAveSumAllCells_PdTave_m * 1000.0;
 	}
 	else {
 		rfSumForPT_mm = getinterpolatedVLinear(ts.rfAveSumAllCells_PTave_m_bak,
-			ts.rfAveSumAllCells_PTave_m, cinterp) * 1000.0;
+			ts.rfAveSumAllCells_PdTave_m, cinterp) * 1000.0;
 	}
 	return rfSumForPT_mm;
 }
@@ -161,16 +168,16 @@ void writeWPoutputFile(string tStrToPrint, double cinterp)
 			oStr.append(dtos(cvs[i].hUAQfromChannelBed_m, 4) + vs);
 			oStr.append(dtos(cvs[i].soilWaterC_m, 4) + vs);
 			oStr.append(dtos(cvs[i].ssr, 4) + vs);
-			oStr.append(dtos(wpSimValue.prcpWPGridForPT_mm[i], 2) + vs);
+			oStr.append(dtos(wpSimValue.prcpWPGridForPdT_mm[i], 2) + vs);
 			oStr.append(dtos(wpSimValue.prcpUpWSAveForPT_mm[i], 2) + vs);
 
-			oStr.append(dtos(wpSimValue.pet_sumPT_mm[i], 4) + vs); // mm로 표시
-			oStr.append(dtos(wpSimValue.aet_sumPT_mm[i], 4) + vs); // mm로 표시
+			oStr.append(dtos(wpSimValue.pet_grid_sumPdT_mm[i], 4) + vs); // mm로 표시
+			oStr.append(dtos(wpSimValue.aet_grid_sumPdT_mm[i], 4) + vs); // mm로 표시
 
 			oStr.append(dtos(cvs[i].intcpAcc_m * 1000.0, 4) + vs);	 // mm로 표시
 
 			oStr.append(dtos(cvs[i].spackAcc_m * 100.0, 4) + vs);  // cm로 표시
-			oStr.append(dtos(wpSimValue.snowM_sumPT_mm[i], 4) + vs); // mm로 표시
+			oStr.append(dtos(wpSimValue.snowM_grid_sumPdT_mm[i], 4) + vs); // mm로 표시
 
 			////wp 별로 inflow, inflow_ave 출력하려면 아래의 것 활성화. 2022.10.17
 			//oStr.append(dtos(cvs[i].QsumCVw_m3Ps, 2) + vs);
@@ -188,24 +195,24 @@ void writeWPoutputFile(string tStrToPrint, double cinterp)
 			oStr.append(dtos(getinterpolatedVLinear(cvsb[i].soilWaterC_m,
 				cvs[i].soilWaterC_m, cinterp), 4) + vs);
 			oStr.append(dtos(getinterpolatedVLinear(cvsb[i].ssr,
-				cvs[i].ssr, cinterp), 4) + vs);
-			oStr.append(dtos(getinterpolatedVLinear(wpSimValueB.prcpWPGridForPT_mm[i],
-				wpSimValue.prcpWPGridForPT_mm[i], cinterp), 2) + vs);
+				cvs[i].ssr, cinterp), 2) + vs);
+			oStr.append(dtos(getinterpolatedVLinear(wpSimValueB.prcpWPGridForPdT_mm[i],
+				wpSimValue.prcpWPGridForPdT_mm[i], cinterp), 2) + vs);
 			oStr.append(dtos(getinterpolatedVLinear(wpSimValueB.prcpUpWSAveForPT_mm[i],
 				wpSimValue.prcpUpWSAveForPT_mm[i], cinterp), 2) + vs);
 
-			oStr.append(dtos(getinterpolatedVLinear(wpSimValueB.pet_sumPT_mm[i],
-				cvs[i].pet_mPdt, cinterp), 4) + vs); // mm로 표시
-			oStr.append(dtos(getinterpolatedVLinear(wpSimValueB.aet_sumPT_mm[i],
-				cvs[i].aet_mPdt, cinterp), 4) + vs); // mm로 표시
+			oStr.append(dtos(getinterpolatedVLinear(wpSimValueB.pet_grid_sumPdT_mm[i],
+				wpSimValue.pet_grid_sumPdT_mm[i], cinterp), 2) + vs); // mm로 표시 . 버그 수정 2024.12.09
+			oStr.append(dtos(getinterpolatedVLinear(wpSimValueB.aet_grid_sumPdT_mm[i],
+				wpSimValue.aet_grid_sumPdT_mm[i], cinterp), 2) + vs); // mm로 표시 . 버그 수정 2024.12.09
 
 			oStr.append(dtos(getinterpolatedVLinear(cvsb[i].intcpAcc_m,
-				cvs[i].intcpAcc_m, cinterp) * 1000.0, 4) + vs); // mm로 표시
+				cvs[i].intcpAcc_m, cinterp) * 1000.0, 2) + vs); // mm로 표시
 
 			oStr.append(dtos(getinterpolatedVLinear(cvsb[i].spackAcc_m,
-				cvs[i].spackAcc_m, cinterp) * 100.0, 4) + vs); // cm로 표시
-			oStr.append(dtos(getinterpolatedVLinear(wpSimValueB.snowM_sumPT_mm[i],
-				cvs[i].smelt_mPdt, cinterp), 4) + vs); // mm로 표시
+				cvs[i].spackAcc_m, cinterp) * 100.0, 3) + vs); // cm로 표시
+			oStr.append(dtos(getinterpolatedVLinear(wpSimValueB.snowM_grid_sumPdT_mm[i],
+				wpSimValue.snowM_grid_sumPdT_mm[i], cinterp), 2) + vs); // mm로 표시. 버그 수정 2024.12.09
 
 			oStr.append(dtos(getinterpolatedVLinear(cvsb[i].storageCumulative_m3,
 				cvs[i].storageCumulative_m3, cinterp) / 1000.0, 3) + "\n");
@@ -223,12 +230,12 @@ void writeRainfallOutputFile(string tStrToPrint, double cinterp) {
 	osRFGrid = tStrToPrint;
 	for (int i : wpSimValue.wpCVidxes) {
 		if (cinterp == 1.0) {
-			osRFGrid.append(vs+dtos(wpSimValue.prcpWPGridForPT_mm[i], 2) );
+			osRFGrid.append(vs+dtos(wpSimValue.prcpWPGridForPdT_mm[i], 2) );
 			osRFUpMean.append(vs + dtos(wpSimValue.prcpUpWSAveForPT_mm[i], 2));
 		}
 		else if (ts.isbak == 1) {
-			osRFGrid.append(vs + dtos(getinterpolatedVLinear(wpSimValueB.prcpWPGridForPT_mm[i],
-				wpSimValue.prcpWPGridForPT_mm[i], cinterp), 2));
+			osRFGrid.append(vs + dtos(getinterpolatedVLinear(wpSimValueB.prcpWPGridForPdT_mm[i],
+				wpSimValue.prcpWPGridForPdT_mm[i], cinterp), 2));
 			osRFUpMean.append(vs + dtos(getinterpolatedVLinear(wpSimValueB.prcpUpWSAveForPT_mm[i],
 				wpSimValue.prcpUpWSAveForPT_mm[i], cinterp), 2));
 		}
@@ -302,11 +309,11 @@ void writeFCAveOutputFile(string tStrToPrint, double cinterp) {
 	if (cinterp == 1.0) {
 		for (int idx : fccds.cvidxsFCcell) {
 				if (fc_inflow_Ave == "") {
-					fc_inflow_Ave = dtos(fccds.inflowSumPT_m3[idx] / prj.dtPrintAveValue_sec, 2);
+					fc_inflow_Ave = dtos(fccds.inflowSumPdT_m3[idx] / prj.dtPrintAveValue_sec, 2);
 				}
 				else {
 					fc_inflow_Ave += vs
-						+ dtos(fccds.inflowSumPT_m3[idx] / prj.dtPrintAveValue_sec, 2);
+						+ dtos(fccds.inflowSumPdT_m3[idx] / prj.dtPrintAveValue_sec, 2);
 				}
 		}
 	}
@@ -314,12 +321,12 @@ void writeFCAveOutputFile(string tStrToPrint, double cinterp) {
 		for (int idx : fccds.cvidxsFCcell) {
 				if (fc_inflow_Ave == "") {
 					fc_inflow_Ave = dtos(getinterpolatedVLinear(fcInflowSumPT_m3_Bak[idx],
-						fccds.inflowSumPT_m3[idx], cinterp) / prj.dtPrintAveValue_sec, 2);
+						fccds.inflowSumPdT_m3[idx], cinterp) / prj.dtPrintAveValue_sec, 2);
 				}
 				else {
 					fc_inflow_Ave += vs
 						+ dtos(getinterpolatedVLinear(fcInflowSumPT_m3_Bak[idx],
-							fccds.inflowSumPT_m3[idx], cinterp) / prj.dtPrintAveValue_sec, 2);
+							fccds.inflowSumPdT_m3[idx], cinterp) / prj.dtPrintAveValue_sec, 2);
 				}
 		}
 	}
@@ -330,47 +337,51 @@ void writeFCAveOutputFile(string tStrToPrint, double cinterp) {
 
 int initOutputFiles()
 {
-	ofs.ofpnDischarge= ppi.fp_prj +"\\"+ ppi.fn_withoutExt_prj+CONST_TAG_DISCHARGE;
-	ofs.ofpnDischargePTAve = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_DISCHARGE_PTAVE;
-	ofs.ofpnDepth = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_DEPTH;
-	ofs.ofpnPRCPGrid = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_PRCP_GRID;
-	ofs.ofpnPRCPMean = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_PRCP_MEAN;
-	ofs.ofpnFCStorage = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FC_STORAGE;
-	ofs.ofpnFCinflow = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FC_INFLOW;
-	ofs.ofpnFCinflowPTAve = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_FC_INFLOW_PTAVE;
+	ofs.ofpnDischarge= ppi.fp_prj +"/"+ ppi.fn_withoutExt_prj+CONST_TAG_DISCHARGE;
+	ofs.ofpnDischargePTAve = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_TAG_DISCHARGE_PTAVE;
+	ofs.ofpnDepth = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_TAG_DEPTH;
+	ofs.ofpnPRCPGrid = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_TAG_PRCP_GRID;
+	ofs.ofpnPRCPMean = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_TAG_PRCP_MEAN;
+	ofs.ofpnFCStorage = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_TAG_FC_STORAGE;
+	ofs.ofpnFCinflow = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_TAG_FC_INFLOW;
+	ofs.ofpnFCinflowPTAve = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_TAG_FC_INFLOW_PTAVE;
 
-	ofs.ofpSSRDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj+ CONST_DIST_SSR_DIRECTORY_TAG;
-	ofs.ofpPRCPDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj +  CONST_DIST_RF_DIRECTORY_TAG;
-	ofs.ofpPRCPAccDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_DIST_RFACC_DIRECTORY_TAG;
-	ofs.ofpFlowDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj +  CONST_DIST_FLOW_DIRECTORY_TAG;
+	ofs.ofpSSRDistribution = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj+ CONST_DIST_SSR_DIRECTORY_TAG;
+	ofs.ofpPRCPDistribution = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj +  CONST_DIST_RF_DIRECTORY_TAG;
+	ofs.ofpPRCPAccDistribution = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_DIST_RFACC_DIRECTORY_TAG;
+	ofs.ofpFlowDistribution = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj +  CONST_DIST_FLOW_DIRECTORY_TAG;
+	ofs.ofpPETDistribution = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_DIST_PET_DIRECTORY_TAG;
+	ofs.ofpAETDistribution = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_DIST_AET_DIRECTORY_TAG;
 
-	ofs.ofpPETDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_DIST_PET_DIRECTORY_TAG;
-	ofs.ofpETDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_DIST_ET_DIRECTORY_TAG;
-	ofs.ofpINTCPDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_DIST_INTERCEPTION_DIRECTORY_TAG;
-	ofs.ofpSnowMDistribution = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_DIST_SNOWMELT_DIRECTORY_TAG;
+	ofs.ofpINTCPDistribution = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_DIST_INTERCEPTION_DIRECTORY_TAG;
+	ofs.ofpSnowMDistribution = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_DIST_SNOWMELT_DIRECTORY_TAG;
 
     string ensbModel = "";
+#ifdef _WIN32
     if (tsrt.g_strModel != "") {
         ensbModel = "_m" + tsrt.g_strModel;
     }
+#endif
     for (wpLocationRC awp : prj.wps) {
         string wpName = replaceText(awp.wpName, ",", "_");
-        string wpfpn = ppi.fp_prj + "\\" + ppi.fn_withoutExt_prj + CONST_TAG_WP + wpName
+        string wpfpn = ppi.fp_prj + "/" + ppi.fn_withoutExt_prj + CONST_TAG_WP + wpName
             + ensbModel + ".out";
         int adix = cvais[awp.wpColX][awp.wpRowY];
         ofs.ofpnWPs[adix] = wpfpn;
     }	
+#ifdef _WIN32
     if (prj.simType == simulationType::RealTime){
         changeOutputFileDisk(tsrt.Output_File_Target_DISK);
     }
+#endif
     if (deleteAllOutputFiles() == -1) {
         string outstr = "ERROR : An error was occured while deleting previous ouput files or folders. Try starting the model again. \n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (makeNewOutputFiles() == -1) {
         string outstr = "ERROR : An error was occured while making ouput files or folders. Try starting the model again. \n";
-        writeLog(fpnLog, outstr, 1, 1);
+        writeLogString(fpnLog, outstr, 1, 1);
         return -1;
     }
     if (prj.makeASCorIMGfile == 1) {
@@ -395,6 +406,8 @@ int deleteAllOutputFiles()
 	fpns.push_back(ofs.ofpPRCPDistribution);
 	fpns.push_back(ofs.ofpPRCPAccDistribution);
 	fpns.push_back(ofs.ofpFlowDistribution);
+	fpns.push_back(ofs.ofpPETDistribution);
+	fpns.push_back(ofs.ofpAETDistribution);
 	for (int id : wpSimValue.wpCVidxes) {
 		fpns.push_back(ofs.ofpnWPs[id]);
 	}
@@ -410,6 +423,12 @@ int deleteAllOutputFiles()
 	}
 	if (prj.makeFlowDistFile == 1) {
 		fps.push_back(ofs.ofpFlowDistribution);
+	}
+	if (prj.makePETDistFile == 1) {
+		fps.push_back(ofs.ofpPETDistribution);
+	}
+	if (prj.makeAETDistFile == 1) {
+		fps.push_back(ofs.ofpAETDistribution);
 	}
 
 	bool beenRun = false;
@@ -427,10 +446,10 @@ int deleteAllOutputFiles()
 	}
 	if (beenRun == true) {
 		cout << "Deleting previous output files... ";
-		writeLog(fpnLog, "Deleting previous output files... \n", 1, -1);
+		writeLogString(fpnLog, "Deleting previous output files... \n", 1, -1);
 		if (confirmDeleteFiles(fpns) == -1) {
 			cout << "failed. \n";
-			writeLog(fpnLog, "ERROR : Deleting previous output files... failed.\n", 1, -1);
+			writeLogString(fpnLog, "ERROR : Deleting previous output files... failed.\n", 1, -1);
 			return -1;
 		}
 		if (fps.size() > 0) {
@@ -439,7 +458,7 @@ int deleteAllOutputFiles()
 			}
 		}
 		cout << "completed. \n";
-		writeLog(fpnLog, "Deleting previous output files... completed.\n", 1, -1);
+		writeLogString(fpnLog, "Deleting previous output files... completed.\n", 1, -1);
 	}
 	return 1;
 }
@@ -454,22 +473,25 @@ int makeNewOutputFiles()
 		|| prj.printOption == GRMPrintType::AverageFile) {
 		string outPutLine;
 		string comHeader;
-		COleDateTime tnow = COleDateTime::GetCurrentTime();
-		string nowT = timeToString(tnow,
-			false, dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS);
-		version grmVersion = getCurrentFileVersion();
-		string ver = "GRM v." + to_string(grmVersion.fmajor) + "."
-			+ to_string(grmVersion.fminor)
-			+ "." + to_string(grmVersion.fbuild)
-			+ " Built in " + grmVersion.LastWrittenTime;
+		tm tnow = getCurrentTimeAsLocal_tm(); //MP 수정
+		string nowT = timeToString(tnow, timeUnitToShow::toM, 
+			dateTimeFormat::yyyy_mm_dd__HHcolMMcolSS );
+		version grmV = getCurrentFileVersion();
+		string ver = "GRM v." + to_string(grmV.pmajor) + "."
+			+ to_string(grmV.pminor) + "."
+			+ to_string(grmV.pbuild) + ". File version : "
+			+ to_string(grmV.fmajor) + "."
+			+ to_string(grmV.fminor) + "."
+			+ to_string(grmV.fbuild) + ".\n";
+
 
 		if (prj.simType == simulationType::RealTime) {
 			comHeader = "Project name : " + ppi.fn_prj + " [Real time simulation] " + nowT
-				+ "  by " + ver + "\n";
+				+ "  by " + ver ;
 		}
 		else {
 			comHeader = "Project name : " + ppi.fn_prj + "    " + nowT
-				+ "  by " + ver + "\n";
+				+ "  by " + ver ;
 		}
 		string heads;
 		string time_wpNames;
@@ -649,7 +671,7 @@ int makeNewOutputFiles()
 						roTypeStr = ENUM_TO_STR(None);
 					}
 					else {
-						writeLog(fpnLog, "ERROR : Reservoir operation type of ["
+						writeLogString(fpnLog, "ERROR : Reservoir operation type of ["
 							+ afc.fcName + "] is invalid.\n", 1, 1);
 						return -1;
 					}
@@ -659,28 +681,28 @@ int makeNewOutputFiles()
 						roiniStorage = roiniStorage + vs + dtos(afc.iniStorage_m3, 2);
 					}
 					else if (afc.fcType == flowControlType::ReservoirOperation) {
-						writeLog(fpnLog, "ERROR : Initial reservoir storage is invalid.\n", 1, 1);
+						writeLogString(fpnLog, "ERROR : Initial reservoir storage is invalid.\n", 1, 1);
 						return -1;
 					}
 					if (afc.maxStorage_m3 >= 0) {
 						roMaxStorage = roMaxStorage + vs + dtos(afc.maxStorage_m3, 2);
 					}
 					else if (afc.fcType == flowControlType::ReservoirOperation) {
-						writeLog(fpnLog, "ERROR : Maximum reservoir storage or storage ratio is invalid.\n", 1, 1);
+						writeLogString(fpnLog, "ERROR : Maximum reservoir storage or storage ratio is invalid.\n", 1, 1);
 						return -1;
 					}
 					if (afc.NormalHighStorage_m3 >= 0) {
 						roNormalHighStorage = roNormalHighStorage + vs + dtos(afc.NormalHighStorage_m3, 2);
 					}
 					else if (afc.fcType == flowControlType::ReservoirOperation) {
-						writeLog(fpnLog, "ERROR : Normal high water level storage is invalid.\n", 1, 1);
+						writeLogString(fpnLog, "ERROR : Normal high water level storage is invalid.\n", 1, 1);
 						return -1;
 					}
 					if (afc.RestrictedStorage_m3 >= 0) {
 						roRestrictedStorage = roRestrictedStorage + vs + dtos(afc.RestrictedStorage_m3, 2);
 					}
 					else if (afc.fcType == flowControlType::ReservoirOperation) {
-						writeLog(fpnLog, "ERROR : Restricted water level storage is invalid.\n", 1, 1);
+						writeLogString(fpnLog, "ERROR : Restricted water level storage is invalid.\n", 1, 1);
 						return -1;
 					}
 
@@ -692,7 +714,7 @@ int makeNewOutputFiles()
 					if (afc.RestrictedPeriod_Start == ""
 						&& afc.fcType == flowControlType::ReservoirOperation
 						&& afc.RestrictedStorage_m3 > 0) {
-						writeLog(fpnLog, "ERROR : Starting time of applying restricted water level storage is invalid.\n", 1, 1);
+						writeLogString(fpnLog, "ERROR : Starting time of applying restricted water level storage is invalid.\n", 1, 1);
 						return -1;
 					}
 
@@ -704,12 +726,12 @@ int makeNewOutputFiles()
 					if (afc.RestrictedPeriod_End == ""
 						&& afc.fcType == flowControlType::ReservoirOperation
 						&& afc.RestrictedStorage_m3 > 0) {
-						writeLog(fpnLog, "ERROR : Ending time of applying restricted water level storage is invalid.\n", 1, 1);
+						writeLogString(fpnLog, "ERROR : Ending time of applying restricted water level storage is invalid.\n", 1, 1);
 						return -1;
 					}
 					if (afc.roType == reservoirOperationType::ConstantQ) {
 						if (afc.roConstQ_cms < 0) {
-							writeLog(fpnLog, "ERROR : Constant reservoir outflow is invalid.\n", 1, 1);
+							writeLogString(fpnLog, "ERROR : Constant reservoir outflow is invalid.\n", 1, 1);
 							return -1;
 						}
 						else {
@@ -718,7 +740,7 @@ int makeNewOutputFiles()
 								roConstQduration = roConstQduration + vs + to_string(afc.roConstQDuration_hr);
 							}
 							else {
-								writeLog(fpnLog, "ERROR : Constant reservoir outflow duration is invalid.\n", 1, 1);
+								writeLogString(fpnLog, "ERROR : Constant reservoir outflow duration is invalid.\n", 1, 1);
 								return -1;
 							}
 						}
@@ -784,6 +806,12 @@ int makeNewOutputFiles()
 		if (prj.makeFlowDistFile == 1) {
 			fs::create_directories(ofs.ofpFlowDistribution);
 		}
+		if (prj.makePETDistFile == 1) {
+			fs::create_directories(ofs.ofpPETDistribution);
+		}
+		if (prj.makeAETDistFile == 1) {
+			fs::create_directories(ofs.ofpAETDistribution);
+		}
 	}
 	return 1;
 }
@@ -822,6 +850,13 @@ int deleteAllFilesExceptDischarge()
     if (fs::exists(ofs.ofpSSRDistribution)) {
         fs::remove_all(ofs.ofpSSRDistribution);
     }
+	if (fs::exists(ofs.ofpPETDistribution)) {
+		fs::remove_all(ofs.ofpPETDistribution);
+	}
+	if (fs::exists(ofs.ofpAETDistribution)) {
+		fs::remove_all(ofs.ofpAETDistribution);
+	}
+
     for (int wpcvid : wpSimValue.wpCVidxes) {
         string fpn = ofs.ofpnWPs[wpcvid];
         if (fs::exists(fpn)) {

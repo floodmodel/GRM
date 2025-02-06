@@ -21,7 +21,7 @@ thread* th_makeASC_rfacc;
 thread* th_makeASC_flow;
 
 thread* th_makeASC_pet;
-thread* th_makeASC_et;
+thread* th_makeASC_aet;
 thread* th_makeASC_intcp;
 thread* th_makeASC_sm;
 
@@ -31,44 +31,48 @@ thread* th_makeIMG_rfacc;
 thread* th_makeIMG_flow;
 
 thread* th_makeIMG_pet;
-thread* th_makeIMG_et;
+thread* th_makeIMG_aet;
 thread* th_makeIMG_intcp;
 thread* th_makeIMG_sm;
 
 double** ssrAry; // 토양포화도 2차원 배열
-double** rfAry;  // 강우 2차원 배열
+double** rfPDTAry;  // 출력 시간간격 동안의 누적강우 2차원 배열. mm
 double** rfaccAry; // 누적강우 2차원배열
 double** QAry; // 순간 유량 2차원 배열
+double** petPDTAry; // 출력 시간간격 동안의 누적 잠재증발산 2차원 배열. mm
+double** aetPDTAry; // 출력 시간간격 동안의 누적 실제증발산 2차원 배열. mm
+
 
 int bssr =0;
 int brf = 0;
 int brfacc = 0;
 int bQ = 0;
+int bPET = 0;
+int bAET = 0;
 
-int bpet = 0;
-int bet = 0;
-int bintcp = 0;
-int bsm = 0;
+int bINTCP = 0;
+int bSM = 0;
 
 int bimg = 0;
 int basc = 0;
 string fpn_ssr_img = "";
-string fpn_rf_img = "";
+string fpn_rfPDT_img = "";
 string fpn_rfacc_img = "";
 string fpn_Q_img = "";
+string fpn_petPDT_img = "";
+string fpn_aetPDT_img = "";
 
-string fpn_pet_img = "";
-string fpn_et_img = "";
 string fpn_intcp_img = "";
 string fpn_sm_img = "";
 
 string fpn_ssr_asc = "";
-string fpn_rf_asc = "";
+string fpn_rfPDT_asc = "";
 string fpn_rfacc_asc = "";
 string fpn_Q_asc = "";
+string fpn_petPDT_asc = "";
+string fpn_aetPDT_asc = "";
+//string fpn_aet_asc = "";
 
-string fpn_pet_asc = "";
-string fpn_et_asc = "";
 string fpn_intcp_asc = "";
 string fpn_sm_asc = "";
 
@@ -82,9 +86,9 @@ void initRasterOutput()
         }
     }
     if (prj.makeRfDistFile == 1) {
-        rfAry = new double* [di.nCols];
+        rfPDTAry = new double* [di.nCols];
         for (int i = 0; i < di.nCols; ++i) {
-            rfAry[i] = new double[di.nRows];
+            rfPDTAry[i] = new double[di.nRows];
         }
     }
     if (prj.makeRFaccDistFile == 1) {
@@ -99,10 +103,24 @@ void initRasterOutput()
             QAry[i] = new double[di.nRows];
         }
     }
+    if (prj.makePETDistFile == 1) {
+        petPDTAry = new double* [di.nCols];
+        for (int i = 0; i < di.nCols; ++i) {
+            petPDTAry[i] = new double[di.nRows];
+        }
+    }
+    if (prj.makeAETDistFile == 1) {
+        aetPDTAry = new double* [di.nCols];
+        for (int i = 0; i < di.nCols; ++i) {
+            aetPDTAry[i] = new double[di.nRows];
+        }
+    }
     bssr = prj.makeSoilSaturationDistFile;
     brf = prj.makeRfDistFile;
     brfacc = prj.makeRFaccDistFile;
     bQ = prj.makeFlowDistFile;
+    bPET = prj.makePETDistFile;
+    bAET = prj.makeAETDistFile;
 
     bimg = prj.makeIMGFile;
     basc = prj.makeASCFile;
@@ -122,169 +140,185 @@ int makeRasterOutput(int nowTmin)
 	}
     setRasterOutputArray();
     if (bssr == 1) {
-        if (fs::exists(ofs.ofpSSRDistribution) == false) {
+        if (fs::exists(lower(ofs.ofpSSRDistribution)) == false) {
             cout << "ERROR : The folder for soil saturation ratio distribution file is not exist. " << endl;
             return -1;
         }
+
         if (bimg == 1) {
-            fpn_ssr_img = ofs.ofpSSRDistribution + "\\"
+            fpn_ssr_img = ofs.ofpSSRDistribution + "/"
                 + CONST_DIST_SSR_FILE_HEAD + tToP + ".bmp";
             th_makeIMG_ssr = new thread(makeIMG_ssr);
         }
+
         if (basc == 1) {
-            fpn_ssr_asc = ofs.ofpSSRDistribution + "\\"
+            fpn_ssr_asc = ofs.ofpSSRDistribution + "/"
                 + CONST_DIST_SSR_FILE_HEAD + tToP + ".asc";
             th_makeASC_ssr = new thread(makeASC_ssr);
             if (prj.fpnProjection != "") {
                 string ofpn = replaceText(fpn_ssr_asc, ".asc", ".prj");
-                fs::copy(prj.fpnProjection, ofpn);
+                fs::copy(lower(prj.fpnProjection), ofpn);
             }            
         }
     }
 
     if (brf == 1) {
-        if (fs::exists(ofs.ofpPRCPDistribution) == false) {
+        if (fs::exists(lower(ofs.ofpPRCPDistribution)) == false) {
             cout << "ERROR : The folder for rainfall distribution file is not exist. " << endl;
             return -1;
         }
+
         if (bimg == 1) {
-            fpn_rf_img = ofs.ofpPRCPDistribution + "\\"
+            fpn_rfPDT_img = ofs.ofpPRCPDistribution + "/"
                 + CONST_DIST_RF_FILE_HEAD + tToP + ".bmp";
             th_makeIMG_rf = new thread(makeIMG_rf);
         }
         if (basc == 1) {
-            fpn_rf_asc = ofs.ofpPRCPDistribution + "\\"
+            fpn_rfPDT_asc = ofs.ofpPRCPDistribution + "/"
                 + CONST_DIST_RF_FILE_HEAD + tToP + ".asc";
             th_makeASC_rf = new thread(makeASC_rf);
             if (prj.fpnProjection != "") {
-                string ofpn = replaceText(fpn_rf_asc, ".asc", ".prj");
-                fs::copy(prj.fpnProjection, ofpn);
+                string ofpn = replaceText(fpn_rfPDT_asc, ".asc", ".prj");
+                fs::copy(lower(prj.fpnProjection), ofpn);
             }
         }
     }
 
     if (brfacc == 1) {
-        if (fs::exists(ofs.ofpPRCPAccDistribution) == false) {
+        if (fs::exists(lower(ofs.ofpPRCPAccDistribution)) == false) {
             cout << "ERROR : The folder for cumulative rainfall distribution file is not exist. " << endl;
             return -1;
         }
+
         if (bimg == 1) {
-            fpn_rfacc_img = ofs.ofpPRCPAccDistribution + "\\"
+            fpn_rfacc_img = ofs.ofpPRCPAccDistribution + "/"
                 + CONST_DIST_RFACC_FILE_HEAD + tToP + ".bmp";
             th_makeIMG_rfacc = new thread(makeIMG_rfacc);
         }
+
         if (basc == 1) {
-            fpn_rfacc_asc = ofs.ofpPRCPAccDistribution + "\\"
+            fpn_rfacc_asc = ofs.ofpPRCPAccDistribution + "/"
                 + CONST_DIST_RFACC_FILE_HEAD + tToP + ".asc";
             th_makeASC_rfacc = new thread(makeASC_rfacc);
             if (prj.fpnProjection != "") {
                 string ofpn = replaceText(fpn_rfacc_asc, ".asc", ".prj");
-                fs::copy(prj.fpnProjection, ofpn);
+                fs::copy(lower(prj.fpnProjection), ofpn);
             }
         }
     }
     if (bQ == 1) {
-        if (fs::exists(ofs.ofpFlowDistribution) == false) {
+        if (fs::exists(lower(ofs.ofpFlowDistribution)) == false) {
             cout << "ERROR : The folder for flow distribution file is not exist. " << endl;
             return -1;
         }
         if (bimg == 1) {
-            fpn_Q_img = ofs.ofpFlowDistribution + "\\"
+            fpn_Q_img = ofs.ofpFlowDistribution + "/"
                 + CONST_DIST_FLOW_FILE_HEAD + tToP + ".bmp";
             th_makeIMG_flow = new thread(makeIMG_flow);
         }
+
         if (basc == 1) {
-            fpn_Q_asc = ofs.ofpFlowDistribution + "\\"
+            fpn_Q_asc = ofs.ofpFlowDistribution + "/"
                 + CONST_DIST_FLOW_FILE_HEAD + tToP + ".asc";
             th_makeASC_flow = new thread(makeASC_flow);
             if (prj.fpnProjection != "") {
                 string ofpn = replaceText(fpn_Q_asc, ".asc", ".prj");
-                fs::copy(prj.fpnProjection, ofpn);
+                fs::copy(lower(prj.fpnProjection), ofpn);
             }
         }
     }
 
-	if (bpet == 1) {
-		if (fs::exists(ofs.ofpPETDistribution) == false) {
+	if (bPET == 1) {
+		if (fs::exists(lower(ofs.ofpPETDistribution)) == false) {
 			cout << "ERROR : The folder for potential evapotranspiration distribution file is not exist. " << endl;
 			return -1;
 		}
+
 		if (bimg == 1) {
-			fpn_pet_img = ofs.ofpPETDistribution + "\\"
+			fpn_petPDT_img = ofs.ofpPETDistribution + "/"
 				+ CONST_DIST_PET_FILE_HEAD + tToP + ".bmp";
-			th_makeIMG_pet = new thread(makeIMG_flow);
+			th_makeIMG_pet = new thread(makeIMG_pet);
 		}
+
 		if (basc == 1) {
-			fpn_pet_asc = ofs.ofpPETDistribution + "\\"
+			fpn_petPDT_asc = ofs.ofpPETDistribution + "/"
 				+ CONST_DIST_PET_FILE_HEAD + tToP + ".asc";
-			th_makeASC_pet = new thread(makeASC_flow);
+			th_makeASC_pet = new thread(makeASC_pet);
 			if (prj.fpnProjection != "") {
-				string ofpn = replaceText(fpn_pet_asc, ".asc", ".prj");
-				fs::copy(prj.fpnProjection, ofpn);
+				string ofpn = replaceText(fpn_petPDT_asc, ".asc", ".prj");
+				fs::copy(lower(prj.fpnProjection), ofpn);
 			}
 		}
 	}
-	if (bet == 1) {
-		if (fs::exists(ofs.ofpETDistribution) == false) {
-			cout << "ERROR : The folder for evapotranspiration distribution file is not exist. " << endl;
-			return -1;
-		}
-		if (bimg == 1) {
-			fpn_et_img = ofs.ofpETDistribution + "\\"
-				+ CONST_DIST_ET_FILE_HEAD + tToP + ".bmp";
-			th_makeIMG_et = new thread(makeIMG_flow);
-		}
-		if (basc == 1) {
-			fpn_et_asc = ofs.ofpETDistribution + "\\"
-				+ CONST_DIST_ET_FILE_HEAD + tToP + ".asc";
-			th_makeASC_et = new thread(makeASC_flow);
-			if (prj.fpnProjection != "") {
-				string ofpn = replaceText(fpn_et_asc, ".asc", ".prj");
-				fs::copy(prj.fpnProjection, ofpn);
-			}
-		}
-	}
-	if (bintcp == 1) {
-		if (fs::exists(ofs.ofpINTCPDistribution) == false) {
-			cout << "ERROR : The folder for interception distribution file is not exist. " << endl;
-			return -1;
-		}
-		if (bimg == 1) {
-			fpn_intcp_img = ofs.ofpINTCPDistribution + "\\"
-				+ CONST_DIST_INTERCEPTION_FILE_HEAD + tToP + ".bmp";
-			th_makeIMG_intcp = new thread(makeIMG_flow);
-		}
-		if (basc == 1) {
-			fpn_intcp_asc = ofs.ofpINTCPDistribution + "\\"
-				+ CONST_DIST_INTERCEPTION_FILE_HEAD + tToP + ".asc";
-			th_makeASC_intcp = new thread(makeASC_flow);
-			if (prj.fpnProjection != "") {
-				string ofpn = replaceText(fpn_intcp_asc, ".asc", ".prj");
-				fs::copy(prj.fpnProjection, ofpn);
-			}
-		}
-	}
-	if (bsm == 1) {
-		if (fs::exists(ofs.ofpSnowMDistribution) == false) {
-			cout << "ERROR : The folder for interception distribution file is not exist. " << endl;
-			return -1;
-		}
-		if (bimg == 1) {
-			fpn_sm_img = ofs.ofpSnowMDistribution + "\\"
-				+ CONST_DIST_SNOWMELT_FILE_HEAD + tToP + ".bmp";
-			th_makeIMG_sm = new thread(makeIMG_flow);
-		}
-		if (basc == 1) {
-			fpn_sm_asc = ofs.ofpSnowMDistribution + "\\"
-				+ CONST_DIST_SNOWMELT_FILE_HEAD + tToP + ".asc";
-			th_makeASC_sm = new thread(makeASC_flow);
-			if (prj.fpnProjection != "") {
-				string ofpn = replaceText(fpn_sm_asc, ".asc", ".prj");
-				fs::copy(prj.fpnProjection, ofpn);
-			}
-		}
-	}
+
+    if (bAET == 1) {
+        if (fs::exists(lower(ofs.ofpAETDistribution)) == false) {
+            cout << "ERROR : The folder for actual evapotranspiration distribution file is not exist. " << endl;
+            return -1;
+        }
+
+        if (bimg == 1) {
+            fpn_aetPDT_img = ofs.ofpAETDistribution + "/"
+                + CONST_DIST_AET_FILE_HEAD + tToP + ".bmp";
+            th_makeIMG_aet = new thread(makeIMG_aet);
+        }
+
+        if (basc == 1) {
+            fpn_aetPDT_asc = ofs.ofpAETDistribution + "/"
+                + CONST_DIST_AET_FILE_HEAD + tToP + ".asc";
+            th_makeASC_aet = new thread(makeASC_aet);
+            if (prj.fpnProjection != "") {
+                string ofpn = replaceText(fpn_aetPDT_asc, ".asc", ".prj");
+                fs::copy(lower(prj.fpnProjection), ofpn);
+            }
+        }
+    }
+	//if (bintcp == 1) {
+	//	if (fs::exists(lower(ofs.ofpINTCPDistribution)) == false) {
+	//		cout << "ERROR : The folder for interception distribution file is not exist. " << endl;
+	//		return -1;
+	//	}
+
+	//	if (bimg == 1) {
+	//		fpn_intcp_img = ofs.ofpINTCPDistribution + "/"
+	//			+ CONST_DIST_INTERCEPTION_FILE_HEAD + tToP + ".bmp";
+	//		th_makeIMG_intcp = new thread(makeIMG_flow);
+	//	}
+
+	//	if (basc == 1) {
+	//		fpn_intcp_asc = ofs.ofpINTCPDistribution + "/"
+	//			+ CONST_DIST_INTERCEPTION_FILE_HEAD + tToP + ".asc";
+	//		th_makeASC_intcp = new thread(makeASC_flow);
+	//		if (prj.fpnProjection != "") {
+	//			string ofpn = replaceText(fpn_intcp_asc, ".asc", ".prj");
+	//			fs::copy(lower(prj.fpnProjection), ofpn);
+	//		}
+	//	}
+	//}
+	//if (bsm == 1) {
+	//	if (fs::exists(lower(ofs.ofpSnowMDistribution)) == false) {
+	//		cout << "ERROR : The folder for interception distribution file is not exist. " << endl;
+	//		return -1;
+	//	}
+
+	//	if (bimg == 1) {
+	//		fpn_sm_img = ofs.ofpSnowMDistribution + "/"
+	//			+ CONST_DIST_SNOWMELT_FILE_HEAD + tToP + ".bmp";
+	//		th_makeIMG_sm = new thread(makeIMG_flow);
+	//	}
+
+	//	if (basc == 1) {
+	//		fpn_sm_asc = ofs.ofpSnowMDistribution + "/"
+	//			+ CONST_DIST_SNOWMELT_FILE_HEAD + tToP + ".asc";
+	//		th_makeASC_sm = new thread(makeASC_flow);
+	//		if (prj.fpnProjection != "") {
+	//			string ofpn = replaceText(fpn_sm_asc, ".asc", ".prj");
+	//			fs::copy(lower(prj.fpnProjection), ofpn);
+	//		}
+	//	}
+	//}
     joinOutputThreads(); // 이과정 거쳐야 래스터 파일 다 쓰고 나서 프로그램 종료한다.
+    return 1;
 }
 
 
@@ -299,7 +333,7 @@ int setRasterOutputArray()
                     ssrAry[cx][ry] = cvs[i].ssr;
                 }
                 if (brf == 1) {
-                    rfAry[cx][ry] = cvs[i].rf_dtPrint_m * 1000;
+                    rfPDTAry[cx][ry] = cvs[i].rf_PDT_m * 1000;
                 }
                 if (brfacc == 1) {
                     rfaccAry[cx][ry] = cvs[i].rfAccRead_fromStart_mm;
@@ -314,14 +348,23 @@ int setRasterOutputArray()
                     }
                     QAry[cx][ry] = v;
                 }
-                cvs[i].rf_dtPrint_m = 0; // 여기서 바로 초기화 한다.
+                if (bPET == 1) {
+                    petPDTAry[cx][ry] = cvs[i].pet_PDT_m * 1000;
+                }
+                if (bAET == 1) {
+                    aetPDTAry[cx][ry] = cvs[i].aet_PDT_m * 1000;
+                }
+
+                cvs[i].rf_PDT_m = 0.0; // 여기서 바로 초기화 한다.
+                cvs[i].pet_PDT_m = 0.0;
+                cvs[i].aet_PDT_m = 0.0;
             }
             else {
                 if (bssr == 1) {
                     ssrAry[cx][ry] = -9999;
                 }
                 if (brf == 1) {
-                    rfAry[cx][ry] = -9999;
+                    rfPDTAry[cx][ry] = -9999;
                 }
                 if (brfacc == 1) {
                     rfaccAry[cx][ry] = -9999;
@@ -329,21 +372,27 @@ int setRasterOutputArray()
                 if (bQ == 1) {
                     QAry[cx][ry] = -9999;
                 }
+                if (bPET == 1) {
+                    petPDTAry[cx][ry] = -9999;
+                }
+                if (bAET == 1) {
+                    aetPDTAry[cx][ry] = -9999;
+                }
             }
         }
     }
     return 1;
 }
 
+//#ifdef _WIN32// MP 추가
 void makeIMG_ssr()
 {
     makeBMPFileUsingArrayGTzero_InParallel( fpn_ssr_img, ssrAry,
         di.nCols, di.nRows, rendererType::Risk, 1.0, di.nodata_value);
 }
-
 void makeIMG_rf()
 {
-    makeBMPFileUsingArrayGTzero_InParallel(fpn_rf_img, rfAry,
+    makeBMPFileUsingArrayGTzero_InParallel(fpn_rfPDT_img, rfPDTAry,
         di.nCols, di.nRows, rendererType::Depth, 100.0, di.nodata_value);
 }
 
@@ -359,6 +408,20 @@ void makeIMG_flow()
         di.nCols, di.nRows, rendererType::Depth, 2000.0, di.nodata_value);
 }
 
+void makeIMG_pet()
+{
+    makeBMPFileUsingArrayGTzero_InParallel(fpn_petPDT_img, petPDTAry,
+        di.nCols, di.nRows, rendererType::Depth, 10.0, di.nodata_value);
+}
+
+void makeIMG_aet()
+{
+    makeBMPFileUsingArrayGTzero_InParallel(fpn_aetPDT_img, aetPDTAry,
+        di.nCols, di.nRows, rendererType::Depth, 10.0, di.nodata_value);
+}
+//#endif// MP 추가
+
+
 void makeASC_ssr()
 {
     makeASCTextFile( fpn_ssr_asc, di.headerStringAll,
@@ -367,8 +430,8 @@ void makeASC_ssr()
 
 void makeASC_rf()
 {
-    makeASCTextFile(fpn_rf_asc, di.headerStringAll,
-        rfAry, di.nCols, di.nRows, 2, di.nodata_value);
+    makeASCTextFile(fpn_rfPDT_asc, di.headerStringAll,
+        rfPDTAry, di.nCols, di.nRows, 2, di.nodata_value);
 }
 void makeASC_rfacc()
 {
@@ -380,6 +443,18 @@ void makeASC_flow()
 {
     makeASCTextFile(fpn_Q_asc, di.headerStringAll,
         QAry, di.nCols, di.nRows, 2, di.nodata_value);
+}
+
+void makeASC_pet()
+{
+    makeASCTextFile(fpn_petPDT_asc, di.headerStringAll,
+        petPDTAry, di.nCols, di.nRows, 2, di.nodata_value);
+}
+
+void makeASC_aet()
+{
+    makeASCTextFile(fpn_aetPDT_asc, di.headerStringAll,
+        aetPDTAry, di.nCols, di.nRows, 2, di.nodata_value);
 }
 
 void joinOutputThreads()
@@ -396,6 +471,12 @@ void joinOutputThreads()
     if (th_makeASC_flow != NULL && th_makeASC_flow->joinable() == true) {
         th_makeASC_flow->join();
     }
+    if (th_makeASC_pet != NULL && th_makeASC_pet->joinable() == true) {
+        th_makeASC_pet->join();
+    }
+    if (th_makeASC_aet != NULL && th_makeASC_aet->joinable() == true) {
+        th_makeASC_aet->join();
+    }
 
     if (th_makeIMG_ssr != NULL && th_makeIMG_ssr->joinable() == true) {
         th_makeIMG_ssr->join();
@@ -408,5 +489,11 @@ void joinOutputThreads()
     }
     if (th_makeIMG_flow != NULL && th_makeIMG_flow->joinable() == true) {
         th_makeIMG_flow->join();
+    }
+    if (th_makeIMG_pet != NULL && th_makeIMG_pet->joinable() == true) {
+        th_makeIMG_pet->join();
+    }
+    if (th_makeIMG_aet != NULL && th_makeIMG_aet->joinable() == true) {
+        th_makeIMG_aet->join();
     }
 }

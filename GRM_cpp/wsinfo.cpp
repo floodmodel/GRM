@@ -16,7 +16,7 @@ extern cvpos* cvps;
 extern domaininfo di;
 extern map<int, int*> cvaisToFA; //fa별 cv array idex 목록
 
-grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
+grmWSinfo::grmWSinfo(string fdirType, string fpnDEM, string fpnDomain,
     string fpnSlope, string fpnFdir, string fpnFac,
     string fpnStream, string fpnLandCover,
     string fpnSoilTexture, string fpnSoilDepth,
@@ -26,8 +26,8 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     prj.forSimulation = -1; // exe로 진입하는 것은 1, dll로 진입하는 것은 -1
 	fs::path fpn_domain = fs::path(fpnDomain.c_str());
 	string fp_domain = fpn_domain.parent_path().string();
-    fpnLog = fp_domain+"\\"+"GRMdll.log";
-    writeNewLog(fpnLog, "GRM.dll : grmWSinfo with input files was started.\n", 1, -1);
+    fpnLog = fp_domain+"/"+"GRMdll.log";
+    writeNewLogString(fpnLog, "GRM.dll : grmWSinfo with input files was started.\n", 1, -1);
 
     if (_access(fpnDomain.c_str(), 0) != 0) {
         cout << "ERROR. GRM.dll : [" + fpnDomain + "] file is invalid" << endl;
@@ -51,6 +51,7 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     }
     fs::path fpn_dm = fs::path(fpnDomain.c_str());
     string fp_dm = fpn_dm.parent_path().string();
+    prj.fpnDEM = fpnDEM;
     prj.fpnDomain = fpnDomain;
     prj.fpnFA = fpnFac;
     prj.fpnFD = fpnFdir;
@@ -78,6 +79,10 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     else {
         cout << "ERROR. GRM.dll : Flow direction type is invalid." << endl;
         return;
+    }
+    if (prj.fpnDEM != "" &&
+        _access(prj.fpnDEM.c_str(), 0) == 0) {
+        prj.demFileApplied = 1;
     }
     if (prj.fpnStream != "" &&
         _access(prj.fpnStream.c_str(), 0) == 0) {
@@ -121,7 +126,7 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     }
 
     readDomainFaFileAndSetupCV();
-	if (readSlopeFdirStreamCwCfSsrFileAndSetCV() == -1) { // 0: false, 1: true
+	if (readDomainAddtionalRasterDataAndSetCV() == -1) { // 0: false, 1: true
 		return;
 	}
     if (prj.lcDataType == fileOrConstant::File) {
@@ -137,7 +142,7 @@ grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     setupByFAandNetwork();
     byGMPfile = false;
     grmWSinfo::setPublicVariables();
-    writeLog(fpnLog, "GRM.dll : grmWSinfo with input files was ended.\n", 1, -1);
+    writeLogString(fpnLog, "GRM.dll : grmWSinfo with input files was ended.\n", 1, -1);
 }
 
 grmWSinfo::grmWSinfo(string gmpFPN)
@@ -145,14 +150,14 @@ grmWSinfo::grmWSinfo(string gmpFPN)
     prj.forSimulation = -1;  // exe로 진입하는 것은 1, dll로 진입하는 것은 -1
     ppi=getProjectFileInfo(gmpFPN);
     fpnLog = "GRMdll.log";
-    writeNewLog(fpnLog, "GRM.dll : grmWSinfo with gmp file was started.\n", 1, -1);
+    writeNewLogString(fpnLog, "GRM.dll : grmWSinfo with gmp file was started.\n", 1, -1);
     if (openPrjAndSetupModel(-1) == -1) {
-        writeLog(fpnLog, "ERROR. GRM.dll : Model setup failed !!!\n", 1, 1);
+        writeLogString(fpnLog, "ERROR. GRM.dll : Model setup failed !!!\n", 1, 1);
         return;
     }
     byGMPfile = true;
     grmWSinfo::setPublicVariables();
-    writeLog(fpnLog, "GRM.dll : grmWSinfo with gmp file was ended.\n", 1, -1);
+    writeLogString(fpnLog, "GRM.dll : grmWSinfo with gmp file was ended.\n", 1, -1);
 }
 
 grmWSinfo::~grmWSinfo()
@@ -177,7 +182,7 @@ grmWSinfo::~grmWSinfo()
 
 void grmWSinfo::setPublicVariables()
 {
-    writeLog(fpnLog, "GRM.dll : setPublicVariables was started.\n", 1, -1);
+    writeLogString(fpnLog, "GRM.dll : setPublicVariables was started.\n", 1, -1);
     facMaxCellxCol = cvps[di.cvidxMaxFac].xCol;
     facMaxCellyRow = cvps[di.cvidxMaxFac].yRow;
     WSIDsAll = di.dmids;
@@ -200,11 +205,11 @@ void grmWSinfo::setPublicVariables()
 		FDtype = "StartsFromE_TauDEM";
 	}
 
-	writeLog(fpnLog, "GRM.dll : setPublicVariables was ended.\n", 1, -1);
-    writeLog(fpnLog, "GRM.dll : facMaxCellxCol : "+to_string(facMaxCellxCol)+"\n", 1, -1);
-	writeLog(fpnLog, "GRM.dll : WScount : " + to_string(WScount) + "\n", 1, -1);
-	writeLog(fpnLog, "GRM.dll : di.cellSize : " + to_string(di.cellSize) + "\n", 1, -1);
-	writeLog(fpnLog, "GRM.dll : cellSize : " + to_string(cellSize) + "\n", 1, -1);
+    writeLogString(fpnLog, "GRM.dll : setPublicVariables was ended.\n", 1, -1);
+    writeLogString(fpnLog, "GRM.dll : facMaxCellxCol : "+to_string(facMaxCellxCol)+"\n", 1, -1);
+    writeLogString(fpnLog, "GRM.dll : WScount : " + to_string(WScount) + "\n", 1, -1);
+    writeLogString(fpnLog, "GRM.dll : di.cellSize : " + to_string(di.cellSize) + "\n", 1, -1);
+    writeLogString(fpnLog, "GRM.dll : cellSize : " + to_string(cellSize) + "\n", 1, -1);
 }
 
 bool grmWSinfo::isInWatershedArea(int colXAryidx, int rowYAryidx)
