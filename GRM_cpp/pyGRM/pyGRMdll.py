@@ -25,15 +25,15 @@ class unSaturatedKType(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
 	usKNone=0
 
 class PETmethod(enum.Enum): #grm 코드에 있는 순서와 맞춘다.
-	FPM = 1              # FAOPenmanMonteith
-	BlaneyCriddle = 2
-	Hamon = 3
-	PriestleyTaylor = 4
-	Hargreaves = 5
-	JensenHaise = 6	
-	Turc = 7
+	BC = 1 # BlaneyCriddle
+	FPM = 2  # FAOPenmanMonteith
+	HMN = 3  # Hamon
+	HRGV = 4  #  Hargreaves
+	PT = 5  # PriestleyTaylor	
+	JH = 6  # JensenHaise
+	TRC = 7 #Turc
 	Constant = 8
-	UserET = 9
+	UserET = 9 # PET 혹은 AET
 	petNone = 0
 
 class SnowMeltMethod(enum.Enum): #grm 코드에 있는 순서와 맞춘다.

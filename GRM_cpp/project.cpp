@@ -453,7 +453,7 @@ int openProjectFile(int forceRealTime)
 
 			// 방법별 기상자료 확인 =========================
 			// 소유역별 잠재증발산 산정 방법에 따라서 필요한 자료가 다르므로, 여기서 검토한다.
-			if (prj.swps[mpair.first].potentialETMethod == PETmethod::BlaneyCriddle) {
+			if (prj.swps[mpair.first].potentialETMethod == PETmethod::BC) {
 				if (prj.fpnBlaneyCriddleK == "") {
 					writeLogString(fpnLog, "ERROR : The file of crop ceofficient data in Blaney-Criddle method is invalid.\n", 1, 1);
 					return -1;
@@ -466,7 +466,7 @@ int openProjectFile(int forceRealTime)
 				}
 				ts.isUsed_Latitude = 1;
 			}
-			if (prj.swps[mpair.first].potentialETMethod == PETmethod::Hamon) {
+			if (prj.swps[mpair.first].potentialETMethod == PETmethod::HMN) {
 				// 일조시간
 				if (prj.DTLDataType == weatherDataType::None) {
 					writeLogString(fpnLog, "ERROR : Daytime length data type is invalid.\n", 1, 1);
@@ -482,7 +482,7 @@ int openProjectFile(int forceRealTime)
 				}
 				ts.wdUsed_DTL = 1;
 			}
-			if (prj.swps[mpair.first].potentialETMethod == PETmethod::Hargreaves) {
+			if (prj.swps[mpair.first].potentialETMethod == PETmethod::HRGV) {
 				// 일사량
 				if (prj.solarRadDataType == weatherDataType::None) {
 					writeLogString(fpnLog, "ERROR : Solar radiation data type is invalid.\n", 1, 1);
@@ -558,7 +558,7 @@ int openProjectFile(int forceRealTime)
 				ts.isUsed_Latitude = 1;
 			}
 
-			if (prj.swps[mpair.first].potentialETMethod == PETmethod::PriestleyTaylor) {
+			if (prj.swps[mpair.first].potentialETMethod == PETmethod::PT) {
 				// 일사량
 				if (prj.solarRadDataType == weatherDataType::None) {
 					writeLogString(fpnLog, "ERROR : Solar radiation data type is invalid.\n", 1, 1);
@@ -3379,17 +3379,17 @@ int readXmlRowSubWatershedSettings(string aline, swsParameters * ssp)
 			if (vStringL == lower(ENUM_TO_STR(FPM))) {
 				petM = PETmethod::FPM;
 			}
-			else if (vStringL == lower(ENUM_TO_STR(BlaneyCriddle))) {
-				petM = PETmethod::BlaneyCriddle;
+			else if (vStringL == lower(ENUM_TO_STR(BC))) {
+				petM = PETmethod::BC;
 			}
-			else if (vStringL == lower(ENUM_TO_STR(Hamon))) {
-				petM = PETmethod::Hamon;
+			else if (vStringL == lower(ENUM_TO_STR(HMN))) {
+				petM = PETmethod::HMN;
 			}
-			else if (vStringL == lower(ENUM_TO_STR(PriestleyTaylor))) {
-				petM = PETmethod::PriestleyTaylor;
+			else if (vStringL == lower(ENUM_TO_STR(PT))) {
+				petM = PETmethod::PT;
 			}
-			else if (vStringL == lower(ENUM_TO_STR(Hargreaves))) {
-				petM = PETmethod::Hargreaves;
+			else if (vStringL == lower(ENUM_TO_STR(HRGV))) {
+				petM = PETmethod::HRGV;
 			}
 			//else if (vStringL == lower(ENUM_TO_STR(JensenHaise))) {
 			//	petM = PETmethod::JensenHaise;

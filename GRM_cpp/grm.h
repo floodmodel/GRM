@@ -152,13 +152,13 @@ enum class unSaturatedKType //pyGRMdll.py 에 있는 구조체와 내용 맞춘다. 순서도 �
 
 enum class PETmethod  //pyGRMdll.py 에 있는 구조체와 내용 맞춘다. 순서도 맞게 해야 한다.
 {
-	FPM = 1, //FAOPenmanMonteith
-	BlaneyCriddle = 2,
-	Hamon = 3,
-	PriestleyTaylor = 4,
-	Hargreaves = 5,
-	//JensenHaise = 6,	
-	//Turc = 7,
+	BC = 1, //BlaneyCriddle
+	FPM = 2, //FAOPenmanMonteith
+	HMN = 3, //Hamon
+	HRGV = 4, //Hargreaves
+	PT = 5, //PriestleyTaylor	
+	//JH = 6,	 //JensenHaise
+	//TRC = 7, //Turc
 	//Constant = 8,
 	UserET = 9, // PET 혹은 AET
 	None = 0

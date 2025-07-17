@@ -32,16 +32,16 @@ void calinterception(int i) {
 
 void calET(int i) {
 	switch (cvs[i].petMethod) {
-	case PETmethod::BlaneyCriddle:
+	case PETmethod::BC:
 		calPET_BlaneyCriddle(i);
 		break;
-	case PETmethod::Hamon:
+	case PETmethod::HMN:
 		calPET_Hamon(i);
 		break;
-	case PETmethod::Hargreaves:
+	case PETmethod::HRGV:
 		calPET_Hargreaves(i);
 		break;
-	case PETmethod::PriestleyTaylor:
+	case PETmethod::PT:
 		calPET_PriestleyTaylor(i);
 		break;
 	case PETmethod::FPM:
