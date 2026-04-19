@@ -38,14 +38,16 @@ void writeSimProgress(int elapsedT_min)
     double simDur_min = prj.simDuration_hr * 60.0;
     nowStep = elapsedT_min / simDur_min * 100.0;
 	if (nowStep > 100) { nowStep = 100; }
+	printf("\033[?25l"); //커서 숨기기 ANSI escape code
 	if (ts.showFileProgress  !=1) {
-		printf("\rCurrent progress: %.2f%%... ", nowStep);
+		printf("\rCurrent progress: %.2f%%... ", nowStep); // \033[K : 현재위치부터 줄 끝까지 지우는 ANSI escape code
 		fflush(stdout); // 이거있어야 linux에서 즉시 출력된다.
 	}
 	else {
 		printf("\rCurrent progress: %.2f%%... %s", nowStep, msgFileProcess.c_str());
 		fflush(stdout);
 	}
+	printf("\033[?25h");  // 커서 복구
 }
 
 void writeDischargeFile(string tStrToPrint, double cinterp)

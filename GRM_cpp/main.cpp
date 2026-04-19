@@ -63,6 +63,7 @@ string msgFileProcess;
 
 int main(int argc, char* argvs[])
 {
+	//printf("\033[?25l"); //커서 숨기기 ANSI escape code
 	string outString;
 	version grmV = getCurrentFileVersion();
 	outString = "GRM v." + to_string(grmV.pmajor) + "."
@@ -206,6 +207,7 @@ int main(int argc, char* argvs[])
 		}
 	}
 	disposeDynamicVars();
+	//printf("\033[?25h");  // 커서 복구
 	return 1;
 }
 
