@@ -42,7 +42,9 @@ int readDomainFaFileAndSetupCV()
 	}
     di.nRows = dmFile.header.nRows;
     di.nCols = dmFile.header.nCols;
+
     di.cellSize = dmFile.header.cellsize;
+    di.dx = di.cellSize;
     di.xll = dmFile.header.xllcorner;
     di.yll = dmFile.header.yllcorner;
     di.headerStringAll = dmFile.headerStringAll;

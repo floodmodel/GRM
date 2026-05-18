@@ -54,6 +54,7 @@ The model indroduction and the download guidelines are wiki page at https://gith
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Potential and actual evapotranspiration raster outputs fuction were added.    
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Source codes were integrated to be built on Linux and Windows system.  
 2025.07. The abbreviations of PET method names were applied instead of full name.  
+2026.05. Minor revision in reading the ASCII header information (cellsize, dx).  
 
 
 
