@@ -1899,7 +1899,7 @@ int readXmlRowProjectSettings(string aline)
 			vString = getValueStringFromXmlLine(aline, fldName.ComputationalTimeStep_min_02);
 		}
 		if (vString != "" && stod_comma(vString) > 0) {
-			prj.dtsec = stoi_comma(vString) * 60;
+			prj.dtsec = (int) (stod_comma(vString) * 60);
 		}
 		return 1;
 	}
