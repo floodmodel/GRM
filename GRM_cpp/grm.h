@@ -13,7 +13,7 @@ namespace fs = std::filesystem;
 #define PONDING_DEPTH_CRITERIA_M 0.001
 #define GRAVITY_ACC 9.8 
 
-const double CONST_MIN_SLOPE = 0.000001;
+const double CONST_MIN_SLOPE = 0.00000001;
 const double CONST_EXPONENTIAL_NUMBER_UNSATURATED_K = 6.4;
 
 const double CONST_DEPTH_TO_BEDROCK = 20;// 암반까지의 깊이[m]
