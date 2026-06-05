@@ -5,7 +5,7 @@ import enum
 from ctypes import *
 
 # here, grm dll file full path and name
-gdl_path = ctypes.util.find_library("D:/Github/GRMv2023/GRMv2023_cpp/x64/Release/GRM.dll") 
+gdl_path = ctypes.util.find_library("D:/Github/GRM/GRM_cpp/x64/Release/GRM.dll") 
 #gdl_path = ctypes.util.find_library("D:/Github/GRMv2023/GRMv2023_cpp/x64/Debug/GRM.dll") # this line is for combined debugging with GRM c++ code.
 
 
@@ -105,11 +105,11 @@ class grmWSinfo(object):
     # fpnGMP_OR_fdirType 여기에 gmp 파일을 입력하든지, flowDirectionType을 입력하든지 선택
     #      flowDirectionType 을 입력할 경우에는 다른 파일들도 argument로 입력해야 한다. 
     def __init__(self, fpnGMP_OR_fdirType, 
-                fpnDEM="", # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
                 fpnDomain="", # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
                 fpnSlope="", # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
                 fpnFdir="",  # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
                 fpnFac="", # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
+                fpnDEM="", # gmp 파일로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수
                 fpnStream = "", # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
                 fpnLandCover = "",   # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
                 fpnSoilTexture = "",  # gmp 로 인스턴싱 할경우 입력하면 안됨, 입력파일들로 인스턴싱 할경우 필수아님
@@ -122,10 +122,7 @@ class grmWSinfo(object):
                 ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p, 
                 ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p,
                 ctypes.c_char_p, ctypes.c_char_p, ctypes.c_char_p] 
-        	# grmWSinfo* grmWSinfo_new_inputFiles(string fdirType, string fpnDomain, string fpnSlope, 
-               #     string fpnFdir, string fpnFac, string fpnStream = "", 
-               #     string fpnLandCover = "",  string fpnSoilTexture = "", string fpnSoilDepth = "",
-		       #     string fpnIniSoilSaturationRatio = "", string pfnIniChannelFlow = "", string fpnChannelWidth = "")
+
         gdl.grmWSinfo_new_inputFiles.restype = ctypes.c_void_p
 
         gdl.grmWSinfo_new_gmpFile.argtypes =[ctypes.c_char_p] # string
@@ -247,11 +244,11 @@ class grmWSinfo(object):
         if fpnDomain=="":
             self.obj = gdl.grmWSinfo_new_gmpFile(bfpnGmpORfdirType)
         else :
-            bfpnDEM =fpnDEM.encode('utf-8')
             bfpnDomain =fpnDomain.encode('utf-8')
             bfpnSlope =fpnSlope.encode('utf-8')
             bfpnFdir = fpnFdir.encode('utf-8')
             bfpnFac = fpnFac.encode('utf-8')
+            bfpnDEM =fpnDEM.encode('utf-8')
             bfpnStream=fpnStream.encode('utf-8')
             bfpnLandCover = fpnLandCover.encode('utf-8')
             bfpnSoilTexture = fpnSoilTexture.encode('utf-8')
@@ -259,9 +256,11 @@ class grmWSinfo(object):
             bfpnIniSoilSaturationRatio = fpnIniSoilSaturationRatio.encode('utf-8')
             bpfnIniChannelFlow = pfnIniChannelFlow.encode('utf-8')
             bfpnChannelWidth = fpnChannelWidth.encode('utf-8')
-            self.obj = gdl.grmWSinfo_new_inputFiles(bfpnGmpORfdirType, bfpnDEM, 
+            self.obj = gdl.grmWSinfo_new_inputFiles(bfpnGmpORfdirType, 
                     bfpnDomain, bfpnSlope, 
-                    bfpnFdir, bfpnFac, bfpnStream, 
+                    bfpnFdir, bfpnFac, 
+                    bfpnDEM, 
+                    bfpnStream, 
                     bfpnLandCover, bfpnSoilTexture, bfpnSoilDepth, 
                     bfpnIniSoilSaturationRatio, bpfnIniChannelFlow, bfpnChannelWidth)
 
@@ -364,16 +363,29 @@ class grmWSinfo(object):
 ### gmp 파일로 grmWSinfo class 를 인스턴싱 할 경우 ==============================
 ### gmp 파일에서 ProjectSetting 테이블까지만 채워져 있어도 사용할 수 있다. 
 #fpn_gmp = "D:\GRM_ex\Han\20220208_aju\Hanriver_GRM_calib_Run_pre.gmp" #"C:\GRM\SampleGHG\GHG500.gmp"
-fpn_gmp  = "D:/Github/zTestSet_GRM2023_SampleJeju/20231123_01_JJD_QGRMtest_v2023.gmp"
-#fpn_gmp  = "D:\Github\zTestSetPyGRM\SampleWC\SampleWiCheon.gmp"
+# fpn_gmp  = "D:/Github/zTestSet_GRM2023_SampleJeju/20231123_01_JJD_QGRMtest_v2023.gmp"
+# fpn_gmp  = "C:\GRM\SampleWC_test\SampleWiCheon_test.gmp" #"D:\Github\zTestSetPyGRM\SampleWC\SampleWiCheon.gmp"
 
-wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
+# wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_void_p
 ###================================================================
 ###================================================================
 
 
 ##================================================================
 ## gmp 에 저장된 GRM 입력 파일로 grmWSinfo class 를 인스턴싱 할 경우 ============================
+
+fdType = "StartsFromE_TauDEM"
+
+fpnDEM = ''
+fpn_domain = "C:/GRM/SampleWC/Domain/WiWatershed.asc"
+fpn_slope = "C:/GRM/SampleWC/Domain/Wi_Slope_ST.asc"
+fpn_fd = "C:/GRM/SampleWC/Domain/WiFDir.asc"
+fpn_fa = "C:/GRM/SampleWC/Domain/WiFAc.asc"
+fpn_stream = "C:/GRM/SampleWC/Domain/WiStream6.asc"
+fpn_lc="C:/GRM/SampleWC/Domain/wilc200.asc"
+fpn_st="C:/GRM/SampleWC/Domain/wistext200.asc"
+fpn_sd="C:/GRM/SampleWC/Domain/wisdepth200.asc"
+
 #fdType = "StartsFromE_TauDEM"
 ##fpn_domain = "C:\GRM\SampleGHG\watershed/GHG_Watershed.asc"
 ##fpn_slope = "C:\GRM\SampleGHG\watershed/GHG_Slope_ST.asc"
@@ -401,31 +413,33 @@ wsi=grmWSinfo(fpn_gmp) # gmp file path and name / [ctypes.c_char_p] -> ctypes.c_
 #fpn_lc = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_lc.asc";
 #fpn_st = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_SoilTexture.asc";
 #fpn_sd = "D:\\GRM_ex\\SpeedTest\\GHG\\watershed\\GHG_SoilDepth.asc";
-#fpn_ssi=''
-#fpn_iniCF=''
-#fpn_CW=''
+
+fpn_ssi=''
+fpn_iniCF=''
+fpn_CW=''
 
 
-#wsi=grmWSinfo(fdType,  
-#    fpn_domain,
-#    fpn_slope,
-#    fpn_fd,
-#    fpn_fa,
-#    fpn_stream, 
-#    fpn_lc,
-#    fpn_st,
-#    fpn_sd, fpn_ssi, fpn_iniCF, fpn_CW)
+wsi=grmWSinfo(fdType,  
+   fpn_domain,
+   fpn_slope,
+   fpn_fd,
+   fpn_fa,
+   fpnDEM,
+   fpn_stream, 
+   fpn_lc,
+   fpn_st,
+   fpn_sd, fpn_ssi, fpn_iniCF, fpn_CW)
 ##================================================================
 ##================================================================
 
 # 여기서는 정보를 얻고자 하는 셀위치 혹은 유역 번호를 지정 =========================
-xCol = 222  # 정보를 얻고자 하는 셀 위치
-yRow = 153 # 정보를 얻고자 하는 셀 위치
-wsid = 100  # 정보를 얻고자 하는 유역 번호
+xCol = 21  # 정보를 얻고자 하는 셀 위치
+yRow = 39 # 정보를 얻고자 하는 셀 위치
+wsid = 1  # 정보를 얻고자 하는 유역 번호
 #=================================================================
 
 print(" ")
-print("From here, pyGRM.dll writes the values.")
+print("From here, pyGRMdll.py writes the values.")
 
 a = wsi.isInWatershedArea(xCol, yRow) # cell position(x, y) / [ctypes.c_int, ctypes.c_int] -> ctypes.c_bool
 print("Is the cell [", xCol, ", ", yRow, "] in the watershed area ? :", a)
@@ -548,7 +562,7 @@ print("subwatershedPars. userSet :", swp.userSet)    # 1 : true, 0: false
 # ========================================================
 
 # 업데이트 된 매개변수 조회하기
-wsid = 100 # 1번은 샘플. setOneSWSParsAndUpdateAllSWSUsingNetwork()에서 업데이트 된 매개변수 조회할 유역 id 지정한다. 
+wsid = 100 # 100번은 샘플. setOneSWSParsAndUpdateAllSWSUsingNetwork()에서 업데이트 된 매개변수 조회할 유역 id 지정한다. 
 swp = wsi.subwatershedPars(wsid) # current ws id / [ctypes.c_int] -> swsParameters
 print("subwatershedPars. wsid :", swp.wsid)
 print("subwatershedPars. iniSaturation :", swp.iniSaturation)

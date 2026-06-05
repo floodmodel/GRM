@@ -14,11 +14,11 @@ extern "C" // for python //grmWSinfo의 내용을  재정의 한다.
 
 	// 여기부터는 grmWSinfo 클래스 관련=============================================
 	GRMDLL_API grmWSinfo* grmWSinfo_new_inputFiles(char* fdirType,
-		char* fpnDEM,
 		char* fpnDomain,
 		char* slopeFPN, 
 		char* fpnFdir, 
 		char* fpnFac,
+		const char* fpnDEM = "", // 여기서 부터 optional argument
 		const char* fpnStream = "", 
 		const char* fpnLandCover = "",
 		const char* fpnSoilTexture = "", 
@@ -27,8 +27,10 @@ extern "C" // for python //grmWSinfo의 내용을  재정의 한다.
 		const char* pfnIniChannelFlow = "",
 		const char* fpnChannelWidth = "")
 	{
-		return new grmWSinfo(fdirType, fpnDEM, fpnDomain,
+		return new grmWSinfo(fdirType, 
+			fpnDomain,
 			slopeFPN, fpnFdir, fpnFac,
+			fpnDEM,
 			fpnStream, fpnLandCover,
 			fpnSoilTexture, fpnSoilDepth,
 			fpnIniSoilSaturationRatio,

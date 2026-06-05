@@ -16,8 +16,9 @@ extern cvpos* cvps;
 extern domaininfo di;
 extern map<int, int*> cvaisToFA; //faº° cv array idex ¸ñ·Ï
 
-grmWSinfo::grmWSinfo(string fdirType, string fpnDEM, string fpnDomain,
+grmWSinfo::grmWSinfo(string fdirType, string fpnDomain,
     string fpnSlope, string fpnFdir, string fpnFac,
+    string fpnDEM,
     string fpnStream, string fpnLandCover,
     string fpnSoilTexture, string fpnSoilDepth,
     string fpnIniSoilSaturationRatio, string pfnIniChannelFlow,

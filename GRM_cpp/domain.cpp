@@ -53,6 +53,12 @@ int readDomainFaFileAndSetupCV()
     di.facMax = -1;
     di.facMin = INT_MAX;
     //====================================
+
+    cout << prj.fpnDomain << endl;
+    cout << prj.fpnFA << endl;
+	cout << di.nCols << ", " << di.nRows << endl;
+
+
     cvais = new int* [di.nCols];
     for (int i = 0; i < di.nCols; ++i) {
         cvais[i] = new int[di.nRows];
