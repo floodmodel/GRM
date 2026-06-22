@@ -2759,8 +2759,8 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 			}
 			return 1;
 		}
-		if (aline.find("<" + fldName.AutoROM_MaxOutFlow_CMS + ">") != string::npos) {
-			vString = getValueStringFromXmlLine(aline, fldName.AutoROM_MaxOutFlow_CMS);
+		if (aline.find("<" + fldName.AutoROMmaxOutflow_CMS + ">") != string::npos) {
+			vString = getValueStringFromXmlLine(aline, fldName.AutoROMmaxOutflow_CMS);
 			if (vString != "") {
 				fci->autoROMmaxOutflow_cms = stod_comma(vString);
 			}

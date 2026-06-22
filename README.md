@@ -56,6 +56,8 @@ The model indroduction and the download guidelines are wiki page at https://gith
 2025.07. The abbreviations of PET method names were applied instead of full name.  
 2026.05. Minor revision in reading the ASCII header information (cellsize, dx).  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Minor revision in reading the fixed time step value.   
+2026.06. Minor revision in min. slope limit.  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bug fix in reading AutoROM options.   
 
 
 

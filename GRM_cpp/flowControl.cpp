@@ -394,7 +394,7 @@ void calReservoirOperation(int i, double nowTmin)
         if (cvs[i].storageCumulative_m3 >= maxStorageApp) {
             Qout_cms = (cvs[i].storageCumulative_m3
                 - maxStorageApp) / ts.dtsec; // 차이 있을 때 유출
-			if (afci.autoROMmaxOutflow_cms > 0 &&
+			if (afci.autoROMmaxOutflow_cms > 0 && //0이하의 값일때는 방류량 제한이 없다.
 				Qout_cms > afci.autoROMmaxOutflow_cms) { // 2023.03.13 이거보다 작게 유출되게 한다.
 				Qout_cms = afci.autoROMmaxOutflow_cms;
 			}

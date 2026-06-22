@@ -444,7 +444,7 @@ typedef struct _projectFileFieldName
 	const string RestrictedStorage = "RestrictedStorage";
 	const string RestrictedPeriod_Start = "RestrictedPeriod_Start";
 	const string RestrictedPeriod_End = "RestrictedPeriod_End";
-	const string AutoROM_MaxOutFlow_CMS = "AutoROM_MaxOutFlow_CMS";
+	const string AutoROMmaxOutflow_CMS = "AutoROMmaxOutflow_CMS";
 	const string ROType = "ROType";
 	const string ROConstRatio = "ROConstRatio";
 	const string ROConstDischarge = "ROConstDischarge";
