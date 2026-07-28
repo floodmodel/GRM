@@ -420,7 +420,7 @@ int setupAndStartSimulation()
 			return -1;
 		}
 	}
-	writeLogString(fpnLog, "Simulation was started.\n", 1, 1);
+	writeLogString(fpnLog, "Simulation started.\n", 1, 1);
 	if (startSimulation() == -1) {
 		writeNewLogString(fpnLog, "ERROR : An error was occurred while simulation...\n", 1, 1);
 		return -1;

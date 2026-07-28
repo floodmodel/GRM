@@ -397,12 +397,20 @@ int readLandCoverFileAndSetCVbyVAT()
 
 int setCVbyLCConstant()
 {
-    if (prj.cnstImperviousR == -1) {
+    if (prj.cnstImperviousR < 0.0) {
         writeLogString(fpnLog, "ERROR : Land cover constant impervious ratio is invalid.\n", 1, 1);
         return -1;
     }
-    if (prj.cnstRoughnessC == -1) {
+    if (prj.cnstRoughnessC < 0.0) {
         writeLogString(fpnLog, "ERROR : Land cover constant roughness coefficient is invalid.\n", 1, 1);
+        return -1;
+    }
+    if (prj.cnstCanopyR < 0.0) {
+        writeLogString(fpnLog, "ERROR : Land cover constant canopy ratio is invalid.\n", 1, 1);
+        return -1;
+    }
+    if (prj.cnstIntcpMaxWaterCanopy_mm < 0.0) {
+        writeLogString(fpnLog, "ERROR : Land cover constant max. water interception capacity is invalid.\n", 1, 1);
         return -1;
     }
     int nRy = di.nRows;
@@ -412,6 +420,8 @@ int setCVbyLCConstant()
         cvs[i].lcCellValue = 0; // 이 값은 상수를 의미하게 한다.
         cvs[i].rcOFori = prj.cnstRoughnessC;
         cvs[i].imperviousR = prj.cnstImperviousR;
+        cvs[i].canopyR = prj.cnstCanopyR;
+        cvs[i].intcpMaxWaterCanopy_m = prj.cnstIntcpMaxWaterCanopy_mm / 1000.0;
         cvs[i].lcCode = landCoverCode::CONSTV;
     }
     return 1;

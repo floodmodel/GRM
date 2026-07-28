@@ -832,12 +832,20 @@ int openProjectFile(int forceRealTime)
 		}
 	}
 	else if (prj.lcDataType == fileOrConstant::Constant) {
-		if (prj.cnstRoughnessC == 0.0) {
-			writeLogString(fpnLog, "ERROR : Land cover constant roughness is invalid.\n", 1, 1);
-			return -1;
-		}
 		if (prj.cnstImperviousR < 0.0) {
 			writeLogString(fpnLog, "ERROR : Land cover constant impervious ratio is invalid.\n", 1, 1);
+			return -1;
+		}
+		if (prj.cnstRoughnessC < 0.0) {
+			writeLogString(fpnLog, "ERROR : Land cover constant roughness coefficient is invalid.\n", 1, 1);
+			return -1;
+		}
+		if (prj.cnstCanopyR < 0.0) {
+			writeLogString(fpnLog, "ERROR : Land cover constant canopy ratio is invalid.\n", 1, 1);
+			return -1;
+		}
+		if (prj.cnstIntcpMaxWaterCanopy_mm < 0.0) {
+			writeLogString(fpnLog, "ERROR : Land cover constant max. water interception capacity is invalid.\n", 1, 1);
 			return -1;
 		}
 	}
@@ -1291,15 +1299,6 @@ int readXmlRowProjectSettings(string aline)
 		return 1;
 	}
 
-	if (aline.find(fldName.LAIFile) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.LAIFile);
-		prj.fpnLAI = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnLAI = vString;
-		}
-		return 1;
-	}
-
 	if (aline.find(fldName.ConstantRoughnessCoeff) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.ConstantRoughnessCoeff);
 		if (vString != "") {
@@ -1312,6 +1311,46 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.ConstantImperviousRatio);
 		if (vString != "") {
 			prj.cnstImperviousR = stod(vString);
+		}
+		return 1;
+	}
+
+	if (aline.find(fldName.ConstantCanopyRatio) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.ConstantCanopyRatio);
+		if (vString != "") {
+			prj.cnstCanopyR = stod(vString);
+		}
+		return 1;
+	}
+
+	if (aline.find(fldName.ConstantInterceptMaxWaterCanopy_mm) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.ConstantInterceptMaxWaterCanopy_mm);
+		if (vString != "") {
+			prj.cnstIntcpMaxWaterCanopy_mm = stod(vString);
+		}
+		return 1;
+	}
+
+	if (aline.find(fldName.LAIFile) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.LAIFile);
+		prj.fpnLAI = "";
+		if (vString != "" && fs::exists(lower(vString)) == true) {
+			prj.fpnLAI = vString;
+		}
+		return 1;
+	}
+
+	if (aline.find(fldName.BlaneyCriddleCoefDataFile) != string::npos) {
+		vString = getValueStringFromXmlLine(aline, fldName.BlaneyCriddleCoefDataFile);
+		prj.fpnBlaneyCriddleK = "";
+		if (vString != "" && fs::exists(lower(vString)) == true) {
+			prj.fpnBlaneyCriddleK = vString;
+		}
+		else if (prj.simType == simulationType::Normal) {
+			if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
+				writeLogString(fpnLog, "ERROR : The file of K ceofficient data in Blaney-Criddle method [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
 		}
 		return 1;
 	}
@@ -1585,21 +1624,6 @@ int readXmlRowProjectSettings(string aline)
 		else if (prj.simType == simulationType::Normal) {//옵션이므로 여기서 애러처리 안한다.
 			//writeLog(fpnLog, "WARNNING : Daytime length data time interval was not set.\n", 1, 1);
 			prj.DTLDataInterval_min = 0;
-		}
-		return 1;
-	}
-
-	if (aline.find(fldName.BlaneyCriddleCoefDataFile) != string::npos) {
-		vString = getValueStringFromXmlLine(aline, fldName.BlaneyCriddleCoefDataFile);
-		prj.fpnBlaneyCriddleK = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnBlaneyCriddleK = vString;
-		}
-		else if (prj.simType == simulationType::Normal) {
-			if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
-				writeLogString(fpnLog, "ERROR : The file of K ceofficient data in Blaney-Criddle method [" + vString + "] is invalid.\n", 1, 1);
-				return -1;
-			}
 		}
 		return 1;
 	}

@@ -297,6 +297,8 @@ typedef struct _projectFileFieldName
 
 	const string ConstantRoughnessCoeff = "ConstantRoughnessCoeff";
 	const string ConstantImperviousRatio = "ConstantImperviousRatio";
+	const string ConstantCanopyRatio = "ConstantCanopyRatio";
+	const string ConstantInterceptMaxWaterCanopy_mm = "ConstantInterceptMaxWaterCanopy_mm";
 	const string SoilTextureDataType = "SoilTextureDataType";
 	const string SoilTextureFile = "SoilTextureFile";
 	const string SoilTextureVATFile = "SoilTextureVATFile";
@@ -884,19 +886,21 @@ typedef struct _projectFile
 	string fpnLC = "";
 	string fpnLCVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
 	string fpnLAI="";
-	double cnstRoughnessC = 0.0;
-	double cnstImperviousR = 0.0;
+	double cnstRoughnessC = -1.0;
+	double cnstImperviousR = -1.0;
+	double cnstCanopyR = -1.0;
+	double cnstIntcpMaxWaterCanopy_mm = -1.0;
 	fileOrConstant stDataType = fileOrConstant::None;
 	string fpnST = "";
 	string fpnSTVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
-	double cnstSoilPorosity = 0.0;
-	double cnstSoilEffPorosity = 0.0;
-	double cnstSoilWFSH = 0.0;
-	double cnstSoilHydraulicK = 0.0;
+	double cnstSoilPorosity = -1.0;
+	double cnstSoilEffPorosity = -1.0;
+	double cnstSoilWFSH = -1.0;
+	double cnstSoilHydraulicK = -1.0;
 	fileOrConstant sdDataType = fileOrConstant::None;
 	string fpnSD = "";
 	string fpnSDVat = ""; // 모델에서 직접 이용되지는 않는다. GUI에서 이용된다. 모델에서는 gmp 파일에 있는 매개변수 이용함
-	double cnstSoilDepth = 0.0;
+	double cnstSoilDepth = -1.0;
 	flowDirectionType fdType = flowDirectionType::None;
 
 	weatherDataType rfDataType = weatherDataType::None;
