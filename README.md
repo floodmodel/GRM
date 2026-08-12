@@ -58,6 +58,8 @@ The model indroduction and the download guidelines are wiki page at https://gith
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Minor revision in reading the fixed time step value.   
 2026.06. Minor revision in min. slope limit.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Bug fix in reading AutoROM options.   
+2026.08. SCEUAC optimization tool was uploaded.  
+   
 
 
 
