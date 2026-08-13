@@ -137,7 +137,9 @@ int openProjectFile(int forceRealTime)
 			}
 			continue;
 		}
-		if (sbSubWatershedSettings == 1 && pt.sSubWatershedSettings == 0) {
+		// sbSubWatershedSettings == 1 : 이전단계에서 열린 조건, pt.sSubWatershedSettings == 0 : 이번 단계에서 단힌 조건
+		// 즉, 이전 루프에서 열려서 내용을 읽다가, 이번 루프에 닫힌 경우
+		if (sbSubWatershedSettings == 1 && pt.sSubWatershedSettings == 0) { 
 			sbSubWatershedSettings = 0;
 			if (aswp->wsid > 0 && isNormalSwsParameter(aswp) == 1) {
 				prj.swps[aswp->wsid] = *aswp;
@@ -151,7 +153,6 @@ int openProjectFile(int forceRealTime)
 			continue;
 		}
 		if (sbSubWatershedSettings == 1 && pt.sSubWatershedSettings != 0) {
-			sbSubWatershedSettings = 1;
 			if (readXmlRowSubWatershedSettings(aline, aswp) == -1) {
 				return -1;
 			}
@@ -172,7 +173,6 @@ int openProjectFile(int forceRealTime)
 			continue;
 		}
 		if (sbChannelSettings == 1 && pt.sChannelSettings != 0) {
-			sbChannelSettings = 1;
 			if (readXmlRowChannelSettings(aline, acs) == -1) {
 				return -1;
 			}
@@ -192,7 +192,6 @@ int openProjectFile(int forceRealTime)
 			continue;
 		}
 		if (sbFlowControlGrid == 1 && pt.sFlowControlGrid != 0) {
-			sbFlowControlGrid = 1;
 			if (readXmlRowFlowControlGrid(aline, afc) == -1) {
 				return -1;
 			}
@@ -213,7 +212,6 @@ int openProjectFile(int forceRealTime)
 			continue;
 		}
 		if (sbWatchPoints == 1 && pt.sWatchPoints != 0) {
-			sbWatchPoints = 1;
 			if (readXmlRowWatchPoint(aline, awp) == -1) {
 				return -1;
 			}
@@ -235,7 +233,6 @@ int openProjectFile(int forceRealTime)
 				continue;
 			}
 			if (sbGreenAmptParameter == 1 && pt.sGreenAmptParameter != 0) {
-				sbGreenAmptParameter = 1;
 				if (readXmlRowSoilTextureInfo(aline, ast) == -1) {
 					return -1;
 				}
@@ -258,7 +255,6 @@ int openProjectFile(int forceRealTime)
 				continue;
 			}
 			if (sbSoilDepth == 1 && pt.sSoilDepth != 0) {
-				sbSoilDepth = 1;
 				if (readXmlRowSoilDepth(aline, asd) == -1) {
 					return -1;
 				}
@@ -281,7 +277,6 @@ int openProjectFile(int forceRealTime)
 				continue;
 			}
 			if (sbLandCover == 1 && pt.sLandCover != 0) {
-				sbLandCover = 1;
 				if (readXmlRowLandCover(aline, alc) == -1) {
 					return -1;
 				}
