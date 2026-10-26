@@ -1159,6 +1159,7 @@ void initRFvars();
 void initValuesAfterPrinting(int nowTP_min, int printAveValueNow); //출력할 때 마다 초기화 되어야 하는 변수들 처리
 int initWatershedNetwork();
 int initWPinfos();
+
 int isNormalChannelSettingInfo(channelSettingInfo *csi);
 int isNormalFlowControlinfo(flowControlinfo *fci);
 int isNormalSwsParameter(swsParameters *swp);

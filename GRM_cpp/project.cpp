@@ -1046,6 +1046,7 @@ int readXmlRowProjectSettings(string aline)
 {
 	string vString = "";
 	projectFileFieldName fldName;
+	//string fpnLogStr = fpnLog.string();
 	if (aline.find(fldName.GRMSimulationType) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.GRMSimulationType);
 		if (vString != "") {
@@ -1079,20 +1080,29 @@ int readXmlRowProjectSettings(string aline)
 		}
 		prj.fpnDomain = "";
 		// wsl에서는 드라이브 문자는 소문자로 표시한다. D: 드라이브는 d로 표시
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnDomain = vString;
-
-			fs::path fpnProjection;
-			fpnProjection = fs::path(prj.fpnDomain.c_str()).replace_extension(".prj");
-			if (fs::exists(lower(fpnProjection.string())) == true) {
-				prj.fpnProjection = fpnProjection.string();
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Domain file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnDomain = vString;
+				fs::path fpnProjection;
+				fpnProjection = fs::path(prj.fpnDomain.c_str()).replace_extension(".prj");
+				if (fs::exists(lower(fpnProjection.string())) == true) {
+					prj.fpnProjection = fpnProjection.string();
+				}
+				else {
+					prj.fpnProjection = "";
+				}
 			}
 			else {
-				prj.fpnProjection = "";
+				writeLogString(fpnLog, "ERROR : Domain file [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
 			}
 		}
 		else {
-			writeLogString(fpnLog, "ERROR : Domain file [" + vString + "] is invalid.\n", 1, 1);
+			writeLogString(fpnLog, "ERROR : Domain file is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1101,11 +1111,21 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.SlopeFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SlopeFile);
 		prj.fpnSlope = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnSlope = vString;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Slope file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnSlope = vString;
+			}
+			else {
+				writeLogString(fpnLog, "ERROR : Slope file [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
 		}
 		else {
-			writeLogString(fpnLog, "ERROR : Slope file [" + vString + "] is invalid.\n", 1, 1);
+			writeLogString(fpnLog, "ERROR : Slope file is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1114,11 +1134,21 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.FlowDirectionFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.FlowDirectionFile);
 		prj.fpnFD = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnFD = vString;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Flow direction file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnFD = vString;
+			}
+			else {
+				writeLogString(fpnLog, "ERROR : Flow direction file [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
 		}
 		else {
-			writeLogString(fpnLog, "ERROR : Flow direction file [" + vString + "] is invalid.\n", 1, 1);
+			writeLogString(fpnLog, "ERROR : Flow direction file is invalid.\n", 1, 1);
 			return -1;
 		}
 		return 1;
@@ -1155,12 +1185,23 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.FlowAccumFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.FlowAccumFile);
 		prj.fpnFA = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnFA = vString;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Flow accumulation file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnFA = vString;
+			}
+			else {
+				writeLogString(fpnLog, "ERROR : Flow accumulation file [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
 		}
 		else {
-			writeLogString(fpnLog, "ERROR : Flow accumulation file [" + vString + "] is invalid.\n", 1, 1);
+			writeLogString(fpnLog, "ERROR : Flow accumulation file is invalid.\n", 1, 1);
 			return -1;
+
 		}
 		return 1;
 	}
@@ -1169,13 +1210,19 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.DEMFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.DEMFile);
 		prj.fpnDEM = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnDEM = vString;
-		}
-		else {
-			// 모의조건에 따른 검증은 다른 곳에서 기상자료와 함께 하자.
-			//writeLogString(fpnLog, "ERROR : DEM file [" + vString + "] is invalid.\n", 1, 1);
-			//return -1;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : DEM file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnDEM = vString;
+			}
+			else {
+				// 모의조건에 따른 검증은 다른 곳에서 기상자료와 함께 하자.
+				//writeLogString(fpnLog, "ERROR : DEM file [" + vString + "] is invalid.\n", 1, 1);
+				//return -1;
+			}
 		}
 		return 1;
 	}
@@ -1184,18 +1231,22 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.StreamFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.StreamFile);
 		prj.fpnStream = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnStream = vString;
-			prj.streamFileApplied = 1;
-		}
-		else {
-			if (vString == "") {
-				writeLogString(fpnLog, "WARNNING : Stream file was not set.\n", 1, -1);
+		prj.streamFileApplied = -1;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Stream file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnStream = vString;
+				prj.streamFileApplied = 1;
 			}
 			else {
 				writeLogString(fpnLog, "WARNNING : Stream file [" + vString + "] is invalid.\n", 1, 1);
 			}
-			prj.streamFileApplied = -1;
+		}
+		else {
+			writeLogString(fpnLog, "WARNNING : Stream file was not set.\n", 1, -1);
 		}
 		return 1;
 	}
@@ -1203,19 +1254,22 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.ChannelWidthFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.ChannelWidthFile);
 		prj.fpnChannelWidth = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnChannelWidth = vString;
-			prj.cwFileApplied = 1;
-		}
-		else {
-			if (vString == "") {
-				writeLogString(fpnLog, "Channel width file was not set.\n", 1, -1);
+		prj.cwFileApplied = -1;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Channel width file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnChannelWidth = vString;
+				prj.cwFileApplied = 1;
 			}
 			else {
 				writeLogString(fpnLog, "WARNNING : Channel width file [" + vString + "] is invalid.\n", 1, 1);
 			}
-
-			prj.cwFileApplied = -1;
+		}
+		else {
+			writeLogString(fpnLog, "Channel width file was not set.\n", 1, -1);
 		}
 		return 1;
 	}
@@ -1223,19 +1277,22 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.InitialSoilSaturationRatioFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.InitialSoilSaturationRatioFile);
 		prj.fpniniSSR = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpniniSSR = vString;
-			prj.issrFileApplied = 1;
-		}
-		else {
-			if (vString == "") {
-				writeLogString(fpnLog, "Soil saturation ratio file was not set.\n", 1, -1);
+		prj.issrFileApplied = -1;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Soil saturation ratio file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpniniSSR = vString;
+				prj.issrFileApplied = 1;
 			}
 			else {
 				writeLogString(fpnLog, "WARNNING : Soil saturation ratio file [" + vString + "] is invalid.\n", 1, 1);
 			}
-
-			prj.issrFileApplied = -1;
+		}
+		else {
+			writeLogString(fpnLog, "Soil saturation ratio file was not set.\n", 1, -1);
 		}
 		return 1;
 	}
@@ -1243,18 +1300,22 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.InitialChannelFlowFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.InitialChannelFlowFile);
 		prj.fpniniChFlow = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpniniChFlow = vString;
-			prj.icfFileApplied = 1;
-		}
-		else {
-			if (vString == "") {
-				writeLogString(fpnLog, "Initial stream flow file was not set.\n", 1, -1);
+		prj.icfFileApplied = -1;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Initial stream flow file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpniniChFlow = vString;
+				prj.icfFileApplied = 1;
 			}
 			else {
 				writeLogString(fpnLog, "WARNNING : Initial stream flow file [" + vString + "] is invalid.\n", 1, 1);
 			}
-			prj.icfFileApplied = -1;
+		}
+		else {
+			writeLogString(fpnLog, "Initial stream flow file was not set.\n", 1, -1);
 		}
 		return 1;
 	}
@@ -1284,8 +1345,18 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.LandCoverFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.LandCoverFile);
 		prj.fpnLC = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnLC = vString;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Land cover file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnLC = vString;
+			}
+			else {
+				writeLogString(fpnLog, "WARNNING :  Land cover file [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
 		}
 		return 1;
 	}
@@ -1293,8 +1364,14 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.LandCoverVATFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.LandCoverVATFile);
 		prj.fpnLCVat = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnLCVat = vString;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Land cover VAT file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnLCVat = vString;
+			}
 		}
 		return 1;
 	}
@@ -1334,8 +1411,14 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.LAIFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.LAIFile);
 		prj.fpnLAI = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnLAI = vString;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : LAT file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnLAI = vString;
+			}
 		}
 		return 1;
 	}
@@ -1343,15 +1426,21 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.BlaneyCriddleCoefDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.BlaneyCriddleCoefDataFile);
 		prj.fpnBlaneyCriddleK = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnBlaneyCriddleK = vString;
-		}
-		else if (prj.simType == simulationType::Normal) {
-			if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
-				writeLogString(fpnLog, "ERROR : The file of K ceofficient data in Blaney-Criddle method [" + vString + "] is invalid.\n", 1, 1);
+		if (vString != "" ) { 
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Blaney-Criddle method K ceofficient data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnBlaneyCriddleK = vString;
+			}
 		}
+		//else if (prj.simType == simulationType::Normal) {
+		//	if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
+		//		writeLogString(fpnLog, "ERROR : The file of K ceofficient data in Blaney-Criddle method [" + vString + "] is invalid.\n", 1, 1);
+		//		return -1;
+		//	}
+		//}
 		return 1;
 	}
 
@@ -1380,8 +1469,14 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.SoilTextureFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SoilTextureFile);
 		prj.fpnST = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnST = vString;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Soil texture data file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnST = vString;
+			}
 		}
 		return 1;
 	}
@@ -1389,8 +1484,14 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.SoilTextureVATFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SoilTextureVATFile);
 		prj.fpnSTVat = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnSTVat = vString;
+		if (vString != "") { 
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Soil texture VAT file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnSTVat = vString;
+			}
 		}
 		return 1;
 	}
@@ -1448,16 +1549,28 @@ int readXmlRowProjectSettings(string aline)
 	if (aline.find(fldName.SoilDepthFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SoilDepthFile);
 		prj.fpnSD = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnSD = vString;
+		if (vString != ""){ 
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Soil depth file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnSD = vString;
+			}
 		}
 		return 1;
 	}
 	if (aline.find(fldName.SoilDepthVATFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SoilDepthVATFile);
 		prj.fpnSDVat = "";
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnSDVat = vString;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Soil depth VAT file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnSDVat = vString;
+			}
 		}
 		return 1;
 	}
@@ -1477,11 +1590,21 @@ int readXmlRowProjectSettings(string aline)
 		}
 		prj.fpnRainfallData = "";
 		prj.rfDataType = weatherDataType::None;
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnRainfallData = vString;
-			prj.rfDataType = getWeatherDataTypeByDataFile(vString);
-			if (prj.rfDataType == weatherDataType::None) {
-				writeLogString(fpnLog, "ERROR : The precipitation data in the file [" + vString + "] is invalid.\n", 1, 1);
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : The precipitation data file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnRainfallData = vString;
+				prj.rfDataType = getWeatherDataTypeByDataFile(vString);
+				if (prj.rfDataType == weatherDataType::None) {
+					writeLogString(fpnLog, "ERROR : The precipitation data in the file [" + vString + "] is invalid.\n", 1, 1);
+					return -1;
+				}
+			}
+			else if (prj.simType == simulationType::Normal) {
+				writeLogString(fpnLog, "ERROR : Precipitation data file [" + vString + "] was not set or invalid.\n", 1, 1);
 				return -1;
 			}
 		}
@@ -1491,6 +1614,7 @@ int readXmlRowProjectSettings(string aline)
 		}
 		return 1;
 	}
+
 	if (aline.find(fldName.PrecipitationInterval_min_01) != string::npos
 		|| aline.find(fldName.PrecipitationInterval_min_02) != string::npos
 		|| aline.find(fldName.PrecipitationInterval_min_03) != string::npos) {
@@ -1516,22 +1640,29 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMaxDataFile);
 		prj.fpnTempMaxData = "";
 		prj.tempMaxDataType = weatherDataType::None;
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnTempMaxData = vString;
-			prj.tempMaxDataType = getWeatherDataTypeByDataFile(vString);
-			if (prj.tempMaxDataType == weatherDataType::None) {
-				writeLogString(fpnLog, "ERROR : Max temperature data file [" + vString + "] is invalid.\n", 1, 1);
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Max temperature data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnTempMaxData = vString;
+				prj.tempMaxDataType = getWeatherDataTypeByDataFile(vString);
+				if (prj.tempMaxDataType == weatherDataType::None) {
+					writeLogString(fpnLog, "ERROR : Max temperature data file [" + vString + "] is invalid.\n", 1, 1);
+					return -1;
+				}
+			}
+			else if (prj.simType == simulationType::Normal) {
+				if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
+					writeLogString(fpnLog, "ERROR : Max temperature data file [" + vString + "] is invalid.\n", 1, 1);
+					return -1;
+				}
+			}
+			return 1;
 		}
-		else if (prj.simType == simulationType::Normal) { 
-			if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
-				writeLogString(fpnLog, "ERROR : Max temperature data file [" + vString + "] is invalid.\n", 1, 1);
-				return -1;
-			}			
-		}
-		return 1;
 	}
+
 	if (aline.find(fldName.TemperatureMaxInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMaxInterval_min);
 		if (vString != "") {
@@ -1554,22 +1685,29 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMinDataFile);
 		prj.fpnTempMinData = "";
 		prj.tempMinDataType = weatherDataType::None;
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnTempMinData = vString;
-			prj.tempMinDataType = getWeatherDataTypeByDataFile(vString);
-			if (prj.tempMinDataType == weatherDataType::None) {
-				writeLogString(fpnLog, "ERROR : Min temperature data file [" + vString + "] is invalid.\n", 1, 1);
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Min temperature data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-		}
-		else if (prj.simType == simulationType::Normal) {
-			if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
-				writeLogString(fpnLog, "ERROR : Min temperature data file [" + vString + "] is invalid.\n", 1, 1);
-				return -1;
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnTempMinData = vString;
+				prj.tempMinDataType = getWeatherDataTypeByDataFile(vString);
+				if (prj.tempMinDataType == weatherDataType::None) {
+					writeLogString(fpnLog, "ERROR : Min temperature data file [" + vString + "] is invalid.\n", 1, 1);
+					return -1;
+				}
+			}
+			else if (prj.simType == simulationType::Normal) {
+				if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
+					writeLogString(fpnLog, "ERROR : Min temperature data file [" + vString + "] is invalid.\n", 1, 1);
+					return -1;
+				}
 			}
 		}
 		return 1;
 	}
+
 	if (aline.find(fldName.TemperatureMinInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.TemperatureMinInterval_min);
 		if (vString != "") {
@@ -1593,22 +1731,29 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.DaytimeLengthDataFile);
 		prj.fpnDTLData = "";
 		prj.DTLDataType = weatherDataType::None;
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnDTLData = vString;
-			prj.DTLDataType = getWeatherDataTypeByDataFile(vString);
-			if (prj.DTLDataType == weatherDataType::None) {
-				writeLogString(fpnLog, "ERROR : Daytime length data file [" + vString + "] is invalid.\n", 1, 1);
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Daytime length data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-		}
-		else if (prj.simType == simulationType::Normal) {
-			if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
-				writeLogString(fpnLog, "ERROR : Daytime length data file [" + vString + "] is invalid.\n", 1, 1);
-				return -1;
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnDTLData = vString;
+				prj.DTLDataType = getWeatherDataTypeByDataFile(vString);
+				if (prj.DTLDataType == weatherDataType::None) {
+					writeLogString(fpnLog, "ERROR : Daytime length data file [" + vString + "] is invalid.\n", 1, 1);
+					return -1;
+				}
+			}
+			else if (prj.simType == simulationType::Normal) {
+				if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
+					writeLogString(fpnLog, "ERROR : Daytime length data file [" + vString + "] is invalid.\n", 1, 1);
+					return -1;
+				}
 			}
 		}
 		return 1;
 	}
+
 	if (aline.find(fldName.DaytimeLengthInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.DaytimeLengthInterval_min);
 		if (vString != "") {
@@ -1632,22 +1777,29 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.SolarRadiationDataFile);
 		prj.fpnSolarRadData = "";
 		prj.solarRadDataType = weatherDataType::None;
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnSolarRadData = vString;
-			prj.solarRadDataType = getWeatherDataTypeByDataFile(vString);
-			if (prj.solarRadDataType == weatherDataType::None) {
-				writeLogString(fpnLog, "ERROR : Solar radiation data file [" + vString + "] is invalid.\n", 1, 1);
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Solar radiation data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-		}
-		else if (prj.simType == simulationType::Normal) {
-			if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
-				writeLogString(fpnLog, "ERROR : Solar radiation data file [" + vString + "] is invalid.\n", 1, 1);
-				return -1;
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnSolarRadData = vString;
+				prj.solarRadDataType = getWeatherDataTypeByDataFile(vString);
+				if (prj.solarRadDataType == weatherDataType::None) {
+					writeLogString(fpnLog, "ERROR : Solar radiation data file [" + vString + "] is invalid.\n", 1, 1);
+					return -1;
+				}
+			}
+			else if (prj.simType == simulationType::Normal) {
+				if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
+					writeLogString(fpnLog, "ERROR : Solar radiation data file [" + vString + "] is invalid.\n", 1, 1);
+					return -1;
+				}
 			}
 		}
 		return 1;
 	}
+
 	if (aline.find(fldName.SolarRadiationInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SolarRadiationInterval_min);
 		if (vString != "") {
@@ -1673,6 +1825,10 @@ int readXmlRowProjectSettings(string aline)
 		prj.fpnDewPointTemp = "";
 		prj.dewPointTempDataType = weatherDataType::None;
 		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Dew point temperature data file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
 			if (fs::exists(lower(vString)) == true) {
 				prj.fpnDewPointTemp = vString;
 				prj.dewPointTempDataType = getWeatherDataTypeByDataFile(vString);
@@ -1685,9 +1841,10 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Dew point temperature data file [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			return 1;
 		}
+		return 1;
 	}
+
 	if (aline.find(fldName.DewPointTemperatureInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.DewPointTemperatureInterval_min);
 		if (vString != "") {
@@ -1711,6 +1868,10 @@ int readXmlRowProjectSettings(string aline)
 		prj.fpnWindSpeed = "";
 		prj.windSpeedDataType = weatherDataType::None;
 		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Wind speed data file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
 			if (fs::exists(lower(vString)) == true) {
 				prj.fpnWindSpeed = vString;
 				prj.windSpeedDataType = getWeatherDataTypeByDataFile(vString);
@@ -1723,9 +1884,10 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Wind speed data file [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			return 1;
 		}
+		return 1;
 	}
+
 	if (aline.find(fldName.WindSpeedInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.WindSpeedInterval_min);
 		if (vString != "") {
@@ -1749,6 +1911,10 @@ int readXmlRowProjectSettings(string aline)
 		prj.fpnUserPET = "";
 		prj.userPETDataType = weatherDataType::None;
 		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : User potential evapotranspiration data file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
 			if (fs::exists(lower(vString)) == true) {
 				prj.fpnUserPET = vString;
 				prj.userPETDataType = getWeatherDataTypeByDataFile(vString);
@@ -1761,14 +1927,19 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : User potential evapotranspiration data file [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			return 1;
 		}
+		return 1;
 	}
+
 	if (aline.find(fldName.UserAETDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.UserAETDataFile);
 		prj.fpnUserAET = "";
 		prj.userAETDataType = weatherDataType::None;
 		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : User actual evapotranspiration data file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
 			if (fs::exists(lower(vString)) == true) {
 				prj.fpnUserAET = vString;
 				prj.userAETDataType = getWeatherDataTypeByDataFile(vString);
@@ -1781,9 +1952,10 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : User actual evapotranspiration data file [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			return 1;
 		}
+		return 1;
 	}
+
 	if (aline.find(fldName.UserETDataInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.UserETDataInterval_min);
 		if (vString != "") {
@@ -1810,22 +1982,29 @@ int readXmlRowProjectSettings(string aline)
 		vString = getValueStringFromXmlLine(aline, fldName.SnowPackTemperatureDataFile);
 		prj.fpnSnowpackTempData = "";
 		prj.snowpackTempDataType = weatherDataType::None;
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			prj.fpnSnowpackTempData = vString;
-			prj.snowpackTempDataType = getWeatherDataTypeByDataFile(vString);
-			if (prj.snowpackTempDataType == weatherDataType::None) {
-				writeLogString(fpnLog, "ERROR : Snowpack temperature data file [" + vString + "] is invalid.\n", 1, 1);
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Snowpack temperature data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-		}
-		else if (prj.simType == simulationType::Normal) {
-			if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
-				writeLogString(fpnLog, "ERROR : Snowpack temperature data file [" + vString + "] is invalid.\n", 1, 1);
-				return -1;
+			if (fs::exists(lower(vString)) == true) {
+				prj.fpnSnowpackTempData = vString;
+				prj.snowpackTempDataType = getWeatherDataTypeByDataFile(vString);
+				if (prj.snowpackTempDataType == weatherDataType::None) {
+					writeLogString(fpnLog, "ERROR : Snowpack temperature data file [" + vString + "] is invalid.\n", 1, 1);
+					return -1;
+				}
+			}
+			else if (prj.simType == simulationType::Normal) {
+				if (vString != "") {//옵션이므로 이 경우에만 애러처리 한다.
+					writeLogString(fpnLog, "ERROR : Snowpack temperature data file [" + vString + "] is invalid.\n", 1, 1);
+					return -1;
+				}
 			}
 		}
 		return 1;
 	}
+
 	if (aline.find(fldName.SnowPackTemperatureInInterval_min) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.SnowPackTemperatureInInterval_min);
 		if (vString != "") {
@@ -2582,6 +2761,10 @@ int readXmlRowWatchPoint(string aline, wpLocationRC* wpl)
 	if (aline.find(fldName.Name_WP) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.Name_WP);
 		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Watch point name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
 			wpl->wpName = vString;
 		}
 		return 1;
@@ -2609,6 +2792,10 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 	if (aline.find("<"+fldName.Name_FCG+">") != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.Name_FCG);
 		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Flow control grid name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
 			fci->fcName = vString;
 		}
 		return 1;
@@ -2693,13 +2880,26 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 
 	if (aline.find(fldName.FlowDataFile) != string::npos) {
 		vString = getValueStringFromXmlLine(aline, fldName.FlowDataFile);
-		if (vString != "" && fs::exists(lower(vString)) == true) {
-			fci->fpnFCData = vString;
+		if (vString != "") {
+			if (isAllowedStringValue(vString) != true) {
+				writeLogString(fpnLog, "ERROR : Flow control data file name [" + vString + "] is invalid.\n", 1, 1);
+				return -1;
+			}
+			if (fs::exists(lower(vString)) == true) {
+				fci->fpnFCData = vString;
+			}
+			else {
+				writeLogString(fpnLog, "ERROR : Flow control data file of ["
+					+ fci->fcName + "](" + vString + ") is invalid.\n", 1, 1);
+				return -1;
+			}
 		}
-		else if (vString != ""){
+		else {
 			writeLogString(fpnLog, "ERROR : Flow control data file of ["
-				+ fci->fcName + "]("+ vString+") is invalid.\n", 1, 1);
+				+ fci->fcName + "](" + vString + ") is invalid.\n", 1, 1);
+			return -1;
 		}
+		return 1;
 	}
 
 	if (fci->fcType != flowControlType::Inlet) {
