@@ -137,7 +137,7 @@ int makeRasterOutput(int nowTmin)
 	}
     setRasterOutputArray();
     if (bssr == 1) {
-        if (fs::exists(lower(ofs.ofpSSRDistribution)) == false) {
+        if (fs::exists(ofs.ofpSSRDistribution) == false) {
             cout << "ERROR : The folder for soil saturation ratio distribution file is not exist. " << endl;
             return -1;
         }
@@ -154,13 +154,13 @@ int makeRasterOutput(int nowTmin)
             th_makeASC_ssr = new thread(makeASC_ssr);
             if (prj.fpnProjection != "") {
                 string ofpn = replaceText(fpn_ssr_asc, ".asc", ".prj");
-                fs::copy(lower(prj.fpnProjection), ofpn);
+                fs::copy(prj.fpnProjection, ofpn);
             }            
         }
     }
 
     if (brf == 1) {
-        if (fs::exists(lower(ofs.ofpPRCPDistribution)) == false) {
+        if (fs::exists(ofs.ofpPRCPDistribution) == false) {
             cout << "ERROR : The folder for rainfall distribution file is not exist. " << endl;
             return -1;
         }
@@ -176,13 +176,13 @@ int makeRasterOutput(int nowTmin)
             th_makeASC_rf = new thread(makeASC_rf);
             if (prj.fpnProjection != "") {
                 string ofpn = replaceText(fpn_rfPDT_asc, ".asc", ".prj");
-                fs::copy(lower(prj.fpnProjection), ofpn);
+                fs::copy(prj.fpnProjection, ofpn);
             }
         }
     }
 
     if (brfacc == 1) {
-        if (fs::exists(lower(ofs.ofpPRCPAccDistribution)) == false) {
+        if (fs::exists(ofs.ofpPRCPAccDistribution) == false) {
             cout << "ERROR : The folder for cumulative rainfall distribution file is not exist. " << endl;
             return -1;
         }
@@ -199,12 +199,12 @@ int makeRasterOutput(int nowTmin)
             th_makeASC_rfacc = new thread(makeASC_rfacc);
             if (prj.fpnProjection != "") {
                 string ofpn = replaceText(fpn_rfacc_asc, ".asc", ".prj");
-                fs::copy(lower(prj.fpnProjection), ofpn);
+                fs::copy(prj.fpnProjection, ofpn);
             }
         }
     }
     if (bQ == 1) {
-        if (fs::exists(lower(ofs.ofpFlowDistribution)) == false) {
+        if (fs::exists(ofs.ofpFlowDistribution) == false) {
             cout << "ERROR : The folder for flow distribution file is not exist. " << endl;
             return -1;
         }
@@ -220,13 +220,13 @@ int makeRasterOutput(int nowTmin)
             th_makeASC_flow = new thread(makeASC_flow);
             if (prj.fpnProjection != "") {
                 string ofpn = replaceText(fpn_Q_asc, ".asc", ".prj");
-                fs::copy(lower(prj.fpnProjection), ofpn);
+                fs::copy(prj.fpnProjection, ofpn);
             }
         }
     }
 
 	if (bPET == 1) {
-		if (fs::exists(lower(ofs.ofpPETDistribution)) == false) {
+		if (fs::exists(ofs.ofpPETDistribution) == false) {
 			cout << "ERROR : The folder for potential evapotranspiration distribution file is not exist. " << endl;
 			return -1;
 		}
@@ -243,13 +243,13 @@ int makeRasterOutput(int nowTmin)
 			th_makeASC_pet = new thread(makeASC_pet);
 			if (prj.fpnProjection != "") {
 				string ofpn = replaceText(fpn_petPDT_asc, ".asc", ".prj");
-				fs::copy(lower(prj.fpnProjection), ofpn);
+				fs::copy(prj.fpnProjection, ofpn);
 			}
 		}
 	}
 
     if (bAET == 1) {
-        if (fs::exists(lower(ofs.ofpAETDistribution)) == false) {
+        if (fs::exists(ofs.ofpAETDistribution) == false) {
             cout << "ERROR : The folder for actual evapotranspiration distribution file is not exist. " << endl;
             return -1;
         }
@@ -266,12 +266,12 @@ int makeRasterOutput(int nowTmin)
             th_makeASC_aet = new thread(makeASC_aet);
             if (prj.fpnProjection != "") {
                 string ofpn = replaceText(fpn_aetPDT_asc, ".asc", ".prj");
-                fs::copy(lower(prj.fpnProjection), ofpn);
+                fs::copy(prj.fpnProjection, ofpn);
             }
         }
     }
 	//if (bintcp == 1) {
-	//	if (fs::exists(lower(ofs.ofpINTCPDistribution)) == false) {
+	//	if (fs::exists(ofs.ofpINTCPDistribution) == false) {
 	//		cout << "ERROR : The folder for interception distribution file is not exist. " << endl;
 	//		return -1;
 	//	}
@@ -288,12 +288,12 @@ int makeRasterOutput(int nowTmin)
 	//		th_makeASC_intcp = new thread(makeASC_flow);
 	//		if (prj.fpnProjection != "") {
 	//			string ofpn = replaceText(fpn_intcp_asc, ".asc", ".prj");
-	//			fs::copy(lower(prj.fpnProjection), ofpn);
+	//			fs::copy(prj.fpnProjection, ofpn);
 	//		}
 	//	}
 	//}
 	//if (bsm == 1) {
-	//	if (fs::exists(lower(ofs.ofpSnowMDistribution)) == false) {
+	//	if (fs::exists(ofs.ofpSnowMDistribution) == false) {
 	//		cout << "ERROR : The folder for interception distribution file is not exist. " << endl;
 	//		return -1;
 	//	}
@@ -310,7 +310,7 @@ int makeRasterOutput(int nowTmin)
 	//		th_makeASC_sm = new thread(makeASC_flow);
 	//		if (prj.fpnProjection != "") {
 	//			string ofpn = replaceText(fpn_sm_asc, ".asc", ".prj");
-	//			fs::copy(lower(prj.fpnProjection), ofpn);
+	//			fs::copy(prj.fpnProjection, ofpn);
 	//		}
 	//	}
 	//}

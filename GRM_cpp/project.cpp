@@ -1085,11 +1085,11 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Domain file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnDomain = vString;
 				fs::path fpnProjection;
 				fpnProjection = fs::path(prj.fpnDomain.c_str()).replace_extension(".prj");
-				if (fs::exists(lower(fpnProjection.string())) == true) {
+				if (fs::exists(fpnProjection.string()) == true) {
 					prj.fpnProjection = fpnProjection.string();
 				}
 				else {
@@ -1116,7 +1116,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Slope file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnSlope = vString;
 			}
 			else {
@@ -1139,7 +1139,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Flow direction file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnFD = vString;
 			}
 			else {
@@ -1190,7 +1190,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Flow accumulation file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnFA = vString;
 			}
 			else {
@@ -1215,7 +1215,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : DEM file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnDEM = vString;
 			}
 			else {
@@ -1237,7 +1237,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Stream file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnStream = vString;
 				prj.streamFileApplied = 1;
 			}
@@ -1260,7 +1260,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Channel width file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnChannelWidth = vString;
 				prj.cwFileApplied = 1;
 			}
@@ -1283,7 +1283,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Soil saturation ratio file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpniniSSR = vString;
 				prj.issrFileApplied = 1;
 			}
@@ -1306,7 +1306,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Initial stream flow file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpniniChFlow = vString;
 				prj.icfFileApplied = 1;
 			}
@@ -1350,7 +1350,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Land cover file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnLC = vString;
 			}
 			else {
@@ -1369,7 +1369,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Land cover VAT file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnLCVat = vString;
 			}
 		}
@@ -1416,7 +1416,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : LAT file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnLAI = vString;
 			}
 		}
@@ -1431,7 +1431,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Blaney-Criddle method K ceofficient data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnBlaneyCriddleK = vString;
 			}
 		}
@@ -1474,7 +1474,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Soil texture data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnST = vString;
 			}
 		}
@@ -1489,7 +1489,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Soil texture VAT file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnSTVat = vString;
 			}
 		}
@@ -1554,7 +1554,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Soil depth file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnSD = vString;
 			}
 		}
@@ -1568,7 +1568,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Soil depth VAT file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnSDVat = vString;
 			}
 		}
@@ -1595,7 +1595,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : The precipitation data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnRainfallData = vString;
 				prj.rfDataType = getWeatherDataTypeByDataFile(vString);
 				if (prj.rfDataType == weatherDataType::None) {
@@ -1645,7 +1645,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Max temperature data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnTempMaxData = vString;
 				prj.tempMaxDataType = getWeatherDataTypeByDataFile(vString);
 				if (prj.tempMaxDataType == weatherDataType::None) {
@@ -1690,7 +1690,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Min temperature data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnTempMinData = vString;
 				prj.tempMinDataType = getWeatherDataTypeByDataFile(vString);
 				if (prj.tempMinDataType == weatherDataType::None) {
@@ -1736,7 +1736,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Daytime length data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnDTLData = vString;
 				prj.DTLDataType = getWeatherDataTypeByDataFile(vString);
 				if (prj.DTLDataType == weatherDataType::None) {
@@ -1782,7 +1782,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Solar radiation data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnSolarRadData = vString;
 				prj.solarRadDataType = getWeatherDataTypeByDataFile(vString);
 				if (prj.solarRadDataType == weatherDataType::None) {
@@ -1829,7 +1829,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Dew point temperature data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnDewPointTemp = vString;
 				prj.dewPointTempDataType = getWeatherDataTypeByDataFile(vString);
 				if (prj.dewPointTempDataType == weatherDataType::None) {
@@ -1872,7 +1872,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Wind speed data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnWindSpeed = vString;
 				prj.windSpeedDataType = getWeatherDataTypeByDataFile(vString);
 				if (prj.windSpeedDataType == weatherDataType::None) {
@@ -1915,7 +1915,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : User potential evapotranspiration data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnUserPET = vString;
 				prj.userPETDataType = getWeatherDataTypeByDataFile(vString);
 				if (prj.userPETDataType == weatherDataType::None) {
@@ -1940,7 +1940,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : User actual evapotranspiration data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnUserAET = vString;
 				prj.userAETDataType = getWeatherDataTypeByDataFile(vString);
 				if (prj.userAETDataType == weatherDataType::None) {
@@ -1987,7 +1987,7 @@ int readXmlRowProjectSettings(string aline)
 				writeLogString(fpnLog, "ERROR : Snowpack temperature data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				prj.fpnSnowpackTempData = vString;
 				prj.snowpackTempDataType = getWeatherDataTypeByDataFile(vString);
 				if (prj.snowpackTempDataType == weatherDataType::None) {
@@ -2885,7 +2885,7 @@ int readXmlRowFlowControlGrid(string aline, flowControlinfo* fci) {
 				writeLogString(fpnLog, "ERROR : Flow control data file name [" + vString + "] is invalid.\n", 1, 1);
 				return -1;
 			}
-			if (fs::exists(lower(vString)) == true) {
+			if (fs::exists(vString) == true) {
 				fci->fpnFCData = vString;
 			}
 			else {

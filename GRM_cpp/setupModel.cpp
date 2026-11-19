@@ -120,7 +120,7 @@ int compareWeatherDataWithDomain(string fpn_in_wd, weatherDataType wdType,
 
 	if (wdType == weatherDataType::Mean_DividedArea) {
 		vector<int> wsids;
-		ifstream txtFile(lower(fpn_in_wd));
+		ifstream txtFile(fpn_in_wd);
 		string aline;
 		getline(txtFile, aline); // 첫줄만 읽는다
 		aline = trim(aline);

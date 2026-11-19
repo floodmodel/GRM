@@ -58,7 +58,7 @@ int updateFCCellinfoAndData()
 				|| afc.fcType == flowControlType::ReservoirOutflow
 				|| afc.fcType == flowControlType::SinkFlow
 				|| afc.fcType == flowControlType::SourceFlow) {
-				if (afc.fpnFCData == "" || fs::exists(lower(afc.fpnFCData)) != true) {
+				if (afc.fpnFCData == "" || fs::exists(afc.fpnFCData) != true) {
 					string outstr = "ERROR : Flow control data file (" + afc.fpnFCData
 						+ ") is invalid.\n";
 					writeLogString(fpnLog, outstr, 1, 1);

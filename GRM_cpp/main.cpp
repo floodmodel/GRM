@@ -223,14 +223,14 @@ int startSingleRun(string fpnGMP_in, int enforceAutoROM, string outString)
 	}
 
 	fs::path fpnGMP = fs::path(fpnGMP_in.c_str());
-	if (fs::exists(lower(fpnGMP.string())) == false
+	if (fs::exists(fpnGMP.string()) == false
 		|| lower(in_arg.extension().string()) != ".gmp") {
 		cout << "ERROR : GRM project file[" +
 			fpnGMP_in + "] is invalid.\n";
 		waitEnterKey();
 		return -1;
 	}
-	else if (fs::exists(lower(fpnGMP.string())) == true) {
+	else if (fs::exists(fpnGMP.string()) == true) {
 		ppi = getProjectFileInfo(fpnGMP_in);
 		ts.enforceFCautoROM = enforceAutoROM;
 		// 프로젝트 파일 여부 검증 후, fpnLog 파일 설정 후 writeNewLog 사용할 수 있다. 
@@ -422,12 +422,12 @@ int setupAndStartSimulation()
 	}
 	writeLogString(fpnLog, "Simulation started.\n", 1, 1);
 	if (startSimulation() == -1) {
-		writeNewLogString(fpnLog, "ERROR : An error was occurred while simulation...\n", 1, 1);
+		writeLogString(fpnLog, "ERROR : An error was occurred while simulation...\n", 1, 1);
 		return -1;
 	}
 	if (prj.deleteAllFilesExceptDischargeOut == 1) {
 		if (deleteAllFilesExceptDischarge() == -1) {
-			writeNewLogString(fpnLog, "ERROR : An error was occurred while deleting all files except discharge.out.\n", 1, 1);
+			writeLogString(fpnLog, "ERROR : An error was occurred while deleting all files except discharge.out.\n", 1, 1);
 			return -1;
 		}
 	}

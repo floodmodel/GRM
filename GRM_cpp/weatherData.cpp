@@ -37,10 +37,10 @@ extern wpSimData wpSimValue;
 int setRainfallData()
 {
 	//rfs.clear();
-	//rfs = readAndSetWeatherData(lower(prj.fpnRainfallData), prj.rfDataType,
+	//rfs = readAndSetWeatherData(prj.fpnRainfallData, prj.rfDataType,
 	//	prj.rfinterval_min, "Precipitation");
 	vector<weatherData> wdinfo;
-	wdinfo = readAndSetWeatherData(lower(prj.fpnRainfallData), prj.rfDataType,
+	wdinfo = readAndSetWeatherData(prj.fpnRainfallData, prj.rfDataType,
 			prj.rfinterval_min, "Precipitation");
 
 	if (wdinfo.size() == 0) {
@@ -337,7 +337,7 @@ int setCVRF(int order)
  
  int setLAIRatio()
  {
-	 if (prj.fpnLAI != "" && fs::exists(lower(prj.fpnLAI)) != true) {
+	 if (prj.fpnLAI != "" && fs::exists(prj.fpnLAI) != true) {
 		 writeLogString(fpnLog, "ERROR : LAI ratio file is invalid.\n", 1, 1);
 		 return -1;
 	 }
@@ -864,7 +864,7 @@ int setCVRF(int order)
  int setBlaneyCriddleK() {
 
 	 if (prj.fpnBlaneyCriddleK != "" // Project open에서 검증했는데, 여기서 또한번 검증
-		 && fs::exists(lower(prj.fpnBlaneyCriddleK)) != true) {
+		 && fs::exists(prj.fpnBlaneyCriddleK) != true) {
 		 writeLogString(fpnLog, "ERROR : The Blaney-Criddle K coefficient data file is invalid.\n", 1, 1);
 		 return -1;
 	 }
@@ -886,7 +886,7 @@ int setCVRF(int order)
  }
 
  weatherDataType getWeatherDataTypeByDataFile(string fpn_wdata) {
-	 ifstream rfFile(lower(fpn_wdata));
+	 ifstream rfFile(fpn_wdata);
 	 string aline;
 	 getline(rfFile, aline);
 	 aline = trim(aline);
@@ -896,7 +896,7 @@ int setCVRF(int order)
 	 }
 
 	 aline = eraseCR(aline);  //\r 문자가 남는경우에 \r 을 삭제
-	 if (aline.length()<254 && fs::exists(lower(aline)) == true) {//MP 수정 win에서는 259자, Linux에서는 255자까지 인식
+	 if (aline.length()<254 && fs::exists(aline) == true) {//MP 수정 win에서는 259자, Linux에서는 255자까지 인식
 		 return weatherDataType::Raster_ASC;
 	 }
 	 else {
@@ -933,7 +933,7 @@ int setCVRF(int order)
 	 int dataInterval_min, string dataString) {
 	 vector<weatherData> nullWD;
 	 if (fpn_in_wd != "" 
-		 && fs::exists(lower(fpn_in_wd)) != true) {
+		 && fs::exists(fpn_in_wd) != true) {
 		 writeLogString(fpnLog, "ERROR : "+dataString + " data file is invalid.\n", 1, 1);
 		 return nullWD;
 	 }
@@ -974,7 +974,7 @@ int setCVRF(int order)
 				 wd.value = value;
 			 }
 			 else {
-				 string err = "ERROR : Can not read " + lower(dataString) 
+				 string err = "ERROR : Can not read " + dataString 
 					 + " value.\nOrder = "
 					 + to_string(n + 1) + "\n";
 				 writeLogString(fpnLog, err, 1, 1);
